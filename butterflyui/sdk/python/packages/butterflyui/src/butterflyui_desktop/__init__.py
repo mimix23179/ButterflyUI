@@ -1,22 +1,22 @@
-"""Conduit Desktop — single-file installer + runner.
+"""ButterflyUI Desktop — single-file installer + runner.
 
 This package intentionally exposes a very small surface. To use it, edit
 `RUNTIME_ZIP_URL` below and set it to the HTTPS address of your
-`conduit-windows.zip` distribution. Optionally set `RUNTIME_ZIP_SHA256` to
+`butterflyui-windows.zip` distribution. Optionally set `RUNTIME_ZIP_SHA256` to
 the expected SHA256 hex string to enforce checksum verification.
 
 Example usage:
 
     import conduit_desktop
 
-    conduit_desktop.install(force=False)
-    conduit_desktop.run(host_port='127.0.0.1:8765', wait=True)
+    butterflyui_desktop.install(force=False)
+    butterflyui_desktop.run(host_port='127.0.0.1:8765', wait=True)
 
 Note: the runtime will be extracted into the `app/` directory inside this
 installed package directory by default. Override via the
-`CONDUIT_DESKTOP_RUNTIME_DIR` environment variable if you prefer a different
+`BUTTERFLYUI_DESKTOP_RUNTIME_DIR` environment variable if you prefer a different
 location. You can also override the download source via
-`CONDUIT_DESKTOP_RUNTIME_URL` and checksum via `CONDUIT_DESKTOP_RUNTIME_SHA256`.
+`BUTTERFLYUI_DESKTOP_RUNTIME_URL` and checksum via `BUTTERFLYUI_DESKTOP_RUNTIME_SHA256`.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ from typing import Optional
 # ----------------------------- CONFIGURATION -----------------------------
 # Edit these constants to point at your published runtime zip and checksum.
 # The package will refuse to download non-HTTPS URLs.
-RUNTIME_ZIP_URL: str = "https://www.dropbox.com/scl/fi/umfxqx5jmx7610uzi47s3/conduit-windows.zip?rlkey=7pdctzo963exxs2nt7x93sjx0&st=7a3els41&dl=0"  # <-- set your URL
+RUNTIME_ZIP_URL: str = "https://www.dropbox.com/scl/fi/umfxqx5jmx7610uzi47s3/butterflyui-windows.zip?rlkey=7pdctzo963exxs2nt7x93sjx0&st=7a3els41&dl=0"  # <-- set your URL
 RUNTIME_ZIP_SHA256: str = ""  # optional: lowercase hex string
 
 # Directory name inside the package where we install the runtime.
