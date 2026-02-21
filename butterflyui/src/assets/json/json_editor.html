@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Conduit JSON Editor</title>
+    <style>
+/*{{style}}*/
+    </style>
+  </head>
+  <body>
+    <div class="toolbar" id="toolbar">
+      <button id="format-btn" type="button">Format</button>
+      <button id="apply-btn" type="button">Apply</button>
+      <span class="status" id="status">Ready</span>
+    </div>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <script>
+      window.__CONDUIT_INITIAL__ = /*{{initial}}*/ "";
+      window.__CONDUIT_CONFIG__ = /*{{config}}*/ {};
+    </script>
+    <script>
+/*{{script}}*/
+    </script>
+  </body>
+</html>

@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "conduit"
+version = "0.1.0"
+description = "Conduit - Make your idea's reality"
+
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "colorama",
+    "pillow",
+    "tree-sitter",
+    "tree-sitter-languages",
+    "websockets",
+    "typing_extensions",
+    "tomli; python_version < '3.11'",
+]
+
+[project.scripts]
+conduit = "conduit.cli:main"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = [
+    "conduit",
+    "conduit.*",
+    "conduit_desktop",
+    "conduit_desktop.*",
+]
