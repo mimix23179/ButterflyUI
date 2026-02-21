@@ -1,0 +1,9 @@
+build
+colorama
+packaging
+pillow
+pyproject_hooks
+pyinstaller
+typing_extensions
+websockets
+wheel
