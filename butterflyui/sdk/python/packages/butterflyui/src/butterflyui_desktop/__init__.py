@@ -272,7 +272,7 @@ def get_installed_info(runtime_dir: Optional[Path] = None, *, use_env_runtime_di
         return None
     try:
         for p in runtime_dir.rglob("*.exe"):
-            if p.is_file() and p.name.lower() == "ButterflyUI.exe":
+            if p.is_file() and p.name.lower() == "butterflyui.exe":
                 return {"path": str(p), "installed_at": p.stat().st_mtime}
         return None
     except Exception:
@@ -369,7 +369,7 @@ def find_butterflyui_exe(runtime_dir: Optional[Path] = None, *, use_env_runtime_
     # Search case-insensitively for `ButterflyUI.exe` (covers both
     # "ButterflyUI.exe" and "ButterflyUI.exe" builds).
     for p in runtime_dir.rglob("*.exe"):
-        if p.is_file() and p.name.lower() == "ButterflyUI.exe":
+        if p.is_file() and p.name.lower() == "butterflyui.exe":
             return p
 
     raise ButterflyUIDesktopRunError(f"Could not find ButterflyUI.exe under {runtime_dir}")
