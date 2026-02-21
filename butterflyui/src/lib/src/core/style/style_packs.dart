@@ -111,13 +111,13 @@ const Map<String, Object?> _baseComponentStyles = {
   },
   'surface': {
     'slots': {
-      'surface': {'radius': 14, 'border_color': r'$border', 'border_width': 1},
+      'surface': {'radius': 14, 'border_width': 0},
     },
-    'modifiers': ['elevation'],
+    'modifiers': [],
   },
   'window_frame': {
-    'slots': {'surface': {'radius': 16, 'border_width': 1}},
-    'modifiers': ['glass', 'elevation'],
+    'slots': {'surface': {'radius': 16, 'border_width': 0}},
+    'modifiers': ['glass'],
     'motion': 'os_pop',
   },
 };

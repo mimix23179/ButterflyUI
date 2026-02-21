@@ -25,7 +25,7 @@ BoxDecoration? _buildBoxDecoration({
   }
   return BoxDecoration(
     color: color,
-    border: borderColor == null
+    border: borderColor == null || (borderWidth ?? 0) <= 0
         ? null
         : Border.all(color: borderColor, width: borderWidth ?? 1.0),
     borderRadius: (shape == BoxShape.circle || radius == null)
@@ -63,7 +63,7 @@ Widget buildContainerControl(
   // Use 'color' as alias for 'bgcolor' for consistency with headers style
   final bgColor = coerceColor(props['bgcolor'] ?? props['color']);
   final borderColor = coerceColor(props['border_color']);
-  final borderWidth = coerceDouble(props['border_width']);
+  final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
   final radius = coerceDouble(props['radius']);
   final boxShadow = coerceBoxShadow(props['shadow']);
   final gradient = coerceGradient(props['gradient']);

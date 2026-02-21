@@ -22,6 +22,7 @@ class CandyTheme:
     def to_json(self) -> dict[str, Any]:
         return {
             "brightness": self.brightness,
+            "theme": {"brightness": self.brightness},
             "colors": self.colors,
             "typography": self.typography,
             "radii": self.radii,

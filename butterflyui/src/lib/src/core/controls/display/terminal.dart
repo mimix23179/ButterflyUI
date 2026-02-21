@@ -23,7 +23,8 @@ class ButterflyUITerminal extends StatefulWidget {
   final double lineHeight;
   final Color backgroundColor;
   final Color textColor;
-  final Color borderColor;
+  final Color? borderColor;
+  final double borderWidth;
   final double radius;
   final ButterflyUISendRuntimeEvent sendEvent;
 
@@ -48,6 +49,7 @@ class ButterflyUITerminal extends StatefulWidget {
     required this.backgroundColor,
     required this.textColor,
     required this.borderColor,
+    required this.borderWidth,
     required this.radius,
     required this.sendEvent,
   });
@@ -136,7 +138,12 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     return Container(
       decoration: BoxDecoration(
         color: widget.backgroundColor,
-        border: Border.all(color: widget.borderColor.withOpacity(0.6)),
+        border: widget.borderColor != null && widget.borderWidth > 0
+            ? Border.all(
+                color: widget.borderColor!.withOpacity(0.6),
+                width: widget.borderWidth,
+              )
+            : null,
         borderRadius: BorderRadius.circular(widget.radius),
       ),
       clipBehavior: Clip.antiAlias,
@@ -160,9 +167,14 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
               padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               decoration: BoxDecoration(
                 color: widget.backgroundColor.withOpacity(0.92),
-                border: Border(
-                  top: BorderSide(color: widget.borderColor.withOpacity(0.5)),
-                ),
+                border: widget.borderColor != null && widget.borderWidth > 0
+                    ? Border(
+                        top: BorderSide(
+                          color: widget.borderColor!.withOpacity(0.5),
+                          width: widget.borderWidth,
+                        ),
+                      )
+                    : null,
               ),
               child: Row(
                 children: [
@@ -288,7 +300,8 @@ Widget buildTerminalControl(
         coerceColor(props['bgcolor'] ?? props['background']) ??
         const Color(0xff050a06),
     textColor: coerceColor(props['text_color']) ?? const Color(0xffd1ffd6),
-    borderColor: coerceColor(props['border_color']) ?? const Color(0xff1e293b),
+    borderColor: coerceColor(props['border_color']),
+    borderWidth: coerceDouble(props['border_width']) ?? 0,
     radius: coerceDouble(props['radius']) ?? 10,
     sendEvent: sendEvent,
   );

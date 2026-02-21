@@ -10,7 +10,7 @@ class ControlModifierCapabilities {
   });
 
   static ControlModifierCapabilities forControl(String controlType) {
-    final normalized = _normalize(controlType);
+    final normalized = _canonicalControlType(controlType);
     return ControlModifierCapabilities(
       supportsInteractiveModifiers: _runtimeInteractiveControls.contains(
         normalized,
@@ -58,6 +58,16 @@ class ControlModifierCapabilities {
 
   static String _normalize(String value) {
     return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
+  }
+
+  static String _canonicalControlType(String value) {
+    var normalized = _normalize(value);
+    if (normalized.startsWith('candy_')) {
+      normalized = normalized.substring(6);
+    }
+    if (normalized == 'container') return 'surface';
+    if (normalized == 'box') return 'surface';
+    return normalized;
   }
 
   static Set<String> _runtimeInteractiveControls = Set<String>.from(

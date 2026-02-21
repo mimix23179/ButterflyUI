@@ -86,6 +86,19 @@ To keep controls consistent with style packs:
 - Prefer candy-driven defaults for control props via `controls.*` tokens (and
   optional `control_groups`) instead of hard-coded values in widgets.
 
+## CustomizationEngine Rules (Current Runtime Contract)
+
+- Hover/press/focus visual modifiers are **interactables-only** (buttons, inputs,
+  toggles, selectable items). Structural/display surfaces must not receive hover effects.
+- Surface controls (`surface`/`box`/`container`, chat/code/terminal/window surfaces)
+  default to **no outline/border**. Borders are opt-in via explicit props/style slots.
+- Legacy `candy_*` props and control names are mapped to the modern style-pack/token
+  pipeline for backward compatibility.
+- Runtime style-pack resolution is subtree-aware: per-node `style_pack` inheritance
+  drives resolver slots, modifier presets, and motion pack lookup.
+- When `animation` is not explicitly provided, runtime motion definitions can still
+  produce consistent enter animation wrappers from style-pack motion specs.
+
 ## Common Failure Modes
 
 - Control type mismatch (Python: `control_type` does not match Dart case).

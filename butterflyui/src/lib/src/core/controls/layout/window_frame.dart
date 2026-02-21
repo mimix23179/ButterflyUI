@@ -138,6 +138,7 @@ class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
         coerceColor(widget.props['border_color']) ??
         widget.tokens.color('border') ??
         const Color(0x22000000);
+    final borderWidth = coerceDouble(widget.props['border_width']) ?? 0.0;
     final backgroundColor =
         coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
         widget.tokens.color('surface') ??
@@ -169,7 +170,9 @@ class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
       decoration: BoxDecoration(
         color: backgroundColor.withValues(alpha: glass ? acrylicOpacity : 1.0),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor),
+        border: borderWidth > 0
+            ? Border.all(color: borderColor, width: borderWidth)
+            : null,
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: const Color(0x32000000),

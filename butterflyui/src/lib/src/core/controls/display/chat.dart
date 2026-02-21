@@ -23,6 +23,8 @@ Widget buildChatMessageControl(
       (isUser ? const Color(0xff1d4ed8) : const Color(0xff111827));
   final bubbleFg = coerceColor(props['text_color']) ?? const Color(0xffe5e7eb);
   final radius = coerceDouble(props['radius']) ?? 14;
+  final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
+  final borderColor = coerceColor(props['border_color']);
   final outerAlignment = isUser ? Alignment.centerRight : Alignment.centerLeft;
 
   Widget bubble = Container(
@@ -31,7 +33,9 @@ Widget buildChatMessageControl(
     decoration: BoxDecoration(
       color: bubbleBg,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: bubbleFg.withOpacity(0.2)),
+      border: borderColor != null && borderWidth > 0
+          ? Border.all(color: borderColor, width: borderWidth)
+          : null,
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

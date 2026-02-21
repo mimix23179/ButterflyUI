@@ -120,7 +120,7 @@ class ControlStyleResolver {
     required CandyTokens tokens,
     required StylePack stylePack,
   }) {
-    final normalizedType = _norm(controlType);
+    final normalizedType = _canonicalControlType(controlType);
     final componentStyles = _asMap(stylePack.componentStyles);
     final component = _asMap(componentStyles[normalizedType]);
     final local = _asMap(props['style']);
@@ -175,6 +175,15 @@ class ControlStyleResolver {
     if (propState != null && propState.trim().isNotEmpty) {
       return _norm(propState);
     }
+    final pressed =
+        props['pressed'] == true ||
+        props['is_pressed'] == true ||
+        props['active'] == true;
+    if (pressed) return 'pressed';
+    final hovered = props['hovered'] == true || props['is_hovered'] == true;
+    if (hovered) return 'hover';
+    final focused = props['focused'] == true || props['is_focused'] == true;
+    if (focused) return 'focused';
     if (props['disabled'] == true || props['enabled'] == false) {
       return 'disabled';
     }
@@ -191,5 +200,19 @@ class ControlStyleResolver {
 
   static String _norm(String value) {
     return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
+  }
+
+  static String _canonicalControlType(String value) {
+    var normalized = _norm(value);
+    if (normalized.startsWith('candy_')) {
+      normalized = normalized.substring(6);
+    }
+    switch (normalized) {
+      case 'container':
+      case 'box':
+        return 'surface';
+      default:
+        return normalized;
+    }
   }
 }

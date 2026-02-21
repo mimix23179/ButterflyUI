@@ -16,7 +16,7 @@ Widget buildCodeViewControl(Map<String, Object?> props) {
 
   final fontSize = coerceDouble(props['font_size']) ?? 13;
   final radius = coerceDouble(props['radius']) ?? 10;
-  final borderWidth = coerceDouble(props['border_width']) ?? 1.0;
+  final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
   final bg =
       coerceColor(props['bgcolor'] ?? props['background']) ??
       const Color(0xff0f172a);
@@ -69,7 +69,9 @@ Widget buildCodeViewControl(Map<String, Object?> props) {
     decoration: BoxDecoration(
       color: bg,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: borderColor, width: borderWidth),
+      border: borderWidth > 0
+          ? Border.all(color: borderColor, width: borderWidth)
+          : null,
     ),
     child: codeText,
   );

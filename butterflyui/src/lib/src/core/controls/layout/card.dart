@@ -17,12 +17,14 @@ Widget buildCardControl(Map<String, Object?> props, List children, CandyTokens t
   }
   final bgColor = coerceColor(props['bgcolor']) ?? tokens.color('surface');
   final borderColor = coerceColor(props['border_color']) ?? tokens.color('border');
-  final borderWidth = coerceDouble(props['border_width']);
+  final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
   final radius = coerceDouble(props['radius']) ?? tokens.number('card', 'radius') ?? tokens.number('radii', 'md');
   final elevation = coerceDouble(props['elevation']) ?? tokens.number('card', 'elevation') ?? 0.0;
   final shape = RoundedRectangleBorder(
     borderRadius: radius == null ? BorderRadius.zero : BorderRadius.circular(radius),
-    side: borderColor == null ? BorderSide.none : BorderSide(color: borderColor, width: borderWidth ?? 1.0),
+    side: borderColor == null || borderWidth <= 0
+        ? BorderSide.none
+        : BorderSide(color: borderColor, width: borderWidth),
   );
   return Card(
     color: bgColor,

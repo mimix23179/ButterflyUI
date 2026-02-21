@@ -5,6 +5,7 @@ import 'candy/theme.dart';
 import 'butterflyui_event_box.dart';
 import 'control_registry.dart';
 import 'control_utils.dart';
+import 'motion/motion_pack.dart';
 import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/common/option_types.dart';
@@ -153,6 +154,7 @@ class ControlRenderer {
 
     final context = ButterflyUIControlContext(
       tokens: effectiveTokens,
+      stylePack: resolvedPack,
       sendEvent: sendEvent,
       sendSystemEvent: sendSystemEvent,
       registerInvokeHandler: registerInvokeHandler,
@@ -257,12 +259,16 @@ class ControlRenderer {
 
       case 'surface':
       case 'box':
+      case 'container':
+      case 'candy_surface':
+      case 'candy_container':
         return buildContainerControl(props, rawChildren, context.buildChild);
 
       case 'page_scene':
         return buildPageSceneControl(props, rawChildren, context.buildChild);
 
       case 'row':
+      case 'candy_row':
         return buildRowControl(
           props,
           rawChildren,
@@ -271,6 +277,7 @@ class ControlRenderer {
         );
 
       case 'column':
+      case 'candy_column':
         return buildColumnControl(
           props,
           rawChildren,
@@ -279,9 +286,11 @@ class ControlRenderer {
         );
 
       case 'stack':
+      case 'candy_stack':
         return buildStackControl(props, rawChildren, context.buildChild);
 
       case 'wrap':
+      case 'candy_wrap':
         return buildWrapControl(
           props,
           rawChildren,
@@ -446,6 +455,7 @@ class ControlRenderer {
         return buildMessageComposerControl(controlId, props, context.sendEvent);
 
       case 'button':
+      case 'candy_button':
         return buildButtonControl(
           controlId,
           props,
@@ -799,7 +809,7 @@ class ControlRenderer {
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
-          stylePack.motionPack,
+          context.stylePack.motionPack,
         );
 
       case 'launcher':
@@ -1125,6 +1135,7 @@ class ControlRenderer {
         }
 
       case 'card':
+      case 'candy_card':
         return buildCardControl(
           props,
           rawChildren,
@@ -1249,7 +1260,7 @@ class ControlRenderer {
       controlType: controlType,
       props: props,
       tokens: context.tokens,
-      stylePack: stylePack,
+      stylePack: context.stylePack,
     );
     final surfaceStyle = resolvedStyle.slot('surface');
 
@@ -1409,8 +1420,8 @@ class ControlRenderer {
       modifiers: modifiers,
       motion: motionSpec,
       tokens: context.tokens,
-      motionPack: stylePack.motionPack,
-      effectPresets: stylePack.effectPresets,
+      motionPack: context.stylePack.motionPack,
+      effectPresets: context.stylePack.effectPresets,
     );
 
     final events = _coerceStringList(props['events']);
@@ -1431,6 +1442,14 @@ class ControlRenderer {
     final animation = props['animation'];
     if (animation is Map) {
       built = AnimationSpec.fromJson(coerceObjectMap(animation)).wrap(built);
+    } else {
+      final fallbackAnimation = _animationFromMotion(
+        motionSpec,
+        context.stylePack.motionPack,
+      );
+      if (fallbackAnimation != null) {
+        built = AnimationSpec.fromJson(fallbackAnimation).wrap(built);
+      }
     }
 
     if (!enabled) {
@@ -1438,6 +1457,33 @@ class ControlRenderer {
     }
 
     return built;
+  }
+
+  Map<String, Object?>? _animationFromMotion(
+    Object? motion,
+    Map<String, Object?> motionPack,
+  ) {
+    if (motion == null) return null;
+    final spec = ButterflyUIMotionPack.resolve(
+      motion,
+      pack: motionPack,
+      fallbackName: 'normal',
+    );
+    final hasOffset =
+        spec.beginOffset.dx != 0 ||
+        spec.beginOffset.dy != 0 ||
+        spec.endOffset.dx != 0 ||
+        spec.endOffset.dy != 0;
+    final hasScale = spec.beginScale != 1.0 || spec.endScale != 1.0;
+    final preset = hasOffset
+        ? 'slide_and_fade'
+        : (hasScale ? 'scale' : 'fade');
+    return <String, Object?>{
+      'preset': preset,
+      'duration_ms': spec.duration.inMilliseconds,
+      'curve': 'ease_out',
+      'offset': <double>[spec.beginOffset.dx, spec.beginOffset.dy],
+    };
   }
 
   Widget _unknownControl(

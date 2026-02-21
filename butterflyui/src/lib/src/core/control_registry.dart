@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'candy/theme.dart';
+import 'style/style_pack.dart';
 import 'webview/webview_api.dart';
 import 'control_utils.dart';
 
@@ -11,6 +12,7 @@ typedef ButterflyUIControlBuilder = Widget Function(
 
 class ButterflyUIControlContext {
   final CandyTokens tokens;
+  final StylePack stylePack;
   final ButterflyUISendRuntimeEvent sendEvent;
   final ButterflyUISendRuntimeSystemEvent sendSystemEvent;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
@@ -19,6 +21,7 @@ class ButterflyUIControlContext {
 
   const ButterflyUIControlContext({
     required this.tokens,
+    required this.stylePack,
     required this.sendEvent,
     required this.sendSystemEvent,
     required this.registerInvokeHandler,
