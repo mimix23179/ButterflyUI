@@ -36,7 +36,7 @@ class _RuntimeSplashFrameState extends State<RuntimeSplashFrame>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.extension<ConduitThemeTokens>();
+    final tokens = theme.extension<ButterflyUIThemeTokens>();
     final baseBackground =
         tokens?.background ?? theme.colorScheme.background;
     final surface =

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitTableView extends StatefulWidget {
+class ButterflyUITableView extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitRegisterInvokeHandler? registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler? unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent? sendEvent;
+  final ButterflyUIRegisterInvokeHandler? registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent? sendEvent;
 
   final List<String> columns;
   final List<List<Object?>> rows;
@@ -16,7 +16,7 @@ class ConduitTableView extends StatefulWidget {
   final bool striped;
   final bool showHeader;
 
-  const ConduitTableView({
+  const ButterflyUITableView({
     super.key,
     this.controlId = '',
     this.props = const {},
@@ -31,10 +31,10 @@ class ConduitTableView extends StatefulWidget {
   });
 
   @override
-  State<ConduitTableView> createState() => _ConduitTableViewState();
+  State<ButterflyUITableView> createState() => _ButterflyUITableViewState();
 }
 
-class _ConduitTableViewState extends State<ConduitTableView> {
+class _ButterflyUITableViewState extends State<ButterflyUITableView> {
   late final ScrollController _verticalController;
   late final ScrollController _horizontalController;
   final Map<Axis, double> _lastPixels = <Axis, double>{};
@@ -55,7 +55,7 @@ class _ConduitTableViewState extends State<ConduitTableView> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitTableView oldWidget) {
+  void didUpdateWidget(covariant ButterflyUITableView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
       if (oldWidget.controlId.isNotEmpty &&

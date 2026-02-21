@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:xterm/xterm.dart' as xterm;
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitTerminal extends StatefulWidget {
+class ButterflyUITerminal extends StatefulWidget {
   final String controlId;
   final List<dynamic> events;
   final List<dynamic> lines;
@@ -25,9 +25,9 @@ class ConduitTerminal extends StatefulWidget {
   final Color textColor;
   final Color borderColor;
   final double radius;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitTerminal({
+  const ButterflyUITerminal({
     super.key,
     required this.controlId,
     required this.events,
@@ -53,10 +53,10 @@ class ConduitTerminal extends StatefulWidget {
   });
 
   @override
-  State<ConduitTerminal> createState() => _ConduitTerminalState();
+  State<ButterflyUITerminal> createState() => _ButterflyUITerminalState();
 }
 
-class _ConduitTerminalState extends State<ConduitTerminal> {
+class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   late final xterm.Terminal _terminal = xterm.Terminal(maxLines: 4000);
   final TextEditingController _inputController = TextEditingController();
   String _lastSnapshot = '';
@@ -72,7 +72,7 @@ class _ConduitTerminalState extends State<ConduitTerminal> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitTerminal oldWidget) {
+  void didUpdateWidget(covariant ButterflyUITerminal oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncTerminalBuffer();
   }
@@ -257,9 +257,9 @@ xterm.TerminalTheme _buildTerminalTheme(Color bg, Color fg) {
 Widget buildTerminalControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitTerminal(
+  return ButterflyUITerminal(
     controlId: controlId,
     events: props['events'] is List
         ? List<dynamic>.from(props['events'] as List)

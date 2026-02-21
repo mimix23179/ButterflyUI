@@ -14,7 +14,7 @@ class ErrorHandlerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeTokens = theme.extension<ConduitThemeTokens>();
+    final themeTokens = theme.extension<ButterflyUIThemeTokens>();
     final title = payload?['title']?.toString() ?? 'Runtime problem';
     final message = payload?['message']?.toString() ?? 'Unknown error';
     final severity = payload?['severity']?.toString() ?? 'error';
@@ -93,7 +93,7 @@ class ErrorHandlerScreen extends StatelessWidget {
     required String? traceback,
     required bool showTraceback,
     required Color accent,
-    required ConduitThemeTokens? themeTokens,
+    required ButterflyUIThemeTokens? themeTokens,
   }) {
     final codeStyle = TextStyle(
       color: themeTokens?.mutedText ?? const Color(0xFFD6DBE2),
@@ -125,7 +125,7 @@ class ErrorHandlerScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Made with Conduit',
+            'Made with ButterflyUI',
             style: TextStyle(
               color: (themeTokens?.mutedText ?? Colors.white).withOpacity(0.7),
               fontSize: 12,
@@ -252,7 +252,7 @@ class ErrorHandlerScreen extends StatelessWidget {
 Color _severityColor(
   String severity,
   ThemeData theme,
-  ConduitThemeTokens? tokens,
+  ButterflyUIThemeTokens? tokens,
 ) {
   switch (severity.toLowerCase()) {
     case 'warning':

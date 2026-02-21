@@ -1,6 +1,6 @@
-# Conduit v1 Control List
+# ButterflyUI v1 Control List
 
-This is the active v1 scope. Controls outside this list are not first-class controls in Conduit v1.
+This is the active v1 scope. Controls outside this list are not first-class controls in ButterflyUI v1.
 
 ## 1) Component Contract
 - `Component` is the universal control contract for SDK controls.

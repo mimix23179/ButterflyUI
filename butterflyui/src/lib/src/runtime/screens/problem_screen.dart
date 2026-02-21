@@ -6,7 +6,7 @@ import 'runtime_splash_frame.dart';
 import 'traceback_logger.dart';
 import '../../core/candy/theme_extension.dart';
 
-class ConduitProblemScreen extends StatelessWidget {
+class ButterflyUIProblemScreen extends StatelessWidget {
   final String? title;
   final String? message;
   final String severity;
@@ -19,10 +19,10 @@ class ConduitProblemScreen extends StatelessWidget {
   final List<Map<String, Object?>>? actions;
   final String? variant;
   final List<String>? errorClasses;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
   final String controlId;
 
-  const ConduitProblemScreen({
+  const ButterflyUIProblemScreen({
     super.key,
     this.title,
     this.message,
@@ -56,7 +56,7 @@ class ConduitProblemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeTokens = theme.extension<ConduitThemeTokens>();
+    final themeTokens = theme.extension<ButterflyUIThemeTokens>();
     final titleText = title ?? 'Runtime problem';
     final messageText = message ?? 'An unexpected error occurred.';
     final accent = _severityColor(severity, theme, themeTokens);
@@ -121,7 +121,7 @@ class ConduitProblemScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Made with Conduit',
+                      'Made with ButterflyUI',
                       style: TextStyle(
                         color: (themeTokens?.mutedText ?? Colors.white)
                             .withOpacity(0.7),
@@ -303,7 +303,7 @@ class ConduitProblemScreen extends StatelessWidget {
 Color _severityColor(
   String severity,
   ThemeData theme,
-  ConduitThemeTokens? tokens,
+  ButterflyUIThemeTokens? tokens,
 ) {
   switch (severity.toLowerCase()) {
     case 'warning':

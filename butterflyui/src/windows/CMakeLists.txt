@@ -1,10 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(conduit LANGUAGES CXX)
+project(butterflyui LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "Conduit")
+set(BINARY_NAME "ButterflyUI")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -59,9 +59,9 @@ add_subdirectory("runner")
 
 # Ensure NuGet is available for plugins that fetch native dependencies
 # (for example flutter_inappwebview_windows on Windows).
-find_program(CONDUIT_NUGET_EXE NAMES nuget)
-if(NOT CONDUIT_NUGET_EXE)
-  set(CONDUIT_NUGET_HINTS
+find_program(BUTTERFLYUI_NUGET_EXE NAMES nuget)
+if(NOT BUTTERFLYUI_NUGET_EXE)
+  set(BUTTERFLYUI_NUGET_HINTS
     "$ENV{ProgramFiles}/NuGet/nuget.exe"
     "$ENV{ProgramW6432}/NuGet/nuget.exe"
     "$ENV{ProgramFiles}/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/NuGet/NuGet.exe"
@@ -71,37 +71,37 @@ if(NOT CONDUIT_NUGET_EXE)
     "$ENV{ProgramFiles}/Microsoft Visual Studio/18/Professional/Common7/IDE/CommonExtensions/Microsoft/NuGet/NuGet.exe"
     "$ENV{ProgramFiles}/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/NuGet/NuGet.exe"
   )
-  foreach(CONDUIT_NUGET_PATH ${CONDUIT_NUGET_HINTS})
-    if(EXISTS "${CONDUIT_NUGET_PATH}")
-      set(CONDUIT_NUGET_EXE "${CONDUIT_NUGET_PATH}")
+  foreach(BUTTERFLYUI_NUGET_PATH ${BUTTERFLYUI_NUGET_HINTS})
+    if(EXISTS "${BUTTERFLYUI_NUGET_PATH}")
+      set(BUTTERFLYUI_NUGET_EXE "${BUTTERFLYUI_NUGET_PATH}")
       break()
     endif()
   endforeach()
 endif()
 
-if(NOT CONDUIT_NUGET_EXE)
-  set(CONDUIT_NUGET_DIR "${CMAKE_BINARY_DIR}/tools")
-  set(CONDUIT_NUGET_EXE "${CONDUIT_NUGET_DIR}/nuget.exe")
-  file(MAKE_DIRECTORY "${CONDUIT_NUGET_DIR}")
+if(NOT BUTTERFLYUI_NUGET_EXE)
+  set(BUTTERFLYUI_NUGET_DIR "${CMAKE_BINARY_DIR}/tools")
+  set(BUTTERFLYUI_NUGET_EXE "${BUTTERFLYUI_NUGET_DIR}/nuget.exe")
+  file(MAKE_DIRECTORY "${BUTTERFLYUI_NUGET_DIR}")
   file(DOWNLOAD
     "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
-    "${CONDUIT_NUGET_EXE}"
-    STATUS CONDUIT_NUGET_DOWNLOAD_STATUS
+    "${BUTTERFLYUI_NUGET_EXE}"
+    STATUS BUTTERFLYUI_NUGET_DOWNLOAD_STATUS
     SHOW_PROGRESS
   )
-  list(GET CONDUIT_NUGET_DOWNLOAD_STATUS 0 CONDUIT_NUGET_DOWNLOAD_CODE)
-  if(NOT CONDUIT_NUGET_DOWNLOAD_CODE EQUAL 0)
-    list(GET CONDUIT_NUGET_DOWNLOAD_STATUS 1 CONDUIT_NUGET_DOWNLOAD_MESSAGE)
-    message(WARNING "Unable to download nuget.exe automatically: ${CONDUIT_NUGET_DOWNLOAD_MESSAGE}")
-    set(CONDUIT_NUGET_EXE "")
+  list(GET BUTTERFLYUI_NUGET_DOWNLOAD_STATUS 0 BUTTERFLYUI_NUGET_DOWNLOAD_CODE)
+  if(NOT BUTTERFLYUI_NUGET_DOWNLOAD_CODE EQUAL 0)
+    list(GET BUTTERFLYUI_NUGET_DOWNLOAD_STATUS 1 BUTTERFLYUI_NUGET_DOWNLOAD_MESSAGE)
+    message(WARNING "Unable to download nuget.exe automatically: ${BUTTERFLYUI_NUGET_DOWNLOAD_MESSAGE}")
+    set(BUTTERFLYUI_NUGET_EXE "")
   endif()
 endif()
 
-if(CONDUIT_NUGET_EXE)
-  get_filename_component(CONDUIT_NUGET_DIR "${CONDUIT_NUGET_EXE}" DIRECTORY)
-  list(PREPEND CMAKE_PROGRAM_PATH "${CONDUIT_NUGET_DIR}")
-  set(ENV{PATH} "${CONDUIT_NUGET_DIR};$ENV{PATH}")
-  message(STATUS "Using NuGet: ${CONDUIT_NUGET_EXE}")
+if(BUTTERFLYUI_NUGET_EXE)
+  get_filename_component(BUTTERFLYUI_NUGET_DIR "${BUTTERFLYUI_NUGET_EXE}" DIRECTORY)
+  list(PREPEND CMAKE_PROGRAM_PATH "${BUTTERFLYUI_NUGET_DIR}")
+  set(ENV{PATH} "${BUTTERFLYUI_NUGET_DIR};$ENV{PATH}")
+  message(STATUS "Using NuGet: ${BUTTERFLYUI_NUGET_EXE}")
 else()
   message(WARNING "NuGet was not found. Plugins that require NuGet may fail to build.")
 endif()

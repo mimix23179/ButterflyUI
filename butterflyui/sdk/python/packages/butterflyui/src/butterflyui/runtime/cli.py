@@ -11,12 +11,12 @@ from .runner import KNOWN_TARGETS, RuntimePlan, build_runtime_plan, load_runner_
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="conduit",
-        description="Conduit deterministic app runner",
+        prog="butterflyui",
+        description="ButterflyUI deterministic app runner",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = subparsers.add_parser("run", help="Run a Conduit app")
+    run_parser = subparsers.add_parser("run", help="Run a ButterflyUI app")
     _add_target_arguments(run_parser, include_entry=True)
 
     plan_parser = subparsers.add_parser("plan", help="Print resolved boot plan")
@@ -30,19 +30,19 @@ def _add_target_arguments(parser: argparse.ArgumentParser, *, include_entry: boo
         "target",
         nargs="?",
         choices=KNOWN_TARGETS,
-        help="Run target (desktop or web). If omitted, Conduit uses conduit.toml or defaults to desktop.",
+        help="Run target (desktop or web). If omitted, ButterflyUI uses butterflyui.toml or defaults to desktop.",
     )
     parser.add_argument(
         "--config",
         dest="config_path",
         default=None,
-        help="Path to conduit.toml (default: ./conduit.toml if present).",
+        help="Path to butterflyui.toml (default: ./butterflyui.toml if present).",
     )
     if include_entry:
         parser.add_argument(
             "--entry",
             default=None,
-            help="Entrypoint in module:function form (default: run.entry in conduit.toml or app:main).",
+            help="Entrypoint in module:function form (default: run.entry in butterflyui.toml or app:main).",
         )
 
     parser.add_argument("--host", default=None, help="Runtime host override.")
@@ -168,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 2
     except Exception as exc:
-        print(f"conduit: {exc}", file=sys.stderr)
+        print(f"butterflyui: {exc}", file=sys.stderr)
         return 2
 
 

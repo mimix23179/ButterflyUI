@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitSwitch extends StatefulWidget {
+class ButterflyUISwitch extends StatefulWidget {
   final String controlId;
   final String? label;
   final bool value;
   final bool enabled;
   final bool inline;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSwitch({
+  const ButterflyUISwitch({
     super.key,
     required this.controlId,
     required this.label,
@@ -21,10 +21,10 @@ class ConduitSwitch extends StatefulWidget {
   });
 
   @override
-  State<ConduitSwitch> createState() => _ConduitSwitchState();
+  State<ButterflyUISwitch> createState() => _ButterflyUISwitchState();
 }
 
-class _ConduitSwitchState extends State<ConduitSwitch> {
+class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
   late bool _value;
 
   @override
@@ -34,7 +34,7 @@ class _ConduitSwitchState extends State<ConduitSwitch> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSwitch oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value) {
       _value = widget.value;

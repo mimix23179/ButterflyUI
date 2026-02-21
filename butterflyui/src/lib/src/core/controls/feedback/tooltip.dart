@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class ConduitTooltipWidget extends StatelessWidget {
+class ButterflyUITooltipWidget extends StatelessWidget {
   final String message;
   final bool preferBelow;
   final int waitMs;
   final Widget child;
 
-  const ConduitTooltipWidget({
+  const ButterflyUITooltipWidget({
     super.key,
     required this.message,
     required this.preferBelow,

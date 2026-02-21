@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "Conduit" "\0"
+            VALUE "FileDescription", "ButterflyUI" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Conduit" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "Conduit.exe" "\0"
-            VALUE "ProductName", "Conduit" "\0"
+            VALUE "InternalName", "ButterflyUI" "\0"
+            VALUE "LegalCopyright", "Copyright (c) 2026 Mimix. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ButterflyUI.exe" "\0"
+            VALUE "ProductName", "ButterflyUI" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

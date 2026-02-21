@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 
-class ConduitPopover extends StatefulWidget {
+class ButterflyUIPopover extends StatefulWidget {
   final String controlId;
   final Widget anchor;
   final Widget content;
@@ -15,9 +15,9 @@ class ConduitPopover extends StatefulWidget {
   final String transitionType;
   final Curve transitionCurve;
   final Color? scrimColor;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitPopover({
+  const ButterflyUIPopover({
     super.key,
     required this.controlId,
     required this.anchor,
@@ -34,10 +34,10 @@ class ConduitPopover extends StatefulWidget {
   });
 
   @override
-  State<ConduitPopover> createState() => _ConduitPopoverState();
+  State<ButterflyUIPopover> createState() => _ButterflyUIPopoverState();
 }
 
-class _ConduitPopoverState extends State<ConduitPopover> {
+class _ButterflyUIPopoverState extends State<ButterflyUIPopover> {
   final LayerLink _link = LayerLink();
 
   Alignment _targetAnchor() {
@@ -79,7 +79,7 @@ class _ConduitPopoverState extends State<ConduitPopover> {
               behavior: HitTestBehavior.translucent,
               onTap: () => widget.sendEvent(widget.controlId, 'dismiss', {}),
               child: Container(
-                color: widget.scrimColor ?? conduitScrim(context, opacity: 0.0),
+                color: widget.scrimColor ?? butterflyuiScrim(context, opacity: 0.0),
               ),
             ),
           ),

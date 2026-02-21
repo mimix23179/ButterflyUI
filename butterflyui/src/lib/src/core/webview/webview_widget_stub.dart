@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'webview_api.dart';
 
-class ConduitWebViewWidget extends StatelessWidget {
+class ButterflyUIWebViewWidget extends StatelessWidget {
   final String controlId;
-  final ConduitWebViewProps props;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIWebViewProps props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitWebViewWidget({
+  const ButterflyUIWebViewWidget({
     super.key,
     required this.controlId,
     required this.props,

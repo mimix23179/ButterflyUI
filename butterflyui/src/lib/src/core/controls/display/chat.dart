@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildChatMessageControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final text = (props['text'] ?? props['value'] ?? props['message'] ?? '')
       .toString();
@@ -75,7 +75,7 @@ Widget buildChatThreadControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final spacing = coerceDouble(props['spacing']) ?? 8;
   final padding =
@@ -137,7 +137,7 @@ Widget buildChatThreadControl(
   );
 }
 
-class ConduitMessageComposer extends StatefulWidget {
+class ButterflyUIMessageComposer extends StatefulWidget {
   final String controlId;
   final String value;
   final bool enabled;
@@ -149,9 +149,9 @@ class ConduitMessageComposer extends StatefulWidget {
   final String placeholder;
   final String sendLabel;
   final bool showAttach;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitMessageComposer({
+  const ButterflyUIMessageComposer({
     super.key,
     required this.controlId,
     required this.value,
@@ -168,10 +168,10 @@ class ConduitMessageComposer extends StatefulWidget {
   });
 
   @override
-  State<ConduitMessageComposer> createState() => _ConduitMessageComposerState();
+  State<ButterflyUIMessageComposer> createState() => _ButterflyUIMessageComposerState();
 }
 
-class _ConduitMessageComposerState extends State<ConduitMessageComposer> {
+class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
@@ -179,7 +179,7 @@ class _ConduitMessageComposerState extends State<ConduitMessageComposer> {
   bool _suppressChange = false;
 
   @override
-  void didUpdateWidget(covariant ConduitMessageComposer oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIMessageComposer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value && widget.value != _controller.text) {
       _suppressChange = true;
@@ -264,11 +264,11 @@ class _ConduitMessageComposerState extends State<ConduitMessageComposer> {
 Widget buildMessageComposerControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final showAttach =
       props['show_attachments'] == true || props['show_attach'] == true;
-  return ConduitMessageComposer(
+  return ButterflyUIMessageComposer(
     controlId: controlId,
     value: (props['value'] ?? '').toString(),
     enabled: props['enabled'] == null ? true : (props['enabled'] == true),

@@ -1,6 +1,6 @@
 # Desktop vs Web Target
 
-This document explains how Conduit app launch targets work.
+This document explains how ButterflyUI app launch targets work.
 
 ## Preferred API
 
@@ -12,7 +12,7 @@ Use explicit target strings:
 Example:
 
 ```python
-from conduit import run, Page
+from butterflyui import run, Page
 
 def main(page: Page) -> None:
     page.title = "My App"
@@ -24,9 +24,9 @@ if __name__ == "__main__":
 
 ## Target Resolution
 
-If `target` is not passed to `run(...)` / `app(...)`, Conduit resolves launch target in this order:
+If `target` is not passed to `run(...)` / `app(...)`, ButterflyUI resolves launch target in this order:
 
-1. `[run].target` in `conduit.toml`
+1. `[run].target` in `butterflyui.toml`
 2. Default: `desktop`
 
 `mode=` and `desktop=` are not supported.

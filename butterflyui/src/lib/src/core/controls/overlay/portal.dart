@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildPortalControl(
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   Map<String, Object?>? baseMap;
   Map<String, Object?>? portalMap;

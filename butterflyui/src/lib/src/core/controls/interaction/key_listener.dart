@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitKeyListener extends StatefulWidget {
+class ButterflyUIKeyListener extends StatefulWidget {
   final String controlId;
   final Widget child;
   final bool autofocus;
   final bool enabled;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitKeyListener({
+  const ButterflyUIKeyListener({
     super.key,
     required this.controlId,
     required this.child,
@@ -20,10 +20,10 @@ class ConduitKeyListener extends StatefulWidget {
   });
 
   @override
-  State<ConduitKeyListener> createState() => _ConduitKeyListenerState();
+  State<ButterflyUIKeyListener> createState() => _ButterflyUIKeyListenerState();
 }
 
-class _ConduitKeyListenerState extends State<ConduitKeyListener> {
+class _ButterflyUIKeyListenerState extends State<ButterflyUIKeyListener> {
   late final FocusNode _focusNode = FocusNode();
 
   @override

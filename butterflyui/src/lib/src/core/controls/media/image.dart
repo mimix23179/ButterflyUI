@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 
 Widget buildImageControl(
   Map<String, Object?> props,
@@ -25,14 +25,14 @@ Widget buildImageControl(
           return Center(child: Text(placeholder));
         }
         return Container(
-          color: conduitSurfaceAlt(context),
+          color: butterflyuiSurfaceAlt(context),
           alignment: Alignment.center,
           child: const Text('image'),
         );
       },
       errorWidget: (context, url, error) {
         return Container(
-          color: conduitSurfaceAlt(context),
+          color: butterflyuiSurfaceAlt(context),
           alignment: Alignment.center,
           child: const Text('image'),
         );
@@ -46,7 +46,7 @@ Widget buildImageControl(
       fit: fit,
       errorBuilder: (context, error, stackTrace) {
         return Container(
-          color: conduitSurfaceAlt(context),
+          color: butterflyuiSurfaceAlt(context),
           alignment: Alignment.center,
           child: const Text('image'),
         );

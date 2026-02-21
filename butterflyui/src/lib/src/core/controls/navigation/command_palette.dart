@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/controls/common/icon_value.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildCommandPaletteControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitCommandPalette(
+  return ButterflyUICommandPalette(
     controlId: controlId,
     props: props,
     sendEvent: sendEvent,
@@ -19,7 +19,7 @@ Widget buildCommandPaletteControl(
 Widget buildCommandItemControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final label = (props['label'] ?? props['title'] ?? props['text'] ?? 'Command')
       .toString();
@@ -73,12 +73,12 @@ class _CommandData {
   });
 }
 
-class ConduitCommandPalette extends StatefulWidget {
+class ButterflyUICommandPalette extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitCommandPalette({
+  const ButterflyUICommandPalette({
     super.key,
     required this.controlId,
     required this.props,
@@ -86,10 +86,10 @@ class ConduitCommandPalette extends StatefulWidget {
   });
 
   @override
-  State<ConduitCommandPalette> createState() => _ConduitCommandPaletteState();
+  State<ButterflyUICommandPalette> createState() => _ButterflyUICommandPaletteState();
 }
 
-class _ConduitCommandPaletteState extends State<ConduitCommandPalette> {
+class _ButterflyUICommandPaletteState extends State<ButterflyUICommandPalette> {
   late final TextEditingController _controller;
   String _query = '';
 
@@ -104,7 +104,7 @@ class _ConduitCommandPaletteState extends State<ConduitCommandPalette> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitCommandPalette oldWidget) {
+  void didUpdateWidget(covariant ButterflyUICommandPalette oldWidget) {
     super.didUpdateWidget(oldWidget);
     final next =
         widget.props['query']?.toString() ??

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/candy/effects.dart';
-import 'package:conduit_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/candy/effects.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 Widget buildScanlineOverlayControl(
   Map<String, Object?> props,
   Widget child, {
   required Color defaultText,
 }) {
-  return ConduitScanlineOverlay(
+  return ButterflyUIScanlineOverlay(
     child: child,
     spacing: (coerceDouble(props['spacing'] ?? props['line_spacing']) ?? 6)
         .clamp(1.0, 256.0),

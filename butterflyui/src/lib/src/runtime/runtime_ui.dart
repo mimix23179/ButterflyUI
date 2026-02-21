@@ -3,24 +3,24 @@ import 'package:flutter/scheduler.dart';
 
 import 'host/runtime_host.dart';
 
-class ConduitRuntimeView extends StatefulWidget {
+class ButterflyUIRuntimeView extends StatefulWidget {
   final List<String> runtimeArgs;
   final ValueChanged<ThemeData?> onThemeChanged;
 
-  const ConduitRuntimeView({
+  const ButterflyUIRuntimeView({
     super.key,
     required this.runtimeArgs,
     required this.onThemeChanged,
   });
 
   @override
-  State<ConduitRuntimeView> createState() => _ConduitRuntimeViewState();
+  State<ButterflyUIRuntimeView> createState() => _ButterflyUIRuntimeViewState();
 }
 
-class _ConduitRuntimeViewState extends State<ConduitRuntimeView>
+class _ButterflyUIRuntimeViewState extends State<ButterflyUIRuntimeView>
     with SingleTickerProviderStateMixin {
   static const bool _enableFpsTicker = bool.fromEnvironment(
-    'CONDUIT_FPS_TICKER',
+    'BUTTERFLYUI_FPS_TICKER',
     defaultValue: false,
   );
 

@@ -2,61 +2,61 @@ import 'package:flutter/material.dart';
 
 import 'candy/theme_extension.dart';
 
-ConduitThemeTokens? conduitTokens(BuildContext context) {
-  return Theme.of(context).extension<ConduitThemeTokens>();
+ButterflyUIThemeTokens? butterflyuiTokens(BuildContext context) {
+  return Theme.of(context).extension<ButterflyUIThemeTokens>();
 }
 
-Color conduitBackground(BuildContext context) {
+Color butterflyuiBackground(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.background ?? theme.colorScheme.background;
 }
 
-Color conduitSurface(BuildContext context) {
+Color butterflyuiSurface(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.surface ?? theme.colorScheme.surface;
 }
 
-Color conduitSurfaceAlt(BuildContext context) {
+Color butterflyuiSurfaceAlt(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.surfaceAlt ?? theme.colorScheme.surfaceVariant;
 }
 
-Color conduitText(BuildContext context) {
+Color butterflyuiText(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.text ?? theme.colorScheme.onSurface;
 }
 
-Color conduitMutedText(BuildContext context) {
+Color butterflyuiMutedText(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.mutedText ?? theme.colorScheme.onSurfaceVariant;
 }
 
-Color conduitBorder(BuildContext context) {
+Color butterflyuiBorder(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.border ?? theme.colorScheme.outlineVariant;
 }
 
-Color conduitPrimary(BuildContext context) {
+Color butterflyuiPrimary(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.primary ?? theme.colorScheme.primary;
 }
 
-Color conduitSecondary(BuildContext context) {
+Color butterflyuiSecondary(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return tokens?.secondary ?? theme.colorScheme.secondary;
 }
 
-Color conduitStatusColor(BuildContext context, String? status) {
+Color butterflyuiStatusColor(BuildContext context, String? status) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   switch ((status ?? '').toLowerCase()) {
     case 'success':
     case 'ok':
@@ -75,14 +75,14 @@ Color conduitStatusColor(BuildContext context, String? status) {
   }
 }
 
-Color conduitScrim(BuildContext context, {double opacity = 0.45}) {
+Color butterflyuiScrim(BuildContext context, {double opacity = 0.45}) {
   final scrim = Theme.of(context).colorScheme.scrim;
   return scrim.withOpacity(opacity);
 }
 
-List<Color> conduitAccentPalette(BuildContext context) {
+List<Color> butterflyuiAccentPalette(BuildContext context) {
   final theme = Theme.of(context);
-  final tokens = conduitTokens(context);
+  final tokens = butterflyuiTokens(context);
   return [
     tokens?.primary ?? theme.colorScheme.primary,
     tokens?.secondary ?? theme.colorScheme.secondary,

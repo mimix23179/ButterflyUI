@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class NativePreviewHostApi {
-  static const MethodChannel _channel = MethodChannel('conduit/native_preview_host');
+  static const MethodChannel _channel = MethodChannel('butterflyui/native_preview_host');
 
   static Future<void> createHost(String hostId) async {
     await _channel.invokeMethod('createHost', {'host_id': hostId});

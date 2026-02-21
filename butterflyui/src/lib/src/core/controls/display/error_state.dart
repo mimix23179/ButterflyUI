@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/controls/common/icon_value.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildErrorStateControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final title = (props['title'] ?? 'Something went wrong').toString();
   final message = (props['message'] ?? props['text'] ?? 'Please try again.')

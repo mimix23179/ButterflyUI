@@ -4,20 +4,20 @@ import 'candy/theme.dart';
 import 'webview/webview_api.dart';
 import 'control_utils.dart';
 
-typedef ConduitControlBuilder = Widget Function(
-  ConduitControlContext context,
+typedef ButterflyUIControlBuilder = Widget Function(
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
 );
 
-class ConduitControlContext {
+class ButterflyUIControlContext {
   final CandyTokens tokens;
-  final ConduitSendRuntimeEvent sendEvent;
-  final ConduitSendRuntimeSystemEvent sendSystemEvent;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeSystemEvent sendSystemEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final Widget Function(Map<String, Object?> control) buildChild;
 
-  const ConduitControlContext({
+  const ButterflyUIControlContext({
     required this.tokens,
     required this.sendEvent,
     required this.sendSystemEvent,
@@ -42,14 +42,14 @@ class ConduitControlContext {
   }
 }
 
-class ConduitControlRegistry {
-  final Map<String, ConduitControlBuilder> _builders = {};
+class ButterflyUIControlRegistry {
+  final Map<String, ButterflyUIControlBuilder> _builders = {};
 
-  void register(String type, ConduitControlBuilder builder) {
+  void register(String type, ButterflyUIControlBuilder builder) {
     _builders[type] = builder;
   }
 
-  ConduitControlBuilder? builderFor(String type) {
+  ButterflyUIControlBuilder? builderFor(String type) {
     return _builders[type];
   }
 

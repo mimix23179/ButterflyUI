@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 Widget buildAnimatedBackgroundControl(
   Map<String, Object?> props,
@@ -15,7 +15,7 @@ Widget buildAnimatedBackgroundControl(
   final curve = _parseCurve(props['curve']);
   final childMap = _firstChildMap(children);
 
-  return ConduitAnimatedBackground(
+  return ButterflyUIAnimatedBackground(
     colors: colors,
     duration: Duration(milliseconds: durationMs.clamp(1, 600000)),
     curve: curve,
@@ -31,14 +31,14 @@ Map<String, Object?>? _firstChildMap(List children) {
   return null;
 }
 
-class ConduitAnimatedBackground extends StatefulWidget {
+class ButterflyUIAnimatedBackground extends StatefulWidget {
   final List<Color> colors;
   final Duration duration;
   final Curve curve;
   final bool loop;
   final Widget? child;
 
-  const ConduitAnimatedBackground({
+  const ButterflyUIAnimatedBackground({
     super.key,
     required this.colors,
     required this.duration,
@@ -48,10 +48,10 @@ class ConduitAnimatedBackground extends StatefulWidget {
   });
 
   @override
-  State<ConduitAnimatedBackground> createState() => _ConduitAnimatedBackgroundState();
+  State<ButterflyUIAnimatedBackground> createState() => _ButterflyUIAnimatedBackgroundState();
 }
 
-class _ConduitAnimatedBackgroundState extends State<ConduitAnimatedBackground>
+class _ButterflyUIAnimatedBackgroundState extends State<ButterflyUIAnimatedBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -66,7 +66,7 @@ class _ConduitAnimatedBackgroundState extends State<ConduitAnimatedBackground>
   }
 
   @override
-  void didUpdateWidget(covariant ConduitAnimatedBackground oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIAnimatedBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.duration != widget.duration) {
       _controller.duration = widget.duration;

@@ -39,7 +39,7 @@ class _MainAppState extends State<MainApp> {
       GoRoute(
         path: '/',
         builder: (context, state) => NotificationRoot(
-          child: ConduitRuntimeView(
+          child: ButterflyUIRuntimeView(
             runtimeArgs: widget.runtimeArgs,
             onThemeChanged: _applyTheme,
           ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 
-class ConduitSlidePanel extends StatelessWidget {
+class ButterflyUISlidePanel extends StatelessWidget {
   final String controlId;
   final Widget child;
   final bool open;
@@ -11,9 +11,9 @@ class ConduitSlidePanel extends StatelessWidget {
   final double size;
   final Color? scrimColor;
   final bool dismissible;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSlidePanel({
+  const ButterflyUISlidePanel({
     super.key,
     required this.controlId,
     required this.child,
@@ -61,7 +61,7 @@ class ConduitSlidePanel extends StatelessWidget {
             child: GestureDetector(
               onTap: dismissible ? () => sendEvent(controlId, 'dismiss', {}) : null,
               child: Container(
-                color: scrimColor ?? conduitScrim(context, opacity: 0.54),
+                color: scrimColor ?? butterflyuiScrim(context, opacity: 0.54),
               ),
             ),
           ),

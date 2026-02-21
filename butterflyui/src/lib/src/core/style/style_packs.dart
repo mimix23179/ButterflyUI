@@ -747,9 +747,9 @@ final StylePack _neonPack = StylePack(
 );
 
 Widget _buildRetroButton(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 ) {
   final props = context.propsOf(control);
   final label = (props['text'] ?? props['label'])?.toString() ?? 'Button';
@@ -787,9 +787,9 @@ Widget _buildRetroButton(
 }
 
 Widget _buildComfyButton(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 ) {
   final props = context.propsOf(control);
   final label = (props['text'] ?? props['label'])?.toString() ?? 'Button';
@@ -811,9 +811,9 @@ Widget _buildComfyButton(
 }
 
 Widget _buildNeonButton(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 ) {
   final props = context.propsOf(control);
   final label = (props['text'] ?? props['label'])?.toString() ?? 'Button';
@@ -845,9 +845,9 @@ Widget _buildNeonButton(
 }
 
 Widget _buildGlassContainer(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 ) {
   final built = buildDefault(context, control);
   final props = context.propsOf(control);
@@ -857,9 +857,9 @@ Widget _buildGlassContainer(
 }
 
 Widget _buildXtermOverride(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 ) {
   final props = context.propsOf(control);
   final events = props['events'] is List
@@ -878,7 +878,7 @@ Widget _buildXtermOverride(
 }
 
 VoidCallback? _buttonHandler(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
   bool enabled,
 ) {

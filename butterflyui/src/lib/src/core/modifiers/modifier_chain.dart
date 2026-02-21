@@ -27,7 +27,7 @@ Widget applyControlModifierChain({
   if (!bundle.enabled) {
     return child;
   }
-  final motionSpec = ConduitMotionPack.resolve(
+  final motionSpec = ButterflyUIMotionPack.resolve(
     motion,
     pack: motionPack,
     fallbackName: 'hover',
@@ -305,7 +305,7 @@ class _ModifierHost extends StatefulWidget {
   final String controlType;
   final String controlId;
   final _ModifierBundle bundle;
-  final ConduitMotionSpec motion;
+  final ButterflyUIMotionSpec motion;
   final CandyTokens tokens;
   final Widget child;
 

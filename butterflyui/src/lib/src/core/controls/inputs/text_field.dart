@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitTextField extends StatefulWidget {
+class ButterflyUITextField extends StatefulWidget {
   final String controlId;
   final String value;
   final String? placeholder;
@@ -21,9 +21,9 @@ class ConduitTextField extends StatefulWidget {
   final bool dense;
   final bool emitOnChange;
   final int debounceMs;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitTextField({
+  const ButterflyUITextField({
     super.key,
     required this.controlId,
     required this.value,
@@ -45,16 +45,16 @@ class ConduitTextField extends StatefulWidget {
   });
 
   @override
-  State<ConduitTextField> createState() => _ConduitTextFieldState();
+  State<ButterflyUITextField> createState() => _ButterflyUITextFieldState();
 }
 
-class _ConduitTextFieldState extends State<ConduitTextField> {
+class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
   late final TextEditingController _controller = TextEditingController(text: widget.value);
   bool _suppressChange = false;
   Timer? _debounce;
 
   @override
-  void didUpdateWidget(covariant ConduitTextField oldWidget) {
+  void didUpdateWidget(covariant ButterflyUITextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value && widget.value != _controller.text) {
       _suppressChange = true;

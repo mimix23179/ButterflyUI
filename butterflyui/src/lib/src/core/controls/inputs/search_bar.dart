@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class _SearchSuggestion {
   final String id;
@@ -36,21 +36,21 @@ class _SearchFilter {
 Widget buildSearchBarControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitSearchBar(
+  return ButterflyUISearchBar(
     controlId: controlId,
     props: props,
     sendEvent: sendEvent,
   );
 }
 
-class ConduitSearchBar extends StatefulWidget {
+class ButterflyUISearchBar extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSearchBar({
+  const ButterflyUISearchBar({
     super.key,
     required this.controlId,
     required this.props,
@@ -58,10 +58,10 @@ class ConduitSearchBar extends StatefulWidget {
   });
 
   @override
-  State<ConduitSearchBar> createState() => _ConduitSearchBarState();
+  State<ButterflyUISearchBar> createState() => _ButterflyUISearchBarState();
 }
 
-class _ConduitSearchBarState extends State<ConduitSearchBar> {
+class _ButterflyUISearchBarState extends State<ButterflyUISearchBar> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   Timer? _debounce;
@@ -82,7 +82,7 @@ class _ConduitSearchBarState extends State<ConduitSearchBar> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSearchBar oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISearchBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.props == widget.props) return;
     final nextQuery = _resolveQuery(widget.props);

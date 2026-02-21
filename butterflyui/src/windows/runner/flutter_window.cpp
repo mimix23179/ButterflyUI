@@ -136,7 +136,7 @@ void FlutterWindow::RegisterWindowChannel() {
 
   window_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-          flutter_controller_->engine()->messenger(), "conduit/window",
+          flutter_controller_->engine()->messenger(), "butterflyui/window",
           &flutter::StandardMethodCodec::GetInstance());
 
   window_channel_->SetMethodCallHandler(

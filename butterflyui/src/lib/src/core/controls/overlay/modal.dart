@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 
-class ConduitModal extends StatefulWidget {
+class ButterflyUIModal extends StatefulWidget {
   final String controlId;
   final Widget child;
   final bool open;
@@ -16,9 +16,9 @@ class ConduitModal extends StatefulWidget {
   final Curve transitionCurve;
   final Rect? sourceRect;
   final Color? scrimColor;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitModal({
+  const ButterflyUIModal({
     super.key,
     required this.controlId,
     required this.child,
@@ -35,10 +35,10 @@ class ConduitModal extends StatefulWidget {
   });
 
   @override
-  State<ConduitModal> createState() => _ConduitModalState();
+  State<ButterflyUIModal> createState() => _ButterflyUIModalState();
 }
 
-class _ConduitModalState extends State<ConduitModal>
+class _ButterflyUIModalState extends State<ButterflyUIModal>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
@@ -75,7 +75,7 @@ class _ConduitModalState extends State<ConduitModal>
   }
 
   @override
-  void didUpdateWidget(covariant ConduitModal oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIModal oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.duration != widget.duration) {
       _controller.duration = widget.duration;
@@ -134,7 +134,7 @@ class _ConduitModalState extends State<ConduitModal>
                     child: Container(
                       color:
                           widget.scrimColor ??
-                          conduitScrim(context, opacity: 0.54),
+                          butterflyuiScrim(context, opacity: 0.54),
                     ),
                   ),
                 ),

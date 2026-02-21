@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildFileBrowserControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitFileBrowser(
+  return ButterflyUIFileBrowser(
     controlId: controlId,
     props: props,
     sendEvent: sendEvent,
   );
 }
 
-class ConduitFileBrowser extends StatefulWidget {
+class ButterflyUIFileBrowser extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitFileBrowser({
+  const ButterflyUIFileBrowser({
     super.key,
     required this.controlId,
     required this.props,
@@ -28,10 +28,10 @@ class ConduitFileBrowser extends StatefulWidget {
   });
 
   @override
-  State<ConduitFileBrowser> createState() => _ConduitFileBrowserState();
+  State<ButterflyUIFileBrowser> createState() => _ButterflyUIFileBrowserState();
 }
 
-class _ConduitFileBrowserState extends State<ConduitFileBrowser> {
+class _ButterflyUIFileBrowserState extends State<ButterflyUIFileBrowser> {
   final Set<String> _expanded = <String>{};
   final Set<String> _selected = <String>{};
 
@@ -42,7 +42,7 @@ class _ConduitFileBrowserState extends State<ConduitFileBrowser> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitFileBrowser oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIFileBrowser oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.props != widget.props) {
       _syncFromProps();

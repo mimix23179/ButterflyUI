@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from conduit.core.control import Component as CoreComponent
+from butterflyui.core.control import Component as CoreComponent
 
 
 def _normalize_token(value: str) -> str:

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildPaginatorControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitRegisterInvokeHandler registerInvokeHandler,
-  ConduitUnregisterInvokeHandler unregisterInvokeHandler,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitPaginator(
+  return ButterflyUIPaginator(
     controlId: controlId,
     props: props,
     registerInvokeHandler: registerInvokeHandler,
@@ -19,14 +19,14 @@ Widget buildPaginatorControl(
   );
 }
 
-class ConduitPaginator extends StatefulWidget {
+class ButterflyUIPaginator extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitPaginator({
+  const ButterflyUIPaginator({
     super.key,
     required this.controlId,
     required this.props,
@@ -36,10 +36,10 @@ class ConduitPaginator extends StatefulWidget {
   });
 
   @override
-  State<ConduitPaginator> createState() => _ConduitPaginatorState();
+  State<ButterflyUIPaginator> createState() => _ButterflyUIPaginatorState();
 }
 
-class _ConduitPaginatorState extends State<ConduitPaginator> {
+class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
   int _page = 1;
   int _pageCount = 1;
 
@@ -53,7 +53,7 @@ class _ConduitPaginatorState extends State<ConduitPaginator> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitPaginator oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIPaginator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
       if (oldWidget.controlId.isNotEmpty) {

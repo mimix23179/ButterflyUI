@@ -206,7 +206,7 @@ class CandyTokens {
       );
     }
     final extensions = <ThemeExtension<dynamic>>[
-      ConduitThemeTokens(
+      ButterflyUIThemeTokens(
         background: background ?? scheme.background,
         surface: surface ?? scheme.surface,
         surfaceAlt: surfaceAlt ?? scheme.surfaceVariant,

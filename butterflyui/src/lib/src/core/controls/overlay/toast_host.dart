@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildToastHostControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final items = _coerceItems(props['items'] ?? props['toasts']);
   final maxItems = (coerceOptionalInt(props['max_items']) ?? 4).clamp(1, 32);
@@ -65,7 +65,7 @@ class _ToastCard extends StatelessWidget {
   final String controlId;
   final Map<String, Object?> item;
   final bool dismissible;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   const _ToastCard({
     required this.controlId,

@@ -158,7 +158,7 @@ NativePreviewHostPlugin::NativePreviewHostPlugin(
   parent_hwnd_ = view ? view->GetNativeWindow() : nullptr;
 
   channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-      registrar_->messenger(), "conduit/native_preview_host",
+      registrar_->messenger(), "butterflyui/native_preview_host",
       &flutter::StandardMethodCodec::GetInstance());
 
   channel_->SetMethodCallHandler(

@@ -14,7 +14,7 @@ from typing import Any, TYPE_CHECKING
 import weakref
 
 if TYPE_CHECKING:
-    from ..app import ConduitSession
+    from ..app import ButterflyUISession
 
 _LAYOUT_PARAM_SPECS: tuple[tuple[str, Any, Any], ...] = (
     ("expand", bool, False),
@@ -31,7 +31,7 @@ _LAYOUT_PARAM_SPECS: tuple[tuple[str, Any, Any], ...] = (
     ("animation", Any, None),
 )
 _LAYOUT_KEYS = {name for name, _, _ in _LAYOUT_PARAM_SPECS}
-_CONDUIT_ROOT = Path(__file__).resolve().parent.parent
+_BUTTERFLYUI_ROOT = Path(__file__).resolve().parent.parent
 _STDLIB_ROOTS: tuple[Path, ...] = ()
 try:
     paths = sysconfig.get_paths()
@@ -59,11 +59,11 @@ def _is_internal_path(path: str | None) -> bool:
     except Exception:
         return False
     try:
-        if resolved.is_relative_to(_CONDUIT_ROOT):
+        if resolved.is_relative_to(_BUTTERFLYUI_ROOT):
             return True
     except Exception:
         try:
-            resolved.relative_to(_CONDUIT_ROOT)
+            resolved.relative_to(_BUTTERFLYUI_ROOT)
             return True
         except Exception:
             pass
@@ -156,7 +156,7 @@ def _coerce_state_value(value: Any) -> tuple[bool, Any]:
 
 
 def _text_child(value: Any) -> dict[str, Any]:
-    from conduit.controls.display import Text
+    from butterflyui.controls.display import Text
 
     return Text(str(value)).to_json()
 
@@ -212,8 +212,8 @@ def coerce_json_value(value: Any) -> Any:
         return coerce_json_value(state_value)
     if isinstance(value, Enum):
         return value.value
-    if hasattr(value, "__conduit_json__"):
-        return coerce_json_value(value.__conduit_json__())
+    if hasattr(value, "__butterflyui_json__"):
+        return coerce_json_value(value.__butterflyui_json__())
     if isinstance(value, (str, int, float, bool)):
         return value
     return str(value)
@@ -481,7 +481,7 @@ class Control:
         else:
             self.props[key] = value
 
-    def _on(self, event: str, handler: Any, session: "ConduitSession | None" = None, **kwargs: Any) -> Any:
+    def _on(self, event: str, handler: Any, session: "ButterflyUISession | None" = None, **kwargs: Any) -> Any:
         if session is None:
             try:
                 from ..runtime import get_current_session
@@ -495,7 +495,7 @@ class Control:
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super(Control, cls).__init_subclass__(**kwargs)
         init = cls.__init__
-        if getattr(init, "_conduit_wrapped", False):
+        if getattr(init, "_butterflyui_wrapped", False):
             return
         signature = inspect.signature(init)
         param_names = {param.name for param in signature.parameters.values()}
@@ -560,21 +560,21 @@ class Control:
             except Exception:
                 pass
 
-            if not getattr(cls, "_conduit_signature_ready", False):
+            if not getattr(cls, "_butterflyui_signature_ready", False):
                 schema_sig = _build_schema_signature(signature, self.control_type)
                 if schema_sig is not None:
                     wrapped.__signature__ = schema_sig
-                cls._conduit_signature_ready = True
+                cls._butterflyui_signature_ready = True
 
             try:
                 _register_control(self)
             except Exception:
                 pass
 
-        wrapped._conduit_wrapped = True  # type: ignore[attr-defined]
+        wrapped._butterflyui_wrapped = True  # type: ignore[attr-defined]
         cls.__init__ = wrapped  # type: ignore[assignment]
 
-    def patch(self, *, session: "ConduitSession | None" = None, **props: Any) -> None:
+    def patch(self, *, session: "ButterflyUISession | None" = None, **props: Any) -> None:
         """Update props in-place and optionally notify the runtime."""
         if not props:
             return
@@ -590,7 +590,7 @@ class Control:
 
     def invoke(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         method: str,
         args: Mapping[str, Any] | None = None,
         *,
@@ -601,7 +601,7 @@ class Control:
 
     async def invoke_async(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         method: str,
         args: dict[str, Any] | None = None,
         *,
@@ -610,30 +610,30 @@ class Control:
     ) -> dict[str, Any]:
         return await session.invoke_async(self.control_id, method, dict(args or {}), timeout=timeout, **kwargs)
 
-    def request_focus(self, session: "ConduitSession", *, timeout: float | None = 10.0) -> dict[str, Any]:
+    def request_focus(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         # Ensure the runtime installs the focus machinery.
         self.patch(session=session, focusable=True)
         return self.invoke(session, "request_focus", timeout=timeout)
 
-    def next_focus(self, session: "ConduitSession", *, timeout: float | None = 10.0) -> dict[str, Any]:
+    def next_focus(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         self.patch(session=session, focusable=True)
         return self.invoke(session, "next_focus", timeout=timeout)
 
-    def previous_focus(self, session: "ConduitSession", *, timeout: float | None = 10.0) -> dict[str, Any]:
+    def previous_focus(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         self.patch(session=session, focusable=True)
         return self.invoke(session, "previous_focus", timeout=timeout)
 
-    def unfocus(self, session: "ConduitSession", *, timeout: float | None = 10.0) -> dict[str, Any]:
+    def unfocus(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         return self.invoke(session, "unfocus", timeout=timeout)
 
     # ---- Scrolling (invoke channel) ----
 
-    def get_scroll_metrics(self, session: "ConduitSession", *, timeout: float | None = 10.0) -> dict[str, Any]:
+    def get_scroll_metrics(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         return self.invoke(session, "get_scroll_metrics", timeout=timeout)
 
     def scroll_to(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         *,
         offset: float | None = None,
         x: float | None = None,
@@ -660,7 +660,7 @@ class Control:
 
     def scroll_by(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         *,
         delta: float | None = None,
         dx: float | None = None,
@@ -687,7 +687,7 @@ class Control:
 
     def scroll_to_start(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         *,
         animate: bool = True,
         duration_ms: int = 250,
@@ -703,7 +703,7 @@ class Control:
 
     def scroll_to_end(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         *,
         animate: bool = True,
         duration_ms: int = 250,
@@ -908,7 +908,7 @@ class Control:
 
     def on_event(
         self,
-        session: "ConduitSession",
+        session: "ButterflyUISession",
         event: str,
         handler: Any,
         *,
@@ -1011,10 +1011,10 @@ class Control:
 
         return aliases
 
-    def _subscribe_event(self, session: "ConduitSession", event: str) -> None:
+    def _subscribe_event(self, session: "ButterflyUISession", event: str) -> None:
         """Ensure the runtime knows this control should emit an event.
 
-        Conduit uses a lightweight subscription model: controls include an `events`
+        ButterflyUI uses a lightweight subscription model: controls include an `events`
         list in props, and the Flutter runtime only installs event listeners for
         events present in that list.
         """
@@ -1046,112 +1046,112 @@ class Control:
 
     # ---- Universal event helpers (unified API) ----
 
-    def on_click(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_click(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "click", handler, **kwargs)
 
-    def on_tap(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_tap(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "click", handler, **kwargs)
 
-    def on_double_click(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_double_click(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "double_click", handler, **kwargs)
 
-    def on_long_press(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_long_press(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "long_press", handler, **kwargs)
 
-    def on_press(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_press(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "press", handler, **kwargs)
 
-    def on_shortcut(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_shortcut(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "shortcut", handler, **kwargs)
 
-    def on_select(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_select(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "select", handler, **kwargs)
 
-    def on_close(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_close(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "close", handler, **kwargs)
 
-    def on_open(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_open(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "open", handler, **kwargs)
 
-    def on_command(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_command(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "command", handler, **kwargs)
 
-    def on_intent(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_intent(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "intent", handler, **kwargs)
 
-    def on_toggle_fold(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_toggle_fold(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "toggle_fold", handler, **kwargs)
 
-    def on_hover_enter(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_hover_enter(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "hover_enter", handler, **kwargs)
 
-    def on_hover_exit(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_hover_exit(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "hover_exit", handler, **kwargs)
 
-    def on_hover_move(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_hover_move(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "hover_move", handler, **kwargs)
 
-    def on_focus(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_focus(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "focus", handler, **kwargs)
 
-    def on_blur(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_blur(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "blur", handler, **kwargs)
 
-    def on_key_down(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_key_down(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "key_down", handler, **kwargs)
 
-    def on_key_up(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_key_up(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "key_up", handler, **kwargs)
 
-    def on_change(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_change(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "change", handler, **kwargs)
 
-    def on_submit(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_submit(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "submit", handler, **kwargs)
 
-    def on_scroll_start(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scroll_start(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scroll_start", handler, **kwargs)
 
-    def on_scroll(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scroll(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scroll", handler, **kwargs)
 
-    def on_scroll_end(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scroll_end(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scroll_end", handler, **kwargs)
 
-    def on_resize(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_resize(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "resize", handler, **kwargs)
 
-    def on_context_menu(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_context_menu(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "context_menu", handler, **kwargs)
 
-    def on_pan_start(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_pan_start(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "pan_start", handler, **kwargs)
 
-    def on_pan_update(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_pan_update(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "pan_update", handler, **kwargs)
 
-    def on_pan_end(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_pan_end(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "pan_end", handler, **kwargs)
 
-    def on_scale_start(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scale_start(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scale_start", handler, **kwargs)
 
-    def on_scale_update(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scale_update(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scale_update", handler, **kwargs)
 
-    def on_scale_end(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def on_scale_end(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "scale_end", handler, **kwargs)
 
-    def click(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def click(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "click", handler, **kwargs)
 
-    def change(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def change(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "change", handler, **kwargs)
 
-    def submit(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def submit(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "submit", handler, **kwargs)
 
-    def select(self, session: "ConduitSession", handler: Any, **kwargs: Any) -> Any:
+    def select(self, session: "ButterflyUISession", handler: Any, **kwargs: Any) -> Any:
         return self.on_event(session, "select", handler, **kwargs)
 
 

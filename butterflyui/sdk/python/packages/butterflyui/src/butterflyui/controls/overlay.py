@@ -1,0 +1,233 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any
+
+from ._shared import Component, merge_props
+
+__all__ = [
+    "Modal",
+    "Popover",
+    "Portal",
+    "ContextMenu",
+    "Tooltip",
+    "Toast",
+    "ToastHost",
+]
+
+
+class Modal(Component):
+    control_type = "modal"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        open: bool | None = None,
+        dismissible: bool | None = None,
+        close_on_escape: bool | None = None,
+        trap_focus: bool | None = None,
+        duration_ms: int | None = None,
+        transition: Mapping[str, Any] | None = None,
+        transition_type: str | None = None,
+        source_rect: Mapping[str, Any] | list[float] | tuple[float, ...] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            open=open,
+            dismissible=dismissible,
+            close_on_escape=close_on_escape,
+            trap_focus=trap_focus,
+            duration_ms=duration_ms,
+            transition=transition,
+            transition_type=transition_type,
+            source_rect=source_rect,
+            **kwargs,
+        )
+        super().__init__(
+            child=child,
+            props=merged,
+            style=style,
+            strict=strict,
+        )
+
+
+class Popover(Component):
+    control_type = "popover"
+
+    def __init__(
+        self,
+        anchor: Any | None = None,
+        content: Any | None = None,
+        *,
+        open: bool | None = None,
+        position: str | None = None,
+        offset: Any | None = None,
+        dismissible: bool | None = None,
+        transition: Mapping[str, Any] | None = None,
+        transition_type: str | None = None,
+        duration_ms: int | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            anchor=anchor,
+            content=content,
+            open=open,
+            position=position,
+            offset=offset,
+            dismissible=dismissible,
+            transition=transition,
+            transition_type=transition_type,
+            duration_ms=duration_ms,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class Portal(Component):
+    control_type = "portal"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        portal: Any | None = None,
+        *,
+        open: bool | None = None,
+        dismissible: bool | None = None,
+        passthrough: bool | None = None,
+        alignment: Any | None = None,
+        offset: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            child=child,
+            portal=portal,
+            open=open,
+            dismissible=dismissible,
+            passthrough=passthrough,
+            alignment=alignment,
+            offset=offset,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class ContextMenu(Component):
+    control_type = "context_menu"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        items: list[Any] | None = None,
+        trigger: str | None = None,
+        open_on_tap: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=items,
+            trigger=trigger,
+            open_on_tap=open_on_tap,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class Tooltip(Component):
+    control_type = "tooltip"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        message: str | None = None,
+        prefer_below: bool | None = None,
+        wait_ms: int | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            message=message,
+            prefer_below=prefer_below,
+            wait_ms=wait_ms,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class Toast(Component):
+    control_type = "toast"
+
+    def __init__(
+        self,
+        message: str | None = None,
+        *,
+        open: bool | None = None,
+        duration_ms: int | None = None,
+        action_label: str | None = None,
+        variant: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            message=message,
+            open=open,
+            duration_ms=duration_ms,
+            action_label=action_label,
+            variant=variant,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class ToastHost(Component):
+    control_type = "toast_host"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        position: str | None = None,
+        max_items: int | None = None,
+        latest_on_top: bool | None = None,
+        dismissible: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=items,
+            position=position,
+            max_items=max_items,
+            latest_on_top=latest_on_top,
+            dismissible=dismissible,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+

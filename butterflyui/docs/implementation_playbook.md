@@ -1,4 +1,4 @@
-# Windsurf LLM Playbook: Implementing Conduit Controls
+# Windsurf LLM Playbook: Implementing ButterflyUI Controls
 
 This guide is written from the perspective of an LLM agent working inside Windsurf
 (or a similar IDE). It focuses on the end-to-end path for adding new controls so
@@ -6,7 +6,7 @@ the control is known, serialized, and rendered when used from the Python SDK.
 
 ## Mental Model
 
-Conduit is a Python-driven UI system. Python builds a control tree, serializes it
+ButterflyUI is a Python-driven UI system. Python builds a control tree, serializes it
 to JSON, and streams it to the Flutter runtime. The runtime renders widgets based
 on control type + props. If any layer is missing, the control will not appear or
 will render incorrectly.
@@ -20,27 +20,23 @@ Pipeline overview:
 ## File Map (Where Things Live)
 
 Python (SDK):
-- `conduit/sdk/python/packages/conduit/src/conduit/core/schema.py`
-- `conduit/sdk/python/packages/conduit/src/conduit/core/control.py`
-- `conduit/sdk/python/packages/conduit/src/conduit/core/*.py`
-- `conduit/sdk/python/packages/conduit/src/conduit/components.py`
-- `conduit/sdk/python/packages/conduit/src/conduit/app.py`
+- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/core/schema.py`
+- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/core/control.py`
+- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/core/*.py`
+- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/components.py`
+- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/app.py`
 
 Dart (Runtime):
-- `conduit/src/lib/src/core/control_registry.dart`
-- `conduit/src/lib/src/core/control_renderer.dart`
-- `conduit/src/lib/src/core/controls/**`
-- `conduit/src/lib/src/core/style/style_packs.dart`
-- `conduit/src/lib/src/core/candy/theme.dart`
-
-Docs + Tests:
-- `conduit/docs/conduit_docs.md`
-- `test_apps/**`
+- `butterflyui/src/lib/src/core/control_registry.dart`
+- `butterflyui/src/lib/src/core/control_renderer.dart`
+- `butterflyui/src/lib/src/core/controls/**`
+- `butterflyui/src/lib/src/core/style/style_packs.dart`
+- `butterflyui/src/lib/src/core/candy/theme.dart`
 
 ## Checklist: Add a New Control
 
 1) Define the Python control class
-- Create a new file in `conduit/core/` or extend an existing module.
+- Create a new file in `butterflyui/core/` or extend an existing module.
 - Inherit from `Control` and assign `control_type`.
 - Decide what data is props vs children vs meta.
 - Keep the constructor minimal and map fields to `self.props`.
@@ -58,7 +54,7 @@ Docs + Tests:
 - Add a builder in `control_registry.dart` if it should be configurable there,
   or add a case in `control_renderer.dart` for direct rendering.
 - Prefer building the widget in a dedicated file under
-  `conduit/src/lib/src/core/controls/` and calling it from the renderer.
+  `butterflyui/src/lib/src/core/controls/` and calling it from the renderer.
 
 5) Map props and implement the widget
 - Parse props carefully (strings, numbers, lists, bools).
@@ -69,10 +65,6 @@ Docs + Tests:
 - If the control emits events, register them in the widget.
 - If it supports imperative methods, implement invoke handlers in the runtime
   (and provide Python helpers if needed).
-
-7) Update docs + demo
-- Document the control in `conduit_docs.md` and/or add a small example in
-  `test_apps/`.
 
 ## Checklist: Make Sure It Renders
 
@@ -86,7 +78,7 @@ Docs + Tests:
 
 To keep controls consistent with style packs:
 
-- In Dart, use `conduit_*` theme helpers (from `control_theme.dart`) instead of
+- In Dart, use `butterflyui_*` theme helpers (from `control_theme.dart`) instead of
   raw `Colors.*` defaults.
 - Use `style_pack` prop to override a subtree style.
 - In Python, set `page.style_pack` for a global theme.
@@ -119,8 +111,8 @@ Dart:
 
 ```dart
 case 'glow_box':
-  built = ConduitGlowBox(
-    color: coerceColor(props['color']) ?? conduitPrimary(context),
+  built = ButterflyUIGlowBox(
+    color: coerceColor(props['color']) ?? butterflyuiPrimary(context),
     child: child,
   );
   break;

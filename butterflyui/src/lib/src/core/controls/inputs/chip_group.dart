@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class _ChipOption {
   final String id;
@@ -20,21 +20,21 @@ class _ChipOption {
 Widget buildChipGroupControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitChipGroup(
+  return ButterflyUIChipGroup(
     controlId: controlId,
     props: props,
     sendEvent: sendEvent,
   );
 }
 
-class ConduitChipGroup extends StatefulWidget {
+class ButterflyUIChipGroup extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitChipGroup({
+  const ButterflyUIChipGroup({
     super.key,
     required this.controlId,
     required this.props,
@@ -42,10 +42,10 @@ class ConduitChipGroup extends StatefulWidget {
   });
 
   @override
-  State<ConduitChipGroup> createState() => _ConduitChipGroupState();
+  State<ButterflyUIChipGroup> createState() => _ButterflyUIChipGroupState();
 }
 
-class _ConduitChipGroupState extends State<ConduitChipGroup> {
+class _ButterflyUIChipGroupState extends State<ButterflyUIChipGroup> {
   final Set<String> _selected = <String>{};
 
   @override
@@ -55,7 +55,7 @@ class _ConduitChipGroupState extends State<ConduitChipGroup> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitChipGroup oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIChipGroup oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.props != widget.props) {
       _syncFromProps();

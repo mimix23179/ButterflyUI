@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/notifications/notification_manager.dart';
-import 'package:conduit_runtime/src/core/notifications/notification.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/notifications/notification_manager.dart';
+import 'package:butterflyui_runtime/src/core/notifications/notification.dart';
 
-class ConduitToastWidget extends StatefulWidget {
+class ButterflyUIToastWidget extends StatefulWidget {
   final String controlId;
   final String message;
   final String? label;
@@ -22,9 +22,9 @@ class ConduitToastWidget extends StatefulWidget {
   final bool useFlushbar;
   final bool useFlutterToast;
   final String? toastPosition;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitToastWidget({
+  const ButterflyUIToastWidget({
     super.key,
     required this.controlId,
     required this.message,
@@ -45,10 +45,10 @@ class ConduitToastWidget extends StatefulWidget {
   });
 
   @override
-  State<ConduitToastWidget> createState() => _ConduitToastWidgetState();
+  State<ButterflyUIToastWidget> createState() => _ButterflyUIToastWidgetState();
 }
 
-class _ConduitToastWidgetState extends State<ConduitToastWidget> {
+class _ButterflyUIToastWidgetState extends State<ButterflyUIToastWidget> {
 
   String _lastMessage = '';
 
@@ -62,7 +62,7 @@ class _ConduitToastWidgetState extends State<ConduitToastWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitToastWidget oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIToastWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.open) {
       if (!oldWidget.open || widget.message != _lastMessage) {

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../core/webview/webview_api.dart';
 
-class ConduitLifecycleProbe extends StatefulWidget {
+class ButterflyUILifecycleProbe extends StatefulWidget {
   final String controlId;
   final String controlType;
   final int signature;
-  final ConduitSendRuntimeSystemEvent sendSystemEvent;
+  final ButterflyUISendRuntimeSystemEvent sendSystemEvent;
   final Widget child;
 
-  const ConduitLifecycleProbe({
+  const ButterflyUILifecycleProbe({
     super.key,
     required this.controlId,
     required this.controlType,
@@ -19,10 +19,10 @@ class ConduitLifecycleProbe extends StatefulWidget {
   });
 
   @override
-  State<ConduitLifecycleProbe> createState() => _ConduitLifecycleProbeState();
+  State<ButterflyUILifecycleProbe> createState() => _ButterflyUILifecycleProbeState();
 }
 
-class _ConduitLifecycleProbeState extends State<ConduitLifecycleProbe> {
+class _ButterflyUILifecycleProbeState extends State<ButterflyUILifecycleProbe> {
   @override
   void initState() {
     super.initState();
@@ -35,7 +35,7 @@ class _ConduitLifecycleProbeState extends State<ConduitLifecycleProbe> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitLifecycleProbe oldWidget) {
+  void didUpdateWidget(covariant ButterflyUILifecycleProbe oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.signature != widget.signature) {
       widget.sendSystemEvent('lifecycle', {

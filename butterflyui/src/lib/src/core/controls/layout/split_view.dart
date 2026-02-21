@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildSplitViewControl(
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final children = <Widget>[];
   for (final child in rawChildren) {
@@ -28,7 +28,7 @@ Widget buildSplitViewControl(
     }
   }
 
-  return ConduitSplitView(
+  return ButterflyUISplitView(
     controlId: controlId,
     props: props,
     children: children,
@@ -36,13 +36,13 @@ Widget buildSplitViewControl(
   );
 }
 
-class ConduitSplitView extends StatefulWidget {
+class ButterflyUISplitView extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final List<Widget> children;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSplitView({
+  const ButterflyUISplitView({
     super.key,
     required this.controlId,
     required this.props,
@@ -51,14 +51,14 @@ class ConduitSplitView extends StatefulWidget {
   });
 
   @override
-  State<ConduitSplitView> createState() => _ConduitSplitViewState();
+  State<ButterflyUISplitView> createState() => _ButterflyUISplitViewState();
 }
 
-class _ConduitSplitViewState extends State<ConduitSplitView> {
+class _ButterflyUISplitViewState extends State<ButterflyUISplitView> {
   double? _ratio;
 
   @override
-  void didUpdateWidget(covariant ConduitSplitView oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISplitView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.props['ratio'] != oldWidget.props['ratio']) {
       _ratio = _coerceRatio(widget.props['ratio']) ?? _ratio;

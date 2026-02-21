@@ -1,4 +1,4 @@
-"""Conduit app entrypoints (transport-only bootstrap).
+"""ButterflyUI app entrypoints (transport-only bootstrap).
 
 This module intentionally keeps the runtime surface minimal for step 1.
 """
@@ -27,13 +27,13 @@ from .core.performance import PerformanceConfig
 from .controls.candy_theme import CandyTheme
 from .controls._shared import modifier_capabilities_manifest
 
-import conduit_desktop
+import butterflyui_desktop
 
 _log = logging.getLogger(__name__)
 
 
-class ConduitError(RuntimeError):
-	"""Base error for Conduit app/runtime failures."""
+class ButterflyUIError(RuntimeError):
+	"""Base error for ButterflyUI app/runtime failures."""
 
 
 @dataclass(slots=True)
@@ -49,7 +49,7 @@ class AppConfig:
 	first_render_timeout: float | None = 10.0
 
 
-class ConduitSession:
+class ButterflyUISession:
 	"""Represents an active runtime transport session (step 1 only)."""
 
 	def __init__(self, server: WebSocketRuntimeServer, config: AppConfig) -> None:
@@ -129,9 +129,9 @@ class ConduitSession:
 			traceback_text = payload.get("traceback") or ""
 			message = payload.get("message") or payload.get("error") or ""
 			if traceback_text:
-				text = f"Conduit runtime problem: {title}\n{traceback_text}"
+				text = f"ButterflyUI runtime problem: {title}\n{traceback_text}"
 			else:
-				text = f"Conduit runtime problem: {title}\n{message}"
+				text = f"ButterflyUI runtime problem: {title}\n{message}"
 			try:
 				print(text, file=sys.stderr)
 			except Exception:
@@ -589,7 +589,7 @@ class ConduitSession:
 					self._cache_tree(child)
 
 
-class WebSession(ConduitSession):
+class WebSession(ButterflyUISession):
 	"""WebSocket-based runtime session."""
 
 	def __init__(self, config: AppConfig) -> None:
@@ -610,19 +610,19 @@ class WebSession(ConduitSession):
 
 
 class DesktopSession(WebSession):
-	"""Desktop runtime session using conduit_desktop."""
+	"""Desktop runtime session using butterflyui_desktop."""
 
 	def __init__(self, config: AppConfig, *, auto_install: bool = True) -> None:
 		super().__init__(config)
 		self._auto_install = auto_install
 
 	def launch_runtime(self, *, wait: bool = False, extra_args: Optional[list[str]] = None) -> Any:
-		if conduit_desktop is None:
-			raise ConduitError("conduit_desktop is not available")
+		if butterflyui_desktop is None:
+			raise ButterflyUIError("butterflyui_desktop is not available")
 		if self._auto_install:
-			conduit_desktop.install(force=False)
+			butterflyui_desktop.install(force=False)
 		host_port = f"{self._config.host}:{self._server.port}"
-		return conduit_desktop.run(
+		return butterflyui_desktop.run(
 			host_port=host_port,
 			extra_args=extra_args,
 			session_token=self._config.token,
@@ -643,7 +643,7 @@ class BaseApp:
 def _minimal_boot_root() -> dict[str, Any]:
 	"""Fallback root to guarantee first render and avoid RuntimeStall."""
 	return {
-		"id": "__conduit_auto_root__",
+		"id": "__butterflyui_auto_root__",
 		"type": "column",
 		"props": {"spacing": 0},
 		"children": [],
@@ -669,7 +669,7 @@ class RuntimeApp(BaseApp):
 		PerformanceConfig.initialize()
 
 	def run(self) -> int:
-		async def _ensure_initial_state(page: "Page", session: ConduitSession) -> None:
+		async def _ensure_initial_state(page: "Page", session: ButterflyUISession) -> None:
 			# Wait for any pending update() calls to complete
 			await page.await_updates()
 			if session._last_root is not None:
@@ -731,7 +731,7 @@ class RuntimeApp(BaseApp):
 			await session.send_ui_payload(payload)
 
 		async def _run_async() -> None:
-			session: ConduitSession
+			session: ButterflyUISession
 			if self._desktop:
 				session = DesktopSession(self._config, auto_install=self._auto_install)
 			else:
@@ -781,7 +781,7 @@ class App(RuntimeApp):
 	pass
 
 
-class ConduitWeb:
+class ButterflyUIWeb:
 	"""Web session configuration helper."""
 
 	def __init__(self, **kwargs: Any) -> None:
@@ -791,7 +791,7 @@ class ConduitWeb:
 		return RuntimeApp(main, self.config, target="web").run()
 
 
-class ConduitDesktop:
+class ButterflyUIDesktop:
 	"""Desktop session configuration helper."""
 
 	def __init__(self, **kwargs: Any) -> None:
@@ -804,7 +804,7 @@ class ConduitDesktop:
 class Page:
 	"""Minimal Page container for step 1 (no UI diffing yet)."""
 
-	def __init__(self, *, session: ConduitSession) -> None:
+	def __init__(self, *, session: ButterflyUISession) -> None:
 		self.session = session
 		self.title: str = ""
 		self.root: Any = None
@@ -1097,7 +1097,7 @@ def run(
 	config: str | None = None,
 	**kwargs: Any,
 ) -> int:
-	"""Run a Conduit app using deterministic target boot profiles."""
+	"""Run a ButterflyUI app using deterministic target boot profiles."""
 	plan = _build_plan_for_app(target=target, config=config, kwargs=kwargs)
 	app_config = AppConfig(**plan.as_app_config_kwargs())
 	return RuntimeApp(
@@ -1120,12 +1120,12 @@ def app(
 
 
 def run_web(main: Callable[[Page], Any], **kwargs: Any) -> int:
-	"""Run a Conduit app in web target mode."""
+	"""Run a ButterflyUI app in web target mode."""
 	return run(main, target="web", **kwargs)
 
 
 def run_desktop(main: Callable[[Page], Any], **kwargs: Any) -> int:
-	"""Run a Conduit app in desktop target mode."""
+	"""Run a ButterflyUI app in desktop target mode."""
 	return run(main, target="desktop", **kwargs)
 
 
@@ -1133,10 +1133,10 @@ __all__ = [
 	"App",
 	"AppConfig",
 	"BaseApp",
-	"ConduitDesktop",
-	"ConduitError",
-	"ConduitSession",
-	"ConduitWeb",
+	"ButterflyUIDesktop",
+	"ButterflyUIError",
+	"ButterflyUISession",
+	"ButterflyUIWeb",
 	"DesktopSession",
 	"Page",
 	"RunTarget",

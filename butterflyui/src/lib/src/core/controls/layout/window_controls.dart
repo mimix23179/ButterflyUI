@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/window/window_api.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/window/window_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildWindowControlsControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final showMinimize = props['show_minimize'] == null
       ? true
@@ -99,7 +99,7 @@ class _WindowControlButton extends StatefulWidget {
   final Color? bgColor;
   final Color? borderColor;
   final Color? iconColor;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   const _WindowControlButton({
     required this.icon,
@@ -162,7 +162,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   }
 
   Future<void> _performAction() async {
-    unawaited(ConduitWindowApi.instance.performAction(widget.action));
+    unawaited(ButterflyUIWindowApi.instance.performAction(widget.action));
     if (widget.controlId.isEmpty) return;
     widget.sendEvent(widget.controlId, 'action', <String, Object?>{
       'window_action': widget.action,

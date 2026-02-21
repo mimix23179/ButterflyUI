@@ -12,7 +12,7 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
 
 RunTarget = Literal["desktop", "web"]
 KNOWN_TARGETS: tuple[RunTarget, RunTarget] = ("desktop", "web")
-DEFAULT_CONFIG_FILENAME = "conduit.toml"
+DEFAULT_CONFIG_FILENAME = "butterflyui.toml"
 _LOCAL_HOSTS = {"127.0.0.1", "localhost"}
 
 

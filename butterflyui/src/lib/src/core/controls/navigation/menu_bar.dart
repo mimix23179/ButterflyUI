@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/controls/common/icon_value.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildMenuBarControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitMenuBar(
+  return ButterflyUIMenuBar(
     controlId: controlId,
     props: props,
     sendEvent: sendEvent,
@@ -19,7 +19,7 @@ Widget buildMenuBarControl(
 Widget buildMenuItemControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final label =
       (props['label'] ?? props['text'] ?? props['title'] ?? 'Menu item')
@@ -91,12 +91,12 @@ class _MenuGroupData {
   });
 }
 
-class ConduitMenuBar extends StatelessWidget {
+class ButterflyUIMenuBar extends StatelessWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitMenuBar({
+  const ButterflyUIMenuBar({
     super.key,
     required this.controlId,
     required this.props,
@@ -166,7 +166,7 @@ class _MenuGroupButton extends StatelessWidget {
   final String controlId;
   final _MenuGroupData group;
   final bool dense;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   const _MenuGroupButton({
     required this.controlId,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 Widget buildDividerControl(Map<String, Object?> props, List children, Widget Function(Map<String, Object?> child) buildFromControl, {Color? fallbackColor}) {
   final vertical = props['vertical'] == true;

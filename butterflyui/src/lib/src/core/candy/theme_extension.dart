@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ConduitThemeTokens extends ThemeExtension<ConduitThemeTokens> {
+class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
   final Color background;
   final Color surface;
   final Color surfaceAlt;
@@ -24,7 +24,7 @@ class ConduitThemeTokens extends ThemeExtension<ConduitThemeTokens> {
   final double spacingLg;
   final double glassBlur;
 
-  const ConduitThemeTokens({
+  const ButterflyUIThemeTokens({
     required this.background,
     required this.surface,
     required this.surfaceAlt,
@@ -50,7 +50,7 @@ class ConduitThemeTokens extends ThemeExtension<ConduitThemeTokens> {
   });
 
   @override
-  ConduitThemeTokens copyWith({
+  ButterflyUIThemeTokens copyWith({
     Color? background,
     Color? surface,
     Color? surfaceAlt,
@@ -74,7 +74,7 @@ class ConduitThemeTokens extends ThemeExtension<ConduitThemeTokens> {
     double? spacingLg,
     double? glassBlur,
   }) {
-    return ConduitThemeTokens(
+    return ButterflyUIThemeTokens(
       background: background ?? this.background,
       surface: surface ?? this.surface,
       surfaceAlt: surfaceAlt ?? this.surfaceAlt,
@@ -101,11 +101,11 @@ class ConduitThemeTokens extends ThemeExtension<ConduitThemeTokens> {
   }
 
   @override
-  ConduitThemeTokens lerp(ThemeExtension<ConduitThemeTokens>? other, double t) {
-    if (other is! ConduitThemeTokens) return this;
+  ButterflyUIThemeTokens lerp(ThemeExtension<ButterflyUIThemeTokens>? other, double t) {
+    if (other is! ButterflyUIThemeTokens) return this;
     Color lerpColor(Color a, Color b) => Color.lerp(a, b, t) ?? a;
     double lerpDouble(double a, double b) => a + (b - a) * t;
-    return ConduitThemeTokens(
+    return ButterflyUIThemeTokens(
       background: lerpColor(background, other.background),
       surface: lerpColor(surface, other.surface),
       surfaceAlt: lerpColor(surfaceAlt, other.surfaceAlt),

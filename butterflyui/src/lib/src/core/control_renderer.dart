@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'animation/animation_spec.dart';
 import 'candy/theme.dart';
-import 'conduit_event_box.dart';
+import 'butterflyui_event_box.dart';
 import 'control_registry.dart';
 import 'control_utils.dart';
 import 'modifiers/modifier_chain.dart';
@@ -101,24 +101,24 @@ Color _borderToken(CandyTokens tokens) {
 
 class ControlRenderer {
   final CandyTokens tokens;
-  final ConduitControlRegistry registry;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
-  final ConduitSendRuntimeSystemEvent sendSystemEvent;
+  final ButterflyUIControlRegistry registry;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeSystemEvent sendSystemEvent;
   final StylePack stylePack;
   final Map<String, Object?> styleTokens;
 
   ControlRenderer({
     required this.tokens,
-    ConduitControlRegistry? registry,
+    ButterflyUIControlRegistry? registry,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
     required this.sendEvent,
     required this.sendSystemEvent,
     StylePack? stylePack,
     Map<String, Object?>? styleTokens,
-  }) : registry = registry ?? ConduitControlRegistry(),
+  }) : registry = registry ?? ButterflyUIControlRegistry(),
        stylePack = stylePack ?? stylePackRegistry.defaultPack,
        styleTokens = styleTokens ?? const <String, Object?>{};
 
@@ -151,7 +151,7 @@ class ControlRenderer {
       );
     }
 
-    final context = ConduitControlContext(
+    final context = ButterflyUIControlContext(
       tokens: effectiveTokens,
       sendEvent: sendEvent,
       sendSystemEvent: sendSystemEvent,
@@ -176,7 +176,7 @@ class ControlRenderer {
       built = registryBuilder(context, controlWithProps);
     } else {
       final defaultBuilder =
-          (ConduitControlContext ctx, Map<String, Object?> node) {
+          (ButterflyUIControlContext ctx, Map<String, Object?> node) {
             return _buildDefaultControl(ctx, node);
           };
       final override = resolvedPack.overrides[type];
@@ -196,7 +196,7 @@ class ControlRenderer {
   }
 
   Widget _buildDefaultControl(
-    ConduitControlContext context,
+    ButterflyUIControlContext context,
     Map<String, Object?> control,
   ) {
     final type = (control['type']?.toString() ?? '').toLowerCase();
@@ -454,7 +454,7 @@ class ControlRenderer {
         );
 
       case 'text_field':
-        return ConduitTextField(
+        return ButterflyUITextField(
           controlId: controlId,
           value: props['value']?.toString() ?? '',
           placeholder: props['placeholder']?.toString(),
@@ -482,7 +482,7 @@ class ControlRenderer {
         return buildSearchBarControl(controlId, props, context.sendEvent);
 
       case 'checkbox':
-        return ConduitCheckbox(
+        return ButterflyUICheckbox(
           controlId: controlId,
           label: props['label']?.toString(),
           value: _coerceBoolOrNull(props['value'] ?? props['checked']),
@@ -494,7 +494,7 @@ class ControlRenderer {
         );
 
       case 'switch':
-        return ConduitSwitch(
+        return ButterflyUISwitch(
           controlId: controlId,
           label: props['label']?.toString(),
           value: _coerceBool(props['value'], fallback: false),
@@ -504,7 +504,7 @@ class ControlRenderer {
         );
 
       case 'radio':
-        return ConduitRadioGroup(
+        return ButterflyUIRadioGroup(
           controlId: controlId,
           options: coerceOptionList(props['options'] ?? props['items']),
           index: coerceOptionalInt(props['index']) ?? 0,
@@ -516,7 +516,7 @@ class ControlRenderer {
         );
 
       case 'slider':
-        return ConduitSlider(
+        return ButterflyUISlider(
           controlId: controlId,
           value: coerceDouble(props['value']) ?? 0.0,
           min: coerceDouble(props['min']) ?? 0.0,
@@ -530,7 +530,7 @@ class ControlRenderer {
         );
 
       case 'select':
-        return ConduitSelect(
+        return ButterflyUISelect(
           controlId: controlId,
           options: coerceOptionList(props['options'] ?? props['items']),
           index: coerceOptionalInt(props['index']) ?? 0,
@@ -581,7 +581,7 @@ class ControlRenderer {
           } else {
             child = const SizedBox.shrink();
           }
-          return ConduitModal(
+          return ButterflyUIModal(
             controlId: controlId,
             child: child,
             open: props['open'] == true,
@@ -639,7 +639,7 @@ class ControlRenderer {
               coerceObjectMap(props['content'] as Map),
             );
           }
-          return ConduitPopover(
+          return ButterflyUIPopover(
             controlId: controlId,
             anchor: anchor,
             content: content,
@@ -696,7 +696,7 @@ class ControlRenderer {
         {
           final message = (props['message'] ?? props['text'] ?? '').toString();
           if (message.isEmpty) return firstChildOrEmpty();
-          return ConduitTooltipWidget(
+          return ButterflyUITooltipWidget(
             message: message,
             preferBelow: props['prefer_below'] == null
                 ? true
@@ -707,7 +707,7 @@ class ControlRenderer {
         }
 
       case 'toast':
-        return ConduitToastWidget(
+        return ButterflyUIToastWidget(
           controlId: controlId,
           message: (props['message'] ?? props['text'] ?? '').toString(),
           label: props['label']?.toString(),
@@ -747,7 +747,7 @@ class ControlRenderer {
         {
           final labels = _coerceStringList(props['labels']);
           final tabChildren = children.map(context.buildChild).toList();
-          return ConduitTabsWidget(
+          return ButterflyUITabsWidget(
             controlId: controlId,
             labels: labels,
             children: tabChildren,
@@ -812,7 +812,7 @@ class ControlRenderer {
         );
 
       case 'sidebar':
-        return ConduitSidebar(
+        return ButterflyUISidebar(
           controlId: controlId,
           sections: _coerceSidebarSections(props),
           selectedId:
@@ -842,7 +842,7 @@ class ControlRenderer {
           for (var i = leading == null ? 0 : 1; i < children.length; i += 1) {
             actions.add(context.buildChild(children[i]));
           }
-          return ConduitAppBar(
+          return ButterflyUIAppBar(
             controlId: controlId,
             title: props['title']?.toString(),
             subtitle: props['subtitle']?.toString(),
@@ -870,7 +870,7 @@ class ControlRenderer {
           final child = children.isNotEmpty
               ? context.buildChild(children.first)
               : mapChildPropOrEmpty('child');
-          return ConduitSlidePanel(
+          return ButterflyUISlidePanel(
             controlId: controlId,
             child: child,
             open: props['open'] == true,
@@ -1133,7 +1133,7 @@ class ControlRenderer {
         );
 
       case 'table':
-        return ConduitTableView(
+        return ButterflyUITableView(
           controlId: controlId,
           props: props,
           registerInvokeHandler: context.registerInvokeHandler,
@@ -1163,7 +1163,7 @@ class ControlRenderer {
         return buildAnimationAssetControl(props);
 
       case 'key_listener':
-        return ConduitKeyListener(
+        return ButterflyUIKeyListener(
           controlId: controlId,
           child: firstChildOrEmpty(),
           autofocus: props['autofocus'] == true,
@@ -1172,7 +1172,7 @@ class ControlRenderer {
         );
 
       case 'shortcut_map':
-        return ConduitShortcutMap(
+        return ButterflyUIShortcutMap(
           controlId: controlId,
           child: firstChildOrEmpty(),
           shortcuts: _coerceMapList(props['shortcuts']),
@@ -1243,7 +1243,7 @@ class ControlRenderer {
     required String controlType,
     required String controlId,
     required Map<String, Object?> props,
-    required ConduitControlContext context,
+    required ButterflyUIControlContext context,
   }) {
     final resolvedStyle = ControlStyleResolver.resolve(
       controlType: controlType,
@@ -1415,7 +1415,7 @@ class ControlRenderer {
 
     final events = _coerceStringList(props['events']);
     if (controlId.isNotEmpty && events.isNotEmpty) {
-      built = ConduitEventBox(
+      built = ButterflyUIEventBox(
         controlId: controlId,
         controlType: controlType,
         props: props,

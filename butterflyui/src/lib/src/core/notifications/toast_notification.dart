@@ -57,7 +57,7 @@ class ToastNotificationWidget extends StatelessWidget {
     final variantKey = _normalizeKey(data.variant);
     final headerText = (data.label != null && data.label!.isNotEmpty)
         ? data.label!
-        : (variantKey.isEmpty ? 'Conduit' : 'Conduit / ${_titleCase(variantKey)}');
+        : (variantKey.isEmpty ? 'ButterflyUI' : 'ButterflyUI / ${_titleCase(variantKey)}');
 
     return Material(
       color: Colors.transparent,

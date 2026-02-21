@@ -131,7 +131,7 @@ class _RuntimeHostState extends State<RuntimeHost> {
           _problem = null;
         });
         if (kDebugMode) {
-          debugPrint('Conduit runtime.ready received; awaiting first render.');
+          debugPrint('ButterflyUI runtime.ready received; awaiting first render.');
         }
         return;
       case 'runtime.problem':

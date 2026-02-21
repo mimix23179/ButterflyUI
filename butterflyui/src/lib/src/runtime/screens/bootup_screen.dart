@@ -19,7 +19,7 @@ class BootupScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Made with Conduit',
+              'Made with ButterflyUI',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,

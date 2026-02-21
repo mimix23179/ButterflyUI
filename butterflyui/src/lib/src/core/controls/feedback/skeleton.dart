@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 Widget buildSkeletonControl(Map<String, Object?> props) {
-  return ConduitSkeleton(props: props);
+  return ButterflyUISkeleton(props: props);
 }
 
 Widget buildSkeletonLoaderControl(Map<String, Object?> props) {
   final count = (coerceOptionalInt(props['count']) ?? 1).clamp(1, 24);
   final spacing = coerceDouble(props['spacing']) ?? 8;
   if (count <= 1) {
-    return ConduitSkeleton(props: props);
+    return ButterflyUISkeleton(props: props);
   }
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -19,22 +19,22 @@ Widget buildSkeletonLoaderControl(Map<String, Object?> props) {
       count,
       (_) => Padding(
         padding: EdgeInsets.only(bottom: spacing),
-        child: ConduitSkeleton(props: props),
+        child: ButterflyUISkeleton(props: props),
       ),
     ),
   );
 }
 
-class ConduitSkeleton extends StatefulWidget {
+class ButterflyUISkeleton extends StatefulWidget {
   final Map<String, Object?> props;
 
-  const ConduitSkeleton({super.key, required this.props});
+  const ButterflyUISkeleton({super.key, required this.props});
 
   @override
-  State<ConduitSkeleton> createState() => _ConduitSkeletonState();
+  State<ButterflyUISkeleton> createState() => _ButterflyUISkeletonState();
 }
 
-class _ConduitSkeletonState extends State<ConduitSkeleton>
+class _ButterflyUISkeletonState extends State<ButterflyUISkeleton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -50,7 +50,7 @@ class _ConduitSkeletonState extends State<ConduitSkeleton>
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSkeleton oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISkeleton oldWidget) {
     super.didUpdateWidget(oldWidget);
     final nextMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 1100)
         .clamp(300, 6000);

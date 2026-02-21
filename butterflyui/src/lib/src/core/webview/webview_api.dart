@@ -1,21 +1,21 @@
 import 'package:flutter/foundation.dart';
 
-typedef ConduitInvokeHandler =
+typedef ButterflyUIInvokeHandler =
     Future<Object?> Function(String method, Map<String, Object?> args);
 
-typedef ConduitRegisterInvokeHandler =
-    void Function(String controlId, ConduitInvokeHandler handler);
+typedef ButterflyUIRegisterInvokeHandler =
+    void Function(String controlId, ButterflyUIInvokeHandler handler);
 
-typedef ConduitUnregisterInvokeHandler = void Function(String controlId);
+typedef ButterflyUIUnregisterInvokeHandler = void Function(String controlId);
 
-typedef ConduitSendRuntimeEvent =
+typedef ButterflyUISendRuntimeEvent =
     void Function(String controlId, String event, Map<String, Object?> payload);
 
-typedef ConduitSendRuntimeSystemEvent =
+typedef ButterflyUISendRuntimeSystemEvent =
     void Function(String kind, Map<String, Object?> payload);
 
 @immutable
-class ConduitWebViewProps {
+class ButterflyUIWebViewProps {
   final String url;
   final List<String> preventLinks;
   final String html;
@@ -39,7 +39,7 @@ class ConduitWebViewProps {
   final bool openExternalLinks;
   final int initTimeoutMs;
 
-  const ConduitWebViewProps({
+  const ButterflyUIWebViewProps({
     required this.url,
     required this.preventLinks,
     this.html = '',
@@ -104,7 +104,7 @@ class ConduitWebViewProps {
     return parsed;
   }
 
-  factory ConduitWebViewProps.fromJson(Map<String, Object?> props) {
+  factory ButterflyUIWebViewProps.fromJson(Map<String, Object?> props) {
     final url = props['url']?.toString() ?? '';
     final html = props['html']?.toString() ?? '';
     final baseUrl = props['base_url']?.toString();
@@ -183,7 +183,7 @@ class ConduitWebViewProps {
       max: 120000,
     );
 
-    return ConduitWebViewProps(
+    return ButterflyUIWebViewProps(
       url: url,
       preventLinks: preventLinks,
       html: html,

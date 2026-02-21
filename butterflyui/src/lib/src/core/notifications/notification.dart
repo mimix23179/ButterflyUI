@@ -13,7 +13,7 @@ class NotificationPayload {
   final String? style;
   final IconData? icon;
   final Map<String, Object?>? animation;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
   final bool instant;
   final int priority;
 

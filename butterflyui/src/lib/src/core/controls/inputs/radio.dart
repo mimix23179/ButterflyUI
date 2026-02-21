@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/controls/common/option_types.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/option_types.dart';
 
-class ConduitRadioGroup extends StatefulWidget {
+class ButterflyUIRadioGroup extends StatefulWidget {
   final String controlId;
-  final List<ConduitOption> options;
+  final List<ButterflyUIOption> options;
   final int index;
   final Object? explicitValue;
   final String? label;
   final bool enabled;
   final bool dense;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitRadioGroup({
+  const ButterflyUIRadioGroup({
     super.key,
     required this.controlId,
     required this.options,
@@ -26,10 +26,10 @@ class ConduitRadioGroup extends StatefulWidget {
   });
 
   @override
-  State<ConduitRadioGroup> createState() => _ConduitRadioGroupState();
+  State<ButterflyUIRadioGroup> createState() => _ButterflyUIRadioGroupState();
 }
 
-class _ConduitRadioGroupState extends State<ConduitRadioGroup> {
+class _ButterflyUIRadioGroupState extends State<ButterflyUIRadioGroup> {
   String? _valueKey;
 
   @override
@@ -39,7 +39,7 @@ class _ConduitRadioGroupState extends State<ConduitRadioGroup> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitRadioGroup oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIRadioGroup oldWidget) {
     super.didUpdateWidget(oldWidget);
     final next = _resolveValue(current: _valueKey);
     if (next != _valueKey) {

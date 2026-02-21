@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 Widget buildMarkdownViewControl(Map<String, Object?> props) {
   final value = (props['value'] ?? props['text'] ?? '').toString();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitSidebar extends StatefulWidget {
+class ButterflyUISidebar extends StatefulWidget {
   final String controlId;
   final List<Map<String, Object?>> sections;
   final String? selectedId;
@@ -10,9 +10,9 @@ class ConduitSidebar extends StatefulWidget {
   final String query;
   final bool collapsible;
   final bool dense;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSidebar({
+  const ButterflyUISidebar({
     super.key,
     required this.controlId,
     required this.sections,
@@ -25,7 +25,7 @@ class ConduitSidebar extends StatefulWidget {
   });
 
   @override
-  State<ConduitSidebar> createState() => _ConduitSidebarState();
+  State<ButterflyUISidebar> createState() => _ButterflyUISidebarState();
 }
 
 class _SidebarItem {
@@ -56,7 +56,7 @@ class _SidebarSection {
   });
 }
 
-class _ConduitSidebarState extends State<ConduitSidebar> {
+class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
   late TextEditingController _controller;
   String _query = '';
 
@@ -68,7 +68,7 @@ class _ConduitSidebarState extends State<ConduitSidebar> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSidebar oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISidebar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.query != oldWidget.query && widget.query != _query) {
       _query = widget.query;

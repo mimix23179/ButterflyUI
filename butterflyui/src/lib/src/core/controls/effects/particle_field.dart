@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 
 Widget buildParticleFieldControl(Map<String, Object?> props) {
   final count = (coerceOptionalInt(props['count']) ?? 40)
@@ -29,7 +29,7 @@ Widget buildParticleFieldControl(Map<String, Object?> props) {
   final play = playValue == null ? true : (playValue == true);
   final shape = props['shape']?.toString() ?? 'circle';
 
-  return ConduitParticleField(
+  return ButterflyUIParticleField(
     count: count,
     colors: colors,
     minSize: minSize,
@@ -46,7 +46,7 @@ Widget buildParticleFieldControl(Map<String, Object?> props) {
   );
 }
 
-class ConduitParticleField extends StatefulWidget {
+class ButterflyUIParticleField extends StatefulWidget {
   final int count;
   final List<Color> colors;
   final double minSize;
@@ -61,7 +61,7 @@ class ConduitParticleField extends StatefulWidget {
   final bool play;
   final String shape;
 
-  const ConduitParticleField({
+  const ButterflyUIParticleField({
     super.key,
     required this.count,
     required this.colors,
@@ -79,10 +79,10 @@ class ConduitParticleField extends StatefulWidget {
   });
 
   @override
-  State<ConduitParticleField> createState() => _ConduitParticleFieldState();
+  State<ButterflyUIParticleField> createState() => _ButterflyUIParticleFieldState();
 }
 
-class _ConduitParticleFieldState extends State<ConduitParticleField>
+class _ButterflyUIParticleFieldState extends State<ButterflyUIParticleField>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -110,7 +110,7 @@ class _ConduitParticleFieldState extends State<ConduitParticleField>
   }
 
   @override
-  void didUpdateWidget(covariant ConduitParticleField oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIParticleField oldWidget) {
     super.didUpdateWidget(oldWidget);
     _resolveColors();
     if (_shouldRebuildParticles(oldWidget)) {
@@ -144,7 +144,7 @@ class _ConduitParticleFieldState extends State<ConduitParticleField>
     );
   }
 
-  bool _shouldRebuildParticles(ConduitParticleField oldWidget) {
+  bool _shouldRebuildParticles(ButterflyUIParticleField oldWidget) {
     return oldWidget.count != widget.count ||
         oldWidget.minSize != widget.minSize ||
         oldWidget.maxSize != widget.maxSize ||
@@ -173,7 +173,7 @@ class _ConduitParticleFieldState extends State<ConduitParticleField>
   void _resolveColors() {
     final next = widget.colors.isNotEmpty
         ? widget.colors
-        : conduitAccentPalette(context);
+        : butterflyuiAccentPalette(context);
     if (_resolvedColors.length != next.length ||
         !_resolvedColors.asMap().entries.every((e) => e.value == next[e.key])) {
       _resolvedColors = next;
@@ -184,7 +184,7 @@ class _ConduitParticleFieldState extends State<ConduitParticleField>
     final random = math.Random(widget.seed);
     final colors = _resolvedColors.isNotEmpty
         ? _resolvedColors
-        : [conduitText(context)];
+        : [butterflyuiText(context)];
     final minSize = math.min(widget.minSize, widget.maxSize);
     final maxSize = math.max(widget.minSize, widget.maxSize);
     final minSpeed = math.min(widget.minSpeed, widget.maxSpeed);

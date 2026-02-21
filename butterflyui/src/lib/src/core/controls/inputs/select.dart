@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/animation/animation_spec.dart';
-import 'package:conduit_runtime/src/core/controls/common/option_types.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/animation/animation_spec.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/option_types.dart';
 
-class ConduitSelect extends StatefulWidget {
+class ButterflyUISelect extends StatefulWidget {
   final String controlId;
-  final List<ConduitOption> options;
+  final List<ButterflyUIOption> options;
   final int index;
   final Object? explicitValue;
   final bool enabled;
   final bool dense;
   final String? label;
   final String? hint;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSelect({
+  const ButterflyUISelect({
     super.key,
     required this.controlId,
     required this.options,
@@ -29,10 +29,10 @@ class ConduitSelect extends StatefulWidget {
   });
 
   @override
-  State<ConduitSelect> createState() => _ConduitSelectState();
+  State<ButterflyUISelect> createState() => _ButterflyUISelectState();
 }
 
-class _ConduitSelectState extends State<ConduitSelect> {
+class _ButterflyUISelectState extends State<ButterflyUISelect> {
   String? _valueKey;
 
   @override
@@ -42,7 +42,7 @@ class _ConduitSelectState extends State<ConduitSelect> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSelect oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISelect oldWidget) {
     super.didUpdateWidget(oldWidget);
     final next = _resolveValue(current: _valueKey);
     if (next != _valueKey) {

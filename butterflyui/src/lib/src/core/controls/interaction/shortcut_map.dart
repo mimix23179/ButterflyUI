@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class _ShortcutIntent extends Intent {
   final String id;
   const _ShortcutIntent(this.id);
 }
 
-class ConduitShortcutMap extends StatefulWidget {
+class ButterflyUIShortcutMap extends StatefulWidget {
   final String controlId;
   final Widget child;
   final List<Map<String, Object?>> shortcuts;
   final bool enabled;
   final bool useGlobalHotkeys;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitShortcutMap({
+  const ButterflyUIShortcutMap({
     super.key,
     required this.controlId,
     required this.child,
@@ -28,10 +28,10 @@ class ConduitShortcutMap extends StatefulWidget {
   });
 
   @override
-  State<ConduitShortcutMap> createState() => _ConduitShortcutMapState();
+  State<ButterflyUIShortcutMap> createState() => _ButterflyUIShortcutMapState();
 }
 
-class _ConduitShortcutMapState extends State<ConduitShortcutMap> {
+class _ButterflyUIShortcutMapState extends State<ButterflyUIShortcutMap> {
   final Map<String, HotKey> _registered = {};
 
   LogicalKeySet? _parseKeySet(String raw) {
@@ -375,7 +375,7 @@ class _ConduitShortcutMapState extends State<ConduitShortcutMap> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitShortcutMap oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIShortcutMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.useGlobalHotkeys != widget.useGlobalHotkeys ||
         oldWidget.shortcuts != widget.shortcuts) {

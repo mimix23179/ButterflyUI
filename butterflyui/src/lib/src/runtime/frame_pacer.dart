@@ -12,7 +12,7 @@ class FramePacer {
   ); // ~60 FPS
 
   static const bool _logFps = bool.fromEnvironment(
-    'CONDUIT_LOG_FPS',
+    'BUTTERFLYUI_LOG_FPS',
     defaultValue: false,
   );
 
@@ -154,7 +154,7 @@ class FramePacer {
     }
 
     if (_logFps) {
-      print('Conduit FPS: ${_currentFPS.toStringAsFixed(1)} / $_targetFPS');
+      print('ButterflyUI FPS: ${_currentFPS.toStringAsFixed(1)} / $_targetFPS');
     }
 
     _frameCount = 0;

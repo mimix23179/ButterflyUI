@@ -30,14 +30,14 @@ const Map<int, String> _httpStatusReasons = {
   504: 'Gateway Timeout',
 };
 
-class ConduitWebViewWidget extends StatefulWidget {
+class ButterflyUIWebViewWidget extends StatefulWidget {
   final String controlId;
-  final ConduitWebViewProps props;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIWebViewProps props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitWebViewWidget({
+  const ButterflyUIWebViewWidget({
     super.key,
     required this.controlId,
     required this.props,
@@ -47,10 +47,10 @@ class ConduitWebViewWidget extends StatefulWidget {
   });
 
   @override
-  State<ConduitWebViewWidget> createState() => _ConduitWebViewWidgetState();
+  State<ButterflyUIWebViewWidget> createState() => _ButterflyUIWebViewWidgetState();
 }
 
-class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
+class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
   final WebviewController _controller = WebviewController();
   InAppWebViewController? _inAppController;
   WebViewController? _flutterController;
@@ -238,7 +238,7 @@ class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitWebViewWidget oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIWebViewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controlId != oldWidget.controlId) {
@@ -533,7 +533,7 @@ class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
 
     if (!_jsDisabled) {
       await controller.addJavaScriptChannel(
-        'Conduit',
+        'ButterflyUI',
         onMessageReceived: (message) {
           _handleWebMessage(message.message);
         },
@@ -1139,7 +1139,7 @@ class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
           _inAppController = controller;
           if (!_jsDisabled) {
             controller.addJavaScriptHandler(
-              handlerName: 'conduit',
+              handlerName: 'butterflyui',
               callback: _handleInAppMessage,
             );
           }

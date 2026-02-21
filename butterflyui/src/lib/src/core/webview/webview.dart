@@ -1,3 +1,3 @@
-library conduit.webview;
+library butterflyui.webview;
 
 export 'webview_widget.dart';

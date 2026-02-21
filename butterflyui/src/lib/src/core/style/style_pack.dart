@@ -4,9 +4,9 @@ import '../candy/theme.dart';
 import '../../core/control_registry.dart';
 
 typedef StyleControlOverride = Widget Function(
-  ConduitControlContext context,
+  ButterflyUIControlContext context,
   Map<String, Object?> control,
-  ConduitControlBuilder buildDefault,
+  ButterflyUIControlBuilder buildDefault,
 );
 
 class StylePack {

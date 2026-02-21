@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/window/window_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/window/window_api.dart';
 
 Widget buildWindowDragRegionControl(
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final draggable = props['draggable'] == null
       ? true
@@ -49,7 +49,7 @@ Widget buildWindowDragRegionControl(
     ),
   );
 
-  return _ConduitWindowDragRegion(
+  return _ButterflyUIWindowDragRegion(
     controlId: controlId,
     draggable: draggable,
     maximizeOnDoubleTap: maximizeOnDoubleTap,
@@ -61,17 +61,17 @@ Widget buildWindowDragRegionControl(
   );
 }
 
-class _ConduitWindowDragRegion extends StatelessWidget {
+class _ButterflyUIWindowDragRegion extends StatelessWidget {
   final String controlId;
   final bool draggable;
   final bool maximizeOnDoubleTap;
   final bool emitMove;
   final bool nativeDrag;
   final bool nativeMaximizeAction;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
   final Widget child;
 
-  const _ConduitWindowDragRegion({
+  const _ButterflyUIWindowDragRegion({
     required this.controlId,
     required this.draggable,
     required this.maximizeOnDoubleTap,
@@ -99,7 +99,7 @@ class _ConduitWindowDragRegion extends StatelessWidget {
         onPanDown: draggable
             ? (details) {
                 if (nativeDrag) {
-                  unawaited(ConduitWindowApi.instance.startDrag());
+                  unawaited(ButterflyUIWindowApi.instance.startDrag());
                 }
                 _emit('drag_start', {
                   'global_x': details.globalPosition.dx,
@@ -126,7 +126,7 @@ class _ConduitWindowDragRegion extends StatelessWidget {
             ? () {
                 if (nativeMaximizeAction) {
                   unawaited(
-                    ConduitWindowApi.instance.performAction('toggle_maximize'),
+                    ButterflyUIWindowApi.instance.performAction('toggle_maximize'),
                   );
                 }
                 _emit('toggle_maximize', {'action': 'toggle_maximize'});

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitCheckbox extends StatefulWidget {
+class ButterflyUICheckbox extends StatefulWidget {
   final String controlId;
   final String? label;
   final bool? value;
   final bool enabled;
   final bool tristate;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitCheckbox({
+  const ButterflyUICheckbox({
     super.key,
     required this.controlId,
     required this.label,
@@ -25,10 +25,10 @@ class ConduitCheckbox extends StatefulWidget {
   });
 
   @override
-  State<ConduitCheckbox> createState() => _ConduitCheckboxState();
+  State<ButterflyUICheckbox> createState() => _ButterflyUICheckboxState();
 }
 
-class _ConduitCheckboxState extends State<ConduitCheckbox> {
+class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
   bool? _value;
 
   @override
@@ -41,7 +41,7 @@ class _ConduitCheckboxState extends State<ConduitCheckbox> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitCheckbox oldWidget) {
+  void didUpdateWidget(covariant ButterflyUICheckbox oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value ||
         widget.tristate != oldWidget.tristate) {

@@ -1,6 +1,6 @@
-"""Conduit Python SDK.
+"""ButterflyUI Python SDK.
 
-Conduit is a UI app-building package driven by a Conduit Flutter runtime.
+ButterflyUI is a UI app-building package driven by a ButterflyUI Flutter runtime.
 Python controls the runtime through a live session channel.
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from .version import get_version, __version__
 
-# Automatically initialize 60 FPS performance when Conduit is imported
+# Automatically initialize 60 FPS performance when ButterflyUI is imported
 from .core.performance import PerformanceConfig
 
 PerformanceConfig.initialize()
@@ -17,10 +17,10 @@ from .app import (
     App,
     AppConfig,
     BaseApp,
-    ConduitDesktop,
-    ConduitError,
-    ConduitSession,
-    ConduitWeb,
+    ButterflyUIDesktop,
+    ButterflyUIError,
+    ButterflyUISession,
+    ButterflyUIWeb,
     Page,
     RunTarget,
     RuntimeApp,
@@ -54,10 +54,10 @@ __all__ = [
     "App",
     "Page",
     "BaseApp",
-    "ConduitWeb",
-    "ConduitDesktop",
-    "ConduitSession",
-    "ConduitError",
+    "ButterflyUIWeb",
+    "ButterflyUIDesktop",
+    "ButterflyUISession",
+    "ButterflyUIError",
     "RunTarget",
     "RuntimePlan",
     "run",

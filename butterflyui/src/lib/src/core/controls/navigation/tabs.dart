@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitTabsWidget extends StatefulWidget {
+class ButterflyUITabsWidget extends StatefulWidget {
   final String controlId;
   final List<String> labels;
   final List<Widget> children;
@@ -10,9 +10,9 @@ class ConduitTabsWidget extends StatefulWidget {
   final bool scrollable;
   final bool closable;
   final bool showAdd;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitTabsWidget({
+  const ButterflyUITabsWidget({
     super.key,
     required this.controlId,
     required this.labels,
@@ -25,10 +25,10 @@ class ConduitTabsWidget extends StatefulWidget {
   });
 
   @override
-  State<ConduitTabsWidget> createState() => _ConduitTabsWidgetState();
+  State<ButterflyUITabsWidget> createState() => _ButterflyUITabsWidgetState();
 }
 
-class _ConduitTabsWidgetState extends State<ConduitTabsWidget> with SingleTickerProviderStateMixin {
+class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with SingleTickerProviderStateMixin {
   TabController? _controller;
   int _lastReported = 0;
   int _activeIndex = 0;
@@ -41,7 +41,7 @@ class _ConduitTabsWidgetState extends State<ConduitTabsWidget> with SingleTicker
   }
 
   @override
-  void didUpdateWidget(covariant ConduitTabsWidget oldWidget) {
+  void didUpdateWidget(covariant ButterflyUITabsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncController();
     _setIndex(widget.index);

@@ -95,7 +95,7 @@ class _AppRendererState extends State<AppRenderer> {
   String? _stylePackName;
   StylePack _stylePack = stylePackRegistry.defaultPack;
   StreamSubscription<RuntimeMessage>? _subscription;
-  final Map<String, ConduitInvokeHandler> _invokeHandlers = {};
+  final Map<String, ButterflyUIInvokeHandler> _invokeHandlers = {};
   final Map<String, Map<String, Object?>> _nodeIndex =
       <String, Map<String, Object?>>{};
   bool _hasRoot = false;
@@ -657,7 +657,7 @@ class _AppRendererState extends State<AppRenderer> {
 
     final renderer = ControlRenderer(
       tokens: _tokens,
-      registry: ConduitControlRegistry(),
+      registry: ButterflyUIControlRegistry(),
       registerInvokeHandler: _registerInvokeHandler,
       unregisterInvokeHandler: _unregisterInvokeHandler,
       sendEvent: _sendEvent,
@@ -728,7 +728,7 @@ class _AppRendererState extends State<AppRenderer> {
     return fallback;
   }
 
-  void _registerInvokeHandler(String controlId, ConduitInvokeHandler handler) {
+  void _registerInvokeHandler(String controlId, ButterflyUIInvokeHandler handler) {
     _invokeHandlers[controlId] = handler;
   }
 

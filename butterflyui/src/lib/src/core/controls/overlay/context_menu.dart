@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/controls/common/icon_value.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildContextMenuControl(
   String controlId,
   Map<String, Object?> props,
   Widget child,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ConduitContextMenu(
+  return ButterflyUIContextMenu(
     controlId: controlId,
     props: props,
     child: child,
@@ -36,13 +36,13 @@ class _ContextAction {
   });
 }
 
-class ConduitContextMenu extends StatefulWidget {
+class ButterflyUIContextMenu extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final Widget child;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitContextMenu({
+  const ButterflyUIContextMenu({
     super.key,
     required this.controlId,
     required this.props,
@@ -51,10 +51,10 @@ class ConduitContextMenu extends StatefulWidget {
   });
 
   @override
-  State<ConduitContextMenu> createState() => _ConduitContextMenuState();
+  State<ButterflyUIContextMenu> createState() => _ButterflyUIContextMenuState();
 }
 
-class _ConduitContextMenuState extends State<ConduitContextMenu> {
+class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
   Future<void> _showAt(Offset globalPosition) async {
     final actions = _parseActions(widget.props['items']);
     if (actions.isEmpty) return;

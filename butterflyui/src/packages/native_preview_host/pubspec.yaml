@@ -1,5 +1,5 @@
 name: native_preview_host
-description: Native preview host plugin for embedding external windows in Conduit.
+description: Native preview host plugin for embedding external windows in ButterflyUI.
 version: 0.0.1
 publish_to: "none"
 

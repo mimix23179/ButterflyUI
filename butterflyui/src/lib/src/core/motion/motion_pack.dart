@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../control_utils.dart';
 
-class ConduitMotionSpec {
+class ButterflyUIMotionSpec {
   final Duration duration;
   final Curve curve;
   final double beginScale;
@@ -14,7 +14,7 @@ class ConduitMotionSpec {
   final double endOpacity;
   final double overshoot;
 
-  const ConduitMotionSpec({
+  const ButterflyUIMotionSpec({
     required this.duration,
     required this.curve,
     this.beginScale = 1.0,
@@ -26,7 +26,7 @@ class ConduitMotionSpec {
     this.overshoot = 1.0,
   });
 
-  ConduitMotionSpec copyWith({
+  ButterflyUIMotionSpec copyWith({
     Duration? duration,
     Curve? curve,
     double? beginScale,
@@ -37,7 +37,7 @@ class ConduitMotionSpec {
     double? endOpacity,
     double? overshoot,
   }) {
-    return ConduitMotionSpec(
+    return ButterflyUIMotionSpec(
       duration: duration ?? this.duration,
       curve: curve ?? this.curve,
       beginScale: beginScale ?? this.beginScale,
@@ -51,7 +51,7 @@ class ConduitMotionSpec {
   }
 }
 
-class ConduitMotionPack {
+class ButterflyUIMotionPack {
   static const Map<String, int> durationsMs = <String, int>{
     'instant': 0,
     'fast': 90,
@@ -60,31 +60,31 @@ class ConduitMotionPack {
     'slower': 320,
   };
 
-  static final Map<String, ConduitMotionSpec> _named =
-      <String, ConduitMotionSpec>{
-        'instant': const ConduitMotionSpec(
+  static final Map<String, ButterflyUIMotionSpec> _named =
+      <String, ButterflyUIMotionSpec>{
+        'instant': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 0),
           curve: Curves.linear,
         ),
-        'hover': const ConduitMotionSpec(
+        'hover': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 90),
           curve: Curves.easeOutCubic,
         ),
-        'normal': const ConduitMotionSpec(
+        'normal': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
         ),
-        'press': const ConduitMotionSpec(
+        'press': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 90),
           curve: Curves.easeOutCubic,
           beginScale: 1.0,
           endScale: 0.97,
         ),
-        'focus': const ConduitMotionSpec(
+        'focus': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
         ),
-        'os_pop': const ConduitMotionSpec(
+        'os_pop': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 220),
           curve: Curves.easeOutBack,
           beginScale: 0.96,
@@ -95,7 +95,7 @@ class ConduitMotionPack {
           endOpacity: 1.0,
           overshoot: 1.02,
         ),
-        'slide': const ConduitMotionSpec(
+        'slide': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 220),
           curve: Curves.easeInOutCubic,
           beginOffset: Offset(0, 8),
@@ -103,7 +103,7 @@ class ConduitMotionPack {
           beginOpacity: 0.0,
           endOpacity: 1.0,
         ),
-        'disappear': const ConduitMotionSpec(
+        'disappear': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
           beginScale: 1.0,
@@ -111,7 +111,7 @@ class ConduitMotionPack {
           beginOpacity: 1.0,
           endOpacity: 0.0,
         ),
-        'route_enter': const ConduitMotionSpec(
+        'route_enter': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 220),
           curve: Curves.easeOutBack,
           beginScale: 0.96,
@@ -122,7 +122,7 @@ class ConduitMotionPack {
           endOpacity: 1.0,
           overshoot: 1.02,
         ),
-        'route_exit': const ConduitMotionSpec(
+        'route_exit': const ButterflyUIMotionSpec(
           duration: Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
           beginScale: 1.0,
@@ -132,16 +132,16 @@ class ConduitMotionPack {
         ),
       };
 
-  static ConduitMotionSpec named(String name) {
+  static ButterflyUIMotionSpec named(String name) {
     return _named[_normalizeName(name)] ?? _named['normal'] ?? _named['hover']!;
   }
 
-  static ConduitMotionSpec resolve(
+  static ButterflyUIMotionSpec resolve(
     Object? raw, {
     Map<String, Object?>? pack,
     String fallbackName = 'hover',
   }) {
-    ConduitMotionSpec base = named(fallbackName);
+    ButterflyUIMotionSpec base = named(fallbackName);
     if (raw is String && raw.trim().isNotEmpty) {
       final key = _normalizeName(raw);
       if (_named.containsKey(key)) return _named[key]!;
@@ -160,8 +160,8 @@ class ConduitMotionPack {
     return base;
   }
 
-  static ConduitMotionSpec _applyMap(
-    ConduitMotionSpec base,
+  static ButterflyUIMotionSpec _applyMap(
+    ButterflyUIMotionSpec base,
     Map<String, Object?> map,
   ) {
     final durationMs =

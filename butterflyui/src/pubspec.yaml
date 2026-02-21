@@ -1,5 +1,5 @@
-name: conduit_runtime
-description: "Conduit runtime (Flutter) controlled by Python via JSON remote."
+name: butterflyui_runtime
+description: "ButterflyUI runtime (Flutter) controlled by Python via JSON remote."
 publish_to: 'none'
 version: 0.1.0
 

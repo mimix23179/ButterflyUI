@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitCodeEditor extends StatefulWidget {
+class ButterflyUICodeEditor extends StatefulWidget {
   final String controlId;
   final String value;
   final String? language;
@@ -23,11 +23,11 @@ class ConduitCodeEditor extends StatefulWidget {
   final Color borderColor;
   final double borderWidth;
   final double radius;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitCodeEditor({
+  const ButterflyUICodeEditor({
     super.key,
     required this.controlId,
     required this.value,
@@ -51,10 +51,10 @@ class ConduitCodeEditor extends StatefulWidget {
   });
 
   @override
-  State<ConduitCodeEditor> createState() => _ConduitCodeEditorState();
+  State<ButterflyUICodeEditor> createState() => _ButterflyUICodeEditorState();
 }
 
-class _ConduitCodeEditorState extends State<ConduitCodeEditor> {
+class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
@@ -69,7 +69,7 @@ class _ConduitCodeEditorState extends State<ConduitCodeEditor> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitCodeEditor oldWidget) {
+  void didUpdateWidget(covariant ButterflyUICodeEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controlId != oldWidget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
@@ -273,9 +273,9 @@ class _ConduitCodeEditorState extends State<ConduitCodeEditor> {
 Widget buildCodeEditorControl(
   String controlId,
   Map<String, Object?> props,
-  ConduitRegisterInvokeHandler registerInvokeHandler,
-  ConduitUnregisterInvokeHandler unregisterInvokeHandler,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final value = (props['value'] ?? props['text'] ?? props['code'] ?? '')
       .toString();
@@ -293,7 +293,7 @@ Widget buildCodeEditorControl(
       coerceColor(props['border_color']) ?? const Color(0xff334155);
   final borderWidth = coerceDouble(props['border_width']) ?? 1.0;
   final radius = coerceDouble(props['radius']) ?? 10.0;
-  return ConduitCodeEditor(
+  return ButterflyUICodeEditor(
     controlId: controlId,
     value: value,
     language: props['language']?.toString(),

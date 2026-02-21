@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 
 import 'webview_api.dart';
 
-class ConduitWebViewWidget extends StatefulWidget {
+class ButterflyUIWebViewWidget extends StatefulWidget {
   final String controlId;
-  final ConduitWebViewProps props;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIWebViewProps props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitWebViewWidget({
+  const ButterflyUIWebViewWidget({
     super.key,
     required this.controlId,
     required this.props,
@@ -23,10 +23,10 @@ class ConduitWebViewWidget extends StatefulWidget {
   });
 
   @override
-  State<ConduitWebViewWidget> createState() => _ConduitWebViewWidgetState();
+  State<ButterflyUIWebViewWidget> createState() => _ButterflyUIWebViewWidgetState();
 }
 
-class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
+class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
   late final String _viewType;
   html.IFrameElement? _iframe;
   bool _jsDisabled = false;
@@ -35,7 +35,7 @@ class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
   void initState() {
     super.initState();
     _viewType =
-        'conduit-webview-${widget.controlId}-${DateTime.now().microsecondsSinceEpoch}';
+        'butterflyui-webview-${widget.controlId}-${DateTime.now().microsecondsSinceEpoch}';
 
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
 
@@ -66,7 +66,7 @@ class _ConduitWebViewWidgetState extends State<ConduitWebViewWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitWebViewWidget oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIWebViewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controlId != oldWidget.controlId) {

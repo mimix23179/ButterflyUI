@@ -4,18 +4,18 @@ import 'package:flutter/services.dart';
 
 import 'webview/webview_api.dart';
 
-class ConduitEventBox extends StatefulWidget {
+class ButterflyUIEventBox extends StatefulWidget {
   final String controlId;
   final String controlType;
   final Map<String, Object?> props;
   final List<String> events;
   final bool enabled;
-  final ConduitSendRuntimeEvent sendEvent;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final Widget child;
 
-  const ConduitEventBox({
+  const ButterflyUIEventBox({
     super.key,
     required this.controlId,
     required this.controlType,
@@ -29,12 +29,12 @@ class ConduitEventBox extends StatefulWidget {
   });
 
   @override
-  State<ConduitEventBox> createState() => _ConduitEventBoxState();
+  State<ButterflyUIEventBox> createState() => _ButterflyUIEventBoxState();
 }
 
-class _ConduitEventBoxState extends State<ConduitEventBox> {
+class _ButterflyUIEventBoxState extends State<ButterflyUIEventBox> {
   late final FocusNode _focusNode = FocusNode(
-    debugLabel: 'conduit:${widget.controlId}',
+    debugLabel: 'butterflyui:${widget.controlId}',
   );
 
   Offset? _lastTapLocal;
@@ -85,7 +85,7 @@ class _ConduitEventBoxState extends State<ConduitEventBox> {
 
   Map<String, Object?> _basePayload() {
     return <String, Object?>{
-      // conduit_session will also inject these, but adding here helps devtools/logs.
+      // butterflyui_session will also inject these, but adding here helps devtools/logs.
       'control_id': widget.controlId,
       'event_type': 'unknown',
       'timestamp': DateTime.now().millisecondsSinceEpoch,

@@ -1,4 +1,4 @@
-class ConduitOption {
+class ButterflyUIOption {
   final String label;
   final Object? value;
   final bool enabled;
@@ -6,7 +6,7 @@ class ConduitOption {
   final String? icon;
   final Map<String, Object?>? animation;
 
-  const ConduitOption({
+  const ButterflyUIOption({
     required this.label,
     required this.value,
     required this.enabled,
@@ -18,13 +18,13 @@ class ConduitOption {
   String get key => (value ?? label).toString();
 }
 
-List<ConduitOption> coerceOptionList(Object? value) {
+List<ButterflyUIOption> coerceOptionList(Object? value) {
   if (value is! List) return const [];
-  final options = <ConduitOption>[];
+  final options = <ButterflyUIOption>[];
   for (final item in value) {
     if (item is Map) {
       final label = item['label']?.toString() ?? item['value']?.toString() ?? '';
-      final option = ConduitOption(
+      final option = ButterflyUIOption(
         label: label,
         value: item.containsKey('value') ? item['value'] : label,
         enabled: item['enabled'] == null ? true : (item['enabled'] == true),
@@ -36,7 +36,7 @@ List<ConduitOption> coerceOptionList(Object? value) {
       continue;
     }
     final label = item?.toString() ?? '';
-    options.add(ConduitOption(label: label, value: item, enabled: true, description: null, icon: null));
+    options.add(ButterflyUIOption(label: label, value: item, enabled: true, description: null, icon: null));
   }
   return options;
 }

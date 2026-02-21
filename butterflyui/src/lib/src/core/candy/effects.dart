@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../core/control_theme.dart';
-class ConduitGlowEffect extends StatelessWidget {
+class ButterflyUIGlowEffect extends StatelessWidget {
   final Widget child;
   final Color color;
   final double blur;
@@ -13,7 +13,7 @@ class ConduitGlowEffect extends StatelessWidget {
   final Offset offset;
   final bool clip;
 
-  const ConduitGlowEffect({
+  const ButterflyUIGlowEffect({
     super.key,
     required this.child,
     required this.color,
@@ -47,7 +47,7 @@ class ConduitGlowEffect extends StatelessWidget {
   }
 }
 
-class ConduitNeonEdge extends StatelessWidget {
+class ButterflyUINeonEdge extends StatelessWidget {
   final Widget child;
   final Color color;
   final double width;
@@ -55,7 +55,7 @@ class ConduitNeonEdge extends StatelessWidget {
   final double spread;
   final double radius;
 
-  const ConduitNeonEdge({
+  const ButterflyUINeonEdge({
     super.key,
     required this.child,
     required this.color,
@@ -84,7 +84,7 @@ class ConduitNeonEdge extends StatelessWidget {
   }
 }
 
-class ConduitGlassBlur extends StatelessWidget {
+class ButterflyUIGlassBlur extends StatelessWidget {
   final Widget child;
   final double blur;
   final double opacity;
@@ -93,7 +93,7 @@ class ConduitGlassBlur extends StatelessWidget {
   final Color? borderColor;
   final double borderWidth;
 
-  const ConduitGlassBlur({
+  const ButterflyUIGlassBlur({
     super.key,
     required this.child,
     required this.blur,
@@ -126,14 +126,14 @@ class ConduitGlassBlur extends StatelessWidget {
   }
 }
 
-class ConduitGrainOverlay extends StatelessWidget {
+class ButterflyUIGrainOverlay extends StatelessWidget {
   final Widget child;
   final double opacity;
   final double density;
   final int seed;
   final Color color;
 
-  const ConduitGrainOverlay({
+  const ButterflyUIGrainOverlay({
     super.key,
     required this.child,
     required this.opacity,
@@ -195,14 +195,14 @@ class _GrainPainter extends CustomPainter {
   }
 }
 
-class ConduitGradientSweep extends StatefulWidget {
+class ButterflyUIGradientSweep extends StatefulWidget {
   final Widget child;
   final List<Color> colors;
   final int durationMs;
   final double angle;
   final double opacity;
 
-  const ConduitGradientSweep({
+  const ButterflyUIGradientSweep({
     super.key,
     required this.child,
     required this.colors,
@@ -212,10 +212,10 @@ class ConduitGradientSweep extends StatefulWidget {
   });
 
   @override
-  State<ConduitGradientSweep> createState() => _ConduitGradientSweepState();
+  State<ButterflyUIGradientSweep> createState() => _ButterflyUIGradientSweepState();
 }
 
-class _ConduitGradientSweepState extends State<ConduitGradientSweep> with SingleTickerProviderStateMixin {
+class _ButterflyUIGradientSweepState extends State<ButterflyUIGradientSweep> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -264,7 +264,7 @@ class _ConduitGradientSweepState extends State<ConduitGradientSweep> with Single
   }
 }
 
-class ConduitShimmer extends StatefulWidget {
+class ButterflyUIShimmer extends StatefulWidget {
   final Widget child;
   final Color baseColor;
   final Color highlightColor;
@@ -272,7 +272,7 @@ class ConduitShimmer extends StatefulWidget {
   final double angle;
   final double opacity;
 
-  const ConduitShimmer({
+  const ButterflyUIShimmer({
     super.key,
     required this.child,
     required this.baseColor,
@@ -283,10 +283,10 @@ class ConduitShimmer extends StatefulWidget {
   });
 
   @override
-  State<ConduitShimmer> createState() => _ConduitShimmerState();
+  State<ButterflyUIShimmer> createState() => _ButterflyUIShimmerState();
 }
 
-class _ConduitShimmerState extends State<ConduitShimmer> with SingleTickerProviderStateMixin {
+class _ButterflyUIShimmerState extends State<ButterflyUIShimmer> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -335,12 +335,12 @@ class _ConduitShimmerState extends State<ConduitShimmer> with SingleTickerProvid
   }
 }
 
-class ConduitShadowStack extends StatelessWidget {
+class ButterflyUIShadowStack extends StatelessWidget {
   final Widget child;
   final List<BoxShadow> shadows;
   final double radius;
 
-  const ConduitShadowStack({
+  const ButterflyUIShadowStack({
     super.key,
     required this.child,
     required this.shadows,
@@ -359,7 +359,7 @@ class ConduitShadowStack extends StatelessWidget {
   }
 }
 
-class ConduitOutlineReveal extends StatelessWidget {
+class ButterflyUIOutlineReveal extends StatelessWidget {
   final Widget child;
   final Color color;
   final double width;
@@ -368,7 +368,7 @@ class ConduitOutlineReveal extends StatelessWidget {
   final bool animate;
   final int durationMs;
 
-  const ConduitOutlineReveal({
+  const ButterflyUIOutlineReveal({
     super.key,
     required this.child,
     required this.color,
@@ -448,13 +448,13 @@ class _OutlineRevealPainter extends CustomPainter {
   }
 }
 
-class ConduitRippleBurst extends StatefulWidget {
+class ButterflyUIRippleBurst extends StatefulWidget {
   final Widget child;
   final Color color;
   final double maxRadius;
   final int durationMs;
 
-  const ConduitRippleBurst({
+  const ButterflyUIRippleBurst({
     super.key,
     required this.child,
     required this.color,
@@ -463,10 +463,10 @@ class ConduitRippleBurst extends StatefulWidget {
   });
 
   @override
-  State<ConduitRippleBurst> createState() => _ConduitRippleBurstState();
+  State<ButterflyUIRippleBurst> createState() => _ButterflyUIRippleBurstState();
 }
 
-class _ConduitRippleBurstState extends State<ConduitRippleBurst> with SingleTickerProviderStateMixin {
+class _ButterflyUIRippleBurstState extends State<ButterflyUIRippleBurst> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   Offset? _center;
 
@@ -554,14 +554,14 @@ class _RipplePainter extends CustomPainter {
   }
 }
 
-class ConduitConfettiBurst extends StatefulWidget {
+class ButterflyUIConfettiBurst extends StatefulWidget {
   final Widget child;
   final List<Color> colors;
   final int count;
   final int durationMs;
   final double gravity;
 
-  const ConduitConfettiBurst({
+  const ButterflyUIConfettiBurst({
     super.key,
     required this.child,
     required this.colors,
@@ -571,10 +571,10 @@ class ConduitConfettiBurst extends StatefulWidget {
   });
 
   @override
-  State<ConduitConfettiBurst> createState() => _ConduitConfettiBurstState();
+  State<ButterflyUIConfettiBurst> createState() => _ButterflyUIConfettiBurstState();
 }
 
-class _ConduitConfettiBurstState extends State<ConduitConfettiBurst> with SingleTickerProviderStateMixin {
+class _ButterflyUIConfettiBurstState extends State<ButterflyUIConfettiBurst> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   Offset? _center;
   List<_ConfettiParticle> _particles = const [];
@@ -597,7 +597,7 @@ class _ConduitConfettiBurstState extends State<ConduitConfettiBurst> with Single
   void _trigger(Offset position) {
     final rand = math.Random();
     final colors = widget.colors.isEmpty
-        ? conduitAccentPalette(context)
+        ? butterflyuiAccentPalette(context)
         : widget.colors;
     final particles = <_ConfettiParticle>[];
     for (var i = 0; i < widget.count; i += 1) {
@@ -700,12 +700,12 @@ class _ConfettiPainter extends CustomPainter {
   }
 }
 
-class ConduitNoiseDisplacement extends StatefulWidget {
+class ButterflyUINoiseDisplacement extends StatefulWidget {
   final Widget child;
   final double strength;
   final int durationMs;
 
-  const ConduitNoiseDisplacement({
+  const ButterflyUINoiseDisplacement({
     super.key,
     required this.child,
     required this.strength,
@@ -713,10 +713,10 @@ class ConduitNoiseDisplacement extends StatefulWidget {
   });
 
   @override
-  State<ConduitNoiseDisplacement> createState() => _ConduitNoiseDisplacementState();
+  State<ButterflyUINoiseDisplacement> createState() => _ButterflyUINoiseDisplacementState();
 }
 
-class _ConduitNoiseDisplacementState extends State<ConduitNoiseDisplacement> with SingleTickerProviderStateMixin {
+class _ButterflyUINoiseDisplacementState extends State<ButterflyUINoiseDisplacement> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -748,13 +748,13 @@ class _ConduitNoiseDisplacementState extends State<ConduitNoiseDisplacement> wit
   }
 }
 
-class ConduitParallaxOffset extends StatelessWidget {
+class ButterflyUIParallaxOffset extends StatelessWidget {
   final Widget child;
   final double dx;
   final double dy;
   final double depth;
 
-  const ConduitParallaxOffset({
+  const ButterflyUIParallaxOffset({
     super.key,
     required this.child,
     required this.dx,
@@ -768,14 +768,14 @@ class ConduitParallaxOffset extends StatelessWidget {
   }
 }
 
-class ConduitLiquidMorph extends StatefulWidget {
+class ButterflyUILiquidMorph extends StatefulWidget {
   final Widget child;
   final double minRadius;
   final double maxRadius;
   final int durationMs;
   final bool animate;
 
-  const ConduitLiquidMorph({
+  const ButterflyUILiquidMorph({
     super.key,
     required this.child,
     required this.minRadius,
@@ -785,10 +785,10 @@ class ConduitLiquidMorph extends StatefulWidget {
   });
 
   @override
-  State<ConduitLiquidMorph> createState() => _ConduitLiquidMorphState();
+  State<ButterflyUILiquidMorph> createState() => _ButterflyUILiquidMorphState();
 }
 
-class _ConduitLiquidMorphState extends State<ConduitLiquidMorph> with SingleTickerProviderStateMixin {
+class _ButterflyUILiquidMorphState extends State<ButterflyUILiquidMorph> with SingleTickerProviderStateMixin {
   AnimationController? _controller;
 
   @override
@@ -828,12 +828,12 @@ class _ConduitLiquidMorphState extends State<ConduitLiquidMorph> with SingleTick
   }
 }
 
-class ConduitChromaticShift extends StatelessWidget {
+class ButterflyUIChromaticShift extends StatelessWidget {
   final Widget child;
   final double shift;
   final double opacity;
 
-  const ConduitChromaticShift({
+  const ButterflyUIChromaticShift({
     super.key,
     required this.child,
     required this.shift,
@@ -842,8 +842,8 @@ class ConduitChromaticShift extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errorTone = conduitStatusColor(context, 'error');
-    final infoTone = conduitStatusColor(context, 'info');
+    final errorTone = butterflyuiStatusColor(context, 'error');
+    final infoTone = butterflyuiStatusColor(context, 'info');
     return Stack(
       children: [
         Transform.translate(
@@ -872,14 +872,14 @@ class ConduitChromaticShift extends StatelessWidget {
   }
 }
 
-class ConduitScanlineOverlay extends StatelessWidget {
+class ButterflyUIScanlineOverlay extends StatelessWidget {
   final Widget child;
   final double spacing;
   final double thickness;
   final double opacity;
   final Color color;
 
-  const ConduitScanlineOverlay({
+  const ButterflyUIScanlineOverlay({
     super.key,
     required this.child,
     required this.spacing,
@@ -940,11 +940,11 @@ class _ScanlinePainter extends CustomPainter {
   }
 }
 
-class ConduitPixelate extends StatelessWidget {
+class ButterflyUIPixelate extends StatelessWidget {
   final Widget child;
   final double pixelSize;
 
-  const ConduitPixelate({
+  const ButterflyUIPixelate({
     super.key,
     required this.child,
     required this.pixelSize,
@@ -973,12 +973,12 @@ class ConduitPixelate extends StatelessWidget {
   }
 }
 
-class ConduitVignette extends StatelessWidget {
+class ButterflyUIVignette extends StatelessWidget {
   final Widget child;
   final double intensity;
   final Color color;
 
-  const ConduitVignette({
+  const ButterflyUIVignette({
     super.key,
     required this.child,
     required this.intensity,
@@ -1010,13 +1010,13 @@ class ConduitVignette extends StatelessWidget {
   }
 }
 
-class ConduitTiltHover extends StatefulWidget {
+class ButterflyUITiltHover extends StatefulWidget {
   final Widget child;
   final double maxAngle;
   final double perspective;
   final double scale;
 
-  const ConduitTiltHover({
+  const ButterflyUITiltHover({
     super.key,
     required this.child,
     required this.maxAngle,
@@ -1025,10 +1025,10 @@ class ConduitTiltHover extends StatefulWidget {
   });
 
   @override
-  State<ConduitTiltHover> createState() => _ConduitTiltHoverState();
+  State<ButterflyUITiltHover> createState() => _ButterflyUITiltHoverState();
 }
 
-class _ConduitTiltHoverState extends State<ConduitTiltHover> {
+class _ButterflyUITiltHoverState extends State<ButterflyUITiltHover> {
   Offset? _position;
 
   @override
@@ -1062,7 +1062,7 @@ class _ConduitTiltHoverState extends State<ConduitTiltHover> {
   }
 }
 
-class ConduitMorphingBorder extends StatefulWidget {
+class ButterflyUIMorphingBorder extends StatefulWidget {
   final Widget child;
   final double minRadius;
   final double maxRadius;
@@ -1071,7 +1071,7 @@ class ConduitMorphingBorder extends StatefulWidget {
   final Color color;
   final double width;
 
-  const ConduitMorphingBorder({
+  const ButterflyUIMorphingBorder({
     super.key,
     required this.child,
     required this.minRadius,
@@ -1083,10 +1083,10 @@ class ConduitMorphingBorder extends StatefulWidget {
   });
 
   @override
-  State<ConduitMorphingBorder> createState() => _ConduitMorphingBorderState();
+  State<ButterflyUIMorphingBorder> createState() => _ButterflyUIMorphingBorderState();
 }
 
-class _ConduitMorphingBorderState extends State<ConduitMorphingBorder> with SingleTickerProviderStateMixin {
+class _ButterflyUIMorphingBorderState extends State<ButterflyUIMorphingBorder> with SingleTickerProviderStateMixin {
   AnimationController? _controller;
 
   @override

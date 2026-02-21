@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitAppBar extends StatefulWidget {
+class ButterflyUIAppBar extends StatefulWidget {
   final String controlId;
   final String? title;
   final String? subtitle;
@@ -17,9 +17,9 @@ class ConduitAppBar extends StatefulWidget {
   final String searchValue;
   final String? searchPlaceholder;
   final bool searchEnabled;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitAppBar({
+  const ButterflyUIAppBar({
     super.key,
     required this.controlId,
     required this.title,
@@ -39,10 +39,10 @@ class ConduitAppBar extends StatefulWidget {
   });
 
   @override
-  State<ConduitAppBar> createState() => _ConduitAppBarState();
+  State<ButterflyUIAppBar> createState() => _ButterflyUIAppBarState();
 }
 
-class _ConduitAppBarState extends State<ConduitAppBar> {
+class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
   late TextEditingController _controller;
   String _lastValue = '';
 
@@ -54,7 +54,7 @@ class _ConduitAppBarState extends State<ConduitAppBar> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitAppBar oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.searchValue != _lastValue) {
       _lastValue = widget.searchValue;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ConduitSlider extends StatefulWidget {
+class ButterflyUISlider extends StatefulWidget {
   final String controlId;
   final double value;
   final double min;
@@ -10,11 +10,11 @@ class ConduitSlider extends StatefulWidget {
   final int? divisions;
   final String? label;
   final bool enabled;
-  final ConduitRegisterInvokeHandler registerInvokeHandler;
-  final ConduitUnregisterInvokeHandler unregisterInvokeHandler;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ConduitSlider({
+  const ButterflyUISlider({
     super.key,
     required this.controlId,
     required this.value,
@@ -29,10 +29,10 @@ class ConduitSlider extends StatefulWidget {
   });
 
   @override
-  State<ConduitSlider> createState() => _ConduitSliderState();
+  State<ButterflyUISlider> createState() => _ButterflyUISliderState();
 }
 
-class _ConduitSliderState extends State<ConduitSlider> {
+class _ButterflyUISliderState extends State<ButterflyUISlider> {
   late double _value;
 
   double get _rangeMin => widget.min <= widget.max ? widget.min : widget.max;
@@ -49,7 +49,7 @@ class _ConduitSliderState extends State<ConduitSlider> {
   }
 
   @override
-  void didUpdateWidget(covariant ConduitSlider oldWidget) {
+  void didUpdateWidget(covariant ButterflyUISlider oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value ||
         widget.min != oldWidget.min ||

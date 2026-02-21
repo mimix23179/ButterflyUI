@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "butterflyui"
+version = "0.1.0"
+description = "ButterflyUI - Make your idea's reality"
+
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "colorama",
+    "pillow",
+    "tree-sitter",
+    "tree-sitter-languages",
+    "websockets",
+    "typing_extensions",
+    "tomli; python_version < '3.11'",
+]
+
+[project.scripts]
+butterflyui = "butterflyui.cli:main"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = [
+    "butterflyui",
+    "butterflyui.*",
+    "butterflyui_desktop",
+    "butterflyui_desktop.*",
+]

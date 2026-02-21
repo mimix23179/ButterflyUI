@@ -11,6 +11,6 @@ class TracebackLogger {
     final key = '${title ?? ''}\n$traceback';
     if (_seen.contains(key)) return;
     _seen.add(key);
-    debugPrint('Conduit runtime problem: ${title ?? 'Error'}\n$traceback');
+    debugPrint('ButterflyUI runtime problem: ${title ?? 'Error'}\n$traceback');
   }
 }

@@ -3,10 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/candy/theme.dart';
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
-import 'package:conduit_runtime/src/core/window/window_api.dart';
+import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/window/window_api.dart';
 
 Widget buildWindowFrameControl(
   String controlId,
@@ -14,7 +14,7 @@ Widget buildWindowFrameControl(
   CandyTokens tokens,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   if (props['open'] == false || props['visible'] == false) {
     return const SizedBox.shrink();
@@ -36,7 +36,7 @@ Widget buildWindowFrameControl(
   final titleContent = contentMap == null ? null : buildChild(contentMap);
   final titleTrailing = trailingMap == null ? null : buildChild(trailingMap);
 
-  return _ConduitWindowFrame(
+  return _ButterflyUIWindowFrame(
     controlId: controlId,
     props: props,
     tokens: tokens,
@@ -75,7 +75,7 @@ Map<String, Object?>? _secondControl(List<dynamic> rawChildren) {
   return null;
 }
 
-class _ConduitWindowFrame extends StatefulWidget {
+class _ButterflyUIWindowFrame extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final CandyTokens tokens;
@@ -83,9 +83,9 @@ class _ConduitWindowFrame extends StatefulWidget {
   final Widget? titleLeading;
   final Widget? titleContent;
   final Widget? titleTrailing;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  const _ConduitWindowFrame({
+  const _ButterflyUIWindowFrame({
     required this.controlId,
     required this.props,
     required this.tokens,
@@ -97,10 +97,10 @@ class _ConduitWindowFrame extends StatefulWidget {
   });
 
   @override
-  State<_ConduitWindowFrame> createState() => _ConduitWindowFrameState();
+  State<_ButterflyUIWindowFrame> createState() => _ButterflyUIWindowFrameState();
 }
 
-class _ConduitWindowFrameState extends State<_ConduitWindowFrame> {
+class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
   bool _customFrame = true;
   bool _nativeActions = true;
 
@@ -109,17 +109,17 @@ class _ConduitWindowFrameState extends State<_ConduitWindowFrame> {
     super.initState();
     _customFrame = _resolveCustomFrame(widget.props);
     _nativeActions = _resolveNativeActions(widget.props);
-    unawaited(ConduitWindowApi.instance.ensureCustomFrame(_customFrame));
+    unawaited(ButterflyUIWindowApi.instance.ensureCustomFrame(_customFrame));
   }
 
   @override
-  void didUpdateWidget(covariant _ConduitWindowFrame oldWidget) {
+  void didUpdateWidget(covariant _ButterflyUIWindowFrame oldWidget) {
     super.didUpdateWidget(oldWidget);
     final nextCustomFrame = _resolveCustomFrame(widget.props);
     _nativeActions = _resolveNativeActions(widget.props);
     if (nextCustomFrame != _customFrame) {
       _customFrame = nextCustomFrame;
-      unawaited(ConduitWindowApi.instance.ensureCustomFrame(_customFrame));
+      unawaited(ButterflyUIWindowApi.instance.ensureCustomFrame(_customFrame));
     }
   }
 
@@ -200,14 +200,14 @@ class _ConduitWindowFrameState extends State<_ConduitWindowFrame> {
             },
             onDragStart: () {
               if (draggable) {
-                unawaited(ConduitWindowApi.instance.startDrag());
+                unawaited(ButterflyUIWindowApi.instance.startDrag());
               }
               if (widget.controlId.isEmpty) return;
               widget.sendEvent(widget.controlId, 'drag_start', const {});
             },
             onAction: (action) {
               if (_nativeActions) {
-                unawaited(ConduitWindowApi.instance.performAction(action));
+                unawaited(ButterflyUIWindowApi.instance.performAction(action));
               }
               if (widget.controlId.isEmpty) return;
               widget.sendEvent(widget.controlId, action, <String, Object?>{

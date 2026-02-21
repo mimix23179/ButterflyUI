@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-class ConduitWindowApi {
-  ConduitWindowApi._();
+class ButterflyUIWindowApi {
+  ButterflyUIWindowApi._();
 
-  static final ConduitWindowApi instance = ConduitWindowApi._();
-  static const MethodChannel _channel = MethodChannel('conduit/window');
+  static final ButterflyUIWindowApi instance = ButterflyUIWindowApi._();
+  static const MethodChannel _channel = MethodChannel('butterflyui/window');
 
   bool _customFrameInitialized = false;
   bool _customFrameEnabled = false;

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:conduit_runtime/src/core/control_utils.dart';
-import 'package:conduit_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildInspectorPanelControl(
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
-  ConduitSendRuntimeEvent sendEvent,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final title = props['title']?.toString() ?? 'Inspector';
   final sections = _coerceSections(props['sections']);
@@ -67,7 +67,7 @@ Widget _wrapPanel(String title, List<Widget> children) {
 class _InspectorSectionTile extends StatelessWidget {
   final String controlId;
   final Map<String, Object?> section;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   const _InspectorSectionTile({
     required this.controlId,

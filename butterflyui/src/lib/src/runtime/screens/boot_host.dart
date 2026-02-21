@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../core/webview/webview_api.dart';
 
-class ConduitBootHost extends StatelessWidget {
+class ButterflyUIBootHost extends StatelessWidget {
   final String? message;
   final double? progress;
   final List<Map<String, Object?>>? actions;
-  final ConduitSendRuntimeEvent sendEvent;
+  final ButterflyUISendRuntimeEvent sendEvent;
   final String controlId;
 
-  const ConduitBootHost({
+  const ButterflyUIBootHost({
     super.key,
     this.message,
     this.progress,
@@ -45,7 +45,7 @@ class ConduitBootHost extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Made with Conduit',
+                'Made with ButterflyUI',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
