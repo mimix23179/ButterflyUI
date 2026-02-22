@@ -19,6 +19,7 @@ __all__ = [
     "ContainerStyle",
     "Gradient",
     "GradientEditor",
+    "BrushPanel",
 ]
 
 
@@ -472,3 +473,50 @@ class GradientEditor(Component):
 
     def set_angle(self, session: Any, angle: float) -> dict[str, Any]:
         return self.invoke(session, "set_angle", {"angle": float(angle)})
+
+
+class BrushPanel(Component):
+    control_type = "brush_panel"
+
+    def __init__(
+        self,
+        *,
+        size: float | None = None,
+        hardness: float | None = None,
+        opacity: float | None = None,
+        flow: float | None = None,
+        spacing: float | None = None,
+        color: Any | None = None,
+        blend_mode: str | None = None,
+        pressure_enabled: bool | None = None,
+        smoothing: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            size=size,
+            hardness=hardness,
+            opacity=opacity,
+            flow=flow,
+            spacing=spacing,
+            color=color,
+            blend_mode=blend_mode,
+            pressure_enabled=pressure_enabled,
+            smoothing=smoothing,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_value(self, session: Any, key: str, value: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"key": key, "value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

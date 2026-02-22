@@ -8,6 +8,7 @@ from ._shared import Component, merge_props
 __all__ = [
     "Chat",
     "ChatBubble",
+    "MessageBubble",
     "CodeEditor",
     "Terminal",
     "TerminalHost",
@@ -540,6 +541,35 @@ class Chat(ChatThread):
 
 class ChatBubble(ChatMessage):
     control_type = "chat_bubble"
+
+    def __init__(
+        self,
+        text: str | None = None,
+        *,
+        role: str | None = None,
+        name: str | None = None,
+        clickable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            text=text,
+            role=role,
+            name=name,
+            clickable=clickable,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class MessageBubble(ChatMessage):
+    control_type = "message_bubble"
 
     def __init__(
         self,

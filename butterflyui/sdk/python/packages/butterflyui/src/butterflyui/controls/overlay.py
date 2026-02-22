@@ -10,11 +10,13 @@ __all__ = [
     "Modal",
     "Popover",
     "Portal",
+    "BottomSheet",
     "ContextMenu",
     "Tooltip",
     "Toast",
     "ToastHost",
     "NotificationCenter",
+    "NotificationHost",
 ]
 
 
@@ -168,6 +170,49 @@ class Portal(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class BottomSheet(Component):
+    control_type = "bottom_sheet"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        open: bool | None = None,
+        dismissible: bool | None = None,
+        scrim_color: Any | None = None,
+        height: float | None = None,
+        max_height: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            open=open,
+            dismissible=dismissible,
+            scrim_color=scrim_color,
+            height=height,
+            max_height=max_height,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class ContextMenu(Component):
     control_type = "context_menu"
 
@@ -272,6 +317,51 @@ class ToastHost(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class NotificationHost(ToastHost):
+    control_type = "notification_host"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        position: str | None = None,
+        max_items: int | None = None,
+        latest_on_top: bool | None = None,
+        dismissible: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            items=items,
+            position=position,
+            max_items=max_items,
+            latest_on_top=latest_on_top,
+            dismissible=dismissible,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def push(self, session: Any, item: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "push", {"item": dict(item)})
+
+    def dismiss(self, session: Any, item_id: str) -> dict[str, Any]:
+        return self.invoke(session, "dismiss", {"id": item_id})
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
+
+    def get_items(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_items", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class NotificationCenter(Component):

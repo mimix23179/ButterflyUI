@@ -7,6 +7,7 @@ from ._shared import Component, merge_props
 
 __all__ = [
     "Button",
+    "AsyncActionButton",
     "TextField",
     "SearchBar",
     "FilePicker",
@@ -25,6 +26,9 @@ __all__ = [
     "ComboBox",
     "Dropdown",
     "EmojiPicker",
+    "Filepicker",
+    "FilterChipsBar",
+    "MultiPick",
     "DateSelect",
     "DateRange",
     "DateSpan",
@@ -60,6 +64,54 @@ class Button(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class AsyncActionButton(Button):
+    control_type = "async_action_button"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        text: str | None = None,
+        value: Any | None = None,
+        variant: str | None = None,
+        busy: bool | None = None,
+        loading: bool | None = None,
+        disabled_while_busy: bool | None = None,
+        busy_label: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            text=text,
+            value=value,
+            variant=variant,
+            props=merge_props(
+                props,
+                busy=busy if busy is not None else loading,
+                loading=loading if loading is not None else busy,
+                disabled_while_busy=disabled_while_busy,
+                busy_label=busy_label,
+                events=events,
+            ),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_busy(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_busy", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class TextField(Component):
@@ -351,6 +403,57 @@ class DirectoryPicker(FilePicker):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class Filepicker(FilePicker):
+    control_type = "filepicker"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        file_type: str | None = None,
+        extensions: list[str] | None = None,
+        allowed_extensions: list[str] | None = None,
+        multiple: bool | None = None,
+        allow_multiple: bool | None = None,
+        with_data: bool | None = None,
+        with_path: bool | None = None,
+        enabled: bool | None = None,
+        mode: str | None = None,
+        pick_directory: bool | None = None,
+        save_file: bool | None = None,
+        file_name: str | None = None,
+        dialog_title: str | None = None,
+        initial_directory: str | None = None,
+        lock_parent_window: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            file_type=file_type,
+            extensions=extensions,
+            allowed_extensions=allowed_extensions,
+            multiple=multiple,
+            allow_multiple=allow_multiple,
+            with_data=with_data,
+            with_path=with_path,
+            enabled=enabled,
+            mode=mode,
+            pick_directory=pick_directory,
+            save_file=save_file,
+            file_name=file_name,
+            dialog_title=dialog_title,
+            initial_directory=initial_directory,
+            lock_parent_window=lock_parent_window,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class ChipGroup(Component):
     control_type = "chip_group"
 
@@ -403,6 +506,33 @@ class TagFilterBar(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class FilterChipsBar(TagFilterBar):
+    control_type = "filter_chips_bar"
+
+    def __init__(
+        self,
+        *,
+        options: list[Any] | None = None,
+        values: list[Any] | None = None,
+        multi_select: bool | None = None,
+        dense: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            options=options,
+            values=values,
+            multi_select=multi_select,
+            dense=dense,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class DatePicker(Component):
@@ -534,6 +664,35 @@ class MultiSelect(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class MultiPick(MultiSelect):
+    control_type = "multi_pick"
+
+    def __init__(
+        self,
+        *,
+        options: list[Any] | None = None,
+        values: list[Any] | None = None,
+        selected: list[Any] | None = None,
+        label: str | None = None,
+        enabled: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            options=options,
+            values=values,
+            selected=selected,
+            label=label,
+            enabled=enabled,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class Combobox(Component):
     control_type = "combobox"
 
@@ -573,39 +732,6 @@ class Combobox(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
-
-
-class ComboBox(Combobox):
-    control_type = "combo_box"
-
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        options: list[Any] | None = None,
-        label: str | None = None,
-        hint: str | None = None,
-        placeholder: str | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            value=value,
-            options=options,
-            label=label,
-            hint=hint,
-            placeholder=placeholder,
-            enabled=enabled,
-            events=events,
-            props=props,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
 
 
 class Dropdown(Combobox):

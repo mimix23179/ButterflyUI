@@ -12,6 +12,7 @@ __all__ = [
     "PageScene",
     "RouteHost",
     "RouteView",
+    "Route",
     "Router",
     "WindowDragRegion",
     "DragRegion",
@@ -36,6 +37,38 @@ class RouteView(Component):
     ) -> None:
         merged = merge_props(props, route_id=route_id, title=title, **kwargs)
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class Route(RouteView):
+    control_type = "route"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        route_id: str | None = None,
+        title: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            route_id=route_id,
+            title=title,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_route_id(self, session: Any, route_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_route_id", {"route_id": route_id})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class RouteHost(Component):

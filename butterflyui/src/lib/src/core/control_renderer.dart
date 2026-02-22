@@ -18,11 +18,15 @@ import 'controls/customization/border.dart';
 import 'controls/customization/border_side.dart';
 import 'controls/customization/button_style.dart';
 import 'controls/customization/candy.dart';
+import 'controls/customization/brush_panel.dart';
 import 'controls/customization/color_tools.dart';
 import 'controls/customization/gallery.dart';
 import 'controls/customization/skins.dart';
 import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
+import 'controls/display/artifact_card.dart';
+import 'controls/display/attachment_tile.dart';
+import 'controls/display/canvas_control.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
 import 'controls/display/diff_view.dart';
@@ -54,6 +58,7 @@ import 'controls/feedback/toast.dart';
 import 'controls/feedback/tooltip.dart';
 import 'controls/inputs/checkbox.dart';
 import 'controls/inputs/chip_group.dart';
+import 'controls/inputs/async_action_button.dart';
 import 'controls/inputs/combobox.dart';
 import 'controls/inputs/date_picker.dart';
 import 'controls/inputs/date_range_picker.dart';
@@ -70,6 +75,10 @@ import 'controls/inputs/text_field.dart';
 import 'controls/interaction/key_listener.dart';
 import 'controls/interaction/shortcut_map.dart';
 import 'controls/layout/card.dart';
+import 'controls/layout/accordion.dart';
+import 'controls/layout/adjustment_panel.dart';
+import 'controls/layout/align_control.dart';
+import 'controls/layout/bounds_probe.dart';
 import 'controls/layout/column.dart';
 import 'controls/layout/container.dart';
 import 'controls/layout/divider.dart';
@@ -93,8 +102,10 @@ import 'controls/lists/tree_view.dart';
 import 'controls/lists/virtual_grid.dart';
 import 'controls/lists/virtual_list.dart';
 import 'controls/media/animation_asset.dart';
+import 'controls/media/audio.dart';
 import 'controls/media/image.dart';
 import 'controls/navigation/app_bar.dart';
+import 'controls/navigation/action_bar.dart';
 import 'controls/navigation/breadcrumbs.dart';
 import 'controls/navigation/command_palette.dart';
 import 'controls/navigation/launcher.dart';
@@ -105,6 +116,7 @@ import 'controls/navigation/sidebar.dart';
 import 'controls/navigation/status_bar.dart';
 import 'controls/navigation/tabs.dart';
 import 'controls/overlay/context_menu.dart';
+import 'controls/overlay/bottom_sheet.dart';
 import 'controls/overlay/modal.dart';
 import 'controls/overlay/overlay_host.dart';
 import 'controls/overlay/portal.dart';
@@ -295,6 +307,17 @@ class ControlRenderer {
       case 'container':
         return buildContainerControl(props, rawChildren, context.buildChild);
 
+      case 'align':
+        return buildAlignControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'candy_surface':
       case 'candy_container':
         return buildCandySurfaceControl(props, rawChildren, context.buildChild);
@@ -387,6 +410,26 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'accordion':
+        return buildAccordionControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'adjustment_panel':
+        return buildAdjustmentPanelControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -511,7 +554,38 @@ class ControlRenderer {
       case 'chart':
       case 'line_chart':
       case 'bar_chart':
+      case 'bar_plot':
         return buildChartControl(controlId, props, context.sendEvent);
+
+      case 'artifact_card':
+      case 'result_card':
+        return buildArtifactCardControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'attachment_tile':
+        return buildAttachmentTileControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'canvas':
+        return buildCanvasControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'sparkline':
       case 'spark_plot':
@@ -584,6 +658,15 @@ class ControlRenderer {
       case 'image':
         return buildImageControl(props, rawChildren, context.buildChild);
 
+      case 'audio':
+        return buildAudioControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'chat_message':
       case 'message_bubble':
       case 'chat_bubble':
@@ -614,6 +697,15 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.sendEvent,
+        );
+
+      case 'async_action_button':
+        return buildAsyncActionButtonControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -838,6 +930,17 @@ class ControlRenderer {
           );
         }
 
+      case 'bottom_sheet':
+        return buildBottomSheetControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'splash':
         return buildSplashControl(
           controlId,
@@ -1010,6 +1113,17 @@ class ControlRenderer {
       case 'menu_bar':
         return buildMenuBarControl(controlId, props, context.sendEvent);
 
+      case 'action_bar':
+        return buildActionBarControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'menu_item':
         return buildMenuItemControl(controlId, props, context.sendEvent);
 
@@ -1131,6 +1245,17 @@ class ControlRenderer {
             sendEvent: context.sendEvent,
           );
         }
+
+      case 'bounds_probe':
+        return buildBoundsProbeControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'overlay_host':
         return buildOverlayHostControl(props, rawChildren, context.buildChild);
@@ -1486,6 +1611,15 @@ class ControlRenderer {
 
       case 'blob_field':
         return buildBlobFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'brush_panel':
+        return buildBrushPanelControl(
           controlId,
           props,
           context.registerInvokeHandler,

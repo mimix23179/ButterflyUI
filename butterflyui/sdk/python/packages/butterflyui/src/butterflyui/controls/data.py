@@ -14,13 +14,16 @@ __all__ = [
     "Table",
     "DataTable",
     "DataGrid",
+    "TableView",
     "ListTile",
+    "ItemTile",
     "TreeNode",
     "TreeView",
     "FileBrowser",
     "ProgressTimeline",
     "TaskList",
     "ProgressIndicator",
+    "Progress",
     "Skeleton",
     "SkeletonLoader",
 ]
@@ -243,6 +246,51 @@ class DataGrid(DataTable):
     control_type = "data_grid"
 
 
+class TableView(DataTable):
+    control_type = "table_view"
+
+    def __init__(
+        self,
+        *,
+        columns: list[Any] | None = None,
+        rows: list[Any] | None = None,
+        sortable: bool | None = None,
+        filterable: bool | None = None,
+        selectable: bool | None = None,
+        dense: bool | None = None,
+        striped: bool | None = None,
+        show_header: bool | None = None,
+        sort_column: str | None = None,
+        sort_ascending: bool | None = None,
+        filter_query: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            columns=columns,
+            rows=rows,
+            sortable=sortable,
+            filterable=filterable,
+            selectable=selectable,
+            dense=dense,
+            striped=striped,
+            show_header=show_header,
+            sort_column=sort_column,
+            sort_ascending=sort_ascending,
+            filter_query=filter_query,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class ListTile(Component):
     control_type = "list_tile"
 
@@ -273,6 +321,49 @@ class ListTile(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class ItemTile(ListTile):
+    control_type = "item_tile"
+
+    def __init__(
+        self,
+        *,
+        title: str | None = None,
+        subtitle: str | None = None,
+        leading_icon: str | None = None,
+        trailing_icon: str | None = None,
+        meta: str | None = None,
+        selected: bool | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            title=title,
+            subtitle=subtitle,
+            leading_icon=leading_icon,
+            trailing_icon=trailing_icon,
+            meta=meta,
+            selected=selected,
+            enabled=enabled,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_selected(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class TreeNode(Component):
@@ -445,6 +536,44 @@ class ProgressIndicator(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class Progress(ProgressIndicator):
+    control_type = "progress"
+
+    def __init__(
+        self,
+        *,
+        value: float | None = None,
+        indeterminate: bool | None = None,
+        label: str | None = None,
+        variant: str | None = None,
+        circular: bool | None = None,
+        stroke_width: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            indeterminate=indeterminate,
+            label=label,
+            variant=variant,
+            circular=circular,
+            stroke_width=stroke_width,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_value(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": float(value)})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Skeleton(Component):

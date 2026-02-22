@@ -11,6 +11,9 @@ __all__ = [
     "AppBar",
     "Drawer",
     "Paginator",
+    "PageNav",
+    "PageStepper",
+    "ActionBar",
     "MenuBar",
     "MenuItem",
     "Breadcrumbs",
@@ -152,6 +155,131 @@ class Paginator(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class PageNav(Paginator):
+    control_type = "page_nav"
+
+    def __init__(
+        self,
+        *,
+        page: int | None = None,
+        page_count: int | None = None,
+        page_size: int | None = None,
+        total_items: int | None = None,
+        max_visible: int | None = None,
+        show_edges: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            page=page,
+            page_count=page_count,
+            page_size=page_size,
+            total_items=total_items,
+            max_visible=max_visible,
+            show_edges=show_edges,
+            dense=dense,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_page(self, session: Any, page: int) -> dict[str, Any]:
+        return self.invoke(session, "set_page", {"page": page})
+
+    def next_page(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "next_page", {})
+
+    def prev_page(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "prev_page", {})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class PageStepper(PageNav):
+    control_type = "page_stepper"
+
+    def __init__(
+        self,
+        *,
+        page: int | None = None,
+        page_count: int | None = None,
+        page_size: int | None = None,
+        total_items: int | None = None,
+        max_visible: int | None = None,
+        show_edges: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            page=page,
+            page_count=page_count,
+            page_size=page_size,
+            total_items=total_items,
+            max_visible=max_visible,
+            show_edges=show_edges,
+            dense=dense,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class ActionBar(Component):
+    control_type = "action_bar"
+
+    def __init__(
+        self,
+        *children: Any,
+        items: list[Mapping[str, Any]] | None = None,
+        dense: bool | None = None,
+        spacing: float | None = None,
+        wrap: bool | None = None,
+        alignment: str | None = None,
+        bgcolor: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=items,
+            dense=dense,
+            spacing=spacing,
+            wrap=wrap,
+            alignment=alignment,
+            bgcolor=bgcolor,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_items", {"items": items})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class MenuBar(Component):
