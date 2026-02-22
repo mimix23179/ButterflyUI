@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:xterm/xterm.dart' as xterm;
 
@@ -15,6 +17,9 @@ class ButterflyUITerminal extends StatefulWidget {
   final bool showInput;
   final bool clearOnSubmit;
   final bool autoFocus;
+  final bool autoScroll;
+  final bool wrapLines;
+  final int maxLines;
   final String prompt;
   final String placeholder;
   final String submitLabel;
@@ -26,6 +31,8 @@ class ButterflyUITerminal extends StatefulWidget {
   final Color? borderColor;
   final double borderWidth;
   final double radius;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUITerminal({
@@ -40,6 +47,9 @@ class ButterflyUITerminal extends StatefulWidget {
     required this.showInput,
     required this.clearOnSubmit,
     required this.autoFocus,
+    required this.autoScroll,
+    required this.wrapLines,
+    required this.maxLines,
     required this.prompt,
     required this.placeholder,
     required this.submitLabel,
@@ -51,6 +61,8 @@ class ButterflyUITerminal extends StatefulWidget {
     required this.borderColor,
     required this.borderWidth,
     required this.radius,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -59,68 +71,177 @@ class ButterflyUITerminal extends StatefulWidget {
 }
 
 class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
-  late final xterm.Terminal _terminal = xterm.Terminal(maxLines: 4000);
+  late xterm.Terminal _terminal;
   final TextEditingController _inputController = TextEditingController();
-  String _lastSnapshot = '';
+  final FocusNode _inputFocusNode = FocusNode();
+
+  String _renderedSnapshot = '';
+  bool _readOnly = false;
 
   @override
   void initState() {
     super.initState();
-    _terminal.onOutput = (data) {
-      if (widget.readOnly) return;
-      widget.sendEvent(widget.controlId, 'input', {'data': data});
-    };
-    _syncTerminalBuffer();
+    _readOnly = widget.readOnly;
+    _terminal = _createTerminal(maxLines: widget.maxLines);
+    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    _syncTerminalBuffer(force: true);
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUITerminal oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controlId != oldWidget.controlId) {
+      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (widget.maxLines != oldWidget.maxLines) {
+      final nextTerminal = _createTerminal(maxLines: widget.maxLines);
+      final snapshot = _renderedSnapshot;
+      _terminal = nextTerminal;
+      _renderedSnapshot = '';
+      if (snapshot.isNotEmpty) {
+        _appendText(snapshot, reset: true);
+      }
+    }
+    _readOnly = widget.readOnly;
     _syncTerminalBuffer();
   }
 
   @override
   void dispose() {
+    widget.unregisterInvokeHandler(widget.controlId);
     _inputController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
   }
 
-  String _buildOutputSnapshot() {
-    final raw = widget.rawText?.trim();
-    if (raw != null && raw.isNotEmpty) return raw;
-    final directOutput = widget.output?.trim();
-    if (directOutput != null && directOutput.isNotEmpty) return directOutput;
-    final buffer = StringBuffer();
-    final source = widget.lines.isNotEmpty ? widget.lines : widget.events;
-    for (final item in source) {
-      if (item is Map) {
-        final line =
-            item['text']?.toString() ??
-            item['line']?.toString() ??
-            item['value']?.toString();
-        if (line != null && line.isNotEmpty) buffer.writeln(line);
-      } else if (item != null) {
-        final line = item.toString();
-        if (line.isNotEmpty) buffer.writeln(line);
-      }
-    }
-    return buffer.toString();
+  xterm.Terminal _createTerminal({required int maxLines}) {
+    final terminal = xterm.Terminal(maxLines: maxLines);
+    terminal.onOutput = (data) {
+      if (_readOnly) return;
+      widget.sendEvent(widget.controlId, 'input', {'data': data});
+    };
+    return terminal;
   }
 
-  void _syncTerminalBuffer() {
-    var snapshot = _buildOutputSnapshot();
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'clear':
+        _appendText('', reset: true);
+        return null;
+      case 'write':
+      case 'append':
+        final value = args['value']?.toString() ?? '';
+        if (value.isNotEmpty) {
+          _appendText(_normalizeOutput(value), reset: false);
+        }
+        return null;
+      case 'append_lines':
+        final raw = args['lines'];
+        if (raw is List) {
+          final lines = raw
+              .map((item) => _lineFromEntry(item) ?? '')
+              .where((line) => line.isNotEmpty)
+              .join('\n');
+          if (lines.isNotEmpty) {
+            _appendText(_normalizeOutput(lines), reset: false);
+          }
+        }
+        return null;
+      case 'focus':
+        _inputFocusNode.requestFocus();
+        return null;
+      case 'blur':
+        _inputFocusNode.unfocus();
+        return null;
+      case 'set_input':
+        final value = args['value']?.toString() ?? '';
+        _inputController.text = value;
+        return null;
+      case 'set_read_only':
+        _readOnly = args['value'] == true;
+        setState(() {});
+        return null;
+      case 'get_value':
+      case 'get_buffer':
+        return _renderedSnapshot;
+      case 'get_input':
+        return _inputController.text;
+      default:
+        throw UnsupportedError('Unknown terminal method: $method');
+    }
+  }
+
+  String? _lineFromEntry(Object? item) {
+    if (item is Map) {
+      final map = coerceObjectMap(item);
+      return map['text']?.toString() ??
+          map['line']?.toString() ??
+          map['value']?.toString();
+    }
+    if (item == null) return null;
+    final value = item.toString();
+    return value.isEmpty ? null : value;
+  }
+
+  String _buildSnapshotFromProps() {
+    final raw = widget.rawText?.trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+
+    final directOutput = widget.output?.trim();
+    if (directOutput != null && directOutput.isNotEmpty) return directOutput;
+
+    final source = widget.lines.isNotEmpty ? widget.lines : widget.events;
+    final out = <String>[];
+    for (final item in source) {
+      final line = _lineFromEntry(item);
+      if (line != null && line.isNotEmpty) {
+        out.add(line);
+      }
+    }
+    return out.join('\n');
+  }
+
+  String _normalizeOutput(String value) {
+    var normalized = value;
     if (widget.stripAnsi) {
-      snapshot = snapshot.replaceAll(
+      normalized = normalized.replaceAll(
         RegExp(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])'),
         '',
       );
     }
-    if (snapshot == _lastSnapshot) return;
-    _lastSnapshot = snapshot;
+    return normalized;
+  }
+
+  void _appendText(String value, {required bool reset}) {
+    final nextText = value;
+    _renderedSnapshot = reset
+        ? nextText
+        : (_renderedSnapshot + (nextText.isEmpty ? '' : nextText));
     _terminal.write('\x1b[2J\x1b[H');
-    if (snapshot.isNotEmpty) {
-      _terminal.write(snapshot);
+    if (_renderedSnapshot.isNotEmpty) {
+      _terminal.write(_renderedSnapshot);
     }
+  }
+
+  void _syncTerminalBuffer({bool force = false}) {
+    final snapshot = _normalizeOutput(_buildSnapshotFromProps());
+    if (!force && snapshot == _renderedSnapshot) return;
+
+    if (!force &&
+        _renderedSnapshot.isNotEmpty &&
+        snapshot.startsWith(_renderedSnapshot)) {
+      final delta = snapshot.substring(_renderedSnapshot.length);
+      if (delta.isNotEmpty) {
+        _appendText(delta, reset: false);
+      }
+      return;
+    }
+
+    _appendText(snapshot, reset: true);
   }
 
   void _submit() {
@@ -140,7 +261,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         color: widget.backgroundColor,
         border: widget.borderColor != null && widget.borderWidth > 0
             ? Border.all(
-                color: widget.borderColor!.withOpacity(0.6),
+                color: widget.borderColor!.withValues(alpha: 0.6),
                 width: widget.borderWidth,
               )
             : null,
@@ -154,7 +275,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
               _terminal,
               theme: theme,
               autofocus: widget.autoFocus,
-              readOnly: widget.readOnly,
+              readOnly: _readOnly,
               textStyle: xterm.TerminalStyle(
                 fontFamily: widget.fontFamily,
                 fontSize: widget.fontSize,
@@ -166,11 +287,11 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
             Container(
               padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               decoration: BoxDecoration(
-                color: widget.backgroundColor.withOpacity(0.92),
+                color: widget.backgroundColor.withValues(alpha: 0.92),
                 border: widget.borderColor != null && widget.borderWidth > 0
                     ? Border(
                         top: BorderSide(
-                          color: widget.borderColor!.withOpacity(0.5),
+                          color: widget.borderColor!.withValues(alpha: 0.5),
                           width: widget.borderWidth,
                         ),
                       )
@@ -186,14 +307,15 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
                         style: TextStyle(
                           fontFamily: widget.fontFamily,
                           fontSize: widget.fontSize,
-                          color: widget.textColor.withOpacity(0.85),
+                          color: widget.textColor.withValues(alpha: 0.85),
                         ),
                       ),
                     ),
                   Expanded(
                     child: TextField(
                       controller: _inputController,
-                      enabled: !widget.readOnly,
+                      focusNode: _inputFocusNode,
+                      enabled: !_readOnly,
                       onChanged: (value) {
                         widget.sendEvent(widget.controlId, 'change', {
                           'value': value,
@@ -211,14 +333,14 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
                         border: InputBorder.none,
                         hintStyle: TextStyle(
                           fontFamily: widget.fontFamily,
-                          color: widget.textColor.withOpacity(0.45),
+                          color: widget.textColor.withValues(alpha: 0.45),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.tonal(
-                    onPressed: widget.readOnly ? null : _submit,
+                    onPressed: _readOnly ? null : _submit,
                     child: Text(widget.submitLabel),
                   ),
                 ],
@@ -243,7 +365,7 @@ xterm.TerminalTheme _buildTerminalTheme(Color bg, Color fg) {
     background: bg,
     foreground: fg,
     cursor: fg,
-    selection: fg.withOpacity(0.25),
+    selection: fg.withValues(alpha: 0.25),
     black: bg,
     red: red,
     green: green,
@@ -269,6 +391,8 @@ xterm.TerminalTheme _buildTerminalTheme(Color bg, Color fg) {
 Widget buildTerminalControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return ButterflyUITerminal(
@@ -290,6 +414,13 @@ Widget buildTerminalControl(
         ? true
         : (props['clear_on_submit'] == true),
     autoFocus: props['auto_focus'] == true || props['autofocus'] == true,
+    autoScroll: props['auto_scroll'] == null
+        ? true
+        : (props['auto_scroll'] == true),
+    wrapLines: props['wrap_lines'] == null
+        ? true
+        : (props['wrap_lines'] == true),
+    maxLines: (coerceOptionalInt(props['max_lines']) ?? 4000).clamp(200, 20000),
     prompt: (props['prompt'] ?? '').toString(),
     placeholder: (props['placeholder'] ?? 'Type command...').toString(),
     submitLabel: (props['submit_label'] ?? 'Run').toString(),
@@ -303,6 +434,8 @@ Widget buildTerminalControl(
     borderColor: coerceColor(props['border_color']),
     borderWidth: coerceDouble(props['border_width']) ?? 0,
     radius: coerceDouble(props['radius']) ?? 10,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }

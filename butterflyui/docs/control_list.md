@@ -18,6 +18,11 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `image`
 - `markdown_view`
 - `code_view`
+- `rich_text_editor`
+- `html_view`
+- `diff_view`
+- `chart`
+- `sparkline`
 - `empty_state`
 - `error_state`
 
@@ -32,9 +37,13 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `switch`
 - `slider`
 - `select`
+- `multi_select`
+- `combobox`
+- `date_picker`
+- `date_range_picker`
 - `chip_group`
 - `tag_filter_bar`
-- `file_picker` (`filepicker` alias)
+- `file_picker`
 - `directory_picker`
 
 ## 5) List/Data Family
@@ -42,11 +51,11 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `grid_view`
 - `virtual_list`
 - `virtual_grid`
-- `list_tile` (`item_tile` alias)
-- `tree_view` (`tree` alias)
+- `list_tile`
+- `tree_view`
 - `tree_node`
 - `table`
-- `data_table` (`data_grid`, `table_view` aliases)
+- `data_table`
 - `file_browser`
 - `task_list`
 
@@ -59,6 +68,7 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `tooltip`
 - `toast`
 - `toast_host`
+- `notification_center`
 
 ## 7) Navigation Family
 - `router`
@@ -70,16 +80,16 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `sidebar`
 - `app_bar`
 - `drawer`
-- `breadcrumbs` (`breadcrumb_bar` alias)
+- `breadcrumbs`
 - `status_bar`
-- `command_palette` (`command_search` alias)
+- `command_palette`
 - `command_item`
 - `paginator`
 - `launcher`
 
 ## 8) Window Shell Controls
 - `window_frame`
-- `window_drag_region` (`drag_region` alias)
+- `window_drag_region`
 - `window_controls`
 
 ## 9) Scene Controls
@@ -93,7 +103,7 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `wrap`
 - `expanded`
 - `scroll_view`
-- `split_view` (`split_pane` alias)
+- `split_view`
 - `dock_layout`
 - `pane`
 - `inspector_panel`
@@ -108,7 +118,7 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `key_listener`
 - `shortcut_map`
 - `animation_asset`
-- `progress_indicator` (`progress` alias)
+- `progress_indicator`
 - `progress_timeline`
 - `skeleton`
 - `skeleton_loader`
@@ -117,12 +127,12 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - `webview`
 
 ## 12) Builder and AI Workspace
-- `code_editor` (`ide` alias)
-- `terminal` (`terminal_view`, `terminal_session`, `terminal_stream`, `terminal_stream_view`, `terminal_raw_view`, `terminal_prompt`, `terminal_stdin`, `terminal_stdin_injector`, `terminal_command_builder`, `terminal_capabilities`, `terminal_presets`, `terminal_replay`, `terminal_flow_gate`, `terminal_output_mapper`, `terminal_timeline`, `terminal_progress` aliases)
-- `chat_thread` (`chat` alias)
-- `chat_message` (`message_bubble`, `chat_bubble` aliases)
-- `message_composer` (`prompt_composer` alias)
-- `form` (`auto_form` alias)
+- `code_editor`
+- `terminal`
+- `chat_thread`
+- `chat_message`
+- `message_composer`
+- `form`
 - `form_field`
 - `validation_summary`
 
@@ -131,3 +141,6 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - Motion hooks and modifier chains are available across controls.
 - Overlay stack integration is unified through `overlay_host`.
 - WebView supports runtime engine selection (`windows` / `inapp` / `flutter`), fallback engine, request headers, user agent, popup policy, storage/cookie/cache toggles, and richer lifecycle events (`load_start`, `progress`, `load_stop`, `load_error`, `http_error`).
+- `code_editor` defaults to Monaco-backed editing with invoke actions (`get_value`, `set_value`, `focus`, `blur`, `select_all`, `insert_text`, `format_document`, `reveal_line`, `set_markers`) and emits editor lifecycle/events (`ready`, `change`, `save`, `submit`, `cursor_change`).
+- `terminal` is xterm-backed with invoke actions (`clear`, `write`, `append_lines`, `focus`, `blur`, `set_input`, `set_read_only`, `get_buffer`) and emits runtime events (`input`, `change`, `submit`).
+- New builder controls are available end-to-end: `rich_text_editor`, `date_picker`, `date_range_picker`, `multi_select`, `combobox`, `chart`, `sparkline`, `diff_view`, `notification_center`, and `html_view` (webview-backed HTML rendering).

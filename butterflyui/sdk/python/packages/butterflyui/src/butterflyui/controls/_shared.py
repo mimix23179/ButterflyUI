@@ -25,9 +25,14 @@ _INTERACTIVE_CONTROLS = {
     "switch",
     "slider",
     "text_field",
+    "rich_text_editor",
     "search_bar",
     "radio",
     "select",
+    "multi_select",
+    "combobox",
+    "date_picker",
+    "date_range_picker",
     "chip_group",
     "tag_filter_bar",
     "file_picker",
@@ -40,6 +45,7 @@ _INTERACTIVE_CONTROLS = {
     "item_tile",
     "paginator",
     "launcher",
+    "notification_center",
 }
 
 _GLASS_CONTROLS = {

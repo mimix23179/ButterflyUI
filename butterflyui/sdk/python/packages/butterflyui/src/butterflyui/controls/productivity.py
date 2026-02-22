@@ -31,6 +31,12 @@ class CodeEditor(Component):
         read_only: bool | None = None,
         word_wrap: bool | None = None,
         line_numbers: bool | None = None,
+        show_gutter: bool | None = None,
+        show_minimap: bool | None = None,
+        glyph_margin: bool | None = None,
+        engine: str | None = None,
+        webview_engine: str | None = None,
+        document_uri: str | None = None,
         emit_on_change: bool | None = None,
         debounce_ms: int | None = None,
         props: Mapping[str, Any] | None = None,
@@ -48,6 +54,12 @@ class CodeEditor(Component):
             read_only=read_only,
             word_wrap=word_wrap,
             line_numbers=line_numbers,
+            show_gutter=show_gutter,
+            show_minimap=show_minimap,
+            glyph_margin=glyph_margin,
+            engine=engine,
+            webview_engine=webview_engine,
+            document_uri=document_uri,
             emit_on_change=emit_on_change,
             debounce_ms=debounce_ms,
             **kwargs,
@@ -75,6 +87,12 @@ class CodeEditor(Component):
     def format_document(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "format_document", {})
 
+    def reveal_line(self, session: Any, line: int) -> dict[str, Any]:
+        return self.invoke(session, "reveal_line", {"line": line})
+
+    def set_markers(self, session: Any, markers: list[dict[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_markers", {"markers": markers})
+
 
 class Terminal(Component):
     control_type = "terminal"
@@ -90,6 +108,10 @@ class Terminal(Component):
         read_only: bool | None = None,
         clear_on_submit: bool | None = None,
         strip_ansi: bool | None = None,
+        auto_scroll: bool | None = None,
+        wrap_lines: bool | None = None,
+        max_lines: int | None = None,
+        engine: str | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -105,9 +127,37 @@ class Terminal(Component):
             read_only=read_only,
             clear_on_submit=clear_on_submit,
             strip_ansi=strip_ansi,
+            auto_scroll=auto_scroll,
+            wrap_lines=wrap_lines,
+            max_lines=max_lines,
+            engine=engine,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
+
+    def write(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "write", {"value": value})
+
+    def append_lines(self, session: Any, lines: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "append_lines", {"lines": lines})
+
+    def focus(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "focus", {})
+
+    def blur(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "blur", {})
+
+    def set_input(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_input", {"value": value})
+
+    def set_read_only(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_read_only", {"value": value})
+
+    def get_buffer(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_buffer", {})
 
 
 class ChatThread(Component):

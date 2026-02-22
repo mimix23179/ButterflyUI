@@ -18,6 +18,10 @@ __all__ = [
     "Select",
     "ChipGroup",
     "TagFilterBar",
+    "DatePicker",
+    "DateRangePicker",
+    "MultiSelect",
+    "Combobox",
 ]
 
 
@@ -390,6 +394,144 @@ class TagFilterBar(Component):
             values=values,
             multi_select=multi_select,
             dense=dense,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class DatePicker(Component):
+    control_type = "date_picker"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        min_date: str | None = None,
+        max_date: str | None = None,
+        enabled: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            label=label,
+            placeholder=placeholder,
+            min_date=min_date,
+            max_date=max_date,
+            enabled=enabled,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def open(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "open", {})
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+
+class DateRangePicker(Component):
+    control_type = "date_range_picker"
+
+    def __init__(
+        self,
+        *,
+        start: str | None = None,
+        end: str | None = None,
+        label: str | None = None,
+        placeholder: str | None = None,
+        min_date: str | None = None,
+        max_date: str | None = None,
+        enabled: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            start=start,
+            end=end,
+            label=label,
+            placeholder=placeholder,
+            min_date=min_date,
+            max_date=max_date,
+            enabled=enabled,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def open(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "open", {})
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+
+class MultiSelect(Component):
+    control_type = "multi_select"
+
+    def __init__(
+        self,
+        *,
+        options: list[Any] | None = None,
+        values: list[Any] | None = None,
+        selected: list[Any] | None = None,
+        label: str | None = None,
+        enabled: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            options=options,
+            values=values if values is not None else selected,
+            selected=selected if selected is not None else values,
+            label=label,
+            enabled=enabled,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class Combobox(Component):
+    control_type = "combobox"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        options: list[Any] | None = None,
+        label: str | None = None,
+        hint: str | None = None,
+        placeholder: str | None = None,
+        enabled: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            options=options,
+            label=label,
+            hint=hint if hint is not None else placeholder,
+            placeholder=placeholder,
+            enabled=enabled,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)

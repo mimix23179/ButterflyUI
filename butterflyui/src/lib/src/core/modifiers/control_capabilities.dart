@@ -98,9 +98,14 @@ class ControlModifierCapabilities {
     'switch',
     'slider',
     'text_field',
+    'rich_text_editor',
     'search_bar',
     'radio',
     'select',
+    'multi_select',
+    'combobox',
+    'date_picker',
+    'date_range_picker',
     'chip_group',
     'tag_filter_bar',
     'file_picker',
@@ -113,6 +118,7 @@ class ControlModifierCapabilities {
     'item_tile',
     'paginator',
     'launcher',
+    'notification_center',
   };
 
   static const Set<String> _defaultGlassControls = <String>{

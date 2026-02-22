@@ -10,12 +10,16 @@ import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/common/option_types.dart';
 import 'controls/display/chat.dart';
+import 'controls/display/chart.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
+import 'controls/display/diff_view.dart';
 import 'controls/display/empty_state.dart';
 import 'controls/display/error_state.dart';
+import 'controls/display/html_view.dart';
 import 'controls/display/icon.dart';
 import 'controls/display/markdown_view.dart';
+import 'controls/display/rich_text_editor.dart';
 import 'controls/display/terminal.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/particle_field.dart';
@@ -28,8 +32,12 @@ import 'controls/feedback/toast.dart';
 import 'controls/feedback/tooltip.dart';
 import 'controls/inputs/checkbox.dart';
 import 'controls/inputs/chip_group.dart';
+import 'controls/inputs/combobox.dart';
+import 'controls/inputs/date_picker.dart';
+import 'controls/inputs/date_range_picker.dart';
 import 'controls/inputs/file_picker.dart';
 import 'controls/inputs/form.dart';
+import 'controls/inputs/multi_select.dart';
 import 'controls/inputs/radio.dart';
 import 'controls/inputs/search_bar.dart';
 import 'controls/inputs/select.dart';
@@ -78,6 +86,7 @@ import 'controls/overlay/modal.dart';
 import 'controls/overlay/overlay_host.dart';
 import 'controls/overlay/portal.dart';
 import 'controls/overlay/popover.dart';
+import 'controls/overlay/notification_center.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/toast_host.dart';
 import 'style/style_pack.dart';
@@ -403,10 +412,44 @@ class ControlRenderer {
       case 'markdown_view':
         return buildMarkdownViewControl(props);
 
+      case 'rich_text_editor':
+      case 'rich_text':
+      case 'rte':
+        return buildRichTextEditorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'code':
       case 'code_block':
       case 'code_view':
         return buildCodeViewControl(props);
+
+      case 'diff_view':
+      case 'diff':
+        return buildDiffViewControl(props);
+
+      case 'chart':
+      case 'line_chart':
+      case 'bar_chart':
+        return buildChartControl(controlId, props, context.sendEvent);
+
+      case 'sparkline':
+      case 'spark_plot':
+        return buildSparklineControl(props);
+
+      case 'html':
+      case 'html_view':
+        return buildHtmlViewControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'code_editor':
       case 'ide':
@@ -550,6 +593,36 @@ class ControlRenderer {
           label: props['label']?.toString(),
           hint: props['hint']?.toString() ?? props['placeholder']?.toString(),
           sendEvent: context.sendEvent,
+        );
+
+      case 'multi_select':
+      case 'multi_pick':
+        return buildMultiSelectControl(controlId, props, context.sendEvent);
+
+      case 'combobox':
+      case 'combo_box':
+      case 'dropdown':
+        return buildComboboxControl(controlId, props, context.sendEvent);
+
+      case 'date_picker':
+      case 'date_select':
+        return buildDatePickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'date_range_picker':
+      case 'date_range':
+      case 'date_span':
+        return buildDateRangePickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'chip_group':
@@ -741,6 +814,15 @@ class ControlRenderer {
       case 'toast_host':
       case 'notification_host':
         return buildToastHostControl(controlId, props, context.sendEvent);
+
+      case 'notification_center':
+        return buildNotificationCenterControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'progress_indicator':
       case 'progress':
@@ -1233,7 +1315,13 @@ class ControlRenderer {
       case 'terminal_output_mapper':
       case 'terminal_timeline':
       case 'terminal_progress':
-        return buildTerminalControl(controlId, props, context.sendEvent);
+        return buildTerminalControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'webview':
         return buildWebViewControl(
