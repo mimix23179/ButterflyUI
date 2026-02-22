@@ -8,6 +8,14 @@ from ._shared import Component, merge_props
 __all__ = [
     "CodeEditor",
     "Terminal",
+    "TerminalHost",
+    "TerminalTabStrip",
+    "TerminalProcessBridge",
+    "OutputPanel",
+    "EditorTabStrip",
+    "WorkspaceTree",
+    "ProblemsPanel",
+    "EditorWorkspace",
     "ChatThread",
     "ChatMessage",
     "MessageComposer",
@@ -160,6 +168,268 @@ class Terminal(Component):
         return self.invoke(session, "get_buffer", {})
 
 
+class TerminalHost(Component):
+    control_type = "terminal_host"
+
+    def __init__(
+        self,
+        *,
+        instances: list[dict[str, Any]] | None = None,
+        active_id: str | None = None,
+        cwd: str | None = None,
+        output_channels: Mapping[str, Any] | None = None,
+        active_output_channel: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            instances=instances,
+            active_id=active_id,
+            cwd=cwd,
+            output_channels=output_channels,
+            active_output_channel=active_output_channel,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def new_instance(self, session: Any, name: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if name is not None:
+            payload["name"] = name
+        return self.invoke(session, "new_instance", payload)
+
+    def close_instance(self, session: Any, instance_id: str) -> dict[str, Any]:
+        return self.invoke(session, "close_instance", {"id": instance_id})
+
+    def set_active(self, session: Any, instance_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_active", {"id": instance_id})
+
+    def run_command(self, session: Any, command: str, cwd: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {"command": command}
+        if cwd is not None:
+            payload["cwd"] = cwd
+        return self.invoke(session, "run_command", payload)
+
+    def append_output(
+        self,
+        session: Any,
+        *,
+        text: str,
+        channel: str | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {"text": text}
+        if channel is not None:
+            payload["channel"] = channel
+        return self.invoke(session, "append_output", payload)
+
+    def get_instances(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_instances", {})
+
+
+class TerminalTabStrip(Component):
+    control_type = "terminal_tab_strip"
+
+    def __init__(
+        self,
+        *,
+        tabs: list[dict[str, Any]] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(props, tabs=tabs, **kwargs)
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class TerminalProcessBridge(Component):
+    control_type = "terminal_process_bridge"
+
+    def __init__(
+        self,
+        *,
+        command: str | None = None,
+        args: list[str] | None = None,
+        cwd: str | None = None,
+        env: Mapping[str, str] | None = None,
+        auto_start: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            command=command,
+            args=args,
+            cwd=cwd,
+            env=env,
+            auto_start=auto_start,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def start(
+        self,
+        session: Any,
+        *,
+        command: str | None = None,
+        args: list[str] | None = None,
+        cwd: str | None = None,
+        env: Mapping[str, str] | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if command is not None:
+            payload["command"] = command
+        if args is not None:
+            payload["args"] = args
+        if cwd is not None:
+            payload["cwd"] = cwd
+        if env is not None:
+            payload["env"] = dict(env)
+        return self.invoke(session, "start", payload)
+
+    def stop(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "stop", {})
+
+    def kill(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "kill", {})
+
+    def restart(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "restart", {})
+
+    def write_stdin(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "write_stdin", {"value": value})
+
+    def is_running(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "is_running", {})
+
+
+class OutputPanel(Component):
+    control_type = "output_panel"
+
+    def __init__(
+        self,
+        *,
+        channels: Mapping[str, Any] | None = None,
+        active_channel: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            channels=channels,
+            active_channel=active_channel,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def append(self, session: Any, text: str, channel: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {"text": text}
+        if channel is not None:
+            payload["channel"] = channel
+        return self.invoke(session, "append", payload)
+
+    def clear_channel(self, session: Any, channel: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if channel is not None:
+            payload["channel"] = channel
+        return self.invoke(session, "clear_channel", payload)
+
+    def set_channel(self, session: Any, channel: str) -> dict[str, Any]:
+        return self.invoke(session, "set_channel", {"channel": channel})
+
+    def get_channel(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_channel", {})
+
+
+class EditorTabStrip(Component):
+    control_type = "editor_tab_strip"
+
+    def __init__(
+        self,
+        *,
+        tabs: list[dict[str, Any]] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(props, tabs=tabs, **kwargs)
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class WorkspaceTree(Component):
+    control_type = "workspace_tree"
+
+    def __init__(
+        self,
+        *,
+        nodes: list[dict[str, Any]] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(props, nodes=nodes, **kwargs)
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class ProblemsPanel(Component):
+    control_type = "problems_panel"
+
+    def __init__(
+        self,
+        *,
+        problems: list[dict[str, Any]] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(props, problems=problems, **kwargs)
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class EditorWorkspace(Component):
+    control_type = "editor_workspace"
+
+    def __init__(
+        self,
+        *,
+        documents: list[dict[str, Any]] | None = None,
+        active_id: str | None = None,
+        workspace_nodes: list[dict[str, Any]] | None = None,
+        problems: list[dict[str, Any]] | None = None,
+        show_explorer: bool | None = None,
+        show_problems: bool | None = None,
+        show_status_bar: bool | None = None,
+        status_text: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            documents=documents,
+            active_id=active_id,
+            workspace_nodes=workspace_nodes,
+            problems=problems,
+            show_explorer=show_explorer,
+            show_problems=show_problems,
+            show_status_bar=show_status_bar,
+            status_text=status_text,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
 class ChatThread(Component):
     control_type = "chat_thread"
 
@@ -249,6 +519,56 @@ class MessageComposer(Component):
 
 class PromptComposer(MessageComposer):
     control_type = "prompt_composer"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        placeholder: str | None = None,
+        send_label: str | None = None,
+        emit_on_change: bool | None = None,
+        clear_on_send: bool | None = None,
+        min_lines: int | None = None,
+        max_lines: int | None = None,
+        show_attach: bool | None = None,
+        prompt_label: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            placeholder=placeholder,
+            send_label=send_label,
+            emit_on_change=emit_on_change,
+            clear_on_send=clear_on_send,
+            min_lines=min_lines,
+            max_lines=max_lines,
+            show_attach=show_attach,
+            prompt_label=prompt_label,
+            **kwargs,
+        )
+        Component.__init__(self, props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def submit(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "submit", {})
+
+    def focus(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "focus", {})
+
+    def blur(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "blur", {})
+
+    def attach(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "attach", {})
 
 
 class Form(Component):

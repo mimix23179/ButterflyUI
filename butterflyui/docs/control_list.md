@@ -129,6 +129,14 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 ## 12) Builder and AI Workspace
 - `code_editor`
 - `terminal`
+- `terminal_host`
+- `terminal_tab_strip`
+- `terminal_process_bridge`
+- `output_panel`
+- `editor_tab_strip`
+- `workspace_tree`
+- `problems_panel`
+- `editor_workspace`
 - `chat_thread`
 - `chat_message`
 - `message_composer`
@@ -143,4 +151,5 @@ This is the active v1 scope. Controls outside this list are not first-class cont
 - WebView supports runtime engine selection (`windows` / `inapp` / `flutter`), fallback engine, request headers, user agent, popup policy, storage/cookie/cache toggles, and richer lifecycle events (`load_start`, `progress`, `load_stop`, `load_error`, `http_error`).
 - `code_editor` defaults to Monaco-backed editing with invoke actions (`get_value`, `set_value`, `focus`, `blur`, `select_all`, `insert_text`, `format_document`, `reveal_line`, `set_markers`) and emits editor lifecycle/events (`ready`, `change`, `save`, `submit`, `cursor_change`).
 - `terminal` is xterm-backed with invoke actions (`clear`, `write`, `append_lines`, `focus`, `blur`, `set_input`, `set_read_only`, `get_buffer`) and emits runtime events (`input`, `change`, `submit`).
+- Workbench controls are available for IDE orchestration: `terminal_host`, `terminal_tab_strip`, `terminal_process_bridge`, `output_panel`, `editor_tab_strip`, `workspace_tree`, `problems_panel`, and `editor_workspace`.
 - New builder controls are available end-to-end: `rich_text_editor`, `date_picker`, `date_range_picker`, `multi_select`, `combobox`, `chart`, `sparkline`, `diff_view`, `notification_center`, and `html_view` (webview-backed HTML rendering).

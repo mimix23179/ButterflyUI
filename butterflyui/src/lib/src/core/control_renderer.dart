@@ -9,6 +9,15 @@ import 'motion/motion_pack.dart';
 import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/common/option_types.dart';
+import 'controls/customization/animated_gradient.dart';
+import 'controls/customization/avatar_stack.dart';
+import 'controls/customization/badge.dart';
+import 'controls/customization/blend_mode_picker.dart';
+import 'controls/customization/blob_field.dart';
+import 'controls/customization/border.dart';
+import 'controls/customization/border_side.dart';
+import 'controls/customization/button_style.dart';
+import 'controls/customization/candy.dart';
 import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/code_view.dart';
@@ -21,6 +30,14 @@ import 'controls/display/icon.dart';
 import 'controls/display/markdown_view.dart';
 import 'controls/display/rich_text_editor.dart';
 import 'controls/display/terminal.dart';
+import 'controls/productivity/editor_tab_strip.dart';
+import 'controls/productivity/editor_workspace.dart';
+import 'controls/productivity/output_panel.dart';
+import 'controls/productivity/problems_panel.dart';
+import 'controls/productivity/terminal_host.dart';
+import 'controls/productivity/terminal_process_bridge.dart';
+import 'controls/productivity/terminal_tab_strip.dart';
+import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/particle_field.dart';
 import 'controls/effects/scanline_overlay.dart';
@@ -269,15 +286,25 @@ class ControlRenderer {
       case 'surface':
       case 'box':
       case 'container':
+        return buildContainerControl(props, rawChildren, context.buildChild);
+
       case 'candy_surface':
       case 'candy_container':
-        return buildContainerControl(props, rawChildren, context.buildChild);
+        return buildCandySurfaceControl(props, rawChildren, context.buildChild);
+
+      case 'candy_gallery':
+        return buildCandyGalleryControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
 
       case 'page_scene':
         return buildPageSceneControl(props, rawChildren, context.buildChild);
 
       case 'row':
-      case 'candy_row':
         return buildRowControl(
           props,
           rawChildren,
@@ -285,8 +312,15 @@ class ControlRenderer {
           context.buildChild,
         );
 
+      case 'candy_row':
+        return buildCandyRowControl(
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+        );
+
       case 'column':
-      case 'candy_column':
         return buildColumnControl(
           props,
           rawChildren,
@@ -294,13 +328,30 @@ class ControlRenderer {
           context.buildChild,
         );
 
+      case 'candy_column':
+        return buildCandyColumnControl(
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+        );
+
       case 'stack':
-      case 'candy_stack':
         return buildStackControl(props, rawChildren, context.buildChild);
 
+      case 'candy_stack':
+        return buildCandyStackControl(props, rawChildren, context.buildChild);
+
       case 'wrap':
-      case 'candy_wrap':
         return buildWrapControl(
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+        );
+
+      case 'candy_wrap':
+        return buildCandyWrapControl(
           props,
           rawChildren,
           context.tokens,
@@ -359,9 +410,12 @@ class ControlRenderer {
 
       case 'divider':
         return buildDividerControl(
+          controlId,
           props,
           rawChildren,
           context.buildChild,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           fallbackColor: defaultBorder,
         );
 
@@ -461,6 +515,34 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'editor_tab_strip':
+      case 'editor_tabs':
+      case 'document_tab_strip':
+        return buildEditorTabStripControl(controlId, props, context.sendEvent);
+
+      case 'workspace_tree':
+      case 'workspace_explorer':
+      case 'explorer_tree':
+        return buildWorkspaceTreeControl(controlId, props, context.sendEvent);
+
+      case 'problems_panel':
+      case 'diagnostics_panel':
+        return buildProblemsPanelControl(controlId, props, context.sendEvent);
+
+      case 'output_panel':
+      case 'log_panel':
+        return buildOutputPanelControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'editor_workspace':
+      case 'workbench_editor':
+        return buildEditorWorkspaceControl(controlId, props, context.sendEvent);
+
       case 'empty_state':
       case 'empty_state_view':
       case 'gallery_empty_state':
@@ -495,11 +577,24 @@ class ControlRenderer {
 
       case 'message_composer':
       case 'prompt_composer':
-        return buildMessageComposerControl(controlId, props, context.sendEvent);
+        return buildMessageComposerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'button':
-      case 'candy_button':
         return buildButtonControl(
+          controlId,
+          props,
+          context.tokens,
+          context.sendEvent,
+        );
+
+      case 'candy_button':
+        return buildCandyButtonAliasControl(
           controlId,
           props,
           context.tokens,
@@ -829,11 +924,21 @@ class ControlRenderer {
         return buildProgressIndicatorControl(props);
 
       case 'skeleton':
-        return buildSkeletonControl(props);
+        return buildSkeletonControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
 
       case 'skeleton_loader':
       case 'gallery_loading_skeleton':
-        return buildSkeletonLoaderControl(props);
+        return buildSkeletonLoaderControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
 
       case 'tabs':
         {
@@ -1217,8 +1322,15 @@ class ControlRenderer {
         }
 
       case 'card':
-      case 'candy_card':
         return buildCardControl(
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+        );
+
+      case 'candy_card':
+        return buildCandyCardAliasControl(
           props,
           rawChildren,
           context.tokens,
@@ -1281,21 +1393,109 @@ class ControlRenderer {
           context.buildChild,
         );
 
+      case 'animated_gradient':
+        return buildAnimatedGradientControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'avatar_stack':
+        return buildAvatarStackControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'badge':
+        return buildBadgeControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'blend_mode_picker':
+        return buildBlendModePickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'blob_field':
+        return buildBlobFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'border':
+        return buildBorderControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'border_side':
+        return buildBorderSideControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'button_style':
+        return buildButtonStyleControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'particle_field':
-        return buildParticleFieldControl(props);
+        return buildParticleFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'scanline_overlay':
         return buildScanlineOverlayControl(
+          controlId,
           props,
           firstChildOrEmpty(),
           defaultText: defaultText,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
         );
 
       case 'vignette':
         return buildVignetteControl(
+          controlId,
           props,
           firstChildOrEmpty(),
           defaultColor: defaultText.withOpacity(0.9),
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
         );
 
       case 'terminal':
@@ -1316,6 +1516,30 @@ class ControlRenderer {
       case 'terminal_timeline':
       case 'terminal_progress':
         return buildTerminalControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'terminal_host':
+      case 'terminal_workbench':
+        return buildTerminalHostControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'terminal_tab_strip':
+      case 'terminal_tabs':
+        return buildTerminalTabStripControl(controlId, props, context.sendEvent);
+
+      case 'terminal_process_bridge':
+      case 'process_bridge':
+        return buildTerminalProcessBridgeControl(
           controlId,
           props,
           context.registerInvokeHandler,

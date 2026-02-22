@@ -46,6 +46,16 @@ _INTERACTIVE_CONTROLS = {
     "paginator",
     "launcher",
     "notification_center",
+    "code_editor",
+    "terminal",
+    "terminal_host",
+    "terminal_tab_strip",
+    "terminal_process_bridge",
+    "output_panel",
+    "editor_tab_strip",
+    "workspace_tree",
+    "problems_panel",
+    "editor_workspace",
 }
 
 _GLASS_CONTROLS = {

@@ -129,6 +129,30 @@ class VirtualGrid(Component):
 class Card(Component):
     control_type = "card"
 
+    def __init__(
+        self,
+        *children: Any,
+        title: str | None = None,
+        subtitle: str | None = None,
+        elevated: bool | None = None,
+        radius: float | None = None,
+        content_padding: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            title=title,
+            subtitle=subtitle,
+            elevated=elevated,
+            radius=radius,
+            content_padding=content_padding,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
 
 class Table(Component):
     control_type = "table"
@@ -185,6 +209,34 @@ class DataTable(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_sort(
+        self,
+        session: Any,
+        *,
+        column: str | None = None,
+        ascending: bool = True,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_sort",
+            {"column": column, "ascending": ascending},
+        )
+
+    def clear_sort(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear_sort", {})
+
+    def set_filter(self, session: Any, query: str) -> dict[str, Any]:
+        return self.invoke(session, "set_filter", {"query": query})
+
+    def clear_filter(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear_filter", {})
+
+    def clear_selection(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear_selection", {})
 
 
 class DataGrid(DataTable):
@@ -398,9 +450,80 @@ class ProgressIndicator(Component):
 class Skeleton(Component):
     control_type = "skeleton"
 
+    def __init__(
+        self,
+        *,
+        variant: str | None = None,
+        radius: float | None = None,
+        width: float | None = None,
+        height: float | None = None,
+        duration_ms: int | None = None,
+        color: Any | None = None,
+        highlight_color: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            variant=variant,
+            radius=radius,
+            width=width,
+            height=height,
+            duration_ms=duration_ms,
+            color=color,
+            highlight_color=highlight_color,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def start(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "start", {})
+
+    def stop(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "stop", {})
+
 
 class SkeletonLoader(Component):
     control_type = "skeleton_loader"
+
+    def __init__(
+        self,
+        *,
+        count: int | None = None,
+        spacing: float | None = None,
+        variant: str | None = None,
+        radius: float | None = None,
+        width: float | None = None,
+        height: float | None = None,
+        duration_ms: int | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            count=count,
+            spacing=spacing,
+            variant=variant,
+            radius=radius,
+            width=width,
+            height=height,
+            duration_ms=duration_ms,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_count(self, session: Any, count: int) -> dict[str, Any]:
+        return self.invoke(session, "set_count", {"count": int(count)})
 
 
 

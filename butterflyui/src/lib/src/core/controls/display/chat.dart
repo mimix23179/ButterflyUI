@@ -154,6 +154,8 @@ class ButterflyUIMessageComposer extends StatefulWidget {
   final String sendLabel;
   final bool showAttach;
   final ButterflyUISendRuntimeEvent sendEvent;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
 
   const ButterflyUIMessageComposer({
     super.key,
@@ -169,6 +171,8 @@ class ButterflyUIMessageComposer extends StatefulWidget {
     required this.sendLabel,
     required this.showAttach,
     required this.sendEvent,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
   });
 
   @override
@@ -179,8 +183,18 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
+  late final FocusNode _focusNode = FocusNode();
   Timer? _debounce;
   bool _suppressChange = false;
+  late bool _enabled = widget.enabled;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
 
   @override
   void didUpdateWidget(covariant ButterflyUIMessageComposer oldWidget) {
@@ -193,12 +207,25 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
       );
       _suppressChange = false;
     }
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    _enabled = widget.enabled;
   }
 
   @override
   void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
     _debounce?.cancel();
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -215,23 +242,71 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
   }
 
   void _submit() {
+    if (!_enabled) {
+      return;
+    }
     final value = _controller.text;
-    if (value.trim().isEmpty) return;
     widget.sendEvent(widget.controlId, 'submit', {'value': value});
     if (widget.clearOnSend) {
+      _suppressChange = true;
       _controller.clear();
+      _suppressChange = false;
+      if (widget.emitOnChange) {
+        widget.sendEvent(widget.controlId, 'change', {'value': ''});
+      }
+    }
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_value':
+        return _controller.text;
+      case 'set_value':
+        final value = (args['value'] ?? '').toString();
+        _suppressChange = true;
+        _controller.value = _controller.value.copyWith(
+          text: value,
+          selection: TextSelection.collapsed(offset: value.length),
+        );
+        _suppressChange = false;
+        return _controller.text;
+      case 'submit':
+        _submit();
+        return null;
+      case 'focus':
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+        return null;
+      case 'blur':
+        if (mounted) {
+          FocusScope.of(context).unfocus();
+        }
+        return null;
+      case 'attach':
+        if (widget.showAttach) {
+          widget.sendEvent(widget.controlId, 'attach', {});
+        }
+        return null;
+      case 'set_enabled':
+        setState(() {
+          _enabled = args['enabled'] == true;
+        });
+        return _enabled;
+      default:
+        throw UnsupportedError('Unknown prompt_composer method: $method');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(
           child: TextField(
             controller: _controller,
-            enabled: widget.enabled,
+            focusNode: _focusNode,
+            enabled: _enabled,
             minLines: widget.minLines,
             maxLines: widget.maxLines,
             keyboardType: TextInputType.multiline,
@@ -247,7 +322,7 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: IconButton(
-              onPressed: widget.enabled
+              onPressed: _enabled
                   ? () => widget.sendEvent(widget.controlId, 'attach', {})
                   : null,
               icon: const Icon(Icons.attach_file_rounded),
@@ -256,7 +331,7 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: FilledButton(
-            onPressed: widget.enabled ? _submit : null,
+            onPressed: _enabled ? _submit : null,
             child: Text(widget.sendLabel),
           ),
         ),
@@ -268,6 +343,8 @@ class _ButterflyUIMessageComposerState extends State<ButterflyUIMessageComposer>
 Widget buildMessageComposerControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final showAttach =
@@ -289,6 +366,8 @@ Widget buildMessageComposerControl(
     sendLabel: (props['send_label'] ?? 'Send').toString(),
     showAttach: showAttach,
     sendEvent: sendEvent,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
   );
 }
 

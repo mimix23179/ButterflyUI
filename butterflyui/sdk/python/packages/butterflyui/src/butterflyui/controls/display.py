@@ -75,6 +75,30 @@ class Image(Component):
 class Divider(Component):
     control_type = "divider"
 
+    def __init__(
+        self,
+        *,
+        vertical: bool | None = None,
+        thickness: float | None = None,
+        indent: float | None = None,
+        end_indent: float | None = None,
+        color: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            vertical=vertical,
+            thickness=thickness,
+            indent=indent,
+            end_indent=end_indent,
+            color=color,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
 
 class MarkdownView(Component):
     control_type = "markdown_view"

@@ -4,32 +4,134 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-Widget buildParticleFieldControl(Map<String, Object?> props) {
-  final count = (coerceOptionalInt(props['count']) ?? 40)
+Widget buildParticleFieldControl(
+  String controlId,
+  Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  return _ParticleFieldControl(
+    controlId: controlId,
+    props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
+
+class _ParticleFieldControl extends StatefulWidget {
+  const _ParticleFieldControl({
+    required this.controlId,
+    required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_ParticleFieldControl> createState() => _ParticleFieldControlState();
+}
+
+class _ParticleFieldControlState extends State<_ParticleFieldControl> {
+  late bool _play;
+  late int? _seed;
+
+  @override
+  void initState() {
+    super.initState();
+    final playValue = widget.props.containsKey('play')
+        ? widget.props['play']
+        : (widget.props.containsKey('playing')
+              ? widget.props['playing']
+              : widget.props['autoplay']);
+    _play = playValue == null ? true : (playValue == true);
+    _seed = coerceOptionalInt(widget.props['seed']);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ParticleFieldControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_state':
+        return {'play': _play, 'seed': _seed};
+      case 'play':
+        setState(() {
+          _play = true;
+        });
+        return null;
+      case 'pause':
+        setState(() {
+          _play = false;
+        });
+        return null;
+      case 'set_seed':
+        setState(() {
+          _seed = coerceOptionalInt(args['seed']) ?? _seed;
+        });
+        widget.sendEvent(widget.controlId, 'seed_change', {'seed': _seed});
+        return _seed;
+      default:
+        throw UnsupportedError('Unknown particle_field method: $method');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+  final count = (coerceOptionalInt(widget.props['count']) ?? 40)
       .clamp(0, 2000)
       .toInt();
-  final colors = _coerceColorList(props['colors']);
-  final size = coerceDouble(props['size']);
-  final minSize = coerceDouble(props['min_size']) ?? size ?? 2.0;
-  final maxSize = coerceDouble(props['max_size']) ?? size ?? 6.0;
-  final speed = coerceDouble(props['speed']);
-  final minSpeed = coerceDouble(props['min_speed']) ?? speed ?? 8.0;
-  final maxSpeed = coerceDouble(props['max_speed']) ?? speed ?? 32.0;
+  final colors = _coerceColorList(widget.props['colors']);
+  final size = coerceDouble(widget.props['size']);
+  final minSize = coerceDouble(widget.props['min_size']) ?? size ?? 2.0;
+  final maxSize = coerceDouble(widget.props['max_size']) ?? size ?? 6.0;
+  final speed = coerceDouble(widget.props['speed']);
+  final minSpeed = coerceDouble(widget.props['min_speed']) ?? speed ?? 8.0;
+  final maxSpeed = coerceDouble(widget.props['max_speed']) ?? speed ?? 32.0;
   final direction = coerceDouble(
-    props['direction'] ?? props['direction_deg'] ?? props['direction_degrees'],
+    widget.props['direction'] ??
+        widget.props['direction_deg'] ??
+        widget.props['direction_degrees'],
   );
-  final spread = coerceDouble(props['spread']);
-  final opacity = (coerceDouble(props['opacity']) ?? 0.6).clamp(0.0, 1.0);
-  final seed = coerceOptionalInt(props['seed']);
-  final loop = props['loop'] == null ? true : (props['loop'] == true);
-  final playValue = props.containsKey('play')
-      ? props['play']
-      : (props.containsKey('playing') ? props['playing'] : props['autoplay']);
-  final play = playValue == null ? true : (playValue == true);
-  final shape = props['shape']?.toString() ?? 'circle';
+  final spread = coerceDouble(widget.props['spread']);
+  final opacity = (coerceDouble(widget.props['opacity']) ?? 0.6).clamp(0.0, 1.0);
+  final loop = widget.props['loop'] == null
+      ? true
+      : (widget.props['loop'] == true);
+  final shape = widget.props['shape']?.toString() ?? 'circle';
 
   return ButterflyUIParticleField(
+    key: ValueKey('${widget.controlId}:$_seed:$_play'),
     count: count,
     colors: colors,
     minSize: minSize,
@@ -39,11 +141,12 @@ Widget buildParticleFieldControl(Map<String, Object?> props) {
     direction: direction,
     spread: spread,
     opacity: opacity,
-    seed: seed,
+    seed: _seed,
     loop: loop,
-    play: play,
+    play: _play,
     shape: shape,
   );
+  }
 }
 
 class ButterflyUIParticleField extends StatefulWidget {
