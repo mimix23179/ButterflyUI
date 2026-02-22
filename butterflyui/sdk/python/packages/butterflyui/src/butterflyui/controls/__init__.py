@@ -4,7 +4,6 @@ from .candy_theme import (
     CandyCard,
     CandyColumn,
     CandyContainer,
-    CandyGallery,
     CandyRow,
     CandyStack,
     CandySurface,
@@ -20,6 +19,11 @@ from .customization import (
     Border,
     BorderSide,
     ButtonStyle,
+    ColorPicker,
+    ColorSwatchGrid,
+    ContainerStyle,
+    Gradient,
+    GradientEditor,
 )
 from .data import (
     Card,
@@ -41,10 +45,13 @@ from .data import (
     VirtualList,
 )
 from .display import (
+    EmojiIcon,
+    CodeBlock,
     Chart,
     CodeView,
     DiffView,
     Divider,
+    BarChart,
     EmptyState,
     ErrorState,
     HtmlView,
@@ -60,6 +67,18 @@ from .effects import (
     ParticleField,
     ScanlineOverlay,
     Vignette,
+    ChromaticShift,
+    ConfettiBurst,
+    GlassBlur,
+    GlowEffect,
+    GradientSweep,
+    GrainOverlay,
+    NeonEdge,
+    NoiseDisplacement,
+    NoiseField,
+)
+from .gallery import (
+    Gallery,
 )
 from .inputs import (
     Button,
@@ -67,8 +86,12 @@ from .inputs import (
     ChipGroup,
     Combobox,
     DatePicker,
+    DateRange,
     DateRangePicker,
+    DateSelect,
+    DateSpan,
     DirectoryPicker,
+    Dropdown,
     FilePicker,
     MultiSelect,
     Radio,
@@ -78,11 +101,13 @@ from .inputs import (
     Switch,
     TagFilterBar,
     TextField,
+    EmojiPicker,
 )
 from .interaction import KeyListener, ShortcutMap
 from .layout import (
     Box,
     Column,
+    Container,
     DockLayout,
     Expanded,
     InspectorPanel,
@@ -97,6 +122,7 @@ from .layout import (
 )
 from .navigation import (
     AppBar,
+    BreadcrumbBar,
     Breadcrumbs,
     CommandItem,
     CommandPalette,
@@ -109,6 +135,8 @@ from .navigation import (
     Tabs,
 )
 from .productivity import (
+    Chat,
+    ChatBubble,
     ChatMessage,
     ChatThread,
     CodeEditor,
@@ -126,6 +154,10 @@ from .productivity import (
     TerminalTabStrip,
     ValidationSummary,
     WorkspaceTree,
+    AutoForm,
+)
+from .skins import (
+    Skins,
 )
 from .overlay import (
     ContextMenu,
@@ -136,9 +168,11 @@ from .overlay import (
     Toast,
     ToastHost,
     Tooltip,
+    Splash,
 )
 from .shell import (
     AnimationAsset,
+    DragRegion,
     Launcher,
     OverlayHost,
     PageScene,
@@ -168,7 +202,6 @@ __all__ = [
     "CandyCard",
     "CandyColumn",
     "CandyContainer",
-    "CandyGallery",
     "CandyRow",
     "CandyStack",
     "CandySurface",
@@ -196,6 +229,7 @@ __all__ = [
     "DirectoryPicker",
     "FileBrowser",
     "GridView",
+    "Gallery",
     "HtmlView",
     "Icon",
     "Image",
@@ -219,6 +253,7 @@ __all__ = [
     "Breadcrumbs",
     "StatusBar",
     "CommandPalette",
+    "Splash",
     "CommandItem",
     "CodeEditor",
     "Terminal",
@@ -258,6 +293,7 @@ __all__ = [
     "ProgressTimeline",
     "Skeleton",
     "SkeletonLoader",
+    "Skins",
     "TagFilterBar",
     "TaskList",
     "TreeNode",
@@ -276,6 +312,16 @@ __all__ = [
     "Tooltip",
     "RichTextEditor",
     "Vignette",
+    "ColorPicker",
+    "ColorSwatchGrid",
+    "ContainerStyle",
+    "Gradient",
+    "GradientEditor",
+    "ChromaticShift",
+    "ConfettiBurst",
+    "GlassBlur",
+    "GlowEffect",
+    "GradientSweep",
     "WebView",
     "WindowDragRegion",
     "WindowFrame",
@@ -283,4 +329,22 @@ __all__ = [
     "Wrap",
     "AnimationAsset",
     "Component",
+    "Chat",
+    "ChatBubble",
+    "DateRange",
+    "DateSelect",
+    "DateSpan",
+    "Dropdown",
+    "Container",
+    "DragRegion",
+    "EmojiIcon",
+    "CodeBlock",
+    "BarChart",
+    "GrainOverlay",
+    "NeonEdge",
+    "NoiseDisplacement",
+    "NoiseField",
+    "EmojiPicker",
+    "BreadcrumbBar",
+    "AutoForm",
 ]

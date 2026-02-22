@@ -18,6 +18,9 @@ import 'controls/customization/border.dart';
 import 'controls/customization/border_side.dart';
 import 'controls/customization/button_style.dart';
 import 'controls/customization/candy.dart';
+import 'controls/customization/color_tools.dart';
+import 'controls/customization/gallery.dart';
+import 'controls/customization/skins.dart';
 import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/code_view.dart';
@@ -40,7 +43,9 @@ import 'controls/productivity/terminal_tab_strip.dart';
 import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/particle_field.dart';
+import 'controls/effects/noise_fx.dart';
 import 'controls/effects/scanline_overlay.dart';
+import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
 import 'controls/feedback/progress_indicator.dart';
 import 'controls/feedback/progress_timeline.dart';
@@ -53,6 +58,7 @@ import 'controls/inputs/combobox.dart';
 import 'controls/inputs/date_picker.dart';
 import 'controls/inputs/date_range_picker.dart';
 import 'controls/inputs/file_picker.dart';
+import 'controls/inputs/emoji_picker.dart';
 import 'controls/inputs/form.dart';
 import 'controls/inputs/multi_select.dart';
 import 'controls/inputs/radio.dart';
@@ -105,6 +111,7 @@ import 'controls/overlay/portal.dart';
 import 'controls/overlay/popover.dart';
 import 'controls/overlay/notification_center.dart';
 import 'controls/overlay/slide_panel.dart';
+import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
 import 'style/style_pack.dart';
 import 'style/control_style_resolver.dart';
@@ -292,12 +299,27 @@ class ControlRenderer {
       case 'candy_container':
         return buildCandySurfaceControl(props, rawChildren, context.buildChild);
 
-      case 'candy_gallery':
-        return buildCandyGalleryControl(
+      case 'gallery':
+        return buildGalleryFamilyControl(
+          type,
           controlId,
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'skins':
+        return buildSkinsFamilyControl(
+          type,
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -545,7 +567,6 @@ class ControlRenderer {
 
       case 'empty_state':
       case 'empty_state_view':
-      case 'gallery_empty_state':
         return buildEmptyStateControl(controlId, props, context.sendEvent);
 
       case 'error_state':
@@ -556,6 +577,9 @@ class ControlRenderer {
           final iconData = _parseIconData(props['icon']) ?? Icons.help_outline;
           return buildIconControl(iconData, props);
         }
+
+      case 'emoji_icon':
+        return buildEmojiIconControl(controlId, props, context.sendEvent);
 
       case 'image':
         return buildImageControl(props, rawChildren, context.buildChild);
@@ -626,7 +650,6 @@ class ControlRenderer {
 
       case 'search_bar':
       case 'smart_search_bar':
-      case 'gallery_search_bar':
         return buildSearchBarControl(controlId, props, context.sendEvent);
 
       case 'checkbox':
@@ -736,9 +759,28 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'emoji_picker':
+        return buildEmojiPickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'form':
-      case 'auto_form':
         return buildFormControl(props, rawChildren, context.buildChild);
+
+      case 'auto_form':
+        return buildAutoFormControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'form_field':
         return buildFormFieldControl(props, rawChildren, context.buildChild);
@@ -795,6 +837,16 @@ class ControlRenderer {
             sendEvent: context.sendEvent,
           );
         }
+
+      case 'splash':
+        return buildSplashControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'popover':
         {
@@ -932,7 +984,6 @@ class ControlRenderer {
         );
 
       case 'skeleton_loader':
-      case 'gallery_loading_skeleton':
         return buildSkeletonLoaderControl(
           controlId,
           props,
@@ -1469,6 +1520,39 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'color_picker':
+        return buildColorPickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'color_swatch_grid':
+        return buildColorSwatchGridControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'container_style':
+        return buildContainerStyleControl(props, rawChildren, context.buildChild);
+
+      case 'gradient':
+        return buildGradientControl(props, rawChildren, context.buildChild);
+
+      case 'gradient_editor':
+        return buildGradientEditorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'particle_field':
         return buildParticleFieldControl(
           controlId,
@@ -1496,6 +1580,66 @@ class ControlRenderer {
           defaultColor: defaultText.withOpacity(0.9),
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
+        );
+
+      case 'glow_effect':
+        return buildGlowEffectControl(props, firstChildOrEmpty());
+
+      case 'glass_blur':
+        return buildGlassBlurControl(props, firstChildOrEmpty());
+
+      case 'chromatic_shift':
+        return buildChromaticShiftControl(props, firstChildOrEmpty());
+
+      case 'neon_edge':
+        return buildNeonEdgeControl(props, firstChildOrEmpty());
+
+      case 'grain_overlay':
+        return buildGrainOverlayControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'noise_displacement':
+        return buildNoiseDisplacementControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'noise_field':
+        return buildNoiseFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'gradient_sweep':
+        return buildGradientSweepControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'confetti_burst':
+        return buildConfettiBurstControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'terminal':

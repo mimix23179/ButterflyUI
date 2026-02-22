@@ -9,6 +9,7 @@ __all__ = [
     "PageControl",
     "Surface",
     "Box",
+    "Container",
     "Row",
     "Column",
     "Stack",
@@ -94,6 +95,53 @@ class Box(Component):
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class Container(Component):
+    control_type = "container"
+
+    def __init__(
+        self,
+        *children: Any,
+        width: Any | None = None,
+        height: Any | None = None,
+        padding: Any | None = None,
+        margin: Any | None = None,
+        alignment: Any | None = None,
+        bgcolor: Any | None = None,
+        border_color: Any | None = None,
+        border_width: float | None = None,
+        radius: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            width=width,
+            height=height,
+            padding=padding,
+            margin=margin,
+            alignment=alignment,
+            bgcolor=bgcolor,
+            border_color=border_color,
+            border_width=border_width,
+            radius=radius,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Row(Component):

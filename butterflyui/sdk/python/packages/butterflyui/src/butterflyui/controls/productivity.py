@@ -6,6 +6,8 @@ from typing import Any
 from ._shared import Component, merge_props
 
 __all__ = [
+    "Chat",
+    "ChatBubble",
     "CodeEditor",
     "Terminal",
     "TerminalHost",
@@ -21,6 +23,7 @@ __all__ = [
     "MessageComposer",
     "PromptComposer",
     "Form",
+    "AutoForm",
     "FormField",
     "ValidationSummary",
 ]
@@ -440,6 +443,7 @@ class ChatThread(Component):
         spacing: float | None = None,
         reverse: bool | None = None,
         scrollable: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -451,9 +455,19 @@ class ChatThread(Component):
             spacing=spacing,
             reverse=reverse,
             scrollable=scrollable,
+            events=events,
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_messages(self, session: Any, messages: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_messages", {"messages": messages})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class ChatMessage(Component):
@@ -466,6 +480,7 @@ class ChatMessage(Component):
         role: str | None = None,
         name: str | None = None,
         clickable: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -478,9 +493,78 @@ class ChatMessage(Component):
             role=role,
             name=name,
             clickable=clickable,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Chat(ChatThread):
+    control_type = "chat"
+
+    def __init__(
+        self,
+        *children: Any,
+        messages: list[Any] | None = None,
+        spacing: float | None = None,
+        reverse: bool | None = None,
+        scrollable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            *children,
+            messages=messages,
+            spacing=spacing,
+            reverse=reverse,
+            scrollable=scrollable,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class ChatBubble(ChatMessage):
+    control_type = "chat_bubble"
+
+    def __init__(
+        self,
+        text: str | None = None,
+        *,
+        role: str | None = None,
+        name: str | None = None,
+        clickable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            text=text,
+            role=role,
+            name=name,
+            clickable=clickable,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class MessageComposer(Component):
@@ -593,6 +677,53 @@ class Form(Component):
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class AutoForm(Component):
+    control_type = "auto_form"
+
+    def __init__(
+        self,
+        *children: Any,
+        schema: Mapping[str, Any] | None = None,
+        fields: list[Mapping[str, Any]] | None = None,
+        values: Mapping[str, Any] | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        submit_label: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            schema=schema,
+            fields=fields,
+            values=dict(values) if values is not None else None,
+            title=title,
+            description=description,
+            submit_label=submit_label,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_values(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_values", {})
+
+    def set_values(self, session: Any, values: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_values", {"values": dict(values)})
+
+    def validate(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "validate", {})
+
+    def submit(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "submit", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class FormField(Component):

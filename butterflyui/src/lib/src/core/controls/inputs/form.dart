@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildFormControl(
   Map<String, Object?> props,
@@ -43,6 +44,126 @@ Widget buildFormControl(
       ],
     ),
   );
+}
+
+Widget buildAutoFormControl(
+  String controlId,
+  Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildChild,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  return _AutoFormControl(
+    controlId: controlId,
+    props: props,
+    rawChildren: rawChildren,
+    buildChild: buildChild,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
+
+class _AutoFormControl extends StatefulWidget {
+  const _AutoFormControl({
+    required this.controlId,
+    required this.props,
+    required this.rawChildren,
+    required this.buildChild,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_AutoFormControl> createState() => _AutoFormControlState();
+}
+
+class _AutoFormControlState extends State<_AutoFormControl> {
+  late Map<String, Object?> _values;
+
+  @override
+  void initState() {
+    super.initState();
+    _values = _coerceValues(widget.props['values']);
+    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+  }
+
+  @override
+  void didUpdateWidget(covariant _AutoFormControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.unregisterInvokeHandler(widget.controlId);
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_values':
+        return _values;
+      case 'set_values':
+        setState(() => _values = _coerceValues(args['values']));
+        widget.sendEvent(widget.controlId, 'change', {'values': _values});
+        return _values;
+      case 'validate':
+        return {'valid': true, 'errors': const <Object>[]};
+      case 'submit':
+        widget.sendEvent(widget.controlId, 'submit', {'values': _values});
+        return {'submitted': true, 'values': _values};
+      case 'emit':
+        final event = (args['event'] ?? 'custom').toString();
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{};
+        widget.sendEvent(widget.controlId, event, payload);
+        return true;
+      default:
+        throw UnsupportedError('Unknown auto_form method: $method');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final submitLabel = (widget.props['submit_label'] ?? 'Submit').toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        buildFormControl(widget.props, widget.rawChildren, widget.buildChild),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton(
+            onPressed: () {
+              widget.sendEvent(widget.controlId, 'submit', {'values': _values});
+            },
+            child: Text(submitLabel),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Map<String, Object?> _coerceValues(Object? value) {
+  if (value is Map) return coerceObjectMap(value);
+  return <String, Object?>{};
 }
 
 Widget buildFormFieldControl(

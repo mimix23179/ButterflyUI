@@ -14,6 +14,7 @@ __all__ = [
     "MenuBar",
     "MenuItem",
     "Breadcrumbs",
+    "BreadcrumbBar",
     "StatusBar",
     "CommandPalette",
     "CommandItem",
@@ -231,6 +232,38 @@ class Breadcrumbs(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class BreadcrumbBar(Component):
+    control_type = "breadcrumb_bar"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        separator: str | None = None,
+        max_items: int | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=items,
+            separator=separator,
+            max_items=max_items,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_items", {"items": items})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class StatusBar(Component):

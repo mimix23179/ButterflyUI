@@ -1,4 +1,4 @@
-# Windsurf LLM Playbook: Implementing ButterflyUI Controls
+# Implementation Playbook: Implementing ButterflyUI Controls
 
 This guide is written from the perspective of an LLM agent working inside Windsurf
 (or a similar IDE). It focuses on the end-to-end path for adding new controls so

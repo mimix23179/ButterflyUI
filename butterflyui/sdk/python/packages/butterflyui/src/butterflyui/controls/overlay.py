@@ -6,6 +6,7 @@ from typing import Any
 from ._shared import Component, merge_props
 
 __all__ = [
+    "Splash",
     "Modal",
     "Popover",
     "Portal",
@@ -15,6 +16,48 @@ __all__ = [
     "ToastHost",
     "NotificationCenter",
 ]
+
+
+class Splash(Component):
+    control_type = "splash"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        active: bool | None = None,
+        color: Any | None = None,
+        duration_ms: int | None = None,
+        radius: float | None = None,
+        centered: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            active=active,
+            color=color,
+            duration_ms=duration_ms,
+            radius=radius,
+            centered=centered,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def trigger(self, session: Any, x: float | None = None, y: float | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if x is not None:
+            payload["x"] = x
+        if y is not None:
+            payload["y"] = y
+        return self.invoke(session, "trigger", payload)
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Modal(Component):

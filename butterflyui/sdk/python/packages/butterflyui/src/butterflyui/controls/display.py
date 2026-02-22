@@ -8,12 +8,15 @@ from ._shared import Component, merge_props
 __all__ = [
     "Text",
     "Icon",
+    "EmojiIcon",
     "Image",
     "Divider",
     "MarkdownView",
     "CodeView",
+    "CodeBlock",
     "RichTextEditor",
     "Chart",
+    "BarChart",
     "Sparkline",
     "DiffView",
     "HtmlView",
@@ -54,6 +57,40 @@ class Icon(Component):
     ) -> None:
         merged = merge_props(props, icon=icon, **kwargs)
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class EmojiIcon(Component):
+    control_type = "emoji_icon"
+
+    def __init__(
+        self,
+        emoji: str | None = None,
+        *,
+        label: str | None = None,
+        size: float | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            emoji=emoji,
+            label=label,
+            size=size,
+            color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_emoji(self, session: Any, emoji: str) -> dict[str, Any]:
+        return self.invoke(session, "set_emoji", {"emoji": emoji})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Image(Component):
@@ -139,6 +176,7 @@ class CodeView(Component):
         selectable: bool | None = None,
         wrap: bool | None = None,
         show_line_numbers: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -153,9 +191,52 @@ class CodeView(Component):
             selectable=selectable,
             wrap=wrap,
             show_line_numbers=show_line_numbers,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class CodeBlock(CodeView):
+    control_type = "code_block"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        text: str | None = None,
+        language: str | None = None,
+        selectable: bool | None = None,
+        wrap: bool | None = None,
+        show_line_numbers: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            text=text,
+            language=language,
+            selectable=selectable,
+            wrap=wrap,
+            show_line_numbers=show_line_numbers,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class RichTextEditor(Component):
@@ -233,6 +314,43 @@ class Chart(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class BarChart(Component):
+    control_type = "bar_chart"
+
+    def __init__(
+        self,
+        *,
+        values: list[Any] | None = None,
+        points: list[Any] | None = None,
+        labels: list[str] | None = None,
+        fill: bool | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            values=values if values is not None else points,
+            points=points if points is not None else values,
+            labels=labels,
+            chart_type="bar",
+            fill=fill,
+            color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_data(self, session: Any, values: list[Any], labels: list[str] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "set_data", {"values": values, "labels": labels})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Sparkline(Component):

@@ -18,9 +18,11 @@ src/butterflyui.egg-info/top_level.txt
 src/butterflyui/controls/__init__.py
 src/butterflyui/controls/_shared.py
 src/butterflyui/controls/candy_theme.py
+src/butterflyui/controls/customization.py
 src/butterflyui/controls/data.py
 src/butterflyui/controls/display.py
 src/butterflyui/controls/effects.py
+src/butterflyui/controls/gallery.py
 src/butterflyui/controls/inputs.py
 src/butterflyui/controls/interaction.py
 src/butterflyui/controls/layout.py
@@ -28,6 +30,7 @@ src/butterflyui/controls/navigation.py
 src/butterflyui/controls/overlay.py
 src/butterflyui/controls/productivity.py
 src/butterflyui/controls/shell.py
+src/butterflyui/controls/skins.py
 src/butterflyui/controls/webview.py
 src/butterflyui/core/__init__.py
 src/butterflyui/core/animation.py

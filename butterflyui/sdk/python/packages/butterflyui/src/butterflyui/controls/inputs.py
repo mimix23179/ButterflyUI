@@ -22,6 +22,12 @@ __all__ = [
     "DateRangePicker",
     "MultiSelect",
     "Combobox",
+    "ComboBox",
+    "Dropdown",
+    "EmojiPicker",
+    "DateSelect",
+    "DateRange",
+    "DateSpan",
 ]
 
 
@@ -411,6 +417,7 @@ class DatePicker(Component):
         min_date: str | None = None,
         max_date: str | None = None,
         enabled: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -424,6 +431,7 @@ class DatePicker(Component):
             min_date=min_date,
             max_date=max_date,
             enabled=enabled,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
@@ -436,6 +444,12 @@ class DatePicker(Component):
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class DateRangePicker(Component):
@@ -451,6 +465,7 @@ class DateRangePicker(Component):
         min_date: str | None = None,
         max_date: str | None = None,
         enabled: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -465,6 +480,7 @@ class DateRangePicker(Component):
             min_date=min_date,
             max_date=max_date,
             enabled=enabled,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
@@ -477,6 +493,17 @@ class DateRangePicker(Component):
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, start: str | None = None, end: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if start is not None:
+            payload["start"] = start
+        if end is not None:
+            payload["end"] = end
+        return self.invoke(session, "set_value", payload)
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class MultiSelect(Component):
@@ -519,6 +546,7 @@ class Combobox(Component):
         hint: str | None = None,
         placeholder: str | None = None,
         enabled: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -532,9 +560,229 @@ class Combobox(Component):
             hint=hint if hint is not None else placeholder,
             placeholder=placeholder,
             enabled=enabled,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ComboBox(Combobox):
+    control_type = "combo_box"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        options: list[Any] | None = None,
+        label: str | None = None,
+        hint: str | None = None,
+        placeholder: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            options=options,
+            label=label,
+            hint=hint,
+            placeholder=placeholder,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class Dropdown(Combobox):
+    control_type = "dropdown"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        options: list[Any] | None = None,
+        label: str | None = None,
+        hint: str | None = None,
+        placeholder: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            options=options,
+            label=label,
+            hint=hint,
+            placeholder=placeholder,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class DateSelect(DatePicker):
+    control_type = "date_select"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        min_date: str | None = None,
+        max_date: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            label=label,
+            placeholder=placeholder,
+            min_date=min_date,
+            max_date=max_date,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class DateRange(DateRangePicker):
+    control_type = "date_range"
+
+    def __init__(
+        self,
+        *,
+        start: str | None = None,
+        end: str | None = None,
+        label: str | None = None,
+        placeholder: str | None = None,
+        min_date: str | None = None,
+        max_date: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            start=start,
+            end=end,
+            label=label,
+            placeholder=placeholder,
+            min_date=min_date,
+            max_date=max_date,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class DateSpan(DateRangePicker):
+    control_type = "date_span"
+
+    def __init__(
+        self,
+        *,
+        start: str | None = None,
+        end: str | None = None,
+        label: str | None = None,
+        placeholder: str | None = None,
+        min_date: str | None = None,
+        max_date: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            start=start,
+            end=end,
+            label=label,
+            placeholder=placeholder,
+            min_date=min_date,
+            max_date=max_date,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class EmojiPicker(Component):
+    control_type = "emoji_picker"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        categories: list[str] | None = None,
+        recent: list[str] | None = None,
+        skin_tone: str | None = None,
+        show_search: bool | None = None,
+        show_recent: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            categories=categories,
+            recent=recent,
+            skin_tone=skin_tone,
+            show_search=show_search,
+            show_recent=show_recent,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 
