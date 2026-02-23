@@ -28,6 +28,7 @@ __all__ = [
     "LineChart",
     "LinePlot",
     "ArtifactCard",
+    "ResultCard",
     "AttachmentTile",
     "Audio",
     "Canvas",
@@ -35,6 +36,18 @@ __all__ = [
     "ErrorState",
     "Glyph",
     "GlyphButton",
+    "MentionPill",
+    "MessageDivider",
+    "MessageMeta",
+    "ReactionBar",
+    "QuotedMessage",
+    "RatingDisplay",
+    "StatusMark",
+    "Persona",
+    "PiePlot",
+    "TypingIndicator",
+    "VectorView",
+    "Video",
 ]
 
 
@@ -163,6 +176,306 @@ class GlyphButton(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
     def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class MentionPill(Component):
+    control_type = "mention_pill"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        color: Any | None = None,
+        text_color: Any | None = None,
+        clickable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            color=color,
+            text_color=text_color,
+            clickable=clickable,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class MessageDivider(Component):
+    control_type = "message_divider"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        padding: Any | None = None,
+        color: Any | None = None,
+        text_color: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            padding=padding,
+            color=color,
+            text_color=text_color,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class MessageMeta(Component):
+    control_type = "message_meta"
+
+    def __init__(
+        self,
+        *,
+        timestamp: str | None = None,
+        status: str | None = None,
+        edited: bool | None = None,
+        pinned: bool | None = None,
+        align: str | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            timestamp=timestamp,
+            status=status,
+            edited=edited,
+            pinned=pinned,
+            align=align,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ReactionBar(Component):
+    control_type = "reaction_bar"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        selected: list[str] | None = None,
+        max_visible: int | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=[dict(item) for item in (items or [])],
+            selected=selected,
+            max_visible=max_visible,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class QuotedMessage(Component):
+    control_type = "quoted_message"
+
+    def __init__(
+        self,
+        text: str | None = None,
+        *,
+        author: str | None = None,
+        timestamp: str | None = None,
+        compact: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            text=text,
+            author=author,
+            timestamp=timestamp,
+            compact=compact,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class RatingDisplay(Component):
+    control_type = "rating_display"
+
+    def __init__(
+        self,
+        *,
+        value: float | None = None,
+        max: int | None = None,
+        allow_half: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            max=max,
+            allow_half=allow_half,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class Persona(Component):
+    control_type = "persona"
+
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        subtitle: str | None = None,
+        avatar: str | None = None,
+        status: str | None = None,
+        initials: str | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            name=name,
+            subtitle=subtitle,
+            avatar=avatar,
+            status=status,
+            initials=initials,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class StatusMark(Component):
+    control_type = "status_mark"
+
+    def __init__(
+        self,
+        *,
+        label: str | None = None,
+        status: str | None = None,
+        value: str | None = None,
+        icon: str | None = None,
+        dense: bool | None = None,
+        align: str | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            status=status,
+            value=value,
+            icon=icon,
+            dense=dense,
+            align=align,
+            color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_status(self, session: Any, status: str) -> dict[str, Any]:
+        return self.invoke(session, "set_status", {"status": status})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class PiePlot(Component):
+    control_type = "pie_plot"
+
+    def __init__(
+        self,
+        *,
+        values: list[float] | None = None,
+        labels: list[str] | None = None,
+        colors: list[Any] | None = None,
+        donut: bool | None = None,
+        hole: float | None = None,
+        start_angle: float | None = None,
+        clockwise: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            values=values,
+            labels=labels,
+            colors=colors,
+            donut=donut,
+            hole=hole,
+            start_angle=start_angle,
+            clockwise=clockwise,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
@@ -800,6 +1113,40 @@ class ArtifactCard(Component):
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
+class ResultCard(ArtifactCard):
+    control_type = "result_card"
+
+    def __init__(
+        self,
+        *children: Any,
+        title: str | None = None,
+        message: str | None = None,
+        variant: str | None = None,
+        label: str | None = None,
+        action_label: str | None = None,
+        clickable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            *children,
+            title=title,
+            message=message,
+            variant=variant,
+            label=label,
+            action_label=action_label,
+            clickable=clickable,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class AttachmentTile(Component):
     control_type = "attachment_tile"
 
@@ -882,6 +1229,137 @@ class Audio(Component):
 
     def set_volume(self, session: Any, volume: float) -> dict[str, Any]:
         return self.invoke(session, "set_volume", {"volume": float(volume)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Video(Component):
+    control_type = "video"
+
+    def __init__(
+        self,
+        *,
+        src: str | None = None,
+        poster: str | None = None,
+        autoplay: bool | None = None,
+        loop: bool | None = None,
+        muted: bool | None = None,
+        controls: bool | None = None,
+        fit: str | None = None,
+        volume: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            src=src,
+            poster=poster,
+            autoplay=autoplay,
+            loop=loop,
+            muted=muted,
+            controls=controls,
+            fit=fit,
+            volume=volume,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def play(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "play", {})
+
+    def pause(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "pause", {})
+
+    def set_position(self, session: Any, seconds: float) -> dict[str, Any]:
+        return self.invoke(session, "set_position", {"seconds": float(seconds)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TypingIndicator(Component):
+    control_type = "typing_indicator"
+
+    def __init__(
+        self,
+        *,
+        text: str | None = None,
+        count: int | None = None,
+        speed_ms: int | None = None,
+        dot_size: float | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            text=text,
+            count=count,
+            speed_ms=speed_ms,
+            dot_size=dot_size,
+            color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class VectorView(Component):
+    control_type = "vector_view"
+
+    def __init__(
+        self,
+        *,
+        src: str | None = None,
+        data: str | None = None,
+        fit: str | None = None,
+        color: Any | None = None,
+        tint: Any | None = None,
+        opacity: float | None = None,
+        width: float | None = None,
+        height: float | None = None,
+        alignment: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            src=src,
+            data=data,
+            fit=fit,
+            color=color,
+            tint=tint,
+            opacity=opacity,
+            width=width,
+            height=height,
+            alignment=alignment,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

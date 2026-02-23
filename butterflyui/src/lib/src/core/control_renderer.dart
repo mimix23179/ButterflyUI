@@ -27,6 +27,9 @@ import 'controls/customization/history_stack.dart';
 import 'controls/customization/histogram_overlay.dart';
 import 'controls/customization/histogram_view.dart';
 import 'controls/customization/layer_mask_editor.dart';
+import 'controls/customization/ruler_guides.dart';
+import 'controls/customization/rulers_overlay.dart';
+import 'controls/customization/ownership_marker.dart';
 import 'controls/customization/brush_panel.dart';
 import 'controls/customization/color_tools.dart';
 import 'controls/customization/gallery.dart';
@@ -40,6 +43,15 @@ import 'controls/display/download_item.dart';
 import 'controls/display/glyph.dart';
 import 'controls/display/glyph_button.dart';
 import 'controls/display/line_plot.dart';
+import 'controls/display/mention_pill.dart';
+import 'controls/display/message_divider.dart';
+import 'controls/display/message_meta.dart';
+import 'controls/display/outline.dart';
+import 'controls/display/persona.dart';
+import 'controls/display/pie_plot.dart';
+import 'controls/display/quoted_message.dart';
+import 'controls/display/rating_display.dart';
+import 'controls/display/reaction_bar.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
 import 'controls/display/diff_view.dart';
@@ -49,9 +61,13 @@ import 'controls/display/html_view.dart';
 import 'controls/display/icon.dart';
 import 'controls/display/markdown_view.dart';
 import 'controls/display/rich_text_editor.dart';
+import 'controls/display/status_mark.dart';
 import 'controls/display/terminal.dart';
+import 'controls/display/typing_indicator.dart';
+import 'controls/display/vector_view.dart';
 import 'controls/productivity/editor_tab_strip.dart';
 import 'controls/productivity/editor_workspace.dart';
+import 'controls/productivity/file_system.dart';
 import 'controls/productivity/output_panel.dart';
 import 'controls/productivity/problems_panel.dart';
 import 'controls/productivity/terminal_host.dart';
@@ -63,14 +79,26 @@ import 'controls/effects/fold_layer.dart';
 import 'controls/effects/flow_field.dart';
 import 'controls/effects/layer.dart';
 import 'controls/effects/layer_list.dart';
+import 'controls/effects/liquid_morph.dart';
+import 'controls/effects/morphing_border.dart';
+import 'controls/effects/motion.dart';
+import 'controls/effects/parallax.dart';
+import 'controls/effects/pixelate.dart';
+import 'controls/effects/pose.dart';
+import 'controls/effects/ripple_burst.dart';
 import 'controls/effects/particle_field.dart';
 import 'controls/effects/noise_fx.dart';
 import 'controls/effects/scanline_overlay.dart';
+import 'controls/effects/shimmer_shadow.dart';
+import 'controls/effects/stagger.dart';
+import 'controls/effects/tilt_hover.dart';
 import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
 import 'controls/feedback/progress_indicator.dart';
 import 'controls/feedback/progress_timeline.dart';
 import 'controls/feedback/skeleton.dart';
+import 'controls/feedback/timeline.dart';
+import 'controls/feedback/time_travel.dart';
 import 'controls/feedback/toast.dart';
 import 'controls/feedback/tooltip.dart';
 import 'controls/inputs/checkbox.dart';
@@ -89,13 +117,19 @@ import 'controls/inputs/field_group.dart';
 import 'controls/inputs/filter_drawer.dart';
 import 'controls/inputs/icon_picker.dart';
 import 'controls/inputs/keybind_recorder.dart';
+import 'controls/inputs/numeric_field.dart';
+import 'controls/inputs/option.dart';
+import 'controls/inputs/path_field.dart';
 import 'controls/inputs/multi_select.dart';
 import 'controls/inputs/radio.dart';
 import 'controls/inputs/search_bar.dart';
 import 'controls/inputs/select.dart';
 import 'controls/inputs/slider.dart';
+import 'controls/inputs/span_slider.dart';
 import 'controls/inputs/switch.dart';
 import 'controls/inputs/text_field.dart';
+import 'controls/inputs/text_field_style.dart';
+import 'controls/inputs/time_select.dart';
 import 'controls/interaction/key_listener.dart';
 import 'controls/interaction/cursor.dart';
 import 'controls/interaction/drag_handle.dart';
@@ -104,7 +138,10 @@ import 'controls/interaction/drop_zone.dart';
 import 'controls/interaction/focus_anchor.dart';
 import 'controls/interaction/gesture_area.dart';
 import 'controls/interaction/hover_region.dart';
+import 'controls/interaction/pan_zoom.dart';
+import 'controls/interaction/pressable.dart';
 import 'controls/interaction/shortcut_map.dart';
+import 'controls/interaction/submit_scope.dart';
 import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
 import 'controls/layout/adjustment_panel.dart';
@@ -114,10 +151,19 @@ import 'controls/layout/column.dart';
 import 'controls/layout/container.dart';
 import 'controls/layout/divider.dart';
 import 'controls/layout/page_scene.dart';
+import 'controls/layout/pane_spec.dart';
+import 'controls/layout/resizable_panel.dart';
 import 'controls/layout/row.dart';
+import 'controls/layout/safe_area.dart';
+import 'controls/layout/scene_view.dart';
 import 'controls/layout/scroll_view.dart';
+import 'controls/layout/scrollable_column.dart';
+import 'controls/layout/scrollable_row.dart';
 import 'controls/layout/split_view.dart';
 import 'controls/layout/stack.dart';
+import 'controls/layout/view_stack.dart';
+import 'controls/layout/viewport.dart';
+import 'controls/layout/visibility.dart';
 import 'controls/layout/dock_layout.dart';
 import 'controls/layout/details_pane.dart';
 import 'controls/layout/flex_spacer.dart';
@@ -132,6 +178,12 @@ import 'controls/lists/data_table.dart';
 import 'controls/lists/data_source_view.dart';
 import 'controls/lists/file_browser.dart';
 import 'controls/lists/list_tile.dart';
+import 'controls/lists/queue_list.dart';
+import 'controls/lists/reorderable_list.dart';
+import 'controls/lists/reorderable_tree.dart';
+import 'controls/lists/snap_grid.dart';
+import 'controls/lists/sortable_header.dart';
+import 'controls/lists/sticky_list.dart';
 import 'controls/lists/task_list.dart';
 import 'controls/lists/table.dart';
 import 'controls/lists/tree_view.dart';
@@ -140,6 +192,7 @@ import 'controls/lists/virtual_list.dart';
 import 'controls/media/animation_asset.dart';
 import 'controls/media/audio.dart';
 import 'controls/media/image.dart';
+import 'controls/media/video.dart';
 import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
 import 'controls/navigation/breadcrumbs.dart';
@@ -148,6 +201,10 @@ import 'controls/navigation/crumb_trail.dart';
 import 'controls/navigation/command_palette.dart';
 import 'controls/navigation/launcher.dart';
 import 'controls/navigation/menu_bar.dart';
+import 'controls/navigation/nav_ring.dart';
+import 'controls/navigation/navigator.dart';
+import 'controls/navigation/notice_bar.dart';
+import 'controls/navigation/rail_nav.dart';
 import 'controls/navigation/paginator.dart';
 import 'controls/navigation/router.dart';
 import 'controls/navigation/sidebar.dart';
@@ -157,10 +214,13 @@ import 'controls/navigation/tabs.dart';
 import 'controls/overlay/context_menu.dart';
 import 'controls/overlay/bottom_sheet.dart';
 import 'controls/overlay/modal.dart';
+import 'controls/overlay/overlay.dart';
 import 'controls/overlay/overlay_host.dart';
 import 'controls/overlay/portal.dart';
 import 'controls/overlay/popover.dart';
 import 'controls/overlay/notification_center.dart';
+import 'controls/overlay/preview_surface.dart';
+import 'controls/overlay/progress_overlay.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
@@ -448,6 +508,16 @@ class ControlRenderer {
       case 'stack':
         return buildStackControl(props, rawChildren, context.buildChild);
 
+      case 'view_stack':
+        return buildViewStackControl(
+          controlId,
+          props,
+          children.map(context.buildChild).toList(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'candy_stack':
         return buildCandyStackControl(props, rawChildren, context.buildChild);
 
@@ -474,6 +544,35 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'viewport':
+        return buildViewportControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'visibility':
+        return buildVisibilityControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'resizable_panel':
+        return buildResizablePanelControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -505,6 +604,9 @@ class ControlRenderer {
       case 'dock_pane':
         return buildPaneControl(props, rawChildren, context.buildChild);
 
+      case 'pane_spec':
+        return buildPaneSpecControl(props, rawChildren, context.buildChild);
+
       case 'inspector_panel':
         return buildInspectorPanelControl(
           controlId,
@@ -532,6 +634,42 @@ class ControlRenderer {
 
       case 'scroll_view':
         return buildScrollViewControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'scrollable_column':
+        return buildScrollableColumnControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'scrollable_row':
+        return buildScrollableRowControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'safe_area':
+        return buildSafeAreaControl(props, rawChildren, context.buildChild);
+
+      case 'scene_view':
+        return buildSceneViewControl(
           controlId,
           props,
           rawChildren,
@@ -741,6 +879,35 @@ class ControlRenderer {
       case 'glyph_button':
         return buildGlyphButtonControl(controlId, props, context.sendEvent);
 
+      case 'mention_pill':
+        return buildMentionPillControl(controlId, props, context.sendEvent);
+
+      case 'message_divider':
+        return buildMessageDividerControl(props);
+
+      case 'message_meta':
+        return buildMessageMetaControl(props);
+
+      case 'reaction_bar':
+        return buildReactionBarControl(controlId, props, context.sendEvent);
+
+      case 'quoted_message':
+        return buildQuotedMessageControl(controlId, props, context.sendEvent);
+
+      case 'rating_display':
+        return buildRatingDisplayControl(controlId, props, context.sendEvent);
+
+      case 'outline':
+      case 'symbol_tree':
+      case 'outline_view':
+        return buildOutlineControl(controlId, props, context.sendEvent);
+
+      case 'persona':
+        return buildPersonaControl(controlId, props, context.sendEvent);
+
+      case 'pie_plot':
+        return buildPiePlotControl(controlId, props, context.sendEvent);
+
       case 'image':
         return buildImageControl(props, rawChildren, context.buildChild);
 
@@ -829,6 +996,55 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
+      case 'text_area':
+        return ButterflyUITextField(
+          controlId: controlId,
+          value: props['value']?.toString() ?? '',
+          placeholder: props['placeholder']?.toString(),
+          label: props['label']?.toString(),
+          helperText: props['helper_text']?.toString(),
+          errorText: props['error_text']?.toString(),
+          multiline: true,
+          minLines: coerceOptionalInt(props['min_lines']) ?? 3,
+          maxLines: coerceOptionalInt(props['max_lines']),
+          password: false,
+          enabled: props['enabled'] == null ? true : (props['enabled'] == true),
+          readOnly: props['read_only'] == true,
+          autofocus: props['autofocus'] == true,
+          dense: props['dense'] == true,
+          emitOnChange: props['emit_on_change'] == null
+              ? true
+              : (props['emit_on_change'] == true),
+          debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
+          sendEvent: context.sendEvent,
+        );
+
+      case 'text_field_style':
+        return buildTextFieldStyleControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'numeric_field':
+        return buildNumericFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'path_field':
+        return buildPathFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'search_bar':
       case 'smart_search_bar':
         return buildSearchBarControl(controlId, props, context.sendEvent);
@@ -855,6 +1071,7 @@ class ControlRenderer {
         );
 
       case 'switch':
+      case 'segmented_switch':
         return ButterflyUISwitch(
           controlId: controlId,
           label: props['label']?.toString(),
@@ -890,6 +1107,15 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
+      case 'span_slider':
+        return buildSpanSliderControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'count_stepper':
         return buildCountStepperControl(
           controlId,
@@ -900,6 +1126,7 @@ class ControlRenderer {
         );
 
       case 'select':
+      case 'segment_bar':
         return ButterflyUISelect(
           controlId: controlId,
           options: coerceOptionList(props['options'] ?? props['items']),
@@ -911,6 +1138,10 @@ class ControlRenderer {
           hint: props['hint']?.toString() ?? props['placeholder']?.toString(),
           sendEvent: context.sendEvent,
         );
+
+      case 'option':
+      case 'select_option':
+        return buildOptionControl(controlId, props, context.sendEvent);
 
       case 'multi_select':
       case 'multi_pick':
@@ -942,6 +1173,15 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'time_select':
+        return buildTimeSelectControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'chip_group':
       case 'tag_filter_bar':
       case 'filter_chips_bar':
@@ -951,6 +1191,15 @@ class ControlRenderer {
         return buildChipControl(
           controlId,
           props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'tag_chip':
+        return buildChipControl(
+          controlId,
+          <String, Object?>{...props, 'selectable': true},
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -996,6 +1245,17 @@ class ControlRenderer {
 
       case 'form':
         return buildFormControl(props, rawChildren, context.buildChild);
+
+      case 'submit_scope':
+        return buildSubmitScopeControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'auto_form':
         return buildAutoFormControl(
@@ -1063,6 +1323,15 @@ class ControlRenderer {
             sendEvent: context.sendEvent,
           );
         }
+
+      case 'overlay':
+        return buildOverlayControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
 
       case 'bottom_sheet':
         return buildBottomSheetControl(
@@ -1174,6 +1443,7 @@ class ControlRenderer {
         }
 
       case 'toast':
+      case 'snackbar':
         return ButterflyUIToastWidget(
           controlId: controlId,
           message: (props['message'] ?? props['text'] ?? '').toString(),
@@ -1205,6 +1475,23 @@ class ControlRenderer {
           props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'progress_overlay':
+        return buildProgressOverlayControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.sendEvent,
+        );
+
+      case 'preview_surface':
+        return buildPreviewSurfaceControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
           context.sendEvent,
         );
 
@@ -1282,6 +1569,21 @@ class ControlRenderer {
       case 'status_bar':
         return buildStatusBarControl(controlId, props, context.sendEvent);
 
+      case 'status_mark':
+        return buildStatusMarkControl(controlId, props, context.sendEvent);
+
+      case 'navigator':
+        return buildNavigatorControl(controlId, props, context.sendEvent);
+
+      case 'nav_ring':
+        return buildNavRingControl(controlId, props, context.sendEvent);
+
+      case 'rail_nav':
+        return buildRailNavControl(controlId, props, context.sendEvent);
+
+      case 'notice_bar':
+        return buildNoticeBarControl(controlId, props, context.sendEvent);
+
       case 'info_bar':
         return buildInfoBarControl(controlId, props, context.sendEvent);
 
@@ -1340,6 +1642,7 @@ class ControlRenderer {
         );
 
       case 'app_bar':
+      case 'top_bar':
         {
           final leading = props['leading'] is Map
               ? context.buildChild(coerceObjectMap(props['leading'] as Map))
@@ -1379,6 +1682,9 @@ class ControlRenderer {
         }
 
       case 'drawer':
+      case 'slide_panel':
+      case 'side_panel':
+      case 'side_drawer':
         {
           final child = children.isNotEmpty
               ? context.buildChild(children.first)
@@ -1448,13 +1754,61 @@ class ControlRenderer {
       case 'file_browser':
         return buildFileBrowserControl(controlId, props, context.sendEvent);
 
+      case 'file_system':
+        return buildFileSystemControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'task_list':
         return buildTaskListControl(controlId, props, context.sendEvent);
+
+      case 'queue_list':
+        return buildQueueListControl(controlId, props, context.sendEvent);
+
+      case 'reorderable_list':
+        return buildReorderableListControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'reorderable_tree':
+        return buildReorderableTreeControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'progress_timeline':
         return buildProgressTimelineControl(
           controlId,
           props,
+          context.sendEvent,
+        );
+
+      case 'timeline':
+        return buildTimelineControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'time_travel':
+        return buildTimeTravelControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -1477,6 +1831,24 @@ class ControlRenderer {
           context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'snap_grid':
+        return buildSnapGridControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'sticky_list':
+        return buildStickyListControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
           context.sendEvent,
         );
 
@@ -1636,6 +2008,15 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'sortable_header':
+        return buildSortableHeaderControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'download_item':
         return buildDownloadItemControl(
           controlId,
@@ -1684,6 +2065,12 @@ class ControlRenderer {
       case 'animation_asset':
         return buildAnimationAssetControl(props);
 
+      case 'sprite':
+        return buildAnimationAssetControl(<String, Object?>{
+          'kind': 'sprite',
+          ...props,
+        });
+
       case 'key_listener':
         return ButterflyUIKeyListener(
           controlId: controlId,
@@ -1715,6 +2102,24 @@ class ControlRenderer {
 
       case 'hover_region':
         return buildHoverRegionControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'pressable':
+        return buildPressableControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'pan_zoom':
+        return buildPanZoomControl(
           controlId,
           props,
           rawChildren,
@@ -1766,6 +2171,32 @@ class ControlRenderer {
 
       case 'layer_list':
         return buildLayerListControl(props, rawChildren, context.buildChild);
+
+      case 'liquid_morph':
+        return buildLiquidMorphControl(props, rawChildren, context.buildChild);
+
+      case 'morphing_border':
+        return buildMorphingBorderControl(props, rawChildren, context.buildChild);
+
+      case 'motion':
+        return buildMotionControl(props, rawChildren, context.buildChild);
+
+      case 'stagger':
+        return buildStaggerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'parallax':
+        return buildParallaxControl(props, rawChildren, context.buildChild);
+
+      case 'pose':
+        return buildPoseControl(controlId, props, firstChildOrEmpty());
 
       case 'flow_field':
         return buildFlowFieldControl(
@@ -1858,6 +2289,9 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'ownership_marker':
+        return buildOwnershipMarkerControl(controlId, props, context.sendEvent);
+
       case 'layer_mask_editor':
         return buildLayerMaskEditorControl(
           controlId,
@@ -1871,6 +2305,26 @@ class ControlRenderer {
         return buildGuidesManagerControl(
           controlId,
           props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'ruler_guides':
+        return buildRulerGuidesControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'rulers_overlay':
+        return buildRulersOverlayControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -1982,6 +2436,9 @@ class ControlRenderer {
           unregisterInvokeHandler: context.unregisterInvokeHandler,
         );
 
+      case 'pixelate':
+        return buildPixelateControl(controlId, props, firstChildOrEmpty());
+
       case 'vignette':
         return buildVignetteControl(
           controlId,
@@ -2043,8 +2500,53 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'shimmer':
+        return buildShimmerControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
+      case 'shadow_stack':
+        return buildShadowStackControl(props, firstChildOrEmpty());
+
       case 'confetti_burst':
         return buildConfettiBurstControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'ripple_burst':
+        return buildRippleBurstControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'tilt_hover':
+        return buildTiltHoverControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.sendEvent,
+        );
+
+      case 'typing_indicator':
+        return buildTypingIndicatorControl(props);
+
+      case 'vector_view':
+        return buildVectorViewControl(props);
+
+      case 'video':
+        return buildVideoControl(
           controlId,
           props,
           context.registerInvokeHandler,

@@ -15,11 +15,25 @@ __all__ = [
     "GlassBlur",
     "GlowEffect",
     "GradientSweep",
+    "Shimmer",
+    "ShadowStack",
+    "TiltHover",
+    "Timeline",
+    "TimeTravel",
+    "Stagger",
     "GrainOverlay",
     "NeonEdge",
     "NoiseDisplacement",
     "NoiseField",
     "FlowField",
+    "LiquidMorph",
+    "MorphingBorder",
+    "Motion",
+    "Parallax",
+    "PanZoom",
+    "Pose",
+    "Pixelate",
+    "RippleBurst",
     "ParticleField",
     "ScanlineOverlay",
     "Vignette",
@@ -89,6 +103,440 @@ class FoldLayer(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class LiquidMorph(Component):
+    control_type = "liquid_morph"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        min_radius: float | None = None,
+        max_radius: float | None = None,
+        duration_ms: int | None = None,
+        animate: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            min_radius=min_radius,
+            max_radius=max_radius,
+            duration_ms=duration_ms,
+            animate=animate,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class MorphingBorder(Component):
+    control_type = "morphing_border"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        min_radius: float | None = None,
+        max_radius: float | None = None,
+        duration_ms: int | None = None,
+        animate: bool | None = None,
+        color: Any | None = None,
+        width: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            min_radius=min_radius,
+            max_radius=max_radius,
+            duration_ms=duration_ms,
+            animate=animate,
+            color=color,
+            width=width,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class Motion(Component):
+    control_type = "motion"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        motion: Any | None = None,
+        from_: Mapping[str, Any] | None = None,
+        to: Mapping[str, Any] | None = None,
+        duration_ms: int | None = None,
+        curve: str | None = None,
+        play: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            motion=motion,
+            **({"from": dict(from_)} if from_ is not None else {}),
+            to=dict(to) if to is not None else None,
+            duration_ms=duration_ms,
+            curve=curve,
+            play=play,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_play(self, session: Any, play: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_play", {"play": play})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class Stagger(Component):
+    control_type = "stagger"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        stagger_ms: int | None = None,
+        stagger: int | None = None,
+        direction: str | None = None,
+        play: bool | None = None,
+        duration_ms: int | None = None,
+        curve: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            stagger_ms=stagger_ms,
+            stagger=stagger,
+            direction=direction,
+            play=play,
+            duration_ms=duration_ms,
+            curve=curve,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_play(self, session: Any, play: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_play", {"play": play})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TiltHover(Component):
+    control_type = "tilt_hover"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        max_tilt: float | None = None,
+        perspective: float | None = None,
+        reset_on_exit: bool | None = None,
+        scale: float | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            max_tilt=max_tilt,
+            perspective=perspective,
+            reset_on_exit=reset_on_exit,
+            scale=scale,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Timeline(Component):
+    control_type = "timeline"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        tracks: list[Mapping[str, Any]] | None = None,
+        direction: str | None = None,
+        spacing: float | None = None,
+        autoplay: bool | None = None,
+        play: bool | None = None,
+        duration_ms: int | None = None,
+        delay_ms: int | None = None,
+        repeat: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            tracks=[dict(track) for track in (tracks or [])],
+            direction=direction,
+            spacing=spacing,
+            autoplay=autoplay,
+            play=play,
+            duration_ms=duration_ms,
+            delay_ms=delay_ms,
+            repeat=repeat,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_play(self, session: Any, play: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_play", {"play": play})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TimeTravel(Component):
+    control_type = "time_travel"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        min: float | int | None = None,
+        max: float | int | None = None,
+        value: float | int | None = None,
+        step: float | int | None = None,
+        playing: bool | None = None,
+        speed: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            min=min,
+            max=max,
+            value=value,
+            step=step,
+            playing=playing,
+            speed=speed,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_value(self, session: Any, value: float | int) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def set_playing(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_playing", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Parallax(Component):
+    control_type = "parallax"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        max_offset: float | None = None,
+        reset_on_exit: bool | None = None,
+        depths: list[float] | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            max_offset=max_offset,
+            reset_on_exit=reset_on_exit,
+            depths=depths,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class PanZoom(Component):
+    control_type = "pan_zoom"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        enabled: bool | None = None,
+        scale: float | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        min_scale: float | None = None,
+        max_scale: float | None = None,
+        boundary_margin: Any | None = None,
+        pan_enabled: bool | None = None,
+        zoom_enabled: bool | None = None,
+        clip: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            enabled=enabled,
+            scale=scale,
+            x=x,
+            y=y,
+            min_scale=min_scale,
+            max_scale=max_scale,
+            boundary_margin=boundary_margin,
+            pan_enabled=pan_enabled,
+            zoom_enabled=zoom_enabled,
+            clip=clip,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_transform(self, session: Any, *, scale: float | None = None, x: float | None = None, y: float | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if scale is not None:
+            payload["scale"] = scale
+        if x is not None:
+            payload["x"] = x
+        if y is not None:
+            payload["y"] = y
+        return self.invoke(session, "set_transform", payload)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class Pose(Component):
+    control_type = "pose"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        scale: float | None = None,
+        rotate: float | None = None,
+        opacity: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            x=x,
+            y=y,
+            z=z,
+            scale=scale,
+            rotate=rotate,
+            opacity=opacity,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class Pixelate(Component):
+    control_type = "pixelate"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        amount: float | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            amount=amount,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class Layer(Component):
@@ -429,6 +877,46 @@ class ConfettiBurst(Component):
         return self.invoke(session, "burst", {})
 
 
+class RippleBurst(Component):
+    control_type = "ripple_burst"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        color: Any | None = None,
+        count: int | None = None,
+        duration_ms: int | None = None,
+        max_radius: float | None = None,
+        center: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            color=color,
+            count=count,
+            duration_ms=duration_ms,
+            max_radius=max_radius,
+            center=center,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def burst(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "burst", {"payload": dict(payload or {})})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class ChromaticShift(Component):
     control_type = "chromatic_shift"
 
@@ -536,6 +1024,66 @@ class GrainOverlay(_EventfulEffect):
             density=density,
             seed=seed,
             color=color,
+            **kwargs,
+        )
+
+
+class Shimmer(_EventfulEffect):
+    control_type = "shimmer"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        duration_ms: int | None = None,
+        angle: float | None = None,
+        opacity: float | None = None,
+        base_color: Any | None = None,
+        highlight_color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            duration_ms=duration_ms,
+            angle=angle,
+            opacity=opacity,
+            base_color=base_color,
+            highlight_color=highlight_color,
+            **kwargs,
+        )
+
+
+class ShadowStack(_EventfulEffect):
+    control_type = "shadow_stack"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        shadows: list[Mapping[str, Any]] | None = None,
+        radius: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            shadows=[dict(shadow) for shadow in (shadows or [])],
+            radius=radius,
             **kwargs,
         )
 

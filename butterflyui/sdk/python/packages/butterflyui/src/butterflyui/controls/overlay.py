@@ -6,6 +6,7 @@ from typing import Any
 from ._shared import Component, merge_props
 
 __all__ = [
+    "Overlay",
     "Splash",
     "Modal",
     "Popover",
@@ -14,10 +15,53 @@ __all__ = [
     "ContextMenu",
     "Tooltip",
     "Toast",
+    "Snackbar",
     "ToastHost",
+    "SlidePanel",
+    "SidePanel",
     "NotificationCenter",
     "NotificationHost",
+    "ProgressOverlay",
+    "PreviewSurface",
 ]
+
+
+class Overlay(Component):
+    control_type = "overlay"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        open: bool | None = None,
+        dismissible: bool | None = None,
+        alignment: Any | None = None,
+        scrim_color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            open=open,
+            dismissible=dismissible,
+            alignment=alignment,
+            scrim_color=scrim_color,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class Splash(Component):
@@ -60,6 +104,75 @@ class Splash(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ProgressOverlay(Component):
+    control_type = "progress_overlay"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        open: bool | None = None,
+        progress: float | None = None,
+        indeterminate: bool | None = None,
+        label: str | None = None,
+        cancellable: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            open=open,
+            progress=progress,
+            indeterminate=indeterminate,
+            label=label,
+            cancellable=cancellable,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_progress(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_progress", {"value": float(value)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class PreviewSurface(Component):
+    control_type = "preview_surface"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        source: str | None = None,
+        loading: bool | None = None,
+        title: str | None = None,
+        subtitle: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            source=source,
+            loading=loading,
+            title=title,
+            subtitle=subtitle,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class Modal(Component):
@@ -213,6 +326,80 @@ class BottomSheet(Component):
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
+class SlidePanel(Component):
+    control_type = "slide_panel"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        open: bool | None = None,
+        side: str | None = None,
+        size: float | None = None,
+        dismissible: bool | None = None,
+        scrim_color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            open=open,
+            side=side,
+            size=size,
+            dismissible=dismissible,
+            scrim_color=scrim_color,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class SidePanel(SlidePanel):
+    control_type = "side_panel"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        open: bool | None = None,
+        side: str | None = None,
+        size: float | None = None,
+        dismissible: bool | None = None,
+        scrim_color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            *children,
+            open=open,
+            side=side,
+            size=size,
+            dismissible=dismissible,
+            scrim_color=scrim_color,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class ContextMenu(Component):
     control_type = "context_menu"
 
@@ -289,6 +476,35 @@ class Toast(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class Snackbar(Toast):
+    control_type = "snackbar"
+
+    def __init__(
+        self,
+        message: str | None = None,
+        *,
+        open: bool | None = None,
+        duration_ms: int | None = None,
+        action_label: str | None = None,
+        variant: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            message=message,
+            open=open,
+            duration_ms=duration_ms,
+            action_label=action_label,
+            variant=variant,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class ToastHost(Component):

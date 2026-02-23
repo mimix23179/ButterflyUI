@@ -8,11 +8,14 @@ from ._shared import Component, merge_props
 __all__ = [
     "ListView",
     "GridView",
+    "SnapGrid",
     "VirtualList",
     "VirtualGrid",
+    "StickyList",
     "Card",
     "Table",
     "DataTable",
+    "SortableHeader",
     "DataGrid",
     "DataSourceView",
     "DownloadItem",
@@ -26,6 +29,9 @@ __all__ = [
     "TaskList",
     "ProgressIndicator",
     "Progress",
+    "QueueList",
+    "ReorderableList",
+    "ReorderableTree",
     "Skeleton",
     "SkeletonLoader",
 ]
@@ -129,6 +135,64 @@ class VirtualGrid(Component):
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class SnapGrid(Component):
+    control_type = "snap_grid"
+
+    def __init__(
+        self,
+        *children: Any,
+        show_grid: bool | None = None,
+        spacing: float | None = None,
+        subdivisions: int | None = None,
+        line_color: Any | None = None,
+        major_line_color: Any | None = None,
+        line_width: float | None = None,
+        major_line_width: float | None = None,
+        background: Any | None = None,
+        origin: Any | None = None,
+        snap: bool | None = None,
+        snap_spacing: float | None = None,
+        snap_mode: str | None = None,
+        enabled: bool | None = None,
+        emit_on_hover: bool | None = None,
+        emit_on_press: bool | None = None,
+        emit_on_drag: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            show_grid=show_grid,
+            spacing=spacing,
+            subdivisions=subdivisions,
+            line_color=line_color,
+            major_line_color=major_line_color,
+            line_width=line_width,
+            major_line_width=major_line_width,
+            background=background,
+            origin=origin,
+            snap=snap,
+            snap_spacing=snap_spacing,
+            snap_mode=snap_mode,
+            enabled=enabled,
+            emit_on_hover=emit_on_hover,
+            emit_on_press=emit_on_press,
+            emit_on_drag=emit_on_drag,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Card(Component):
@@ -242,6 +306,46 @@ class DataTable(Component):
 
     def clear_selection(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "clear_selection", {})
+
+
+class SortableHeader(Component):
+    control_type = "sortable_header"
+
+    def __init__(
+        self,
+        *,
+        columns: list[Mapping[str, Any]] | None = None,
+        sort_column: str | None = None,
+        sort_ascending: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            columns=[dict(column) for column in (columns or [])],
+            sort_column=sort_column,
+            sort_ascending=sort_ascending,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_sort(self, session: Any, *, column: str, ascending: bool = True) -> dict[str, Any]:
+        return self.invoke(session, "set_sort", {"column": column, "ascending": ascending})
+
+    def clear_sort(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear_sort", {})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class DataGrid(DataTable):
@@ -670,6 +774,158 @@ class Progress(ProgressIndicator):
 
     def set_value(self, session: Any, value: float) -> dict[str, Any]:
         return self.invoke(session, "set_value", {"value": float(value)})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class QueueList(Component):
+    control_type = "queue_list"
+
+    def __init__(
+        self,
+        *children: Any,
+        items: list[Mapping[str, Any]] | None = None,
+        max_items: int | None = None,
+        dense: bool | None = None,
+        show_progress: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=[dict(item) for item in (items or [])],
+            max_items=max_items,
+            dense=dense,
+            show_progress=show_progress,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class StickyList(Component):
+    control_type = "sticky_list"
+
+    def __init__(
+        self,
+        *children: Any,
+        sections: list[Mapping[str, Any]] | None = None,
+        spacing: float | None = None,
+        padding: Any | None = None,
+        scrollable: bool | None = None,
+        shrink_wrap: bool | None = None,
+        reverse: bool | None = None,
+        cache_extent: float | None = None,
+        header_extent: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            sections=[dict(section) for section in (sections or [])],
+            spacing=spacing,
+            padding=padding,
+            scrollable=scrollable,
+            shrink_wrap=shrink_wrap,
+            reverse=reverse,
+            cache_extent=cache_extent,
+            header_extent=header_extent,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ReorderableList(Component):
+    control_type = "reorderable_list"
+
+    def __init__(
+        self,
+        *children: Any,
+        items: list[Mapping[str, Any]] | None = None,
+        dense: bool | None = None,
+        lock_axis: str | None = None,
+        handle: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=[dict(item) for item in (items or [])],
+            dense=dense,
+            lock_axis=lock_axis,
+            handle=handle,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_items", {"items": [dict(item) for item in items]})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ReorderableTree(Component):
+    control_type = "reorderable_tree"
+
+    def __init__(
+        self,
+        *children: Any,
+        nodes: list[Mapping[str, Any]] | None = None,
+        expanded: list[str] | None = None,
+        selected: list[str] | None = None,
+        dense: bool | None = None,
+        lock_axis: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            nodes=[dict(node) for node in (nodes or [])],
+            expanded=expanded,
+            selected=selected,
+            dense=dense,
+            lock_axis=lock_axis,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_nodes(self, session: Any, nodes: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_nodes", {"nodes": [dict(node) for node in nodes]})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

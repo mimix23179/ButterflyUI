@@ -23,6 +23,9 @@ __all__ = [
     "CropBox",
     "CurveEditor",
     "GuidesManager",
+    "RulerGuides",
+    "RulersOverlay",
+    "SceneView",
     "HistoryStack",
     "HistogramOverlay",
     "HistogramView",
@@ -742,6 +745,130 @@ class GuidesManager(Component):
             "set_guides",
             {"guides_x": [float(v) for v in guides_x], "guides_y": [float(v) for v in guides_y]},
         )
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class RulerGuides(Component):
+    control_type = "ruler_guides"
+
+    def __init__(
+        self,
+        *children: Any,
+        guides_x: list[float] | None = None,
+        guides_y: list[float] | None = None,
+        snap_tolerance: float | None = None,
+        visible: bool | None = None,
+        locked: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            guides_x=guides_x,
+            guides_y=guides_y,
+            snap_tolerance=snap_tolerance,
+            visible=visible,
+            locked=locked,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_guides(self, session: Any, guides_x: list[float], guides_y: list[float]) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_guides",
+            {"guides_x": [float(v) for v in guides_x], "guides_y": [float(v) for v in guides_y]},
+        )
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class RulersOverlay(Component):
+    control_type = "rulers_overlay"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        guides_x: list[float] | None = None,
+        guides_y: list[float] | None = None,
+        show_rulers: bool | None = None,
+        show_grid: bool | None = None,
+        grid_size: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            guides_x=guides_x,
+            guides_y=guides_y,
+            show_rulers=show_rulers,
+            show_grid=show_grid,
+            grid_size=grid_size,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_guides(self, session: Any, guides_x: list[float], guides_y: list[float]) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_guides",
+            {"guides_x": [float(v) for v in guides_x], "guides_y": [float(v) for v in guides_y]},
+        )
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class SceneView(Component):
+    control_type = "scene_view"
+
+    def __init__(
+        self,
+        *children: Any,
+        background: Any | None = None,
+        show_grid: bool | None = None,
+        show_axes: bool | None = None,
+        camera: Mapping[str, Any] | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            background=background,
+            show_grid=show_grid,
+            show_axes=show_axes,
+            camera=dict(camera) if camera is not None else None,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

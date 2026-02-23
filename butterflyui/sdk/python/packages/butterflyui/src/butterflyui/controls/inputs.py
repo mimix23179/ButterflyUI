@@ -9,6 +9,9 @@ __all__ = [
     "Button",
     "AsyncActionButton",
     "TextField",
+    "TextArea",
+    "TextFieldStyle",
+    "NumericField",
     "SearchBar",
     "FilePicker",
     "DirectoryPicker",
@@ -20,6 +23,7 @@ __all__ = [
     "ChipGroup",
     "TagFilterBar",
     "DatePicker",
+    "TimeSelect",
     "DateRangePicker",
     "MultiSelect",
     "Combobox",
@@ -34,6 +38,7 @@ __all__ = [
     "DateSpan",
     "CheckList",
     "Chip",
+    "TagChip",
     "CountStepper",
     "ElevatedButton",
     "IconButton",
@@ -41,6 +46,12 @@ __all__ = [
     "KeybindRecorder",
     "FieldGroup",
     "FilterDrawer",
+    "Option",
+    "SelectOption",
+    "PathField",
+    "SegmentBar",
+    "SegmentedSwitch",
+    "SpanSlider",
 ]
 
 
@@ -147,6 +158,275 @@ class TextField(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class TextArea(Component):
+    control_type = "text_area"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        placeholder: str | None = None,
+        label: str | None = None,
+        min_lines: int | None = None,
+        max_lines: int | None = None,
+        enabled: bool | None = None,
+        read_only: bool | None = None,
+        emit_on_change: bool | None = None,
+        debounce_ms: int | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            placeholder=placeholder,
+            label=label,
+            multiline=True,
+            min_lines=min_lines,
+            max_lines=max_lines,
+            enabled=enabled,
+            read_only=read_only,
+            emit_on_change=emit_on_change,
+            debounce_ms=debounce_ms,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TextFieldStyle(Component):
+    control_type = "text_field_style"
+
+    def __init__(
+        self,
+        *,
+        variant: str | None = None,
+        dense: bool | None = None,
+        filled: bool | None = None,
+        outlined: bool | None = None,
+        radius: float | None = None,
+        border_width: float | None = None,
+        color: Any | None = None,
+        border_color: Any | None = None,
+        hint_color: Any | None = None,
+        label_color: Any | None = None,
+        text_color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            variant=variant,
+            dense=dense,
+            filled=filled,
+            outlined=outlined,
+            radius=radius,
+            border_width=border_width,
+            color=color,
+            border_color=border_color,
+            hint_color=hint_color,
+            label_color=label_color,
+            text_color=text_color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_variant(self, session: Any, variant: str) -> dict[str, Any]:
+        return self.invoke(session, "set_variant", {"variant": variant})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class NumericField(Component):
+    control_type = "numeric_field"
+
+    def __init__(
+        self,
+        value: float | int | None = None,
+        *,
+        min: float | None = None,
+        max: float | None = None,
+        step: float | None = None,
+        decimals: int | None = None,
+        placeholder: str | None = None,
+        label: str | None = None,
+        enabled: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            min=min,
+            max=max,
+            step=step,
+            decimals=decimals,
+            placeholder=placeholder,
+            label=label,
+            enabled=enabled,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: float | int) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Option(Component):
+    control_type = "option"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        value: Any | None = None,
+        description: str | None = None,
+        icon: str | None = None,
+        selected: bool | None = None,
+        enabled: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            value=value,
+            description=description,
+            icon=icon,
+            selected=selected,
+            enabled=enabled,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str = "select", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class SelectOption(Option):
+    control_type = "select_option"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        value: Any | None = None,
+        description: str | None = None,
+        icon: str | None = None,
+        selected: bool | None = None,
+        enabled: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            value=value,
+            description=description,
+            icon=icon,
+            selected=selected,
+            enabled=enabled,
+            dense=dense,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class PathField(Component):
+    control_type = "path_field"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        mode: str | None = None,
+        file_type: str | None = None,
+        extensions: list[str] | None = None,
+        suggested_name: str | None = None,
+        show_browse: bool | None = None,
+        show_clear: bool | None = None,
+        enabled: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            label=label,
+            placeholder=placeholder,
+            mode=mode,
+            file_type=file_type,
+            extensions=extensions,
+            suggested_name=suggested_name,
+            show_browse=show_browse,
+            show_clear=show_clear,
+            enabled=enabled,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class SearchBar(Component):
     control_type = "search_bar"
 
@@ -236,6 +516,31 @@ class Switch(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class SegmentedSwitch(Switch):
+    control_type = "segmented_switch"
+
+    def __init__(
+        self,
+        value: bool | None = None,
+        *,
+        label: str | None = None,
+        inline: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            label=label,
+            inline=inline,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class Radio(Component):
     control_type = "radio"
 
@@ -316,6 +621,35 @@ class Select(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class SegmentBar(Select):
+    control_type = "segment_bar"
+
+    def __init__(
+        self,
+        *,
+        options: list[Any] | None = None,
+        index: int | None = None,
+        value: Any | None = None,
+        label: str | None = None,
+        hint: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            options=options,
+            index=index,
+            value=value,
+            label=label,
+            hint=hint,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class FilePicker(Component):
@@ -581,6 +915,49 @@ class CheckList(Component):
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
+class SpanSlider(Component):
+    control_type = "span_slider"
+
+    def __init__(
+        self,
+        *,
+        start: float | int | None = None,
+        end: float | int | None = None,
+        min: float | int | None = None,
+        max: float | int | None = None,
+        divisions: int | None = None,
+        enabled: bool | None = None,
+        labels: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            start=start,
+            end=end,
+            min=min,
+            max=max,
+            divisions=divisions,
+            enabled=enabled,
+            labels=labels,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, *, start: float | int, end: float | int) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"start": float(start), "end": float(end)})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class Chip(Component):
     control_type = "chip"
 
@@ -607,6 +984,49 @@ class Chip(Component):
             enabled=enabled,
             dismissible=dismissible,
             color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TagChip(Component):
+    control_type = "tag_chip"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        value: Any | None = None,
+        selected: bool | None = None,
+        enabled: bool | None = None,
+        dismissible: bool | None = None,
+        color: Any | None = None,
+        icon: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            value=value,
+            selected=selected,
+            enabled=enabled,
+            dismissible=dismissible,
+            color=color,
+            icon=icon,
             events=events,
             **kwargs,
         )
@@ -711,6 +1131,50 @@ class DatePicker(Component):
 
     def clear(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "clear", {})
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class TimeSelect(Component):
+    control_type = "time_select"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        label: str | None = None,
+        placeholder: str | None = None,
+        minute_step: int | None = None,
+        use_24h: bool | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            label=label,
+            placeholder=placeholder,
+            minute_step=minute_step,
+            use_24h=use_24h,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def open(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "open", {})
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

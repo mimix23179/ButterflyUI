@@ -17,17 +17,54 @@ __all__ = [
     "OutputPanel",
     "EditorTabStrip",
     "WorkspaceTree",
+    "FileSystem",
     "ProblemsPanel",
     "EditorWorkspace",
+    "OwnershipMarker",
     "ChatThread",
     "ChatMessage",
     "MessageComposer",
     "PromptComposer",
     "Form",
     "AutoForm",
+    "SubmitScope",
     "FormField",
     "ValidationSummary",
 ]
+
+
+class OwnershipMarker(Component):
+    control_type = "ownership_marker"
+
+    def __init__(
+        self,
+        *,
+        document_id: str | None = None,
+        items: list[Mapping[str, Any]] | None = None,
+        enabled: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            document_id=document_id,
+            items=[dict(item) for item in (items or [])],
+            enabled=enabled,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class CodeEditor(Component):
@@ -384,6 +421,45 @@ class WorkspaceTree(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class FileSystem(Component):
+    control_type = "file_system"
+
+    def __init__(
+        self,
+        *,
+        root: str | None = None,
+        nodes: list[dict[str, Any]] | None = None,
+        selected_path: str | None = None,
+        show_hidden: bool | None = None,
+        readonly: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            root=root,
+            nodes=nodes,
+            selected_path=selected_path,
+            show_hidden=show_hidden,
+            readonly=readonly,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected_path(self, session: Any, path: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected_path", {"path": path})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class ProblemsPanel(Component):
     control_type = "problems_panel"
 
@@ -707,6 +783,49 @@ class Form(Component):
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class SubmitScope(Component):
+    control_type = "submit_scope"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        enabled: bool | None = None,
+        submit_on_enter: bool | None = None,
+        submit_on_ctrl_enter: bool | None = None,
+        debounce_ms: int | None = None,
+        payload: Mapping[str, Any] | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            enabled=enabled,
+            submit_on_enter=submit_on_enter,
+            submit_on_ctrl_enter=submit_on_ctrl_enter,
+            debounce_ms=debounce_ms,
+            payload=dict(payload) if payload is not None else None,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def submit(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "submit", {"payload": dict(payload or {})})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class AutoForm(Component):

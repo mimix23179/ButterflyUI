@@ -462,6 +462,10 @@ Color? coerceColor(Object? value) {
   return Color(parsed);
 }
 
+Color? parseColor(Object? value) {
+  return coerceColor(value);
+}
+
 Map<String, Object?> coerceObjectMap(Map value) {
   return value.map((k, v) => MapEntry(k.toString(), v));
 }

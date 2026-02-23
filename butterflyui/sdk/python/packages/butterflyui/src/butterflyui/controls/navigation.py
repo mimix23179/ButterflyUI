@@ -9,7 +9,9 @@ __all__ = [
     "Tabs",
     "Sidebar",
     "AppBar",
+    "TopBar",
     "Drawer",
+    "SideDrawer",
     "Paginator",
     "PageNav",
     "PageStepper",
@@ -21,6 +23,12 @@ __all__ = [
     "CrumbTrail",
     "ContextActionBar",
     "StatusBar",
+    "Navigator",
+    "NavRing",
+    "SymbolTree",
+    "RailNav",
+    "NoticeBar",
+    "Outline",
     "CommandPalette",
     "CommandItem",
 ]
@@ -74,6 +82,219 @@ class Sidebar(Component):
         super().__init__(props=merged, style=style, strict=strict)
 
 
+class Navigator(Sidebar):
+    control_type = "navigator"
+
+    def __init__(
+        self,
+        *,
+        sections: list[Mapping[str, Any]] | None = None,
+        items: list[Any] | None = None,
+        selected_id: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            sections=sections,
+            items=items,
+            selected_id=selected_id,
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class NavRing(Component):
+    control_type = "nav_ring"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        selected_id: str | None = None,
+        policy: str | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=[dict(item) for item in (items or [])],
+            selected_id=selected_id,
+            policy=policy,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class RailNav(Component):
+    control_type = "rail_nav"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        selected_id: str | None = None,
+        dense: bool | None = None,
+        extended: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=[dict(item) for item in (items or [])],
+            selected_id=selected_id,
+            dense=dense,
+            extended=extended,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class NoticeBar(Component):
+    control_type = "notice_bar"
+
+    def __init__(
+        self,
+        *,
+        text: str | None = None,
+        variant: str | None = None,
+        icon: str | None = None,
+        dismissible: bool | None = None,
+        action_label: str | None = None,
+        action_id: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            text=text,
+            variant=variant,
+            icon=icon,
+            dismissible=dismissible,
+            action_label=action_label,
+            action_id=action_id,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_text(self, session: Any, text: str) -> dict[str, Any]:
+        return self.invoke(session, "set_text", {"text": text})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Outline(Component):
+    control_type = "outline"
+
+    def __init__(
+        self,
+        *,
+        nodes: list[Mapping[str, Any]] | None = None,
+        expanded: list[str] | None = None,
+        selected_id: str | None = None,
+        dense: bool | None = None,
+        show_icons: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            nodes=[dict(node) for node in (nodes or [])],
+            expanded=expanded,
+            selected_id=selected_id,
+            dense=dense,
+            show_icons=show_icons,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class SymbolTree(Component):
+    control_type = "symbol_tree"
+
+    def __init__(
+        self,
+        *,
+        nodes: list[Mapping[str, Any]] | None = None,
+        expanded: list[str] | None = None,
+        selected_id: str | None = None,
+        dense: bool | None = None,
+        show_icons: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            nodes=[dict(node) for node in (nodes or [])],
+            expanded=expanded,
+            selected_id=selected_id,
+            dense=dense,
+            show_icons=show_icons,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class AppBar(Component):
     control_type = "app_bar"
 
@@ -98,6 +319,49 @@ class AppBar(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class TopBar(Component):
+    control_type = "top_bar"
+
+    def __init__(
+        self,
+        *children: Any,
+        title: str | None = None,
+        subtitle: str | None = None,
+        center_title: bool | None = None,
+        show_search: bool | None = None,
+        search_value: str | None = None,
+        search_placeholder: str | None = None,
+        actions: list[Any] | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            title=title,
+            subtitle=subtitle,
+            center_title=center_title,
+            show_search=show_search,
+            search_value=search_value,
+            search_placeholder=search_placeholder,
+            actions=actions,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_title(self, session: Any, title: str) -> dict[str, Any]:
+        return self.invoke(session, "set_title", {"title": title})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Drawer(Component):
@@ -125,6 +389,35 @@ class Drawer(Component):
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class SideDrawer(Drawer):
+    control_type = "side_drawer"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        open: bool | None = None,
+        side: str | None = None,
+        size: float | None = None,
+        dismissible: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            open=open,
+            side=side,
+            size=size,
+            dismissible=dismissible,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class Paginator(Component):

@@ -15,9 +15,16 @@ __all__ = [
     "Row",
     "Column",
     "Stack",
+    "ViewStack",
+    "Viewport",
+    "Visibility",
     "Wrap",
     "Expanded",
     "ScrollView",
+    "ScrollableColumn",
+    "ScrollableRow",
+    "SafeArea",
+    "ResizablePanel",
     "SplitView",
     "SplitPane",
     "Accordion",
@@ -25,11 +32,13 @@ __all__ = [
     "BoundsProbe",
     "DockLayout",
     "Pane",
+    "PaneSpec",
     "InspectorPanel",
     "Frame",
     "Grid",
     "DetailsPane",
     "FlexSpacer",
+    "Spacer",
 ]
 
 
@@ -126,6 +135,37 @@ class FlexSpacer(Component):
     ) -> None:
         merged = merge_props(props, flex=int(flex), **kwargs)
         super().__init__(props=merged, style=style, strict=strict)
+
+
+class Spacer(Component):
+    control_type = "spacer"
+
+    def __init__(
+        self,
+        *,
+        flex: int = 1,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            flex=int(flex),
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_flex(self, session: Any, flex: int) -> dict[str, Any]:
+        return self.invoke(session, "set_flex", {"flex": int(flex)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Frame(Component):
@@ -447,6 +487,129 @@ class Stack(Component):
         super().__init__(*children, props=merged, style=style, strict=strict)
 
 
+class ViewStack(Component):
+    control_type = "view_stack"
+
+    def __init__(
+        self,
+        *children: Any,
+        index: int | None = None,
+        animate: bool | None = None,
+        duration_ms: int | None = None,
+        keep_alive: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            index=index,
+            animate=animate,
+            duration_ms=duration_ms,
+            keep_alive=keep_alive,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_index(self, session: Any, index: int) -> dict[str, Any]:
+        return self.invoke(session, "set_index", {"index": int(index)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Viewport(Component):
+    control_type = "viewport"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        width: float | None = None,
+        height: float | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        clip: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            width=width,
+            height=height,
+            x=x,
+            y=y,
+            clip=clip,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_offset(self, session: Any, *, x: float, y: float) -> dict[str, Any]:
+        return self.invoke(session, "set_offset", {"x": float(x), "y": float(y)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Visibility(Component):
+    control_type = "visibility"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        visible: bool | None = None,
+        maintain_state: bool | None = None,
+        maintain_size: bool | None = None,
+        maintain_animation: bool | None = None,
+        replacement: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            visible=visible,
+            maintain_state=maintain_state,
+            maintain_size=maintain_size,
+            maintain_animation=maintain_animation,
+            replacement=replacement,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+    def set_visible(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_visible", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class Wrap(Component):
     control_type = "wrap"
 
@@ -571,6 +734,189 @@ class ScrollView(Component):
 
     def scroll_to_end(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "scroll_to_end", {})
+
+
+class ScrollableColumn(Component):
+    control_type = "scrollable_column"
+
+    def __init__(
+        self,
+        *children: Any,
+        spacing: float | None = None,
+        reverse: bool | None = None,
+        content_padding: Any | None = None,
+        initial_offset: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            spacing=spacing,
+            reverse=reverse,
+            content_padding=content_padding,
+            initial_offset=initial_offset,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_scroll_metrics(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_scroll_metrics", {})
+
+    def scroll_to(
+        self,
+        session: Any,
+        offset: float,
+        *,
+        animate: bool = True,
+        duration_ms: int = 250,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "scroll_to",
+            {
+                "offset": offset,
+                "animate": animate,
+                "duration_ms": duration_ms,
+            },
+        )
+
+    def scroll_to_start(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "scroll_to_start", {})
+
+    def scroll_to_end(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "scroll_to_end", {})
+
+
+class ScrollableRow(Component):
+    control_type = "scrollable_row"
+
+    def __init__(
+        self,
+        *children: Any,
+        spacing: float | None = None,
+        reverse: bool | None = None,
+        content_padding: Any | None = None,
+        initial_offset: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            spacing=spacing,
+            reverse=reverse,
+            content_padding=content_padding,
+            initial_offset=initial_offset,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_scroll_metrics(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_scroll_metrics", {})
+
+    def scroll_to(
+        self,
+        session: Any,
+        offset: float,
+        *,
+        animate: bool = True,
+        duration_ms: int = 250,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "scroll_to",
+            {
+                "offset": offset,
+                "animate": animate,
+                "duration_ms": duration_ms,
+            },
+        )
+
+    def scroll_to_start(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "scroll_to_start", {})
+
+    def scroll_to_end(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "scroll_to_end", {})
+
+
+class SafeArea(Component):
+    control_type = "safe_area"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        left: bool | None = None,
+        top: bool | None = None,
+        right: bool | None = None,
+        bottom: bool | None = None,
+        minimum: Any | None = None,
+        maintain_bottom_view_padding: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            left=left,
+            top=top,
+            right=right,
+            bottom=bottom,
+            minimum=minimum,
+            maintain_bottom_view_padding=maintain_bottom_view_padding,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class ResizablePanel(Component):
+    control_type = "resizable_panel"
+
+    def __init__(
+        self,
+        *children: Any,
+        axis: str | None = None,
+        size: float | None = None,
+        min_size: float | None = None,
+        max_size: float | None = None,
+        drag_handle_size: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            axis=axis,
+            size=size,
+            min_size=min_size,
+            max_size=max_size,
+            drag_handle_size=drag_handle_size,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_size(self, session: Any, size: float) -> dict[str, Any]:
+        return self.invoke(session, "set_size", {"size": float(size)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class SplitView(Component):
@@ -815,6 +1161,43 @@ class Pane(Component):
             size=size,
             width=width,
             height=height,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class PaneSpec(Component):
+    control_type = "pane_spec"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        slot: str | None = None,
+        title: str | None = None,
+        size: float | None = None,
+        width: float | None = None,
+        height: float | None = None,
+        min_size: float | None = None,
+        max_size: float | None = None,
+        collapsible: bool | None = None,
+        collapsed: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            slot=slot,
+            title=title,
+            size=size,
+            width=width,
+            height=height,
+            min_size=min_size,
+            max_size=max_size,
+            collapsible=collapsible,
+            collapsed=collapsed,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
