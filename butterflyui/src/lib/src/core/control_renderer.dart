@@ -456,7 +456,6 @@ class ControlRenderer {
 
       case 'gallery':
         return buildGalleryFamilyControl(
-          type,
           controlId,
           props,
           rawChildren,
@@ -468,7 +467,6 @@ class ControlRenderer {
 
       case 'skins':
         return buildSkinsFamilyControl(
-          type,
           controlId,
           props,
           rawChildren,

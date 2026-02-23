@@ -1,11 +1,117 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
+from ..core.schema import ButterflyUIContractError, ensure_valid_props
 from ._shared import Component, merge_props
 
 __all__ = ["Gallery"]
+
+GALLERY_SCHEMA_VERSION = 2
+
+GALLERY_MODULES = {
+    "toolbar",
+    "filter_bar",
+    "grid_layout",
+    "item_actions",
+    "item_badge",
+    "item_meta_row",
+    "item_preview",
+    "item_selectable",
+    "item_tile",
+    "pagination",
+    "section_header",
+    "sort_bar",
+    "empty_state",
+    "loading_skeleton",
+    "search_bar",
+    "fonts",
+    "font_picker",
+    "font_renderer",
+    "audio",
+    "audio_picker",
+    "audio_renderer",
+    "video",
+    "video_picker",
+    "video_renderer",
+    "image",
+    "image_picker",
+    "image_renderer",
+    "document",
+    "document_picker",
+    "document_renderer",
+    "item_drag_handle",
+    "item_drop_target",
+    "item_reorder_handle",
+    "item_selection_checkbox",
+    "item_selection_radio",
+    "item_selection_switch",
+    "apply",
+    "clear",
+    "select_all",
+    "deselect_all",
+    "apply_font",
+    "apply_image",
+    "set_as_wallpaper",
+    "presets",
+    "skins",
+}
+
+GALLERY_STATES = {"idle", "loading", "empty", "ready", "disabled"}
+
+GALLERY_EVENTS = {
+    "change",
+    "select",
+    "select_change",
+    "page_change",
+    "sort_change",
+    "filter_change",
+    "action",
+    "apply",
+    "clear",
+    "select_all",
+    "deselect_all",
+    "apply_font",
+    "apply_image",
+    "set_as_wallpaper",
+    "pick",
+    "drag_handle",
+    "drop_target",
+    "section_action",
+    "font_change",
+}
+
+
+def _normalize_token(value: str | None) -> str:
+    if value is None:
+        return ""
+    return value.strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _normalize_module(value: str | None) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return normalized
+
+
+def _normalize_state(value: str | None) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return normalized
+
+
+def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
+    if values is None:
+        return None
+    out: list[str] = []
+    for entry in values:
+        value = _normalize_token(str(entry))
+        if value and value not in out:
+            out.append(value)
+    return out
 
 
 class Gallery(Component):
@@ -15,53 +121,130 @@ class Gallery(Component):
         self,
         *children: Any,
         items: list[Any] | None = None,
+        module: str | None = None,
+        state: str | None = None,
+        modules: Mapping[str, Any] | None = None,
         spacing: float | None = None,
         run_spacing: float | None = None,
         tile_width: float | None = None,
         tile_height: float | None = None,
         selectable: bool | None = None,
         enabled: bool | None = None,
-        events: list[str] | None = None,
-        gallery_toolbar: Mapping[str, Any] | None = None,
-        gallery_filter_bar: Mapping[str, Any] | None = None,
-        gallery_grid_layout: Mapping[str, Any] | None = None,
-        gallery_item_actions: Mapping[str, Any] | None = None,
-        gallery_item_badge: Mapping[str, Any] | None = None,
-        gallery_item_meta_row: Mapping[str, Any] | None = None,
-        gallery_item_preview: Mapping[str, Any] | None = None,
-        gallery_item_selectable: Mapping[str, Any] | None = None,
-        gallery_item_tile: Mapping[str, Any] | None = None,
-        gallery_pagination: Mapping[str, Any] | None = None,
-        gallery_section_header: Mapping[str, Any] | None = None,
-        gallery_sort_bar: Mapping[str, Any] | None = None,
-        gallery_empty_state: Mapping[str, Any] | None = None,
-        gallery_loading_skeleton: Mapping[str, Any] | None = None,
-        gallery_search_bar: Mapping[str, Any] | None = None,
-        gallery_font_picker: Mapping[str, Any] | None = None,
-        gallery_audio_picker: Mapping[str, Any] | None = None,
-        gallery_video_picker: Mapping[str, Any] | None = None,
-        gallery_image_picker: Mapping[str, Any] | None = None,
-        gallery_item_drag_handle: Mapping[str, Any] | None = None,
-        gallery_item_drop_target: Mapping[str, Any] | None = None,
-        gallery_item_reorder_handle: Mapping[str, Any] | None = None,
-        gallery_item_selection_checkbox: Mapping[str, Any] | None = None,
-        gallery_item_selection_radio: Mapping[str, Any] | None = None,
-        gallery_item_selection_switch: Mapping[str, Any] | None = None,
-        gallery_action: Mapping[str, Any] | None = None,
-        gallery_apply: Mapping[str, Any] | None = None,
-        gallery_clear: Mapping[str, Any] | None = None,
-        gallery_select_all: Mapping[str, Any] | None = None,
-        gallery_deselect_all: Mapping[str, Any] | None = None,
-        gallery_apply_font: Mapping[str, Any] | None = None,
-        gallery_apply_image: Mapping[str, Any] | None = None,
-        gallery_set_as_wallpaper: Mapping[str, Any] | None = None,
+        events: Iterable[str] | None = None,
+        toolbar: Mapping[str, Any] | None = None,
+        filter_bar: Mapping[str, Any] | None = None,
+        grid_layout: Mapping[str, Any] | None = None,
+        item_actions: Mapping[str, Any] | None = None,
+        item_badge: Mapping[str, Any] | None = None,
+        item_meta_row: Mapping[str, Any] | None = None,
+        item_preview: Mapping[str, Any] | None = None,
+        item_selectable: Mapping[str, Any] | None = None,
+        item_tile: Mapping[str, Any] | None = None,
+        pagination: Mapping[str, Any] | None = None,
+        section_header: Mapping[str, Any] | None = None,
+        sort_bar: Mapping[str, Any] | None = None,
+        empty_state: Mapping[str, Any] | None = None,
+        loading_skeleton: Mapping[str, Any] | None = None,
+        search_bar: Mapping[str, Any] | None = None,
+        fonts: Mapping[str, Any] | None = None,
+        font_picker: Mapping[str, Any] | None = None,
+        font_renderer: Mapping[str, Any] | None = None,
+        audio: Mapping[str, Any] | None = None,
+        audio_picker: Mapping[str, Any] | None = None,
+        audio_renderer: Mapping[str, Any] | None = None,
+        video: Mapping[str, Any] | None = None,
+        video_picker: Mapping[str, Any] | None = None,
+        video_renderer: Mapping[str, Any] | None = None,
+        image: Mapping[str, Any] | None = None,
+        image_picker: Mapping[str, Any] | None = None,
+        image_renderer: Mapping[str, Any] | None = None,
+        document: Mapping[str, Any] | None = None,
+        document_picker: Mapping[str, Any] | None = None,
+        document_renderer: Mapping[str, Any] | None = None,
+        item_drag_handle: Mapping[str, Any] | None = None,
+        item_drop_target: Mapping[str, Any] | None = None,
+        item_reorder_handle: Mapping[str, Any] | None = None,
+        item_selection_checkbox: Mapping[str, Any] | None = None,
+        item_selection_radio: Mapping[str, Any] | None = None,
+        item_selection_switch: Mapping[str, Any] | None = None,
+        apply: Mapping[str, Any] | None = None,
+        clear: Mapping[str, Any] | None = None,
+        select_all: Mapping[str, Any] | None = None,
+        deselect_all: Mapping[str, Any] | None = None,
+        apply_font: Mapping[str, Any] | None = None,
+        apply_image: Mapping[str, Any] | None = None,
+        set_as_wallpaper: Mapping[str, Any] | None = None,
+        presets: Mapping[str, Any] | None = None,
+        skins: Mapping[str, Any] | None = None,
+        schema_version: int = GALLERY_SCHEMA_VERSION,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        module_map: dict[str, Any] = {
+            "toolbar": toolbar,
+            "filter_bar": filter_bar,
+            "grid_layout": grid_layout,
+            "item_actions": item_actions,
+            "item_badge": item_badge,
+            "item_meta_row": item_meta_row,
+            "item_preview": item_preview,
+            "item_selectable": item_selectable,
+            "item_tile": item_tile,
+            "pagination": pagination,
+            "section_header": section_header,
+            "sort_bar": sort_bar,
+            "empty_state": empty_state,
+            "loading_skeleton": loading_skeleton,
+            "search_bar": search_bar,
+            "fonts": fonts,
+            "font_picker": font_picker,
+            "font_renderer": font_renderer,
+            "audio": audio,
+            "audio_picker": audio_picker,
+            "audio_renderer": audio_renderer,
+            "video": video,
+            "video_picker": video_picker,
+            "video_renderer": video_renderer,
+            "image": image,
+            "image_picker": image_picker,
+            "image_renderer": image_renderer,
+            "document": document,
+            "document_picker": document_picker,
+            "document_renderer": document_renderer,
+            "item_drag_handle": item_drag_handle,
+            "item_drop_target": item_drop_target,
+            "item_reorder_handle": item_reorder_handle,
+            "item_selection_checkbox": item_selection_checkbox,
+            "item_selection_radio": item_selection_radio,
+            "item_selection_switch": item_selection_switch,
+            "apply": apply,
+            "clear": clear,
+            "select_all": select_all,
+            "deselect_all": deselect_all,
+            "apply_font": apply_font,
+            "apply_image": apply_image,
+            "set_as_wallpaper": set_as_wallpaper,
+            "presets": presets,
+            "skins": skins,
+        }
+
+        merged_modules: dict[str, Any] = {}
+        if isinstance(modules, Mapping):
+            for key, value in modules.items():
+                normalized = _normalize_module(str(key))
+                if normalized and normalized in GALLERY_MODULES and value is not None:
+                    merged_modules[normalized] = value
+        for key, value in module_map.items():
+            if value is not None:
+                merged_modules[key] = value
+
         merged = merge_props(
             props,
+            schema_version=int(schema_version),
+            module=_normalize_module(module),
+            state=_normalize_state(state),
             items=items,
             spacing=spacing,
             run_spacing=run_spacing,
@@ -69,59 +252,79 @@ class Gallery(Component):
             tile_height=tile_height,
             selectable=selectable,
             enabled=enabled,
-            events=events,
-            gallery_toolbar=gallery_toolbar,
-            gallery_filter_bar=gallery_filter_bar,
-            gallery_grid_layout=gallery_grid_layout,
-            gallery_item_actions=gallery_item_actions,
-            gallery_item_badge=gallery_item_badge,
-            gallery_item_meta_row=gallery_item_meta_row,
-            gallery_item_preview=gallery_item_preview,
-            gallery_item_selectable=gallery_item_selectable,
-            gallery_item_tile=gallery_item_tile,
-            gallery_pagination=gallery_pagination,
-            gallery_section_header=gallery_section_header,
-            gallery_sort_bar=gallery_sort_bar,
-            gallery_empty_state=gallery_empty_state,
-            gallery_loading_skeleton=gallery_loading_skeleton,
-            gallery_search_bar=gallery_search_bar,
-            gallery_font_picker=gallery_font_picker,
-            gallery_audio_picker=gallery_audio_picker,
-            gallery_video_picker=gallery_video_picker,
-            gallery_image_picker=gallery_image_picker,
-            gallery_item_drag_handle=gallery_item_drag_handle,
-            gallery_item_drop_target=gallery_item_drop_target,
-            gallery_item_reorder_handle=gallery_item_reorder_handle,
-            gallery_item_selection_checkbox=gallery_item_selection_checkbox,
-            gallery_item_selection_radio=gallery_item_selection_radio,
-            gallery_item_selection_switch=gallery_item_selection_switch,
-            gallery_action=gallery_action,
-            gallery_apply=gallery_apply,
-            gallery_clear=gallery_clear,
-            gallery_select_all=gallery_select_all,
-            gallery_deselect_all=gallery_deselect_all,
-            gallery_apply_font=gallery_apply_font,
-            gallery_apply_image=gallery_apply_image,
-            gallery_set_as_wallpaper=gallery_set_as_wallpaper,
+            events=_normalize_events(events),
+            modules=merged_modules,
+            **merged_modules,
             **kwargs,
         )
+        self._strict_contract = strict
+        self._validate_props(merged, strict=strict)
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+    @staticmethod
+    def _validate_props(props: Mapping[str, Any], *, strict: bool) -> None:
+        try:
+            ensure_valid_props("gallery", props, strict=strict)
+        except ButterflyUIContractError as exc:
+            raise ValueError("\n".join(exc.errors)) from exc
+
+    def set_module(self, session: Any, module: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        normalized = _normalize_module(module)
+        if normalized is None or normalized not in GALLERY_MODULES:
+            return {"ok": False, "error": f"Unknown gallery module '{module}'"}
+        payload_dict = dict(payload or {})
+        self.props["module"] = normalized
+        modules = dict(self.props.get("modules") or {})
+        modules[normalized] = payload_dict
+        self.props["modules"] = modules
+        self.props[normalized] = payload_dict
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_module", {"module": normalized, "payload": payload_dict})
+
+    def set_state(self, session: Any, state: str) -> dict[str, Any]:
+        normalized = _normalize_state(state)
+        if normalized is None or normalized not in GALLERY_STATES:
+            return {"ok": False, "error": f"Unknown gallery state '{state}'"}
+        self.props["state"] = normalized
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_state", {"state": normalized})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
     def set_items(self, session: Any, items: list[Any]) -> dict[str, Any]:
+        self.props["items"] = items
         return self.invoke(session, "set_items", {"items": items})
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        if "module" in props:
+            props["module"] = _normalize_module(props.get("module"))
+        if "state" in props:
+            props["state"] = _normalize_state(props.get("state"))
+        if "events" in props and isinstance(props.get("events"), Iterable):
+            props["events"] = _normalize_events(props.get("events"))
+        if "modules" in props and isinstance(props.get("modules"), Mapping):
+            normalized_modules: dict[str, Any] = {}
+            for key, value in dict(props["modules"]).items():
+                normalized = _normalize_module(str(key))
+                if normalized and normalized in GALLERY_MODULES and value is not None:
+                    normalized_modules[normalized] = value
+            props["modules"] = normalized_modules
+        next_props = dict(self.props)
+        next_props.update({k: v for k, v in props.items() if v is not None})
+        self._validate_props(next_props, strict=self._strict_contract)
+        self.props.update({k: v for k, v in props.items() if v is not None})
         return self.invoke(session, "set_props", {"props": props})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        event_name = _normalize_token(event)
+        if event_name not in GALLERY_EVENTS:
+            return {"ok": False, "error": f"Unknown gallery event '{event}'"}
         return self.invoke(
             session,
             "emit",
             {
-                "event": event,
+                "event": event_name,
                 "payload": dict(payload or {}),
             },
         )

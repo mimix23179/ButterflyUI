@@ -3,8 +3,112 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
+const int _skinsSchemaVersion = 2;
+
+const List<String> _skinsModuleOrder = [
+  'selector',
+  'preset',
+  'editor',
+  'preview',
+  'token_mapper',
+  'effects',
+  'particles',
+  'shaders',
+  'materials',
+  'icons',
+  'fonts',
+  'colors',
+  'background',
+  'border',
+  'shadow',
+  'outline',
+  'animation',
+  'transition',
+  'interaction',
+  'layout',
+  'responsive',
+  'effect_editor',
+  'particle_editor',
+  'shader_editor',
+  'material_editor',
+  'icon_editor',
+  'font_editor',
+  'color_editor',
+  'background_editor',
+  'border_editor',
+  'shadow_editor',
+  'outline_editor',
+  'apply',
+  'clear',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+];
+
+const Set<String> _skinsModules = {
+  'selector',
+  'preset',
+  'editor',
+  'preview',
+  'apply',
+  'clear',
+  'token_mapper',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+  'effects',
+  'particles',
+  'shaders',
+  'materials',
+  'icons',
+  'fonts',
+  'colors',
+  'background',
+  'border',
+  'shadow',
+  'outline',
+  'animation',
+  'transition',
+  'interaction',
+  'layout',
+  'responsive',
+  'effect_editor',
+  'particle_editor',
+  'shader_editor',
+  'material_editor',
+  'icon_editor',
+  'font_editor',
+  'color_editor',
+  'background_editor',
+  'border_editor',
+  'shadow_editor',
+  'outline_editor',
+};
+
+const Set<String> _actionModules = {
+  'apply',
+  'clear',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+};
+
+const Set<String> _skinsStates = {'idle', 'loading', 'ready', 'editing', 'preview', 'disabled'};
+
+const Set<String> _skinsEvents = {
+  'change',
+  'select',
+  'apply',
+  'clear',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+  'state_change',
+  'module_change',
+  'token_map',
+};
+
 Widget buildSkinsFamilyControl(
-  String controlType,
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
@@ -13,10 +117,7 @@ Widget buildSkinsFamilyControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  if (controlType != 'skins') {
-    return const SizedBox.shrink();
-  }
-  return _ButterflyUISkins(
+  return _SkinsControl(
     controlId: controlId,
     props: props,
     rawChildren: rawChildren,
@@ -32,8 +133,8 @@ Set<String> _configuredEvents(Map<String, Object?> props) {
   final out = <String>{};
   if (raw is List) {
     for (final entry in raw) {
-      final value = entry?.toString();
-      if (value != null && value.isNotEmpty) {
+      final value = _norm(entry?.toString() ?? '');
+      if (value.isNotEmpty && _skinsEvents.contains(value)) {
         out.add(value);
       }
     }
@@ -48,108 +149,24 @@ void _emitEvent(
   String event,
   Map<String, Object?> payload,
 ) {
-  final events = _configuredEvents(props);
-  if (events.isNotEmpty && !events.contains(event)) {
+  final eventName = _norm(event);
+  if (!_skinsEvents.contains(eventName)) {
     return;
   }
-  sendEvent(controlId, event, payload);
-}
-
-class _SkinsInvokeHost extends StatefulWidget {
-  const _SkinsInvokeHost({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.registerInvokeHandler,
-    required this.unregisterInvokeHandler,
-    required this.sendEvent,
-    required this.child,
+  final events = _configuredEvents(props);
+  if (events.isNotEmpty && !events.contains(eventName)) {
+    return;
+  }
+  sendEvent(controlId, eventName, {
+    'schema_version': props['schema_version'] ?? _skinsSchemaVersion,
+    'module': props['module'],
+    'state': props['state'],
+    ...payload,
   });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
-  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
-  final ButterflyUISendRuntimeEvent sendEvent;
-  final Widget child;
-
-  @override
-  State<_SkinsInvokeHost> createState() => _SkinsInvokeHostState();
 }
 
-class _SkinsInvokeHostState extends State<_SkinsInvokeHost> {
-  late Map<String, Object?> _runtimeProps = Map<String, Object?>.from(widget.props);
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.controlId.isNotEmpty) {
-      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant _SkinsInvokeHost oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _runtimeProps = Map<String, Object?>.from(widget.props);
-    if (oldWidget.controlId != widget.controlId) {
-      if (oldWidget.controlId.isNotEmpty) {
-        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
-      }
-      if (widget.controlId.isNotEmpty) {
-        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    if (widget.controlId.isNotEmpty) {
-      widget.unregisterInvokeHandler(widget.controlId);
-    }
-    super.dispose();
-  }
-
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
-    switch (method) {
-      case 'get_state':
-        return <String, Object?>{
-          'control_type': widget.controlType,
-          'props': _runtimeProps,
-        };
-      case 'set_props':
-        final incoming = args['props'];
-        if (incoming is Map) {
-          setState(() {
-            _runtimeProps.addAll(coerceObjectMap(incoming));
-          });
-        }
-        return _runtimeProps;
-      case 'emit':
-      case 'trigger':
-        final event = (args['event'] ?? args['name'] ?? method).toString();
-        final payload = args['payload'];
-        _emitEvent(
-          widget.controlId,
-          _runtimeProps,
-          widget.sendEvent,
-          event,
-          payload is Map ? coerceObjectMap(payload) : args,
-        );
-        return true;
-      default:
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, method, args);
-        return true;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
-class _ButterflyUISkins extends StatefulWidget {
-  const _ButterflyUISkins({
+class _SkinsControl extends StatefulWidget {
+  const _SkinsControl({
     required this.controlId,
     required this.props,
     required this.rawChildren,
@@ -168,10 +185,10 @@ class _ButterflyUISkins extends StatefulWidget {
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
-  State<_ButterflyUISkins> createState() => _ButterflyUISkinsState();
+  State<_SkinsControl> createState() => _SkinsControlState();
 }
 
-class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
+class _SkinsControlState extends State<_SkinsControl> {
   late Map<String, Object?> _runtimeProps;
   late List<String> _skins;
   String? _selectedSkin;
@@ -179,7 +196,7 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
   @override
   void initState() {
     super.initState();
-    _runtimeProps = Map<String, Object?>.from(widget.props);
+    _runtimeProps = _normalizeProps(widget.props);
     _skins = _coerceSkins(_runtimeProps['skins'] ?? _runtimeProps['presets']);
     _selectedSkin = _resolveSelected(_runtimeProps, _skins);
     if (widget.controlId.isNotEmpty) {
@@ -188,9 +205,9 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
   }
 
   @override
-  void didUpdateWidget(covariant _ButterflyUISkins oldWidget) {
+  void didUpdateWidget(covariant _SkinsControl oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _runtimeProps = Map<String, Object?>.from(widget.props);
+    _runtimeProps = _normalizeProps(widget.props);
     _skins = _coerceSkins(_runtimeProps['skins'] ?? _runtimeProps['presets']);
     _selectedSkin = _resolveSelected(_runtimeProps, _skins);
     if (oldWidget.controlId != widget.controlId) {
@@ -211,10 +228,23 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
     super.dispose();
   }
 
+  void _setModuleAndPayload(String module, Map<String, Object?> payload) {
+    final modules = _coerceObjectMap(_runtimeProps['modules']);
+    modules[module] = payload;
+    _runtimeProps['modules'] = modules;
+    _runtimeProps[module] = payload;
+    _runtimeProps['module'] = module;
+    _runtimeProps = _normalizeProps(_runtimeProps);
+  }
+
   Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
-    switch (method) {
+    final normalizedMethod = _norm(method);
+    switch (normalizedMethod) {
       case 'get_state':
         return {
+          'schema_version': _runtimeProps['schema_version'],
+          'module': _runtimeProps['module'],
+          'state': _runtimeProps['state'],
           'skins': _skins,
           'selected_skin': _selectedSkin,
           'props': _runtimeProps,
@@ -224,14 +254,47 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
         if (incoming is Map) {
           setState(() {
             _runtimeProps.addAll(coerceObjectMap(incoming));
+            _runtimeProps = _normalizeProps(_runtimeProps);
             _skins = _coerceSkins(_runtimeProps['skins'] ?? _runtimeProps['presets']);
             _selectedSkin = _resolveSelected(_runtimeProps, _skins);
           });
         }
         return _runtimeProps;
+      case 'set_module':
+        {
+          final module = _norm(args['module']?.toString() ?? '');
+          if (!_skinsModules.contains(module)) {
+            return {'ok': false, 'error': 'unknown module: $module'};
+          }
+          final payload = args['payload'];
+          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{};
+          setState(() {
+            _setModuleAndPayload(module, payloadMap);
+          });
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'module_change', {
+            'module': module,
+            'payload': payloadMap,
+          });
+          return {'ok': true, 'module': module};
+        }
+      case 'set_state':
+        {
+          final state = _norm(args['state']?.toString() ?? '');
+          if (!_skinsStates.contains(state)) {
+            return {'ok': false, 'error': 'unknown state: $state'};
+          }
+          setState(() {
+            _runtimeProps['state'] = state;
+          });
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'state_change', {'state': state});
+          return {'ok': true, 'state': state};
+        }
       case 'emit':
       case 'trigger':
-        final event = (args['event'] ?? args['name'] ?? method).toString();
+        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        if (!_skinsEvents.contains(event)) {
+          return {'ok': false, 'error': 'unknown event: $event'};
+        }
         final payload = args['payload'];
         _emitEvent(
           widget.controlId,
@@ -241,7 +304,6 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
           payload is Map ? coerceObjectMap(payload) : args,
         );
         return true;
-      case 'skins_apply':
       case 'apply':
         final skin = (args['skin'] ?? args['value'] ?? _selectedSkin)?.toString();
         if (skin != null && skin.isNotEmpty) {
@@ -250,16 +312,17 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
             if (!_skins.contains(skin)) {
               _skins = <String>[..._skins, skin];
             }
+            _runtimeProps['selected_skin'] = skin;
           });
         }
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'skins_apply', {'skin': _selectedSkin});
+        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'apply', {'skin': _selectedSkin});
         return _selectedSkin;
-      case 'skins_clear':
       case 'clear':
         setState(() {
           _selectedSkin = null;
+          _runtimeProps.remove('selected_skin');
         });
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'skins_clear', {});
+        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'clear', {});
         return true;
       case 'create_skin':
         {
@@ -270,15 +333,22 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
                 _skins = <String>[..._skins, name];
               }
               _selectedSkin = name;
+              _runtimeProps['selected_skin'] = name;
             });
           }
-          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'create_skin', {'name': name, 'payload': args['payload']});
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'create_skin', {
+            'name': name,
+            'payload': args['payload'],
+          });
           return name;
         }
       case 'edit_skin':
         {
           final name = (args['name'] ?? args['skin'] ?? _selectedSkin ?? '').toString();
-          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'edit_skin', {'name': name, 'payload': args['payload']});
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'edit_skin', {
+            'name': name,
+            'payload': args['payload'],
+          });
           return name;
         }
       case 'delete_skin':
@@ -288,106 +358,288 @@ class _ButterflyUISkinsState extends State<_ButterflyUISkins> {
             _skins = _skins.where((entry) => entry != name).toList(growable: false);
             if (_selectedSkin == name) {
               _selectedSkin = _skins.isEmpty ? null : _skins.first;
+              _runtimeProps['selected_skin'] = _selectedSkin;
             }
           });
           _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'delete_skin', {'name': name});
           return true;
         }
       default:
+        if (_skinsModules.contains(normalizedMethod)) {
+          final payload = args['payload'];
+          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{...args};
+          setState(() {
+            _setModuleAndPayload(normalizedMethod, payloadMap);
+          });
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'change', {
+            'module': normalizedMethod,
+            'payload': payloadMap,
+          });
+          return {'ok': true, 'module': normalizedMethod};
+        }
         throw UnsupportedError('Unknown skins method: $method');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sections = <Widget>[];
-    final selector = _sectionProps(_runtimeProps, 'skins_selector');
-    if (selector != null) {
-      sections.add(_SkinsSelector(controlId: widget.controlId, props: selector, sendEvent: widget.sendEvent));
+    final state = (_runtimeProps['state'] ?? 'ready').toString();
+    final currentModule = _norm(_runtimeProps['module']?.toString() ?? '');
+    final availableModules = _availableModules(_runtimeProps, currentModule);
+
+    if (state == 'loading') {
+      return const Center(child: CircularProgressIndicator());
     }
-    final preset = _sectionProps(_runtimeProps, 'skins_preset');
-    if (preset != null) {
-      sections.add(_SkinsPreset(controlId: widget.controlId, props: preset, sendEvent: widget.sendEvent));
-    }
-    final editor = _sectionProps(_runtimeProps, 'skins_editor');
-    if (editor != null) {
-      sections.add(_SkinsEditor(controlId: widget.controlId, props: editor, sendEvent: widget.sendEvent));
-    }
-    final preview = _sectionProps(_runtimeProps, 'skins_preview');
-    if (preview != null) {
-      sections.add(_SkinsPreview(props: preview, rawChildren: widget.rawChildren, buildChild: widget.buildChild));
-    }
-    final tokenMapper = _sectionProps(_runtimeProps, 'skins_token_mapper');
-    if (tokenMapper != null) {
-      sections.add(_SkinsTokenMapper(props: tokenMapper));
+
+    final sectionWidgets = <Widget>[];
+
+    sectionWidgets.add(
+      _Header(
+        state: state,
+        selectedSkin: _selectedSkin,
+        skinCount: _skins.length,
+      ),
+    );
+
+    sectionWidgets.add(
+      _ModuleTabs(
+        modules: availableModules,
+        currentModule: currentModule,
+        onSelected: (module) {
+          setState(() {
+            _runtimeProps['module'] = module;
+          });
+          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'module_change', {
+            'module': module,
+          });
+        },
+      ),
+    );
+
+    for (final module in _skinsModuleOrder) {
+      if (_actionModules.contains(module)) {
+        continue;
+      }
+      final section = _sectionProps(_runtimeProps, module);
+      if (section == null && module != currentModule) {
+        continue;
+      }
+      final payload = section ?? <String, Object?>{'events': _runtimeProps['events']};
+      final widgetForModule = _buildModuleWidget(module, payload);
+      if (widgetForModule != null) {
+        sectionWidgets.add(
+          _ModulePanel(
+            module: module,
+            expanded: module == currentModule,
+            child: widgetForModule,
+          ),
+        );
+      }
     }
 
     final actionWidgets = <Widget>[];
-    for (final key in const <String>['skins_apply', 'skins_clear', 'create_skin', 'edit_skin', 'delete_skin']) {
-      final section = _sectionProps(_runtimeProps, key);
-      if (section != null) {
-        actionWidgets.add(_SkinsActionButton(controlType: key, controlId: widget.controlId, props: section, sendEvent: widget.sendEvent));
+    for (final module in _skinsModuleOrder) {
+      if (!_actionModules.contains(module)) {
+        continue;
       }
+      final section = _sectionProps(_runtimeProps, module);
+      if (section == null && module != currentModule) {
+        continue;
+      }
+      actionWidgets.add(
+        _ActionButton(
+          controlType: module,
+          controlId: widget.controlId,
+          props: section ?? <String, Object?>{'events': _runtimeProps['events']},
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     if (actionWidgets.isNotEmpty) {
-      sections.add(Wrap(spacing: 8, runSpacing: 8, children: actionWidgets));
+      sectionWidgets.add(Wrap(spacing: 8, runSpacing: 8, children: actionWidgets));
     }
 
-    if (sections.isEmpty) {
-      if (_skins.isEmpty) {
-        return const SizedBox.shrink();
-      }
+    if (sectionWidgets.length <= 2 && _skins.isNotEmpty) {
       final selected = _selectedSkin ?? _skins.first;
-      return Row(
-        children: [
-          Expanded(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: _skins.contains(selected) ? selected : _skins.first,
-              items: _skins
-                  .map((skin) => DropdownMenuItem<String>(value: skin, child: Text(skin)))
-                  .toList(growable: false),
-              onChanged: (next) {
-                if (next == null) return;
-                setState(() {
-                  _selectedSkin = next;
-                });
-                _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'select', {'skin': next});
-              },
+      sectionWidgets.add(
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: _skins.contains(selected) ? selected : _skins.first,
+                items: _skins
+                    .map((skin) => DropdownMenuItem<String>(value: skin, child: Text(skin)))
+                    .toList(growable: false),
+                onChanged: (next) {
+                  if (next == null) return;
+                  setState(() {
+                    _selectedSkin = next;
+                    _runtimeProps['selected_skin'] = next;
+                  });
+                  _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'select', {'skin': next});
+                },
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton(
-            onPressed: () {
-              _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'skins_apply', {'skin': _selectedSkin});
-            },
-            child: const Text('Apply'),
-          ),
-        ],
+            const SizedBox(width: 8),
+            FilledButton(
+              onPressed: () {
+                _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'apply', {
+                  'skin': _selectedSkin,
+                });
+              },
+              child: const Text('Apply'),
+            ),
+          ],
+        ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var i = 0; i < sections.length; i++) ...[
+        for (var i = 0; i < sectionWidgets.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),
-          sections[i],
+          sectionWidgets[i],
         ],
       ],
     );
   }
+
+  Widget? _buildModuleWidget(String module, Map<String, Object?> section) {
+    switch (module) {
+      case 'selector':
+        return _Selector(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
+      case 'preset':
+        return _PresetList(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
+      case 'editor':
+        return _Editor(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
+      case 'preview':
+        return _Preview(props: section, rawChildren: widget.rawChildren, buildChild: widget.buildChild);
+      case 'token_mapper':
+        return _TokenMapper(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
+      case 'effect_editor':
+      case 'particle_editor':
+      case 'shader_editor':
+      case 'material_editor':
+      case 'icon_editor':
+      case 'font_editor':
+      case 'color_editor':
+      case 'background_editor':
+      case 'border_editor':
+      case 'shadow_editor':
+      case 'outline_editor':
+        return _NamedEditor(
+          controlId: widget.controlId,
+          module: module,
+          props: section,
+          sendEvent: widget.sendEvent,
+        );
+      default:
+        return _CollectionModule(controlId: widget.controlId, module: module, props: section, sendEvent: widget.sendEvent);
+    }
+  }
+}
+
+Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
+  final out = Map<String, Object?>.from(input);
+  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _skinsSchemaVersion).clamp(1, 9999);
+
+  final module = _norm(out['module']?.toString() ?? '');
+  if (module.isNotEmpty && _skinsModules.contains(module)) {
+    out['module'] = module;
+  } else if (module.isNotEmpty) {
+    out.remove('module');
+  }
+
+  final state = _norm(out['state']?.toString() ?? '');
+  if (state.isNotEmpty && _skinsStates.contains(state)) {
+    out['state'] = state;
+  } else if (state.isNotEmpty) {
+    out.remove('state');
+  }
+
+  final events = out['events'];
+  if (events is List) {
+    out['events'] = events
+        .map((e) => _norm(e?.toString() ?? ''))
+        .where((e) => e.isNotEmpty && _skinsEvents.contains(e))
+        .toSet()
+        .toList(growable: false);
+  }
+
+  final modules = _coerceObjectMap(out['modules']);
+  final normalizedModules = <String, Object?>{};
+  for (final module in _skinsModules) {
+    final topLevel = out[module];
+    if (topLevel is Map) {
+      normalizedModules[module] = coerceObjectMap(topLevel);
+      out[module] = coerceObjectMap(topLevel);
+      continue;
+    }
+    if (topLevel == true) {
+      normalizedModules[module] = <String, Object?>{};
+      out[module] = <String, Object?>{};
+    }
+  }
+  for (final entry in modules.entries) {
+    final normalizedModule = _norm(entry.key);
+    if (!_skinsModules.contains(normalizedModule)) continue;
+    final payload = _coerceObjectMap(entry.value);
+    normalizedModules[normalizedModule] = payload;
+    out[normalizedModule] = payload;
+  }
+  out['modules'] = normalizedModules;
+
+  return out;
 }
 
 Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
-  final section = props[key];
+  final normalized = _norm(key);
+  final section = props[normalized];
   if (section is Map) {
     return <String, Object?>{...coerceObjectMap(section), 'events': props['events']};
   }
   if (section == true) {
     return <String, Object?>{'events': props['events']};
   }
+  final modules = _coerceObjectMap(props['modules']);
+  final fromModules = modules[normalized];
+  if (fromModules is Map) {
+    return <String, Object?>{...coerceObjectMap(fromModules), 'events': props['events']};
+  }
   return null;
+}
+
+List<String> _availableModules(Map<String, Object?> props, String currentModule) {
+  final out = <String>[];
+  for (final module in _skinsModuleOrder) {
+    if (props[module] is Map || props[module] == true) {
+      out.add(module);
+      continue;
+    }
+    final modules = _coerceObjectMap(props['modules']);
+    if (modules[module] is Map) {
+      out.add(module);
+      continue;
+    }
+    if (module == currentModule) {
+      out.add(module);
+    }
+  }
+  if (out.isEmpty) {
+    out.addAll(const ['selector', 'preview', 'editor', 'apply']);
+  }
+  return out;
+}
+
+Map<String, Object?> _coerceObjectMap(Object? value) {
+  if (value is Map) return coerceObjectMap(value);
+  return <String, Object?>{};
+}
+
+String _norm(String value) {
+  return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
 }
 
 List<String> _coerceSkins(Object? value) {
@@ -395,7 +647,7 @@ List<String> _coerceSkins(Object? value) {
   if (value is List) {
     for (final item in value) {
       final name = item is Map
-          ? (item['name'] ?? item['id'] ?? '').toString()
+          ? (item['name'] ?? item['id'] ?? item['value'] ?? '').toString()
           : (item?.toString() ?? '');
       if (name.isNotEmpty && !out.contains(name)) {
         out.add(name);
@@ -416,8 +668,79 @@ String? _resolveSelected(Map<String, Object?> props, List<String> skins) {
   return null;
 }
 
-class _SkinsSelector extends StatelessWidget {
-  const _SkinsSelector({required this.controlId, required this.props, required this.sendEvent});
+class _Header extends StatelessWidget {
+  const _Header({required this.state, required this.selectedSkin, required this.skinCount});
+
+  final String state;
+  final String? selectedSkin;
+  final int skinCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Skins', style: Theme.of(context).textTheme.titleMedium),
+              Text('State: $state', style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ),
+        ),
+        Text('Selected: ${selectedSkin ?? 'none'}'),
+        const SizedBox(width: 8),
+        Text('Total: $skinCount'),
+      ],
+    );
+  }
+}
+
+class _ModuleTabs extends StatelessWidget {
+  const _ModuleTabs({required this.modules, required this.currentModule, required this.onSelected});
+
+  final List<String> modules;
+  final String currentModule;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final module in modules)
+          ChoiceChip(
+            selected: currentModule == module,
+            label: Text(module.replaceAll('_', ' ')),
+            onSelected: (_) => onSelected(module),
+          ),
+      ],
+    );
+  }
+}
+
+class _ModulePanel extends StatelessWidget {
+  const _ModulePanel({required this.module, required this.expanded, required this.child});
+
+  final String module;
+  final bool expanded;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      key: ValueKey<String>('skins_module_$module'),
+      initiallyExpanded: expanded,
+      title: Text(module.replaceAll('_', ' ')),
+      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      children: [child],
+    );
+  }
+}
+
+class _Selector extends StatelessWidget {
+  const _Selector({required this.controlId, required this.props, required this.sendEvent});
 
   final String controlId;
   final Map<String, Object?> props;
@@ -443,8 +766,8 @@ class _SkinsSelector extends StatelessWidget {
   }
 }
 
-class _SkinsPreset extends StatelessWidget {
-  const _SkinsPreset({required this.controlId, required this.props, required this.sendEvent});
+class _PresetList extends StatelessWidget {
+  const _PresetList({required this.controlId, required this.props, required this.sendEvent});
 
   final String controlId;
   final Map<String, Object?> props;
@@ -452,26 +775,40 @@ class _SkinsPreset extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = (props['label'] ?? props['name'] ?? 'Preset').toString();
-    return OutlinedButton(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {'skin': label}),
-      child: Text(label),
+    final presets = _coerceSkins(props['presets'] ?? props['items'] ?? props['options']);
+    if (presets.isEmpty) {
+      final label = (props['label'] ?? props['name'] ?? 'Preset').toString();
+      return OutlinedButton(
+        onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {'skin': label}),
+        child: Text(label),
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final preset in presets)
+          OutlinedButton(
+            onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {'skin': preset}),
+            child: Text(preset),
+          ),
+      ],
     );
   }
 }
 
-class _SkinsEditor extends StatefulWidget {
-  const _SkinsEditor({required this.controlId, required this.props, required this.sendEvent});
+class _Editor extends StatefulWidget {
+  const _Editor({required this.controlId, required this.props, required this.sendEvent});
 
   final String controlId;
   final Map<String, Object?> props;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
-  State<_SkinsEditor> createState() => _SkinsEditorState();
+  State<_Editor> createState() => _EditorState();
 }
 
-class _SkinsEditorState extends State<_SkinsEditor> {
+class _EditorState extends State<_Editor> {
   late final TextEditingController _controller = TextEditingController(
     text: (widget.props['value'] ?? widget.props['text'] ?? '').toString(),
   );
@@ -505,8 +842,60 @@ class _SkinsEditorState extends State<_SkinsEditor> {
   }
 }
 
-class _SkinsPreview extends StatelessWidget {
-  const _SkinsPreview({required this.props, required this.rawChildren, required this.buildChild});
+class _NamedEditor extends StatefulWidget {
+  const _NamedEditor({
+    required this.controlId,
+    required this.module,
+    required this.props,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final String module;
+  final Map<String, Object?> props;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_NamedEditor> createState() => _NamedEditorState();
+}
+
+class _NamedEditorState extends State<_NamedEditor> {
+  late final TextEditingController _controller = TextEditingController(
+    text: (widget.props['value'] ?? widget.props['text'] ?? '').toString(),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final title = (widget.props['title'] ?? widget.module.replaceAll('_', ' ')).toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _controller,
+          minLines: 3,
+          maxLines: 10,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: () {
+            _emitEvent(widget.controlId, widget.props, widget.sendEvent, 'change', {
+              'module': widget.module,
+              'name': widget.props['name']?.toString(),
+              'value': _controller.text,
+            });
+          },
+          child: const Text('Save Module'),
+        ),
+      ],
+    );
+  }
+}
+
+class _Preview extends StatelessWidget {
+  const _Preview({required this.props, required this.rawChildren, required this.buildChild});
 
   final Map<String, Object?> props;
   final List<dynamic> rawChildren;
@@ -535,10 +924,12 @@ class _SkinsPreview extends StatelessWidget {
   }
 }
 
-class _SkinsTokenMapper extends StatelessWidget {
-  const _SkinsTokenMapper({required this.props});
+class _TokenMapper extends StatelessWidget {
+  const _TokenMapper({required this.controlId, required this.props, required this.sendEvent});
 
+  final String controlId;
   final Map<String, Object?> props;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -555,13 +946,74 @@ class _SkinsTokenMapper extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 4),
             child: Text('${entry.key}: ${entry.value}'),
           ),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: () {
+            _emitEvent(controlId, props, sendEvent, 'token_map', {
+              'mapping': mapping,
+            });
+          },
+          child: const Text('Emit Mapping'),
+        ),
       ],
     );
   }
 }
 
-class _SkinsActionButton extends StatelessWidget {
-  const _SkinsActionButton({
+class _CollectionModule extends StatelessWidget {
+  const _CollectionModule({
+    required this.controlId,
+    required this.module,
+    required this.props,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final String module;
+  final Map<String, Object?> props;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = props['items'] is List
+        ? (props['items'] as List)
+        : (props['options'] is List ? (props['options'] as List) : const <dynamic>[]);
+
+    if (items.isEmpty) {
+      return FilledButton.tonal(
+        onPressed: () {
+          _emitEvent(controlId, props, sendEvent, 'change', {
+            'module': module,
+            'action': 'touch',
+          });
+        },
+        child: Text('Update ${module.replaceAll('_', ' ')}'),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in items)
+          FilterChip(
+            selected: false,
+            label: Text(item is Map ? (item['label'] ?? item['name'] ?? item['id'] ?? '').toString() : item.toString()),
+            onSelected: (selected) {
+              _emitEvent(controlId, props, sendEvent, 'change', {
+                'module': module,
+                'selected': selected,
+                'value': item,
+              });
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
     required this.controlType,
     required this.controlId,
     required this.props,

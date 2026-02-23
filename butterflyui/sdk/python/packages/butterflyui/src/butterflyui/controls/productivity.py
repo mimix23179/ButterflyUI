@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from collections.abc import Mapping
 from typing import Any
 
+from ..core.schema import ButterflyUIContractError, ensure_valid_props
 from ._shared import Component, merge_props
 
 __all__ = [
@@ -67,6 +69,113 @@ class OwnershipMarker(Component):
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
+CODE_EDITOR_SCHEMA_VERSION = 2
+
+CODE_EDITOR_MODULES = {
+    "editor_intent_router",
+    "editor_minimap",
+    "editor_surface",
+    "editor_view",
+    "diff",
+    "editor_tabs",
+    "empty_state_view",
+    "explorer_tree",
+    "ide",
+    "code_buffer",
+    "code_category_layer",
+    "code_document",
+    "file_tabs",
+    "file_tree",
+    "smart_search_bar",
+    "semantic_search",
+    "search_box",
+    "search_everything_panel",
+    "search_field",
+    "search_history",
+    "search_intent",
+    "search_item",
+    "search_provider",
+    "search_results_view",
+    "search_scope_selector",
+    "search_source",
+    "query_token",
+    "document_tab_strip",
+    "command_search",
+    "tree",
+    "workbench_editor",
+    "workspace_explorer",
+    "command_bar",
+    "diagnostic_stream",
+    "diff_narrator",
+    "dock_graph",
+    "dock",
+    "dock_pane",
+    "empty_view",
+    "export_panel",
+    "gutter",
+    "hint",
+    "mini_map",
+    "scope_picker",
+    "scoped_search_replace",
+    "diagnostics_panel",
+    "ghost_editor",
+    "inline_error_view",
+    "inline_search_overlay",
+    "inline_widget",
+    "inspector",
+    "intent_panel",
+    "intent_router",
+    "intent_search",
+}
+
+CODE_EDITOR_STATES = {"idle", "loading", "ready", "searching", "diff", "disabled"}
+
+CODE_EDITOR_EVENTS = {
+    "ready",
+    "change",
+    "submit",
+    "save",
+    "format_request",
+    "search",
+    "open_document",
+    "close_document",
+    "select",
+    "state_change",
+    "module_change",
+}
+
+
+def _normalize_token(value: str | None) -> str:
+    if value is None:
+        return ""
+    return value.strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _normalize_module(value: str | None) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return normalized
+
+
+def _normalize_state(value: str | None) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return normalized
+
+
+def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
+    if values is None:
+        return None
+    out: list[str] = []
+    for entry in values:
+        value = _normalize_token(str(entry))
+        if value and value not in out:
+            out.append(value)
+    return out
+
+
 class CodeEditor(Component):
     control_type = "code_editor"
 
@@ -88,14 +197,145 @@ class CodeEditor(Component):
         document_uri: str | None = None,
         emit_on_change: bool | None = None,
         debounce_ms: int | None = None,
+        module: str | None = None,
+        state: str | None = None,
+        events: Iterable[str] | None = None,
+        modules: Mapping[str, Any] | None = None,
+        editor_intent_router: Mapping[str, Any] | None = None,
+        editor_minimap: Mapping[str, Any] | None = None,
+        editor_surface: Mapping[str, Any] | None = None,
+        editor_view: Mapping[str, Any] | None = None,
+        diff: Mapping[str, Any] | None = None,
+        editor_tabs: Mapping[str, Any] | None = None,
+        empty_state_view: Mapping[str, Any] | None = None,
+        explorer_tree: Mapping[str, Any] | None = None,
+        ide: Mapping[str, Any] | None = None,
+        code_buffer: Mapping[str, Any] | None = None,
+        code_category_layer: Mapping[str, Any] | None = None,
+        code_document: Mapping[str, Any] | None = None,
+        file_tabs: Mapping[str, Any] | None = None,
+        file_tree: Mapping[str, Any] | None = None,
+        smart_search_bar: Mapping[str, Any] | None = None,
+        semantic_search: Mapping[str, Any] | None = None,
+        search_box: Mapping[str, Any] | None = None,
+        search_everything_panel: Mapping[str, Any] | None = None,
+        search_field: Mapping[str, Any] | None = None,
+        search_history: Mapping[str, Any] | None = None,
+        search_intent: Mapping[str, Any] | None = None,
+        search_item: Mapping[str, Any] | None = None,
+        search_provider: Mapping[str, Any] | None = None,
+        search_results_view: Mapping[str, Any] | None = None,
+        search_scope_selector: Mapping[str, Any] | None = None,
+        search_source: Mapping[str, Any] | None = None,
+        query_token: Mapping[str, Any] | None = None,
+        document_tab_strip: Mapping[str, Any] | None = None,
+        command_search: Mapping[str, Any] | None = None,
+        tree: Mapping[str, Any] | None = None,
+        workbench_editor: Mapping[str, Any] | None = None,
+        workspace_explorer: Mapping[str, Any] | None = None,
+        command_bar: Mapping[str, Any] | None = None,
+        diagnostic_stream: Mapping[str, Any] | None = None,
+        diff_narrator: Mapping[str, Any] | None = None,
+        dock_graph: Mapping[str, Any] | None = None,
+        dock: Mapping[str, Any] | None = None,
+        dock_pane: Mapping[str, Any] | None = None,
+        empty_view: Mapping[str, Any] | None = None,
+        export_panel: Mapping[str, Any] | None = None,
+        gutter: Mapping[str, Any] | None = None,
+        hint: Mapping[str, Any] | None = None,
+        mini_map: Mapping[str, Any] | None = None,
+        scope_picker: Mapping[str, Any] | None = None,
+        scoped_search_replace: Mapping[str, Any] | None = None,
+        diagnostics_panel: Mapping[str, Any] | None = None,
+        ghost_editor: Mapping[str, Any] | None = None,
+        inline_error_view: Mapping[str, Any] | None = None,
+        inline_search_overlay: Mapping[str, Any] | None = None,
+        inline_widget: Mapping[str, Any] | None = None,
+        inspector: Mapping[str, Any] | None = None,
+        intent_panel: Mapping[str, Any] | None = None,
+        intent_router: Mapping[str, Any] | None = None,
+        intent_search: Mapping[str, Any] | None = None,
+        schema_version: int = CODE_EDITOR_SCHEMA_VERSION,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
         resolved = code if code is not None else (text if text is not None else value)
+
+        module_map: dict[str, Any] = {
+            "editor_intent_router": editor_intent_router,
+            "editor_minimap": editor_minimap,
+            "editor_surface": editor_surface,
+            "editor_view": editor_view,
+            "diff": diff,
+            "editor_tabs": editor_tabs,
+            "empty_state_view": empty_state_view,
+            "explorer_tree": explorer_tree,
+            "ide": ide,
+            "code_buffer": code_buffer,
+            "code_category_layer": code_category_layer,
+            "code_document": code_document,
+            "file_tabs": file_tabs,
+            "file_tree": file_tree,
+            "smart_search_bar": smart_search_bar,
+            "semantic_search": semantic_search,
+            "search_box": search_box,
+            "search_everything_panel": search_everything_panel,
+            "search_field": search_field,
+            "search_history": search_history,
+            "search_intent": search_intent,
+            "search_item": search_item,
+            "search_provider": search_provider,
+            "search_results_view": search_results_view,
+            "search_scope_selector": search_scope_selector,
+            "search_source": search_source,
+            "query_token": query_token,
+            "document_tab_strip": document_tab_strip,
+            "command_search": command_search,
+            "tree": tree,
+            "workbench_editor": workbench_editor,
+            "workspace_explorer": workspace_explorer,
+            "command_bar": command_bar,
+            "diagnostic_stream": diagnostic_stream,
+            "diff_narrator": diff_narrator,
+            "dock_graph": dock_graph,
+            "dock": dock,
+            "dock_pane": dock_pane,
+            "empty_view": empty_view,
+            "export_panel": export_panel,
+            "gutter": gutter,
+            "hint": hint,
+            "mini_map": mini_map,
+            "scope_picker": scope_picker,
+            "scoped_search_replace": scoped_search_replace,
+            "diagnostics_panel": diagnostics_panel,
+            "ghost_editor": ghost_editor,
+            "inline_error_view": inline_error_view,
+            "inline_search_overlay": inline_search_overlay,
+            "inline_widget": inline_widget,
+            "inspector": inspector,
+            "intent_panel": intent_panel,
+            "intent_router": intent_router,
+            "intent_search": intent_search,
+        }
+
+        merged_modules: dict[str, Any] = {}
+        if isinstance(modules, Mapping):
+            for key, module_value in modules.items():
+                normalized = _normalize_module(str(key))
+                if normalized and normalized in CODE_EDITOR_MODULES and module_value is not None:
+                    merged_modules[normalized] = module_value
+        for key, module_value in module_map.items():
+            if module_value is not None:
+                merged_modules[key] = module_value
+
         merged = merge_props(
             props,
+            schema_version=int(schema_version),
+            module=_normalize_module(module),
+            state=_normalize_state(state),
+            events=_normalize_events(events),
             value=resolved,
             text=resolved,
             code=resolved,
@@ -111,9 +351,83 @@ class CodeEditor(Component):
             document_uri=document_uri,
             emit_on_change=emit_on_change,
             debounce_ms=debounce_ms,
+            modules=merged_modules,
+            **merged_modules,
             **kwargs,
         )
+        self._strict_contract = strict
+        self._validate_props(merged, strict=strict)
         super().__init__(props=merged, style=style, strict=strict)
+
+    @staticmethod
+    def _validate_props(props: Mapping[str, Any], *, strict: bool) -> None:
+        try:
+            ensure_valid_props("code_editor", props, strict=strict)
+        except ButterflyUIContractError as exc:
+            raise ValueError("\n".join(exc.errors)) from exc
+
+    def set_module(self, session: Any, module: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        normalized = _normalize_module(module)
+        if normalized is None or normalized not in CODE_EDITOR_MODULES:
+            return {"ok": False, "error": f"Unknown code_editor module '{module}'"}
+        payload_dict = dict(payload or {})
+        self.props["module"] = normalized
+        modules = dict(self.props.get("modules") or {})
+        modules[normalized] = payload_dict
+        self.props["modules"] = modules
+        self.props[normalized] = payload_dict
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_module", {"module": normalized, "payload": payload_dict})
+
+    def set_state(self, session: Any, state: str) -> dict[str, Any]:
+        normalized = _normalize_state(state)
+        if normalized is None or normalized not in CODE_EDITOR_STATES:
+            return {"ok": False, "error": f"Unknown code_editor state '{state}'"}
+        self.props["state"] = normalized
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_state", {"state": normalized})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def update_module(self, session: Any, module: str, **payload: Any) -> dict[str, Any]:
+        return self.set_module(session, module, payload)
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        if "module" in props:
+            props["module"] = _normalize_module(props.get("module"))
+        if "state" in props:
+            props["state"] = _normalize_state(props.get("state"))
+        if "events" in props and isinstance(props.get("events"), Iterable):
+            props["events"] = _normalize_events(props.get("events"))
+        if "modules" in props and isinstance(props.get("modules"), Mapping):
+            normalized_modules: dict[str, Any] = {}
+            for key, value in dict(props["modules"]).items():
+                normalized = _normalize_module(str(key))
+                if normalized and normalized in CODE_EDITOR_MODULES and value is not None:
+                    normalized_modules[normalized] = value
+            props["modules"] = normalized_modules
+        next_props = dict(self.props)
+        next_props.update({k: v for k, v in props.items() if v is not None})
+        self._validate_props(next_props, strict=self._strict_contract)
+        self.props.update({k: v for k, v in props.items() if v is not None})
+        return self.invoke(session, "set_props", {"props": props})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        event_name = _normalize_token(event)
+        if event_name not in CODE_EDITOR_EVENTS:
+            return {"ok": False, "error": f"Unknown code_editor event '{event}'"}
+        return self.invoke(
+            session,
+            "emit",
+            {
+                "event": event_name,
+                "payload": dict(payload or {}),
+            },
+        )
+
+    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
+        return self.invoke(session, "trigger", payload)
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

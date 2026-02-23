@@ -19,6 +19,7 @@ def _canonical_control_type(value: str) -> str:
 
 _INTERACTIVE_CONTROLS = {
     "candy",
+    "skins",
     "button",
     "checkbox",
     "switch",
