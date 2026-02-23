@@ -36,6 +36,9 @@ __all__ = [
     "Chip",
     "CountStepper",
     "ElevatedButton",
+    "IconButton",
+    "IconPicker",
+    "KeybindRecorder",
     "FieldGroup",
     "FilterDrawer",
 ]
@@ -1033,6 +1036,110 @@ class EmojiPicker(Component):
             skin_tone=skin_tone,
             show_search=show_search,
             show_recent=show_recent,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class IconPicker(EmojiPicker):
+    control_type = "icon_picker"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        categories: list[str] | None = None,
+        recent: list[str] | None = None,
+        skin_tone: str | None = None,
+        show_search: bool | None = None,
+        show_recent: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            categories=categories,
+            recent=recent,
+            skin_tone=skin_tone,
+            show_search=show_search,
+            show_recent=show_recent,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class IconButton(Button):
+    control_type = "icon_button"
+
+    def __init__(
+        self,
+        icon: str | None = None,
+        *,
+        tooltip: str | None = None,
+        size: float | None = None,
+        color: Any | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=None,
+            props=merge_props(
+                props,
+                icon=icon,
+                tooltip=tooltip,
+                size=size,
+                color=color,
+                enabled=enabled,
+                events=events,
+            ),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class KeybindRecorder(Component):
+    control_type = "keybind_recorder"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        placeholder: str | None = None,
+        enabled: bool | None = None,
+        show_clear: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            placeholder=placeholder,
+            enabled=enabled,
+            show_clear=show_clear,
             events=events,
             **kwargs,
         )

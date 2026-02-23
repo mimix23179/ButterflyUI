@@ -9,6 +9,7 @@ import 'motion/motion_pack.dart';
 import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/buttons/elevated_button.dart';
+import 'controls/buttons/icon_button.dart';
 import 'controls/common/option_types.dart';
 import 'controls/customization/animated_gradient.dart';
 import 'controls/customization/avatar_stack.dart';
@@ -22,8 +23,10 @@ import 'controls/customization/candy.dart';
 import 'controls/customization/crop_box.dart';
 import 'controls/customization/curve_editor.dart';
 import 'controls/customization/guides_manager.dart';
+import 'controls/customization/history_stack.dart';
 import 'controls/customization/histogram_overlay.dart';
 import 'controls/customization/histogram_view.dart';
+import 'controls/customization/layer_mask_editor.dart';
 import 'controls/customization/brush_panel.dart';
 import 'controls/customization/color_tools.dart';
 import 'controls/customization/gallery.dart';
@@ -36,6 +39,7 @@ import 'controls/display/canvas_control.dart';
 import 'controls/display/download_item.dart';
 import 'controls/display/glyph.dart';
 import 'controls/display/glyph_button.dart';
+import 'controls/display/line_plot.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
 import 'controls/display/diff_view.dart';
@@ -57,6 +61,8 @@ import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/fold_layer.dart';
 import 'controls/effects/flow_field.dart';
+import 'controls/effects/layer.dart';
+import 'controls/effects/layer_list.dart';
 import 'controls/effects/particle_field.dart';
 import 'controls/effects/noise_fx.dart';
 import 'controls/effects/scanline_overlay.dart';
@@ -81,6 +87,8 @@ import 'controls/inputs/emoji_picker.dart';
 import 'controls/inputs/form.dart';
 import 'controls/inputs/field_group.dart';
 import 'controls/inputs/filter_drawer.dart';
+import 'controls/inputs/icon_picker.dart';
+import 'controls/inputs/keybind_recorder.dart';
 import 'controls/inputs/multi_select.dart';
 import 'controls/inputs/radio.dart';
 import 'controls/inputs/search_bar.dart';
@@ -95,6 +103,7 @@ import 'controls/interaction/drag_payload.dart';
 import 'controls/interaction/drop_zone.dart';
 import 'controls/interaction/focus_anchor.dart';
 import 'controls/interaction/gesture_area.dart';
+import 'controls/interaction/hover_region.dart';
 import 'controls/interaction/shortcut_map.dart';
 import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
@@ -142,6 +151,7 @@ import 'controls/navigation/menu_bar.dart';
 import 'controls/navigation/paginator.dart';
 import 'controls/navigation/router.dart';
 import 'controls/navigation/sidebar.dart';
+import 'controls/navigation/info_bar.dart';
 import 'controls/navigation/status_bar.dart';
 import 'controls/navigation/tabs.dart';
 import 'controls/overlay/context_menu.dart';
@@ -619,8 +629,12 @@ class ControlRenderer {
 
       case 'chart':
       case 'line_chart':
+      case 'line_plot':
       case 'bar_chart':
       case 'bar_plot':
+        if ((type == 'line_plot')) {
+          return buildLinePlotControl(controlId, props, context.sendEvent);
+        }
         return buildChartControl(controlId, props, context.sendEvent);
 
       case 'artifact_card':
@@ -771,6 +785,9 @@ class ControlRenderer {
           context.tokens,
           context.sendEvent,
         );
+
+      case 'icon_button':
+        return buildIconButtonControl(controlId, props, context.sendEvent);
 
       case 'async_action_button':
         return buildAsyncActionButtonControl(
@@ -952,6 +969,24 @@ class ControlRenderer {
 
       case 'emoji_picker':
         return buildEmojiPickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'icon_picker':
+        return buildIconPickerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'keybind_recorder':
+        return buildKeybindRecorderControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1246,6 +1281,9 @@ class ControlRenderer {
 
       case 'status_bar':
         return buildStatusBarControl(controlId, props, context.sendEvent);
+
+      case 'info_bar':
+        return buildInfoBarControl(controlId, props, context.sendEvent);
 
       case 'command_palette':
       case 'command_search':
@@ -1675,6 +1713,15 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'hover_region':
+        return buildHoverRegionControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
       case 'shortcut_map':
         return ButterflyUIShortcutMap(
           controlId: controlId,
@@ -1713,6 +1760,12 @@ class ControlRenderer {
           context.unregisterInvokeHandler,
           context.sendEvent,
         );
+
+      case 'layer':
+        return buildLayerControl(props, rawChildren, context.buildChild);
+
+      case 'layer_list':
+        return buildLayerListControl(props, rawChildren, context.buildChild);
 
       case 'flow_field':
         return buildFlowFieldControl(
@@ -1791,6 +1844,24 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'history_stack':
+        return buildHistoryStackControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'layer_mask_editor':
+        return buildLayerMaskEditorControl(
+          controlId,
+          props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,

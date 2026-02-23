@@ -8,6 +8,8 @@ from ._shared import Component, merge_props
 __all__ = [
     "AnimatedBackground",
     "FoldLayer",
+    "Layer",
+    "LayerList",
     "ChromaticShift",
     "ConfettiBurst",
     "GlassBlur",
@@ -81,6 +83,89 @@ class FoldLayer(Component):
 
     def set_progress(self, session: Any, progress: float) -> dict[str, Any]:
         return self.invoke(session, "set_progress", {"progress": float(progress)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Layer(Component):
+    control_type = "layer"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        clip: bool | None = None,
+        clip_shape: str | None = None,
+        shape: str | None = None,
+        clip_radius: float | None = None,
+        border_radius: float | None = None,
+        radius: float | None = None,
+        opacity: float | None = None,
+        ignore_pointer: bool | None = None,
+        absorb_pointer: bool | None = None,
+        visible: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            clip=clip,
+            clip_shape=clip_shape,
+            shape=shape,
+            clip_radius=clip_radius,
+            border_radius=border_radius,
+            radius=radius,
+            opacity=opacity,
+            ignore_pointer=ignore_pointer,
+            absorb_pointer=absorb_pointer,
+            visible=visible,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+
+class LayerList(Component):
+    control_type = "layer_list"
+
+    def __init__(
+        self,
+        *children: Any,
+        layers: list[Mapping[str, Any]] | None = None,
+        active_layer: str | None = None,
+        active_id: str | None = None,
+        max_visible_overlays: int | None = None,
+        mode: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            layers=[dict(layer) for layer in (layers or [])],
+            active_layer=active_layer if active_layer is not None else active_id,
+            active_id=active_id if active_id is not None else active_layer,
+            max_visible_overlays=max_visible_overlays,
+            mode=mode,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_active(self, session: Any, layer_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_active", {"active_id": layer_id})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

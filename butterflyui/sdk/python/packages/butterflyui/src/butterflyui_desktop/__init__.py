@@ -40,7 +40,7 @@ from typing import Optional
 # ----------------------------- CONFIGURATION -----------------------------
 # Edit these constants to point at your published runtime zip and checksum.
 # The package will refuse to download non-HTTPS URLs.
-RUNTIME_ZIP_URL: str = "https://www.dropbox.com/scl/fi/umfxqx5jmx7610uzi47s3/butterflyui-windows.zip?rlkey=7pdctzo963exxs2nt7x93sjx0&st=0qvc0p7a&dl=0"  # <-- set your URL
+RUNTIME_ZIP_URL: str = "https://github.com/mimix23179/ButterflyUI/blob/main/final/butterflyui-windows.zip"  # <-- set your URL
 RUNTIME_ZIP_SHA256: str = ""  # optional: lowercase hex string
 
 # Directory name inside the package where we install the runtime.

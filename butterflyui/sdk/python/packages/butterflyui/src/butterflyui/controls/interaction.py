@@ -8,6 +8,7 @@ from ._shared import Component, merge_props
 __all__ = [
     "FocusAnchor",
     "GestureArea",
+    "HoverRegion",
     "KeyListener",
     "ShortcutMap",
     "Cursor",
@@ -109,6 +110,39 @@ class GestureArea(Component):
             long_press_enabled=long_press_enabled,
             pan_enabled=pan_enabled,
             scale_enabled=scale_enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class HoverRegion(Component):
+    control_type = "hover_region"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        enabled: bool | None = None,
+        opaque: bool | None = None,
+        cursor: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            enabled=enabled,
+            opaque=opaque,
+            cursor=cursor,
             events=events,
             **kwargs,
         )

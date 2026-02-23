@@ -26,6 +26,7 @@ __all__ = [
     "Html",
     "Markdown",
     "LineChart",
+    "LinePlot",
     "ArtifactCard",
     "AttachmentTile",
     "Audio",
@@ -495,6 +496,35 @@ class LineChart(Chart):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class LinePlot(LineChart):
+    control_type = "line_plot"
+
+    def __init__(
+        self,
+        *,
+        values: list[Any] | None = None,
+        points: list[Any] | None = None,
+        fill: bool | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            values=values,
+            points=points,
+            fill=fill,
+            color=color,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class BarChart(Component):
