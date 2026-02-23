@@ -159,6 +159,8 @@ const Set<String> _defaultCodeEditorEvents = {
 
 class ButterflyUICodeEditor extends StatefulWidget {
   final String controlId;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
   final String value;
   final String? language;
   final String? theme;
@@ -190,6 +192,8 @@ class ButterflyUICodeEditor extends StatefulWidget {
   const ButterflyUICodeEditor({
     super.key,
     required this.controlId,
+    required this.rawChildren,
+    required this.buildChild,
     required this.value,
     required this.language,
     required this.theme,
@@ -359,19 +363,23 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   Future<void> _initializeMonaco() async {
     if (_monacoInitialized) return;
     _monacoInitialized = true;
-    if (_useFlutterWebView) {
-      await _initializeFlutterMonaco();
-      return;
+    try {
+      if (_useFlutterWebView) {
+        await _initializeFlutterMonaco();
+        return;
+      }
+
+      await _windowsController.initialize().timeout(
+        const Duration(milliseconds: 15000),
+      );
+      _windowsMessageSub?.cancel();
+      _windowsMessageSub = _windowsController.webMessage.listen(_handleMonacoMessage);
+
+      final html = await _buildMonacoHtml();
+      await _windowsController.loadStringContent(html);
+    } catch (_) {
+      _monacoReady = false;
     }
-
-    await _windowsController.initialize().timeout(
-      const Duration(milliseconds: 15000),
-    );
-    _windowsMessageSub?.cancel();
-    _windowsMessageSub = _windowsController.webMessage.listen(_handleMonacoMessage);
-
-    final html = await _buildMonacoHtml();
-    await _windowsController.loadStringContent(html);
   }
 
   Future<void> _initializeFlutterMonaco() async {
@@ -918,10 +926,13 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   }
 
   Widget _buildMonacoEditor() {
+    if (!_monacoReady) {
+      return _buildFallbackEditor();
+    }
     if (_useFlutterWebView) {
       final controller = _flutterController;
       if (controller == null) {
-        return const SizedBox.shrink();
+        return _buildFallbackEditor();
       }
       return WebViewWidget(controller: controller);
     }
@@ -930,16 +941,20 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
 
   Widget _buildEditorContainer() {
     final child = _useMonaco ? _buildMonacoEditor() : _buildFallbackEditor();
-    return Container(
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
-        border: widget.borderWidth > 0
-            ? Border.all(color: widget.borderColor, width: widget.borderWidth)
-            : null,
-        borderRadius: BorderRadius.circular(widget.radius),
+    final minHeight = coerceDouble(_runtimeProps['height']) ?? 320;
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: minHeight),
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.backgroundColor,
+          border: widget.borderWidth > 0
+              ? Border.all(color: widget.borderColor, width: widget.borderWidth)
+              : null,
+          borderRadius: BorderRadius.circular(widget.radius),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: child,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: child,
     );
   }
 
@@ -947,9 +962,30 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
     final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'editor_surface');
+    final customChildren = widget.rawChildren
+        .whereType<Map>()
+        .map((child) => widget.buildChild(coerceObjectMap(child)))
+        .toList(growable: false);
+    final customLayout = _runtimeProps['custom_layout'] == true ||
+        _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (customLayout && customChildren.isNotEmpty) {
+      if (customChildren.length == 1) {
+        return customChildren.first;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < customChildren.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            customChildren[i],
+          ],
+        ],
+      );
     }
 
     final sectionWidgets = <Widget>[];
@@ -1420,6 +1456,8 @@ class _GenericModule extends StatelessWidget {
 Widget buildCodeEditorControl(
   String controlId,
   Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildChild,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
@@ -1443,6 +1481,8 @@ Widget buildCodeEditorControl(
 
   return ButterflyUICodeEditor(
     controlId: controlId,
+    rawChildren: rawChildren,
+    buildChild: buildChild,
     value: value,
     language: props['language']?.toString(),
     theme: props['theme']?.toString(),

@@ -408,6 +408,7 @@ class _GalleryControlState extends State<_GalleryControl> {
     final runSpacing = coerceDouble(_runtimeProps['run_spacing']) ?? spacing;
     final tileWidth = coerceDouble(_runtimeProps['tile_width']) ?? 180;
     final tileHeight = coerceDouble(_runtimeProps['tile_height']) ?? 120;
+    final tileRadius = _resolveRadius(_runtimeProps, fallback: 12);
     final selectable = _runtimeProps['selectable'] == null
         ? true
       : (_runtimeProps['selectable'] == true);
@@ -416,6 +417,25 @@ class _GalleryControlState extends State<_GalleryControl> {
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
+    final customLayout = _runtimeProps['custom_layout'] == true ||
+        _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
+    final hasBuiltInData =
+        _items.isNotEmpty || _runtimeProps['module'] != null || _coerceObjectMap(_runtimeProps['modules']).isNotEmpty;
+
+    if (childControls.isNotEmpty && (customLayout || !hasBuiltInData)) {
+      if (childControls.length == 1) {
+        return childControls.first;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < childControls.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            childControls[i],
+          ],
+        ],
+      );
+    }
 
     final itemTiles = <Widget>[];
     for (final item in _items) {
@@ -445,14 +465,14 @@ class _GalleryControlState extends State<_GalleryControl> {
                   });
                 }
               : null,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(tileRadius),
           child: Container(
             width: tileWidth,
             height: tileHeight,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(tileRadius),
               border: Border.all(
                 color: selected
                     ? Theme.of(context).colorScheme.primary
@@ -566,6 +586,7 @@ class _GalleryControlState extends State<_GalleryControl> {
           props: itemPreview,
           rawChildren: widget.rawChildren,
           buildChild: widget.buildChild,
+          radius: _resolveRadius(itemPreview, parent: _runtimeProps, fallback: 10),
         ),
       );
     }
@@ -586,7 +607,14 @@ class _GalleryControlState extends State<_GalleryControl> {
     }
     final itemDrop = _sectionProps(_runtimeProps, 'item_drop_target');
     if (itemDrop != null) {
-      footerWidgets.add(_ItemDropTarget(controlId: widget.controlId, props: itemDrop, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _ItemDropTarget(
+          controlId: widget.controlId,
+          props: itemDrop,
+          radius: _resolveRadius(itemDrop, parent: _runtimeProps, fallback: 8),
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final itemReorder = _sectionProps(_runtimeProps, 'item_reorder_handle');
     if (itemReorder != null) {
@@ -723,6 +751,14 @@ Map<String, Object?> _coerceObjectMap(Object? value) {
 
 String _norm(String value) {
   return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
+}
+
+double _resolveRadius(
+  Map<String, Object?> props, {
+  Map<String, Object?>? parent,
+  double fallback = 10,
+}) {
+  return coerceDouble(props['radius'] ?? parent?['radius']) ?? fallback;
 }
 
 List<Map<String, Object?>> _coerceItems(Object? value) {
@@ -954,11 +990,17 @@ class _ItemMetaRow extends StatelessWidget {
 }
 
 class _ItemPreview extends StatelessWidget {
-  const _ItemPreview({required this.props, required this.rawChildren, required this.buildChild});
+  const _ItemPreview({
+    required this.props,
+    required this.rawChildren,
+    required this.buildChild,
+    required this.radius,
+  });
 
   final Map<String, Object?> props;
   final List<dynamic> rawChildren;
   final Widget Function(Map<String, Object?> child) buildChild;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -978,8 +1020,9 @@ class _ItemPreview extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Text(label),
     );
   }
@@ -1141,10 +1184,16 @@ class _ItemHandle extends StatelessWidget {
 }
 
 class _ItemDropTarget extends StatelessWidget {
-  const _ItemDropTarget({required this.controlId, required this.props, required this.sendEvent});
+  const _ItemDropTarget({
+    required this.controlId,
+    required this.props,
+    required this.radius,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
+  final double radius;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
@@ -1154,7 +1203,7 @@ class _ItemDropTarget extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(radius),
       ),
       child: TextButton(
         onPressed: () => _emitEvent(controlId, props, sendEvent, 'drop_target', {}),

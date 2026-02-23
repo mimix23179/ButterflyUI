@@ -826,6 +826,40 @@ class Page:
 		# Track pending update tasks to ensure they complete before runtime.ready
 		self._pending_updates: list[asyncio.Task[Any]] = []
 
+	def _bind_inline_handlers(self) -> None:
+		visited: set[int] = set()
+
+		def walk(node: Any) -> None:
+			marker = id(node)
+			if marker in visited:
+				return
+			visited.add(marker)
+
+			if isinstance(node, Control):
+				try:
+					node.bind_inline_event_handlers(self.session)
+				except Exception:
+					pass
+				for child in node.children:
+					walk(child)
+				for value in node.props.values():
+					walk(value)
+				return
+
+			if isinstance(node, dict):
+				for value in node.values():
+					walk(value)
+				return
+
+			if isinstance(node, (list, tuple, set)):
+				for item in node:
+					walk(item)
+
+		walk(self.root)
+		walk(self.screen)
+		walk(self.overlay)
+		walk(self.splash)
+
 	def update(self) -> None:
 		"""Send the current page state to the runtime.
 
@@ -834,6 +868,8 @@ class Page:
 		"""
 		if not self._has_payload():
 			return
+
+		self._bind_inline_handlers()
 
 		root_payload = self._coerce_root(self.root) if self.root is not None else None
 		# If root is present but not serializable, warn and abort.

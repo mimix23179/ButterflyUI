@@ -814,6 +814,8 @@ class ControlRenderer {
           type == 'semantic_search'
               ? <String, Object?>{...props, 'module': 'semantic_search'}
               : props,
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -840,6 +842,8 @@ class ControlRenderer {
           (type == 'selection_tools' || type == 'transform_box')
               ? <String, Object?>{...props, 'module': type}
               : props,
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -2579,6 +2583,8 @@ class ControlRenderer {
         return buildTerminalControl(
           controlId,
           props,
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,

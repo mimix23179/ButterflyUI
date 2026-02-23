@@ -355,6 +355,8 @@ class Control:
         self.props = {}
         self.children = list(children) if children else []
         self.meta = dict(meta) if isinstance(meta, Mapping) else {}
+        self._inline_event_handlers: dict[str, Any] = {}
+        self._inline_event_bound_sessions: set[str] = set()
 
         if isinstance(props, Mapping):
             _merge_props(self.props, props, override=True)
@@ -385,6 +387,24 @@ class Control:
             from .schema import ensure_valid_props
 
             ensure_valid_props(self.control_type, self.props, strict=True)
+
+    def add_inline_event_handler(self, event: str, handler: Any) -> None:
+        if not callable(handler):
+            return
+        name = str(event).strip()
+        if not name:
+            return
+        self._inline_event_handlers[name] = handler
+
+    def bind_inline_event_handlers(self, session: "ButterflyUISession") -> None:
+        if not self._inline_event_handlers:
+            return
+        session_key = str(id(session))
+        if session_key in self._inline_event_bound_sessions:
+            return
+        for event, handler in self._inline_event_handlers.items():
+            self.on_event(session, event, handler)
+        self._inline_event_bound_sessions.add(session_key)
 
     def to_json(self) -> dict[str, Any]:
         merged_children = list(self.children)

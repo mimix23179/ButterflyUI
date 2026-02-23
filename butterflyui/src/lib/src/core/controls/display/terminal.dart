@@ -93,6 +93,8 @@ const Set<String> _defaultTerminalEvents = {
 class ButterflyUITerminal extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> initialProps;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
@@ -101,6 +103,8 @@ class ButterflyUITerminal extends StatefulWidget {
     super.key,
     required this.controlId,
     required this.initialProps,
+    required this.rawChildren,
+    required this.buildChild,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
     required this.sendEvent,
@@ -204,24 +208,30 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     if (_xtermInitialized) return;
     _xtermInitialized = true;
 
-    if (_useNativeTerminal) {
+    try {
+      if (_useNativeTerminal) {
+        _xtermReady = true;
+        _nativeRenderBufferAndInput();
+        _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native'});
+        return;
+      }
+
+      if (_useFlutterWebView) {
+        await _initializeFlutterXterm();
+        return;
+      }
+
+      await _windowsController.initialize().timeout(const Duration(milliseconds: 15000));
+      _windowsMessageSub?.cancel();
+      _windowsMessageSub = _windowsController.webMessage.listen(_handleXtermMessage);
+
+      final html = _buildXtermHtml();
+      await _windowsController.loadStringContent(html);
+    } catch (_) {
       _xtermReady = true;
       _nativeRenderBufferAndInput();
-      _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native'});
-      return;
+      _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native_fallback'});
     }
-
-    if (_useFlutterWebView) {
-      await _initializeFlutterXterm();
-      return;
-    }
-
-    await _windowsController.initialize().timeout(const Duration(milliseconds: 15000));
-    _windowsMessageSub?.cancel();
-    _windowsMessageSub = _windowsController.webMessage.listen(_handleXtermMessage);
-
-    final html = _buildXtermHtml();
-    await _windowsController.loadStringContent(html);
   }
 
   void _configureNativeTerminal() {
@@ -781,55 +791,59 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     });
   }
 
-  Widget _buildXtermView() {
-    if (_useNativeTerminal) {
-      final bg =
-          coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06);
-      final fg = coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6);
-      final fontSize = coerceDouble(_runtimeProps['font_size']) ?? 12;
-      final lineHeight = coerceDouble(_runtimeProps['line_height']) ?? 1.35;
-      final fontFamily = (_runtimeProps['font_family'] ?? 'JetBrains Mono').toString();
+  Widget _buildNativeXtermView() {
+    final bg =
+        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06);
+    final fg = coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6);
+    final fontSize = coerceDouble(_runtimeProps['font_size']) ?? 12;
+    final lineHeight = coerceDouble(_runtimeProps['line_height']) ?? 1.35;
+    final fontFamily = (_runtimeProps['font_family'] ?? 'JetBrains Mono').toString();
 
-      return xterm.TerminalView(
-        _nativeTerminal,
-        focusNode: _nativeFocusNode,
-        readOnly: _runtimeProps['read_only'] == true,
-        theme: xterm.TerminalTheme(
-          background: bg,
-          foreground: fg,
-          cursor: fg,
-          selection: fg.withValues(alpha: 0.3),
-          black: bg,
-          red: const Color(0xffef4444),
-          green: const Color(0xff22c55e),
-          yellow: const Color(0xfff59e0b),
-          blue: const Color(0xff3b82f6),
-          magenta: const Color(0xffa855f7),
-          cyan: const Color(0xff22d3ee),
-          white: fg,
-          brightBlack: Color.lerp(bg, Colors.white, 0.35) ?? bg,
-          brightRed: const Color(0xffff6b6b),
-          brightGreen: const Color(0xff4ade80),
-          brightYellow: const Color(0xfffbbf24),
-          brightBlue: const Color(0xff60a5fa),
-          brightMagenta: const Color(0xffc084fc),
-          brightCyan: const Color(0xff67e8f9),
-          brightWhite: Color.lerp(fg, Colors.white, 0.2) ?? fg,
-          searchHitBackground: fg.withValues(alpha: 0.15),
-          searchHitBackgroundCurrent: fg.withValues(alpha: 0.3),
-          searchHitForeground: bg,
-        ),
-        textStyle: xterm.TerminalStyle(
-          fontFamily: fontFamily,
-          fontSize: fontSize,
-          height: lineHeight,
-        ),
-      );
+    return xterm.TerminalView(
+      _nativeTerminal,
+      focusNode: _nativeFocusNode,
+      readOnly: _runtimeProps['read_only'] == true,
+      theme: xterm.TerminalTheme(
+        background: bg,
+        foreground: fg,
+        cursor: fg,
+        selection: fg.withValues(alpha: 0.3),
+        black: bg,
+        red: const Color(0xffef4444),
+        green: const Color(0xff22c55e),
+        yellow: const Color(0xfff59e0b),
+        blue: const Color(0xff3b82f6),
+        magenta: const Color(0xffa855f7),
+        cyan: const Color(0xff22d3ee),
+        white: fg,
+        brightBlack: Color.lerp(bg, Colors.white, 0.35) ?? bg,
+        brightRed: const Color(0xffff6b6b),
+        brightGreen: const Color(0xff4ade80),
+        brightYellow: const Color(0xfffbbf24),
+        brightBlue: const Color(0xff60a5fa),
+        brightMagenta: const Color(0xffc084fc),
+        brightCyan: const Color(0xff67e8f9),
+        brightWhite: Color.lerp(fg, Colors.white, 0.2) ?? fg,
+        searchHitBackground: fg.withValues(alpha: 0.15),
+        searchHitBackgroundCurrent: fg.withValues(alpha: 0.3),
+        searchHitForeground: bg,
+      ),
+      textStyle: xterm.TerminalStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        height: lineHeight,
+      ),
+    );
+  }
+
+  Widget _buildXtermView() {
+    if (_useNativeTerminal || !_xtermReady) {
+      return _buildNativeXtermView();
     }
 
     if (_useFlutterWebView) {
       final controller = _flutterController;
-      if (controller == null) return const SizedBox.shrink();
+      if (controller == null) return _buildNativeXtermView();
       return WebViewWidget(controller: controller);
     }
     return Webview(_windowsController);
@@ -862,9 +876,30 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
     final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'session');
+    final customChildren = widget.rawChildren
+        .whereType<Map>()
+        .map((child) => widget.buildChild(coerceObjectMap(child)))
+        .toList(growable: false);
+    final customLayout = _runtimeProps['custom_layout'] == true ||
+        _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (customLayout && customChildren.isNotEmpty) {
+      if (customChildren.length == 1) {
+        return customChildren.first;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < customChildren.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            customChildren[i],
+          ],
+        ],
+      );
     }
 
     return Column(
@@ -1088,6 +1123,8 @@ class _TerminalGenericModule extends StatelessWidget {
 Widget buildTerminalControl(
   String controlId,
   Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildChild,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
@@ -1095,6 +1132,8 @@ Widget buildTerminalControl(
   return ButterflyUITerminal(
     controlId: controlId,
     initialProps: props,
+    rawChildren: rawChildren,
+    buildChild: buildChild,
     registerInvokeHandler: registerInvokeHandler,
     unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,

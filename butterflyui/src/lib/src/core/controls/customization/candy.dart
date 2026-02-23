@@ -525,6 +525,12 @@ class _CandyFamilyState extends State<_CandyFamily> {
     Map<String, Object?> merged,
     _CandyStyle style,
   ) {
+    final customLayout = merged['custom_layout'] == true ||
+        _norm((merged['layout'] ?? '').toString()) == 'custom';
+    if (customLayout && widget.rawChildren.isNotEmpty) {
+      return buildContainerControl(merged, widget.rawChildren, widget.buildChild);
+    }
+
     switch (module) {
       case 'button':
         return buildButtonControl(widget.controlId, merged, widget.tokens, widget.sendEvent);

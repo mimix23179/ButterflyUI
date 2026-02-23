@@ -495,7 +495,9 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
       if (raw is! Map) continue;
       final child = coerceObjectMap(raw);
       final type = child['type']?.toString().toLowerCase();
-      if (type != 'route_view' && type != 'route_host') continue;
+      if (type != 'route_view' && type != 'route_host' && type != 'route') {
+        continue;
+      }
       final props = child['props'] is Map
           ? coerceObjectMap(child['props'] as Map)
           : <String, Object?>{};

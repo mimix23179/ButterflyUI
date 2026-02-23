@@ -387,9 +387,30 @@ class _SkinsControlState extends State<_SkinsControl> {
     final state = (_runtimeProps['state'] ?? 'ready').toString();
     final currentModule = _norm(_runtimeProps['module']?.toString() ?? '');
     final availableModules = _availableModules(_runtimeProps, currentModule);
+    final customChildren = widget.rawChildren
+        .whereType<Map>()
+        .map((child) => widget.buildChild(coerceObjectMap(child)))
+        .toList(growable: false);
+    final customLayout = _runtimeProps['custom_layout'] == true ||
+        _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
 
     if (state == 'loading') {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (customLayout && customChildren.isNotEmpty) {
+      if (customChildren.length == 1) {
+        return customChildren.first;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < customChildren.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            customChildren[i],
+          ],
+        ],
+      );
     }
 
     final sectionWidgets = <Widget>[];
@@ -516,7 +537,12 @@ class _SkinsControlState extends State<_SkinsControl> {
       case 'editor':
         return _Editor(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
       case 'preview':
-        return _Preview(props: section, rawChildren: widget.rawChildren, buildChild: widget.buildChild);
+        return _Preview(
+          props: section,
+          rawChildren: widget.rawChildren,
+          buildChild: widget.buildChild,
+          radius: coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 12,
+        );
       case 'token_mapper':
         return _TokenMapper(controlId: widget.controlId, props: section, sendEvent: widget.sendEvent);
       case 'effect_editor':
@@ -896,11 +922,17 @@ class _NamedEditorState extends State<_NamedEditor> {
 }
 
 class _Preview extends StatelessWidget {
-  const _Preview({required this.props, required this.rawChildren, required this.buildChild});
+  const _Preview({
+    required this.props,
+    required this.rawChildren,
+    required this.buildChild,
+    required this.radius,
+  });
 
   final Map<String, Object?> props;
   final List<dynamic> rawChildren;
   final Widget Function(Map<String, Object?> child) buildChild;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -918,8 +950,9 @@ class _Preview extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radius),
       ),
+      clipBehavior: Clip.antiAlias,
       child: preview,
     );
   }

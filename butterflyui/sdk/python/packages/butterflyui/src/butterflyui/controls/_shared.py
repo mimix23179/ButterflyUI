@@ -248,6 +248,19 @@ class Component(CoreComponent):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        inline_handlers: dict[str, Any] = {}
+        for key in list(kwargs):
+            value = kwargs.get(key)
+            if not callable(value):
+                continue
+            if key.startswith("on_") and len(key) > 3:
+                inline_handlers[key[3:]] = value
+                kwargs.pop(key, None)
+                continue
+            if key == "action":
+                inline_handlers["click"] = value
+                kwargs.pop(key, None)
+
         control_props = merge_props(
             props,
             variant=variant,
@@ -287,5 +300,7 @@ class Component(CoreComponent):
             style=style,
             strict=strict,
         )
+        for event, handler in inline_handlers.items():
+            self.add_inline_event_handler(event, handler)
 
 

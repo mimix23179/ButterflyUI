@@ -64,6 +64,8 @@ const Set<String> _studioEvents = {
 class ButterflyUIStudio extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> initialProps;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
@@ -72,6 +74,8 @@ class ButterflyUIStudio extends StatefulWidget {
     super.key,
     required this.controlId,
     required this.initialProps,
+    required this.rawChildren,
+    required this.buildChild,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
     required this.sendEvent,
@@ -218,12 +222,14 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         final showGrid = section['show_grid'] == true;
         final snapToGrid = section['snap_to_grid'] == true;
         final gridSize = coerceDouble(section['grid_size']) ?? 8;
+        final moduleRadius =
+            coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 10;
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(moduleRadius),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,9 +266,30 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
     final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'builder');
+    final customChildren = widget.rawChildren
+        .whereType<Map>()
+        .map((child) => widget.buildChild(coerceObjectMap(child)))
+        .toList(growable: false);
+    final showChrome =
+        _runtimeProps['show_modules'] == true || _runtimeProps['show_chrome'] == true;
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (customChildren.isNotEmpty && !showChrome) {
+      if (customChildren.length == 1) {
+        return customChildren.first;
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < customChildren.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            customChildren[i],
+          ],
+        ],
+      );
     }
 
     return Column(
@@ -655,6 +682,8 @@ class _StudioGenericModule extends StatelessWidget {
 Widget buildStudioControl(
   String controlId,
   Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildChild,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
@@ -662,6 +691,8 @@ Widget buildStudioControl(
   return ButterflyUIStudio(
     controlId: controlId,
     initialProps: props,
+    rawChildren: rawChildren,
+    buildChild: buildChild,
     registerInvokeHandler: registerInvokeHandler,
     unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
