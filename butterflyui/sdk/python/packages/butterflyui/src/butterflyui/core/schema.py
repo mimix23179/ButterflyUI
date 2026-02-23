@@ -5243,7 +5243,7 @@ CONTROL_SCHEMAS.update(
         "chat": CHAT_THREAD_SCHEMA,
         "column": COLUMN_SCHEMA,
         "container": CONTAINER_SCHEMA,
-        "container_style": _control_schema({"padding": PADDING_SCHEMA, "margin": MARGIN_SCHEMA, "radius": NUMBER_SCHEMA, "elevation": NUMBER_SCHEMA}),
+        "container_style": _control_schema({"padding": PADDING_SCHEMA, "margin": PADDING_SCHEMA, "radius": NUMBER_SCHEMA, "elevation": NUMBER_SCHEMA}),
         "context_menu": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "open": BOOL_SCHEMA}),
         "data_grid": JSON_TABLE_SCHEMA,
         "data_table": JSON_TABLE_SCHEMA,
