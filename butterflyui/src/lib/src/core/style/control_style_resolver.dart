@@ -204,9 +204,6 @@ class ControlStyleResolver {
 
   static String _canonicalControlType(String value) {
     var normalized = _norm(value);
-    if (normalized.startsWith('candy_')) {
-      normalized = normalized.substring(6);
-    }
     switch (normalized) {
       case 'container':
       case 'box':

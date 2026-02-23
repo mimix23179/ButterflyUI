@@ -17,7 +17,7 @@ src/butterflyui.egg-info/requires.txt
 src/butterflyui.egg-info/top_level.txt
 src/butterflyui/controls/__init__.py
 src/butterflyui/controls/_shared.py
-src/butterflyui/controls/candy_theme.py
+src/butterflyui/controls/candy.py
 src/butterflyui/controls/customization.py
 src/butterflyui/controls/data.py
 src/butterflyui/controls/display.py

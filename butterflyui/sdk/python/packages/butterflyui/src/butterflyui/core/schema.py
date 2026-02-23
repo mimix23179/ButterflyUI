@@ -671,6 +671,450 @@ BOUNDS_PROBE_SCHEMA = {
     "additionalProperties": True,
 }
 
+CANDY_MODULE_ENUM = [
+    "button",
+    "card",
+    "column",
+    "container",
+    "row",
+    "stack",
+    "surface",
+    "wrap",
+    "align",
+    "center",
+    "spacer",
+    "aspect_ratio",
+    "overflow_box",
+    "fitted_box",
+    "effects",
+    "particles",
+    "border",
+    "shadow",
+    "outline",
+    "gradient",
+    "animation",
+    "transition",
+    "canvas",
+    "clip",
+    "decorated_box",
+    "badge",
+    "avatar",
+    "icon",
+    "text",
+    "motion",
+]
+
+CANDY_STATE_ENUM = ["idle", "hover", "pressed", "focused", "disabled", "selected", "loading"]
+
+CANDY_EVENT_ENUM = [
+    "change",
+    "state_change",
+    "module_change",
+    "click",
+    "tap",
+    "double_tap",
+    "long_press",
+    "hover_enter",
+    "hover_exit",
+    "hover_move",
+    "focus",
+    "blur",
+    "focus_change",
+    "animation_start",
+    "animation_end",
+    "transition_start",
+    "transition_end",
+    "gesture_pan_start",
+    "gesture_pan_update",
+    "gesture_pan_end",
+    "gesture_scale_start",
+    "gesture_scale_update",
+    "gesture_scale_end",
+]
+
+CANDY_SLOTS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "leading": ANY_SCHEMA,
+        "trailing": ANY_SCHEMA,
+        "overlay": ANY_SCHEMA,
+        "background": ANY_SCHEMA,
+        "content": ANY_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+CANDY_SEMANTICS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label": STRING_SCHEMA,
+        "hint": STRING_SCHEMA,
+        "value": STRING_SCHEMA,
+        "button": BOOL_SCHEMA,
+        "focusable": BOOL_SCHEMA,
+        "live_region": BOOL_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+CANDY_ACCESSIBILITY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label": STRING_SCHEMA,
+        "hint": STRING_SCHEMA,
+        "value": STRING_SCHEMA,
+        "button": BOOL_SCHEMA,
+        "focusable": BOOL_SCHEMA,
+        "live_region": BOOL_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+CANDY_PERFORMANCE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "cache": BOOL_SCHEMA,
+        "repaint_boundary": BOOL_SCHEMA,
+        "revision": ANY_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+
+def _candy_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {
+            "enabled": BOOL_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "state": {"type": "string", "enum": CANDY_STATE_ENUM},
+            "slots": CANDY_SLOTS_SCHEMA,
+            "leading": ANY_SCHEMA,
+            "trailing": ANY_SCHEMA,
+            "overlay": ANY_SCHEMA,
+            "background": ANY_SCHEMA,
+            "content": ANY_SCHEMA,
+            "animation": ANY_SCHEMA,
+            "transition": ANY_SCHEMA,
+            "motion": ANY_SCHEMA,
+            "events": {"type": "array", "items": {"type": "string", "enum": CANDY_EVENT_ENUM}},
+            "semantics": CANDY_SEMANTICS_SCHEMA,
+            "accessibility": CANDY_ACCESSIBILITY_SCHEMA,
+            "performance": CANDY_PERFORMANCE_SCHEMA,
+            **dict(extra_properties),
+        },
+        "additionalProperties": False,
+    }
+
+
+CANDY_MODULE_SCHEMAS = {
+    "button": _candy_module_schema(
+        {
+            "label": STRING_SCHEMA,
+            "text": STRING_SCHEMA,
+            "icon": STRING_SCHEMA,
+            "loading": BOOL_SCHEMA,
+            "disabled": BOOL_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+            "padding": PADDING_SCHEMA,
+            "bgcolor": COLOR_SCHEMA,
+            "text_color": COLOR_SCHEMA,
+        }
+    ),
+    "card": _candy_module_schema(
+        {
+            "elevation": NUMBER_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+            "padding": PADDING_SCHEMA,
+            "margin": PADDING_SCHEMA,
+            "bgcolor": COLOR_SCHEMA,
+        }
+    ),
+    "column": _candy_module_schema(
+        {
+            "spacing": NUMBER_SCHEMA,
+            "alignment": STRING_SCHEMA,
+            "main_axis": STRING_SCHEMA,
+            "cross_axis": STRING_SCHEMA,
+        }
+    ),
+    "container": _candy_module_schema(
+        {
+            "width": DIMENSION_SCHEMA,
+            "height": DIMENSION_SCHEMA,
+            "padding": PADDING_SCHEMA,
+            "margin": PADDING_SCHEMA,
+            "alignment": ALIGNMENT_SCHEMA,
+            "bgcolor": COLOR_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+        }
+    ),
+    "row": _candy_module_schema(
+        {
+            "spacing": NUMBER_SCHEMA,
+            "alignment": STRING_SCHEMA,
+            "main_axis": STRING_SCHEMA,
+            "cross_axis": STRING_SCHEMA,
+        }
+    ),
+    "stack": _candy_module_schema({"alignment": ALIGNMENT_SCHEMA, "fit": STRING_SCHEMA}),
+    "surface": _candy_module_schema(
+        {
+            "bgcolor": COLOR_SCHEMA,
+            "elevation": NUMBER_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+            "border_color": COLOR_SCHEMA,
+            "border_width": NUMBER_SCHEMA,
+        }
+    ),
+    "wrap": _candy_module_schema(
+        {
+            "spacing": NUMBER_SCHEMA,
+            "run_spacing": NUMBER_SCHEMA,
+            "alignment": STRING_SCHEMA,
+            "run_alignment": STRING_SCHEMA,
+        }
+    ),
+    "align": _candy_module_schema(
+        {"alignment": ALIGNMENT_SCHEMA, "width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA}
+    ),
+    "center": _candy_module_schema({"width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA}),
+    "spacer": _candy_module_schema({"width": DIMENSION_SCHEMA, "height": DIMENSION_SCHEMA, "flex": INTEGER_SCHEMA}),
+    "aspect_ratio": _candy_module_schema({"ratio": NUMBER_SCHEMA, "value": NUMBER_SCHEMA}),
+    "overflow_box": _candy_module_schema(
+        {
+            "alignment": ALIGNMENT_SCHEMA,
+            "min_width": DIMENSION_SCHEMA,
+            "max_width": DIMENSION_SCHEMA,
+            "min_height": DIMENSION_SCHEMA,
+            "max_height": DIMENSION_SCHEMA,
+        }
+    ),
+    "fitted_box": _candy_module_schema(
+        {
+            "fit": STRING_SCHEMA,
+            "alignment": ALIGNMENT_SCHEMA,
+            "clip_behavior": STRING_SCHEMA,
+        }
+    ),
+    "effects": _candy_module_schema(
+        {
+            "shimmer": BOOL_SCHEMA,
+            "blur": NUMBER_SCHEMA,
+            "opacity": NUMBER_SCHEMA,
+            "overlay": BOOL_SCHEMA,
+        }
+    ),
+    "particles": _candy_module_schema(
+        {
+            "count": INTEGER_SCHEMA,
+            "speed": NUMBER_SCHEMA,
+            "size": NUMBER_SCHEMA,
+            "gravity": NUMBER_SCHEMA,
+            "drift": NUMBER_SCHEMA,
+            "overlay": BOOL_SCHEMA,
+            "colors": {"type": "array", "items": COLOR_SCHEMA},
+        }
+    ),
+    "border": _candy_module_schema(
+        {
+            "color": COLOR_SCHEMA,
+            "width": NUMBER_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+            "side": STRING_SCHEMA,
+            "padding": PADDING_SCHEMA,
+        }
+    ),
+    "shadow": _candy_module_schema(
+        {
+            "color": COLOR_SCHEMA,
+            "blur": NUMBER_SCHEMA,
+            "spread": NUMBER_SCHEMA,
+            "dx": NUMBER_SCHEMA,
+            "dy": NUMBER_SCHEMA,
+        }
+    ),
+    "outline": _candy_module_schema(
+        {
+            "outline_color": COLOR_SCHEMA,
+            "outline_width": NUMBER_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+        }
+    ),
+    "gradient": _candy_module_schema(
+        {
+            "variant": STRING_SCHEMA,
+            "colors": {"type": "array", "items": COLOR_SCHEMA},
+            "stops": {"type": "array", "items": NUMBER_SCHEMA},
+            "begin": ANY_SCHEMA,
+            "end": ANY_SCHEMA,
+            "angle": NUMBER_SCHEMA,
+        }
+    ),
+    "animation": _candy_module_schema(
+        {
+            "duration_ms": INTEGER_SCHEMA,
+            "curve": STRING_SCHEMA,
+            "opacity": NUMBER_SCHEMA,
+            "scale": NUMBER_SCHEMA,
+            "autoplay": BOOL_SCHEMA,
+            "loop": BOOL_SCHEMA,
+            "reverse": BOOL_SCHEMA,
+        }
+    ),
+    "transition": _candy_module_schema(
+        {
+            "duration_ms": INTEGER_SCHEMA,
+            "curve": STRING_SCHEMA,
+            "preset": STRING_SCHEMA,
+            "key": ANY_SCHEMA,
+        }
+    ),
+    "canvas": _candy_module_schema(
+        {
+            "width": DIMENSION_SCHEMA,
+            "height": DIMENSION_SCHEMA,
+            "commands": {"type": "array", "items": {"type": "object", "additionalProperties": True}},
+        }
+    ),
+    "clip": _candy_module_schema(
+        {
+            "shape": STRING_SCHEMA,
+            "clip_shape": STRING_SCHEMA,
+            "clip_behavior": STRING_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+        }
+    ),
+    "decorated_box": _candy_module_schema(
+        {
+            "bgcolor": COLOR_SCHEMA,
+            "gradient": ANY_SCHEMA,
+            "border_color": COLOR_SCHEMA,
+            "border_width": NUMBER_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+            "shadow": ANY_SCHEMA,
+        }
+    ),
+    "badge": _candy_module_schema(
+        {
+            "label": STRING_SCHEMA,
+            "text": STRING_SCHEMA,
+            "value": ANY_SCHEMA,
+            "color": COLOR_SCHEMA,
+            "bgcolor": COLOR_SCHEMA,
+            "text_color": COLOR_SCHEMA,
+            "radius": NUMBER_SCHEMA,
+        }
+    ),
+    "avatar": _candy_module_schema(
+        {
+            "src": STRING_SCHEMA,
+            "label": STRING_SCHEMA,
+            "text": STRING_SCHEMA,
+            "size": NUMBER_SCHEMA,
+            "color": COLOR_SCHEMA,
+            "bgcolor": COLOR_SCHEMA,
+        }
+    ),
+    "icon": _candy_module_schema({"icon": STRING_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA}),
+    "text": _candy_module_schema(
+        {
+            "text": STRING_SCHEMA,
+            "value": STRING_SCHEMA,
+            "color": COLOR_SCHEMA,
+            "font_size": NUMBER_SCHEMA,
+            "size": NUMBER_SCHEMA,
+            "font_weight": ANY_SCHEMA,
+            "weight": ANY_SCHEMA,
+            "align": STRING_SCHEMA,
+            "max_lines": INTEGER_SCHEMA,
+            "overflow": STRING_SCHEMA,
+        }
+    ),
+    "motion": _candy_module_schema(
+        {
+            "duration_ms": INTEGER_SCHEMA,
+            "curve": STRING_SCHEMA,
+            "opacity": NUMBER_SCHEMA,
+            "scale": NUMBER_SCHEMA,
+            "autoplay": BOOL_SCHEMA,
+            "loop": BOOL_SCHEMA,
+            "reverse": BOOL_SCHEMA,
+        }
+    ),
+}
+
+CANDY_MODULE_PAYLOAD_SCHEMA = {
+    "anyOf": [CANDY_MODULE_SCHEMAS[name] for name in CANDY_MODULE_ENUM],
+}
+
+CANDY_SCHEMA = _control_schema(
+    {
+        "schema_version": INTEGER_SCHEMA,
+        "module": {"type": "string", "enum": CANDY_MODULE_ENUM},
+        "state": {"type": "string", "enum": CANDY_STATE_ENUM},
+        "variant": STRING_SCHEMA,
+        "events": {"type": "array", "items": {"type": "string", "enum": CANDY_EVENT_ENUM}},
+        "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "token_overrides": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "modules": {
+            "type": "object",
+            "properties": {name: CANDY_MODULE_SCHEMAS[name] for name in CANDY_MODULE_ENUM},
+            "additionalProperties": False,
+        },
+        "slots": CANDY_SLOTS_SCHEMA,
+        "semantics": CANDY_SEMANTICS_SCHEMA,
+        "accessibility": CANDY_ACCESSIBILITY_SCHEMA,
+        "interaction": {
+            "type": "object",
+            "properties": {
+                "enabled": BOOL_SCHEMA,
+                "hover": BOOL_SCHEMA,
+                "focus": BOOL_SCHEMA,
+                "press": BOOL_SCHEMA,
+                "tap": BOOL_SCHEMA,
+                "double_tap": BOOL_SCHEMA,
+                "long_press": BOOL_SCHEMA,
+            },
+            "additionalProperties": False,
+        },
+        "performance": CANDY_PERFORMANCE_SCHEMA,
+        "quality": STRING_SCHEMA,
+        "cache": BOOL_SCHEMA,
+        "button": CANDY_MODULE_SCHEMAS["button"],
+        "card": CANDY_MODULE_SCHEMAS["card"],
+        "column": CANDY_MODULE_SCHEMAS["column"],
+        "container": CANDY_MODULE_SCHEMAS["container"],
+        "row": CANDY_MODULE_SCHEMAS["row"],
+        "stack": CANDY_MODULE_SCHEMAS["stack"],
+        "surface": CANDY_MODULE_SCHEMAS["surface"],
+        "wrap": CANDY_MODULE_SCHEMAS["wrap"],
+        "align": CANDY_MODULE_SCHEMAS["align"],
+        "center": CANDY_MODULE_SCHEMAS["center"],
+        "spacer": CANDY_MODULE_SCHEMAS["spacer"],
+        "aspect_ratio": CANDY_MODULE_SCHEMAS["aspect_ratio"],
+        "overflow_box": CANDY_MODULE_SCHEMAS["overflow_box"],
+        "fitted_box": CANDY_MODULE_SCHEMAS["fitted_box"],
+        "effects": CANDY_MODULE_SCHEMAS["effects"],
+        "particles": CANDY_MODULE_SCHEMAS["particles"],
+        "border": CANDY_MODULE_SCHEMAS["border"],
+        "shadow": CANDY_MODULE_SCHEMAS["shadow"],
+        "outline": CANDY_MODULE_SCHEMAS["outline"],
+        "gradient": CANDY_MODULE_SCHEMAS["gradient"],
+        "animation": CANDY_MODULE_SCHEMAS["animation"],
+        "transition": CANDY_MODULE_SCHEMAS["transition"],
+        "canvas": CANDY_MODULE_SCHEMAS["canvas"],
+        "clip": CANDY_MODULE_SCHEMAS["clip"],
+        "decorated_box": CANDY_MODULE_SCHEMAS["decorated_box"],
+        "badge": CANDY_MODULE_SCHEMAS["badge"],
+        "avatar": CANDY_MODULE_SCHEMAS["avatar"],
+        "icon": CANDY_MODULE_SCHEMAS["icon"],
+        "text": CANDY_MODULE_SCHEMAS["text"],
+        "motion": CANDY_MODULE_SCHEMAS["motion"],
+    }
+)
+
 PAN_ZOOM_SCHEMA = {
     "type": "object",
     "properties": {
@@ -3936,6 +4380,7 @@ CONTROL_SCHEMAS = {
     "webview_adapter": WEBVIEW_ADAPTER_SCHEMA,
 
     # Candy
+    "candy": CANDY_SCHEMA,
     "emoji_icon": EMOJI_ICON_SCHEMA,
     "color_picker": COLOR_PICKER_SCHEMA,
 
@@ -4026,15 +4471,8 @@ _ALL_CONTROL_TYPES = {
     "elevated_button",
     "button_style",
     "callout",
-    "candy_button",
-    "candy_card",
-    "candy_column",
-    "candy_container",
+    "candy",
     "gallery",
-    "candy_row",
-    "candy_stack",
-    "candy_surface",
-    "candy_wrap",
     "skins",
     "canvas",
     "card",
@@ -4761,57 +5199,58 @@ _button_hints = RUNTIME_PROP_HINTS.setdefault("button", [])
 if "window_action" not in _button_hints:
     _button_hints.append("window_action")
 
-CANDY_PROP_HINTS = [
-    "candy_skins",
-    "candy_enabled",
-    "candy_background",
-    "candy_bgcolor",
-    "candy_color",
-    "candy_border_color",
-    "candy_border_width",
-    "candy_border",
-    "candy_radius",
-    "candy_clip",
-    "candy_padding",
-    "candy_shadow",
-    "candy_gradient",
-    "candy_image",
-    "candy_effects",
-    "candy_hover_scale",
-    "candy_press_scale",
-    "candy_hover_opacity",
-    "candy_press_opacity",
-    "candy_motion_ms",
-    "candy_glow",
-    "candy_neon",
-    "candy_glass",
-    "candy_grain",
-    "candy_sweep",
-    "candy_shimmer",
-    "candy_scanlines",
-    "candy_outline",
-    "candy_shadow_stack",
-    "candy_morphing_border",
-    "candy_ripple",
-    "candy_confetti",
-    "candy_tilt",
-    "candy_pulse",
-    "candy_pulse_ms",
-    "candy_pulse_scale",
-    "candy_float",
-    "candy_float_ms",
-    "candy_float_distance",
-    "candy_shake",
-    "candy_shake_ms",
-    "candy_shake_hz",
-    "candy_shake_offset",
-]
-
-for _name in _ALL_CONTROL_TYPES:
-    _hints = RUNTIME_PROP_HINTS.setdefault(_name, [])
-    for _prop in CANDY_PROP_HINTS:
-        if _prop not in _hints:
-            _hints.append(_prop)
+RUNTIME_PROP_HINTS.setdefault(
+    "candy",
+    [
+        "schema_version",
+        "module",
+        "variant",
+        "events",
+        "state",
+        "payload",
+        "theme",
+        "tokens",
+        "token_overrides",
+        "modules",
+        "slots",
+        "semantics",
+        "accessibility",
+        "interaction",
+        "performance",
+        "quality",
+        "cache",
+        "button",
+        "card",
+        "column",
+        "container",
+        "row",
+        "stack",
+        "surface",
+        "wrap",
+        "align",
+        "center",
+        "spacer",
+        "aspect_ratio",
+        "overflow_box",
+        "fitted_box",
+        "effects",
+        "particles",
+        "border",
+        "shadow",
+        "outline",
+        "gradient",
+        "animation",
+        "transition",
+        "canvas",
+        "clip",
+        "decorated_box",
+        "badge",
+        "avatar",
+        "icon",
+        "text",
+        "motion",
+    ],
+)
 
 for _name, _props in RUNTIME_PROP_HINTS.items():
     _schema = CONTROL_SCHEMAS.setdefault(_name, _control_schema())

@@ -442,9 +442,17 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'candy_surface':
-      case 'candy_container':
-        return buildCandySurfaceControl(props, rawChildren, context.buildChild);
+      case 'candy':
+        return buildCandyFamilyControl(
+          controlId,
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'gallery':
         return buildGalleryFamilyControl(
@@ -481,24 +489,8 @@ class ControlRenderer {
           context.buildChild,
         );
 
-      case 'candy_row':
-        return buildCandyRowControl(
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
-        );
-
       case 'column':
         return buildColumnControl(
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
-        );
-
-      case 'candy_column':
-        return buildCandyColumnControl(
           props,
           rawChildren,
           context.tokens,
@@ -518,19 +510,8 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'candy_stack':
-        return buildCandyStackControl(props, rawChildren, context.buildChild);
-
       case 'wrap':
         return buildWrapControl(
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
-        );
-
-      case 'candy_wrap':
-        return buildCandyWrapControl(
           props,
           rawChildren,
           context.tokens,
@@ -962,14 +943,6 @@ class ControlRenderer {
           props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'candy_button':
-        return buildCandyButtonAliasControl(
-          controlId,
-          props,
-          context.tokens,
           context.sendEvent,
         );
 
@@ -1971,14 +1944,6 @@ class ControlRenderer {
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
-        );
-
-      case 'candy_card':
-        return buildCandyCardAliasControl(
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
         );
 
       case 'table':

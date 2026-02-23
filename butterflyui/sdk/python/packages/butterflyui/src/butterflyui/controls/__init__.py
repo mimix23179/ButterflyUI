@@ -1,14 +1,7 @@
 from ._shared import Component
-from .candy_theme import (
-    CandyButton,
-    CandyCard,
-    CandyColumn,
-    CandyContainer,
-    CandyRow,
-    CandyStack,
-    CandySurface,
-    CandyTheme,
-    CandyWrap,
+from .candy import (
+    Candy, 
+    CandyTheme
 )
 from .customization import (
     AnimatedGradient,
@@ -369,15 +362,8 @@ __all__ = [
     "BorderSide",
     "Button",
     "ButtonStyle",
-    "CandyButton",
-    "CandyCard",
-    "CandyColumn",
-    "CandyContainer",
-    "CandyRow",
-    "CandyStack",
-    "CandySurface",
+    "Candy",
     "CandyTheme",
-    "CandyWrap",
     "Card",
     "Canvas",
     "CheckList",

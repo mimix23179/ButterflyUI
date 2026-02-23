@@ -12,14 +12,13 @@ def _normalize_token(value: str) -> str:
 
 def _canonical_control_type(value: str) -> str:
     normalized = _normalize_token(value)
-    if normalized.startswith("candy_"):
-        normalized = normalized[6:]
     if normalized in {"container", "box"}:
         return "surface"
     return normalized
 
 
 _INTERACTIVE_CONTROLS = {
+    "candy",
     "button",
     "checkbox",
     "switch",
@@ -59,6 +58,7 @@ _INTERACTIVE_CONTROLS = {
 }
 
 _GLASS_CONTROLS = {
+    "candy",
     "surface",
     "box",
     "container",
@@ -96,6 +96,7 @@ _GLASS_CONTROLS = {
 }
 
 _TRANSITION_CONTROLS = {
+    "candy",
     "overlay_host",
     "modal",
     "popover",
@@ -200,34 +201,8 @@ def _sanitize_modifiers_for_control(control_type: str, modifiers: Any) -> list[A
     return filtered
 
 
-def _normalize_candy_props(props: Mapping[str, Any] | None) -> dict[str, Any]:
-    out = dict(props or {})
-    alias_pairs = {
-        "candy_background": "background",
-        "candy_bgcolor": "bgcolor",
-        "candy_color": "bgcolor",
-        "candy_border_color": "border_color",
-        "candy_border_width": "border_width",
-        "candy_radius": "radius",
-        "candy_padding": "padding",
-        "candy_shadow": "shadow",
-        "candy_gradient": "gradient",
-        "candy_image": "image",
-    }
-    for source, target in alias_pairs.items():
-        if source in out and target not in out:
-            out[target] = out[source]
-
-    effects = out.get("candy_effects")
-    if effects is not None and "modifiers" not in out:
-        if isinstance(effects, Iterable) and not isinstance(effects, (str, bytes, Mapping)):
-            out["modifiers"] = list(effects)
-
-    skins = out.get("candy_skins")
-    if skins is not None and "style_pack" not in out:
-        if isinstance(skins, str) and skins.strip():
-            out["style_pack"] = skins.strip()
-    return out
+def _normalize_component_props(props: Mapping[str, Any] | None) -> dict[str, Any]:
+    return dict(props or {})
 
 
 def merge_props(
@@ -282,7 +257,7 @@ class Component(CoreComponent):
             state=state,
             **kwargs,
         )
-        control_props = _normalize_candy_props(control_props)
+        control_props = _normalize_component_props(control_props)
         if modifiers is not None:
             control_props["modifiers"] = _sanitize_modifiers_for_control(
                 self.control_type,

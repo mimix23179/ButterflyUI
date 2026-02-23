@@ -62,9 +62,6 @@ class ControlModifierCapabilities {
 
   static String _canonicalControlType(String value) {
     var normalized = _normalize(value);
-    if (normalized.startsWith('candy_')) {
-      normalized = normalized.substring(6);
-    }
     if (normalized == 'container') return 'surface';
     if (normalized == 'box') return 'surface';
     return normalized;
@@ -93,6 +90,7 @@ class ControlModifierCapabilities {
   }
 
   static const Set<String> _defaultInteractiveControls = <String>{
+    'candy',
     'button',
     'checkbox',
     'switch',
@@ -122,6 +120,7 @@ class ControlModifierCapabilities {
   };
 
   static const Set<String> _defaultGlassControls = <String>{
+    'candy',
     'surface',
     'box',
     'container',
@@ -159,6 +158,7 @@ class ControlModifierCapabilities {
   };
 
   static const Set<String> _defaultTransitionControls = <String>{
+    'candy',
     'overlay_host',
     'modal',
     'popover',

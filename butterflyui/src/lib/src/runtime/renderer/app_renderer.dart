@@ -236,12 +236,11 @@ class _AppRendererState extends State<AppRenderer> {
         }
         final registeredPacks = _registerStylePacks(payload['style_packs']);
         final hasTokens =
-            payload.containsKey('tokens') || payload.containsKey('candy');
+            payload.containsKey('tokens') ||
+            payload.containsKey('theme') ||
+            payload.containsKey('candy');
         if (hasTokens) {
-          final tokensRaw = payload['tokens'] ?? payload['candy'];
-          _rawTokens = tokensRaw is Map
-              ? tokensRaw.cast<String, Object?>()
-              : <String, Object?>{};
+          _rawTokens = _extractRuntimeTokens(payload);
         }
         if (payload.containsKey('style_pack')) {
           _stylePackName = payload['style_pack']?.toString();
@@ -534,10 +533,7 @@ class _AppRendererState extends State<AppRenderer> {
     final basePack = (baseName == null || baseName.isEmpty)
         ? stylePackRegistry.defaultPack
         : stylePackRegistry.resolve(baseName);
-    final tokensRaw = spec['tokens'] ?? spec['candy'] ?? spec['theme'];
-    final tokenMap = tokensRaw is Map
-        ? coerceObjectMap(tokensRaw)
-        : <String, Object?>{};
+    final tokenMap = _extractStylePackTokens(spec);
     final mergedTokens = CandyTokens.mergeMaps(
       basePack.defaultTokens,
       tokenMap,
@@ -609,6 +605,64 @@ class _AppRendererState extends State<AppRenderer> {
   Map<String, Object?> _coerceMapSection(Object? raw) {
     if (raw is! Map) return const <String, Object?>{};
     return coerceObjectMap(raw);
+  }
+
+  Map<String, Object?> _extractRuntimeTokens(Map<String, Object?> payload) {
+    final direct = _extractTokenMap(payload['tokens']);
+    if (direct.isNotEmpty) return direct;
+
+    final theme = _extractTokenMap(payload['theme']);
+    if (theme.isNotEmpty) return theme;
+
+    final candy = _extractTokenMap(payload['candy']);
+    if (candy.isNotEmpty) return candy;
+
+    return <String, Object?>{};
+  }
+
+  Map<String, Object?> _extractStylePackTokens(Map<String, Object?> spec) {
+    final direct = _extractTokenMap(spec['tokens']);
+    if (direct.isNotEmpty) return direct;
+
+    final candy = _extractTokenMap(spec['candy']);
+    if (candy.isNotEmpty) return candy;
+
+    final theme = _extractTokenMap(spec['theme']);
+    if (theme.isNotEmpty) return theme;
+
+    return <String, Object?>{};
+  }
+
+  Map<String, Object?> _extractTokenMap(Object? raw) {
+    if (raw is! Map) return <String, Object?>{};
+
+    final map = coerceObjectMap(raw);
+
+    final nestedTokens = map['tokens'];
+    if (nestedTokens is Map) {
+      return coerceObjectMap(nestedTokens);
+    }
+
+    final nestedTheme = map['theme'];
+    if (nestedTheme is Map) {
+      final themeMap = coerceObjectMap(nestedTheme);
+      final themedTokens = themeMap['tokens'];
+      if (themedTokens is Map) {
+        return coerceObjectMap(themedTokens);
+      }
+    }
+
+    final looksLikeCandyControl =
+        map.containsKey('module') ||
+        map.containsKey('modules') ||
+        map.containsKey('state') ||
+        map.containsKey('schema_version');
+
+    if (looksLikeCandyControl) {
+      return <String, Object?>{};
+    }
+
+    return map;
   }
 
   Widget Function(BuildContext, CandyTokens) _backgroundFromSpec(
