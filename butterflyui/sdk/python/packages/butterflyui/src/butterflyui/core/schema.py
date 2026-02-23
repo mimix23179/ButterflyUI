@@ -1985,6 +1985,74 @@ CODE_EDITOR_EVENT_ENUM = [
     "module_change",
 ]
 
+TERMINAL_MODULE_ENUM = [
+    "capabilities",
+    "command_builder",
+    "flow_gate",
+    "output_mapper",
+    "presets",
+    "progress",
+    "progress_view",
+    "prompt",
+    "raw_view",
+    "replay",
+    "session",
+    "stdin",
+    "stdin_injector",
+    "stream",
+    "stream_view",
+    "tabs",
+    "timeline",
+    "view",
+    "workbench",
+    "process_bridge",
+    "execution_lane",
+    "log_viewer",
+    "log_panel",
+]
+
+TERMINAL_STATE_ENUM = ["idle", "loading", "ready", "running", "paused", "disabled"]
+
+TERMINAL_EVENT_ENUM = [
+    "ready",
+    "change",
+    "submit",
+    "input",
+    "output",
+    "state_change",
+    "module_change",
+]
+
+STUDIO_MODULE_ENUM = [
+    "actions_editor",
+    "asset_browser",
+    "bindings_editor",
+    "block_palette",
+    "builder",
+    "canvas",
+    "component_palette",
+    "inspector",
+    "outline_tree",
+    "project_panel",
+    "properties_panel",
+    "responsive_toolbar",
+    "tokens_editor",
+    "selection_tools",
+    "transform_box",
+    "transform_toolbar",
+]
+
+STUDIO_STATE_ENUM = ["idle", "loading", "ready", "editing", "preview", "disabled"]
+
+STUDIO_EVENT_ENUM = [
+    "ready",
+    "change",
+    "submit",
+    "select",
+    "state_change",
+    "module_change",
+]
+
 
 def _gallery_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
     return {
@@ -2019,6 +2087,38 @@ def _skins_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _code_editor_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {
+            "enabled": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "title": STRING_SCHEMA,
+            "subtitle": STRING_SCHEMA,
+            "value": ANY_SCHEMA,
+            "payload": ANY_SCHEMA,
+            **dict(extra_properties),
+        },
+        "additionalProperties": False,
+    }
+
+
+def _terminal_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {
+            "enabled": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "title": STRING_SCHEMA,
+            "subtitle": STRING_SCHEMA,
+            "value": ANY_SCHEMA,
+            "payload": ANY_SCHEMA,
+            **dict(extra_properties),
+        },
+        "additionalProperties": False,
+    }
+
+
+def _studio_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "type": "object",
         "properties": {
@@ -2186,6 +2286,183 @@ CODE_EDITOR_MODULE_SCHEMAS = {
     "intent_panel": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
     "intent_router": _code_editor_module_schema({"routes": {"type": "array", "items": ANY_SCHEMA}}),
     "intent_search": _code_editor_module_schema({"query": STRING_SCHEMA}),
+}
+
+STUDIO_MODULE_SCHEMAS = {
+    "actions_editor": _studio_module_schema(
+        {
+            "actions": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "target_id": STRING_SCHEMA,
+        }
+    ),
+    "asset_browser": _studio_module_schema(
+        {
+            "assets": {"type": "array", "items": ANY_SCHEMA},
+            "selected_id": STRING_SCHEMA,
+            "show_header": BOOL_SCHEMA,
+        }
+    ),
+    "bindings_editor": _studio_module_schema(
+        {
+            "bindings": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "target_id": STRING_SCHEMA,
+        }
+    ),
+    "block_palette": _studio_module_schema(
+        {
+            "query": STRING_SCHEMA,
+            "blocks": {"type": "array", "items": ANY_SCHEMA},
+            "show_search": BOOL_SCHEMA,
+        }
+    ),
+    "builder": _studio_module_schema(
+        {
+            "project": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "blocks": {"type": "array", "items": ANY_SCHEMA},
+            "assets": {"type": "array", "items": ANY_SCHEMA},
+            "breakpoints": {"type": "array", "items": ANY_SCHEMA},
+            "selected_id": STRING_SCHEMA,
+        }
+    ),
+    "canvas": _studio_module_schema(
+        {
+            "selected_id": STRING_SCHEMA,
+            "hovered_id": STRING_SCHEMA,
+            "show_grid": BOOL_SCHEMA,
+            "snap_to_grid": BOOL_SCHEMA,
+            "grid_size": NUMBER_SCHEMA,
+            "show_drop_hints": BOOL_SCHEMA,
+        }
+    ),
+    "component_palette": _studio_module_schema(
+        {
+            "query": STRING_SCHEMA,
+            "blocks": {"type": "array", "items": ANY_SCHEMA},
+            "show_search": BOOL_SCHEMA,
+        }
+    ),
+    "inspector": _studio_module_schema(
+        {
+            "node": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "show_raw": BOOL_SCHEMA,
+            "show_actions": BOOL_SCHEMA,
+            "show_bindings": BOOL_SCHEMA,
+        }
+    ),
+    "outline_tree": _studio_module_schema(
+        {
+            "nodes": {"type": "array", "items": ANY_SCHEMA},
+            "selected_id": STRING_SCHEMA,
+            "dense": BOOL_SCHEMA,
+        }
+    ),
+    "project_panel": _studio_module_schema(
+        {
+            "project": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        }
+    ),
+    "properties_panel": _studio_module_schema(
+        {
+            "schema": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "value": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "dense": BOOL_SCHEMA,
+        }
+    ),
+    "responsive_toolbar": _studio_module_schema(
+        {
+            "breakpoints": {"type": "array", "items": ANY_SCHEMA},
+            "current_id": STRING_SCHEMA,
+        }
+    ),
+    "tokens_editor": _studio_module_schema(
+        {
+            "height": NUMBER_SCHEMA,
+            "json": STRING_SCHEMA,
+            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        }
+    ),
+    "selection_tools": _studio_module_schema(
+        {
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "active": STRING_SCHEMA,
+        }
+    ),
+    "transform_box": _studio_module_schema(
+        {
+            "x": NUMBER_SCHEMA,
+            "y": NUMBER_SCHEMA,
+            "width": NUMBER_SCHEMA,
+            "height": NUMBER_SCHEMA,
+            "rotation": NUMBER_SCHEMA,
+        }
+    ),
+    "transform_toolbar": _studio_module_schema(
+        {
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "active": STRING_SCHEMA,
+        }
+    ),
+}
+
+TERMINAL_MODULE_SCHEMAS = {
+    "capabilities": _terminal_module_schema(
+        {
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "supports": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+    "command_builder": _terminal_module_schema(
+        {
+            "command": STRING_SCHEMA,
+            "args": {"type": "array", "items": STRING_SCHEMA},
+            "cwd": STRING_SCHEMA,
+        }
+    ),
+    "flow_gate": _terminal_module_schema(
+        {
+            "enabled": BOOL_SCHEMA,
+            "blocked": BOOL_SCHEMA,
+            "reason": STRING_SCHEMA,
+        }
+    ),
+    "output_mapper": _terminal_module_schema(
+        {
+            "mode": STRING_SCHEMA,
+            "items": {"type": "array", "items": ANY_SCHEMA},
+        }
+    ),
+    "presets": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "progress": _terminal_module_schema({"value": NUMBER_SCHEMA, "total": NUMBER_SCHEMA}),
+    "progress_view": _terminal_module_schema({"value": NUMBER_SCHEMA, "label": STRING_SCHEMA}),
+    "prompt": _terminal_module_schema({"value": STRING_SCHEMA, "placeholder": STRING_SCHEMA}),
+    "raw_view": _terminal_module_schema({"text": STRING_SCHEMA, "raw_text": STRING_SCHEMA}),
+    "replay": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "session": _terminal_module_schema({"session_id": STRING_SCHEMA, "status": STRING_SCHEMA}),
+    "stdin": _terminal_module_schema({"value": STRING_SCHEMA}),
+    "stdin_injector": _terminal_module_schema({"value": STRING_SCHEMA}),
+    "stream": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "stream_view": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "tabs": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "timeline": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "view": _terminal_module_schema({"mode": STRING_SCHEMA}),
+    "workbench": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "process_bridge": _terminal_module_schema(
+        {
+            "command": STRING_SCHEMA,
+            "args": {"type": "array", "items": STRING_SCHEMA},
+            "cwd": STRING_SCHEMA,
+            "env": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "auto_start": BOOL_SCHEMA,
+        }
+    ),
+    "execution_lane": _terminal_module_schema(
+        {
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "active_id": STRING_SCHEMA,
+        }
+    ),
+    "log_viewer": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+    "log_panel": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
 }
 
 GALLERY_SCHEMA = _control_schema(
@@ -2358,6 +2635,21 @@ CODE_EDITOR_SCHEMA = _control_schema(
         "emit_on_change": BOOL_SCHEMA,
         "debounce_ms": INTEGER_SCHEMA,
         **{name: CODE_EDITOR_MODULE_SCHEMAS[name] for name in CODE_EDITOR_MODULE_ENUM},
+    }
+)
+
+STUDIO_SCHEMA = _control_schema(
+    {
+        "schema_version": INTEGER_SCHEMA,
+        "module": {"type": "string", "enum": STUDIO_MODULE_ENUM},
+        "state": {"type": "string", "enum": STUDIO_STATE_ENUM},
+        "events": {"type": "array", "items": {"type": "string", "enum": STUDIO_EVENT_ENUM}},
+        "modules": {
+            "type": "object",
+            "properties": {name: STUDIO_MODULE_SCHEMAS[name] for name in STUDIO_MODULE_ENUM},
+            "additionalProperties": False,
+        },
+        **{name: STUDIO_MODULE_SCHEMAS[name] for name in STUDIO_MODULE_ENUM},
     }
 )
 
@@ -3713,6 +4005,15 @@ IDE_SCHEMA = _control_schema(
 
 TERMINAL_SCHEMA = _control_schema(
     {
+        "schema_version": INTEGER_SCHEMA,
+        "module": {"type": "string", "enum": TERMINAL_MODULE_ENUM},
+        "state": {"type": "string", "enum": TERMINAL_STATE_ENUM},
+        "events": {"type": "array", "items": {"type": "string", "enum": TERMINAL_EVENT_ENUM}},
+        "modules": {
+            "type": "object",
+            "properties": {name: TERMINAL_MODULE_SCHEMAS[name] for name in TERMINAL_MODULE_ENUM},
+            "additionalProperties": False,
+        },
         "lines": {"type": "array", "items": ANY_SCHEMA},
         "history": {"type": "array", "items": STRING_SCHEMA},
         "history_items": {"type": "array", "items": STRING_SCHEMA},
@@ -3760,33 +4061,10 @@ TERMINAL_SCHEMA = _control_schema(
         "local_blocklist": {"type": "array", "items": STRING_SCHEMA},
         "local_allow_patterns": {"type": "array", "items": STRING_SCHEMA},
         "local_block_patterns": {"type": "array", "items": STRING_SCHEMA},
-    }
-)
-
-TERMINAL_HOST_SCHEMA = _control_schema(
-    {
-        "instances": {"type": "array", "items": {"type": "object"}},
-        "active_id": STRING_SCHEMA,
-        "cwd": STRING_SCHEMA,
-        "workspace_path": STRING_SCHEMA,
-        "output_channels": {"type": "object"},
-        "active_output_channel": STRING_SCHEMA,
-    }
-)
-
-TERMINAL_TAB_STRIP_SCHEMA = _control_schema(
-    {
-        "tabs": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-TERMINAL_PROCESS_BRIDGE_SCHEMA = _control_schema(
-    {
-        "command": STRING_SCHEMA,
-        "args": {"type": "array", "items": STRING_SCHEMA},
-        "cwd": STRING_SCHEMA,
-        "env": {"type": "object"},
-        "auto_start": BOOL_SCHEMA,
+        "output": STRING_SCHEMA,
+        "raw_text": STRING_SCHEMA,
+        "webview_engine": STRING_SCHEMA,
+        **{name: TERMINAL_MODULE_SCHEMAS[name] for name in TERMINAL_MODULE_ENUM},
     }
 )
 
@@ -4759,6 +5037,7 @@ CONTROL_SCHEMAS = {
     "mini_map": MINI_MAP_SCHEMA,
     "ide": IDE_SCHEMA,
     "code_editor": CODE_EDITOR_SCHEMA,
+    "studio": STUDIO_SCHEMA,
     "code_buffer": CODE_BUFFER_SCHEMA,
     "code_document": CODE_DOCUMENT_SCHEMA,
     "multi_cursor_controller": MULTI_CURSOR_CONTROLLER_SCHEMA,
@@ -4849,29 +5128,7 @@ CONTROL_SCHEMAS = {
     "toast_host": _control_schema(),
     "drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
     "window_controls": _control_schema(),
-    "terminal_view": TERMINAL_SCHEMA,
     "terminal": TERMINAL_SCHEMA,
-    "terminal_session": TERMINAL_SCHEMA,
-    "terminal_stream": TERMINAL_SCHEMA,
-    "terminal_stream_view": TERMINAL_SCHEMA,
-    "terminal_raw_view": TERMINAL_SCHEMA,
-    "terminal_prompt": TERMINAL_SCHEMA,
-    "terminal_stdin": TERMINAL_SCHEMA,
-    "terminal_stdin_injector": TERMINAL_SCHEMA,
-    "terminal_command_builder": TERMINAL_SCHEMA,
-    "terminal_capabilities": TERMINAL_SCHEMA,
-    "terminal_presets": TERMINAL_SCHEMA,
-    "terminal_replay": TERMINAL_SCHEMA,
-    "terminal_flow_gate": TERMINAL_SCHEMA,
-    "terminal_output_mapper": TERMINAL_SCHEMA,
-    "terminal_timeline": TERMINAL_SCHEMA,
-    "terminal_progress": TERMINAL_SCHEMA,
-    "terminal_host": TERMINAL_HOST_SCHEMA,
-    "terminal_workbench": TERMINAL_HOST_SCHEMA,
-    "terminal_tab_strip": TERMINAL_TAB_STRIP_SCHEMA,
-    "terminal_tabs": TERMINAL_TAB_STRIP_SCHEMA,
-    "terminal_process_bridge": TERMINAL_PROCESS_BRIDGE_SCHEMA,
-    "process_bridge": TERMINAL_PROCESS_BRIDGE_SCHEMA,
     "output_panel": OUTPUT_PANEL_SCHEMA,
     "log_panel": OUTPUT_PANEL_SCHEMA,
     "editor_tab_strip": EDITOR_TAB_STRIP_SCHEMA,
@@ -5221,12 +5478,14 @@ _ALL_CONTROL_TYPES = {
     "state_snapshot",
     "status_bar",
     "status_mark",
+    "studio",
     "studio_actions_editor",
     "studio_asset_browser",
     "studio_bindings_editor",
     "studio_block_palette",
     "studio_builder",
     "studio_canvas",
+    "studio_component_palette",
     "studio_inspector",
     "studio_outline_tree",
     "studio_project_panel",
@@ -5243,30 +5502,8 @@ _ALL_CONTROL_TYPES = {
     "tabs",
     "tag_chip",
     "terminal",
-    "terminal_capabilities",
-    "terminal_command_builder",
-    "terminal_flow_gate",
-    "terminal_output_mapper",
-    "terminal_page",
-    "terminal_presets",
-    "terminal_progress",
-    "terminal_progress_view",
-    "terminal_host",
-    "terminal_workbench",
-    "terminal_tab_strip",
-    "terminal_tabs",
-    "terminal_process_bridge",
-    "process_bridge",
     "output_panel",
     "log_panel",
-    "terminal_prompt",
-    "terminal_raw_view",
-    "terminal_replay",
-    "terminal_session",
-    "terminal_stdin_injector",
-    "terminal_stream",
-    "terminal_stream_view",
-    "terminal_timeline",
     "text",
     "text_area",
     "text_field",
@@ -5442,7 +5679,6 @@ RUNTIME_PROP_HINTS = {
     'submit_scope': ['autofocus', 'enabled'],
     'table': ['columns', 'rows'],
     'tabs': ['closable', 'index', 'labels', 'scrollable', 'show_add'],
-    'terminal_view': ['output', 'strip_ansi'],
     'time_select': ['enabled', 'label', 'placeholder', 'use_24h', 'value'],
     'toast': ['action_label', 'duration_ms', 'icon', 'instant', 'label', 'message', 'open', 'priority', 'style', 'variant', 'use_flushbar', 'use_fluttertoast', 'toast_position'],
     'snackbar': ['action_label', 'duration_ms', 'icon', 'instant', 'label', 'message', 'open', 'priority', 'style', 'variant', 'use_flushbar', 'use_fluttertoast', 'toast_position'],
@@ -5511,13 +5747,18 @@ RUNTIME_PROP_HINTS = {
         'value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste', 'emit_on_change', 'debounce_ms',
         'editor_intent_router', 'editor_minimap', 'editor_surface', 'editor_view', 'diff', 'editor_tabs', 'empty_state_view', 'explorer_tree', 'ide', 'code_buffer', 'code_category_layer', 'code_document', 'file_tabs', 'file_tree', 'smart_search_bar', 'semantic_search', 'search_box', 'search_everything_panel', 'search_field', 'search_history', 'search_intent', 'search_item', 'search_provider', 'search_results_view', 'search_scope_selector', 'search_source', 'query_token', 'document_tab_strip', 'command_search', 'tree', 'workbench_editor', 'workspace_explorer', 'command_bar', 'diagnostic_stream', 'diff_narrator', 'dock_graph', 'dock', 'dock_pane', 'empty_view', 'export_panel', 'gutter', 'hint', 'mini_map', 'scope_picker', 'scoped_search_replace', 'diagnostics_panel', 'ghost_editor', 'inline_error_view', 'inline_search_overlay', 'inline_widget', 'inspector', 'intent_panel', 'intent_router', 'intent_search',
     ],
+    'studio': ['schema_version', 'module', 'state', 'events', 'modules',
+        'actions_editor', 'asset_browser', 'bindings_editor', 'block_palette',
+        'builder', 'canvas', 'component_palette', 'inspector', 'outline_tree',
+        'project_panel', 'properties_panel', 'responsive_toolbar', 'tokens_editor',
+        'selection_tools', 'transform_box', 'transform_toolbar',
+    ],
     'ide': ['value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste'],
     'editor_minimap': ['text', 'language', 'visible', 'position', 'width', 'background', 'border_color', 'text_color'],
     'file_tabs': ['items', 'active_id', 'dense'],
     'pane_spec': ['size', 'min_size', 'max_size', 'resizable', 'collapsible', 'collapsed'],
     'progress_indicator': ['value', 'indeterminate', 'label', 'color', 'background_color', 'stroke_width', 'variant', 'circular'],
     'table_view': ['rows', 'headers', 'columns', 'sortable', 'filterable', 'selectable', 'multi_select', 'dense', 'striped', 'show_header'],
-    'terminal_progress_view': ['progress', 'total', 'label', 'detail', 'show_percentage', 'show_eta', 'eta', 'dense'],
     'tree_node': ['id', 'label', 'expanded', 'selected', 'disabled', 'icon', 'children'],
     'tree_view': ['nodes', 'expanded', 'dense', 'multi_select', 'show_root', 'expand_all'],
     'markdown': ['value', 'text', 'selectable', 'scrollable', 'use_flutter_markdown'],
@@ -5532,16 +5773,21 @@ RUNTIME_PROP_HINTS = {
     'drop_zone': ['enabled', 'accepts', 'title', 'subtitle', 'use_desktop_drop'],
     'queue_list': ['items', 'auto_download', 'download_dir', 'max_concurrent', 'use_download_manager', 'emit_local_events'],
     'download_item': ['id', 'title', 'subtitle', 'progress', 'status', 'speed', 'eta', 'paused', 'url', 'path'],
-    'terminal': ['events', 'lines', 'output', 'session_id', 'title', 'status', 'running', 'enabled', 'dense', 'show_header', 'show_actions', 'show_view_toggle', 'show_filters', 'show_input', 'show_prompt', 'read_only', 'show_timeline', 'show_raw_toggle', 'auto_scroll', 'clear_on_submit', 'wrap_lines', 'show_timestamps', 'view', 'max_lines', 'prompt', 'placeholder', 'submit_label', 'input_mode', 'raw_text', 'raw', 'mapped', 'mapped_output', 'mapped_data', 'mapped_view', 'mapped_type', 'timeline', 'streams', 'font_size', 'line_height', 'font_family', 'cursor_blink', 'cursor_color', 'bgcolor', 'background', 'border_color', 'radius', 'text_color', 'command_color', 'error_color', 'accent_color', 'strip_ansi', 'ansi_enabled', 'history', 'history_items', 'history_limit', 'history_key', 'persist_history', 'auto_focus', 'engine', 'webview_engine', 'local_command', 'local_args', 'local_env', 'local_cwd', 'auto_start', 'use_pty', 'pipe_input', 'emit_local_events', 'local_allowlist', 'local_blocklist', 'local_allow_patterns', 'local_block_patterns'],
-    'terminal_session': ['events', 'lines', 'output', 'session_id', 'title', 'status', 'running', 'enabled', 'dense', 'show_header', 'show_actions', 'show_view_toggle', 'show_filters', 'show_input', 'show_prompt', 'read_only', 'show_timeline', 'show_raw_toggle', 'auto_scroll', 'clear_on_submit', 'wrap_lines', 'show_timestamps', 'view', 'max_lines', 'prompt', 'placeholder', 'submit_label', 'input_mode', 'raw_text', 'raw', 'mapped', 'mapped_output', 'mapped_data', 'mapped_view', 'mapped_type', 'timeline', 'streams', 'font_size', 'line_height', 'font_family', 'cursor_blink', 'cursor_color', 'bgcolor', 'background', 'border_color', 'radius', 'text_color', 'command_color', 'error_color', 'accent_color', 'strip_ansi', 'ansi_enabled', 'history', 'history_items', 'history_limit', 'history_key', 'persist_history', 'auto_focus', 'engine', 'webview_engine', 'local_command', 'local_args', 'local_env', 'local_cwd', 'auto_start', 'use_pty', 'pipe_input', 'emit_local_events', 'local_allowlist', 'local_blocklist', 'local_allow_patterns', 'local_block_patterns'],
-    'terminal_stream_view': ['events', 'lines', 'output', 'enabled', 'dense', 'show_filters', 'auto_scroll', 'show_timestamps', 'wrap_lines', 'max_lines', 'streams', 'font_family', 'font_size', 'line_height', 'bgcolor', 'background', 'text_color', 'command_color', 'error_color', 'strip_ansi'],
-    'terminal_raw_view': ['raw_text', 'text', 'events', 'lines', 'output', 'dense', 'font_family', 'font_size', 'line_height', 'bgcolor', 'background', 'text_color', 'strip_ansi'],
-    'terminal_host': ['instances', 'active_id', 'cwd', 'workspace_path', 'output_channels', 'active_output_channel'],
-    'terminal_workbench': ['instances', 'active_id', 'cwd', 'workspace_path', 'output_channels', 'active_output_channel'],
-    'terminal_tab_strip': ['tabs'],
-    'terminal_tabs': ['tabs'],
-    'terminal_process_bridge': ['command', 'args', 'cwd', 'env', 'auto_start'],
-    'process_bridge': ['command', 'args', 'cwd', 'env', 'auto_start'],
+    'terminal': ['schema_version', 'module', 'state', 'events', 'modules',
+        'lines', 'history', 'history_items', 'history_limit', 'history_key', 'persist_history',
+        'prompt', 'placeholder', 'submit_label', 'enabled', 'dense', 'show_prompt', 'show_input',
+        'read_only', 'cursor_blink', 'auto_scroll', 'wrap_lines', 'show_timestamps', 'strip_ansi',
+        'clear_on_submit', 'auto_focus', 'max_lines', 'font_family', 'font_size', 'line_height',
+        'bgcolor', 'background', 'text_color', 'cursor_color', 'command_color', 'error_color',
+        'stderr_color', 'border_color', 'radius', 'engine', 'webview_engine',
+        'local_command', 'local_args', 'local_env', 'local_cwd', 'auto_start', 'use_pty', 'pipe_input',
+        'emit_local_events', 'local_allowlist', 'local_blocklist', 'local_allow_patterns', 'local_block_patterns',
+        'output', 'raw_text',
+        'capabilities', 'command_builder', 'flow_gate', 'output_mapper', 'presets', 'progress',
+        'progress_view', 'raw_view', 'replay', 'session', 'stdin', 'stdin_injector', 'stream',
+        'stream_view', 'tabs', 'timeline', 'view', 'workbench', 'process_bridge',
+        'execution_lane', 'log_viewer', 'log_panel',
+    ],
     'output_panel': ['channels', 'active_channel'],
     'log_panel': ['channels', 'active_channel'],
     'editor_tab_strip': ['tabs'],

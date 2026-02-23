@@ -54,6 +54,7 @@ import 'controls/display/rating_display.dart';
 import 'controls/display/reaction_bar.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
+import 'controls/display/studio.dart';
 import 'controls/display/diff_view.dart';
 import 'controls/display/empty_state.dart';
 import 'controls/display/error_state.dart';
@@ -70,9 +71,6 @@ import 'controls/productivity/editor_workspace.dart';
 import 'controls/productivity/file_system.dart';
 import 'controls/productivity/output_panel.dart';
 import 'controls/productivity/problems_panel.dart';
-import 'controls/productivity/terminal_host.dart';
-import 'controls/productivity/terminal_process_bridge.dart';
-import 'controls/productivity/terminal_tab_strip.dart';
 import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/fold_layer.dart';
@@ -801,6 +799,28 @@ class ControlRenderer {
       case 'code_editor':
       case 'ide':
         return buildCodeEditorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'studio':
+      case 'studio_builder':
+      case 'studio_canvas':
+      case 'studio_block_palette':
+      case 'studio_component_palette':
+      case 'studio_inspector':
+      case 'studio_outline_tree':
+      case 'studio_project_panel':
+      case 'studio_properties_panel':
+      case 'studio_responsive_toolbar':
+      case 'studio_tokens_editor':
+      case 'studio_actions_editor':
+      case 'studio_bindings_editor':
+      case 'studio_asset_browser':
+        return buildStudioControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -2518,47 +2538,7 @@ class ControlRenderer {
         );
 
       case 'terminal':
-      case 'terminal_view':
-      case 'terminal_session':
-      case 'terminal_stream':
-      case 'terminal_stream_view':
-      case 'terminal_raw_view':
-      case 'terminal_prompt':
-      case 'terminal_stdin':
-      case 'terminal_stdin_injector':
-      case 'terminal_command_builder':
-      case 'terminal_capabilities':
-      case 'terminal_presets':
-      case 'terminal_replay':
-      case 'terminal_flow_gate':
-      case 'terminal_output_mapper':
-      case 'terminal_timeline':
-      case 'terminal_progress':
         return buildTerminalControl(
-          controlId,
-          props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'terminal_host':
-      case 'terminal_workbench':
-        return buildTerminalHostControl(
-          controlId,
-          props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'terminal_tab_strip':
-      case 'terminal_tabs':
-        return buildTerminalTabStripControl(controlId, props, context.sendEvent);
-
-      case 'terminal_process_bridge':
-      case 'process_bridge':
-        return buildTerminalProcessBridgeControl(
           controlId,
           props,
           context.registerInvokeHandler,
