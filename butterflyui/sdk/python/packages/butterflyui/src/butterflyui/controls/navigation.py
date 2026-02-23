@@ -18,6 +18,8 @@ __all__ = [
     "MenuItem",
     "Breadcrumbs",
     "BreadcrumbBar",
+    "CrumbTrail",
+    "ContextActionBar",
     "StatusBar",
     "CommandPalette",
     "CommandItem",
@@ -282,6 +284,40 @@ class ActionBar(Component):
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
+class ContextActionBar(ActionBar):
+    control_type = "context_action_bar"
+
+    def __init__(
+        self,
+        *children: Any,
+        items: list[Mapping[str, Any]] | None = None,
+        dense: bool | None = None,
+        spacing: float | None = None,
+        wrap: bool | None = None,
+        alignment: str | None = None,
+        bgcolor: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            *children,
+            items=items,
+            dense=dense,
+            spacing=spacing,
+            wrap=wrap,
+            alignment=alignment,
+            bgcolor=bgcolor,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class MenuBar(Component):
     control_type = "menu_bar"
 
@@ -392,6 +428,40 @@ class BreadcrumbBar(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class CrumbTrail(BreadcrumbBar):
+    control_type = "crumb_trail"
+
+    def __init__(
+        self,
+        *,
+        items: list[Mapping[str, Any]] | None = None,
+        current_index: int | None = None,
+        separator: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            items=items,
+            separator=separator,
+            max_items=None,
+            events=events,
+            props=merge_props(props, current_index=current_index, enabled=enabled),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+    def set_index(self, session: Any, index: int) -> dict[str, Any]:
+        return self.invoke(session, "set_index", {"index": int(index)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class StatusBar(Component):

@@ -14,6 +14,8 @@ __all__ = [
     "Table",
     "DataTable",
     "DataGrid",
+    "DataSourceView",
+    "DownloadItem",
     "TableView",
     "ListTile",
     "ItemTile",
@@ -244,6 +246,103 @@ class DataTable(Component):
 
 class DataGrid(DataTable):
     control_type = "data_grid"
+
+
+class DataSourceView(Component):
+    control_type = "data_source_view"
+
+    def __init__(
+        self,
+        *,
+        sources: list[Mapping[str, Any]] | None = None,
+        selected_id: str | None = None,
+        query: str | None = None,
+        show_search: bool | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            sources=sources,
+            selected_id=selected_id,
+            query=query,
+            show_search=show_search,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_sources(self, session: Any, sources: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_sources", {"sources": [dict(source) for source in sources]})
+
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def set_query(self, session: Any, query: str) -> dict[str, Any]:
+        return self.invoke(session, "set_query", {"query": query})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class DownloadItem(Component):
+    control_type = "download_item"
+
+    def __init__(
+        self,
+        *,
+        id: str | None = None,
+        title: str | None = None,
+        subtitle: str | None = None,
+        progress: float | None = None,
+        status: str | None = None,
+        speed: str | None = None,
+        eta: str | None = None,
+        paused: bool | None = None,
+        url: str | None = None,
+        path: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            id=id,
+            title=title,
+            subtitle=subtitle,
+            progress=progress,
+            status=status,
+            speed=speed,
+            eta=eta,
+            paused=paused,
+            url=url,
+            path=path,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_progress(self, session: Any, progress: float) -> dict[str, Any]:
+        return self.invoke(session, "set_progress", {"progress": float(progress)})
+
+    def set_paused(self, session: Any, paused: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_paused", {"paused": paused})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class TableView(DataTable):

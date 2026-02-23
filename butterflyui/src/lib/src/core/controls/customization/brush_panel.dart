@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -64,7 +65,7 @@ class _BrushPanelControlState extends State<_BrushPanelControl> {
         widget.registerInvokeHandler(widget.controlId, _handleInvoke);
       }
     }
-    if (oldWidget.props != widget.props) {
+    if (!mapEquals(oldWidget.props, widget.props)) {
       _syncFromProps();
     }
   }
@@ -79,12 +80,21 @@ class _BrushPanelControlState extends State<_BrushPanelControl> {
 
   void _syncFromProps() {
     _size = (coerceDouble(widget.props['size']) ?? 16).clamp(1, 256).toDouble();
-    _hardness = (coerceDouble(widget.props['hardness']) ?? 50).clamp(0, 100).toDouble();
-    _opacity = (coerceDouble(widget.props['opacity']) ?? 100).clamp(0, 100).toDouble();
-    _flow = (coerceDouble(widget.props['flow']) ?? 100).clamp(0, 100).toDouble();
+    _hardness = (coerceDouble(widget.props['hardness']) ?? 50)
+        .clamp(0, 100)
+        .toDouble();
+    _opacity = (coerceDouble(widget.props['opacity']) ?? 100)
+        .clamp(0, 100)
+        .toDouble();
+    _flow = (coerceDouble(widget.props['flow']) ?? 100)
+        .clamp(0, 100)
+        .toDouble();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_value':
         final key = args['key']?.toString();
@@ -148,17 +158,52 @@ class _BrushPanelControlState extends State<_BrushPanelControl> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _slider('Size', _size, 1, 256, (v) => setState(() => _size = v), 'size'),
-            _slider('Hardness', _hardness, 0, 100, (v) => setState(() => _hardness = v), 'hardness'),
-            _slider('Opacity', _opacity, 0, 100, (v) => setState(() => _opacity = v), 'opacity'),
-            _slider('Flow', _flow, 0, 100, (v) => setState(() => _flow = v), 'flow'),
+            _slider(
+              'Size',
+              _size,
+              1,
+              256,
+              (v) => setState(() => _size = v),
+              'size',
+            ),
+            _slider(
+              'Hardness',
+              _hardness,
+              0,
+              100,
+              (v) => setState(() => _hardness = v),
+              'hardness',
+            ),
+            _slider(
+              'Opacity',
+              _opacity,
+              0,
+              100,
+              (v) => setState(() => _opacity = v),
+              'opacity',
+            ),
+            _slider(
+              'Flow',
+              _flow,
+              0,
+              100,
+              (v) => setState(() => _flow = v),
+              'flow',
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _slider(String label, double value, double min, double max, ValueChanged<double> onChanged, String key) {
+  Widget _slider(
+    String label,
+    double value,
+    double min,
+    double max,
+    ValueChanged<double> onChanged,
+    String key,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

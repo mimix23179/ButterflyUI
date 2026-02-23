@@ -7,6 +7,7 @@ from ._shared import Component, merge_props
 
 __all__ = [
     "AnimatedBackground",
+    "FoldLayer",
     "ChromaticShift",
     "ConfettiBurst",
     "GlassBlur",
@@ -16,6 +17,7 @@ __all__ = [
     "NeonEdge",
     "NoiseDisplacement",
     "NoiseField",
+    "FlowField",
     "ParticleField",
     "ScanlineOverlay",
     "Vignette",
@@ -43,6 +45,48 @@ class AnimatedBackground(Component):
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+
+class FoldLayer(Component):
+    control_type = "fold_layer"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        folds: int | None = None,
+        progress: float | None = None,
+        axis: str | None = None,
+        perspective: float | None = None,
+        shadow: float | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            folds=folds,
+            progress=progress,
+            axis=axis,
+            perspective=perspective,
+            shadow=shadow,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_progress(self, session: Any, progress: float) -> dict[str, Any]:
+        return self.invoke(session, "set_progress", {"progress": float(progress)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class ParticleField(Component):
@@ -465,6 +509,41 @@ class NoiseField(_EventfulEffect):
             intensity=intensity,
             speed=speed,
             color=color,
+            **kwargs,
+        )
+
+
+class FlowField(_EventfulEffect):
+    control_type = "flow_field"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *,
+        seed: int | None = None,
+        density: float | None = None,
+        speed: float | None = None,
+        line_width: float | None = None,
+        color: Any | None = None,
+        opacity: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            seed=seed,
+            density=density,
+            speed=speed,
+            line_width=line_width,
+            color=color,
+            opacity=opacity,
             **kwargs,
         )
 

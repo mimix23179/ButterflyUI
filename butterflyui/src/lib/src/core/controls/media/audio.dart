@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -64,7 +65,7 @@ class _AudioControlState extends State<_AudioControl> {
         widget.registerInvokeHandler(widget.controlId, _handleInvoke);
       }
     }
-    if (oldWidget.props != widget.props) {
+    if (!mapEquals(oldWidget.props, widget.props)) {
       _syncFromProps();
     }
   }
@@ -79,12 +80,21 @@ class _AudioControlState extends State<_AudioControl> {
 
   void _syncFromProps() {
     _playing = widget.props['autoplay'] == true;
-    _duration = (coerceDouble(widget.props['duration']) ?? 0).clamp(0, 86400).toDouble();
-    _position = (coerceDouble(widget.props['position']) ?? 0).clamp(0, _duration <= 0 ? 0 : _duration).toDouble();
-    _volume = (coerceDouble(widget.props['volume']) ?? 1).clamp(0, 1).toDouble();
+    _duration = (coerceDouble(widget.props['duration']) ?? 0)
+        .clamp(0, 86400)
+        .toDouble();
+    _position = (coerceDouble(widget.props['position']) ?? 0)
+        .clamp(0, _duration <= 0 ? 0 : _duration)
+        .toDouble();
+    _volume = (coerceDouble(widget.props['volume']) ?? 1)
+        .clamp(0, 1)
+        .toDouble();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'play':
         setState(() => _playing = true);
@@ -97,7 +107,11 @@ class _AudioControlState extends State<_AudioControl> {
       case 'set_position':
         final next = coerceDouble(args['seconds']);
         if (next != null) {
-          setState(() => _position = next.clamp(0, _duration <= 0 ? next : _duration).toDouble());
+          setState(
+            () => _position = next
+                .clamp(0, _duration <= 0 ? next : _duration)
+                .toDouble(),
+          );
           _emit('seek', _statePayload());
         }
         return _statePayload();

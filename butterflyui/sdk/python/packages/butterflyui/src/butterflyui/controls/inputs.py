@@ -32,6 +32,12 @@ __all__ = [
     "DateSelect",
     "DateRange",
     "DateSpan",
+    "CheckList",
+    "Chip",
+    "CountStepper",
+    "ElevatedButton",
+    "FieldGroup",
+    "FilterDrawer",
 ]
 
 
@@ -535,6 +541,137 @@ class FilterChipsBar(TagFilterBar):
         )
 
 
+class CheckList(Component):
+    control_type = "check_list"
+
+    def __init__(
+        self,
+        *,
+        options: list[Any] | None = None,
+        values: list[Any] | None = None,
+        dense: bool | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            options=options,
+            values=values,
+            dense=dense,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_values(self, session: Any, values: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_values", {"values": values})
+
+    def get_values(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_values", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Chip(Component):
+    control_type = "chip"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        value: Any | None = None,
+        selected: bool | None = None,
+        enabled: bool | None = None,
+        dismissible: bool | None = None,
+        color: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            value=value,
+            selected=selected,
+            enabled=enabled,
+            dismissible=dismissible,
+            color=color,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_selected(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class CountStepper(Component):
+    control_type = "count_stepper"
+
+    def __init__(
+        self,
+        *,
+        value: int | float | None = None,
+        min: int | float | None = None,
+        max: int | float | None = None,
+        step: int | float | None = None,
+        wrap: bool | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            value=value,
+            min=min,
+            max=max,
+            step=step,
+            wrap=wrap,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_value(self, session: Any, value: int | float) -> dict[str, Any]:
+        return self.invoke(session, "set_value", {"value": value})
+
+    def increment(self, session: Any, amount: int | float | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if amount is not None:
+            payload["amount"] = amount
+        return self.invoke(session, "increment", payload)
+
+    def decrement(self, session: Any, amount: int | float | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if amount is not None:
+            payload["amount"] = amount
+        return self.invoke(session, "decrement", payload)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
 class DatePicker(Component):
     control_type = "date_picker"
 
@@ -906,6 +1043,109 @@ class EmojiPicker(Component):
 
     def set_value(self, session: Any, value: str) -> dict[str, Any]:
         return self.invoke(session, "set_value", {"value": value})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class ElevatedButton(Button):
+    control_type = "elevated_button"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        text: str | None = None,
+        value: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            text=text,
+            value=value,
+            variant="elevated",
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class FieldGroup(Component):
+    control_type = "field_group"
+
+    def __init__(
+        self,
+        *children: Any,
+        label: str | None = None,
+        helper_text: str | None = None,
+        error_text: str | None = None,
+        spacing: float | None = None,
+        required: bool | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            label=label,
+            helper_text=helper_text,
+            error_text=error_text,
+            spacing=spacing,
+            required=required,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class FilterDrawer(Component):
+    control_type = "filter_drawer"
+
+    def __init__(
+        self,
+        *children: Any,
+        title: str | None = None,
+        open: bool | None = None,
+        schema: Mapping[str, Any] | None = None,
+        state: Mapping[str, Any] | None = None,
+        show_actions: bool | None = None,
+        apply_label: str | None = None,
+        clear_label: str | None = None,
+        dense: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            title=title,
+            open=open,
+            schema=dict(schema or {}),
+            state=dict(state or {}),
+            show_actions=show_actions,
+            apply_label=apply_label,
+            clear_label=clear_label,
+            dense=dense,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_open(self, session: Any, open: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"open": open})
+
+    def set_state(self, session: Any, state: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_state", {"state": dict(state)})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

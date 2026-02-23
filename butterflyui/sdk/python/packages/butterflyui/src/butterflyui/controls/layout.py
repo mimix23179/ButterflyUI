@@ -7,6 +7,7 @@ from ._shared import Component, merge_props
 
 __all__ = [
     "Align",
+    "Center",
     "PageControl",
     "Surface",
     "Box",
@@ -25,6 +26,10 @@ __all__ = [
     "DockLayout",
     "Pane",
     "InspectorPanel",
+    "Frame",
+    "Grid",
+    "DetailsPane",
+    "FlexSpacer",
 ]
 
 
@@ -62,6 +67,187 @@ class Align(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class DetailsPane(Component):
+    control_type = "details_pane"
+
+    def __init__(
+        self,
+        *children: Any,
+        mode: str | None = None,
+        split_ratio: float | None = None,
+        stack_breakpoint: float | None = None,
+        show_details: bool | None = None,
+        show_back: bool | None = None,
+        back_label: str | None = None,
+        divider: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            mode=mode,
+            split_ratio=split_ratio,
+            stack_breakpoint=stack_breakpoint,
+            show_details=show_details,
+            show_back=show_back,
+            back_label=back_label,
+            divider=divider,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_show_details(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_show_details", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class FlexSpacer(Component):
+    control_type = "flex_spacer"
+
+    def __init__(
+        self,
+        *,
+        flex: int = 1,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(props, flex=int(flex), **kwargs)
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class Frame(Component):
+    control_type = "frame"
+
+    def __init__(
+        self,
+        *children: Any,
+        width: float | None = None,
+        height: float | None = None,
+        min_width: float | None = None,
+        min_height: float | None = None,
+        max_width: float | None = None,
+        max_height: float | None = None,
+        padding: Any | None = None,
+        margin: Any | None = None,
+        alignment: Any | None = None,
+        bgcolor: Any | None = None,
+        border_color: Any | None = None,
+        border_width: float | None = None,
+        radius: float | None = None,
+        clip_behavior: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            width=width,
+            height=height,
+            min_width=min_width,
+            min_height=min_height,
+            max_width=max_width,
+            max_height=max_height,
+            padding=padding,
+            margin=margin,
+            alignment=alignment,
+            bgcolor=bgcolor,
+            border_color=border_color,
+            border_width=border_width,
+            radius=radius,
+            clip_behavior=clip_behavior,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Grid(Component):
+    control_type = "grid"
+
+    def __init__(
+        self,
+        *children: Any,
+        items: list[Any] | None = None,
+        columns: int | None = None,
+        spacing: float | None = None,
+        run_spacing: float | None = None,
+        child_aspect_ratio: float | None = None,
+        direction: str | None = None,
+        reverse: bool | None = None,
+        shrink_wrap: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            items=items,
+            columns=columns,
+            spacing=spacing,
+            run_spacing=run_spacing,
+            child_aspect_ratio=child_aspect_ratio,
+            direction=direction,
+            reverse=reverse,
+            shrink_wrap=shrink_wrap,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class Center(Align):
+    control_type = "center"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        width_factor: float | None = None,
+        height_factor: float | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            child=child,
+            *children,
+            alignment="center",
+            width_factor=width_factor,
+            height_factor=height_factor,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
 
 
 class PageControl(Component):

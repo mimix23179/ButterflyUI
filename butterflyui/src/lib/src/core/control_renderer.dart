@@ -8,6 +8,7 @@ import 'control_utils.dart';
 import 'motion/motion_pack.dart';
 import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
+import 'controls/buttons/elevated_button.dart';
 import 'controls/common/option_types.dart';
 import 'controls/customization/animated_gradient.dart';
 import 'controls/customization/avatar_stack.dart';
@@ -18,6 +19,11 @@ import 'controls/customization/border.dart';
 import 'controls/customization/border_side.dart';
 import 'controls/customization/button_style.dart';
 import 'controls/customization/candy.dart';
+import 'controls/customization/crop_box.dart';
+import 'controls/customization/curve_editor.dart';
+import 'controls/customization/guides_manager.dart';
+import 'controls/customization/histogram_overlay.dart';
+import 'controls/customization/histogram_view.dart';
 import 'controls/customization/brush_panel.dart';
 import 'controls/customization/color_tools.dart';
 import 'controls/customization/gallery.dart';
@@ -27,6 +33,9 @@ import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
 import 'controls/display/attachment_tile.dart';
 import 'controls/display/canvas_control.dart';
+import 'controls/display/download_item.dart';
+import 'controls/display/glyph.dart';
+import 'controls/display/glyph_button.dart';
 import 'controls/display/code_view.dart';
 import 'controls/display/code_editor.dart';
 import 'controls/display/diff_view.dart';
@@ -46,6 +55,8 @@ import 'controls/productivity/terminal_process_bridge.dart';
 import 'controls/productivity/terminal_tab_strip.dart';
 import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
+import 'controls/effects/fold_layer.dart';
+import 'controls/effects/flow_field.dart';
 import 'controls/effects/particle_field.dart';
 import 'controls/effects/noise_fx.dart';
 import 'controls/effects/scanline_overlay.dart';
@@ -57,7 +68,10 @@ import 'controls/feedback/skeleton.dart';
 import 'controls/feedback/toast.dart';
 import 'controls/feedback/tooltip.dart';
 import 'controls/inputs/checkbox.dart';
+import 'controls/inputs/check_list.dart';
+import 'controls/inputs/chip.dart';
 import 'controls/inputs/chip_group.dart';
+import 'controls/inputs/count_stepper.dart';
 import 'controls/inputs/async_action_button.dart';
 import 'controls/inputs/combobox.dart';
 import 'controls/inputs/date_picker.dart';
@@ -65,6 +79,8 @@ import 'controls/inputs/date_range_picker.dart';
 import 'controls/inputs/file_picker.dart';
 import 'controls/inputs/emoji_picker.dart';
 import 'controls/inputs/form.dart';
+import 'controls/inputs/field_group.dart';
+import 'controls/inputs/filter_drawer.dart';
 import 'controls/inputs/multi_select.dart';
 import 'controls/inputs/radio.dart';
 import 'controls/inputs/search_bar.dart';
@@ -73,6 +89,12 @@ import 'controls/inputs/slider.dart';
 import 'controls/inputs/switch.dart';
 import 'controls/inputs/text_field.dart';
 import 'controls/interaction/key_listener.dart';
+import 'controls/interaction/cursor.dart';
+import 'controls/interaction/drag_handle.dart';
+import 'controls/interaction/drag_payload.dart';
+import 'controls/interaction/drop_zone.dart';
+import 'controls/interaction/focus_anchor.dart';
+import 'controls/interaction/gesture_area.dart';
 import 'controls/interaction/shortcut_map.dart';
 import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
@@ -88,12 +110,17 @@ import 'controls/layout/scroll_view.dart';
 import 'controls/layout/split_view.dart';
 import 'controls/layout/stack.dart';
 import 'controls/layout/dock_layout.dart';
+import 'controls/layout/details_pane.dart';
+import 'controls/layout/flex_spacer.dart';
+import 'controls/layout/frame.dart';
+import 'controls/layout/grid.dart';
 import 'controls/layout/inspector_panel.dart';
 import 'controls/layout/window_frame.dart';
 import 'controls/layout/window_drag_region.dart';
 import 'controls/layout/window_controls.dart';
 import 'controls/layout/wrap.dart';
 import 'controls/lists/data_table.dart';
+import 'controls/lists/data_source_view.dart';
 import 'controls/lists/file_browser.dart';
 import 'controls/lists/list_tile.dart';
 import 'controls/lists/task_list.dart';
@@ -107,6 +134,8 @@ import 'controls/media/image.dart';
 import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
 import 'controls/navigation/breadcrumbs.dart';
+import 'controls/navigation/context_action_bar.dart';
+import 'controls/navigation/crumb_trail.dart';
 import 'controls/navigation/command_palette.dart';
 import 'controls/navigation/launcher.dart';
 import 'controls/navigation/menu_bar.dart';
@@ -307,10 +336,35 @@ class ControlRenderer {
       case 'container':
         return buildContainerControl(props, rawChildren, context.buildChild);
 
+      case 'frame':
+        return buildFrameControl(props, rawChildren, context.buildChild);
+
       case 'align':
         return buildAlignControl(
           controlId,
           props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'details_pane':
+        return buildDetailsPaneControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'center':
+        return buildAlignControl(
+          controlId,
+          <String, Object?>{'alignment': 'center', ...props},
           rawChildren,
           context.buildChild,
           context.registerInvokeHandler,
@@ -462,6 +516,10 @@ class ControlRenderer {
           return Expanded(flex: flex, child: child);
         }
 
+      case 'flex_spacer':
+      case 'spacer':
+        return buildFlexSpacerControl(props);
+
       case 'scroll_view':
         return buildScrollViewControl(
           controlId,
@@ -470,6 +528,14 @@ class ControlRenderer {
           context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'elevated_button':
+        return buildElevatedButtonControl(
+          controlId,
+          props,
+          context.tokens,
           context.sendEvent,
         );
 
@@ -655,6 +721,12 @@ class ControlRenderer {
       case 'emoji_icon':
         return buildEmojiIconControl(controlId, props, context.sendEvent);
 
+      case 'glyph':
+        return buildGlyphControl(props);
+
+      case 'glyph_button':
+        return buildGlyphButtonControl(controlId, props, context.sendEvent);
+
       case 'image':
         return buildImageControl(props, rawChildren, context.buildChild);
 
@@ -756,6 +828,15 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
+      case 'check_list':
+        return buildCheckListControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'switch':
         return ButterflyUISwitch(
           controlId: controlId,
@@ -790,6 +871,15 @@ class ControlRenderer {
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
+        );
+
+      case 'count_stepper':
+        return buildCountStepperControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'select':
@@ -839,6 +929,15 @@ class ControlRenderer {
       case 'tag_filter_bar':
       case 'filter_chips_bar':
         return buildChipGroupControl(controlId, props, context.sendEvent);
+
+      case 'chip':
+        return buildChipControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'file_picker':
       case 'filepicker':
@@ -1124,12 +1223,26 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'context_action_bar':
+        return buildContextActionBarControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'menu_item':
         return buildMenuItemControl(controlId, props, context.sendEvent);
 
       case 'breadcrumbs':
       case 'breadcrumb_bar':
         return buildBreadcrumbsControl(controlId, props, context.sendEvent);
+
+      case 'crumb_trail':
+        return buildCrumbTrailControl(controlId, props, context.sendEvent);
 
       case 'status_bar':
         return buildStatusBarControl(controlId, props, context.sendEvent);
@@ -1417,83 +1530,14 @@ class ControlRenderer {
         }
 
       case 'grid_view':
+      case 'grid':
         {
-          final axis = _parseAxis(props['direction']) ?? Axis.vertical;
-          final reverse = props['reverse'] == true;
-          final shrinkWrap = props['shrink_wrap'] == true;
-          final scrollable = props['scrollable'] == null
-              ? true
-              : (props['scrollable'] == true);
-          final primary = axis == Axis.vertical
-              ? (props['primary'] == true)
-              : false;
-          final ScrollPhysics? physics = scrollable
-              ? null
-              : const NeverScrollableScrollPhysics();
-          final padding = coercePadding(
-            props['content_padding'] ?? props['padding'],
-          );
-          final columns =
-              (coerceOptionalInt(
-                        props['columns'] ?? props['cross_axis_count'],
-                      ) ??
-                      2)
-                  .clamp(1, 24);
-          final spacing = coerceDouble(props['spacing']) ?? 8;
-          final runSpacing = coerceDouble(props['run_spacing']) ?? spacing;
-          final childAspectRatio =
-              coerceDouble(props['child_aspect_ratio']) ?? 1;
-
-          final tiles = <Widget>[];
-          if (children.isNotEmpty) {
-            tiles.addAll(children.map(context.buildChild));
-          } else if (props['items'] is List) {
-            final items = props['items'] as List;
-            for (var i = 0; i < items.length; i += 1) {
-              final item = items[i];
-              if (item is Map) {
-                final map = coerceObjectMap(item);
-                final title =
-                    map['title']?.toString() ??
-                    map['label']?.toString() ??
-                    '${map['id'] ?? i}';
-                tiles.add(
-                  Card(
-                    child: InkWell(
-                      onTap: controlId.isEmpty
-                          ? null
-                          : () {
-                              context.sendEvent(controlId, 'select', {
-                                'index': i,
-                                'item': map,
-                              });
-                            },
-                      child: Center(
-                        child: Text(title, textAlign: TextAlign.center),
-                      ),
-                    ),
-                  ),
-                );
-              } else {
-                tiles.add(
-                  Card(child: Center(child: Text(item?.toString() ?? ''))),
-                );
-              }
-            }
-          }
-
-          return GridView.count(
-            crossAxisCount: columns,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: runSpacing,
-            childAspectRatio: childAspectRatio,
-            scrollDirection: axis,
-            reverse: reverse,
-            shrinkWrap: shrinkWrap,
-            primary: primary,
-            physics: physics,
-            padding: padding,
-            children: tiles,
+          return buildGridControl(
+            controlId,
+            props,
+            children,
+            context.buildChild,
+            context.sendEvent,
           );
         }
 
@@ -1503,6 +1547,20 @@ class ControlRenderer {
           rawChildren,
           context.tokens,
           context.buildChild,
+        );
+
+      case 'field_group':
+        return buildFieldGroupControl(props, rawChildren, context.buildChild);
+
+      case 'filter_drawer':
+        return buildFilterDrawerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'candy_card':
@@ -1540,6 +1598,51 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'download_item':
+        return buildDownloadItemControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'data_source_view':
+        return buildDataSourceViewControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'drag_handle':
+        return buildDragHandleControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'drag_payload':
+        return buildDragPayloadControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
+      case 'drop_zone':
+        return buildDropZoneControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
       case 'animation_asset':
         return buildAnimationAssetControl(props);
 
@@ -1552,6 +1655,26 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
+      case 'focus_anchor':
+        return buildFocusAnchorControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'gesture_area':
+        return buildGestureAreaControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
       case 'shortcut_map':
         return ButterflyUIShortcutMap(
           controlId: controlId,
@@ -1562,11 +1685,44 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
+      case 'cursor':
+        return buildCursorControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'animated_background':
         return buildAnimatedBackgroundControl(
           props,
           rawChildren,
           context.buildChild,
+        );
+
+      case 'fold_layer':
+        return buildFoldLayerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'flow_field':
+        return buildFlowFieldControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'animated_gradient':
@@ -1595,6 +1751,55 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'crop_box':
+        return buildCropBoxControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'curve_editor':
+        return buildCurveEditorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'histogram_view':
+        return buildHistogramViewControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'histogram_overlay':
+        return buildHistogramOverlayControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'guides_manager':
+        return buildGuidesManagerControl(
+          controlId,
+          props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,

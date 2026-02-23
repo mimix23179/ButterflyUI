@@ -32,6 +32,8 @@ __all__ = [
     "Canvas",
     "EmptyState",
     "ErrorState",
+    "Glyph",
+    "GlyphButton",
 ]
 
 
@@ -100,6 +102,66 @@ class EmojiIcon(Component):
         return self.invoke(session, "set_emoji", {"emoji": emoji})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Glyph(Icon):
+    control_type = "glyph"
+
+    def __init__(
+        self,
+        glyph: str | None = None,
+        *,
+        icon: str | None = None,
+        tooltip: str | None = None,
+        size: float | None = None,
+        color: Any | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            icon=icon if icon is not None else glyph,
+            props=merge_props(props, tooltip=tooltip, size=size, color=color),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class GlyphButton(Component):
+    control_type = "glyph_button"
+
+    def __init__(
+        self,
+        glyph: str | None = None,
+        *,
+        icon: str | None = None,
+        tooltip: str | None = None,
+        size: float | None = None,
+        color: Any | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            glyph=glyph if glyph is not None else icon,
+            icon=icon if icon is not None else glyph,
+            tooltip=tooltip,
+            size=size,
+            color=color,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
