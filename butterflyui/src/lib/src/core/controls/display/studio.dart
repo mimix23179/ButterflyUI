@@ -154,7 +154,8 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         return {'ok': true, 'state': state};
       case 'emit':
       case 'trigger':
-        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        final fallback = method == 'trigger' ? 'change' : method;
+        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
         if (!_studioEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
@@ -461,6 +462,21 @@ class _StudioSearchModuleState extends State<_StudioSearchModule> {
   late final TextEditingController _controller = TextEditingController(
     text: (widget.props['query'] ?? '').toString(),
   );
+
+  @override
+  void didUpdateWidget(covariant _StudioSearchModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextQuery = (widget.props['query'] ?? '').toString();
+    if (nextQuery != _controller.text) {
+      _controller.text = nextQuery;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

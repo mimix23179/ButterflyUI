@@ -61,6 +61,11 @@ class _FileSystemControlState extends State<_FileSystemControl> {
         widget.registerInvokeHandler(widget.controlId, _handleInvoke);
       }
     }
+    final nextSelected = widget.props['selected_path']?.toString();
+    final oldSelected = oldWidget.props['selected_path']?.toString();
+    if (nextSelected != oldSelected && nextSelected != _selectedPath) {
+      _selectedPath = nextSelected;
+    }
   }
 
   @override

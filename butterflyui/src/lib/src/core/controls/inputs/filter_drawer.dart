@@ -50,6 +50,7 @@ class _FilterDrawerControl extends StatefulWidget {
 class _FilterDrawerControlState extends State<_FilterDrawerControl> {
   late bool _open;
   Map<String, Object?> _state = <String, Object?>{};
+  Set<String> _events = <String>{};
 
   @override
   void initState() {
@@ -89,6 +90,7 @@ class _FilterDrawerControlState extends State<_FilterDrawerControl> {
     _state = widget.props['state'] is Map
         ? coerceObjectMap(widget.props['state'] as Map)
         : <String, Object?>{};
+    _events = _coerceEvents(widget.props['events']);
   }
 
   Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
@@ -121,6 +123,7 @@ class _FilterDrawerControlState extends State<_FilterDrawerControl> {
 
   void _emit(String event, Map<String, Object?> payload) {
     if (widget.controlId.isEmpty) return;
+    if (_events.isNotEmpty && !_events.contains(event)) return;
     widget.sendEvent(widget.controlId, event, payload);
   }
 
@@ -196,4 +199,16 @@ class _FilterDrawerControlState extends State<_FilterDrawerControl> {
       ),
     );
   }
+}
+
+Set<String> _coerceEvents(Object? value) {
+  final out = <String>{};
+  if (value is List) {
+    for (final entry in value) {
+      final normalized = entry?.toString().trim().toLowerCase();
+      if (normalized == null || normalized.isEmpty) continue;
+      out.add(normalized);
+    }
+  }
+  return out;
 }

@@ -291,7 +291,8 @@ class _SkinsControlState extends State<_SkinsControl> {
         }
       case 'emit':
       case 'trigger':
-        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        final fallback = method == 'trigger' ? 'change' : method;
+        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
         if (!_skinsEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }

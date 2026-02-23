@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 from ..core.schema import ButterflyUIContractError, ensure_valid_props
@@ -456,8 +455,8 @@ class CodeEditor(Component):
             },
         )
 
-    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
-        return self.invoke(session, "trigger", payload)
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})
@@ -629,8 +628,8 @@ class Studio(Component):
             },
         )
 
-    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
-        return self.invoke(session, "trigger", payload)
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
 
 TERMINAL_SCHEMA_VERSION = 2
@@ -854,8 +853,8 @@ class Terminal(Component):
             },
         )
 
-    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
-        return self.invoke(session, "trigger", payload)
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
     def clear(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "clear", {})

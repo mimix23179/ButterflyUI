@@ -396,8 +396,18 @@ class ControlRenderer {
 
       case 'route_view':
       case 'route_host':
-      case 'route':
         return buildRouteViewControl(props, rawChildren, context.buildChild);
+
+      case 'route':
+        return buildRouteControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'surface':
       case 'box':
@@ -798,9 +808,12 @@ class ControlRenderer {
 
       case 'code_editor':
       case 'ide':
+      case 'semantic_search':
         return buildCodeEditorControl(
           controlId,
-          props,
+          type == 'semantic_search'
+              ? <String, Object?>{...props, 'module': 'semantic_search'}
+              : props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -820,9 +833,13 @@ class ControlRenderer {
       case 'studio_actions_editor':
       case 'studio_bindings_editor':
       case 'studio_asset_browser':
+      case 'selection_tools':
+      case 'transform_box':
         return buildStudioControl(
           controlId,
-          props,
+          (type == 'selection_tools' || type == 'transform_box')
+              ? <String, Object?>{...props, 'module': type}
+              : props,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -861,6 +878,7 @@ class ControlRenderer {
         return buildEmptyStateControl(controlId, props, context.sendEvent);
 
       case 'error_state':
+      case 'problem_screen':
         return buildErrorStateControl(controlId, props, context.sendEvent);
 
       case 'icon':
@@ -1564,7 +1582,13 @@ class ControlRenderer {
         return buildStatusMarkControl(controlId, props, context.sendEvent);
 
       case 'navigator':
-        return buildNavigatorControl(controlId, props, context.sendEvent);
+        return buildNavigatorControl(
+          controlId,
+          props,
+          context.sendEvent,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
 
       case 'nav_ring':
         return buildNavRingControl(controlId, props, context.sendEvent);
@@ -1629,6 +1653,13 @@ class ControlRenderer {
           query: props['query']?.toString() ?? '',
           collapsible: props['collapsible'] == true,
           dense: props['dense'] == true,
+          emitOnSearchChange: props['emit_on_search_change'] == null
+              ? true
+              : (props['emit_on_search_change'] == true),
+          searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+          events: _coerceStringList(props['events']).toSet(),
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1668,6 +1699,13 @@ class ControlRenderer {
             searchEnabled: props['search_enabled'] == null
                 ? true
                 : (props['search_enabled'] == true),
+            emitOnSearchChange: props['emit_on_search_change'] == null
+                ? true
+                : (props['emit_on_search_change'] == true),
+            searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+            events: _coerceStringList(props['events']).toSet(),
+            registerInvokeHandler: context.registerInvokeHandler,
+            unregisterInvokeHandler: context.unregisterInvokeHandler,
             sendEvent: context.sendEvent,
           );
         }
@@ -2547,6 +2585,8 @@ class ControlRenderer {
         );
 
       case 'webview':
+      case 'webview_adapter':
+      case 'native_preview_host':
         return buildWebViewControl(
           controlId,
           props,
@@ -2567,6 +2607,12 @@ class ControlRenderer {
     required Map<String, Object?> props,
     required ButterflyUIControlContext context,
   }) {
+    if (controlType == 'expanded' ||
+        controlType == 'flex_spacer' ||
+        controlType == 'spacer') {
+      return built;
+    }
+
     final resolvedStyle = ControlStyleResolver.resolve(
       controlType: controlType,
       props: props,

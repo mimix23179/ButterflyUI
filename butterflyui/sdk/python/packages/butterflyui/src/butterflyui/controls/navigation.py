@@ -305,6 +305,7 @@ class AppBar(Component):
         subtitle: str | None = None,
         leading: Any | None = None,
         actions: list[Any] | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -316,9 +317,28 @@ class AppBar(Component):
             subtitle=subtitle,
             leading=leading,
             actions=actions,
+            events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def set_title(self, session: Any, title: str, subtitle: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {"title": title}
+        if subtitle is not None:
+            payload["subtitle"] = subtitle
+        return self.invoke(session, "set_title", payload)
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
 
 class TopBar(Component):
@@ -357,11 +377,17 @@ class TopBar(Component):
     def set_title(self, session: Any, title: str) -> dict[str, Any]:
         return self.invoke(session, "set_title", {"title": title})
 
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
 
 class Drawer(Component):
@@ -375,6 +401,7 @@ class Drawer(Component):
         side: str | None = None,
         size: float | None = None,
         dismissible: bool | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -386,9 +413,25 @@ class Drawer(Component):
             side=side,
             size=size,
             dismissible=dismissible,
+            events=events,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_open(self, session: Any, open: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"open": open})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
 
 class SideDrawer(Drawer):

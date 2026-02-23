@@ -106,6 +106,9 @@ class _AutoFormControlState extends State<_AutoFormControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props['values'] != widget.props['values']) {
+      _values = _coerceValues(widget.props['values']);
+    }
   }
 
   @override

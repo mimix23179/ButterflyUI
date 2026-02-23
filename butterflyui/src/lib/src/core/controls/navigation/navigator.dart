@@ -8,6 +8,8 @@ Widget buildNavigatorControl(
   String controlId,
   Map<String, Object?> props,
   ButterflyUISendRuntimeEvent sendEvent,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
 ) {
   final sections = _coerceSections(props);
   return ButterflyUISidebar(
@@ -18,8 +20,26 @@ Widget buildNavigatorControl(
     query: props['query']?.toString() ?? '',
     collapsible: props['collapsible'] == true,
     dense: props['dense'] == true,
+    emitOnSearchChange: props['emit_on_search_change'] == null
+        ? true
+        : (props['emit_on_search_change'] == true),
+    searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+    events: _coerceStringList(props['events']).toSet(),
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
+}
+
+List<String> _coerceStringList(Object? value) {
+  if (value is! List) return const [];
+  final out = <String>[];
+  for (final item in value) {
+    final text = item?.toString().trim().toLowerCase();
+    if (text == null || text.isEmpty) continue;
+    out.add(text);
+  }
+  return out;
 }
 
 List<Map<String, Object?>> _coerceSections(Map<String, Object?> props) {

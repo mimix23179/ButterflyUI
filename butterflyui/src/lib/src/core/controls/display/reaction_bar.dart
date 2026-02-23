@@ -74,6 +74,15 @@ class _ReactionChipState extends State<_ReactionChip> {
     _selected = widget.selected.contains(_id);
   }
 
+  @override
+  void didUpdateWidget(covariant _ReactionChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = widget.selected.contains(_id);
+    if (next != _selected) {
+      _selected = next;
+    }
+  }
+
   String get _id => (widget.item['id'] ?? widget.item['key'] ?? widget.item['emoji'] ?? '').toString();
   String get _label => (widget.item['label'] ?? widget.item['emoji'] ?? _id).toString();
   int get _count => coerceOptionalInt(widget.item['count']) ?? 0;

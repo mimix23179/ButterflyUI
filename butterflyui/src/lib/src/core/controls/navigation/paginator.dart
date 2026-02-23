@@ -153,9 +153,11 @@ class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
         _setPage(requested);
         return _statePayload();
       case 'next':
+      case 'next_page':
         _setPage(_page + 1);
         return _statePayload();
       case 'prev':
+      case 'prev_page':
         _setPage(_page - 1);
         return _statePayload();
       case 'first':

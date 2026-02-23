@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_windows/webview_windows.dart';
+import 'package:xterm/xterm.dart' as xterm;
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -82,6 +83,13 @@ const Set<String> _terminalEvents = {
   'module_change',
 };
 
+const Set<String> _defaultTerminalEvents = {
+  'ready',
+  'submit',
+  'state_change',
+  'module_change',
+};
+
 class ButterflyUITerminal extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> initialProps;
@@ -104,6 +112,8 @@ class ButterflyUITerminal extends StatefulWidget {
 
 class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   final WebviewController _windowsController = WebviewController();
+  final FocusNode _nativeFocusNode = FocusNode();
+  late final xterm.Terminal _nativeTerminal = xterm.Terminal(maxLines: 4000);
   WebViewController? _flutterController;
   StreamSubscription<dynamic>? _windowsMessageSub;
 
@@ -113,8 +123,14 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   bool _xtermReady = false;
   bool _xtermInitialized = false;
 
+  bool get _useNativeTerminal {
+    final engine = (_runtimeProps['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    return engine == 'native' || engine == 'xterm';
+  }
+
   bool get _useFlutterWebView {
     final engine = (_runtimeProps['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    if (engine == 'native' || engine == 'xterm') return false;
     if (engine == 'flutter' || engine == 'webview_flutter') return true;
     if (engine == 'windows' || engine == 'webview_windows') return false;
     return !Platform.isWindows;
@@ -125,6 +141,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     super.initState();
     _runtimeProps = _normalizeProps(widget.initialProps);
     _latestBuffer = _collectBuffer(_runtimeProps);
+    _configureNativeTerminal();
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     unawaited(_initializeXterm());
   }
@@ -133,6 +150,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   void didUpdateWidget(covariant ButterflyUITerminal oldWidget) {
     super.didUpdateWidget(oldWidget);
     _runtimeProps = _normalizeProps(widget.initialProps);
+    _configureNativeTerminal();
 
     if (widget.controlId != oldWidget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
@@ -140,7 +158,8 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     }
 
     final oldUseFlutter = _resolveUseFlutterWebView(oldWidget.initialProps);
-    if (_useFlutterWebView != oldUseFlutter) {
+    final oldUseNative = _resolveUseNativeTerminal(oldWidget.initialProps);
+    if (_useFlutterWebView != oldUseFlutter || _useNativeTerminal != oldUseNative) {
       _xtermReady = false;
       _xtermInitialized = false;
       unawaited(_initializeXterm());
@@ -148,15 +167,25 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
       final nextBuffer = _collectBuffer(_runtimeProps);
       if (nextBuffer != _latestBuffer) {
         _latestBuffer = nextBuffer;
-        unawaited(_runXtermJavaScript(
-          'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
-        ));
+        if (_useNativeTerminal) {
+          _nativeRenderBufferAndInput();
+        } else {
+          unawaited(_runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
+          ));
+        }
       }
     }
   }
 
+  bool _resolveUseNativeTerminal(Map<String, Object?> props) {
+    final engine = (props['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    return engine == 'native' || engine == 'xterm';
+  }
+
   bool _resolveUseFlutterWebView(Map<String, Object?> props) {
     final engine = (props['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    if (engine == 'native' || engine == 'xterm') return false;
     if (engine == 'flutter' || engine == 'webview_flutter') return true;
     if (engine == 'windows' || engine == 'webview_windows') return false;
     return !Platform.isWindows;
@@ -166,6 +195,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   void dispose() {
     widget.unregisterInvokeHandler(widget.controlId);
     _windowsMessageSub?.cancel();
+    _nativeFocusNode.dispose();
     unawaited(_windowsController.dispose());
     super.dispose();
   }
@@ -173,6 +203,13 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   Future<void> _initializeXterm() async {
     if (_xtermInitialized) return;
     _xtermInitialized = true;
+
+    if (_useNativeTerminal) {
+      _xtermReady = true;
+      _nativeRenderBufferAndInput();
+      _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native'});
+      return;
+    }
 
     if (_useFlutterWebView) {
       await _initializeFlutterXterm();
@@ -185,6 +222,55 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
 
     final html = _buildXtermHtml();
     await _windowsController.loadStringContent(html);
+  }
+
+  void _configureNativeTerminal() {
+    _nativeTerminal.onOutput = (data) {
+      if (_runtimeProps['read_only'] == true) return;
+
+      _emitConfiguredEvent('input', {'data': data});
+
+      if (data == '\r' || data == '\n') {
+        final value = _latestInput;
+        if (value.isNotEmpty) {
+          _nativeTerminal.write('\r\n');
+        }
+        _latestInput = '';
+        _emitConfiguredEvent('submit', {'value': value, 'input': value});
+        _emitConfiguredEvent('change', {'value': '', 'input': ''});
+        _nativeRenderBufferAndInput();
+        return;
+      }
+
+      if (data == '\u007f') {
+        if (_latestInput.isNotEmpty) {
+          _latestInput = _latestInput.substring(0, _latestInput.length - 1);
+          _nativeRenderBufferAndInput();
+          _emitConfiguredEvent('change', {'value': _latestInput, 'input': _latestInput});
+        }
+        return;
+      }
+
+      if (data.isNotEmpty) {
+        _latestInput += data;
+        _nativeTerminal.write(data);
+        _emitConfiguredEvent('change', {'value': _latestInput, 'input': _latestInput});
+      }
+    };
+  }
+
+  void _nativeRenderBufferAndInput() {
+    _nativeTerminal.write('\x1b[2J\x1b[H');
+    if (_latestBuffer.isNotEmpty) {
+      _nativeTerminal.write(_latestBuffer);
+    }
+    final prompt = (_runtimeProps['prompt'] ?? '').toString();
+    if (prompt.isNotEmpty) {
+      _nativeTerminal.write(prompt);
+    }
+    if (_latestInput.isNotEmpty) {
+      _nativeTerminal.write(_latestInput);
+    }
   }
 
   Future<void> _initializeFlutterXterm() async {
@@ -245,6 +331,19 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         } else if (window.chrome && window.chrome.webview && typeof window.chrome.webview.postMessage === 'function') {
           window.chrome.webview.postMessage(msg);
         }
+      }
+
+      if (typeof Terminal === 'undefined') {
+        const fallback = document.getElementById('terminal');
+        fallback.style.overflow = 'auto';
+        fallback.style.whiteSpace = 'pre-wrap';
+        fallback.style.fontFamily = 'JetBrains Mono, Consolas, monospace';
+        fallback.style.fontSize = '${fontSize}px';
+        fallback.style.lineHeight = '1.5';
+        fallback.style.padding = '10px 12px';
+        fallback.textContent = String(${jsonEncode(initial)} || '');
+        post('ready', { engine: 'fallback', reason: 'cdn_unavailable' });
+        return;
       }
 
       const term = new Terminal({
@@ -361,10 +460,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   }
 
   String _hexColor(Color color) {
-    final a = color.alpha.toRadixString(16).padLeft(2, '0');
-    final r = color.red.toRadixString(16).padLeft(2, '0');
-    final g = color.green.toRadixString(16).padLeft(2, '0');
-    final b = color.blue.toRadixString(16).padLeft(2, '0');
+    final a = (color.a * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+    final r = (color.r * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+    final g = (color.g * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+    final b = (color.b * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
     return '#$a$r$g$b';
   }
 
@@ -387,9 +486,13 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
             _runtimeProps = _normalizeProps(_runtimeProps);
             _latestBuffer = _collectBuffer(_runtimeProps);
           });
-          await _runXtermJavaScript(
-            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
-          );
+          if (_useNativeTerminal) {
+            _nativeRenderBufferAndInput();
+          } else {
+            await _runXtermJavaScript(
+              'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
+            );
+          }
         }
         return _runtimeProps;
       case 'set_module':
@@ -421,7 +524,8 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         return {'ok': true, 'state': state};
       case 'emit':
       case 'trigger':
-        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        final fallback = method == 'trigger' ? 'change' : method;
+        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
         if (!_terminalEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
@@ -430,16 +534,24 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         return true;
       case 'clear':
         _latestBuffer = '';
-        await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.clear();}');
+        if (_useNativeTerminal) {
+          _nativeRenderBufferAndInput();
+        } else {
+          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.clear();}');
+        }
         return null;
       case 'write':
       case 'append':
         final value = args['value']?.toString() ?? '';
         if (value.isNotEmpty) {
           _latestBuffer += value;
-          await _runXtermJavaScript(
-            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.appendText(${jsonEncode(value)});}',
-          );
+          if (_useNativeTerminal) {
+            _nativeTerminal.write(value);
+          } else {
+            await _runXtermJavaScript(
+              'if(window.ButterflyUIXterm){window.ButterflyUIXterm.appendText(${jsonEncode(value)});}',
+            );
+          }
           _emitConfiguredEvent('output', {'buffer': _latestBuffer});
         }
         return null;
@@ -452,35 +564,56 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
               .join('\n');
           if (lines.isNotEmpty) {
             _latestBuffer += lines;
-            await _runXtermJavaScript(
-              'if(window.ButterflyUIXterm){window.ButterflyUIXterm.appendText(${jsonEncode(lines)});}',
-            );
+            if (_useNativeTerminal) {
+              _nativeTerminal.write(lines);
+            } else {
+              await _runXtermJavaScript(
+                'if(window.ButterflyUIXterm){window.ButterflyUIXterm.appendText(${jsonEncode(lines)});}',
+              );
+            }
             _emitConfiguredEvent('output', {'buffer': _latestBuffer});
           }
         }
         return null;
       case 'focus':
-        await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.focus();}');
+        if (_useNativeTerminal) {
+          _nativeFocusNode.requestFocus();
+        } else {
+          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.focus();}');
+        }
         return null;
       case 'blur':
-        await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.blur();}');
+        if (_useNativeTerminal) {
+          _nativeFocusNode.unfocus();
+        } else {
+          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.blur();}');
+        }
         return null;
       case 'set_input':
         _latestInput = args['value']?.toString() ?? '';
-        await _runXtermJavaScript(
-          'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setInput(${jsonEncode(_latestInput)});}',
-        );
+        if (_useNativeTerminal) {
+          _nativeRenderBufferAndInput();
+        } else {
+          await _runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setInput(${jsonEncode(_latestInput)});}',
+          );
+        }
         return null;
       case 'set_read_only':
         final value = args['value'] == true;
         _runtimeProps['read_only'] = value;
-        await _runXtermJavaScript(
-          'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setReadOnly(${value ? 'true' : 'false'});}',
-        );
+        if (!_useNativeTerminal) {
+          await _runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setReadOnly(${value ? 'true' : 'false'});}',
+          );
+        }
         return null;
       case 'get_buffer':
       case 'get_value':
         {
+          if (_useNativeTerminal) {
+            return _latestBuffer;
+          }
           final result = await _runXtermJavaScript(
             'window.ButterflyUIXterm ? window.ButterflyUIXterm.getText() : "";',
             expectResult: true,
@@ -493,6 +626,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         }
       case 'get_input':
         {
+          if (_useNativeTerminal) {
+            return _latestInput;
+          }
           final result = await _runXtermJavaScript(
             'window.ButterflyUIXterm ? window.ButterflyUIXterm.getInput() : "";',
             expectResult: true,
@@ -624,6 +760,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         }
       }
     }
+    if (out.isEmpty) {
+      return _defaultTerminalEvents;
+    }
     return out;
   }
 
@@ -643,6 +782,51 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   }
 
   Widget _buildXtermView() {
+    if (_useNativeTerminal) {
+      final bg =
+          coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06);
+      final fg = coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6);
+      final fontSize = coerceDouble(_runtimeProps['font_size']) ?? 12;
+      final lineHeight = coerceDouble(_runtimeProps['line_height']) ?? 1.35;
+      final fontFamily = (_runtimeProps['font_family'] ?? 'JetBrains Mono').toString();
+
+      return xterm.TerminalView(
+        _nativeTerminal,
+        focusNode: _nativeFocusNode,
+        readOnly: _runtimeProps['read_only'] == true,
+        theme: xterm.TerminalTheme(
+          background: bg,
+          foreground: fg,
+          cursor: fg,
+          selection: fg.withValues(alpha: 0.3),
+          black: bg,
+          red: const Color(0xffef4444),
+          green: const Color(0xff22c55e),
+          yellow: const Color(0xfff59e0b),
+          blue: const Color(0xff3b82f6),
+          magenta: const Color(0xffa855f7),
+          cyan: const Color(0xff22d3ee),
+          white: fg,
+          brightBlack: Color.lerp(bg, Colors.white, 0.35) ?? bg,
+          brightRed: const Color(0xffff6b6b),
+          brightGreen: const Color(0xff4ade80),
+          brightYellow: const Color(0xfffbbf24),
+          brightBlue: const Color(0xff60a5fa),
+          brightMagenta: const Color(0xffc084fc),
+          brightCyan: const Color(0xff67e8f9),
+          brightWhite: Color.lerp(fg, Colors.white, 0.2) ?? fg,
+          searchHitBackground: fg.withValues(alpha: 0.15),
+          searchHitBackgroundCurrent: fg.withValues(alpha: 0.3),
+          searchHitForeground: bg,
+        ),
+        textStyle: xterm.TerminalStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: lineHeight,
+        ),
+      );
+    }
+
     if (_useFlutterWebView) {
       final controller = _flutterController;
       if (controller == null) return const SizedBox.shrink();

@@ -23,6 +23,9 @@ Widget buildPanZoomControl(
 
   final minScale = (coerceDouble(props['min_scale']) ?? 0.2).clamp(0.01, 100.0);
   final maxScale = (coerceDouble(props['max_scale']) ?? 4.0).clamp(minScale, 200.0);
+  final events = _coercePanZoomEvents(props['events']);
+  final throttleMs = (coerceOptionalInt(props['throttle_ms']) ?? 32).clamp(0, 1000);
+  int lastUpdateEmitMs = 0;
 
   final boundaryMargin = coercePadding(props['boundary_margin']) ?? const EdgeInsets.all(80);
   final clip = props['clip'] == true ? Clip.hardEdge : Clip.none;
@@ -37,6 +40,7 @@ Widget buildPanZoomControl(
     onInteractionStart: controlId.isEmpty
         ? null
         : (details) {
+            if (!events.contains('start')) return;
             sendEvent(controlId, 'start', {
               'focal_x': details.focalPoint.dx,
               'focal_y': details.focalPoint.dy,
@@ -45,6 +49,14 @@ Widget buildPanZoomControl(
     onInteractionUpdate: controlId.isEmpty
         ? null
         : (details) {
+            if (!events.contains('update')) return;
+            if (throttleMs > 0) {
+              final now = DateTime.now().millisecondsSinceEpoch;
+              if (now - lastUpdateEmitMs < throttleMs) {
+                return;
+              }
+              lastUpdateEmitMs = now;
+            }
             sendEvent(controlId, 'update', {
               'focal_x': details.focalPoint.dx,
               'focal_y': details.focalPoint.dy,
@@ -54,6 +66,7 @@ Widget buildPanZoomControl(
     onInteractionEnd: controlId.isEmpty
         ? null
         : (details) {
+            if (!events.contains('end')) return;
             sendEvent(controlId, 'end', {
               'velocity_x': details.velocity.pixelsPerSecond.dx,
               'velocity_y': details.velocity.pixelsPerSecond.dy,
@@ -61,4 +74,21 @@ Widget buildPanZoomControl(
           },
     child: child,
   );
+}
+
+Set<String> _coercePanZoomEvents(Object? value) {
+  final out = <String>{};
+  if (value is List) {
+    for (final entry in value) {
+      final normalized = entry?.toString().trim().toLowerCase();
+      if (normalized == null || normalized.isEmpty) continue;
+      if (normalized == 'start' || normalized == 'update' || normalized == 'end') {
+        out.add(normalized);
+      }
+    }
+  }
+  if (out.isEmpty) {
+    return <String>{'start', 'end'};
+  }
+  return out;
 }

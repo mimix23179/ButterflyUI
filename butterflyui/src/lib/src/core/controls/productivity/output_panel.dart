@@ -56,6 +56,25 @@ class _ButterflyUIOutputPanelState extends State<_ButterflyUIOutputPanel> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.channels != widget.channels) {
+      _channels = {
+        for (final entry in widget.channels.entries)
+          entry.key: List<_OutputEntry>.from(entry.value),
+      };
+      if (_channels.isEmpty) {
+        _channels['output'] = <_OutputEntry>[];
+      }
+      if (!_channels.containsKey(_activeChannel)) {
+        _activeChannel = widget.activeChannel;
+      }
+      if (!_channels.containsKey(_activeChannel) && _channels.isNotEmpty) {
+        _activeChannel = _channels.keys.first;
+      }
+    } else if (oldWidget.activeChannel != widget.activeChannel &&
+        widget.activeChannel.isNotEmpty &&
+        _channels.containsKey(widget.activeChannel)) {
+      _activeChannel = widget.activeChannel;
+    }
   }
 
   @override
@@ -123,56 +142,65 @@ class _ButterflyUIOutputPanelState extends State<_ButterflyUIOutputPanel> {
   Widget build(BuildContext context) {
     final channelNames = _channels.keys.toList(growable: false);
     final entries = _channels[_activeChannel] ?? const <_OutputEntry>[];
+    final entryList = Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(10),
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          final entry = entries[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Text(
+              '[${entry.level}] ${entry.timestamp ?? ''} ${entry.text}'.trim(),
+              style: const TextStyle(fontFamily: 'JetBrains Mono', fontSize: 12),
+            ),
+          );
+        },
+      ),
+    );
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 36,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              final channel = channelNames[index];
-              final selected = channel == _activeChannel;
-              return ChoiceChip(
-                label: Text(channel),
-                selected: selected,
-                onSelected: (_) {
-                  setState(() {
-                    _activeChannel = channel;
-                  });
-                  widget.sendEvent(widget.controlId, 'channel_changed', {'channel': channel});
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final body = hasBoundedHeight
+            ? Expanded(child: entryList)
+            : SizedBox(height: 220, child: entryList);
+
+        return Column(
+          mainAxisSize: hasBoundedHeight ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 36,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  final channel = channelNames[index];
+                  final selected = channel == _activeChannel;
+                  return ChoiceChip(
+                    label: Text(channel),
+                    selected: selected,
+                    onSelected: (_) {
+                      setState(() {
+                        _activeChannel = channel;
+                      });
+                      widget.sendEvent(widget.controlId, 'channel_changed', {'channel': channel});
+                    },
+                  );
                 },
-              );
-            },
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemCount: channelNames.length,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(8),
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemCount: channelNames.length,
+              ),
             ),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
-                    '[${entry.level}] ${entry.timestamp ?? ''} ${entry.text}'.trim(),
-                    style: const TextStyle(fontFamily: 'JetBrains Mono', fontSize: 12),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+            const SizedBox(height: 8),
+            body,
+          ],
+        );
+      },
     );
   }
 }

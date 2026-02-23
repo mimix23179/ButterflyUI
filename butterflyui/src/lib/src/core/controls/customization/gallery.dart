@@ -346,7 +346,8 @@ class _GalleryControlState extends State<_GalleryControl> {
         }
       case 'emit':
       case 'trigger':
-        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        final fallback = method == 'trigger' ? 'change' : method;
+        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
         if (!_galleryEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }

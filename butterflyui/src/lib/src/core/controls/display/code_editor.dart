@@ -149,6 +149,14 @@ const Set<String> _codeEditorEvents = {
   'module_change',
 };
 
+const Set<String> _defaultCodeEditorEvents = {
+  'ready',
+  'submit',
+  'save',
+  'state_change',
+  'module_change',
+};
+
 class ButterflyUICodeEditor extends StatefulWidget {
   final String controlId;
   final String value;
@@ -446,10 +454,29 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
       case 'set_props':
         final incoming = args['props'];
         if (incoming is Map) {
+          final incomingMap = coerceObjectMap(incoming);
+          final nextValue = incomingMap['value'] ?? incomingMap['text'] ?? incomingMap['code'];
           setState(() {
-            _runtimeProps.addAll(coerceObjectMap(incoming));
+            _runtimeProps.addAll(incomingMap);
             _runtimeProps = _normalizeProps(_runtimeProps);
           });
+          if (nextValue != null) {
+            final valueText = nextValue.toString();
+            _latestValue = valueText;
+            if (_useMonaco) {
+              await _setMonacoValue(valueText, silent: true);
+            } else if (_fallbackController.text != valueText) {
+              _fallbackSuppressChange = true;
+              _fallbackController.value = _fallbackController.value.copyWith(
+                text: valueText,
+                selection: TextSelection.collapsed(offset: valueText.length),
+              );
+              _fallbackSuppressChange = false;
+            }
+          }
+          if (_useMonaco) {
+            await _applyMonacoRuntimeOptionsFromProps();
+          }
         }
         return _runtimeProps;
       case 'set_module':
@@ -648,6 +675,34 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     );
   }
 
+  Future<void> _applyMonacoRuntimeOptionsFromProps() async {
+    final readOnly = _runtimeProps['read_only'] == true;
+    final wordWrap = _runtimeProps['word_wrap'] == true;
+    final lineNumbers = _runtimeProps['line_numbers'] == false ? 'off' : 'on';
+    final minimap = _runtimeProps['show_minimap'] == true;
+    final glyphMargin = _runtimeProps['glyph_margin'] == true;
+    final tabSize = coerceOptionalInt(_runtimeProps['tab_size']) ?? widget.tabSize;
+    final fontSize = coerceDouble(_runtimeProps['font_size']) ?? widget.fontSize;
+    final fontFamily = (_runtimeProps['font_family'] ?? widget.fontFamily).toString();
+    final theme = (_runtimeProps['theme'] ?? widget.theme ?? 'vs-dark').toString();
+
+    await _runMonacoJavaScript(
+      'if(window.ButterflyUIMonaco){'
+      'if(window.ButterflyUIMonaco.setOptions){window.ButterflyUIMonaco.setOptions({'
+      'readOnly:${readOnly ? 'true' : 'false'},'
+      'wordWrap:${wordWrap ? jsonEncode('on') : jsonEncode('off')},'
+      'lineNumbers:${jsonEncode(lineNumbers)},'
+      'minimap:{enabled:${minimap ? 'true' : 'false'}},'
+      'glyphMargin:${glyphMargin ? 'true' : 'false'},'
+      'tabSize:${tabSize.toString()},'
+      'fontSize:${fontSize.toString()},'
+      'fontFamily:${jsonEncode(fontFamily)}'
+      '});}'
+      'if(window.ButterflyUIMonaco.setTheme){window.ButterflyUIMonaco.setTheme(${jsonEncode(theme)});}'
+      '}',
+    );
+  }
+
   Future<Object?> _runMonacoJavaScript(
     String script, {
     bool expectResult = false,
@@ -749,6 +804,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         }
       }
     }
+    if (out.isEmpty) {
+      return _defaultCodeEditorEvents;
+    }
     return out;
   }
 
@@ -777,7 +835,7 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
       controller: _fallbackController,
       focusNode: _fallbackFocusNode,
       autofocus: widget.autofocus,
-      readOnly: widget.readOnly,
+      readOnly: _runtimeProps['read_only'] == true || widget.readOnly,
       maxLines: null,
       minLines: 12,
       scrollController: _fallbackEditorScroll,

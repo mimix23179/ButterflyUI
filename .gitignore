@@ -1,4 +1,8 @@
 env/*
-__pycache__/
+__pycache__/*
+Matrix/*
 *.pyc
 CustomizationEngine.md
+images/*
+demo/*
+flet/*

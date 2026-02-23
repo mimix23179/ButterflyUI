@@ -1130,6 +1130,7 @@ PAN_ZOOM_SCHEMA = {
         "emit_on_start": BOOL_SCHEMA,
         "emit_on_update": BOOL_SCHEMA,
         "emit_on_end": BOOL_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
         "throttle_ms": INTEGER_SCHEMA,
         "clip": BOOL_SCHEMA,
     },
@@ -3730,6 +3731,23 @@ SEARCH_BOX_SCHEMA = _control_schema(
     }
 )
 
+SEARCH_BAR_SCHEMA = _control_schema(
+    {
+        "value": STRING_SCHEMA,
+        "query": STRING_SCHEMA,
+        "placeholder": STRING_SCHEMA,
+        "hint": STRING_SCHEMA,
+        "suggestions": {"type": "array", "items": ANY_SCHEMA},
+        "filters": {"type": "array", "items": ANY_SCHEMA},
+        "debounce_ms": INTEGER_SCHEMA,
+        "show_clear": BOOL_SCHEMA,
+        "show_suggestions": BOOL_SCHEMA,
+        "max_suggestions": INTEGER_SCHEMA,
+        "loading": BOOL_SCHEMA,
+        "enabled": BOOL_SCHEMA,
+    }
+)
+
 SEARCH_ITEM_SCHEMA = {
     "type": "object",
     "properties": {
@@ -3967,6 +3985,9 @@ IDE_SCHEMA = _control_schema(
         "language": STRING_SCHEMA,
         "theme": STRING_SCHEMA,
         "read_only": BOOL_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
+        "emit_on_search_change": BOOL_SCHEMA,
+        "search_debounce_ms": INTEGER_SCHEMA,
         "wrap": BOOL_SCHEMA,
         "word_wrap": BOOL_SCHEMA,
         "show_gutter": BOOL_SCHEMA,
@@ -4118,6 +4139,9 @@ SIDEBAR_SCHEMA = _control_schema(
         "query": STRING_SCHEMA,
         "collapsible": BOOL_SCHEMA,
         "dense": BOOL_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
+        "emit_on_search_change": BOOL_SCHEMA,
+        "search_debounce_ms": INTEGER_SCHEMA,
         "open": BOOL_SCHEMA,
         "side": STRING_SCHEMA,
         "size": NUMBER_SCHEMA,
@@ -4139,6 +4163,9 @@ APP_BAR_SCHEMA = _control_schema(
         "search_value": STRING_SCHEMA,
         "search_placeholder": STRING_SCHEMA,
         "search_enabled": BOOL_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
+        "emit_on_search_change": BOOL_SCHEMA,
+        "search_debounce_ms": INTEGER_SCHEMA,
     }
 )
 
@@ -4191,12 +4218,15 @@ POPOVER_SCHEMA = _control_schema(
         "offset": {"type": "array"},
         "dismissible": BOOL_SCHEMA,
         "scrim_color": COLOR_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
     }
 )
 
 SLIDE_PANEL_SCHEMA = _control_schema(
     {
         "open": BOOL_SCHEMA,
+        "emit_on_search_change": BOOL_SCHEMA,
+        "search_debounce_ms": INTEGER_SCHEMA,
         "side": STRING_SCHEMA,
         "size": NUMBER_SCHEMA,
         "scrim_color": COLOR_SCHEMA,
@@ -4467,6 +4497,22 @@ VIRTUAL_FILE_SYSTEM_SCHEMA = _control_schema(
     {
         "vfs_id": STRING_SCHEMA,
         "nodes": {"type": "array", "items": {"type": "object"}},
+        "root_id": STRING_SCHEMA,
+        "selected_id": STRING_SCHEMA,
+        "expanded": {"type": "array", "items": STRING_SCHEMA},
+        "version": INTEGER_SCHEMA,
+    }
+)
+
+FILE_SYSTEM_SCHEMA = _control_schema(
+    {
+        "root": STRING_SCHEMA,
+        "nodes": {"type": "array", "items": {"type": "object"}},
+        "selected_path": STRING_SCHEMA,
+        "show_hidden": BOOL_SCHEMA,
+        "readonly": BOOL_SCHEMA,
+        "events": {"type": "array", "items": STRING_SCHEMA},
+        "vfs_id": STRING_SCHEMA,
         "root_id": STRING_SCHEMA,
         "selected_id": STRING_SCHEMA,
         "expanded": {"type": "array", "items": STRING_SCHEMA},
@@ -4853,6 +4899,7 @@ CONTROL_SCHEMAS = {
     "chart": _control_schema({"series": {"type": "array", "items": {"type": "object"}}, "data": ANY_SCHEMA, "kind": STRING_SCHEMA}),
     "bar_chart": _control_schema({"series": {"type": "array", "items": {"type": "object"}}, "data": ANY_SCHEMA, "kind": STRING_SCHEMA}),
     "line_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "points": {"type": "array", "items": ANY_SCHEMA}, "fill": BOOL_SCHEMA, "color": COLOR_SCHEMA}),
+    "line_chart": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "points": {"type": "array", "items": ANY_SCHEMA}, "fill": BOOL_SCHEMA, "color": COLOR_SCHEMA}),
     "pie_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "labels": {"type": "array", "items": STRING_SCHEMA}, "colors": {"type": "array", "items": COLOR_SCHEMA}, "donut": BOOL_SCHEMA, "hole": NUMBER_SCHEMA, "start_angle": NUMBER_SCHEMA, "clockwise": BOOL_SCHEMA}),
     "bar_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "labels": {"type": "array", "items": STRING_SCHEMA}, "color": COLOR_SCHEMA, "spacing": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA}),
     "sparkline": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "data": ANY_SCHEMA}),
@@ -4927,6 +4974,7 @@ CONTROL_SCHEMAS = {
     "text_area": TEXT_AREA_SCHEMA,
     "text_field_style": _control_schema({"variant": STRING_SCHEMA, "dense": BOOL_SCHEMA, "filled": BOOL_SCHEMA, "outlined": BOOL_SCHEMA, "radius": NUMBER_SCHEMA, "border_width": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "border_color": COLOR_SCHEMA, "hint_color": COLOR_SCHEMA, "label_color": COLOR_SCHEMA, "text_color": COLOR_SCHEMA}),
     "search_box": SEARCH_BOX_SCHEMA,
+    "search_bar": SEARCH_BAR_SCHEMA,
     "smart_search_bar": SMART_SEARCH_BAR_SCHEMA,
     "search_scope_selector": SEARCH_SCOPE_SELECTOR_SCHEMA,
     "filter_chips_bar": FILTER_CHIPS_BAR_SCHEMA,
@@ -4948,14 +4996,18 @@ CONTROL_SCHEMAS = {
     "segment_bar": SELECT_SCHEMA,
     "combobox": SELECT_SCHEMA,
     "combo_box": SELECT_SCHEMA,
+    "dropdown": SELECT_SCHEMA,
     "multi_select": SELECT_SCHEMA,
+    "multi_pick": SELECT_SCHEMA,
     "radio": RADIO_SCHEMA,
     "file_picker": FILE_PICKER_SCHEMA,
     "filepicker": FILE_PICKER_SCHEMA,
     "date_picker": _control_schema({"value": ANY_SCHEMA, "enabled": BOOL_SCHEMA}),
+    "date_select": _control_schema({"value": ANY_SCHEMA, "enabled": BOOL_SCHEMA}),
     "time_select": _control_schema({"value": STRING_SCHEMA, "label": STRING_SCHEMA, "placeholder": STRING_SCHEMA, "minute_step": INTEGER_SCHEMA, "use_24h": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
     "date_range_picker": _control_schema({"value": ANY_SCHEMA, "start": ANY_SCHEMA, "end": ANY_SCHEMA, "enabled": BOOL_SCHEMA}),
     "date_range": _control_schema({"value": ANY_SCHEMA, "start": ANY_SCHEMA, "end": ANY_SCHEMA, "enabled": BOOL_SCHEMA}),
+    "date_span": _control_schema({"value": ANY_SCHEMA, "start": ANY_SCHEMA, "end": ANY_SCHEMA, "enabled": BOOL_SCHEMA}),
     "directory_picker": DIRECTORY_PICKER_SCHEMA,
     "path_field": PATH_FIELD_SCHEMA,
     "keybind_recorder": KEYBIND_RECORDER_SCHEMA,
@@ -5050,7 +5102,7 @@ CONTROL_SCHEMAS = {
     "ownership_marker": OWNERSHIP_MARKER_SCHEMA,
     "inline_widget": INLINE_WIDGET_SCHEMA,
     "virtual_file_system": VIRTUAL_FILE_SYSTEM_SCHEMA,
-    "file_system": VIRTUAL_FILE_SYSTEM_SCHEMA,
+    "file_system": FILE_SYSTEM_SCHEMA,
     "editor_intent_router": EDITOR_INTENT_ROUTER_SCHEMA,
     "focus_mode_controller": FOCUS_MODE_CONTROLLER_SCHEMA,
     "control_preset": CONTROL_PRESET_SCHEMA,
@@ -5091,7 +5143,7 @@ CONTROL_SCHEMAS = {
     "ghost_editor": GHOST_EDITOR_SCHEMA,
     "emoji_picker": EMOJI_PICKER_SCHEMA,
     "field_group": _control_schema({"label": STRING_SCHEMA, "helper_text": STRING_SCHEMA, "error_text": STRING_SCHEMA, "spacing": NUMBER_SCHEMA, "required": BOOL_SCHEMA}),
-    "filter_drawer": _control_schema({"title": STRING_SCHEMA, "open": BOOL_SCHEMA, "schema": {"type": "object"}, "state": {"type": "object"}, "show_actions": BOOL_SCHEMA, "apply_label": STRING_SCHEMA, "clear_label": STRING_SCHEMA, "dense": BOOL_SCHEMA}),
+    "filter_drawer": _control_schema({"title": STRING_SCHEMA, "open": BOOL_SCHEMA, "schema": {"type": "object"}, "state": {"type": "object"}, "show_actions": BOOL_SCHEMA, "apply_label": STRING_SCHEMA, "clear_label": STRING_SCHEMA, "dense": BOOL_SCHEMA, "events": {"type": "array", "items": STRING_SCHEMA}}),
     "icon_picker": ICON_PICKER_SCHEMA,
     "file_tree": FILE_TREE_SCHEMA,
     "log_viewer": LOG_VIEWER_SCHEMA,
@@ -5103,7 +5155,7 @@ CONTROL_SCHEMAS = {
     "focus_anchor": _control_schema({"autofocus": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "can_request_focus": BOOL_SCHEMA, "skip_traversal": BOOL_SCHEMA, "descendants_are_focusable": BOOL_SCHEMA, "descendants_are_traversable": BOOL_SCHEMA}),
     "gesture_area": _control_schema({"enabled": BOOL_SCHEMA, "tap_enabled": BOOL_SCHEMA, "double_tap_enabled": BOOL_SCHEMA, "long_press_enabled": BOOL_SCHEMA, "pan_enabled": BOOL_SCHEMA, "scale_enabled": BOOL_SCHEMA}),
     "pressable": _control_schema({"enabled": BOOL_SCHEMA, "autofocus": BOOL_SCHEMA, "hover_enabled": BOOL_SCHEMA, "focus_enabled": BOOL_SCHEMA}),
-    "hover_region": _control_schema({"enabled": BOOL_SCHEMA, "opaque": BOOL_SCHEMA, "cursor": STRING_SCHEMA}),
+    "hover_region": _control_schema({"enabled": BOOL_SCHEMA, "opaque": BOOL_SCHEMA, "cursor": STRING_SCHEMA, "events": {"type": "array", "items": STRING_SCHEMA}, "throttle_ms": INTEGER_SCHEMA}),
     "details_pane": _control_schema({"mode": STRING_SCHEMA, "split_ratio": NUMBER_SCHEMA, "stack_breakpoint": NUMBER_SCHEMA, "show_details": BOOL_SCHEMA, "show_back": BOOL_SCHEMA, "back_label": STRING_SCHEMA, "divider": BOOL_SCHEMA}),
     "flex_spacer": _control_schema({"flex": INTEGER_SCHEMA}),
     "spacer": _control_schema({"flex": INTEGER_SCHEMA}),
@@ -5120,6 +5172,9 @@ CONTROL_SCHEMAS = {
     "sortable_header": _control_schema({"columns": {"type": "array", "items": {"type": "object"}}, "sort_column": STRING_SCHEMA, "sort_ascending": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
     "sticky_list": _control_schema(STICKY_LIST_SCHEMA["properties"]),
     "auto_form": AUTO_FORM_SCHEMA,
+    "form": _control_schema({"title": STRING_SCHEMA, "description": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
+    "form_field": _control_schema({"label": STRING_SCHEMA, "description": STRING_SCHEMA, "required": BOOL_SCHEMA, "helper_text": STRING_SCHEMA, "error_text": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
+    "validation_summary": _control_schema({"title": STRING_SCHEMA, "errors": {"type": "array", "items": STRING_SCHEMA}, "messages": {"type": "array", "items": STRING_SCHEMA}, "items": {"type": "array", "items": ANY_SCHEMA}}),
     "submit_scope": _control_schema({"enabled": BOOL_SCHEMA, "submit_on_enter": BOOL_SCHEMA, "submit_on_ctrl_enter": BOOL_SCHEMA, "debounce_ms": INTEGER_SCHEMA, "payload": {"type": "object"}}),
     "surface": SURFACE_SCHEMA,
     "paginator": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "enabled": BOOL_SCHEMA}),
@@ -5142,10 +5197,17 @@ CONTROL_SCHEMAS = {
     "editor_workspace": EDITOR_WORKSPACE_SCHEMA,
     "workbench_editor": EDITOR_WORKSPACE_SCHEMA,
     "breadcrumbs": CRUMB_TRAIL_SCHEMA,
+    "menu_bar": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "dense": BOOL_SCHEMA, "show_dividers": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
+    "command_item": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "value": ANY_SCHEMA, "description": STRING_SCHEMA, "icon": STRING_SCHEMA, "shortcut": STRING_SCHEMA, "enabled": BOOL_SCHEMA}),
     "table_view": _control_schema({"columns": {"type": "array", "items": ANY_SCHEMA}, "rows": {"type": "array", "items": ANY_SCHEMA}, "sortable": BOOL_SCHEMA, "filterable": BOOL_SCHEMA, "selectable": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "striped": BOOL_SCHEMA, "show_header": BOOL_SCHEMA, "sort_column": STRING_SCHEMA, "sort_ascending": BOOL_SCHEMA, "filter_query": STRING_SCHEMA}),
+    "tree_view": _control_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}, "expanded": {"type": "array", "items": STRING_SCHEMA}, "dense": BOOL_SCHEMA, "multi_select": BOOL_SCHEMA, "show_root": BOOL_SCHEMA, "expand_all": BOOL_SCHEMA, "show_search": BOOL_SCHEMA, "show_expand_collapse_all": BOOL_SCHEMA, "search_placeholder": STRING_SCHEMA, "search_hint": STRING_SCHEMA, "auto_expand_search_hits": BOOL_SCHEMA}),
+    "virtual_list": _control_schema({"item_count": INTEGER_SCHEMA, "item_extent": NUMBER_SCHEMA, "cache_extent": NUMBER_SCHEMA, "padding": PADDING_SCHEMA, "reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "physics": STRING_SCHEMA}),
+    "virtual_grid": _control_schema({"item_count": INTEGER_SCHEMA, "cross_axis_count": INTEGER_SCHEMA, "main_axis_extent": NUMBER_SCHEMA, "child_aspect_ratio": NUMBER_SCHEMA, "cross_axis_spacing": NUMBER_SCHEMA, "main_axis_spacing": NUMBER_SCHEMA, "padding": PADDING_SCHEMA, "reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "physics": STRING_SCHEMA}),
     "scene_view": _control_schema({"background": ANY_SCHEMA, "show_grid": BOOL_SCHEMA, "show_axes": BOOL_SCHEMA, "camera": {"type": "object"}}),
     "search_provider": SEARCH_PROVIDER_SCHEMA,
     "search_history": SEARCH_HISTORY_SCHEMA,
+
+    "webview": _control_schema({"url": STRING_SCHEMA, "html": STRING_SCHEMA, "initial_url": STRING_SCHEMA, "javascript_enabled": BOOL_SCHEMA, "transparent": BOOL_SCHEMA, "allow_navigation": BOOL_SCHEMA, "headers": {"type": "object"}}),
 
     "webview_adapter": WEBVIEW_ADAPTER_SCHEMA,
 
@@ -5169,6 +5231,60 @@ CONTROL_SCHEMAS = {
     "studio_outline_tree": STUDIO_OUTLINE_TREE_SCHEMA,
     "studio_properties_panel": STUDIO_PROPERTIES_PANEL_SCHEMA,
 }
+
+# Compatibility mappings for renderer-wired controls that share existing
+# contracts or only require permissive property acceptance in 0.1.0.
+CONTROL_SCHEMAS.update(
+    {
+        "animated_background": _control_schema({"layers": {"type": "array", "items": ANY_SCHEMA}, "speed": NUMBER_SCHEMA}),
+        "animation_asset": _control_schema({"src": STRING_SCHEMA, "asset": STRING_SCHEMA, "autoplay": BOOL_SCHEMA, "loop": BOOL_SCHEMA}),
+        "box": CONTAINER_SCHEMA,
+        "card": CONTAINER_SCHEMA,
+        "chat": CHAT_THREAD_SCHEMA,
+        "column": COLUMN_SCHEMA,
+        "container": CONTAINER_SCHEMA,
+        "container_style": _control_schema({"padding": PADDING_SCHEMA, "margin": MARGIN_SCHEMA, "radius": NUMBER_SCHEMA, "elevation": NUMBER_SCHEMA}),
+        "context_menu": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "open": BOOL_SCHEMA}),
+        "data_grid": JSON_TABLE_SCHEMA,
+        "data_table": JSON_TABLE_SCHEMA,
+        "divider": _control_schema({"orientation": STRING_SCHEMA, "thickness": NUMBER_SCHEMA, "indent": NUMBER_SCHEMA}),
+        "expanded": _control_schema({"flex": INTEGER_SCHEMA}),
+        "file_browser": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "path": STRING_SCHEMA}),
+        "gradient": GRADIENT_SCHEMA,
+        "grid_view": GRID_VIEW_SCHEMA,
+        "icon": _control_schema({"name": STRING_SCHEMA, "value": STRING_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA}),
+        "item_tile": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "leading": ANY_SCHEMA, "trailing": ANY_SCHEMA}),
+        "key_listener": _control_schema({"autofocus": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
+        "launcher": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "query": STRING_SCHEMA, "open": BOOL_SCHEMA}),
+        "list_tile": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "leading": ANY_SCHEMA, "trailing": ANY_SCHEMA}),
+        "list_view": _control_schema({"reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "padding": PADDING_SCHEMA, "spacing": NUMBER_SCHEMA}),
+        "menu_item": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "icon": STRING_SCHEMA, "enabled": BOOL_SCHEMA}),
+        "overlay_host": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
+        "page": _control_schema({"title": STRING_SCHEMA, "bgcolor": COLOR_SCHEMA, "safe_area": BOOL_SCHEMA}),
+        "page_scene": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "show_header": BOOL_SCHEMA}),
+        "particle_field": PARTICLE_FIELD_SCHEMA,
+        "progress_timeline": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "current": INTEGER_SCHEMA}),
+        "router": _control_schema({"route": STRING_SCHEMA, "routes": {"type": "array", "items": ANY_SCHEMA}}),
+        "row": ROW_SCHEMA,
+        "scroll_view": SCROLL_VIEW_SCHEMA,
+        "shortcut_map": _control_schema({"bindings": {"type": "array", "items": ANY_SCHEMA}, "enabled": BOOL_SCHEMA}),
+        "skeleton": _control_schema({"enabled": BOOL_SCHEMA, "lines": INTEGER_SCHEMA, "height": NUMBER_SCHEMA}),
+        "skeleton_loader": _control_schema({"enabled": BOOL_SCHEMA, "lines": INTEGER_SCHEMA, "height": NUMBER_SCHEMA}),
+        "splash": _control_schema({"message": STRING_SCHEMA, "loading": BOOL_SCHEMA, "progress": NUMBER_SCHEMA}),
+        "stack": STACK_SCHEMA,
+        "table": JSON_TABLE_SCHEMA,
+        "tabs": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "selected": INTEGER_SCHEMA}),
+        "task_list": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "dense": BOOL_SCHEMA}),
+        "toast": _control_schema({"message": STRING_SCHEMA, "title": STRING_SCHEMA, "variant": STRING_SCHEMA, "open": BOOL_SCHEMA}),
+        "tooltip": _control_schema({"message": STRING_SCHEMA, "text": STRING_SCHEMA, "placement": STRING_SCHEMA}),
+        "tree_node": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "children": {"type": "array", "items": ANY_SCHEMA}}),
+        "window_drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
+        "window_frame": _control_schema({"title": STRING_SCHEMA, "show_controls": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
+        "wrap": WRAP_SCHEMA,
+        "empty_state_view": CONTROL_SCHEMAS["empty_state"],
+        "tree": CONTROL_SCHEMAS["tree_view"],
+    }
+)
 
 
 def _merge_layout(schema: dict[str, Any]) -> dict[str, Any]:

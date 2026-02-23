@@ -457,8 +457,8 @@ class Candy(Component):
             },
         )
 
-    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
-        return self.invoke(session, "trigger", payload)
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 
     def click(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "click", {"payload": dict(payload or {})})

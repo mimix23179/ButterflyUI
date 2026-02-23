@@ -455,7 +455,8 @@ class _CandyFamilyState extends State<_CandyFamily> {
       case 'emit':
       case 'trigger':
         {
-          final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
           if (!_candyEvents.contains(event)) {
             return {'ok': false, 'error': 'unknown event: $event'};
           }
