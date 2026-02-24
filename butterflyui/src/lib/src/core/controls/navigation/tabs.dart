@@ -28,7 +28,8 @@ class ButterflyUITabsWidget extends StatefulWidget {
   State<ButterflyUITabsWidget> createState() => _ButterflyUITabsWidgetState();
 }
 
-class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with SingleTickerProviderStateMixin {
+class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget>
+    with SingleTickerProviderStateMixin {
   TabController? _controller;
   int _lastReported = 0;
   int _activeIndex = 0;
@@ -43,8 +44,28 @@ class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with Sing
   @override
   void didUpdateWidget(covariant ButterflyUITabsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final oldCount = oldWidget.children.length;
     _syncController();
-    _setIndex(widget.index);
+    final controller = _controller;
+    if (controller == null) return;
+
+    if (oldWidget.index != widget.index) {
+      _setIndex(widget.index);
+      return;
+    }
+
+    if (oldCount != widget.children.length) {
+      final safeIndex = _safeIndex(_activeIndex, controller.length);
+      if (controller.index != safeIndex) {
+        _suppressEvents = true;
+        controller.index = safeIndex;
+        _suppressEvents = false;
+      }
+      _lastReported = safeIndex;
+      if (_activeIndex != safeIndex && mounted) {
+        setState(() => _activeIndex = safeIndex);
+      }
+    }
   }
 
   @override
@@ -62,9 +83,15 @@ class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with Sing
       return;
     }
     if (_controller == null || _controller!.length != count) {
+      final hadController = _controller != null;
       _disposeController();
-      final safeIndex = _safeIndex(widget.index, count);
-      _controller = TabController(length: count, vsync: this, initialIndex: safeIndex);
+      final seedIndex = hadController ? _activeIndex : widget.index;
+      final safeIndex = _safeIndex(seedIndex, count);
+      _controller = TabController(
+        length: count,
+        vsync: this,
+        initialIndex: safeIndex,
+      );
       _lastReported = safeIndex;
       _activeIndex = safeIndex;
       _controller!.addListener(_handleTabChange);
@@ -147,7 +174,10 @@ class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with Sing
             Text(label),
             const SizedBox(width: 6),
             GestureDetector(
-              onTap: () => widget.sendEvent(widget.controlId, 'close', {'index': idx, 'label': label}),
+              onTap: () => widget.sendEvent(widget.controlId, 'close', {
+                'index': idx,
+                'label': label,
+              }),
               child: const Icon(Icons.close, size: 14),
             ),
           ],
@@ -179,4 +209,3 @@ class _ButterflyUITabsWidgetState extends State<ButterflyUITabsWidget> with Sing
     );
   }
 }
-

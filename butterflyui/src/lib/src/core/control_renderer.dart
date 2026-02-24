@@ -298,6 +298,39 @@ const Set<String> _galleryModuleAliases = {
   'skins',
 };
 
+const Set<String> _candyModuleAliases = {
+  'button',
+  'card',
+  'column',
+  'container',
+  'row',
+  'stack',
+  'surface',
+  'wrap',
+  'align',
+  'center',
+  'spacer',
+  'aspect_ratio',
+  'overflow_box',
+  'fitted_box',
+  'effects',
+  'particles',
+  'border',
+  'shadow',
+  'outline',
+  'gradient',
+  'animation',
+  'transition',
+  'canvas',
+  'clip',
+  'decorated_box',
+  'badge',
+  'avatar',
+  'icon',
+  'text',
+  'motion',
+};
+
 const Set<String> _skinsModuleAliases = {
   'selector',
   'preset',
@@ -367,6 +400,10 @@ const Set<String> _terminalModuleAliases = {
 const Set<String> _studioModuleAliases = {
   'builder',
   'canvas',
+  'canvas_surface',
+  'timeline_surface',
+  'node_surface',
+  'preview_surface',
   'block_palette',
   'component_palette',
   'inspector',
@@ -381,6 +418,22 @@ const Set<String> _studioModuleAliases = {
   'selection_tools',
   'transform_box',
   'transform_toolbar',
+  'assets',
+  'assets_panel',
+  'layers',
+  'layers_panel',
+  'node',
+  'node_graph',
+  'preview',
+  'properties',
+  'responsive',
+  'timeline',
+  'timeline_editor',
+  'token_editor',
+  'tokens',
+  'toolbox',
+  'transform',
+  'transform_tools',
 };
 
 const Set<String> _codeEditorModuleAliases = {
@@ -390,21 +443,43 @@ const Set<String> _codeEditorModuleAliases = {
   'editor_tabs',
   'document_tab_strip',
   'file_tabs',
+  'file_tree',
   'workspace_explorer',
   'explorer_tree',
+  'tree',
+  'code_document',
+  'code_buffer',
+  'code_category_layer',
+  'smart_search_bar',
   'search_box',
   'search_field',
+  'search_history',
+  'search_intent',
+  'search_item',
   'search_results_view',
   'search_scope_selector',
   'search_source',
   'search_provider',
-  'search_history',
-  'search_intent',
-  'search_item',
   'search_everything_panel',
   'semantic_search',
+  'query_token',
+  'scoped_search_replace',
+  'inline_search_overlay',
+  'inline_widget',
+  'ghost_editor',
+  'gutter',
+  'hint',
+  'mini_map',
+  'editor_minimap',
+  'dock_graph',
+  'dock',
+  'dock_pane',
+  'workbench_editor',
+  'empty_state_view',
+  'empty_view',
   'command_search',
   'diff',
+  'diff_narrator',
   'diagnostic_stream',
   'diagnostics_panel',
   'inline_error_view',
@@ -414,6 +489,7 @@ const Set<String> _codeEditorModuleAliases = {
   'intent_search',
   'command_bar',
   'export_panel',
+  'scope_picker',
   'inspector',
 };
 
@@ -550,6 +626,20 @@ class ControlRenderer {
       final raw = props[key];
       if (raw is Map) return context.buildChild(coerceObjectMap(raw));
       return const SizedBox.shrink();
+    }
+
+    final candyAlias = _moduleFromPrefixedAlias(type, 'candy_', _candyModuleAliases);
+    if (candyAlias != null) {
+      return buildCandyFamilyControl(
+        controlId,
+        <String, Object?>{...props, 'module': candyAlias},
+        rawChildren,
+        context.tokens,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
     }
 
     final galleryAlias = _moduleFromPrefixedAlias(
@@ -1144,6 +1234,10 @@ class ControlRenderer {
       case 'studio':
       case 'studio_builder':
       case 'studio_canvas':
+      case 'studio_canvas_surface':
+      case 'studio_timeline_surface':
+      case 'studio_node_surface':
+      case 'studio_preview_surface':
       case 'studio_block_palette':
       case 'studio_component_palette':
       case 'studio_inspector':

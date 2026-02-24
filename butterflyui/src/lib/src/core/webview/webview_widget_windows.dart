@@ -47,7 +47,8 @@ class ButterflyUIWebViewWidget extends StatefulWidget {
   });
 
   @override
-  State<ButterflyUIWebViewWidget> createState() => _ButterflyUIWebViewWidgetState();
+  State<ButterflyUIWebViewWidget> createState() =>
+      _ButterflyUIWebViewWidgetState();
 }
 
 class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
@@ -70,7 +71,6 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
   bool _jsDisabled = false;
   bool _readySent = false;
   String? _initializationError;
-  final Set<String> _failedEngines = <String>{};
 
   bool get _useInApp => _engine == 'inapp';
   bool get _useFlutter {
@@ -95,20 +95,15 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
 
   String _normalizeEngine(String engine) {
     final value = engine.trim().toLowerCase();
-    if (value == 'inapp') return 'inapp';
+    if (value == 'inapp' ||
+        value == 'windows_inapp' ||
+        value == 'windows_inapp_monaco') {
+      return 'inapp';
+    }
     if (value == 'flutter' || value == 'webview_flutter') return 'flutter';
     if (value == 'windows' || value == 'webview_windows') return 'windows';
     if (!Platform.isWindows) return 'flutter';
-    return 'windows';
-  }
-
-  bool _isKnownEngine(String value) {
-    final normalized = value.trim().toLowerCase();
-    return normalized == 'windows' ||
-        normalized == 'webview_windows' ||
-        normalized == 'inapp' ||
-        normalized == 'flutter' ||
-        normalized == 'webview_flutter';
+    return 'inapp';
   }
 
   void _resetNavigationState() {
@@ -119,7 +114,7 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
     _readySent = false;
   }
 
-  Future<void> _startEngineInitialization({bool asFallback = false}) async {
+  Future<void> _startEngineInitialization() async {
     _initializationError = null;
     _resetNavigationState();
     if (_useInApp) {
@@ -131,7 +126,6 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
         } catch (_) {}
       }
       if (mounted) setState(() {});
-      _failedEngines.remove(_engine);
       return;
     }
     if (_useFlutter) {
@@ -139,18 +133,13 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
       _inAppController = null;
       try {
         await _initializeFlutter();
-        _failedEngines.remove(_engine);
       } catch (error) {
         _initializationError = error.toString();
-        _failedEngines.add(_engine);
         widget.sendEvent(widget.controlId, 'load_error', {
           'engine': _engine,
           'stage': 'initialize',
           'message': error.toString(),
         });
-        if (!asFallback && await _attemptFallback('initialize_failed', error)) {
-          return;
-        }
         if (mounted) setState(() {});
       }
       return;
@@ -159,67 +148,15 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
     _flutterController = null;
     try {
       await _initialize();
-      _failedEngines.remove(_engine);
     } catch (error) {
       _initializationError = error.toString();
-      _failedEngines.add(_engine);
       widget.sendEvent(widget.controlId, 'load_error', {
         'engine': _engine,
         'stage': 'initialize',
         'message': error.toString(),
       });
-      if (!asFallback && await _attemptFallback('initialize_failed', error)) {
-        return;
-      }
       if (mounted) setState(() {});
     }
-  }
-
-  Future<bool> _attemptFallback(String reason, Object error) async {
-    final candidates = <String>[];
-    final explicitFallback = widget.props.fallbackEngine.trim().toLowerCase();
-    if (explicitFallback.isNotEmpty && _isKnownEngine(explicitFallback)) {
-      candidates.add(explicitFallback);
-    } else {
-      // Automatic fallback chain so unsupported engines recover without
-      // requiring per-control fallback configuration.
-      if (_engine == 'windows') {
-        candidates.addAll(const ['inapp', 'flutter']);
-      } else if (_engine == 'inapp') {
-        if (Platform.isWindows) {
-          candidates.addAll(const ['flutter', 'windows']);
-        } else {
-          candidates.add('flutter');
-        }
-      } else {
-        // flutter/webview_flutter
-        if (Platform.isWindows) {
-          candidates.addAll(const ['inapp', 'windows']);
-        } else {
-          candidates.add('inapp');
-        }
-      }
-    }
-
-    for (final candidateRaw in candidates) {
-      final candidate = _normalizeEngine(candidateRaw);
-      if (candidate == _engine) continue;
-      if (_failedEngines.contains(candidate)) continue;
-      final previous = _engine;
-      _engine = candidate;
-      widget.sendEvent(widget.controlId, 'engine_fallback', {
-        'from': previous,
-        'to': candidate,
-        'reason': reason,
-        'error': error.toString(),
-      });
-      if (mounted) setState(() {});
-      await _startEngineInitialization(asFallback: true);
-      if (_initializationError == null || _initializationError!.isEmpty) {
-        return true;
-      }
-    }
-    return false;
   }
 
   void _clearWindowsSubscriptions() {

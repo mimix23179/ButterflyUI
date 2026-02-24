@@ -80,6 +80,45 @@ CANDY_EVENTS = {
     "gesture_scale_end",
 }
 
+CANDY_REGISTRY_ROLE_ALIASES = {
+    "module": "module_registry",
+    "modules": "module_registry",
+    "foundation": "foundation_registry",
+    "foundations": "foundation_registry",
+    "interaction": "interaction_registry",
+    "interactions": "interaction_registry",
+    "motion_pack": "motion_registry",
+    "motion": "motion_registry",
+    "motions": "motion_registry",
+    "effect": "effect_registry",
+    "effects_pack": "effect_registry",
+    "effects": "effect_registry",
+    "recipe": "recipe_registry",
+    "recipes": "recipe_registry",
+    "provider": "provider_registry",
+    "providers": "provider_registry",
+    "command": "command_registry",
+    "commands": "command_registry",
+    "module_registry": "module_registry",
+    "foundation_registry": "foundation_registry",
+    "interaction_registry": "interaction_registry",
+    "motion_registry": "motion_registry",
+    "effect_registry": "effect_registry",
+    "recipe_registry": "recipe_registry",
+    "provider_registry": "provider_registry",
+    "command_registry": "command_registry",
+}
+
+CANDY_REGISTRY_MANIFEST_LISTS = {
+    "module_registry": "enabled_modules",
+    "foundation_registry": "enabled_foundations",
+    "interaction_registry": "enabled_interactions",
+    "motion_registry": "enabled_motion",
+    "effect_registry": "enabled_effects",
+    "recipe_registry": "enabled_recipes",
+    "command_registry": "enabled_commands",
+}
+
 
 class CandySchemaError(ValueError):
     pass
@@ -155,6 +194,64 @@ def _as_mapping(value: Any) -> Mapping[str, Any] | None:
     if isinstance(value, Mapping):
         return value
     return None
+
+
+def _normalize_registry_role(
+    value: str | None,
+    aliases: Mapping[str, str],
+) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return aliases.get(normalized, f"{normalized}_registry")
+
+
+def _register_runtime_module(
+    props: dict[str, Any],
+    *,
+    role: str,
+    module_id: str,
+    definition: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    normalized_role = _normalize_registry_role(role, CANDY_REGISTRY_ROLE_ALIASES)
+    normalized_module = _normalize_module(module_id)
+    if normalized_module is None:
+        normalized_module = _normalize_token(module_id)
+    if not normalized_role or not normalized_module:
+        return {"ok": False, "error": "role and module_id are required"}
+
+    registries = dict(props.get("registries") or {})
+    role_registry = dict(registries.get(normalized_role) or {})
+    role_registry[normalized_module] = dict(definition or {})
+    registries[normalized_role] = role_registry
+    props["registries"] = registries
+
+    manifest = dict(props.get("manifest") or {})
+    enabled_modules = _normalize_events(manifest.get("enabled_modules")) or []
+    if normalized_module in CANDY_MODULES and normalized_module not in enabled_modules:
+        enabled_modules.append(normalized_module)
+    manifest["enabled_modules"] = enabled_modules
+
+    list_key = CANDY_REGISTRY_MANIFEST_LISTS.get(normalized_role)
+    if list_key:
+        values = _normalize_events(manifest.get(list_key)) or []
+        if normalized_module not in values:
+            values.append(normalized_module)
+        manifest[list_key] = values
+    props["manifest"] = manifest
+
+    if normalized_module in CANDY_MODULES:
+        modules = dict(props.get("modules") or {})
+        modules.setdefault(normalized_module, {})
+        props["modules"] = modules
+        props.setdefault(normalized_module, modules[normalized_module])
+
+    return {
+        "ok": True,
+        "role": normalized_role,
+        "module_id": normalized_module,
+        "definition": dict(definition or {}),
+    }
 
 
 class Candy(Component):
@@ -271,6 +368,8 @@ class Candy(Component):
             state=resolved_state,
             custom_layout=custom_layout,
             layout=layout,
+            manifest=dict(kwargs.pop("manifest", {}) or {}),
+            registries=dict(kwargs.pop("registries", {}) or {}),
             variant=variant,
             events=resolved_events,
             theme=theme_payload,
@@ -439,6 +538,137 @@ class Candy(Component):
         self._validate_props(next_props, strict=self._strict_contract)
         self.props.update({k: v for k, v in props.items() if v is not None})
         return self.invoke(session, "set_props", {"props": props})
+
+    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
+        manifest_payload = dict(manifest or {})
+        current_manifest = dict(self.props.get("manifest") or {})
+        current_manifest.update(manifest_payload)
+        self.props["manifest"] = current_manifest
+        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
+
+    def register_module(
+        self,
+        session: Any,
+        *,
+        role: str,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        result = _register_runtime_module(
+            self.props,
+            role=role,
+            module_id=module_id,
+            definition=definition,
+        )
+        if result.get("ok") is not True:
+            return result
+        return self.invoke(
+            session,
+            "register_module",
+            {
+                "role": result["role"],
+                "module_id": result["module_id"],
+                "definition": dict(definition or {}),
+            },
+        )
+
+    def register_foundation(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="foundation",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_interaction(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="interaction",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_motion(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="motion",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_effect(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="effect",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_recipe(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="recipe",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_provider(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="provider",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_command(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="command",
+            module_id=module_id,
+            definition=definition,
+        )
 
     def emit(
         self,

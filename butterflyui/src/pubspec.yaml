@@ -9,79 +9,86 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  web_socket_channel: "3.0.3"
-  webview_windows: "0.4.0"
+  web_socket_channel:
+  webview_windows:
+  webview_flutter:
   native_preview_host:
     path: packages/native_preview_host
-  collection: "1.19.1"
-  animations: "2.1.1"
-  file_picker: "10.3.8"
-  flutter_colorpicker: "1.1.0"
-  flutter_markdown: "0.7.7+1"
-  flutter_svg: "2.2.3"
-  media_kit: "1.2.6"
-  media_kit_libs_windows_audio: "1.0.9"
-  media_kit_libs_windows_video: "1.0.11"
-  media_kit_video: "1.3.1"
-  material_color_utilities: "0.11.1"
-  shared_preferences: "2.5.4"
-  share_plus: "7.2.2"
-  undo: "1.6.0"
-  webview_flutter: "4.13.1"
-  photo_view: "0.15.0"
-  flutter_staggered_grid_view: "0.6.2"
-  flutter_markdown_plus: "1.0.7"
-  flutter_code_editor: "0.3.5"
-  highlight: "0.7.0"
-  diff_match_patch: "0.4.1"
-  json_schema: "5.2.2"
-  animated_tree_view: "2.3.0"
-  data_table_2: "2.7.2"
-  multi_split_view: "3.6.1"
-  scrollable_positioned_list: "0.3.8"
-  linked_scroll_controller: "0.2.0"
-  reorderables: "0.6.0"
-  super_drag_and_drop: "0.9.1"
-  flutter_box_transform: "0.4.7"
-  flutter_portal: "1.1.4"
-  flutter_inappwebview: "6.1.5"
-  google_fonts: "6.3.3"
-  xterm: "4.0.0"
-  flutter_glow: "0.3.2"
-  flutter_neumorphic_plus: "3.5.0"
-  nes_ui: "0.27.0"
-  phosphor_flutter: "2.1.0"
-  flutter_animate: "4.5.2"
-  flutter_pty: "0.4.2"
-  process_run: "1.2.4"
-  menu_bar: "0.5.3"
-  mac_menu_bar: "0.0.2"
-  dio: "4.0.6"
-  flutter_download_manager_dio4: "0.5.6"
-  flutter_chat_ui: "1.6.15"
-  flutter_chat_types: "3.6.2"
-  flutter_highlight: "0.7.0"
-  syntax_highlight: "0.5.0"
-  cached_network_image: "3.4.1"
-  go_router: "17.0.1"
-  flutter_riverpod: "3.2.0"
-  path_provider: "2.1.5"
-  isar: "3.1.0+1"
-  fuzzywuzzy: "1.2.0"
-  fuse: "0.0.99"
-  hotkey_manager: "0.2.3"
-  ansicolor: "2.0.3"
-  another_flushbar: "1.12.32"
-  fluttertoast: "9.0.0"
-  contextmenu: "3.0.0"
-  desktop_drop: "0.7.0"
-  cross_file: "0.3.5+1"
-  split_view: "3.2.1"
+  collection:
+  path:
+  archive:
+  crypto:
+  uuid:
+  mime:
+  logging:
+  vector_math:
+  dotted_border:
+  animations:
+  file_picker:
+  flutter_colorpicker:
+  flutter_markdown_plus:
+  flutter_svg:
+  media_kit:
+  media_kit_libs_windows_audio:
+  media_kit_libs_windows_video:
+  media_kit_video:
+  material_color_utilities:
+  shared_preferences:
+  share_plus:
+  undo:
+  photo_view:
+  flutter_staggered_grid_view:
+  flutter_monaco:
+  highlight:
+  diff_match_patch:
+  json_schema:
+  animated_tree_view:
+  data_table_2:
+  multi_split_view:
+  scrollable_positioned_list:
+  linked_scroll_controller:
+  reorderables:
+  super_drag_and_drop:
+  flutter_box_transform:
+  flutter_portal:
+  flutter_inappwebview:
+  google_fonts:
+  xterm:
+  flutter_glow:
+  flutter_neumorphic_plus:
+  nes_ui:
+  phosphor_flutter:
+  flutter_animate:
+  flutter_pty:
+  process_run:
+  menu_bar:
+  mac_menu_bar:
+  dio:
+  flutter_download_manager_dio4:
+  flutter_chat_ui:
+  flutter_chat_types:
+  flutter_highlight:
+  syntax_highlight:
+  cached_network_image:
+  go_router:
+  flutter_riverpod:
+  path_provider:
+  isar:
+  fuzzywuzzy:
+  fuse:
+  hotkey_manager:
+  ansicolor:
+  another_flushbar:
+  fluttertoast:
+  contextmenu:
+  desktop_drop:
+  cross_file:
+  split_view:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: "6.0.0"
+  flutter_lints:
 
 flutter:
   uses-material-design: true

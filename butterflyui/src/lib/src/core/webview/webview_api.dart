@@ -45,7 +45,7 @@ class ButterflyUIWebViewProps {
     this.html = '',
     this.baseUrl,
     this.bgcolor,
-    this.engine = 'windows',
+    this.engine = 'inapp',
     this.fallbackEngine = '',
     this.requestHeaders = const <String, String>{},
     this.userAgent,
@@ -112,7 +112,11 @@ class ButterflyUIWebViewProps {
     final engineRaw =
         props['engine']?.toString() ?? props['webview_engine']?.toString();
     final engine = (engineRaw == null || engineRaw.isEmpty)
-        ? (useInApp ? 'inapp' : 'windows')
+        ? (useInApp
+              ? 'inapp'
+              : (kIsWeb || defaultTargetPlatform != TargetPlatform.windows
+                    ? 'flutter'
+                    : 'inapp'))
         : engineRaw.toLowerCase();
     final fallbackEngine =
         props['fallback_engine']?.toString().trim().toLowerCase() ?? '';

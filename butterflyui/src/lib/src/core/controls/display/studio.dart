@@ -1,75 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/studio/studio_engine.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-const int _studioSchemaVersion = 2;
-
-const List<String> _studioModuleOrder = [
-  'builder',
-  'canvas',
-  'block_palette',
-  'component_palette',
-  'inspector',
-  'outline_tree',
-  'project_panel',
-  'properties_panel',
-  'responsive_toolbar',
-  'tokens_editor',
-  'actions_editor',
-  'bindings_editor',
-  'asset_browser',
-  'selection_tools',
-  'transform_box',
-  'transform_toolbar',
-];
-
-const Set<String> _studioModules = {
-  'actions_editor',
-  'asset_browser',
-  'bindings_editor',
-  'block_palette',
-  'builder',
-  'canvas',
-  'component_palette',
-  'inspector',
-  'outline_tree',
-  'project_panel',
-  'properties_panel',
-  'responsive_toolbar',
-  'tokens_editor',
-  'selection_tools',
-  'transform_box',
-  'transform_toolbar',
-};
-
-const Set<String> _studioStates = {
-  'idle',
-  'loading',
-  'ready',
-  'editing',
-  'preview',
-  'disabled',
-};
-
-const Set<String> _studioEvents = {
-  'ready',
-  'change',
-  'submit',
-  'select',
-  'state_change',
-  'module_change',
-};
-
 class ButterflyUIStudio extends StatefulWidget {
-  final String controlId;
-  final Map<String, Object?> initialProps;
-  final List<dynamic> rawChildren;
-  final Widget Function(Map<String, Object?> child) buildChild;
-  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
-  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
   const ButterflyUIStudio({
     super.key,
     required this.controlId,
@@ -81,24 +16,40 @@ class ButterflyUIStudio extends StatefulWidget {
     required this.sendEvent,
   });
 
+  final String controlId;
+  final Map<String, Object?> initialProps;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
   @override
   State<ButterflyUIStudio> createState() => _ButterflyUIStudioState();
 }
 
 class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
-  late Map<String, Object?> _runtimeProps;
+  late final StudioHostEngine _engine = StudioHostEngine(widget.initialProps);
+  bool _readyEmitted = false;
 
   @override
   void initState() {
     super.initState();
-    _runtimeProps = _normalizeProps(widget.initialProps);
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _readyEmitted) return;
+      _readyEmitted = true;
+      _emitConfiguredEvent('ready', const <String, Object?>{
+        'module': 'builder',
+        'source': 'studio_host',
+      });
+    });
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUIStudio oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _runtimeProps = _normalizeProps(widget.initialProps);
+    _engine.replaceProps(widget.initialProps);
     if (widget.controlId != oldWidget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
@@ -115,64 +66,292 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
     String method,
     Map<String, Object?> args,
   ) async {
-    switch (_norm(method)) {
+    final normalized = studioNorm(method);
+    switch (normalized) {
       case 'get_state':
-        return {
-          'schema_version':
-              _runtimeProps['schema_version'] ?? _studioSchemaVersion,
-          'module': _runtimeProps['module'],
-          'state': _runtimeProps['state'],
-          'props': _runtimeProps,
-        };
+        return _engine.stateSnapshot();
       case 'set_props':
         final incoming = args['props'];
         if (incoming is Map) {
           setState(() {
-            _runtimeProps.addAll(coerceObjectMap(incoming));
-            _runtimeProps = _normalizeProps(_runtimeProps);
+            _engine.setProps(coerceObjectMap(incoming), recordHistory: false);
           });
         }
-        return _runtimeProps;
+        return _engine.props;
       case 'set_module':
-        final module = _norm(args['module']?.toString() ?? '');
-        if (!_studioModules.contains(module)) {
-          return {'ok': false, 'error': 'unknown module: $module'};
-        }
-        final payload = args['payload'];
-        final payloadMap = payload is Map
-            ? coerceObjectMap(payload)
-            : <String, Object?>{};
-        setState(() {
-          final modules = _coerceObjectMap(_runtimeProps['modules']);
-          modules[module] = payloadMap;
-          _runtimeProps['modules'] = modules;
-          _runtimeProps['module'] = module;
-          _runtimeProps[module] = payloadMap;
-          _runtimeProps = _normalizeProps(_runtimeProps);
+        return _withState(() {
+          final module = (args['module'] ?? '').toString();
+          final payload = studioCoerceObjectMap(args['payload']);
+          final result = _engine.setModule(
+            module,
+            payload,
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('module_change', <String, Object?>{
+              'module': result['module'],
+              'payload': payload,
+            });
+          }
+          return result;
         });
-        _emitConfiguredEvent('module_change', {
-          'module': module,
-          'payload': payloadMap,
-        });
-        return {'ok': true, 'module': module};
       case 'set_state':
-        final state = _norm(args['state']?.toString() ?? '');
-        if (!_studioStates.contains(state)) {
-          return {'ok': false, 'error': 'unknown state: $state'};
-        }
-        setState(() {
-          _runtimeProps['state'] = state;
+        return _withState(() {
+          final result = _engine.setState(
+            (args['state'] ?? '').toString(),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('state_change', <String, Object?>{
+              'state': result['state'],
+            });
+          }
+          return result;
         });
-        _emitConfiguredEvent('state_change', {'state': state});
-        return {'ok': true, 'state': state};
+      case 'set_manifest':
+        return _withState(() {
+          final result = _engine.setManifest(
+            studioCoerceObjectMap(args['manifest']),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': 'set_manifest',
+              'manifest': result['manifest'],
+            });
+          }
+          return result;
+        });
+      case 'register_module':
+        return _withState(() {
+          final role = (args['role'] ?? '').toString();
+          final moduleId = (args['module_id'] ?? args['id'] ?? '').toString();
+          final definition = studioCoerceObjectMap(args['definition']);
+          final result = _engine.registerModule(
+            role: role,
+            moduleId: moduleId,
+            definition: definition,
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': 'register_module',
+              'role': result['role'],
+              'module_id': result['module_id'],
+            });
+          }
+          return result;
+        });
+      case 'register_surface':
+      case 'register_tool':
+      case 'register_panel':
+      case 'register_importer':
+      case 'register_exporter':
+        return _withState(() {
+          final role = normalized.replaceFirst('register_', '');
+          final moduleId =
+              (args['module_id'] ??
+                      args['id'] ??
+                      args['name'] ??
+                      args['surface'] ??
+                      args['tool'] ??
+                      args['panel'] ??
+                      '')
+                  .toString();
+          final definition = studioCoerceObjectMap(args['definition']);
+          final result = _engine.registerModule(
+            role: role,
+            moduleId: moduleId,
+            definition: definition,
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': normalized,
+              'role': result['role'],
+              'module_id': result['module_id'],
+            });
+          }
+          return result;
+        });
+      case 'set_selection':
+        return _withState(() {
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{...args};
+          final result = _engine.setSelection(payload, recordHistory: true);
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('select', <String, Object?>{
+              'module': 'canvas',
+              'selected_id': result['selected_id'],
+              'selected_ids': result['selected_ids'],
+            });
+          }
+          return result;
+        });
+      case 'set_active_surface':
+        return _withState(() {
+          final result = _engine.setActiveSurface(
+            (args['surface'] ?? args['active_surface'] ?? '').toString(),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('module_change', <String, Object?>{
+              'module': result['active_surface'],
+            });
+          }
+          return result;
+        });
+      case 'set_tool':
+        return _withState(() {
+          final result = _engine.setTool(
+            (args['tool'] ?? args['active_tool'] ?? '').toString(),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'selection_tools',
+              'tool': result['tool'],
+            });
+          }
+          return result;
+        });
+      case 'focus_panel':
+        return _withState(() {
+          final result = _engine.focusPanel(
+            (args['panel'] ?? args['panel_id'] ?? '').toString(),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': result['focused_panel'],
+              'intent': 'focus_panel',
+            });
+          }
+          return result;
+        });
+      case 'register_shortcut':
+        return _withState(() {
+          final result = _engine.registerShortcut(
+            context: (args['context'] ?? args['scope'] ?? 'global').toString(),
+            chord: (args['chord'] ?? args['keys'] ?? '').toString(),
+            command: (args['shortcut_command'] ?? args['command'] ?? '')
+                .toString(),
+            payload: studioCoerceObjectMap(args['payload']),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': 'register_shortcut',
+              'result': result,
+            });
+          }
+          return result;
+        });
+      case 'set_dock_layout':
+        return _withState(() {
+          final result = _engine.setDockLayout(
+            studioCoerceObjectMap(args['layout']),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': 'set_dock_layout',
+            });
+          }
+          return result;
+        });
+      case 'import_asset':
+        return _withState(() {
+          final result = _engine.importAsset(
+            (args['path'] ?? args['asset_path'] ?? '').toString(),
+            mode: (args['mode'] ?? 'copy').toString(),
+            metadata: studioCoerceObjectMap(args['metadata']),
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'asset_browser',
+              'intent': 'import_asset',
+              'asset': result['asset'],
+            });
+          }
+          return result;
+        });
+      case 'enqueue_export':
+      case 'export':
+        return _withState(() {
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{...args};
+          final result = _engine.enqueueExport(
+            format: (args['format'] ?? payload['format'] ?? 'png').toString(),
+            payload: payload,
+            recordHistory: true,
+          );
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('submit', <String, Object?>{
+              'module': 'builder',
+              'intent': 'enqueue_export',
+              'job': result['job'],
+            });
+          }
+          return result;
+        });
+      case 'execute_command':
+      case 'command':
+      case 'route_command':
+        return _withState(() {
+          final result = _engine.executeCommand(args);
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': _engine.props['module'],
+              'intent': 'execute_command',
+              'result': result,
+            });
+          }
+          return result;
+        });
+      case 'undo':
+        return _withState(() {
+          final result = _engine.undo();
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'actions_editor',
+              'intent': 'undo',
+              'result': result,
+            });
+          }
+          return result;
+        });
+      case 'redo':
+        return _withState(() {
+          final result = _engine.redo();
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'actions_editor',
+              'intent': 'redo',
+              'result': result,
+            });
+          }
+          return result;
+        });
       case 'emit':
       case 'trigger':
-        final fallback = method == 'trigger' ? 'change' : method;
-        final event = _norm(
+        final fallback = normalized == 'trigger' ? 'change' : normalized;
+        final event = studioNorm(
           (args['event'] ?? args['name'] ?? fallback).toString(),
         );
-        if (!_studioEvents.contains(event)) {
-          return {'ok': false, 'error': 'unknown event: $event'};
+        if (!studioEvents.contains(event)) {
+          return <String, Object?>{
+            'ok': false,
+            'error': 'unknown event: $event',
+          };
         }
         final payload = args['payload'];
         _emitConfiguredEvent(
@@ -181,708 +360,157 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         );
         return true;
       default:
-        final normalized = _norm(method);
-        if (_studioModules.contains(normalized)) {
-          final payload = args['payload'];
-          final payloadMap = payload is Map
-              ? coerceObjectMap(payload)
-              : <String, Object?>{...args};
-          setState(() {
-            final modules = _coerceObjectMap(_runtimeProps['modules']);
-            modules[normalized] = payloadMap;
-            _runtimeProps['modules'] = modules;
-            _runtimeProps['module'] = normalized;
-            _runtimeProps[normalized] = payloadMap;
-            _runtimeProps = _normalizeProps(_runtimeProps);
+        if (studioModules.contains(normalized)) {
+          return _withState(() {
+            final payload = args['payload'];
+            final payloadMap = payload is Map
+                ? coerceObjectMap(payload)
+                : <String, Object?>{...args};
+            final result = _engine.setModule(
+              normalized,
+              payloadMap,
+              recordHistory: true,
+            );
+            if (result['ok'] == true) {
+              _emitConfiguredEvent('module_change', <String, Object?>{
+                'module': normalized,
+                'payload': payloadMap,
+              });
+            }
+            return result;
           });
-          _emitConfiguredEvent('module_change', {
-            'module': normalized,
-            'payload': payloadMap,
-          });
-          return {'ok': true, 'module': normalized};
         }
-        return {'ok': false, 'error': 'unknown method: $method'};
+        return <String, Object?>{
+          'ok': false,
+          'error': 'unknown method: $method',
+        };
     }
   }
 
+  Object _withState(Object Function() action) {
+    late Object result;
+    setState(() {
+      result = action();
+    });
+    return result;
+  }
+
   Set<String> _configuredEvents() {
-    final raw = _runtimeProps['events'];
+    final raw = _engine.props['events'];
     final out = <String>{};
     if (raw is List) {
       for (final entry in raw) {
-        final value = _norm(entry?.toString() ?? '');
-        if (value.isNotEmpty && _studioEvents.contains(value)) {
+        final value = studioNorm(entry?.toString() ?? '');
+        if (value.isNotEmpty && studioEvents.contains(value)) {
           out.add(value);
         }
       }
     }
+    if (out.isEmpty) return defaultStudioEvents;
     return out;
   }
 
   void _emitConfiguredEvent(String event, Map<String, Object?> payload) {
-    final normalized = _norm(event);
+    final normalized = studioNorm(event);
     final configured = _configuredEvents();
     if (configured.isNotEmpty && !configured.contains(normalized)) {
       return;
     }
-    widget.sendEvent(widget.controlId, normalized, {
-      'schema_version': _runtimeProps['schema_version'] ?? _studioSchemaVersion,
-      'module': _runtimeProps['module'],
-      'state': _runtimeProps['state'],
+    widget.sendEvent(widget.controlId, normalized, <String, Object?>{
+      'schema_version': _engine.props['schema_version'] ?? studioSchemaVersion,
+      'module': _engine.props['module'],
+      'state': _engine.props['state'],
       ...payload,
     });
   }
 
-  Widget _buildModuleSection(String module, Map<String, Object?> section) {
-    switch (module) {
-      case 'builder':
-      case 'canvas':
-        final selected = (section['selected_id'] ?? '').toString();
-        final showGrid = section['show_grid'] == true;
-        final snapToGrid = section['snap_to_grid'] == true;
-        final gridSize = coerceDouble(section['grid_size']) ?? 8;
-        final moduleRadius =
-            coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 10;
-        final canvasHeight =
-            coerceDouble(section['height']) ?? (module == 'canvas' ? 280 : 220);
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(moduleRadius),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Selected: ${selected.isEmpty ? '-' : selected}'),
-              const SizedBox(height: 6),
-              Text(
-                'Grid: ${showGrid ? 'on' : 'off'} - Snap: ${snapToGrid ? 'on' : 'off'} - Size: $gridSize',
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: canvasHeight,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(moduleRadius - 2),
-                  border: Border.all(color: Theme.of(context).dividerColor),
-                ),
-                child: Center(
-                  child: Text(
-                    module == 'canvas' ? 'Canvas Surface' : 'Builder Workspace',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              FilledButton.tonal(
-                onPressed: () => _emitConfiguredEvent('select', {
-                  'module': module,
-                  'selected_id': selected,
-                }),
-                child: const Text('Emit Select'),
-              ),
-            ],
-          ),
-        );
-      case 'block_palette':
-      case 'component_palette':
-        return _StudioSearchModule(
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      case 'asset_browser':
-      case 'outline_tree':
-      case 'project_panel':
-      case 'selection_tools':
-      case 'transform_toolbar':
-      case 'responsive_toolbar':
-        return _StudioListModule(
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      case 'inspector':
-      case 'properties_panel':
-      case 'tokens_editor':
-      case 'actions_editor':
-      case 'bindings_editor':
-        return _StudioPropertyModule(
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      case 'transform_box':
-        return _StudioTransformModule(
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      default:
-        return _StudioGenericModule(
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final availableModules = _availableModules(_runtimeProps);
-    final activeModule = _norm(
-      _runtimeProps['module']?.toString() ?? 'builder',
+    final availableModules = availableStudioModules(_engine.props);
+    final activeModule = normalizeStudioModuleToken(
+      (_engine.props['module'] ?? 'builder').toString(),
     );
+
     final customChildren = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
-    final showChrome =
-        _runtimeProps['show_modules'] == true ||
-        _runtimeProps['show_chrome'] == true;
 
-    if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (customChildren.isNotEmpty && !showChrome) {
-      if (customChildren.length == 1) {
-        return customChildren.first;
-      }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < customChildren.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
-            customChildren[i],
-          ],
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _StudioHeader(
-          state: (_runtimeProps['state'] ?? 'ready').toString(),
-          module: activeModule,
-        ),
-        const SizedBox(height: 8),
-        _StudioModuleTabs(
-          modules: availableModules,
-          activeModule: activeModule,
-          onSelect: (module) {
-            setState(() {
-              _runtimeProps['module'] = module;
-            });
-            _emitConfiguredEvent('module_change', {'module': module});
-          },
-        ),
-        const SizedBox(height: 8),
-        for (final module in availableModules) ...[
-          ExpansionTile(
-            key: ValueKey<String>('studio_module_$module'),
-            initiallyExpanded: module == activeModule,
-            title: Text(module.replaceAll('_', ' ')),
-            childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            children: [
-              _buildModuleSection(
-                module,
-                _sectionProps(_runtimeProps, module) ??
-                    <String, Object?>{'events': _runtimeProps['events']},
+    return StudioWorkbench(
+      runtimeProps: _engine.props,
+      availableModules: availableModules,
+      activeModule: activeModule,
+      history: _engine.history,
+      undoDepth: _engine.undoDepth,
+      redoDepth: _engine.redoDepth,
+      customChildren: customChildren,
+      onSelectModule: (module) {
+        setState(() {
+          final normalizedModule = normalizeStudioModuleToken(module);
+          if (studioSurfaceModules.contains(normalizedModule)) {
+            _engine.setActiveSurface(module, recordHistory: false);
+          } else {
+            _engine.setModule(
+              module,
+              studioSectionProps(_engine.props, module) ?? <String, Object?>{},
+              recordHistory: false,
+            );
+          }
+        });
+        _emitConfiguredEvent('module_change', <String, Object?>{
+          'module': module,
+        });
+      },
+      onEmit: (event, payload) {
+        final action = studioNorm((payload['action'] ?? '').toString());
+        if (event == 'change' && action == 'undo') {
+          final result = _withState(() => _engine.undo());
+          _emitConfiguredEvent('change', <String, Object?>{
+            'intent': 'undo',
+            'result': result,
+          });
+          return;
+        }
+        if (event == 'change' && action == 'redo') {
+          final result = _withState(() => _engine.redo());
+          _emitConfiguredEvent('change', <String, Object?>{
+            'intent': 'redo',
+            'result': result,
+          });
+          return;
+        }
+        if (event == 'select') {
+          _withState(() => _engine.setSelection(payload, recordHistory: true));
+        } else if (event == 'change') {
+          final module = normalizeStudioModuleToken(
+            (payload['module'] ?? '').toString(),
+          );
+          final modulePayload = studioCoerceObjectMap(payload['payload']);
+          if (module == 'selection_tools' &&
+              modulePayload['active_tool'] != null) {
+            _withState(
+              () => _engine.setTool(
+                modulePayload['active_tool'].toString(),
+                recordHistory: true,
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-        ],
-      ],
-    );
-  }
-}
-
-Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
-  final out = Map<String, Object?>.from(input);
-  out['schema_version'] =
-      (coerceOptionalInt(out['schema_version']) ?? _studioSchemaVersion).clamp(
-        1,
-        9999,
-      );
-
-  final module = _norm(out['module']?.toString() ?? '');
-  if (module.isNotEmpty && _studioModules.contains(module)) {
-    out['module'] = module;
-  } else if (module.isNotEmpty) {
-    out.remove('module');
-  }
-
-  final state = _norm(out['state']?.toString() ?? '');
-  if (state.isNotEmpty && _studioStates.contains(state)) {
-    out['state'] = state;
-  } else if (state.isNotEmpty) {
-    out.remove('state');
-  }
-
-  final events = out['events'];
-  if (events is List) {
-    out['events'] = events
-        .map((e) => _norm(e?.toString() ?? ''))
-        .where((e) => e.isNotEmpty && _studioEvents.contains(e))
-        .toSet()
-        .toList(growable: false);
-  }
-
-  final modules = _coerceObjectMap(out['modules']);
-  final normalizedModules = <String, Object?>{};
-  for (final moduleKey in _studioModules) {
-    final topLevel = out[moduleKey];
-    if (topLevel is Map) {
-      final value = coerceObjectMap(topLevel);
-      normalizedModules[moduleKey] = value;
-      out[moduleKey] = value;
-    } else if (topLevel == true) {
-      normalizedModules[moduleKey] = <String, Object?>{};
-      out[moduleKey] = <String, Object?>{};
-    }
-  }
-  for (final entry in modules.entries) {
-    final normalized = _norm(entry.key);
-    if (!_studioModules.contains(normalized)) continue;
-    if (entry.value == true) {
-      normalizedModules[normalized] = <String, Object?>{};
-      out[normalized] = <String, Object?>{};
-      continue;
-    }
-    final value = _coerceObjectMap(entry.value);
-    if (value.isEmpty && entry.value is! Map) continue;
-    normalizedModules[normalized] = value;
-    out[normalized] = value;
-  }
-  out['modules'] = normalizedModules;
-
-  return out;
-}
-
-List<String> _availableModules(Map<String, Object?> props) {
-  final modules = <String>[];
-  final moduleMap = _coerceObjectMap(props['modules']);
-  for (final key in _studioModuleOrder) {
-    if (props[key] is Map ||
-        props[key] == true ||
-        moduleMap[key] is Map ||
-        moduleMap[key] == true) {
-      modules.add(key);
-    }
-  }
-  if (modules.isEmpty) {
-    modules.addAll(const [
-      'builder',
-      'responsive_toolbar',
-      'block_palette',
-      'component_palette',
-      'canvas',
-      'outline_tree',
-      'inspector',
-      'properties_panel',
-      'tokens_editor',
-      'actions_editor',
-      'bindings_editor',
-    ]);
-  }
-  return modules;
-}
-
-Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
-  final normalized = _norm(key);
-  final section = props[normalized];
-  if (section is Map) {
-    return <String, Object?>{
-      ...coerceObjectMap(section),
-      'events': props['events'],
-    };
-  }
-  if (section == true) {
-    return <String, Object?>{'events': props['events']};
-  }
-  final modules = _coerceObjectMap(props['modules']);
-  final fromModules = modules[normalized];
-  if (fromModules is Map) {
-    return <String, Object?>{
-      ...coerceObjectMap(fromModules),
-      'events': props['events'],
-    };
-  }
-  if (fromModules == true) {
-    return <String, Object?>{'events': props['events']};
-  }
-  return null;
-}
-
-Map<String, Object?> _coerceObjectMap(Object? value) {
-  if (value is Map) return coerceObjectMap(value);
-  return <String, Object?>{};
-}
-
-String _norm(String value) {
-  return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
-}
-
-class _StudioHeader extends StatelessWidget {
-  const _StudioHeader({required this.state, required this.module});
-
-  final String state;
-  final String module;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Studio', style: Theme.of(context).textTheme.titleMedium),
-              Text(
-                'State: $state',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        Text('Module: $module'),
-      ],
-    );
-  }
-}
-
-class _StudioModuleTabs extends StatelessWidget {
-  const _StudioModuleTabs({
-    required this.modules,
-    required this.activeModule,
-    required this.onSelect,
-  });
-
-  final List<String> modules;
-  final String activeModule;
-  final ValueChanged<String> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        for (final module in modules)
-          ChoiceChip(
-            selected: module == activeModule,
-            label: Text(module.replaceAll('_', ' ')),
-            onSelected: (_) => onSelect(module),
-          ),
-      ],
-    );
-  }
-}
-
-class _StudioSearchModule extends StatefulWidget {
-  const _StudioSearchModule({
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  State<_StudioSearchModule> createState() => _StudioSearchModuleState();
-}
-
-class _StudioSearchModuleState extends State<_StudioSearchModule> {
-  late final TextEditingController _controller = TextEditingController(
-    text: (widget.props['query'] ?? '').toString(),
-  );
-
-  @override
-  void didUpdateWidget(covariant _StudioSearchModule oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final nextQuery = (widget.props['query'] ?? '').toString();
-    if (nextQuery != _controller.text) {
-      _controller.text = nextQuery;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final blocks = widget.props['blocks'] is List
-        ? (widget.props['blocks'] as List)
-        : const <dynamic>[];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                decoration: const InputDecoration(
-                  hintText: 'Search...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            FilledButton.tonal(
-              onPressed: () {
-                widget.onEmit('change', {
-                  'module': widget.module,
-                  'query': _controller.text,
-                });
-              },
-              child: const Text('Apply'),
-            ),
-          ],
-        ),
-        if (blocks.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final block in blocks.take(24))
-                ActionChip(
-                  label: Text(
-                    block is Map
-                        ? (block['label'] ??
-                                  block['title'] ??
-                                  block['id'] ??
-                                  '')
-                              .toString()
-                        : block.toString(),
-                  ),
-                  onPressed: () => widget.onEmit('select', {
-                    'module': widget.module,
-                    'item': block,
-                  }),
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _StudioListModule extends StatelessWidget {
-  const _StudioListModule({
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final candidates = [
-      props['items'],
-      props['nodes'],
-      props['assets'],
-      props['breakpoints'],
-      props['tools'],
-      props['actions'],
-    ];
-    List<dynamic> values = const <dynamic>[];
-    for (final candidate in candidates) {
-      if (candidate is List) {
-        values = candidate;
-        break;
-      }
-    }
-
-    if (values.isEmpty) {
-      return Text('No items for ${module.replaceAll('_', ' ')}');
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final value in values.take(30))
-          ListTile(
-            dense: true,
-            title: Text(
-              value is Map
-                  ? (value['label'] ??
-                            value['name'] ??
-                            value['id'] ??
-                            value.toString())
-                        .toString()
-                  : value.toString(),
-            ),
-            onTap: () => onEmit('select', {'module': module, 'item': value}),
-          ),
-      ],
-    );
-  }
-}
-
-class _StudioTransformModule extends StatelessWidget {
-  const _StudioTransformModule({required this.props, required this.onEmit});
-
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final x = coerceDouble(props['x']) ?? 0;
-    final y = coerceDouble(props['y']) ?? 0;
-    final w = coerceDouble(props['width']) ?? 0;
-    final h = coerceDouble(props['height']) ?? 0;
-    final rotation = coerceDouble(props['rotation']) ?? 0;
-
-    return Row(
-      children: [
-        Expanded(child: Text('x: $x, y: $y')),
-        Expanded(child: Text('w: $w, h: $h')),
-        Expanded(child: Text('rot: $rotation')),
-        FilledButton.tonal(
-          onPressed: () => onEmit('change', {
-            'module': 'transform_box',
-            'x': x,
-            'y': y,
-            'width': w,
-            'height': h,
-            'rotation': rotation,
-          }),
-          child: const Text('Emit'),
-        ),
-      ],
-    );
-  }
-}
-
-class _StudioPropertyModule extends StatefulWidget {
-  const _StudioPropertyModule({
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  State<_StudioPropertyModule> createState() => _StudioPropertyModuleState();
-}
-
-class _StudioPropertyModuleState extends State<_StudioPropertyModule> {
-  late final TextEditingController _controller = TextEditingController(
-    text: widget.props.entries
-        .where((entry) => entry.key != 'events')
-        .map((entry) => '${entry.key}: ${entry.value}')
-        .join('\n'),
-  );
-
-  @override
-  void didUpdateWidget(covariant _StudioPropertyModule oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final next = widget.props.entries
-        .where((entry) => entry.key != 'events')
-        .map((entry) => '${entry.key}: ${entry.value}')
-        .join('\n');
-    if (_controller.text != next) {
-      _controller.text = next;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _controller,
-          minLines: 4,
-          maxLines: 12,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'module payload',
-          ),
-        ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () => widget.onEmit('change', {
-            'module': widget.module,
-            'value': _controller.text,
-          }),
-          child: const Text('Apply Module Value'),
-        ),
-      ],
-    );
-  }
-}
-
-class _StudioGenericModule extends StatelessWidget {
-  const _StudioGenericModule({
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final entries = props.entries
-        .where((e) => e.key != 'events')
-        .toList(growable: false);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (entries.isEmpty)
-            Text(
-              'No payload for ${module.replaceAll('_', ' ')}',
-              style: Theme.of(context).textTheme.bodySmall,
-            )
-          else
-            for (final entry in entries.take(24))
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('${entry.key}: ${entry.value}'),
-              ),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () =>
-                onEmit('change', {'module': module, 'payload': props}),
-            child: const Text('Emit Change'),
-          ),
-        ],
-      ),
+            );
+          } else if (module == 'responsive_toolbar' &&
+              modulePayload['zoom'] != null) {
+            _withState(
+              () => _engine.executeCommand(<String, Object?>{
+                'type': 'set_zoom',
+                'payload': <String, Object?>{'zoom': modulePayload['zoom']},
+              }),
+            );
+          } else if (module.isNotEmpty && modulePayload.isNotEmpty) {
+            _withState(
+              () =>
+                  _engine.setModule(module, modulePayload, recordHistory: true),
+            );
+          }
+        }
+        _emitConfiguredEvent(event, payload);
+      },
     );
   }
 }

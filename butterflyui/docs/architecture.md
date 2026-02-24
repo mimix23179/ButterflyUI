@@ -434,6 +434,556 @@ Studio is the construction yard.
 
 It builds the structure that the runtime later renders faithfully.
 
+## Additional information for Studio:
+
+## Studio control submodules you’ll want too:
+
+### 1) Project & Document Core
+
+**Purpose:** open/save projects, asset references, autosave, recovery, versioning.
+
+* Project format (JSON + binary assets folder)
+* Asset registry (images/video/audio/fonts)
+* Autosave + crash recovery
+* Import pipeline (copy into project / link externally)
+
+**Good pubspec packages**
+
+* `path`, `path_provider` (paths + app dirs)
+* `file_picker` (import assets / choose save locations)
+* `archive` (zip projects for sharing/backups)
+* `crypto` (hash assets / dedupe)
+* `uuid` (stable IDs for layers/nodes/clips)
+* `mime` (detect file types)
+* `collection` (better data utilities)
+
+---
+
+### 2) Command System (Undo/Redo) + History
+
+**Purpose:** every edit is a command; reversible; supports batching.
+
+* Command stack
+* Transaction grouping (“dragging a layer” becomes 1 undo)
+* Optional: snapshotting for heavy ops
+
+**Good pubspec packages**
+
+* (Often you write this yourself — it’s worth it.)
+* `rxdart` (optional, if you like streams for event buses)
+* `logging` (structured logs)
+* `stack_trace` (better error traces)
+
+---
+
+### 3) Editor Surface (Canvas + Layers + Selection)
+
+**Purpose:** the “Photoshop/Elementor” feel: zoom, pan, selection, transform handles, snapping guides.
+
+* Infinite/large canvas (world coords)
+* Layer model (rect/text/image/vector/video “elements”)
+* Selection, multi-select, marquee
+* Transform gizmos (scale/rotate/skew)
+* Snapping/grid/rulers
+* Hit testing
+
+**Good pubspec packages**
+
+* `flutter` built-ins + `CustomPaint` (you’ll rely on this a lot)
+* `vector_math` (transforms, matrices)
+* `dotted_border` (selection outlines / guides)
+* `pixel_snap` *or* your own snapping math (snapping is usually custom)
+* For SVG: `flutter_svg` (import SVG assets, render)
+* For rich text layout on canvas: `super_editor` (optional, heavy but powerful) or simpler: your own text box widget
+
+> Real talk: a lot of “editor feel” comes from your own math + hit testing, not a magic package. Packages help, but the *Studio* control should own the interaction model.
+
+---
+
+### 4) Timeline Engine (Video/Audio Editors)
+
+**Purpose:** clips, tracks, trimming, transitions, keyframes.
+
+* Track model (video/audio/effects)
+* Clip boundaries + ripple editing
+* Scrubber + playhead
+* Waveform previews
+* Keyframe curves (position/opacity/etc)
+* Proxy generation (for smooth playback)
+
+**Good pubspec packages**
+
+* `ffmpeg_kit_flutter` (the workhorse: transcode, probe, render, waveform generation)
+* `video_player` (basic playback; sometimes enough for preview)
+* `just_audio` (reliable audio playback)
+* `audio_session` (proper audio focus handling)
+* `wakelock_plus` (keep screen awake while rendering/recording)
+* `synchronized` (locking for render queues)
+
+**Waveforms / visualization**
+
+* `audio_waveforms` (waveform rendering + recording helpers, depending on platform)
+* Or generate waveform data via FFmpeg and draw it yourself (classic approach, very controllable)
+
+---
+
+### 5) Node Graph Engine (Compositor / “Creator” Apps)
+
+**Purpose:** Blender-like shader graph, After Effects-ish compositor graph, procedural pipelines.
+
+* Node definitions (inputs/outputs/types)
+* Connections, validation, cycles rules
+* Evaluation scheduler (topological sort)
+* Caching (memoization)
+* Graph UI (pan/zoom, ports, wires)
+
+**Good pubspec packages**
+
+* Graph UI is usually custom (because you’ll want *your* look)
+* `vector_math` again (geometry)
+* `collection` (graphs + helpers)
+
+If you want a head start, you can search pub.dev for node editors, but most are either limited or opinionated — for a framework like ButterflyUI, building your own graph UI is often the right “old craft” move.
+
+---
+
+### 6) Export / Render Pipeline
+
+**Purpose:** “Export MP4”, “Export PNG sequence”, “Export project bundle”.
+
+* Render queue + progress
+* Background worker / isolate scheduling
+* Per-platform encoders (mostly via FFmpeg)
+* Presets (YouTube, TikTok, lossless, etc.)
+
+**Good pubspec packages**
+
+* `ffmpeg_kit_flutter` (again)
+* `compute` / isolates (built-in) + `pool` (optional worker pools)
+* `json_annotation` + `freezed` (nice for stable project schemas)
+* `isar` or `hive` (optional: cache DB for thumbnails/proxies/render history)
+
+---
+
+### 7) Thumbnails, Proxies, Caching
+
+**Purpose:** smooth UX, fast scrolling, no laggy asset previews.
+
+* Thumbnail generation (images + video frames)
+* Proxy video generation (low-res edit proxies)
+* Cache invalidation
+
+**Good pubspec packages**
+
+* `extended_image` (better image caching + advanced features)
+* `cached_network_image` (if you have online assets)
+* `isar` (fast local DB) or `hive` (simple)
+* `path_provider` + `crypto` (cache keys)
+
+---
+
+### 8) Screen Recorder Module
+
+**Purpose:** record screen + mic/system audio, save MP4/MKV, optionally overlay webcam.
+
+* Screen capture
+* Audio capture
+* Muxing
+* Hotkeys
+* Frame drop handling
+
+**Good pubspec packages (reality check)**
+
+* This is the one area where Flutter packages alone often aren’t enough.
+* You typically combine:
+
+  * **platform-native capture** (Windows/macOS/Linux APIs)
+  * then FFmpeg mux/transcode if needed
+
+Still useful packages:
+
+* `ffmpeg_kit_flutter` (muxing + encoding control)
+* `hotkey_manager` (desktop hotkeys)
+* `window_manager` (desktop window control, always-on-top, etc.)
+* `permission_handler` (macOS permissions especially)
+* For webcam preview: `camera` (mobile-focused but can help; desktop support varies)
+
+For serious desktop capture, you’ll likely end up with **FFI plugins** (your own or community) that call:
+
+* Windows: Desktop Duplication API / WASAPI
+* macOS: ScreenCaptureKit / AVFoundation
+* Linux: PipeWire/X11/Wayland paths
+
+ButterflyUI-wise, I’d treat this as a **Studio submodule** implemented as a “native bridge provider”.
+
+---
+
+### 9) Keyboard/Mouse Power UX (the “pro editor feel”)
+
+**Purpose:** shortcuts, precise nudges, ctrl/shift behavior, selection patterns.
+**Good pubspec packages**
+
+* `flutter_shortcuts` *or* roll your own mapping layer
+* `hotkey_manager` (desktop global hotkeys)
+* `super_hot_key` (another option; pick one and standardize)
+* `two_dimensional_scrollables` (useful for timelines/grids)
+* `scrollable_positioned_list` (jump-to-index in layers/timeline lists)
+
+---
+
+## A practical “Studio” pubspec set (starter pack)
+
+If I had to pick a *clean* baseline that covers most Studio apps:
+
+**Core**
+
+* `path`, `path_provider`, `file_picker`, `uuid`, `collection`, `archive`, `crypto`, `mime`
+
+**State/model**
+
+* `freezed`, `json_annotation`, `json_serializable` (or just `dart:convert` if you want minimalism)
+* `isar` (or `hive`) for caches
+
+**Editor surface**
+
+* `vector_math`, `flutter_svg`, `extended_image`
+
+**Media (video/audio)**
+
+* `ffmpeg_kit_flutter`
+* `video_player`
+* `just_audio`
+* `audio_session`
+* `wakelock_plus`
+
+**Desktop pro-feel**
+
+* `window_manager`
+* `hotkey_manager`
+* `permission_handler` (especially macOS)
+
+That combo gets you *shockingly far*.
+
+---
+
+## Studio control structure inside ButterflyUI (how I’d modularize it)
+
+Think “engine + views”, old-school and dependable:
+
+* `studio_core/`
+
+  * `project/` (load/save, assets, autosave)
+  * `commands/` (undo/redo)
+  * `selection/` (hit testing, selection state)
+  * `transform/` (matrix transforms, snapping)
+  * `render/` (export queue, progress, presets)
+  * `cache/` (thumb/proxy caches)
+* `studio_surfaces/`
+
+  * `canvas_surface/` (element editor)
+  * `timeline_surface/` (tracks/clips/keyframes)
+  * `node_surface/` (graph editor)
+* `studio_media/`
+
+  * `ffmpeg_bridge/`
+  * `playback/`
+  * `waveforms/`
+  * `recording/` (optional, native-bridge heavy)
+* `studio_ui/`
+
+  * toolbars, inspectors, panels, docks
+  * property editors (numbers/colors/curves)
+* `studio_integrations/`
+
+  * ButterflyUI “Candy” theming hooks
+  * plugin API (custom tools/effects/elements)
+
+That lets you build:
+
+* **Image editor:** mostly `canvas_surface + export`
+* **Elementor-like builder:** `canvas_surface + inspector + snapping + templates`
+* **Video editor:** `timeline_surface + ffmpeg_bridge + cache`
+* **Node compositor:** `node_surface + render`
+
+Treat **Studio** as a **umbrella control** (a shell + runtime) and make everything else a **pluggable submodule** that registers capabilities, UI panels, tools, and file formats.
+
+Think of it like the old-school IDE architecture: **core services + plugins**, not one giant app.
+
+Here’s the structure I’d ship.
+
+---
+
+## The Studio Control: what it *is*
+
+**`studio`** = a container control that provides:
+
+1. **Docking layout + panels**
+2. **Shared editor services** (project, assets, selection, undo/redo, commands)
+3. **A plugin bus** (submodules register tools, surfaces, exporters, inspectors)
+4. **Theme + UX hooks** (Candy/Skins integration)
+5. **Serialization contract** (project schema + per-module state)
+
+Users then pick submodules like LEGO.
+
+---
+
+## Studio’s “Core Services” (mandatory)
+
+These are the parts every studio-like tool needs, no matter what it becomes.
+
+### A) Project Service
+
+* Load/save
+* Autosave + recovery
+* Project manifest (modules enabled, versions, assets index)
+
+### B) Asset Service
+
+* Import/copy/link assets
+* Thumbnail/proxy caches
+* File watchers (optional)
+
+### C) Command Service (Undo/Redo)
+
+* Command stack
+* Transactions (group commands during drag)
+* Command routing (active surface gets first dibs)
+
+### D) Selection & Focus Service
+
+* Active document, active surface, active element(s)
+* Multi-select
+* Focus tracking (what receives shortcuts)
+
+### E) Tool Service
+
+* Tool registry (“Move”, “Trim”, “Pen”, “Text”, “Cut”)
+* Tool lifecycle: activate/deactivate, cursor, overlays
+
+### F) Shortcut Service
+
+* Keymaps (default + user override)
+* Context-sensitive shortcuts (timeline vs canvas vs node graph)
+
+### G) Render/Export Service
+
+* Export presets + queue
+* Background execution + progress callbacks
+
+### H) Panel/Dock Service
+
+* Panels register themselves: Inspector, Layers, Timeline, Nodes, Assets, History
+* Dock layout save/restore
+
+That’s the Studio “operating system”.
+
+---
+
+## Studio Submodule Types (the plugin interface set)
+
+To make this truly configurable, don’t just have “modules”. Have **module roles**:
+
+### 1) Surface Modules (main work areas)
+
+Examples: Canvas editor, Timeline editor, Node graph editor, Code editor.
+They provide:
+
+* A widget/view
+* Hit-testing + selection logic (or use shared)
+* Tool overlays (guides, handles)
+* Commands they emit
+
+### 2) Tool Modules
+
+Examples: Brush tool, Trim tool, Crop tool, Razor tool.
+They provide:
+
+* Input handling (mouse/key/touch)
+* Command generation (for undo/redo)
+* Optional UI (tool options panel)
+
+### 3) Panel Modules
+
+Examples: Inspector, Assets browser, Layers list, History, Export panel.
+They provide:
+
+* Dockable UI panel
+* Bindings to services
+
+### 4) Asset Handler Modules
+
+Examples: SVG importer, PSD importer, video importer, font loader.
+They provide:
+
+* “Can I import this file?”
+* Import pipeline (copy/link + metadata extraction)
+* Thumbnail generation hooks
+
+### 5) Renderer/Exporter Modules
+
+Examples: PNG exporter, MP4 exporter via FFmpeg, GIF exporter.
+They provide:
+
+* Export formats + settings UI
+* Render implementation + progress
+
+### 6) Codec/Compute Modules (optional heavy hitters)
+
+Examples: FFmpeg bridge, waveform generation, proxy generation.
+They provide:
+
+* Background tasks
+* Job queue integration
+
+### 7) Template/Component Modules (Elementor-like builders)
+
+Examples: blocks library, widgets library, layout templates.
+They provide:
+
+* “Insertable” components
+* Parameter schemas for inspector editing
+
+This is how users can assemble: “I want an Elementor-like builder” (Canvas surface + Inspector + Blocks library + HTML exporter), or “Video editor” (Timeline surface + FFmpeg compute + MP4 exporter + waveform module).
+
+---
+
+## The “Studio Manifest” (how users choose submodules)
+
+Users need a single config object.
+
+Example conceptual manifest (not code, just the idea):
+
+* enabledSurfaces: `canvas`, `timeline`
+* enabledPanels: `assets`, `inspector`, `layers`, `history`
+* enabledTools: `select`, `move`, `crop`, `trim`
+* importers: `image`, `svg`, `audio`, `video`
+* exporters: `png`, `mp4`
+* compute: `ffmpeg`, `proxies`
+
+You can store this inside the project file too, so a project can “bring its own studio setup”.
+
+---
+
+## Pubspec packages that support this modular Studio host
+
+### Core + architecture
+
+* `collection`, `meta`, `uuid`
+* `path`, `path_provider`
+* `file_picker`
+* `archive`, `crypto`, `mime`
+* `logging`
+
+### Data model + serialization
+
+Pick one style:
+
+* “Batteries”: `freezed`, `json_annotation`, `json_serializable`
+* “Minimal”: just `dart:convert` + careful schemas
+
+### Caching / database (optional but very useful)
+
+* `isar` (fast + structured) **or** `hive` (simple)
+
+### Desktop UX (if Studio targets desktop seriously)
+
+* `window_manager` (window controls)
+* `hotkey_manager` (global hotkeys)
+* `permission_handler` (macOS permissions)
+
+### Graphics / canvas helpers
+
+* `vector_math` (transforms)
+* `flutter_svg` (SVG assets)
+* `extended_image` (image caching + advanced features)
+
+### Media stack (only if user enables video/audio modules)
+
+* `ffmpeg_kit_flutter` (export/transcode/probes)
+* `video_player` (preview playback)
+* `just_audio` + `audio_session` (audio preview)
+* `wakelock_plus` (render/record)
+
+> Key idea: **Studio’s pubspec can include everything**, but submodules are “soft-enabled” by manifest. Or, if you want lean builds: you split submodules into separate Dart packages later.
+
+---
+
+## How to design the plugin API (so it stays clean)
+
+Use a “registry” approach:
+
+### Studio provides registries:
+
+* `SurfaceRegistry`
+* `ToolRegistry`
+* `PanelRegistry`
+* `ImporterRegistry`
+* `ExporterRegistry`
+* `CommandRegistry` (optional)
+* `SchemaRegistry` (inspector uses this)
+
+### Each module implements:
+
+* `id`, `version`, `dependsOn`
+* `register(StudioHost host)` where it adds its parts
+
+And you keep dependencies honest:
+
+* Timeline module can depend on FFmpeg module
+* Screen recorder depends on platform capture module
+
+Old-school, predictable, maintainable.
+
+---
+
+## The 3 Studio “starter kits” you should ship
+
+So users can start instantly:
+
+### 1) StudioKit.CanvasBuilder (Elementor-ish)
+
+* Surfaces: Canvas
+* Panels: Assets, Inspector, Layers, History
+* Tools: Select/Move/Resize/Text/Shapes
+* Importers: PNG/JPG/SVG/Fonts
+* Exporters: PNG/SVG/HTML (later)
+
+### 2) StudioKit.VideoEditor
+
+* Surfaces: Timeline + Preview
+* Panels: Assets, Inspector, Effects, Export, History
+* Tools: Trim/Razor/Move/Snap
+* Compute: FFmpeg, Waveforms, Proxies
+* Exporters: MP4/GIF
+
+### 3) StudioKit.NodeComposer
+
+* Surfaces: NodeGraph + Preview
+* Panels: Node library, Inspector, History
+* Tools: Connect/Group/Frame
+* Exporters: PNG sequence / MP4 (if FFmpeg enabled)
+
+These kits are your “classic presets”, like how old software ships templates.
+
+---
+
+## One important warning (so you don’t get stuck later)
+
+If you want Studio to be truly universal, **don’t hardcode “layers” or “clips”** as the only content types.
+
+Instead define a generic concept:
+
+* **Entity** (anything editable)
+* **Component** (properties)
+* **Surface view** (how entities are visualized/edited)
+
+That’s the trick that lets the same inspector edit:
+
+* a canvas rectangle,
+* a timeline clip,
+* a node parameter,
+* a recorded capture source.
+
 ---
 
 ## Belonging to the CodeEditor control as a whole:
@@ -1210,7 +1760,7 @@ it should compute a derived filtered view.
 
 Each asset is represented as a tile composed of smaller submodules.
 
-- `item_tile`
+- `item_tile` ✅
   Main asset container.
   Combines:
   - preview
@@ -1724,6 +2274,361 @@ Everything else is built on top of it.
 
 ---
 
+## The shared pattern for all umbrella controls:
+Yep — and your LIST.md already sets the precedent: **Candy, Gallery, Skins, Studio, CodeEditor, Terminal are umbrella controls** with submodules living under one control ID. 
+
+Below is the “extra layer” you’re asking for: how to make **Candy / CodeEditor / Terminal / Skins / Gallery** behave like **Studio** does — i.e. a **host control** where users pick submodules to assemble their own program (their own IDE, their own asset browser, their own theme editor, etc.).
+
+---
+
+## The shared pattern for all umbrella controls
+
+Give every umbrella control the same 3-part architecture:
+
+### 1) A Host (the control itself)
+
+* Owns the **layout/workbench**
+* Owns **core services**
+* Owns **registries** (module registration)
+* Owns **persistence** (layout + settings + module enablement)
+
+### 2) Modules (submodules)
+
+Each module declares:
+
+* `id`, `version`, `depends_on`
+* what it contributes: **panels**, **tools**, **views**, **providers**, **commands**
+* what services it needs from the host
+
+### 3) A Manifest (user configuration)
+
+A serializable config that selects:
+
+* enabled modules
+* default layout
+* keybinds
+* providers (local/remote, etc.)
+
+If you do this consistently, users can “compose software” the old-school way: **shell + plugins**, like classic IDEs.
+
+---
+
+# Candy as an umbrella control (User assembles a design language)
+
+Candy in your doc is the primitives layer. 
+To make it “user-buildable”, you don’t want users picking *every primitive*. Instead, let them pick **systems**:
+
+## Candy module roles
+
+### A) Foundations
+
+* `layout_primitives` (row/column/stack/wrap/container/spacer/etc.)
+* `typography` (text roles, scaling rules)
+* `icons` (glyph/icon packs, sizing rules)
+* `surfaces` (surface/card/panel conventions)
+
+### B) Interaction language
+
+* `states` (hover/pressed/focus/disabled)
+* `hit_slop` and accessibility defaults
+* `gesture_profiles` (desktop vs touch feel)
+
+### C) Motion language
+
+* `motion_engine` (springs/curves)
+* `transition_pack` (page/modal/hover transitions)
+* `stagger_pack` (list reveal)
+
+### D) Effects systems (optional packs)
+
+* `glass_pack` (blur, acrylic, noise)
+* `glow_pack`
+* `grain_pack`
+* `particles_pack`
+* `shader_pack`
+
+### E) Composition helpers
+
+* `style_resolver` (token lookup + variants)
+* `variant_system` (intent/size/shape)
+* `component_recipes` (button recipe, card recipe, input recipe)
+
+## Candy manifest example (conceptually)
+
+* enabledPacks: `["foundations", "interaction", "motion", "glass_pack"]`
+* defaultVariant: `{ density: "comfortable", radius: "md" }`
+* performanceMode: `balanced | low_power | max`
+
+## Pubspec packages Candy often benefits from
+
+* `vector_math` (transforms/math helpers)
+* `flutter_svg` (icons/illustrations)
+* `material_color_utilities` (nice token generation / tonal palettes if you want it)
+* `animations` (optional helper widgets, if you want classic transitions fast)
+* Effects-heavy packs might need shader plumbing (often custom), but you can keep it optional.
+
+---
+
+# CodeEditor as an umbrella control (Users build their own IDE)
+
+Your LIST already describes CodeEditor as a modular workbench. 
+To make it *user-assembled*, treat “IDE features” as modules you can switch on/off.
+
+## CodeEditor module roles
+
+### A) Workbench + Docking
+
+* `workbench_editor` (layout coordinator)
+* `dock`, `dock_pane`, `dock_graph`
+* `layout_persistence` (save/restore)
+
+### B) Document system
+
+* `workspace_explorer`, `file_tree`
+* `document_model` (buffers/docs)
+* `tab_system` (tabs/splits)
+
+### C) Language intelligence (plug-in providers)
+
+* `diagnostics_provider` (lint/type errors)
+* `formatter_provider`
+* `symbols_provider` (outline tree)
+* `completion_provider`
+* `goto_provider` (definition/references)
+
+This is where you can support multiple backends:
+
+* local analyzers
+* LSP
+* “AI suggestions” provider
+* simple regex-based fallback
+
+### D) Search systems
+
+* `text_search`
+* `semantic_search` (optional)
+* `command_palette`
+
+### E) Dev workflows
+
+* `diff`
+* `git_integration` (optional)
+* `tasks` (run/build/test) that can delegate to Terminal
+
+## CodeEditor manifest ideas
+
+* enabledPanels: explorer, search, diagnostics, outline, diff
+* enabledProviders: lsp, formatter, semantic_search
+* keymap: vscode | sublime | custom
+* fileTypes: what languages are registered
+
+## Pubspec packages that help CodeEditor feel “real”
+
+* `flutter_inappwebview` or `webview_flutter` (if Monaco is hosted via WebView; depends on your current approach)
+* `file_picker`, `path`, `path_provider`
+* `watcher` (file watching)
+* `hotkey_manager` (desktop shortcuts)
+* `window_manager` (desktop window UX)
+* `archive` (workspace export)
+* For protocol/LSP: `json_rpc_2` (or your own protocol layer), `web_socket_channel` (if talking to servers)
+* For diff prettiness: often custom, but `collection` helps.
+
+---
+
+# Terminal as an umbrella control (Users build their own “workbench terminal”)
+
+Your Terminal section is already very plugin-friendly (sessions, tabs, output mapping, progress, etc.). 
+To make it user-assembled, the key is: **multiple backends** + **multiple renderers**.
+
+## Terminal module roles
+
+### A) Backend bridges (swappable engines)
+
+* `process_bridge_local` (spawn local processes)
+* `process_bridge_pty` (PTY-style true terminal)
+* `process_bridge_remote` (SSH / remote agent)
+* `process_bridge_sandbox` (restricted command runner for “safe mode”)
+
+### B) Output shaping + renderers
+
+* `output_mapper_basic`
+* `ansi_parser` (optional)
+* `stream_view_plain`
+* `stream_view_rich` (links, folding, grouping)
+* `timeline_view` (structured runs)
+
+### C) Session/workflow modules
+
+* `tabs`
+* `presets`
+* `execution_lane` (queue + concurrency policies)
+* `stdin_tools` (injector, macros)
+
+### D) Extras
+
+* `log_panel`
+* `progress_view`
+* `replay_recorder` (record a session and replay it)
+
+## Terminal manifest ideas
+
+* backend: `local | pty | remote`
+* viewsEnabled: stream_view, timeline, progress, logs
+* safetyPolicy: allowlist commands, block destructive commands
+* concurrency: max jobs, cancel policy
+
+## Pubspec packages that help Terminal
+
+* `process` (or direct `dart:io` Process; package depends on your style)
+* `xterm` (very useful if you want real terminal emulation rendering)
+* `hotkey_manager`, `window_manager`
+* `collection`, `logging`
+* `synchronized` (job lanes / locking)
+* `path` / `path_provider` (logs + session history persistence)
+
+---
+
+# Skins as an umbrella control (Users build identity systems)
+
+Skins is already token-driven in your doc. 
+To make it user-configurable like Studio, split it into **token pipelines** + **editors** + **preview surfaces**.
+
+## Skins module roles
+
+### A) Token pipeline
+
+* `token_schema` (what tokens exist)
+* `token_mapper` (resolve inheritance/derived values)
+* `token_validator` (types, ranges)
+* `token_exporters` (export to json, export to code, export to CSS-like maps)
+
+### B) Editors (users can enable/disable complexity)
+
+* `color_editor`
+* `typography_editor`
+* `motion_editor`
+* `material_editor` (glass/neon/etc.)
+* `effect_editor`
+* `icon_editor`
+
+### C) Preview & testing
+
+* `preview_surface` (live sample app)
+* `component_preview_gallery` (see how controls react)
+* `accessibility_preview` (contrast, focus visibility)
+
+### D) Distribution
+
+* `skins_registry` (installed skins)
+* `skins_market` (optional, if you ever want remote browsing)
+* `versioning` + migrations (skin format changes)
+
+## Skins manifest ideas
+
+* enabledEditors: colors/fonts/motion/materials
+* previewMode: minimal | full_app | component_grid
+* constraints: enforce contrast, clamp motion duration, etc.
+
+## Pubspec packages that help Skins
+
+* `shared_preferences` (simple persistence)
+* `isar` or `hive` (skin library + metadata)
+* `material_color_utilities` (palette generation / tonal rules)
+* `collection`, `uuid`
+* Optional: `color_models` (if you want advanced color spaces)
+
+---
+
+# Gallery as an umbrella control (Users build their “asset intelligence layer”)
+
+Your Gallery writeup is already perfect for modularization. 
+To make it truly “user-built”, focus on **sources** + **type handlers** + **views**.
+
+## Gallery module roles
+
+### A) Asset sources (where assets come from)
+
+* `local_folder_source`
+* `project_assets_source`
+* `remote_http_source`
+* `huggingface_source` (for Matrix-like stuff)
+* `marketplace_source`
+
+Each source implements:
+
+* list/query
+* fetch/resolve
+* caching rules
+
+### B) Type handlers (how each asset behaves)
+
+* `image_handler` (thumb, preview, metadata)
+* `video_handler`
+* `audio_handler`
+* `font_handler`
+* `document_handler`
+* `skin_handler` (ties directly into Skins)
+
+### C) Views (how assets are shown)
+
+* `grid_layout`
+* `list_layout`
+* `details_view`
+* `compare_view`
+* `quick_preview` (spacebar preview like classic file browsers)
+
+### D) Selection & application adapters
+
+* selection modes: single/multi
+* `apply_adapters`:
+
+  * “apply selected image to Studio element”
+  * “apply selected font to Skins typography”
+  * “apply selected skin to runtime”
+
+## Gallery manifest ideas
+
+* enabledSources: local/project/remote
+* enabledTypes: image/video/audio/font/skins
+* viewsEnabled: grid/list/details/preview
+* cachePolicy: aggressive | balanced | minimal
+
+## Pubspec packages that help Gallery
+
+* `file_picker`
+* `path`, `path_provider`
+* `mime`
+* `extended_image` (thumb caching)
+* `video_player` (light preview)
+* `just_audio` (audio preview)
+* `isar` / `hive` (asset index + cache metadata)
+* `http` (remote sources)
+
+---
+
+## The “unifying glue” that makes all umbrellas compose nicely
+
+If you want users to mix-and-match Candy/Skins/Gallery/CodeEditor/Terminal/Studio in *one app* without mess, add 3 cross-cutting registries that every umbrella can contribute to:
+
+1. **Command Registry**
+
+* shared command IDs (`studio.export`, `terminal.runPreset`, `editor.format`)
+* binds to shortcut service(s)
+
+2. **Panel Registry**
+
+* everything dockable uses the same panel spec type
+* so users can dock “Gallery > Assets” next to “CodeEditor > Diagnostics”
+
+3. **Asset Slot / Apply Registry**
+
+* a standard way to say: “I can accept an Image here”
+* Gallery can then “apply” into any tool consistently
+
+This makes ButterflyUI feel like an “application platform”, not disconnected mega-controls.
+
+---
+
 ## ButterflyUI Control Catalog (detailed):
 
 These controls are not simple layout primitives.
@@ -1737,7 +2642,7 @@ They are designed to:
 
 ### Visual Dynamics & Advanced Gradients
 
-- `animated_gradient`
+- `animated_gradient` ✅
   A dynamic gradient system that supports time-based animation.
   Features may include:
   - color interpolation over time
@@ -1748,7 +2653,7 @@ They are designed to:
   Designed for backgrounds, hero sections, and dynamic surfaces.
   Should support GPU acceleration where possible.
 
-- `gradient`
+- `gradient` ✅
   Structured gradient definition layer.
   Supports:
   - linear gradients
@@ -1758,7 +2663,7 @@ They are designed to:
   - opacity layering
   Should integrate with token colors and responsive overrides.
 
-- `gradient_editor`
+- `gradient_editor` ✅
   Visual editor for constructing gradients.
   Must support:
   - interactive stop manipulation
@@ -1767,7 +2672,7 @@ They are designed to:
   - live preview
   - export to token format
 
-- `gradient_sweep`
+- `gradient_sweep` ✅
   Specialized conic/sweep gradient control.
   Useful for:
   - progress indicators
@@ -1777,7 +2682,7 @@ They are designed to:
 
 ### Avatar & Identity Controls
 
-- `avatar_stack`
+- `avatar_stack` ✅
   Compositional layout for multiple avatar elements.
   Designed for:
   - overlapping user indicators
@@ -1789,7 +2694,7 @@ They are designed to:
   - max-visible logic with "+X" overflow badge
   - interactive hover expansion
 
-- `badge`
+- `badge` ✅
   Lightweight status indicator system.
   Supports:
   - numeric counts
@@ -1800,7 +2705,7 @@ They are designed to:
 
 ### Color & Blending Systems
 
-- `color_picker`
+- `color_picker` ✅
   Advanced color selection control.
   Features:
   - RGB / HSL / HEX input
@@ -1810,7 +2715,7 @@ They are designed to:
   - token-aware preview
   Must emit structured color objects, not raw strings.
 
-- `color_swatch_grid`
+- `color_swatch_grid` ✅
   Structured grid of predefined color tokens.
   Used for:
   - quick selection
@@ -1821,7 +2726,7 @@ They are designed to:
   - selection highlighting
   - responsive layout
 
-- `blend_mode_picker`
+- `blend_mode_picker` ✅
   UI for selecting blend modes.
   Supports:
   - multiply
@@ -1834,7 +2739,7 @@ They are designed to:
 
 ### Surface Styling & Effects
 
-- `container_style`
+- `container_style` ✅
   Structured styling system for containers.
   Encapsulates:
   - padding
@@ -1844,7 +2749,7 @@ They are designed to:
   - border tokens
   Allows reusable container style presets.
 
-- `button_style`
+- `button_style` ✅
   Dedicated styling configuration for buttons.
   Should define:
   - base state
@@ -1855,7 +2760,7 @@ They are designed to:
   - motion behavior
   Encourages consistent interaction language across the system.
 
-- `border`
+- `border` ✅
   Full border system.
   Supports:
   - per-side control
@@ -1863,14 +2768,14 @@ They are designed to:
   - dynamic color linking
   - animated border transitions
 
-- `border_side`
+- `border_side` ✅
   Fine-grained border configuration.
   Enables:
   - different colors per side
   - mixed thickness
   - asymmetric styling
 
-- `glass_blur`
+- `glass_blur` ✅
   Glassmorphism effect layer.
   Combines:
   - background blur
@@ -1879,7 +2784,7 @@ They are designed to:
   - border glow
   Must remain performant and degrade gracefully.
 
-- `glow_effect`
+- `glow_effect` ✅
   Outer glow system.
   Supports:
   - soft glow
@@ -1887,7 +2792,7 @@ They are designed to:
   - animated intensity
   - neon-style highlights
 
-- `neon_edge`
+- `neon_edge` ✅
   High-intensity edge lighting effect.
   Designed for:
   - cyberpunk aesthetics
@@ -1895,7 +2800,7 @@ They are designed to:
   - high contrast modes
   Can combine with glow + animated gradients.
 
-- `grain_overlay`
+- `grain_overlay` ✅
   Film-grain / texture overlay.
   Adds:
   - subtle visual noise
@@ -1905,7 +2810,7 @@ They are designed to:
 
 ### Motion & Celebration Effects
 
-- `confetti_burst`
+- `confetti_burst` ✅
   Particle-based celebratory animation.
   Supports:
   - emission burst
@@ -1917,7 +2822,7 @@ They are designed to:
   - reward events
   - milestone feedback
 
-- `chromatic_shift`
+- `chromatic_shift` ✅
   RGB channel offset distortion effect.
   Used for:
   - glitch aesthetics
@@ -1927,7 +2832,7 @@ They are designed to:
 
 ### Noise & Organic Systems
 
-- `noise_field`
+- `noise_field` ✅
   Procedural noise generator.
   Can generate:
   - Perlin noise
@@ -1938,7 +2843,7 @@ They are designed to:
   - blob fields
   - shader inputs
 
-- `noise_displacement`
+- `noise_displacement` ✅
   Distortion effect based on noise input.
   Used for:
   - liquid effects
@@ -1946,7 +2851,7 @@ They are designed to:
   - heat-wave distortions
   Must allow strength control and animation speed.
 
-- `blob_field`
+- `blob_field` ✅
   Organic shape generator.
   Produces:
   - fluid blobs
@@ -1957,7 +2862,7 @@ They are designed to:
 
 ### Launch & Identity
 
-- `splash`
+- `splash` ✅
   Entry-screen presentation control.
   Used for:
   - application startup
@@ -1971,7 +2876,7 @@ They are designed to:
   - optional skip behavior
   Should integrate with animation + gradient systems.
 
-- `emoji_icon`
+- `emoji_icon` ✅
   Emoji-based icon renderer.
   Used when:
   - lightweight visual symbol is needed
@@ -1981,8 +2886,8 @@ They are designed to:
   - token-based sizing
   - fallback compatibility
 
-- `emoji_picker`
-  Emoji selection interface.
+- `emoji_picker` ✅
+  Emoji selection  interface.
   Supports:
   - category grouping
   - search
@@ -1992,7 +2897,7 @@ They are designed to:
 
 ### Forms & Input Systems
 
-- `auto_form`
+- `auto_form` ✅
   Schema-driven form generator.
   Generates forms automatically based on:
   - field definitions
@@ -2004,7 +2909,7 @@ They are designed to:
   - submit hooks
   - layout configuration
 
-- `combo_box`
+- `combo_box` ✅
   Hybrid input + dropdown selector.
   Supports:
   - free text input
@@ -2012,7 +2917,7 @@ They are designed to:
   - keyboard navigation
   - async options loading
 
-- `dropdown`
+- `dropdown` ✅
   Structured dropdown selector.
   Must support:
   - single-select
@@ -2020,7 +2925,7 @@ They are designed to:
   - disabled options
   - animated open/close
 
-- `multi_pick`
+- `multi_pick` ✅
   Multi-selection input control.
   Used for:
   - tag selection
@@ -2028,7 +2933,7 @@ They are designed to:
   - multi-assign interfaces
   Should integrate with chip system.
 
-- `filepicker`
+- `filepicker` ✅
   File selection control.
   Supports:
   - local file browsing
@@ -2039,7 +2944,7 @@ They are designed to:
 
 ### Date & Time Controls
 
-- `date_select`
+- `date_select` ✅
   Single date picker.
   Must support:
   - calendar view
@@ -2047,14 +2952,14 @@ They are designed to:
   - locale formatting
   - disabled date rules
 
-- `date_range`
+- `date_range` ✅
   Dual date selector for range picking.
   Supports:
   - start/end logic
   - visual range highlighting
   - validation constraints
 
-- `date_span`
+- `date_span` ✅
   Preset-based time span selector.
   Examples:
   - last 7 days
@@ -2065,7 +2970,7 @@ They are designed to:
 
 ### Navigation & Structural UI
 
-- `breadcrumb_bar`
+- `breadcrumb_bar` ✅
   Hierarchical navigation indicator.
   Displays:
   - path structure
@@ -2076,7 +2981,7 @@ They are designed to:
   - settings hierarchy
   - multi-level apps
 
-- `filter_chips_bar`
+- `filter_chips_bar` ✅
   Horizontal list of filter chips.
   Supports:
   - toggling
@@ -2085,14 +2990,14 @@ They are designed to:
   - dynamic chip creation
   Often paired with Gallery or dashboards.
 
-- `drag_region`
+- `drag_region` ✅
   Region that enables window dragging (desktop apps).
   Important for:
   - custom title bars
   - frameless windows
   Must respect platform boundaries.
 
-- `container`
+- `container` ✅
   Flexible structural wrapper.
   Used for:
   - grouping
@@ -2102,7 +3007,7 @@ They are designed to:
 
 ### Chat & Messaging Systems
 
-- `chat`
+- `chat` ✅
   Full conversation container.
   Manages:
   - message list
@@ -2112,7 +3017,7 @@ They are designed to:
   - timestamps
   Designed for AI, support, or social interfaces.
 
-- `chat_bubble`
+- `chat_bubble` ✅
   Individual styled message container.
   Supports:
   - sender alignment
@@ -2120,7 +3025,7 @@ They are designed to:
   - avatar integration
   - status indicators
 
-- `message_bubble`
+- `message_bubble` ✅
   More generic message container.
   Used outside chat contexts (notifications, system messages).
   Can support:
@@ -2130,7 +3035,7 @@ They are designed to:
 
 ### Content Rendering
 
-- `markdown`
+- `markdown` ✅
   Markdown rendering component.
   Must support:
   - headings
@@ -2141,7 +3046,7 @@ They are designed to:
   - inline styling
   Should sanitize input safely.
 
-- `code_block`
+- `code_block` ✅
   Styled code display.
   Supports:
   - syntax highlighting
@@ -2149,7 +3054,7 @@ They are designed to:
   - line numbers
   - optional diff highlight
 
-- `html`
+- `html` ✅
   Safe HTML rendering component.
   Must:
   - sanitize content
@@ -2159,7 +3064,7 @@ They are designed to:
 
 ### Data Visualization
 
-- `bar_chart`
+- `bar_chart` ✅
   Structured bar visualization component.
   Supports:
   - categorical datasets
@@ -2168,7 +3073,7 @@ They are designed to:
   - animated transitions
   - tooltips
 
-- `line_chart`
+- `line_chart` ✅
   Time-series or continuous data visualization.
   Supports:
   - multiple data lines
@@ -2180,7 +3085,7 @@ They are designed to:
 
 ### Gallery Integration
 
-- `item_tile`
+- `item_tile` ✅
   Reusable tile component for content display.
   Can represent:
   - assets
@@ -2194,7 +3099,7 @@ They are designed to:
 
 ### Overlays & System UI
 
-- `notification_host`
+- `notification_host` ✅
   The central overlay manager for notifications and transient UI messages.
   Responsibilities:
   - owns the overlay layer where toasts/snackbars/banners are rendered
@@ -2217,9 +3122,33 @@ They are designed to:
   - background scrim and focus trapping
   - keyboard-safe layout on mobile
 
+- `modal` ✅
+  Focused blocking dialog surface for confirmation and structured workflows.
+  Used for:
+  - destructive confirmations
+  - short forms/wizards
+  - settings or detail popups
+  Should support:
+  - focus trapping and keyboard navigation
+  - backdrop dismiss rules
+  - primary/secondary actions
+  - safe serialization of open state and payload
+
+- `toast` ✅
+  Lightweight transient status message for non-blocking feedback.
+  Useful for:
+  - save success/error feedback
+  - clipboard and quick-action confirmations
+  - short-lived background task updates
+  Should support:
+  - auto-dismiss timing and queueing
+  - optional action button (undo/retry)
+  - placement and stacking coordination
+  - severity styling (info/success/warn/error)
+
 ### Navigation & Routing
 
-- `route`
+- `route` ✅
   Declarative routing node that represents a navigation destination/state.
   Responsibilities:
   - defines route identity (path/name/params)
@@ -2227,7 +3156,7 @@ They are designed to:
   - binds to navigation system (push/pop/replace)
   Should be serializable so navigation can be restored.
 
-- `page_nav`
+- `page_nav` ✅
   Page navigation control (the “navigator UI”).
   Handles:
   - switching between pages/routes
@@ -2235,7 +3164,7 @@ They are designed to:
   - page transition coordination
   Commonly paired with sidebars, tab bars, or breadcrumb systems.
 
-- `page_stepper`
+- `page_stepper` ✅
   Multi-step navigation component for guided flows.
   Great for:
   - onboarding
@@ -2249,7 +3178,7 @@ They are designed to:
 
 ### Progress & Lightweight Insight
 
-- `progress`
+- `progress` ✅
   A reusable progress presentation control.
   Supports:
   - determinate progress (0–100%)
@@ -2260,7 +3189,7 @@ They are designed to:
   - Terminal execution states
   - loading skeleton patterns
 
-- `spark_plot`
+- `spark_plot` ✅
   Compact micro-visualization for quick trends.
   Used for:
   - dashboard cards
@@ -2268,7 +3197,7 @@ They are designed to:
   - inline analytics
   Must be lightweight, fast to render, and readable at small sizes.
 
-- `bar_plot`
+- `bar_plot` ✅
   Bar-style plotting control (often simpler and more compact than a full chart).
   Useful for:
   - tiny distribution previews
@@ -2281,7 +3210,7 @@ They are designed to:
 
 ### Layout & Composition
 
-- `split_pane`
+- `split_pane` ✅
   Resizable split layout system.
   Essential for desktop-style apps (editors, IDEs, Studio-like tools).
   Responsibilities:
@@ -2291,7 +3220,7 @@ They are designed to:
   - optional multi-split (nestable panes)
   This is the backbone of “professional tool” layouts.
 
-- `align`
+- `align` ✅
   Alignment control for positioning a child inside available space.
   Used heavily as glue:
   - aligning overlays
@@ -2301,7 +3230,7 @@ They are designed to:
 
 ### Data Display & Structured Content
 
-- `table_view`
+- `table_view` ✅
   Structured table renderer for datasets.
   Supports:
   - columns/rows with typed cells
@@ -2311,7 +3240,7 @@ They are designed to:
   - sticky headers (optional)
   Used for “real software” screens: logs, downloads, settings lists, analytics.
 
-- `accordion`
+- `accordion` ✅
   Expand/collapse container for grouped content.
   Designed for:
   - settings sections
@@ -2324,7 +3253,7 @@ They are designed to:
 
 ### Action Surfaces & Async UX
 
-- `action_bar`
+- `action_bar` ✅
   A horizontal command strip for high-priority actions.
   Common in:
   - editor toolbars
@@ -2335,7 +3264,7 @@ They are designed to:
   - overflow handling (“…” menu)
   - disabled state logic tied to selection/validation
 
-- `async_action_button`
+- `async_action_button` ✅
   A button specialized for async tasks.
   Must handle the full lifecycle:
   - idle → loading → success/failure
@@ -2346,7 +3275,7 @@ They are designed to:
 
 ### Tooling Panels (Editor-Grade UI)
 
-- `adjustment_panel`
+- `adjustment_panel` ✅
   A panel for controlling continuous adjustments (sliders/knobs/toggles).
   Used for:
   - image/video/audio adjustments
@@ -2357,7 +3286,7 @@ They are designed to:
   - reset-to-default per group
   - fine-grained numeric input
 
-- `brush_panel`
+- `brush_panel` ✅
   Specialized panel for brush-based tools.
   Designed for:
   - drawing/painting
@@ -2370,7 +3299,7 @@ They are designed to:
   - blend mode / brush type
   Often paired with `canvas` and effects.
 
-- `bounds_probe`
+- `bounds_probe` ✅
   Debug/inspection utility that measures layout bounds.
   Useful for:
   - visual debugging (hitboxes, padding, alignment)
@@ -2380,7 +3309,7 @@ They are designed to:
 
 ### Attachments & Media Tiles
 
-- `attachment_tile`
+- `attachment_tile` ✅
   A tile representation for attachments (files/media).
   Used in:
   - chat attachments
@@ -2392,7 +3321,7 @@ They are designed to:
   - actions (open/download/remove)
   - progress indicator when uploading/downloading
 
-- `audio`
+- `audio` ✅
   Audio presentation/control surface.
   Can be:
   - lightweight player (play/pause, seek)
@@ -2402,7 +3331,7 @@ They are designed to:
 
 ### Web & Rendering Surfaces
 
-- `webview`
+- `webview` ✅
   Embedded web content renderer.
   Used for:
   - documentation pages
@@ -2413,7 +3342,7 @@ They are designed to:
   - sizing and focus
   - message bridge (optional) for JS ↔ app communication
 
-- `canvas`
+- `canvas` ✅
   Custom drawing surface for procedural or tool-driven rendering.
   Used for:
   - editors (Studio canvas, brush tools)
@@ -2427,7 +3356,7 @@ They are designed to:
 
 ### Meta: Artifact UI Integration
 
-- `artifact_card`
+- `artifact_card` ✅
   A structured card component for presenting “artifacts” (generated outputs, files, exports, results).
   Intended for:
   - showing an output preview (image/text/file)
@@ -2981,7 +3910,7 @@ This trio (`drag_handle`, `drag_payload`, `drop_zone`) forms a clean drag archit
   - inline actions
   - dismiss controls
 
-- `snackbar`
+- `snackbar` ✅
   Temporary transient notification.
   Used for:
   - quick feedback (“Saved”, “Copied”)

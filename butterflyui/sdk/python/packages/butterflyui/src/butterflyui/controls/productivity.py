@@ -67,6 +67,8 @@ class OwnershipMarker(Component):
 
 
 CODE_EDITOR_SCHEMA_VERSION = 2
+CODE_EDITOR_DEFAULT_ENGINE = "monaco"
+CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE = "windows_inapp_monaco"
 
 CODE_EDITOR_MODULES = {
     "editor_intent_router",
@@ -141,6 +143,38 @@ CODE_EDITOR_EVENTS = {
     "module_change",
 }
 
+CODE_EDITOR_REGISTRY_ROLE_ALIASES = {
+    "module": "module_registry",
+    "modules": "module_registry",
+    "panel": "panel_registry",
+    "panels": "panel_registry",
+    "tool": "tool_registry",
+    "tools": "tool_registry",
+    "view": "view_registry",
+    "views": "view_registry",
+    "surface": "view_registry",
+    "surfaces": "view_registry",
+    "provider": "provider_registry",
+    "providers": "provider_registry",
+    "command": "command_registry",
+    "commands": "command_registry",
+    "module_registry": "module_registry",
+    "panel_registry": "panel_registry",
+    "tool_registry": "tool_registry",
+    "view_registry": "view_registry",
+    "provider_registry": "provider_registry",
+    "command_registry": "command_registry",
+}
+
+CODE_EDITOR_REGISTRY_MANIFEST_LISTS = {
+    "module_registry": "enabled_modules",
+    "panel_registry": "enabled_panels",
+    "tool_registry": "enabled_tools",
+    "view_registry": "enabled_views",
+    "provider_registry": "enabled_providers",
+    "command_registry": "enabled_commands",
+}
+
 STUDIO_SCHEMA_VERSION = 2
 
 STUDIO_MODULES = {
@@ -150,6 +184,9 @@ STUDIO_MODULES = {
     "block_palette",
     "builder",
     "canvas",
+    "timeline_surface",
+    "node_surface",
+    "preview_surface",
     "component_palette",
     "inspector",
     "outline_tree",
@@ -171,6 +208,64 @@ STUDIO_EVENTS = {
     "select",
     "state_change",
     "module_change",
+}
+
+STUDIO_MODULE_ALIASES = {
+    "assets": "asset_browser",
+    "assets_panel": "asset_browser",
+    "builder_surface": "builder",
+    "canvas_surface": "canvas",
+    "layers": "outline_tree",
+    "layers_panel": "outline_tree",
+    "node": "node_surface",
+    "node_graph": "node_surface",
+    "preview": "preview_surface",
+    "properties": "properties_panel",
+    "responsive": "responsive_toolbar",
+    "timeline": "timeline_surface",
+    "timeline_editor": "timeline_surface",
+    "token_editor": "tokens_editor",
+    "tokens": "tokens_editor",
+    "toolbox": "selection_tools",
+    "transform": "transform_box",
+    "transform_tools": "transform_toolbar",
+}
+
+STUDIO_REGISTRY_ROLE_ALIASES = {
+    "surface": "surface_registry",
+    "surfaces": "surface_registry",
+    "surface_registry": "surface_registry",
+    "tool": "tool_registry",
+    "tools": "tool_registry",
+    "tool_registry": "tool_registry",
+    "panel": "panel_registry",
+    "panels": "panel_registry",
+    "panel_registry": "panel_registry",
+    "importer": "importer_registry",
+    "importers": "importer_registry",
+    "importer_registry": "importer_registry",
+    "exporter": "exporter_registry",
+    "exporters": "exporter_registry",
+    "exporter_registry": "exporter_registry",
+    "command": "command_registry",
+    "commands": "command_registry",
+    "command_registry": "command_registry",
+    "schema": "schema_registry",
+    "schemas": "schema_registry",
+    "schema_registry": "schema_registry",
+    "compute": "command_registry",
+    "module": "module_registry",
+    "modules": "module_registry",
+    "module_registry": "module_registry",
+}
+
+STUDIO_REGISTRY_MANIFEST_LISTS = {
+    "surface_registry": "enabled_surfaces",
+    "panel_registry": "enabled_panels",
+    "tool_registry": "enabled_tools",
+    "importer_registry": "importers",
+    "exporter_registry": "exporters",
+    "module_registry": "enabled_modules",
 }
 
 
@@ -203,6 +298,128 @@ def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
         if value and value not in out:
             out.append(value)
     return out
+
+
+def _normalize_registry_role(
+    value: str | None,
+    aliases: Mapping[str, str],
+) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return aliases.get(normalized, f"{normalized}_registry")
+
+
+def _register_runtime_module(
+    props: dict[str, Any],
+    *,
+    role: str,
+    module_id: str,
+    definition: Mapping[str, Any] | None,
+    role_aliases: Mapping[str, str],
+    role_manifest_lists: Mapping[str, str],
+    allowed_modules: set[str],
+    normalize_module: Any,
+) -> dict[str, Any]:
+    normalized_role = _normalize_registry_role(role, role_aliases)
+    normalized_module = normalize_module(module_id)
+    if normalized_module is None:
+        normalized_module = _normalize_token(module_id)
+    if not normalized_role or not normalized_module:
+        return {"ok": False, "error": "role and module_id are required"}
+
+    registries = dict(props.get("registries") or {})
+    role_registry = dict(registries.get(normalized_role) or {})
+    role_registry[normalized_module] = dict(definition or {})
+    registries[normalized_role] = role_registry
+    props["registries"] = registries
+
+    manifest = dict(props.get("manifest") or {})
+    enabled_modules = _normalize_events(manifest.get("enabled_modules")) or []
+    if normalized_module in allowed_modules and normalized_module not in enabled_modules:
+        enabled_modules.append(normalized_module)
+    manifest["enabled_modules"] = enabled_modules
+
+    list_key = role_manifest_lists.get(normalized_role)
+    if list_key:
+        values = _normalize_events(manifest.get(list_key)) or []
+        if normalized_module not in values:
+            values.append(normalized_module)
+        manifest[list_key] = values
+    props["manifest"] = manifest
+
+    if normalized_module in allowed_modules:
+        modules = dict(props.get("modules") or {})
+        modules.setdefault(normalized_module, {})
+        props["modules"] = modules
+        props.setdefault(normalized_module, modules[normalized_module])
+
+    return {
+        "ok": True,
+        "role": normalized_role,
+        "module_id": normalized_module,
+        "definition": dict(definition or {}),
+    }
+
+
+def _normalize_engine(value: Any | None, *, fallback: str | None = None) -> str | None:
+    normalized = _normalize_token(None if value is None else str(value))
+    if not normalized:
+        return fallback
+    if normalized in {"xterm_terminal", "terminal_xterm"}:
+        return "xterm"
+    return normalized
+
+
+def _normalize_studio_module(value: str | None) -> str | None:
+    normalized = _normalize_module(value)
+    if normalized is None:
+        return None
+    return STUDIO_MODULE_ALIASES.get(normalized, normalized)
+
+
+def _normalize_code_editor_engine(value: Any | None, *, fallback: str | None = None) -> str | None:
+    normalized = _normalize_engine(value, fallback=fallback)
+    if normalized is None:
+        return None
+    if normalized in {
+        "flutter_monaco",
+        "monaco_editor",
+        "webview_windows",
+        "webview_flutter",
+        "windows",
+        "flutter",
+    }:
+        return "monaco"
+    return normalized
+
+
+def _normalize_code_editor_webview_engine(
+    value: Any | None, *, fallback: str | None = None
+) -> str | None:
+    normalized = _normalize_engine(value, fallback=fallback)
+    if normalized is None:
+        return None
+    if normalized in {
+        "windows_inapp",
+        "windows_inapp_monaco",
+        "inapp",
+        "monaco",
+        "flutter_monaco",
+        "monaco_editor",
+    }:
+        return "windows_inapp_monaco"
+    if normalized in {
+        "webview_windows",
+        "windows",
+    }:
+        return "webview_windows"
+    if normalized in {
+        "webview_flutter",
+        "flutter",
+    }:
+        return "webview_flutter"
+    return normalized
 
 
 class CodeEditor(Component):
@@ -361,6 +578,15 @@ class CodeEditor(Component):
             if module_value is not None:
                 merged_modules[key] = module_value
 
+        normalized_engine = _normalize_code_editor_engine(
+            engine,
+            fallback=CODE_EDITOR_DEFAULT_ENGINE,
+        )
+        normalized_webview_engine = _normalize_code_editor_webview_engine(
+            webview_engine,
+            fallback=CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE,
+        )
+
         merged = merge_props(
             props,
             schema_version=int(schema_version),
@@ -368,6 +594,8 @@ class CodeEditor(Component):
             state=_normalize_state(state),
             custom_layout=custom_layout,
             layout=layout,
+            manifest=dict(kwargs.pop("manifest", {}) or {}),
+            registries=dict(kwargs.pop("registries", {}) or {}),
             events=_normalize_events(events),
             value=resolved,
             text=resolved,
@@ -379,8 +607,8 @@ class CodeEditor(Component):
             show_gutter=show_gutter,
             show_minimap=show_minimap,
             glyph_margin=glyph_margin,
-            engine=engine,
-            webview_engine=webview_engine,
+            engine=normalized_engine,
+            webview_engine=normalized_webview_engine,
             document_uri=document_uri,
             emit_on_change=emit_on_change,
             debounce_ms=debounce_ms,
@@ -431,6 +659,18 @@ class CodeEditor(Component):
             props["module"] = _normalize_module(props.get("module"))
         if "state" in props:
             props["state"] = _normalize_state(props.get("state"))
+        if "engine" in props:
+            props["engine"] = _normalize_code_editor_engine(
+                props.get("engine"),
+                fallback=str(self.props.get("engine") or CODE_EDITOR_DEFAULT_ENGINE),
+            )
+        if "webview_engine" in props:
+            props["webview_engine"] = _normalize_code_editor_webview_engine(
+                props.get("webview_engine"),
+                fallback=str(
+                    self.props.get("webview_engine") or CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE
+                ),
+            )
         if "events" in props and isinstance(props.get("events"), Iterable):
             props["events"] = _normalize_events(props.get("events"))
         if "modules" in props and isinstance(props.get("modules"), Mapping):
@@ -445,6 +685,127 @@ class CodeEditor(Component):
         self._validate_props(next_props, strict=self._strict_contract)
         self.props.update({k: v for k, v in props.items() if v is not None})
         return self.invoke(session, "set_props", {"props": props})
+
+    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
+        manifest_payload = dict(manifest or {})
+        current_manifest = dict(self.props.get("manifest") or {})
+        current_manifest.update(manifest_payload)
+        self.props["manifest"] = current_manifest
+        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
+
+    def register_module(
+        self,
+        session: Any,
+        *,
+        role: str,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        result = _register_runtime_module(
+            self.props,
+            role=role,
+            module_id=module_id,
+            definition=definition,
+            role_aliases=CODE_EDITOR_REGISTRY_ROLE_ALIASES,
+            role_manifest_lists=CODE_EDITOR_REGISTRY_MANIFEST_LISTS,
+            allowed_modules=CODE_EDITOR_MODULES,
+            normalize_module=_normalize_module,
+        )
+        if result.get("ok") is not True:
+            return result
+        return self.invoke(
+            session,
+            "register_module",
+            {
+                "role": result["role"],
+                "module_id": result["module_id"],
+                "definition": dict(definition or {}),
+            },
+        )
+
+    def register_panel(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="panel",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_tool(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="tool",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_view(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="view",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_surface(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="surface",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_provider(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="provider",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_command(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="command",
+            module_id=module_id,
+            definition=definition,
+        )
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         event_name = _normalize_token(event)
@@ -511,6 +872,9 @@ class Studio(Component):
         block_palette: Mapping[str, Any] | None = None,
         builder: Mapping[str, Any] | None = None,
         canvas: Mapping[str, Any] | None = None,
+        timeline_surface: Mapping[str, Any] | None = None,
+        node_surface: Mapping[str, Any] | None = None,
+        preview_surface: Mapping[str, Any] | None = None,
         component_palette: Mapping[str, Any] | None = None,
         inspector: Mapping[str, Any] | None = None,
         outline_tree: Mapping[str, Any] | None = None,
@@ -521,6 +885,18 @@ class Studio(Component):
         selection_tools: Mapping[str, Any] | None = None,
         transform_box: Mapping[str, Any] | None = None,
         transform_toolbar: Mapping[str, Any] | None = None,
+        manifest: Mapping[str, Any] | None = None,
+        registries: Mapping[str, Any] | None = None,
+        panels: Mapping[str, Any] | None = None,
+        shortcuts: Mapping[str, Any] | None = None,
+        render: Mapping[str, Any] | None = None,
+        cache: Mapping[str, Any] | None = None,
+        media: Mapping[str, Any] | None = None,
+        documents: list[Any] | None = None,
+        assets: list[Any] | None = None,
+        left_pane_ratio: float | None = None,
+        right_pane_ratio: float | None = None,
+        bottom_panel_height: float | None = None,
         schema_version: int = STUDIO_SCHEMA_VERSION,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -534,6 +910,9 @@ class Studio(Component):
             "block_palette": block_palette,
             "builder": builder,
             "canvas": canvas,
+            "timeline_surface": timeline_surface,
+            "node_surface": node_surface,
+            "preview_surface": preview_surface,
             "component_palette": component_palette,
             "inspector": inspector,
             "outline_tree": outline_tree,
@@ -549,7 +928,7 @@ class Studio(Component):
         merged_modules: dict[str, Any] = {}
         if isinstance(modules, Mapping):
             for key, module_value in modules.items():
-                normalized = _normalize_module(str(key))
+                normalized = _normalize_studio_module(str(key))
                 if normalized and normalized in STUDIO_MODULES and module_value is not None:
                     merged_modules[normalized] = module_value
         for key, module_value in module_map.items():
@@ -559,13 +938,25 @@ class Studio(Component):
         merged = merge_props(
             props,
             schema_version=int(schema_version),
-            module=_normalize_module(module),
+            module=_normalize_studio_module(module),
             state=_normalize_state(state),
             custom_layout=custom_layout,
             layout=layout,
             show_modules=show_modules,
             show_chrome=show_chrome,
             radius=radius,
+            manifest=dict(manifest or {}),
+            registries=dict(registries or {}),
+            panels=dict(panels or {}),
+            shortcuts=dict(shortcuts or {}),
+            render=dict(render or {}),
+            cache=dict(cache or {}),
+            media=dict(media or {}),
+            documents=documents,
+            assets=assets,
+            left_pane_ratio=left_pane_ratio,
+            right_pane_ratio=right_pane_ratio,
+            bottom_panel_height=bottom_panel_height,
             events=_normalize_events(events),
             modules=merged_modules,
             **merged_modules,
@@ -583,7 +974,7 @@ class Studio(Component):
             raise ValueError("\n".join(exc.errors)) from exc
 
     def set_module(self, session: Any, module: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        normalized = _normalize_module(module)
+        normalized = _normalize_studio_module(module)
         if normalized is None or normalized not in STUDIO_MODULES:
             return {"ok": False, "error": f"Unknown studio module '{module}'"}
         payload_dict = dict(payload or {})
@@ -611,7 +1002,7 @@ class Studio(Component):
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         if "module" in props:
-            props["module"] = _normalize_module(props.get("module"))
+            props["module"] = _normalize_studio_module(props.get("module"))
         if "state" in props:
             props["state"] = _normalize_state(props.get("state"))
         if "events" in props and isinstance(props.get("events"), Iterable):
@@ -619,7 +1010,7 @@ class Studio(Component):
         if "modules" in props and isinstance(props.get("modules"), Mapping):
             normalized_modules: dict[str, Any] = {}
             for key, value in dict(props["modules"]).items():
-                normalized = _normalize_module(str(key))
+                normalized = _normalize_studio_module(str(key))
                 if normalized and normalized in STUDIO_MODULES and value is not None:
                     normalized_modules[normalized] = value
             props["modules"] = normalized_modules
@@ -645,8 +1036,280 @@ class Studio(Component):
     def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
         return self.emit(session, event, payload)
 
+    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
+        manifest_payload = dict(manifest or {})
+        current_manifest = dict(self.props.get("manifest") or {})
+        current_manifest.update(manifest_payload)
+        self.props["manifest"] = current_manifest
+        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
+
+    def register_module(
+        self,
+        session: Any,
+        *,
+        role: str,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        result = _register_runtime_module(
+            self.props,
+            role=role,
+            module_id=module_id,
+            definition=definition,
+            role_aliases=STUDIO_REGISTRY_ROLE_ALIASES,
+            role_manifest_lists=STUDIO_REGISTRY_MANIFEST_LISTS,
+            allowed_modules=STUDIO_MODULES,
+            normalize_module=_normalize_studio_module,
+        )
+        if result.get("ok") is not True:
+            return result
+        return self.invoke(
+            session,
+            "register_module",
+            {
+                "role": result["role"],
+                "module_id": result["module_id"],
+                "definition": dict(definition or {}),
+            },
+        )
+
+    def set_selection(
+        self,
+        session: Any,
+        *,
+        selected_id: str | None = None,
+        selected_ids: Iterable[str] | None = None,
+        active_tool: str | None = None,
+        active_surface: str | None = None,
+        focused_panel: str | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        selection_payload = dict(self.props.get("selection_tools") or {})
+        if selected_id is not None:
+            payload["selected_id"] = selected_id
+            selection_payload["selected_id"] = selected_id
+        if selected_ids is not None:
+            ids_list = list(selected_ids)
+            payload["selected_ids"] = ids_list
+            selection_payload["selected_ids"] = ids_list
+        if active_tool is not None:
+            payload["active_tool"] = active_tool
+            selection_payload["active_tool"] = active_tool
+        if active_surface is not None:
+            normalized_surface = _normalize_studio_module(active_surface)
+            if normalized_surface is None or normalized_surface not in STUDIO_MODULES:
+                return {"ok": False, "error": f"Unknown studio surface '{active_surface}'"}
+            payload["active_surface"] = normalized_surface
+            selection_payload["active_surface"] = normalized_surface
+            self.props["module"] = normalized_surface
+        if focused_panel is not None:
+            normalized_panel = _normalize_studio_module(focused_panel)
+            if normalized_panel is None or normalized_panel not in STUDIO_MODULES:
+                return {"ok": False, "error": f"Unknown studio panel '{focused_panel}'"}
+            payload["focused_panel"] = normalized_panel
+            selection_payload["focused_panel"] = normalized_panel
+
+        modules = dict(self.props.get("modules") or {})
+        existing_selection = dict(modules.get("selection_tools") or {})
+        existing_selection.update(selection_payload)
+        modules["selection_tools"] = existing_selection
+        self.props["modules"] = modules
+        self.props["selection_tools"] = existing_selection
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_selection", payload)
+
+    def set_tool(self, session: Any, tool: str) -> dict[str, Any]:
+        modules = dict(self.props.get("modules") or {})
+        selection_payload = dict(modules.get("selection_tools") or {})
+        selection_payload["active_tool"] = tool
+        modules["selection_tools"] = selection_payload
+        self.props["modules"] = modules
+        self.props["selection_tools"] = selection_payload
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_tool", {"tool": tool})
+
+    def set_active_surface(self, session: Any, surface: str) -> dict[str, Any]:
+        normalized = _normalize_studio_module(surface)
+        if normalized is None:
+            return {"ok": False, "error": "surface is required"}
+        if normalized not in STUDIO_MODULES:
+            return {"ok": False, "error": f"Unknown studio surface '{surface}'"}
+        self.props["module"] = normalized
+        modules = dict(self.props.get("modules") or {})
+        selection_payload = dict(modules.get("selection_tools") or {})
+        selection_payload["active_surface"] = normalized
+        modules["selection_tools"] = selection_payload
+        self.props["modules"] = modules
+        self.props["selection_tools"] = selection_payload
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(
+            session,
+            "set_active_surface",
+            {"surface": normalized},
+        )
+
+    def focus_panel(self, session: Any, panel: str) -> dict[str, Any]:
+        normalized = _normalize_studio_module(panel)
+        if normalized is None:
+            return {"ok": False, "error": "panel is required"}
+        modules = dict(self.props.get("modules") or {})
+        selection_payload = dict(modules.get("selection_tools") or {})
+        selection_payload["focused_panel"] = normalized
+        modules["selection_tools"] = selection_payload
+        self.props["modules"] = modules
+        self.props["selection_tools"] = selection_payload
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "focus_panel", {"panel": normalized})
+
+    def register_surface(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="surface",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_tool(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="tool",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_panel(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="panel",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_importer(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="importer",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_exporter(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="exporter",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_shortcut(
+        self,
+        session: Any,
+        *,
+        context: str,
+        chord: str,
+        command: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "register_shortcut",
+            {
+                "context": context,
+                "chord": chord,
+                "command": command,
+                "payload": dict(payload or {}),
+            },
+        )
+
+    def set_dock_layout(self, session: Any, layout: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_dock_layout", {"layout": dict(layout)})
+
+    def import_asset(
+        self,
+        session: Any,
+        *,
+        path: str,
+        mode: str = "copy",
+        metadata: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "import_asset",
+            {
+                "path": path,
+                "mode": mode,
+                "metadata": dict(metadata or {}),
+            },
+        )
+
+    def enqueue_export(
+        self,
+        session: Any,
+        *,
+        format: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "enqueue_export",
+            {
+                "format": format,
+                "payload": dict(payload or {}),
+            },
+        )
+
+    def execute_command(
+        self,
+        session: Any,
+        *,
+        command_type: str,
+        payload: Mapping[str, Any] | None = None,
+        label: str | None = None,
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = {"type": command_type, "payload": dict(payload or {})}
+        if label:
+            data["label"] = label
+        return self.invoke(session, "execute_command", data)
+
+    def undo(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "undo", {})
+
+    def redo(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "redo", {})
+
 
 TERMINAL_SCHEMA_VERSION = 2
+TERMINAL_DEFAULT_ENGINE = "xterm"
 
 TERMINAL_MODULES = {
     "capabilities",
@@ -684,6 +1347,40 @@ TERMINAL_EVENTS = {
     "output",
     "state_change",
     "module_change",
+}
+
+TERMINAL_REGISTRY_ROLE_ALIASES = {
+    "module": "module_registry",
+    "modules": "module_registry",
+    "view": "view_registry",
+    "views": "view_registry",
+    "panel": "panel_registry",
+    "panels": "panel_registry",
+    "tool": "tool_registry",
+    "tools": "tool_registry",
+    "provider": "provider_registry",
+    "providers": "provider_registry",
+    "backend": "provider_registry",
+    "backends": "provider_registry",
+    "bridge": "provider_registry",
+    "bridges": "provider_registry",
+    "command": "command_registry",
+    "commands": "command_registry",
+    "module_registry": "module_registry",
+    "view_registry": "view_registry",
+    "panel_registry": "panel_registry",
+    "tool_registry": "tool_registry",
+    "provider_registry": "provider_registry",
+    "command_registry": "command_registry",
+}
+
+TERMINAL_REGISTRY_MANIFEST_LISTS = {
+    "module_registry": "enabled_modules",
+    "view_registry": "enabled_views",
+    "panel_registry": "enabled_panels",
+    "tool_registry": "enabled_tools",
+    "provider_registry": "enabled_providers",
+    "command_registry": "enabled_commands",
 }
 
 
@@ -777,6 +1474,9 @@ class Terminal(Component):
             if module_value is not None:
                 merged_modules[key] = module_value
 
+        normalized_engine = _normalize_engine(engine, fallback=TERMINAL_DEFAULT_ENGINE)
+        normalized_webview_engine = _normalize_engine(webview_engine)
+
         merged = merge_props(
             props,
             schema_version=int(schema_version),
@@ -784,6 +1484,8 @@ class Terminal(Component):
             state=_normalize_state(state),
             custom_layout=custom_layout,
             layout=layout,
+            manifest=dict(kwargs.pop("manifest", {}) or {}),
+            registries=dict(kwargs.pop("registries", {}) or {}),
             events=_normalize_events(events),
             modules=merged_modules,
             **merged_modules,
@@ -798,8 +1500,8 @@ class Terminal(Component):
             wrap_lines=wrap_lines,
             max_lines=max_lines,
             border_width=border_width,
-            engine=engine,
-            webview_engine=webview_engine,
+            engine=normalized_engine,
+            webview_engine=normalized_webview_engine,
             **kwargs,
         )
         self._strict_contract = strict
@@ -845,6 +1547,13 @@ class Terminal(Component):
             props["module"] = _normalize_module(props.get("module"))
         if "state" in props:
             props["state"] = _normalize_state(props.get("state"))
+        if "engine" in props:
+            props["engine"] = _normalize_engine(
+                props.get("engine"),
+                fallback=str(self.props.get("engine") or TERMINAL_DEFAULT_ENGINE),
+            )
+        if "webview_engine" in props:
+            props["webview_engine"] = _normalize_engine(props.get("webview_engine"))
         if "events" in props and isinstance(props.get("events"), Iterable):
             props["events"] = _normalize_events(props.get("events"))
         if "modules" in props and isinstance(props.get("modules"), Mapping):
@@ -859,6 +1568,141 @@ class Terminal(Component):
         self._validate_props(next_props, strict=self._strict_contract)
         self.props.update({k: v for k, v in props.items() if v is not None})
         return self.invoke(session, "set_props", {"props": props})
+
+    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
+        manifest_payload = dict(manifest or {})
+        current_manifest = dict(self.props.get("manifest") or {})
+        current_manifest.update(manifest_payload)
+        self.props["manifest"] = current_manifest
+        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
+
+    def register_module(
+        self,
+        session: Any,
+        *,
+        role: str,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        result = _register_runtime_module(
+            self.props,
+            role=role,
+            module_id=module_id,
+            definition=definition,
+            role_aliases=TERMINAL_REGISTRY_ROLE_ALIASES,
+            role_manifest_lists=TERMINAL_REGISTRY_MANIFEST_LISTS,
+            allowed_modules=TERMINAL_MODULES,
+            normalize_module=_normalize_module,
+        )
+        if result.get("ok") is not True:
+            return result
+        return self.invoke(
+            session,
+            "register_module",
+            {
+                "role": result["role"],
+                "module_id": result["module_id"],
+                "definition": dict(definition or {}),
+            },
+        )
+
+    def register_view(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="view",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_panel(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="panel",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_tool(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="tool",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_provider(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="provider",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_backend(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="backend",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_bridge(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="bridge",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_command(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="command",
+            module_id=module_id,
+            definition=definition,
+        )
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         event_name = _normalize_token(event)

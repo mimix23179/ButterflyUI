@@ -33,6 +33,7 @@ export 'display/reaction_bar.dart';
 export 'display/status_mark.dart';
 export 'display/code_view.dart';
 export 'display/code_editor.dart';
+export 'display/studio.dart';
 export 'display/diff_view.dart';
 export 'display/empty_state.dart';
 export 'display/error_state.dart';

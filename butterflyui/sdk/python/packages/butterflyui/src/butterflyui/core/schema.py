@@ -1061,6 +1061,8 @@ CANDY_SCHEMA = _control_schema(
         "state": {"type": "string", "enum": CANDY_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
         "layout": STRING_SCHEMA,
+        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "variant": STRING_SCHEMA,
         "events": {"type": "array", "items": {"type": "string", "enum": CANDY_EVENT_ENUM}},
         "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
@@ -2075,6 +2077,9 @@ STUDIO_MODULE_ENUM = [
     "block_palette",
     "builder",
     "canvas",
+    "timeline_surface",
+    "node_surface",
+    "preview_surface",
     "component_palette",
     "inspector",
     "outline_tree",
@@ -2409,6 +2414,31 @@ STUDIO_MODULE_SCHEMAS = {
             "show_drop_hints": BOOL_SCHEMA,
         }
     ),
+    "timeline_surface": _studio_module_schema(
+        {
+            "tracks": {"type": "array", "items": ANY_SCHEMA},
+            "playhead_seconds": NUMBER_SCHEMA,
+            "duration_seconds": NUMBER_SCHEMA,
+            "pixels_per_second": NUMBER_SCHEMA,
+            "snap_enabled": BOOL_SCHEMA,
+        }
+    ),
+    "node_surface": _studio_module_schema(
+        {
+            "nodes": {"type": "array", "items": ANY_SCHEMA},
+            "edges": {"type": "array", "items": ANY_SCHEMA},
+            "world_width": NUMBER_SCHEMA,
+            "world_height": NUMBER_SCHEMA,
+        }
+    ),
+    "preview_surface": _studio_module_schema(
+        {
+            "title": STRING_SCHEMA,
+            "subtitle": STRING_SCHEMA,
+            "status": STRING_SCHEMA,
+            "source": STRING_SCHEMA,
+        }
+    ),
     "component_palette": _studio_module_schema(
         {
             "query": STRING_SCHEMA,
@@ -2547,6 +2577,8 @@ GALLERY_SCHEMA = _control_schema(
         "state": {"type": "string", "enum": GALLERY_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
         "layout": STRING_SCHEMA,
+        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "radius": NUMBER_SCHEMA,
         "items": {"type": "array", "items": ANY_SCHEMA},
         "spacing": NUMBER_SCHEMA,
@@ -2615,6 +2647,8 @@ SKINS_SCHEMA = _control_schema(
         "module": {"type": "string", "enum": SKINS_MODULE_ENUM},
         "state": {"type": "string", "enum": SKINS_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
+        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "radius": NUMBER_SCHEMA,
         "skins": {"type": "array", "items": ANY_SCHEMA},
         "selected_skin": STRING_SCHEMA,
@@ -2674,6 +2708,8 @@ CODE_EDITOR_SCHEMA = _control_schema(
         "state": {"type": "string", "enum": CODE_EDITOR_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
         "layout": STRING_SCHEMA,
+        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "events": {"type": "array", "items": {"type": "string", "enum": CODE_EDITOR_EVENT_ENUM}},
         "modules": {
             "type": "object",
@@ -3376,6 +3412,37 @@ STUDIO_CANVAS_SCHEMA = _control_schema(
         "show_drop_hints": BOOL_SCHEMA,
         "use_native_drag": BOOL_SCHEMA,
         "expand_child": BOOL_SCHEMA,
+    }
+)
+
+STUDIO_TIMELINE_SURFACE_SCHEMA = _control_schema(
+    {
+        "enabled": BOOL_SCHEMA,
+        "tracks": {"type": "array", "items": {"type": "object"}},
+        "playhead_seconds": NUMBER_SCHEMA,
+        "duration_seconds": NUMBER_SCHEMA,
+        "pixels_per_second": NUMBER_SCHEMA,
+        "snap_enabled": BOOL_SCHEMA,
+    }
+)
+
+STUDIO_NODE_SURFACE_SCHEMA = _control_schema(
+    {
+        "enabled": BOOL_SCHEMA,
+        "nodes": {"type": "array", "items": {"type": "object"}},
+        "edges": {"type": "array", "items": {"type": "object"}},
+        "world_width": NUMBER_SCHEMA,
+        "world_height": NUMBER_SCHEMA,
+    }
+)
+
+STUDIO_PREVIEW_SURFACE_SCHEMA = _control_schema(
+    {
+        "enabled": BOOL_SCHEMA,
+        "title": STRING_SCHEMA,
+        "subtitle": STRING_SCHEMA,
+        "status": STRING_SCHEMA,
+        "source": STRING_SCHEMA,
     }
 )
 
@@ -4220,6 +4287,8 @@ TERMINAL_SCHEMA = _control_schema(
         "state": {"type": "string", "enum": TERMINAL_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
         "layout": STRING_SCHEMA,
+        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "events": {"type": "array", "items": {"type": "string", "enum": TERMINAL_EVENT_ENUM}},
         "modules": {
             "type": "object",
@@ -5544,6 +5613,9 @@ CONTROL_SCHEMAS = {
 
     # Studio
     "studio_canvas": STUDIO_CANVAS_SCHEMA,
+    "studio_timeline_surface": STUDIO_TIMELINE_SURFACE_SCHEMA,
+    "studio_node_surface": STUDIO_NODE_SURFACE_SCHEMA,
+    "studio_preview_surface": STUDIO_PREVIEW_SURFACE_SCHEMA,
     "studio_tokens_editor": STUDIO_TOKENS_EDITOR_SCHEMA,
     "studio_builder": STUDIO_BUILDER_SCHEMA,
     "studio_block_palette": STUDIO_BLOCK_PALETTE_SCHEMA,
@@ -5972,6 +6044,9 @@ _ALL_CONTROL_TYPES = {
     "studio_block_palette",
     "studio_builder",
     "studio_canvas",
+    "studio_timeline_surface",
+    "studio_node_surface",
+    "studio_preview_surface",
     "studio_component_palette",
     "studio_inspector",
     "studio_outline_tree",
@@ -6038,6 +6113,7 @@ RUNTIME_PROP_HINTS = {
     'button_style': ['value', 'options'],
     'gallery': [
         'schema_version', 'module', 'state', 'items', 'spacing', 'run_spacing', 'tile_width', 'tile_height', 'selectable', 'enabled', 'events', 'modules',
+        'manifest', 'registries',
         'toolbar', 'filter_bar', 'grid_layout', 'item_actions', 'item_badge',
         'item_meta_row', 'item_preview', 'item_selectable', 'item_tile',
         'pagination', 'section_header', 'sort_bar', 'empty_state',
@@ -6053,6 +6129,7 @@ RUNTIME_PROP_HINTS = {
     ],
     'skins': [
         'schema_version', 'module', 'state', 'skins', 'selected_skin', 'presets', 'value', 'enabled', 'events', 'modules',
+        'manifest', 'registries',
         'selector', 'preset', 'editor', 'preview', 'apply', 'clear', 'token_mapper',
         'create_skin', 'edit_skin', 'delete_skin',
         'effects', 'particles', 'shaders', 'materials', 'icons', 'fonts', 'colors', 'background',
@@ -6231,14 +6308,19 @@ RUNTIME_PROP_HINTS = {
     'socket_client': ['url', 'protocols', 'auto_connect'],
     'data_grid': ['rows', 'columns', 'sortable', 'filterable', 'selectable', 'multi_select', 'pagination', 'page_size', 'dense', 'striped', 'show_header', 'auto_sort', 'selected_index', 'sort_column', 'sort_ascending', 'filter_query', 'filter_column', 'filter_case_sensitive'],
     'code_editor': ['schema_version', 'module', 'state', 'events', 'modules',
+        'manifest', 'registries',
         'value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste', 'emit_on_change', 'debounce_ms',
         'editor_intent_router', 'editor_minimap', 'editor_surface', 'editor_view', 'diff', 'editor_tabs', 'empty_state_view', 'explorer_tree', 'ide', 'code_buffer', 'code_category_layer', 'code_document', 'file_tabs', 'file_tree', 'smart_search_bar', 'semantic_search', 'search_box', 'search_everything_panel', 'search_field', 'search_history', 'search_intent', 'search_item', 'search_provider', 'search_results_view', 'search_scope_selector', 'search_source', 'query_token', 'document_tab_strip', 'command_search', 'tree', 'workbench_editor', 'workspace_explorer', 'command_bar', 'diagnostic_stream', 'diff_narrator', 'dock_graph', 'dock', 'dock_pane', 'empty_view', 'export_panel', 'gutter', 'hint', 'mini_map', 'scope_picker', 'scoped_search_replace', 'diagnostics_panel', 'ghost_editor', 'inline_error_view', 'inline_search_overlay', 'inline_widget', 'inspector', 'intent_panel', 'intent_router', 'intent_search',
     ],
     'studio': ['schema_version', 'module', 'state', 'events', 'modules',
         'actions_editor', 'asset_browser', 'bindings_editor', 'block_palette',
-        'builder', 'canvas', 'component_palette', 'inspector', 'outline_tree',
+        'builder', 'canvas', 'timeline_surface', 'node_surface', 'preview_surface',
+        'component_palette', 'inspector', 'outline_tree',
         'project_panel', 'properties_panel', 'responsive_toolbar', 'tokens_editor',
         'selection_tools', 'transform_box', 'transform_toolbar',
+        'manifest', 'registries', 'render', 'cache', 'media', 'shortcuts', 'panels',
+        'selected_id', 'selected_ids', 'active_tool', 'focused_panel', 'documents', 'assets',
+        'left_pane_ratio', 'right_pane_ratio', 'bottom_panel_height',
     ],
     'ide': ['value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste'],
     'editor_minimap': ['text', 'language', 'visible', 'position', 'width', 'background', 'border_color', 'text_color'],
@@ -6261,6 +6343,7 @@ RUNTIME_PROP_HINTS = {
     'queue_list': ['items', 'auto_download', 'download_dir', 'max_concurrent', 'use_download_manager', 'emit_local_events'],
     'download_item': ['id', 'title', 'subtitle', 'progress', 'status', 'speed', 'eta', 'paused', 'url', 'path'],
     'terminal': ['schema_version', 'module', 'state', 'events', 'modules',
+        'manifest', 'registries',
         'lines', 'history', 'history_items', 'history_limit', 'history_key', 'persist_history',
         'prompt', 'placeholder', 'submit_label', 'enabled', 'dense', 'show_prompt', 'show_input',
         'read_only', 'cursor_blink', 'auto_scroll', 'wrap_lines', 'show_timestamps', 'strip_ansi',

@@ -9,6 +9,8 @@ from ._shared import Component, merge_props
 __all__ = ["Skins"]
 
 SKINS_SCHEMA_VERSION = 2
+SKINS_DEFAULT_NAMES = ["Obsidian Neon", "Linen Paper", "Matrix Terminal"]
+SKINS_DEFAULT_PRESETS = ["Dark", "Light", "Glass", "Neon"]
 
 SKINS_MODULES = {
     "selector",
@@ -80,6 +82,41 @@ SKINS_EVENT_ALIASES = {
     "skins_clear": "clear",
 }
 
+SKINS_REGISTRY_ROLE_ALIASES = {
+    "module": "module_registry",
+    "modules": "module_registry",
+    "pipeline": "pipeline_registry",
+    "pipelines": "pipeline_registry",
+    "editor": "editor_registry",
+    "editors": "editor_registry",
+    "preview": "preview_registry",
+    "previews": "preview_registry",
+    "distribution": "distribution_registry",
+    "distributions": "distribution_registry",
+    "registry": "distribution_registry",
+    "provider": "pipeline_registry",
+    "providers": "pipeline_registry",
+    "panel": "editor_registry",
+    "panels": "editor_registry",
+    "command": "command_registry",
+    "commands": "command_registry",
+    "module_registry": "module_registry",
+    "pipeline_registry": "pipeline_registry",
+    "editor_registry": "editor_registry",
+    "preview_registry": "preview_registry",
+    "distribution_registry": "distribution_registry",
+    "command_registry": "command_registry",
+}
+
+SKINS_REGISTRY_MANIFEST_LISTS = {
+    "module_registry": "enabled_modules",
+    "pipeline_registry": "enabled_pipelines",
+    "editor_registry": "enabled_editors",
+    "preview_registry": "enabled_previews",
+    "distribution_registry": "enabled_distribution",
+    "command_registry": "enabled_commands",
+}
+
 
 def _normalize_token(value: str | None) -> str:
     if value is None:
@@ -111,6 +148,64 @@ def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
         if value and value not in out:
             out.append(value)
     return out
+
+
+def _normalize_registry_role(
+    value: str | None,
+    aliases: Mapping[str, str],
+) -> str | None:
+    normalized = _normalize_token(value)
+    if not normalized:
+        return None
+    return aliases.get(normalized, f"{normalized}_registry")
+
+
+def _register_runtime_module(
+    props: dict[str, Any],
+    *,
+    role: str,
+    module_id: str,
+    definition: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    normalized_role = _normalize_registry_role(role, SKINS_REGISTRY_ROLE_ALIASES)
+    normalized_module = _normalize_module(module_id)
+    if normalized_module is None:
+        normalized_module = _normalize_token(module_id)
+    if not normalized_role or not normalized_module:
+        return {"ok": False, "error": "role and module_id are required"}
+
+    registries = dict(props.get("registries") or {})
+    role_registry = dict(registries.get(normalized_role) or {})
+    role_registry[normalized_module] = dict(definition or {})
+    registries[normalized_role] = role_registry
+    props["registries"] = registries
+
+    manifest = dict(props.get("manifest") or {})
+    enabled_modules = _normalize_events(manifest.get("enabled_modules")) or []
+    if normalized_module in SKINS_MODULES and normalized_module not in enabled_modules:
+        enabled_modules.append(normalized_module)
+    manifest["enabled_modules"] = enabled_modules
+
+    list_key = SKINS_REGISTRY_MANIFEST_LISTS.get(normalized_role)
+    if list_key:
+        values = _normalize_events(manifest.get(list_key)) or []
+        if normalized_module not in values:
+            values.append(normalized_module)
+        manifest[list_key] = values
+    props["manifest"] = manifest
+
+    if normalized_module in SKINS_MODULES:
+        modules = dict(props.get("modules") or {})
+        modules.setdefault(normalized_module, {})
+        props["modules"] = modules
+        props.setdefault(normalized_module, modules[normalized_module])
+
+    return {
+        "ok": True,
+        "role": normalized_role,
+        "module_id": normalized_module,
+        "definition": dict(definition or {}),
+    }
 
 
 class Skins(Component):
@@ -242,15 +337,25 @@ class Skins(Component):
             if value is not None:
                 merged_modules[key] = value
 
+        resolved_skins = list(skins) if skins is not None else list(SKINS_DEFAULT_NAMES)
+        resolved_presets = (
+            list(presets) if presets is not None else list(SKINS_DEFAULT_PRESETS)
+        )
+        resolved_selected = selected_skin
+        if not resolved_selected and resolved_skins:
+            resolved_selected = str(resolved_skins[0])
+
         merged = merge_props(
             props,
             schema_version=int(schema_version),
             module=_normalize_module(module),
             state=_normalize_state(state),
             custom_layout=custom_layout,
-            skins=skins,
-            selected_skin=selected_skin,
-            presets=presets,
+            manifest=dict(kwargs.pop("manifest", {}) or {}),
+            registries=dict(kwargs.pop("registries", {}) or {}),
+            skins=resolved_skins,
+            selected_skin=resolved_selected,
+            presets=resolved_presets,
             value=value,
             enabled=enabled,
             events=_normalize_events(events),
@@ -331,6 +436,137 @@ class Skins(Component):
         self._validate_props(next_props, strict=self._strict_contract)
         self.props.update({k: v for k, v in props.items() if v is not None})
         return self.invoke(session, "set_props", {"props": props})
+
+    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
+        manifest_payload = dict(manifest or {})
+        current_manifest = dict(self.props.get("manifest") or {})
+        current_manifest.update(manifest_payload)
+        self.props["manifest"] = current_manifest
+        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
+
+    def register_module(
+        self,
+        session: Any,
+        *,
+        role: str,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        result = _register_runtime_module(
+            self.props,
+            role=role,
+            module_id=module_id,
+            definition=definition,
+        )
+        if result.get("ok") is not True:
+            return result
+        return self.invoke(
+            session,
+            "register_module",
+            {
+                "role": result["role"],
+                "module_id": result["module_id"],
+                "definition": dict(definition or {}),
+            },
+        )
+
+    def register_pipeline(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="pipeline",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_editor(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="editor",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_preview(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="preview",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_distribution(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="distribution",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_provider(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="provider",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_panel(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="panel",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_command(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="command",
+            module_id=module_id,
+            definition=definition,
+        )
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         event_name = _normalize_token(event)
