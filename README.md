@@ -1,3 +1,5 @@
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
+
 # ButterflyUI
 
 ButterflyUI is a programmable Python UI framework with a Flutter rendering runtime.
