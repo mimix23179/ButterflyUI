@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
 import 'package:flutter/material.dart';
 
 import '../studio_contract.dart';
@@ -183,6 +184,17 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
 
   @override
   Widget build(BuildContext context) {
+    final body = _buildBody(context);
+    return ensureUmbrellaLayoutBounds(
+      props: widget.runtimeProps,
+      child: body,
+      defaultHeight: 1080,
+      minHeight: 520,
+      maxHeight: 3600,
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final state = (widget.runtimeProps['state'] ?? 'ready').toString();
     final layoutMode = studioNorm(
       (widget.runtimeProps['layout'] ?? '').toString(),
@@ -415,9 +427,18 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
 
   Widget _center(BuildContext context) {
     final responsive = _section('responsive_toolbar');
+    final centerBackground =
+        coerceColor(
+          widget.runtimeProps['workspace_bg'] ??
+              widget.runtimeProps['background'] ??
+              _section('canvas')['background'] ??
+              _section('canvas')['bgcolor'],
+        ) ??
+        const Color(0xff0b1220);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
+        color: centerBackground,
         border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(10),
       ),

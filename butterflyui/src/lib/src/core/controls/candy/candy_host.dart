@@ -870,7 +870,13 @@ class _CandyFamilyState extends State<_CandyFamily> {
     base = _wrapWithPerformance(base, merged);
     base = _wrapWithInteraction(base, merged, module);
 
-    return base;
+    return ensureUmbrellaLayoutBounds(
+      props: _runtimeProps,
+      child: base,
+      defaultHeight: 560,
+      minHeight: 200,
+      maxHeight: 2600,
+    );
   }
 
   Widget _buildModule(
@@ -1475,7 +1481,7 @@ class _CandyFamilyState extends State<_CandyFamily> {
         });
       },
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.deferToChild,
         onTap: () {
           _emit('tap', {'module': module, 'state': _state});
           _emit('click', {'module': module, 'state': _state});
@@ -1707,7 +1713,139 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   );
   out['manifest'] = umbrella['manifest'];
   out['registries'] = umbrella['registries'];
+  _seedCandyDefaults(out);
   return out;
+}
+
+void _seedCandyDefaults(Map<String, Object?> out) {
+  final modules = _coerceObjectMap(out['modules']);
+
+  Map<String, Object?> ensureModule(
+    String module,
+    Map<String, Object?> defaults,
+  ) {
+    final fromTopLevel = _coerceObjectMap(out[module]);
+    final fromModules = _coerceObjectMap(modules[module]);
+    final merged = <String, Object?>{
+      ...defaults,
+      ...fromModules,
+      ...fromTopLevel,
+    };
+    modules[module] = merged;
+    out[module] = merged;
+    return merged;
+  }
+
+  final selectedModule = _resolveModule(out);
+  out['module'] = selectedModule;
+  out['state'] = _norm((out['state'] ?? 'idle').toString()).isEmpty
+      ? 'idle'
+      : out['state'];
+
+  ensureModule('surface', <String, Object?>{
+    'bgcolor': '#0f172a',
+    'radius': 14,
+    'padding': <double>[16, 16, 16, 16],
+  });
+  ensureModule('container', <String, Object?>{
+    'padding': <double>[12, 12, 12, 12],
+    'radius': 12,
+  });
+  ensureModule('row', <String, Object?>{'spacing': 8});
+  ensureModule('column', <String, Object?>{'spacing': 8});
+  ensureModule('stack', <String, Object?>{'fit': 'loose'});
+  ensureModule('wrap', <String, Object?>{'spacing': 8, 'run_spacing': 8});
+  ensureModule('align', <String, Object?>{'alignment': 'center'});
+  ensureModule('center', <String, Object?>{'enabled': true});
+  ensureModule('spacer', <String, Object?>{'height': 12});
+  ensureModule('aspect_ratio', <String, Object?>{'ratio': 1.6});
+  ensureModule('overflow_box', <String, Object?>{
+    'min_width': 120,
+    'max_width': 480,
+  });
+  ensureModule('fitted_box', <String, Object?>{'fit': 'contain'});
+  ensureModule('button', <String, Object?>{
+    'label': 'Apply Candy',
+    'variant': 'secondary',
+    'enabled': true,
+  });
+  ensureModule('badge', <String, Object?>{
+    'label': 'Candy',
+    'color': '#22d3ee',
+  });
+  ensureModule('avatar', <String, Object?>{'label': 'B', 'size': 36});
+  ensureModule('icon', <String, Object?>{'icon': 'auto_awesome', 'size': 18});
+  ensureModule('text', <String, Object?>{
+    'text': 'Candy primitive layer',
+    'size': 14,
+    'weight': 'w600',
+  });
+  ensureModule('border', <String, Object?>{
+    'border_color': '#334155',
+    'border_width': 1,
+  });
+  ensureModule('shadow', <String, Object?>{
+    'shadow_color': '#22d3ee33',
+    'shadow_blur': 16,
+    'shadow_dx': 0,
+    'shadow_dy': 8,
+  });
+  ensureModule('outline', <String, Object?>{
+    'outline_color': '#22d3ee',
+    'outline_width': 1,
+  });
+  ensureModule('gradient', <String, Object?>{
+    'colors': <String>['#0ea5e9', '#6366f1', '#14b8a6'],
+    'stops': <double>[0.0, 0.55, 1.0],
+    'opacity': 0.2,
+  });
+  ensureModule('decorated_box', <String, Object?>{
+    'bgcolor': '#111827',
+    'radius': 16,
+    'padding': <double>[20, 20, 20, 20],
+    'border_color': '#334155',
+    'border_width': 1,
+  });
+  ensureModule('clip', <String, Object?>{
+    'shape': 'rect',
+    'clip_behavior': 'anti_alias',
+  });
+  ensureModule('effects', <String, Object?>{'shimmer': false});
+  ensureModule('particles', <String, Object?>{'overlay': true, 'count': 80});
+  ensureModule('canvas', <String, Object?>{
+    'draw_mode': 'none',
+    'background': '#0b1220',
+  });
+  ensureModule('animation', <String, Object?>{
+    'duration_ms': 220,
+    'curve': 'ease_out_cubic',
+  });
+  ensureModule('transition', <String, Object?>{
+    'duration_ms': 220,
+    'preset': 'fade',
+  });
+  ensureModule('motion', <String, Object?>{
+    'duration_ms': 240,
+    'curve': 'ease_in_out',
+  });
+
+  final manifest = _coerceObjectMap(out['manifest']);
+  final enabledModules = umbrellaRuntimeStringList(
+    manifest['enabled_modules'],
+    allowed: _candyModules,
+  ).toList(growable: true);
+  if (enabledModules.isEmpty) {
+    enabledModules.addAll(
+      _candyManifestDefaults['enabled_modules'] ?? const <String>[],
+    );
+  } else {
+    for (final module in _candyModules) {
+      if (!enabledModules.contains(module)) enabledModules.add(module);
+    }
+  }
+  manifest['enabled_modules'] = enabledModules;
+  out['manifest'] = manifest;
+  out['modules'] = modules;
 }
 
 String _resolveModule(Map<String, Object?> props) {

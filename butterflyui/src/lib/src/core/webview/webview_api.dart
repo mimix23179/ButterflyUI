@@ -114,9 +114,11 @@ class ButterflyUIWebViewProps {
     final engine = (engineRaw == null || engineRaw.isEmpty)
         ? (useInApp
               ? 'inapp'
-              : (kIsWeb || defaultTargetPlatform != TargetPlatform.windows
+              : (kIsWeb
                     ? 'flutter'
-                    : 'inapp'))
+                    : (defaultTargetPlatform == TargetPlatform.windows
+                          ? 'windows'
+                          : 'flutter')))
         : engineRaw.toLowerCase();
     final fallbackEngine =
         props['fallback_engine']?.toString().trim().toLowerCase() ?? '';

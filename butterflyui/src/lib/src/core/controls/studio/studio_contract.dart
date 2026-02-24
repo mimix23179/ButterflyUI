@@ -244,6 +244,139 @@ List<String> _normalizedUniqueStrings(
   return out;
 }
 
+List<String> _studioDependencyList(Object? value) {
+  final out = <String>[];
+
+  void addToken(String raw) {
+    for (final part in raw.split(',')) {
+      final normalized = normalizeStudioModuleToken(part);
+      if (!studioModules.contains(normalized)) continue;
+      if (!out.contains(normalized)) out.add(normalized);
+    }
+  }
+
+  if (value is String) {
+    addToken(value);
+    return out;
+  }
+  if (value is List) {
+    for (final entry in value) {
+      addToken(entry?.toString() ?? '');
+    }
+    return out;
+  }
+  if (value is Map) {
+    final map = studioCoerceObjectMap(value);
+    for (final entry in map.entries) {
+      final enabled = entry.value == null
+          ? true
+          : (entry.value is bool)
+          ? entry.value == true
+          : true;
+      if (!enabled) continue;
+      addToken(entry.key);
+    }
+  }
+  return out;
+}
+
+List<String> _studioModuleDependencies(
+  Map<String, Object?> props,
+  String module,
+) {
+  final dependencies = <String>[];
+
+  void addAll(Object? raw) {
+    for (final dependency in _studioDependencyList(raw)) {
+      if (!dependencies.contains(dependency)) {
+        dependencies.add(dependency);
+      }
+    }
+  }
+
+  final modules = studioCoerceObjectMap(props['modules']);
+  final section = studioCoerceObjectMap(modules[module]);
+  addAll(section['depends_on'] ?? section['dependsOn']);
+
+  final topLevel = studioCoerceObjectMap(props[module]);
+  addAll(topLevel['depends_on'] ?? topLevel['dependsOn']);
+
+  final manifest = studioCoerceObjectMap(props['manifest']);
+  final depMap = studioCoerceObjectMap(manifest['module_dependencies']);
+  addAll(depMap[module]);
+
+  final propDeps = studioCoerceObjectMap(props['module_dependencies']);
+  addAll(propDeps[module]);
+
+  final registries = studioCoerceObjectMap(props['registries']);
+  final moduleRegistry = studioCoerceObjectMap(registries['module_registry']);
+  final moduleDef = studioCoerceObjectMap(moduleRegistry[module]);
+  addAll(moduleDef['depends_on'] ?? moduleDef['dependsOn']);
+
+  return dependencies;
+}
+
+List<String> resolveStudioEnabledModules(
+  Map<String, Object?> props,
+  Iterable<String> seed,
+) {
+  final out = <String>[];
+
+  void addModule(String module) {
+    final normalized = normalizeStudioModuleToken(module);
+    if (normalized.isEmpty || !studioModules.contains(normalized)) return;
+    if (!out.contains(normalized)) out.add(normalized);
+  }
+
+  for (final module in seed) {
+    addModule(module);
+  }
+
+  final manifest = studioCoerceObjectMap(props['manifest']);
+  for (final module in _normalizedUniqueStrings(
+    manifest['required_modules'],
+    normalize: normalizeStudioModuleToken,
+    allowed: studioModules,
+  )) {
+    addModule(module);
+  }
+  for (final module in _normalizedUniqueStrings(
+    props['required_modules'],
+    normalize: normalizeStudioModuleToken,
+    allowed: studioModules,
+  )) {
+    addModule(module);
+  }
+
+  final modules = studioCoerceObjectMap(props['modules']);
+  for (final entry in modules.entries) {
+    if (entry.value is Map || entry.value == true) {
+      addModule(entry.key);
+    }
+  }
+  for (final module in studioModules) {
+    final value = props[module];
+    if (value is Map || value == true) {
+      addModule(module);
+    }
+  }
+
+  final queue = <String>[...out];
+  var index = 0;
+  while (index < queue.length) {
+    final module = queue[index];
+    index += 1;
+    for (final dependency in _studioModuleDependencies(props, module)) {
+      if (!out.contains(dependency)) {
+        out.add(dependency);
+        queue.add(dependency);
+      }
+    }
+  }
+
+  return out;
+}
+
 Map<String, Object?> studioBuildManifest(Map<String, Object?> props) {
   final rawManifest = studioCoerceObjectMap(props['manifest']);
   final manifest = <String, Object?>{...rawManifest};
@@ -276,7 +409,7 @@ Map<String, Object?> studioBuildManifest(Map<String, Object?> props) {
     normalize: normalizeStudioSurfaceToken,
     allowed: studioSurfaceModules,
   );
-  manifest['enabled_modules'] = readList(
+  final enabledModuleSeed = readList(
     'enabled_modules',
     const [
       'builder',
@@ -301,6 +434,10 @@ Map<String, Object?> studioBuildManifest(Map<String, Object?> props) {
     ],
     normalize: normalizeStudioModuleToken,
     allowed: studioModules,
+  );
+  manifest['enabled_modules'] = resolveStudioEnabledModules(
+    <String, Object?>{...props, 'manifest': manifest},
+    enabledModuleSeed,
   );
   manifest['enabled_panels'] = readList(
     'enabled_panels',
@@ -333,6 +470,42 @@ Map<String, Object?> studioBuildManifest(Map<String, Object?> props) {
   ]);
   manifest['exporters'] = readList('exporters', const ['png', 'json']);
   manifest['compute'] = readList('compute', const <String>[]);
+
+  final requiredModules = readList(
+    'required_modules',
+    const <String>[],
+    normalize: normalizeStudioModuleToken,
+    allowed: studioModules,
+  );
+  if (requiredModules.isNotEmpty) {
+    manifest['required_modules'] = requiredModules;
+  } else {
+    manifest.remove('required_modules');
+  }
+
+  final layout = studioCoerceObjectMap(manifest['layout']);
+  final propLayout = studioCoerceObjectMap(props['layout']);
+  if (layout.isEmpty && propLayout.isNotEmpty) {
+    manifest['layout'] = propLayout;
+  } else if (layout.isNotEmpty) {
+    manifest['layout'] = layout;
+  }
+
+  final keybinds = studioCoerceObjectMap(manifest['keybinds']);
+  final propKeybinds = studioCoerceObjectMap(props['keybinds']);
+  if (keybinds.isEmpty && propKeybinds.isNotEmpty) {
+    manifest['keybinds'] = propKeybinds;
+  } else if (keybinds.isNotEmpty) {
+    manifest['keybinds'] = keybinds;
+  }
+
+  final providers = studioCoerceObjectMap(manifest['providers']);
+  final propProviders = studioCoerceObjectMap(props['providers']);
+  if (providers.isEmpty && propProviders.isNotEmpty) {
+    manifest['providers'] = propProviders;
+  } else if (providers.isNotEmpty) {
+    manifest['providers'] = providers;
+  }
 
   final starterKit = (manifest['starter_kit'] ?? props['starter_kit'] ?? '')
       .toString()

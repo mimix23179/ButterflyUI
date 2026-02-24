@@ -444,6 +444,9 @@ class Candy(Component):
         self._validate_props(self.props, strict=self._strict_contract)
         return self.invoke(session, "set_module", args)
 
+    def update_module(self, session: Any, module: str, **payload: Any) -> dict[str, Any]:
+        return self.set_module(session, module, payload)
+
     def set_state(self, session: Any, state: str) -> dict[str, Any]:
         normalized = _normalize_state(state)
         if normalized is None:
@@ -696,6 +699,9 @@ class Candy(Component):
 
     def click(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "click", {"payload": dict(payload or {})})
+
+    def tap(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "tap", {"payload": dict(payload or {})})
 
     def focus(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "focus", {})

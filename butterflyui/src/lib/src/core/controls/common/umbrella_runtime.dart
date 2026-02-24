@@ -1,4 +1,25 @@
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:flutter/widgets.dart';
+
+Widget ensureUmbrellaLayoutBounds({
+  required Map<String, Object?> props,
+  required Widget child,
+  double defaultHeight = 640,
+  double minHeight = 240,
+  double maxHeight = 5000,
+}) {
+  final configuredHeight = (coerceDouble(props['height']) ?? defaultHeight)
+      .clamp(minHeight, maxHeight)
+      .toDouble();
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.hasBoundedHeight && constraints.maxHeight.isFinite) {
+        return child;
+      }
+      return SizedBox(height: configuredHeight, child: child);
+    },
+  );
+}
 
 String umbrellaRuntimeNorm(String value) {
   return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
@@ -44,6 +65,146 @@ Map<String, Object?> normalizeUmbrellaRegistries(
     if (role.isEmpty) continue;
     out[role] = umbrellaRuntimeMap(entry.value);
   }
+  return out;
+}
+
+List<String> _normalizedDependencyList(Object? value, Set<String> modules) {
+  final out = <String>[];
+
+  void addToken(String raw) {
+    for (final part in raw.split(',')) {
+      final normalized = umbrellaRuntimeNorm(part);
+      if (normalized.isEmpty) continue;
+      if (!modules.contains(normalized)) continue;
+      if (!out.contains(normalized)) out.add(normalized);
+    }
+  }
+
+  if (value is String) {
+    addToken(value);
+    return out;
+  }
+  if (value is List) {
+    for (final entry in value) {
+      addToken(entry?.toString() ?? '');
+    }
+    return out;
+  }
+  if (value is Map) {
+    for (final entry in value.entries) {
+      final enabled = entry.value == null
+          ? true
+          : (entry.value is bool)
+          ? entry.value == true
+          : true;
+      if (!enabled) continue;
+      addToken(entry.key.toString());
+    }
+  }
+  return out;
+}
+
+List<String> _moduleDependencies({
+  required Map<String, Object?> props,
+  required String module,
+  required Set<String> modules,
+}) {
+  final dependencies = <String>[];
+
+  void addAll(Object? value) {
+    final normalized = _normalizedDependencyList(value, modules);
+    for (final dependency in normalized) {
+      if (!dependencies.contains(dependency)) {
+        dependencies.add(dependency);
+      }
+    }
+  }
+
+  final moduleMap = umbrellaRuntimeMap(props['modules']);
+  final modulePayload = umbrellaRuntimeMap(moduleMap[module]);
+  addAll(modulePayload['depends_on'] ?? modulePayload['dependsOn']);
+
+  final topLevelPayload = umbrellaRuntimeMap(props[module]);
+  addAll(topLevelPayload['depends_on'] ?? topLevelPayload['dependsOn']);
+
+  final manifest = umbrellaRuntimeMap(props['manifest']);
+  final manifestDependencies = umbrellaRuntimeMap(manifest['module_dependencies']);
+  addAll(manifestDependencies[module]);
+
+  final propDependencies = umbrellaRuntimeMap(props['module_dependencies']);
+  addAll(propDependencies[module]);
+
+  final registries = umbrellaRuntimeMap(props['registries']);
+  final moduleRegistry = umbrellaRuntimeMap(registries['module_registry']);
+  final moduleDefinition = umbrellaRuntimeMap(moduleRegistry[module]);
+  addAll(moduleDefinition['depends_on'] ?? moduleDefinition['dependsOn']);
+
+  return dependencies;
+}
+
+List<String> resolveUmbrellaEnabledModules({
+  required Map<String, Object?> props,
+  required Set<String> modules,
+  required Iterable<String> seed,
+}) {
+  final out = <String>[];
+
+  void addModule(String module) {
+    final normalized = umbrellaRuntimeNorm(module);
+    if (normalized.isEmpty) return;
+    if (!modules.contains(normalized)) return;
+    if (!out.contains(normalized)) out.add(normalized);
+  }
+
+  for (final module in seed) {
+    addModule(module);
+  }
+
+  final manifest = umbrellaRuntimeMap(props['manifest']);
+  for (final module in umbrellaRuntimeStringList(
+    manifest['required_modules'],
+    allowed: modules,
+  )) {
+    addModule(module);
+  }
+  for (final module in umbrellaRuntimeStringList(
+    props['required_modules'],
+    allowed: modules,
+  )) {
+    addModule(module);
+  }
+
+  final moduleMap = umbrellaRuntimeMap(props['modules']);
+  for (final entry in moduleMap.entries) {
+    if (entry.value is Map || entry.value == true) {
+      addModule(entry.key);
+    }
+  }
+  for (final module in modules) {
+    final value = props[module];
+    if (value is Map || value == true) {
+      addModule(module);
+    }
+  }
+
+  final queue = <String>[...out];
+  var index = 0;
+  while (index < queue.length) {
+    final module = queue[index];
+    index += 1;
+    final dependencies = _moduleDependencies(
+      props: props,
+      module: module,
+      modules: modules,
+    );
+    for (final dependency in dependencies) {
+      if (!out.contains(dependency)) {
+        out.add(dependency);
+        queue.add(dependency);
+      }
+    }
+  }
+
   return out;
 }
 
@@ -96,11 +257,31 @@ Map<String, Object?> buildUmbrellaManifest({
   };
   for (final key in listKeys) {
     final fallback = normalizedDefaults[key] ?? const <String>[];
-    manifest[key] = readList(
-      key,
-      fallback,
-      allowed: key == 'enabled_modules' ? modules : null,
-    );
+    if (key == 'enabled_modules') {
+      final seed = readList(
+        key,
+        fallback,
+        allowed: modules,
+      );
+      manifest[key] = resolveUmbrellaEnabledModules(
+        props: props,
+        modules: modules,
+        seed: seed,
+      );
+      continue;
+    }
+    manifest[key] = readList(key, fallback);
+  }
+
+  final requiredModules = readList(
+    'required_modules',
+    const <String>[],
+    allowed: modules,
+  );
+  if (requiredModules.isNotEmpty) {
+    manifest['required_modules'] = requiredModules;
+  } else {
+    manifest.remove('required_modules');
   }
 
   final layout = umbrellaRuntimeMap(manifest['layout']);
@@ -177,14 +358,18 @@ Map<String, Object?> registerUmbrellaModule({
     defaults: manifestDefaults,
   );
 
-  final enabledModules = umbrellaRuntimeStringList(
+  final enabledSeed = umbrellaRuntimeStringList(
     manifest['enabled_modules'],
     allowed: modules,
-  ).toList();
-  if (modules.contains(normalizedModule) && !enabledModules.contains(normalizedModule)) {
-    enabledModules.add(normalizedModule);
+  ).toList(growable: true);
+  if (modules.contains(normalizedModule) && !enabledSeed.contains(normalizedModule)) {
+    enabledSeed.add(normalizedModule);
   }
-  manifest['enabled_modules'] = enabledModules;
+  manifest['enabled_modules'] = resolveUmbrellaEnabledModules(
+    props: <String, Object?>{...props, 'manifest': manifest},
+    modules: modules,
+    seed: enabledSeed,
+  );
 
   final listKey = roleManifestLists[normalizedRole];
   if (listKey != null) {

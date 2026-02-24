@@ -383,6 +383,9 @@ class Gallery(Component):
         self._validate_props(self.props, strict=self._strict_contract)
         return self.invoke(session, "set_module", {"module": normalized, "payload": payload_dict})
 
+    def update_module(self, session: Any, module: str, **payload: Any) -> dict[str, Any]:
+        return self.set_module(session, module, payload)
+
     def set_state(self, session: Any, state: str) -> dict[str, Any]:
         normalized = _normalize_state(state)
         if normalized is None or normalized not in GALLERY_STATES:
@@ -475,6 +478,19 @@ class Gallery(Component):
         return self.register_module(
             session,
             role="type",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_type(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_type_handler(
+            session,
             module_id=module_id,
             definition=definition,
         )

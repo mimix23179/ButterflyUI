@@ -158,14 +158,38 @@ const Map<String, List<String>> _skinsManifestDefaults = {
     'preview',
     'editor',
     'token_mapper',
+    'icons',
     'colors',
     'fonts',
+    'background',
+    'border',
+    'shadow',
+    'outline',
+    'animation',
+    'transition',
+    'interaction',
+    'layout',
+    'responsive',
     'effects',
+    'particles',
+    'shaders',
     'materials',
+    'effect_editor',
+    'particle_editor',
+    'shader_editor',
+    'material_editor',
     'icon_editor',
     'font_editor',
+    'color_editor',
+    'background_editor',
+    'border_editor',
+    'shadow_editor',
+    'outline_editor',
     'apply',
     'clear',
+    'create_skin',
+    'edit_skin',
+    'delete_skin',
   ],
   'enabled_pipelines': <String>[
     'token_mapper',
@@ -743,8 +767,14 @@ class _SkinsControlState extends State<_SkinsControl> {
     final workbenchHeight = (coerceDouble(_runtimeProps['height']) ?? 640)
         .clamp(360, 2200)
         .toDouble();
+    final libraryBg =
+        coerceColor(_runtimeProps['library_bg'] ?? _runtimeProps['panel_bg']) ??
+        Theme.of(context).colorScheme.surface.withValues(alpha: 0.55);
+    final workspaceBg =
+        coerceColor(_runtimeProps['workspace_bg'] ?? _runtimeProps['panel_bg']) ??
+        Theme.of(context).colorScheme.surface.withValues(alpha: 0.35);
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _Header(
@@ -780,6 +810,7 @@ class _SkinsControlState extends State<_SkinsControl> {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
+                    color: libraryBg,
                     border: Border.all(color: Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -877,6 +908,7 @@ class _SkinsControlState extends State<_SkinsControl> {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
+                    color: workspaceBg,
                     border: Border.all(color: Theme.of(context).dividerColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -918,6 +950,13 @@ class _SkinsControlState extends State<_SkinsControl> {
           const Text('No skins configured yet.'),
         ],
       ],
+    );
+    return ensureUmbrellaLayoutBounds(
+      props: _runtimeProps,
+      child: body,
+      defaultHeight: workbenchHeight + 180,
+      minHeight: 420,
+      maxHeight: 3200,
     );
   }
 
@@ -1147,6 +1186,85 @@ void _seedSkinsDefaults(Map<String, Object?> out) {
       <String, Object?>{'name': 'Neon'},
     ],
   });
+  ensureModule('icons', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'Material Rounded'},
+      <String, Object?>{'name': 'Feather'},
+      <String, Object?>{'name': 'JetBrains Mono Icons'},
+    ],
+  });
+  ensureModule('background', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'surface', 'value': '#0f172a'},
+      <String, Object?>{'id': 'elevated', 'value': '#111827'},
+    ],
+  });
+  ensureModule('border', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'default', 'color': '#334155', 'width': 1},
+      <String, Object?>{'id': 'focus', 'color': '#22d3ee', 'width': 2},
+    ],
+  });
+  ensureModule('shadow', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'soft', 'blur': 12, 'color': '#00000055'},
+      <String, Object?>{'id': 'hard', 'blur': 20, 'color': '#00000088'},
+    ],
+  });
+  ensureModule('outline', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'focus', 'color': '#22d3ee', 'width': 1},
+      <String, Object?>{'id': 'error', 'color': '#ef4444', 'width': 1},
+    ],
+  });
+  ensureModule('animation', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'fast', 'duration_ms': 140, 'curve': 'ease_out'},
+      <String, Object?>{
+        'id': 'normal',
+        'duration_ms': 220,
+        'curve': 'ease_in_out',
+      },
+    ],
+  });
+  ensureModule('transition', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'fade', 'duration_ms': 180},
+      <String, Object?>{'id': 'slide', 'duration_ms': 220},
+    ],
+  });
+  ensureModule('interaction', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'hover', 'enabled': true},
+      <String, Object?>{'id': 'focus_ring', 'enabled': true},
+      <String, Object?>{'id': 'press_feedback', 'enabled': true},
+    ],
+  });
+  ensureModule('layout', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'density', 'value': 'comfortable'},
+      <String, Object?>{'id': 'radius_scale', 'value': 'md'},
+    ],
+  });
+  ensureModule('responsive', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'desktop', 'width': 1440},
+      <String, Object?>{'id': 'tablet', 'width': 1024},
+      <String, Object?>{'id': 'mobile', 'width': 430},
+    ],
+  });
+  ensureModule('particles', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'dust', 'enabled': false},
+      <String, Object?>{'id': 'spark', 'enabled': true},
+    ],
+  });
+  ensureModule('shaders', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'noise', 'enabled': true},
+      <String, Object?>{'id': 'gradient_mesh', 'enabled': false},
+    ],
+  });
 
   ensureModule('color_editor', <String, Object?>{
     'title': 'Color Editor',
@@ -1160,12 +1278,63 @@ void _seedSkinsDefaults(Map<String, Object?> out) {
     'title': 'Material Editor',
     'text': 'Tune blur, noise, and reflectance.',
   });
+  ensureModule('effect_editor', <String, Object?>{
+    'title': 'Effect Editor',
+    'text': 'Tune bloom, glow, and blur profiles.',
+  });
+  ensureModule('particle_editor', <String, Object?>{
+    'title': 'Particle Editor',
+    'text': 'Adjust density, drift, and burst behavior.',
+  });
+  ensureModule('shader_editor', <String, Object?>{
+    'title': 'Shader Editor',
+    'text': 'Configure shader uniforms and toggles.',
+  });
+  ensureModule('icon_editor', <String, Object?>{
+    'title': 'Icon Editor',
+    'text': 'Map icon sets, sizes, and stroke weights.',
+  });
+  ensureModule('background_editor', <String, Object?>{
+    'title': 'Background Editor',
+    'text': 'Edit gradient, tint, and texture presets.',
+  });
+  ensureModule('border_editor', <String, Object?>{
+    'title': 'Border Editor',
+    'text': 'Adjust border widths, tones, and radii.',
+  });
+  ensureModule('shadow_editor', <String, Object?>{
+    'title': 'Shadow Editor',
+    'text': 'Edit layered elevation shadow tokens.',
+  });
+  ensureModule('outline_editor', <String, Object?>{
+    'title': 'Outline Editor',
+    'text': 'Tune focus and accessibility outlines.',
+  });
 
   ensureModule('apply', <String, Object?>{'label': 'Apply'});
   ensureModule('clear', <String, Object?>{'label': 'Clear'});
   ensureModule('create_skin', <String, Object?>{'label': 'Create Skin'});
   ensureModule('edit_skin', <String, Object?>{'label': 'Edit Skin'});
   ensureModule('delete_skin', <String, Object?>{'label': 'Delete Skin'});
+
+  final manifest = _coerceObjectMap(out['manifest']);
+  final enabledModules = umbrellaRuntimeStringList(
+    manifest['enabled_modules'],
+    allowed: _skinsModules,
+  ).toList(growable: true);
+  if (enabledModules.isEmpty) {
+    enabledModules.addAll(
+      _skinsManifestDefaults['enabled_modules'] ?? const <String>[],
+    );
+  } else {
+    for (final module in _skinsModuleOrder) {
+      if (_skinsModules.contains(module) && !enabledModules.contains(module)) {
+        enabledModules.add(module);
+      }
+    }
+  }
+  manifest['enabled_modules'] = enabledModules;
+  out['manifest'] = manifest;
 
   out['modules'] = modules;
 }
@@ -1558,13 +1727,86 @@ class _Preview extends StatelessWidget {
         break;
       }
     }
+    final previewBg =
+        coerceColor(props['preview_bg'] ?? props['background'] ?? props['bgcolor']) ??
+        Theme.of(context).colorScheme.surfaceContainerHighest;
+    final borderColor =
+        coerceColor(props['border_color']) ??
+        Theme.of(context).dividerColor.withValues(alpha: 0.85);
+
+    final swatches = <Color>[];
+    final rawSwatches = props['swatches'];
+    if (rawSwatches is List) {
+      for (final entry in rawSwatches) {
+        final color = coerceColor(entry);
+        if (color != null) swatches.add(color);
+      }
+    }
+    if (swatches.isEmpty) {
+      final rawColors = props['colors'];
+      if (rawColors is List) {
+        for (final entry in rawColors) {
+          if (entry is Map) {
+            final map = coerceObjectMap(entry);
+            final color = coerceColor(
+              map['value'] ?? map['color'] ?? map['hex'] ?? map['token'],
+            );
+            if (color != null) swatches.add(color);
+          }
+        }
+      }
+    }
+    if (swatches.isEmpty) {
+      swatches.addAll(<Color>[
+        Theme.of(context).colorScheme.primary,
+        Theme.of(context).colorScheme.secondary,
+        Theme.of(context).colorScheme.tertiary,
+      ]);
+    }
+
+    final skinName =
+        (props['skin'] ?? props['active'] ?? props['selected_skin'] ?? 'Preview')
+            .toString();
     final preview = firstChild == null
-        ? Center(child: Text((props['label'] ?? 'Skin Preview').toString()))
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                skinName,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                (props['label'] ?? 'Live skin preview').toString(),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final color in swatches.take(8))
+                    Container(
+                      width: 40,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.12),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          )
         : buildChild(firstChild);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: previewBg,
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(radius),
       ),
       clipBehavior: Clip.antiAlias,

@@ -115,20 +115,7 @@ const Map<String, String> _terminalRegistryManifestLists = {
 };
 
 const Map<String, List<String>> _terminalManifestDefaults = {
-  'enabled_modules': <String>[
-    'workbench',
-    'view',
-    'tabs',
-    'session',
-    'stream_view',
-    'prompt',
-    'progress_view',
-    'timeline',
-    'log_panel',
-    'process_bridge',
-    'output_mapper',
-    'command_builder',
-  ],
+  'enabled_modules': _terminalModuleOrder,
   'enabled_views': <String>[
     'workbench',
     'view',
@@ -505,7 +492,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     );
     final radius = coerceDouble(_runtimeProps['radius']) ?? 12.0;
 
-    return SizedBox(
+    final body = SizedBox(
       height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -540,6 +527,13 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
           ),
         ),
       ),
+    );
+    return ensureUmbrellaLayoutBounds(
+      props: _runtimeProps,
+      child: body,
+      defaultHeight: height.toDouble(),
+      minHeight: 220,
+      maxHeight: 5000,
     );
   }
 
@@ -1218,7 +1212,196 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   );
   out['manifest'] = umbrella['manifest'];
   out['registries'] = umbrella['registries'];
+  _seedTerminalDefaults(out);
   return out;
+}
+
+void _seedTerminalDefaults(Map<String, Object?> out) {
+  final modules = _coerceObjectMap(out['modules']);
+
+  Map<String, Object?> ensureModule(
+    String module,
+    Map<String, Object?> defaults,
+  ) {
+    final fromTopLevel = _coerceObjectMap(out[module]);
+    final fromModules = _coerceObjectMap(modules[module]);
+    final merged = <String, Object?>{
+      ...defaults,
+      ...fromModules,
+      ...fromTopLevel,
+    };
+    modules[module] = merged;
+    out[module] = merged;
+    return merged;
+  }
+
+  final now = DateTime.now();
+  final hh = now.hour.toString().padLeft(2, '0');
+  final mm = now.minute.toString().padLeft(2, '0');
+
+  final lines = <Object?>[
+    '[${hh}:${mm}:01] Terminal host initialized.',
+    '[${hh}:${mm}:03] Capabilities negotiated: stream/stdin/progress.',
+    '[${hh}:${mm}:06] Ready for command execution.',
+  ];
+  if (out['lines'] is List && (out['lines'] as List).isNotEmpty) {
+    out['lines'] = (out['lines'] as List).toList(growable: false);
+  } else {
+    out['lines'] = lines;
+  }
+  final seededLineCount = out['lines'] is List
+      ? (out['lines'] as List).length
+      : 0;
+
+  ensureModule('workbench', <String, Object?>{
+    'title': 'Terminal workbench',
+    'status': 'ready',
+  });
+  ensureModule('view', <String, Object?>{
+    'layout': 'prompt_stream_panel',
+    'active': true,
+  });
+  ensureModule('tabs', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'session-1', 'label': 'Session'},
+      <String, Object?>{'id': 'session-2', 'label': 'Build'},
+    ],
+  });
+  ensureModule('session', <String, Object?>{
+    'id': 'session-1',
+    'label': 'Session',
+    'cwd': '.',
+    'state': 'idle',
+  });
+  ensureModule('stream_view', <String, Object?>{
+    'mode': 'rich',
+    'auto_scroll': out['auto_scroll'] == null
+        ? true
+        : out['auto_scroll'] == true,
+  });
+  ensureModule('stream', <String, Object?>{
+    'status': 'connected',
+    'buffer_lines': seededLineCount,
+  });
+  ensureModule('prompt', <String, Object?>{
+    'value': out['prompt'] ?? 'butterfly@studio',
+    'placeholder': out['placeholder'] ?? 'run build --target windows',
+  });
+  ensureModule('command_builder', <String, Object?>{
+    'cwd': '.',
+    'mode': 'shell',
+    'env': <String, Object?>{'BUTTERFLY_ENV': 'dev'},
+  });
+  ensureModule('flow_gate', <String, Object?>{
+    'policy': 'queue',
+    'max_concurrency': 2,
+    'lock_while_running': true,
+  });
+  ensureModule('output_mapper', <String, Object?>{
+    'mode': 'structured',
+    'ansi': out['strip_ansi'] == true ? 'stripped' : 'enabled',
+  });
+  ensureModule('presets', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'tests', 'label': 'Run tests'},
+      <String, Object?>{'id': 'build', 'label': 'Build desktop'},
+      <String, Object?>{'id': 'lint', 'label': 'Lint workspace'},
+    ],
+  });
+  ensureModule('progress', <String, Object?>{
+    'value': 0.72,
+    'stage': 'compile',
+    'status': 'running',
+  });
+  ensureModule('progress_view', <String, Object?>{
+    'value': 0.72,
+    'label': 'Build graph',
+  });
+  ensureModule('stdin', <String, Object?>{
+    'supported': true,
+    'interactive': true,
+  });
+  ensureModule('stdin_injector', <String, Object?>{
+    'enabled': true,
+    'macros': <String>['y', 'n', 'retry'],
+  });
+  ensureModule('timeline', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'label': 'Resolve deps', 'status': 'success'},
+      <String, Object?>{'label': 'Compile', 'status': 'running'},
+      <String, Object?>{'label': 'Bundle', 'status': 'queued'},
+    ],
+  });
+  ensureModule('process_bridge', <String, Object?>{
+    'backend': 'local',
+    'pty': true,
+    'status': 'connected',
+  });
+  ensureModule('execution_lane', <String, Object?>{
+    'mode': 'queue',
+    'max_concurrency': 2,
+    'active_jobs': 1,
+  });
+  ensureModule('log_viewer', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'level': 'info', 'message': 'Terminal ready'},
+      <String, Object?>{'level': 'info', 'message': 'Lane max concurrency = 2'},
+    ],
+  });
+  ensureModule('log_panel', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'level': 'info', 'message': 'Local bridge connected'},
+      <String, Object?>{
+        'level': 'warn',
+        'message': 'No active PTY resize event',
+      },
+    ],
+  });
+  ensureModule('capabilities', <String, Object?>{
+    'interactive_stdin': true,
+    'streaming': true,
+    'ansi': true,
+    'links': true,
+  });
+
+  final manifest = _coerceObjectMap(out['manifest']);
+  final enabledModules = umbrellaRuntimeStringList(
+    manifest['enabled_modules'],
+    allowed: _terminalModules,
+  ).toList(growable: true);
+  if (enabledModules.isEmpty) {
+    enabledModules.addAll(_terminalModuleOrder);
+  } else {
+    for (final module in _terminalModuleOrder) {
+      if (!enabledModules.contains(module)) enabledModules.add(module);
+    }
+  }
+  manifest['enabled_modules'] = enabledModules;
+
+  for (final key in const <String>[
+    'enabled_views',
+    'enabled_panels',
+    'enabled_tools',
+    'enabled_providers',
+    'enabled_commands',
+  ]) {
+    final values = umbrellaRuntimeStringList(
+      manifest[key],
+      allowed: _terminalModules,
+    ).toList(growable: true);
+    if (values.isEmpty) {
+      values.addAll(_terminalManifestDefaults[key] ?? const <String>[]);
+    }
+    for (final module in modules.keys) {
+      final normalized = _norm(module);
+      if (!_terminalModules.contains(normalized)) continue;
+      if (!values.contains(normalized)) values.add(normalized);
+    }
+    manifest[key] = values;
+  }
+
+  out['manifest'] = manifest;
+  out['modules'] = modules;
 }
 
 List<String> _availableModules(Map<String, Object?> props) {

@@ -206,14 +206,49 @@ const Map<String, List<String>> _codeEditorManifestDefaults = {
     'ide',
     'editor_surface',
     'editor_view',
+    'editor_minimap',
+    'gutter',
+    'hint',
+    'inline_widget',
+    'ghost_editor',
+    'code_buffer',
+    'code_document',
+    'code_category_layer',
     'editor_tabs',
     'document_tab_strip',
+    'file_tabs',
     'workspace_explorer',
+    'file_tree',
     'explorer_tree',
+    'tree',
+    'smart_search_bar',
     'search_box',
+    'search_intent',
+    'search_provider',
+    'semantic_search',
+    'search_scope_selector',
+    'search_source',
+    'query_token',
+    'search_results_view',
+    'search_everything_panel',
+    'search_history',
+    'command_search',
+    'diff',
+    'diff_narrator',
+    'diagnostic_stream',
     'diagnostics_panel',
+    'inline_error_view',
+    'dock',
+    'dock_pane',
+    'dock_graph',
+    'empty_state_view',
+    'editor_intent_router',
+    'intent_router',
+    'intent_panel',
+    'intent_search',
     'inspector',
     'command_bar',
+    'export_panel',
     'workbench_editor',
   ],
   'enabled_views': <String>[
@@ -222,6 +257,8 @@ const Map<String, List<String>> _codeEditorManifestDefaults = {
     'editor_view',
     'workbench_editor',
     'diff',
+    'search_results_view',
+    'diagnostics_panel',
   ],
   'enabled_panels': <String>[
     'workspace_explorer',
@@ -230,22 +267,31 @@ const Map<String, List<String>> _codeEditorManifestDefaults = {
     'inspector',
     'command_bar',
     'search_box',
+    'search_results_view',
+    'intent_panel',
+    'dock_pane',
   ],
   'enabled_tools': <String>[
     'editor_intent_router',
     'scoped_search_replace',
     'command_search',
+    'smart_search_bar',
+    'editor_minimap',
+    'gutter',
   ],
   'enabled_providers': <String>[
     'search_provider',
     'search_source',
     'semantic_search',
     'diagnostic_stream',
+    'query_token',
   ],
   'enabled_commands': <String>[
     'command_bar',
     'command_search',
     'editor_intent_router',
+    'export_panel',
+    'diff_narrator',
   ],
 };
 
@@ -470,9 +516,8 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   }
 
   bool _shouldUseInAppMonaco(String engine) {
-    return engine == 'windows_inapp' ||
-        engine == 'windows_inapp_monaco' ||
-        engine == 'inapp';
+    final normalized = _normalizeCodeEditorWebViewEngine(engine);
+    return normalized == 'windows_inapp';
   }
 
   bool _isUnsupportedWindowsWebViewError(Object error) {
@@ -486,7 +531,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     required int readyTimeoutMs,
   }) async {
     return monaco.MonacoController.createForTesting(
-      webViewController: _MonacoInAppWindowsWebViewController(),
+      webViewController: _MonacoInAppWindowsWebViewController(
+        readyTimeoutMs: readyTimeoutMs,
+      ),
       markReady: true,
     );
   }
@@ -1058,15 +1105,10 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     if (_shouldUseInAppMonaco(webviewEngine)) {
       return _createInAppMonacoController(readyTimeoutMs: readyTimeoutMs);
     }
-    try {
-      return await monaco.MonacoController.create(
-        options: _buildMonacoOptions(),
-        readyTimeout: Duration(milliseconds: readyTimeoutMs),
-      );
-    } catch (error) {
-      if (!_isUnsupportedWindowsWebViewError(error)) rethrow;
-      return _createInAppMonacoController(readyTimeoutMs: readyTimeoutMs);
-    }
+    return monaco.MonacoController.create(
+      options: _buildMonacoOptions(),
+      readyTimeout: Duration(milliseconds: readyTimeoutMs),
+    );
   }
 
   Widget _buildMonacoEditor() {
@@ -1269,7 +1311,7 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         .clamp(360, 2200)
         .toDouble();
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _CodeEditorHeader(
@@ -1331,6 +1373,13 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           ),
         ),
       ],
+    );
+    return ensureUmbrellaLayoutBounds(
+      props: _runtimeProps,
+      child: body,
+      defaultHeight: workbenchHeight + 140,
+      minHeight: 420,
+      maxHeight: 3200,
     );
   }
 }
@@ -1412,7 +1461,289 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   );
   out['manifest'] = umbrella['manifest'];
   out['registries'] = umbrella['registries'];
+  _seedCodeEditorDefaults(out);
   return out;
+}
+
+void _seedCodeEditorDefaults(Map<String, Object?> out) {
+  final modules = _coerceObjectMap(out['modules']);
+
+  Map<String, Object?> ensureModule(
+    String module,
+    Map<String, Object?> defaults,
+  ) {
+    final fromTopLevel = _coerceObjectMap(out[module]);
+    final fromModules = _coerceObjectMap(modules[module]);
+    final merged = <String, Object?>{
+      ...defaults,
+      ...fromModules,
+      ...fromTopLevel,
+    };
+    modules[module] = merged;
+    out[module] = merged;
+    return merged;
+  }
+
+  final now = DateTime.now();
+  final sessionTag =
+      '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+  final normalizedModule = _norm((out['module'] ?? 'ide').toString());
+  out['module'] = _codeEditorModules.contains(normalizedModule)
+      ? normalizedModule
+      : 'ide';
+  final normalizedState = _norm((out['state'] ?? 'ready').toString());
+  out['state'] = _codeEditorStates.contains(normalizedState)
+      ? normalizedState
+      : 'ready';
+
+  ensureModule('ide', <String, Object?>{
+    'title': 'ButterflyUI IDE',
+    'subtitle': 'Monaco workbench session $sessionTag',
+  });
+  ensureModule('editor_surface', <String, Object?>{
+    'label': 'Editor surface',
+    'status': 'mounted',
+  });
+  ensureModule('editor_view', <String, Object?>{
+    'line_numbers': true,
+    'word_wrap': out['word_wrap'] == true,
+    'show_minimap': out['show_minimap'] == true,
+  });
+  ensureModule('editor_tabs', <String, Object?>{
+    'tabs': <Map<String, Object?>>[
+      <String, Object?>{'id': 'main.py', 'label': 'main.py', 'dirty': true},
+      <String, Object?>{'id': 'tokens.json', 'label': 'tokens.json'},
+      <String, Object?>{'id': 'README.md', 'label': 'README.md'},
+    ],
+  });
+  ensureModule('document_tab_strip', <String, Object?>{
+    'tabs': <Map<String, Object?>>[
+      <String, Object?>{'id': 'main.py', 'label': 'main.py', 'dirty': true},
+      <String, Object?>{'id': 'tokens.json', 'label': 'tokens.json'},
+      <String, Object?>{'id': 'README.md', 'label': 'README.md'},
+    ],
+  });
+  ensureModule('file_tabs', <String, Object?>{
+    'tabs': <Map<String, Object?>>[
+      <String, Object?>{'id': 'main.py', 'label': 'main.py'},
+      <String, Object?>{'id': 'tokens.json', 'label': 'tokens.json'},
+    ],
+  });
+  ensureModule('workspace_explorer', <String, Object?>{
+    'nodes': <Map<String, Object?>>[
+      <String, Object?>{
+        'id': 'src',
+        'label': 'src',
+        'children': <Map<String, Object?>>[
+          <String, Object?>{'id': 'main.py', 'label': 'main.py'},
+          <String, Object?>{'id': 'theme.py', 'label': 'theme.py'},
+        ],
+      },
+      <String, Object?>{
+        'id': 'tests',
+        'label': 'tests',
+        'children': <Map<String, Object?>>[
+          <String, Object?>{'id': 'test_editor.py', 'label': 'test_editor.py'},
+        ],
+      },
+    ],
+  });
+  ensureModule('explorer_tree', <String, Object?>{
+    'nodes': <Map<String, Object?>>[
+      <String, Object?>{'id': 'symbols', 'label': 'Symbols'},
+      <String, Object?>{'id': 'references', 'label': 'References'},
+    ],
+  });
+  ensureModule('file_tree', <String, Object?>{
+    'nodes': <Map<String, Object?>>[
+      <String, Object?>{
+        'id': 'workspace',
+        'label': 'workspace',
+        'children': <Map<String, Object?>>[
+          <String, Object?>{'id': 'main.py', 'label': 'main.py'},
+          <String, Object?>{'id': 'README.md', 'label': 'README.md'},
+        ],
+      },
+    ],
+  });
+  ensureModule('tree', <String, Object?>{
+    'nodes': <Map<String, Object?>>[
+      <String, Object?>{'id': 'outline', 'label': 'Outline'},
+      <String, Object?>{'id': 'imports', 'label': 'Imports'},
+    ],
+  });
+  ensureModule('search_box', <String, Object?>{
+    'query': '',
+    'placeholder': 'Search files, symbols, commands...',
+  });
+  ensureModule('search_results_view', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{
+        'id': 'r1',
+        'label': 'build_manifest',
+        'path': 'src/main.py:3',
+      },
+      <String, Object?>{
+        'id': 'r2',
+        'label': 'editor_surface',
+        'path': 'src/editor.py:18',
+      },
+    ],
+  });
+  ensureModule('diagnostics_panel', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{
+        'severity': 'warning',
+        'message': 'Add docstring to build_manifest',
+      },
+      <String, Object?>{
+        'severity': 'info',
+        'message': 'No type errors detected',
+      },
+    ],
+  });
+  ensureModule('command_bar', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'open_file', 'label': 'Open File'},
+      <String, Object?>{'id': 'format', 'label': 'Format Document'},
+      <String, Object?>{'id': 'find', 'label': 'Find in Files'},
+    ],
+  });
+  ensureModule('command_search', <String, Object?>{
+    'query': '',
+    'placeholder': 'Search commands...',
+  });
+  ensureModule('diff', <String, Object?>{
+    'left': "print('old world')",
+    'right': "print('new world')",
+  });
+  ensureModule('diff_narrator', <String, Object?>{
+    'text': 'Changed output string and added workspace metadata.',
+  });
+  ensureModule('inspector', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{
+        'key': 'language',
+        'value': out['language'] ?? 'python',
+      },
+      <String, Object?>{'key': 'engine', 'value': out['engine'] ?? 'monaco'},
+      <String, Object?>{
+        'key': 'webview',
+        'value': out['webview_engine'] ?? 'windows_inapp',
+      },
+    ],
+  });
+  ensureModule('workbench_editor', <String, Object?>{
+    'left_panel': 'workspace_explorer',
+    'right_panel': 'diagnostics_panel',
+    'bottom_panel': 'command_bar',
+  });
+  ensureModule('diagnostic_stream', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'severity': 'info', 'message': 'Indexer ready'},
+      <String, Object?>{'severity': 'warning', 'message': '2 pending hints'},
+    ],
+  });
+  ensureModule('editor_minimap', <String, Object?>{'visible': true});
+  ensureModule('gutter', <String, Object?>{'visible': true});
+  ensureModule('hint', <String, Object?>{
+    'text': 'Use Ctrl+Shift+P for command palette',
+  });
+  ensureModule('inline_widget', <String, Object?>{'enabled': true});
+  ensureModule('inline_error_view', <String, Object?>{'enabled': true});
+  ensureModule('editor_intent_router', <String, Object?>{
+    'routes': <String>['open', 'search', 'format', 'diff'],
+  });
+  ensureModule('intent_router', <String, Object?>{
+    'routes': <String>['open', 'search', 'format', 'diff'],
+  });
+  ensureModule('intent_panel', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'id': 'open', 'label': 'Open'},
+      <String, Object?>{'id': 'search', 'label': 'Search'},
+    ],
+  });
+  ensureModule('intent_search', <String, Object?>{
+    'query': '',
+    'placeholder': 'Search intents...',
+  });
+  ensureModule('smart_search_bar', <String, Object?>{
+    'query': '',
+    'placeholder': 'Semantic + symbol search',
+  });
+  ensureModule('search_provider', <String, Object?>{
+    'provider': 'local_index',
+    'status': 'ready',
+  });
+  ensureModule('semantic_search', <String, Object?>{
+    'enabled': true,
+    'provider': 'semantic_local',
+  });
+  ensureModule('search_scope_selector', <String, Object?>{
+    'options': <String>['workspace', 'open_files', 'selection'],
+    'selected': 'workspace',
+  });
+  ensureModule('search_source', <String, Object?>{
+    'sources': <String>['local', 'project', 'history'],
+    'selected': 'local',
+  });
+  ensureModule('query_token', <String, Object?>{
+    'tokens': <String>['function', 'class', 'symbol', 'file'],
+  });
+  ensureModule('search_everything_panel', <String, Object?>{'enabled': true});
+  ensureModule('search_history', <String, Object?>{
+    'items': <String>['build_manifest', 'theme tokens', 'workspace explorer'],
+  });
+  ensureModule('dock', <String, Object?>{'layout': 'horizontal'});
+  ensureModule('dock_pane', <String, Object?>{
+    'panes': <String>['explorer', 'editor', 'diagnostics'],
+  });
+  ensureModule('dock_graph', <String, Object?>{
+    'nodes': <int>[1, 2, 3],
+  });
+  ensureModule('empty_state_view', <String, Object?>{
+    'title': 'Open a document to begin editing',
+  });
+  ensureModule('export_panel', <String, Object?>{
+    'formats': <String>['zip', 'json'],
+  });
+  ensureModule('ghost_editor', <String, Object?>{'enabled': false});
+  ensureModule('code_buffer', <String, Object?>{
+    'language': out['language'] ?? 'python',
+  });
+  ensureModule('code_document', <String, Object?>{
+    'uri': out['document_uri'] ?? 'file:///workspace/main.py',
+  });
+  ensureModule('code_category_layer', <String, Object?>{
+    'categories': <String>['source', 'config', 'docs'],
+  });
+
+  final manifest = _coerceObjectMap(out['manifest']);
+  for (final key in const <String>[
+    'enabled_modules',
+    'enabled_views',
+    'enabled_panels',
+    'enabled_tools',
+    'enabled_providers',
+    'enabled_commands',
+  ]) {
+    final values = umbrellaRuntimeStringList(
+      manifest[key],
+      allowed: _codeEditorModules,
+    ).toList(growable: true);
+    if (values.isEmpty) {
+      values.addAll(_codeEditorManifestDefaults[key] ?? const <String>[]);
+    }
+    for (final module in modules.keys) {
+      final normalized = _norm(module);
+      if (!_codeEditorModules.contains(normalized)) continue;
+      if (!values.contains(normalized)) values.add(normalized);
+    }
+    manifest[key] = values;
+  }
+  out['manifest'] = manifest;
+  out['modules'] = modules;
 }
 
 List<String> _availableModules(Map<String, Object?> props) {
@@ -1494,9 +1825,12 @@ String _norm(String value) {
 
 String _normalizeCodeEditorWebViewEngine(String? value) {
   final normalized = _norm(value ?? '');
-  if (normalized.isEmpty) return 'windows_inapp_monaco';
+  if (normalized.isEmpty) return 'windows_inapp';
+  if (normalized == 'windows_inapp') {
+    return 'windows_inapp';
+  }
   if (normalized == 'webview_windows' || normalized == 'windows') {
-    return 'webview_windows';
+    return 'windows_inapp';
   }
   if (normalized == 'webview_flutter' || normalized == 'flutter') {
     return 'webview_flutter';
@@ -1507,7 +1841,7 @@ String _normalizeCodeEditorWebViewEngine(String? value) {
       normalized == 'monaco' ||
       normalized == 'flutter_monaco' ||
       normalized == 'monaco_editor') {
-    return 'windows_inapp_monaco';
+    return 'windows_inapp';
   }
   return normalized;
 }
@@ -2157,7 +2491,10 @@ class _CodeEditorMonacoError extends StatelessWidget {
 
 class _MonacoInAppWindowsWebViewController
     implements monaco_platform.PlatformWebViewController {
-  _MonacoInAppWindowsWebViewController() {
+  _MonacoInAppWindowsWebViewController({int readyTimeoutMs = 45000})
+    : _readyTimeout = Duration(
+        milliseconds: readyTimeoutMs.clamp(5000, 180000),
+      ) {
     _widget = InAppWebView(
       initialSettings: _defaultSettings,
       onWebViewCreated: _onWebViewCreated,
@@ -2186,6 +2523,8 @@ class _MonacoInAppWindowsWebViewController
   final Map<String, void Function(String)> _channels =
       <String, void Function(String)>{};
   final Set<String> _boundChannels = <String>{};
+  final List<String> _pendingScripts = <String>[];
+  final Duration _readyTimeout;
   String? _pendingHtmlPath;
   String? _pendingCustomCss;
   bool _pendingAllowCdnFonts = false;
@@ -2216,6 +2555,9 @@ class _MonacoInAppWindowsWebViewController
       ),
     );
     unawaited(_flushPendingLoad());
+    if (_readySignaled) {
+      unawaited(_flushPendingScripts());
+    }
   }
 
   void _onLoadStop(InAppWebViewController controller, WebUri? url) {
@@ -2227,9 +2569,12 @@ class _MonacoInAppWindowsWebViewController
       return _controller!;
     }
     return _controllerReady.future.timeout(
-      const Duration(seconds: 30),
+      _readyTimeout,
       onTimeout: () {
-        throw StateError('Monaco WebView controller was not created in time.');
+        throw StateError(
+          'Monaco InApp WebView controller did not initialize in '
+          '${_readyTimeout.inMilliseconds}ms.',
+        );
       },
     );
   }
@@ -2270,6 +2615,7 @@ class _MonacoInAppWindowsWebViewController
       if (!_readyCompleter.isCompleted) {
         _readyCompleter.complete();
       }
+      unawaited(_flushPendingScripts());
       onMonacoReady?.call();
     }
   }
@@ -2324,6 +2670,19 @@ if (typeof window['$escaped'] === 'undefined') {
     }
   }
 
+  Future<void> _flushPendingScripts() async {
+    if (!_readySignaled || _pendingScripts.isEmpty) return;
+    final controller = _controller;
+    if (controller == null) return;
+    final scripts = List<String>.from(_pendingScripts);
+    _pendingScripts.clear();
+    for (final script in scripts) {
+      try {
+        await controller.evaluateJavascript(source: script);
+      } catch (_) {}
+    }
+  }
+
   Future<void> _flushPendingLoad() async {
     if (_loading || _disposed) return;
     final controller = _controller;
@@ -2357,9 +2716,12 @@ if (typeof window['$escaped'] === 'undefined') {
   Future<void> _waitForMonacoReady() async {
     if (_readySignaled) return;
     await _readyCompleter.future.timeout(
-      const Duration(seconds: 30),
+      _readyTimeout,
       onTimeout: () {
-        throw StateError('Monaco InApp editor did not become ready in time.');
+        throw StateError(
+          'Monaco InApp editor did not report ready in '
+          '${_readyTimeout.inMilliseconds}ms.',
+        );
       },
     );
   }
@@ -2402,8 +2764,11 @@ if (typeof window['$escaped'] === 'undefined') {
   @override
   Future<Object?> runJavaScript(String script) async {
     await _ensureLoadRequested();
-    final controller = await _ensureController();
-    await _waitForMonacoReady();
+    final controller = _controller;
+    if (controller == null || !_readySignaled) {
+      _pendingScripts.add(script);
+      return null;
+    }
     return controller.evaluateJavascript(source: script);
   }
 
@@ -2480,21 +2845,24 @@ if (typeof window['$escaped'] === 'undefined') {
 
   @override
   Future<void> setBackgroundColor(Color color) async {
-    final controller = await _ensureController();
     final alpha = color.a.clamp(0.0, 1.0).toStringAsFixed(3);
     final red = (color.r * 255.0).round().clamp(0, 255);
     final green = (color.g * 255.0).round().clamp(0, 255);
     final blue = (color.b * 255.0).round().clamp(0, 255);
-    await controller.evaluateJavascript(
-      source:
-          '''
+    final script =
+        '''
 const _color = 'rgba($red, $green, $blue, $alpha)';
 try {
   document.documentElement.style.background = _color;
   if (document.body) document.body.style.background = _color;
 } catch (_) {}
-''',
-    );
+''';
+    final controller = _controller;
+    if (controller == null || !_readySignaled) {
+      _pendingScripts.add(script);
+      return;
+    }
+    await controller.evaluateJavascript(source: script);
   }
 
   @override
@@ -2511,6 +2879,7 @@ try {
     }
     _channels.clear();
     _boundChannels.clear();
+    _pendingScripts.clear();
     _pendingHtmlPath = null;
   }
 }
@@ -2549,8 +2918,7 @@ Widget buildCodeEditorControl(
     language: props['language']?.toString(),
     theme: props['theme']?.toString(),
     engine: (props['engine'] ?? 'monaco').toString(),
-    webviewEngine: (props['webview_engine'] ?? 'windows_inapp_monaco')
-        .toString(),
+    webviewEngine: (props['webview_engine'] ?? 'windows_inapp').toString(),
     readOnly: props['read_only'] == true,
     autofocus: props['auto_focus'] == true || props['autofocus'] == true,
     wordWrap: props['word_wrap'] == true || props['wrap'] == true,

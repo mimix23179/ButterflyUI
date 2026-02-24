@@ -68,7 +68,7 @@ class OwnershipMarker(Component):
 
 CODE_EDITOR_SCHEMA_VERSION = 2
 CODE_EDITOR_DEFAULT_ENGINE = "monaco"
-CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE = "windows_inapp_monaco"
+CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE = "windows_inapp"
 
 CODE_EDITOR_MODULES = {
     "editor_intent_router",
@@ -400,20 +400,21 @@ def _normalize_code_editor_webview_engine(
     normalized = _normalize_engine(value, fallback=fallback)
     if normalized is None:
         return None
+    if normalized in {"windows_inapp"}:
+        return "windows_inapp"
     if normalized in {
-        "windows_inapp",
         "windows_inapp_monaco",
         "inapp",
         "monaco",
         "flutter_monaco",
         "monaco_editor",
     }:
-        return "windows_inapp_monaco"
+        return "windows_inapp"
     if normalized in {
         "webview_windows",
         "windows",
     }:
-        return "webview_windows"
+        return "windows_inapp"
     if normalized in {
         "webview_flutter",
         "flutter",
@@ -827,7 +828,18 @@ class CodeEditor(Component):
         return self.invoke(session, "get_value", {})
 
     def set_value(self, session: Any, value: str) -> dict[str, Any]:
-        return self.invoke(session, "set_value", {"value": value})
+        text_value = str(value)
+        self.props["value"] = text_value
+        self.props["text"] = text_value
+        self.props["code"] = text_value
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_value", {"value": text_value})
+
+    def set_text(self, session: Any, value: str) -> dict[str, Any]:
+        return self.set_value(session, value)
+
+    def set_code(self, session: Any, value: str) -> dict[str, Any]:
+        return self.set_value(session, value)
 
     def focus(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "focus", {})
@@ -1125,8 +1137,20 @@ class Studio(Component):
         modules["selection_tools"] = selection_payload
         self.props["modules"] = modules
         self.props["selection_tools"] = selection_payload
+        self.props["active_tool"] = tool
         self._validate_props(self.props, strict=self._strict_contract)
         return self.invoke(session, "set_tool", {"tool": tool})
+
+    def activate_tool(self, session: Any, tool: str) -> dict[str, Any]:
+        modules = dict(self.props.get("modules") or {})
+        selection_payload = dict(modules.get("selection_tools") or {})
+        selection_payload["active_tool"] = tool
+        modules["selection_tools"] = selection_payload
+        self.props["modules"] = modules
+        self.props["selection_tools"] = selection_payload
+        self.props["active_tool"] = tool
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "activate_tool", {"tool": tool})
 
     def set_active_surface(self, session: Any, surface: str) -> dict[str, Any]:
         normalized = _normalize_studio_module(surface)
@@ -1231,6 +1255,48 @@ class Studio(Component):
             definition=definition,
         )
 
+    def register_command(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="command",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_schema(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="schema",
+            module_id=module_id,
+            definition=definition,
+        )
+
+    def register_compute(
+        self,
+        session: Any,
+        *,
+        module_id: str,
+        definition: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.register_module(
+            session,
+            role="compute",
+            module_id=module_id,
+            definition=definition,
+        )
+
     def register_shortcut(
         self,
         session: Any,
@@ -1252,7 +1318,10 @@ class Studio(Component):
         )
 
     def set_dock_layout(self, session: Any, layout: Mapping[str, Any]) -> dict[str, Any]:
-        return self.invoke(session, "set_dock_layout", {"layout": dict(layout)})
+        payload = dict(layout)
+        self.props["layout"] = payload
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_dock_layout", {"layout": payload})
 
     def import_asset(
         self,
@@ -1287,6 +1356,118 @@ class Studio(Component):
                 "payload": dict(payload or {}),
             },
         )
+
+    def export(
+        self,
+        session: Any,
+        *,
+        format: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "export",
+            {
+                "format": format,
+                "payload": dict(payload or {}),
+            },
+        )
+
+    def set_zoom(self, session: Any, zoom: float) -> dict[str, Any]:
+        zoom_value = float(zoom)
+        modules = dict(self.props.get("modules") or {})
+        responsive_source = modules.get("responsive_toolbar")
+        if not isinstance(responsive_source, Mapping):
+            responsive_source = self.props.get("responsive_toolbar")
+        responsive = dict(responsive_source) if isinstance(responsive_source, Mapping) else {}
+        responsive["zoom"] = zoom_value
+        modules["responsive_toolbar"] = responsive
+        self.props["modules"] = modules
+        self.props["responsive_toolbar"] = responsive
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_zoom", {"zoom": zoom_value})
+
+    def set_viewport(
+        self,
+        session: Any,
+        *,
+        width: float,
+        height: float,
+        device: str | None = None,
+        portrait: bool | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "width": float(width),
+            "height": float(height),
+        }
+        if device is not None:
+            payload["device"] = device
+        if portrait is not None:
+            payload["portrait"] = bool(portrait)
+
+        modules = dict(self.props.get("modules") or {})
+        responsive_source = modules.get("responsive_toolbar")
+        if not isinstance(responsive_source, Mapping):
+            responsive_source = self.props.get("responsive_toolbar")
+        responsive = dict(responsive_source) if isinstance(responsive_source, Mapping) else {}
+        responsive["width"] = payload["width"]
+        responsive["height"] = payload["height"]
+        if "device" in payload:
+            responsive["device"] = payload["device"]
+        if "portrait" in payload:
+            responsive["portrait"] = payload["portrait"]
+        modules["responsive_toolbar"] = responsive
+        self.props["modules"] = modules
+        self.props["responsive_toolbar"] = responsive
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_viewport", payload)
+
+    def set_prop(self, session: Any, key: str, value: Any) -> dict[str, Any]:
+        normalized_key = str(key).strip()
+        if not normalized_key:
+            return {"ok": False, "error": "key is required"}
+        self.props[normalized_key] = value
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_prop", {"key": normalized_key, "value": value})
+
+    def begin_transaction(self, session: Any, label: str | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if label:
+            payload["label"] = label
+        return self.invoke(session, "begin_transaction", payload)
+
+    def end_transaction(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "end_transaction", {})
+
+    def set_playback(
+        self,
+        session: Any,
+        payload: Mapping[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        playback_payload = dict(payload or {})
+        for key, value in kwargs.items():
+            if value is not None:
+                playback_payload[key] = value
+        media = dict(self.props.get("media") or {})
+        media["playback"] = playback_payload
+        self.props["media"] = media
+        self._validate_props(self.props, strict=self._strict_contract)
+        return self.invoke(session, "set_playback", playback_payload)
+
+    def ffmpeg_enqueue(
+        self,
+        session: Any,
+        *,
+        command: str,
+        args: Iterable[str] | None = None,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        request = dict(payload or {})
+        request["command"] = command
+        if args is not None:
+            request["args"] = [str(item) for item in args]
+        return self.invoke(session, "ffmpeg_enqueue", request)
 
     def execute_command(
         self,
@@ -1721,12 +1902,27 @@ class Terminal(Component):
         return self.emit(session, event, payload)
 
     def clear(self, session: Any) -> dict[str, Any]:
+        self.props["lines"] = []
+        self.props["output"] = ""
+        self.props["raw_text"] = ""
         return self.invoke(session, "clear", {})
 
     def write(self, session: Any, value: str) -> dict[str, Any]:
-        return self.invoke(session, "write", {"value": value})
+        text_value = str(value)
+        current_output = str(self.props.get("output") or "")
+        self.props["output"] = f"{current_output}{text_value}"
+        return self.invoke(session, "write", {"value": text_value})
+
+    def append(self, session: Any, value: str) -> dict[str, Any]:
+        text_value = str(value)
+        current_output = str(self.props.get("output") or "")
+        self.props["output"] = f"{current_output}{text_value}"
+        return self.invoke(session, "append", {"value": text_value})
 
     def append_lines(self, session: Any, lines: list[Any]) -> dict[str, Any]:
+        existing = list(self.props.get("lines") or [])
+        existing.extend(lines)
+        self.props["lines"] = existing
         return self.invoke(session, "append_lines", {"lines": lines})
 
     def focus(self, session: Any) -> dict[str, Any]:
@@ -1736,13 +1932,30 @@ class Terminal(Component):
         return self.invoke(session, "blur", {})
 
     def set_input(self, session: Any, value: str) -> dict[str, Any]:
-        return self.invoke(session, "set_input", {"value": value})
+        text_value = str(value)
+        self.props["input"] = text_value
+        return self.invoke(session, "set_input", {"value": text_value})
+
+    def set_value(self, session: Any, value: str) -> dict[str, Any]:
+        text_value = str(value)
+        self.props["input"] = text_value
+        return self.invoke(session, "set_value", {"value": text_value})
+
+    def get_input(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_input", {})
 
     def set_read_only(self, session: Any, value: bool) -> dict[str, Any]:
-        return self.invoke(session, "set_read_only", {"value": value})
+        self.props["read_only"] = bool(value)
+        return self.invoke(session, "set_read_only", {"value": bool(value)})
+
+    def submit(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "submit", {})
 
     def get_buffer(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_buffer", {})
+
+    def get_value(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_value", {})
 
 
 class OutputPanel(Component):

@@ -30,6 +30,9 @@ class StudioCanvasSurface extends StatelessWidget {
       10000,
     );
     final grid = (coerceDouble(surfaceProps['grid_size']) ?? 24).clamp(4, 240);
+    final background =
+        coerceColor(surfaceProps['background'] ?? surfaceProps['bgcolor']) ??
+        const Color(0xff0b1220);
     final entities = _entities();
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
@@ -44,6 +47,7 @@ class StudioCanvasSurface extends StatelessWidget {
               height: worldH.toDouble(),
               child: Stack(
                 children: [
+                  Positioned.fill(child: ColoredBox(color: background)),
                   Positioned.fill(
                     child: CustomPaint(
                       painter: _Grid(

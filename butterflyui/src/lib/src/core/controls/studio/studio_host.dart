@@ -24,6 +24,7 @@ class StudioHostEngine implements StudioPluginHost {
   StudioHostEngine(Map<String, Object?> initialProps)
     : _props = normalizeStudioProps(initialProps),
       commandService = StudioCommandService() {
+    _seedStudioDefaults();
     _hydrateServices();
     _writeServiceProps();
   }
@@ -62,6 +63,7 @@ class StudioHostEngine implements StudioPluginHost {
 
   void replaceProps(Map<String, Object?> nextProps) {
     _props = normalizeStudioProps(nextProps);
+    _seedStudioDefaults();
     _hydrateServices();
     _writeServiceProps();
   }
@@ -87,6 +89,7 @@ class StudioHostEngine implements StudioPluginHost {
     final before = deepCopyStudioMap(_props);
     _props.addAll(incoming);
     _props = normalizeStudioProps(_props);
+    _seedStudioDefaults();
     _hydrateServices();
     _writeServiceProps();
     final after = deepCopyStudioMap(_props);
@@ -672,6 +675,7 @@ class StudioHostEngine implements StudioPluginHost {
       return <String, Object?>{'ok': false, 'error': 'nothing to redo'};
     }
     _props = normalizeStudioProps(entry.after);
+    _seedStudioDefaults();
     _hydrateServices();
     _writeServiceProps();
     return <String, Object?>{
@@ -693,6 +697,7 @@ class StudioHostEngine implements StudioPluginHost {
     final before = deepCopyStudioMap(_props);
     mutate();
     _props = normalizeStudioProps(_props);
+    _seedStudioDefaults();
     _hydrateServices();
     _writeServiceProps();
     final after = deepCopyStudioMap(_props);
@@ -712,6 +717,246 @@ class StudioHostEngine implements StudioPluginHost {
       'undo_depth': undoDepth,
       'redo_depth': redoDepth,
     };
+  }
+
+  void _seedStudioDefaults() {
+    final modules = studioCoerceObjectMap(_props['modules']);
+
+    Map<String, Object?> ensureModule(
+      String module,
+      Map<String, Object?> defaults,
+    ) {
+      final fromTopLevel = studioCoerceObjectMap(_props[module]);
+      final fromModules = studioCoerceObjectMap(modules[module]);
+      final merged = <String, Object?>{
+        ...defaults,
+        ...fromModules,
+        ...fromTopLevel,
+      };
+      modules[module] = merged;
+      _props[module] = merged;
+      return merged;
+    }
+
+    ensureModule('builder', <String, Object?>{
+      'title': 'Studio Builder',
+      'subtitle': 'Manifest-driven visual workbench',
+    });
+    ensureModule('canvas', <String, Object?>{
+      'background': '#0b1220',
+      'grid_size': 24,
+      'world_width': 2200,
+      'world_height': 1400,
+      'entities': <Map<String, Object?>>[
+        <String, Object?>{
+          'id': 'hero_card',
+          'label': 'Hero Card',
+          'x': 120,
+          'y': 120,
+          'width': 360,
+          'height': 220,
+          'color': '#1f2937',
+        },
+        <String, Object?>{
+          'id': 'headline',
+          'label': 'Headline',
+          'x': 560,
+          'y': 140,
+          'width': 300,
+          'height': 76,
+          'color': '#115e59',
+        },
+      ],
+    });
+    ensureModule('timeline_surface', <String, Object?>{
+      'tracks': <Map<String, Object?>>[
+        <String, Object?>{
+          'id': 'intro',
+          'label': 'Intro Fade',
+          'start': 0.0,
+          'duration': 1.2,
+        },
+        <String, Object?>{
+          'id': 'cta',
+          'label': 'CTA Pulse',
+          'start': 1.3,
+          'duration': 0.8,
+        },
+      ],
+      'playhead_seconds': 0.6,
+      'duration_seconds': 8.0,
+      'pixels_per_second': 120.0,
+    });
+    ensureModule('node_surface', <String, Object?>{
+      'nodes': <Map<String, Object?>>[
+        <String, Object?>{'id': 'start', 'label': 'Start'},
+        <String, Object?>{'id': 'transform', 'label': 'Transform'},
+        <String, Object?>{'id': 'output', 'label': 'Output'},
+      ],
+      'edges': <Map<String, Object?>>[
+        <String, Object?>{'from': 'start', 'to': 'transform'},
+        <String, Object?>{'from': 'transform', 'to': 'output'},
+      ],
+      'world_width': 2800,
+      'world_height': 1600,
+    });
+    ensureModule('preview_surface', <String, Object?>{
+      'title': 'Preview',
+      'subtitle': 'Live render surface',
+      'status': 'ready',
+    });
+    ensureModule('project_panel', <String, Object?>{
+      'project': <String, Object?>{
+        'name': 'ButterflyUI Studio',
+        'target': 'desktop',
+      },
+    });
+    ensureModule('outline_tree', <String, Object?>{
+      'nodes': <Map<String, Object?>>[
+        <String, Object?>{
+          'id': 'root',
+          'label': 'root',
+          'children': <Map<String, Object?>>[
+            <String, Object?>{'id': 'hero_card', 'label': 'hero_card'},
+          ],
+        },
+      ],
+    });
+    ensureModule('component_palette', <String, Object?>{
+      'blocks': <Map<String, Object?>>[
+        <String, Object?>{'id': 'row', 'label': 'Row'},
+        <String, Object?>{'id': 'column', 'label': 'Column'},
+        <String, Object?>{'id': 'surface', 'label': 'Surface'},
+        <String, Object?>{'id': 'button', 'label': 'Button'},
+      ],
+    });
+    ensureModule('block_palette', <String, Object?>{
+      'blocks': <Map<String, Object?>>[
+        <String, Object?>{'id': 'if', 'label': 'If'},
+        <String, Object?>{'id': 'for_each', 'label': 'For Each'},
+        <String, Object?>{'id': 'switch', 'label': 'Switch'},
+      ],
+      'query': '',
+    });
+    ensureModule('asset_browser', <String, Object?>{
+      'assets': <Map<String, Object?>>[
+        <String, Object?>{'id': 'hero_grid', 'label': 'hero_grid.png'},
+        <String, Object?>{'id': 'font_jetbrains', 'label': 'JetBrains Mono'},
+      ],
+    });
+    ensureModule('inspector', <String, Object?>{
+      'node': <String, Object?>{
+        'id': 'hero_card',
+        'x': 120,
+        'y': 120,
+        'width': 360,
+        'height': 220,
+      },
+    });
+    ensureModule('properties_panel', <String, Object?>{
+      'schema': <String, Object?>{'padding': 'number', 'radius': 'number'},
+      'value': <String, Object?>{'padding': 20, 'radius': 16},
+    });
+    ensureModule('actions_editor', <String, Object?>{
+      'actions': <String, Object?>{
+        'onTap': <String, Object?>{'intent': 'navigate', 'target': '/home'},
+      },
+    });
+    ensureModule('bindings_editor', <String, Object?>{
+      'bindings': <String, Object?>{
+        'text.value': 'state.headline',
+        'button.enabled': 'state.can_submit',
+      },
+    });
+    ensureModule('tokens_editor', <String, Object?>{
+      'tokens': <String, Object?>{'color.primary': '#22d3ee'},
+      'json': '{"color.primary":"#22d3ee"}',
+    });
+    ensureModule('selection_tools', <String, Object?>{
+      'items': <Map<String, Object?>>[
+        <String, Object?>{'id': 'select', 'label': 'Select'},
+        <String, Object?>{'id': 'move', 'label': 'Move'},
+        <String, Object?>{'id': 'resize', 'label': 'Resize'},
+      ],
+      'active_tool': 'select',
+    });
+    ensureModule('transform_toolbar', <String, Object?>{
+      'items': <Map<String, Object?>>[
+        <String, Object?>{'id': 'align_left', 'label': 'Align Left'},
+        <String, Object?>{'id': 'align_center', 'label': 'Align Center'},
+      ],
+    });
+    ensureModule('transform_box', <String, Object?>{
+      'x': 120,
+      'y': 120,
+      'width': 360,
+      'height': 220,
+      'rotation': 0,
+    });
+    ensureModule('responsive_toolbar', <String, Object?>{
+      'breakpoints': <Map<String, Object?>>[
+        <String, Object?>{'id': 'desktop', 'width': 1440},
+        <String, Object?>{'id': 'tablet', 'width': 1024},
+        <String, Object?>{'id': 'mobile', 'width': 430},
+      ],
+      'current_id': 'desktop',
+      'zoom': 1.0,
+      'width': 1280.0,
+      'height': 720.0,
+    });
+
+    final panels = studioCoerceObjectMap(_props['panels']);
+    final layout = studioCoerceObjectMap(panels['layout']);
+    if (studioCoerceStringList(layout['left']).isEmpty) {
+      layout['left'] = <String>[
+        'project_panel',
+        'outline_tree',
+        'asset_browser',
+      ];
+    }
+    if (studioCoerceStringList(layout['right']).isEmpty) {
+      layout['right'] = <String>[
+        'inspector',
+        'properties_panel',
+        'tokens_editor',
+        'actions_editor',
+        'bindings_editor',
+      ];
+    }
+    panels['layout'] = layout;
+    _props['panels'] = panels;
+
+    final manifest = studioCoerceObjectMap(_props['manifest']);
+    final builtManifest = studioBuildManifest(_props);
+    for (final key in const <String>[
+      'enabled_modules',
+      'enabled_surfaces',
+      'enabled_panels',
+      'enabled_tools',
+    ]) {
+      final values = studioCoerceStringList(
+        manifest[key],
+      ).toList(growable: true);
+      if (values.isEmpty) {
+        values.addAll(studioCoerceStringList(builtManifest[key]));
+      }
+      for (final module in modules.keys) {
+        final normalized = normalizeStudioModuleToken(module);
+        if (!studioModules.contains(normalized)) continue;
+        if (key == 'enabled_surfaces' &&
+            !studioSurfaceModules.contains(normalized)) {
+          continue;
+        }
+        if (key == 'enabled_panels' &&
+            !studioPanelModules.contains(normalized)) {
+          continue;
+        }
+        if (!values.contains(normalized)) values.add(normalized);
+      }
+      manifest[key] = values;
+    }
+    _props['manifest'] = manifest;
+    _props['modules'] = modules;
   }
 
   void _hydrateServices() {

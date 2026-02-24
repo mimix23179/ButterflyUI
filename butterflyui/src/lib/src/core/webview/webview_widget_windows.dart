@@ -103,7 +103,7 @@ class _ButterflyUIWebViewWidgetState extends State<ButterflyUIWebViewWidget> {
     if (value == 'flutter' || value == 'webview_flutter') return 'flutter';
     if (value == 'windows' || value == 'webview_windows') return 'windows';
     if (!Platform.isWindows) return 'flutter';
-    return 'inapp';
+    return 'windows';
   }
 
   void _resetNavigationState() {

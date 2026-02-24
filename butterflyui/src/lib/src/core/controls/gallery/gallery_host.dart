@@ -126,30 +126,74 @@ const Map<String, String> _galleryRegistryManifestLists = {
 const Map<String, List<String>> _galleryManifestDefaults = {
   'enabled_modules': <String>[
     'toolbar',
-    'filter_bar',
-    'search_bar',
-    'sort_bar',
     'section_header',
+    'search_bar',
+    'filter_bar',
+    'sort_bar',
     'grid_layout',
     'item_tile',
+    'item_badge',
+    'item_meta_row',
     'item_preview',
     'item_actions',
     'item_selectable',
+    'item_drag_handle',
+    'item_drop_target',
+    'item_reorder_handle',
+    'item_selection_checkbox',
+    'item_selection_radio',
+    'item_selection_switch',
     'pagination',
     'fonts',
+    'font_picker',
+    'font_renderer',
     'image',
+    'image_picker',
+    'image_renderer',
     'video',
+    'video_picker',
+    'video_renderer',
     'audio',
+    'audio_picker',
+    'audio_renderer',
     'document',
+    'document_picker',
+    'document_renderer',
+    'presets',
+    'skins',
+    'apply_font',
+    'apply_image',
+    'set_as_wallpaper',
     'apply',
     'clear',
     'select_all',
     'deselect_all',
+    'empty_state',
+    'loading_skeleton',
   ],
-  'enabled_views': <String>['grid_layout', 'item_tile', 'item_preview'],
-  'enabled_panels': <String>['toolbar', 'filter_bar', 'search_bar', 'sort_bar'],
-  'enabled_sources': <String>['project_assets', 'local_folder'],
-  'enabled_types': <String>['image', 'video', 'audio', 'document', 'fonts'],
+  'enabled_views': <String>[
+    'grid_layout',
+    'item_tile',
+    'item_preview',
+    'item_meta_row',
+    'section_header',
+  ],
+  'enabled_panels': <String>[
+    'toolbar',
+    'section_header',
+    'search_bar',
+    'filter_bar',
+    'sort_bar',
+  ],
+  'enabled_sources': <String>['project_assets', 'local_folder', 'remote_http'],
+  'enabled_types': <String>[
+    'image',
+    'video',
+    'audio',
+    'document',
+    'fonts',
+    'skins',
+  ],
   'enabled_adapters': <String>['apply_image', 'apply_font', 'set_as_wallpaper'],
   'enabled_commands': <String>['apply', 'clear', 'select_all', 'deselect_all'],
 };
@@ -1013,7 +1057,7 @@ class _GalleryControlState extends State<_GalleryControl> {
       );
     }
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var i = 0; i < sectionWidgets.length; i++) ...[
@@ -1021,6 +1065,13 @@ class _GalleryControlState extends State<_GalleryControl> {
           sectionWidgets[i],
         ],
       ],
+    );
+    return ensureUmbrellaLayoutBounds(
+      props: _runtimeProps,
+      child: body,
+      defaultHeight: 860,
+      minHeight: 320,
+      maxHeight: 3200,
     );
   }
 }
@@ -1080,7 +1131,230 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   );
   out['manifest'] = umbrella['manifest'];
   out['registries'] = umbrella['registries'];
+  _seedGalleryDefaults(out);
   return out;
+}
+
+void _seedGalleryDefaults(Map<String, Object?> out) {
+  final modules = _coerceObjectMap(out['modules']);
+
+  Map<String, Object?> ensureModule(
+    String module,
+    Map<String, Object?> defaults,
+  ) {
+    final fromTopLevel = _coerceObjectMap(out[module]);
+    final fromModules = _coerceObjectMap(modules[module]);
+    final merged = <String, Object?>{
+      ...defaults,
+      ...fromModules,
+      ...fromTopLevel,
+    };
+    modules[module] = merged;
+    out[module] = merged;
+    return merged;
+  }
+
+  if (out['items'] is! List || (out['items'] as List).isEmpty) {
+    out['items'] = <Map<String, Object?>>[
+      <String, Object?>{
+        'id': 'font_jetbrains',
+        'name': 'JetBrains Mono',
+        'label': 'JetBrains Mono',
+        'type': 'font',
+      },
+      <String, Object?>{
+        'id': 'img_hero_grid',
+        'name': 'Hero Grid',
+        'label': 'Hero Grid',
+        'type': 'image',
+      },
+      <String, Object?>{
+        'id': 'video_showreel',
+        'name': 'Showreel',
+        'label': 'Showreel',
+        'type': 'video',
+      },
+      <String, Object?>{
+        'id': 'audio_startup',
+        'name': 'Startup Chime',
+        'label': 'Startup Chime',
+        'type': 'audio',
+      },
+      <String, Object?>{
+        'id': 'skin_obsidian',
+        'name': 'Obsidian Neon',
+        'label': 'Obsidian Neon',
+        'type': 'skin',
+      },
+    ];
+  }
+
+  ensureModule('toolbar', <String, Object?>{
+    'title': 'Gallery',
+    'subtitle': 'Asset workbench',
+    'actions': <Map<String, Object?>>[
+      <String, Object?>{'id': 'import', 'label': 'Import'},
+      <String, Object?>{'id': 'refresh', 'label': 'Refresh'},
+      <String, Object?>{'id': 'batch_apply', 'label': 'Batch Apply'},
+    ],
+  });
+  ensureModule('section_header', <String, Object?>{
+    'id': 'featured',
+    'title': 'Featured',
+    'count': (out['items'] as List).length,
+  });
+  ensureModule('search_bar', <String, Object?>{
+    'query': '',
+    'placeholder': 'Search assets, tags, metadata...',
+  });
+  ensureModule('filter_bar', <String, Object?>{
+    'filters': <String>['type:image', 'tag:hero', 'source:local'],
+  });
+  ensureModule('sort_bar', <String, Object?>{
+    'options': <String>['name', 'date_added', 'type'],
+    'selected': 'name',
+  });
+  ensureModule('grid_layout', <String, Object?>{
+    'columns': 3,
+    'spacing': coerceDouble(out['spacing']) ?? 12,
+  });
+  ensureModule('item_tile', <String, Object?>{
+    'title': 'Item tile',
+    'subtitle': 'Primary asset card',
+  });
+  ensureModule('item_badge', <String, Object?>{
+    'label': 'Featured',
+    'tone': 'accent',
+  });
+  ensureModule('item_meta_row', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'key': 'type', 'value': 'image'},
+      <String, Object?>{'key': 'source', 'value': 'local'},
+    ],
+  });
+  ensureModule('item_preview', <String, Object?>{
+    'height': 96,
+    'label': 'Preview',
+  });
+  ensureModule('item_actions', <String, Object?>{
+    'actions': <Map<String, Object?>>[
+      <String, Object?>{'id': 'preview', 'label': 'Preview'},
+      <String, Object?>{'id': 'apply', 'label': 'Apply'},
+      <String, Object?>{'id': 'delete', 'label': 'Delete'},
+    ],
+  });
+  ensureModule('item_selectable', <String, Object?>{'selected': false});
+  ensureModule('item_drag_handle', <String, Object?>{'label': 'drag'});
+  ensureModule('item_drop_target', <String, Object?>{'label': 'drop target'});
+  ensureModule('item_reorder_handle', <String, Object?>{'label': 'reorder'});
+  ensureModule('item_selection_checkbox', <String, Object?>{
+    'label': 'Checkbox select',
+    'value': false,
+  });
+  ensureModule('item_selection_radio', <String, Object?>{
+    'label': 'Radio select',
+    'value': false,
+  });
+  ensureModule('item_selection_switch', <String, Object?>{
+    'label': 'Switch select',
+    'value': false,
+  });
+  ensureModule('pagination', <String, Object?>{'page': 1, 'page_count': 3});
+  ensureModule('fonts', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'JetBrains Mono'},
+      <String, Object?>{'name': 'IBM Plex Sans'},
+    ],
+  });
+  ensureModule('font_picker', <String, Object?>{
+    'items': <String>['JetBrains Mono', 'IBM Plex Sans'],
+  });
+  ensureModule('font_renderer', <String, Object?>{
+    'sample': 'ButterflyUI',
+    'font': 'JetBrains Mono',
+  });
+  ensureModule('image', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'hero_grid.png'},
+      <String, Object?>{'name': 'terminal_bg.jpg'},
+    ],
+  });
+  ensureModule('image_picker', <String, Object?>{
+    'items': <String>['hero_grid.png', 'terminal_bg.jpg'],
+  });
+  ensureModule('image_renderer', <String, Object?>{'label': 'Image renderer'});
+  ensureModule('video', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'showreel.mp4'},
+    ],
+  });
+  ensureModule('video_picker', <String, Object?>{
+    'items': <String>['showreel.mp4'],
+  });
+  ensureModule('video_renderer', <String, Object?>{'label': 'Video renderer'});
+  ensureModule('audio', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'startup_chime.wav'},
+    ],
+  });
+  ensureModule('audio_picker', <String, Object?>{
+    'items': <String>['startup_chime.wav'],
+  });
+  ensureModule('audio_renderer', <String, Object?>{'label': 'Audio renderer'});
+  ensureModule('document', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'design_spec.pdf'},
+    ],
+  });
+  ensureModule('document_picker', <String, Object?>{
+    'items': <String>['design_spec.pdf'],
+  });
+  ensureModule('document_renderer', <String, Object?>{
+    'label': 'Document renderer',
+  });
+  ensureModule('presets', <String, Object?>{
+    'items': <String>['featured', 'recent', 'favorites'],
+  });
+  ensureModule('skins', <String, Object?>{
+    'items': <Map<String, Object?>>[
+      <String, Object?>{'name': 'Obsidian Neon'},
+      <String, Object?>{'name': 'Linen Paper'},
+    ],
+  });
+  ensureModule('apply', <String, Object?>{'label': 'Apply'});
+  ensureModule('clear', <String, Object?>{'label': 'Clear'});
+  ensureModule('select_all', <String, Object?>{'label': 'Select all'});
+  ensureModule('deselect_all', <String, Object?>{'label': 'Deselect all'});
+  ensureModule('apply_font', <String, Object?>{'label': 'Apply font'});
+  ensureModule('apply_image', <String, Object?>{'label': 'Apply image'});
+  ensureModule('set_as_wallpaper', <String, Object?>{'label': 'Set wallpaper'});
+  ensureModule('loading_skeleton', <String, Object?>{'lines': 3, 'height': 72});
+  ensureModule('empty_state', <String, Object?>{
+    'title': 'No assets found',
+    'message': 'Import assets or change your filters.',
+  });
+
+  final manifest = _coerceObjectMap(out['manifest']);
+  final enabledModules = umbrellaRuntimeStringList(
+    manifest['enabled_modules'],
+    allowed: _galleryModules,
+  ).toList(growable: true);
+  if (enabledModules.isEmpty) {
+    enabledModules.addAll(
+      _galleryManifestDefaults['enabled_modules'] ?? const <String>[],
+    );
+  } else {
+    for (final module in modules.keys) {
+      final normalized = _norm(module);
+      if (_galleryModules.contains(normalized) &&
+          !enabledModules.contains(normalized)) {
+        enabledModules.add(normalized);
+      }
+    }
+  }
+  manifest['enabled_modules'] = enabledModules;
+  out['manifest'] = manifest;
+  out['modules'] = modules;
 }
 
 Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
