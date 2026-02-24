@@ -1210,7 +1210,7 @@ it should compute a derived filtered view.
 
 Each asset is represented as a tile composed of smaller submodules.
 
-- `item_tile` ✅
+- `item_tile`
   Main asset container.
   Combines:
   - preview
@@ -1737,7 +1737,7 @@ They are designed to:
 
 ### Visual Dynamics & Advanced Gradients
 
-- `animated_gradient` ✅
+- `animated_gradient`
   A dynamic gradient system that supports time-based animation.
   Features may include:
   - color interpolation over time
@@ -1748,7 +1748,7 @@ They are designed to:
   Designed for backgrounds, hero sections, and dynamic surfaces.
   Should support GPU acceleration where possible.
 
-- `gradient` ✅
+- `gradient`
   Structured gradient definition layer.
   Supports:
   - linear gradients
@@ -1758,7 +1758,7 @@ They are designed to:
   - opacity layering
   Should integrate with token colors and responsive overrides.
 
-- `gradient_editor` ✅
+- `gradient_editor`
   Visual editor for constructing gradients.
   Must support:
   - interactive stop manipulation
@@ -1767,7 +1767,7 @@ They are designed to:
   - live preview
   - export to token format
 
-- `gradient_sweep` ✅
+- `gradient_sweep`
   Specialized conic/sweep gradient control.
   Useful for:
   - progress indicators
@@ -1777,7 +1777,7 @@ They are designed to:
 
 ### Avatar & Identity Controls
 
-- `avatar_stack` ✅
+- `avatar_stack`
   Compositional layout for multiple avatar elements.
   Designed for:
   - overlapping user indicators
@@ -1789,7 +1789,7 @@ They are designed to:
   - max-visible logic with "+X" overflow badge
   - interactive hover expansion
 
-- `badge` ✅
+- `badge`
   Lightweight status indicator system.
   Supports:
   - numeric counts
@@ -1800,7 +1800,7 @@ They are designed to:
 
 ### Color & Blending Systems
 
-- `color_picker` ✅
+- `color_picker`
   Advanced color selection control.
   Features:
   - RGB / HSL / HEX input
@@ -1810,7 +1810,7 @@ They are designed to:
   - token-aware preview
   Must emit structured color objects, not raw strings.
 
-- `color_swatch_grid` ✅
+- `color_swatch_grid`
   Structured grid of predefined color tokens.
   Used for:
   - quick selection
@@ -1821,7 +1821,7 @@ They are designed to:
   - selection highlighting
   - responsive layout
 
-- `blend_mode_picker` ✅
+- `blend_mode_picker`
   UI for selecting blend modes.
   Supports:
   - multiply
@@ -1834,7 +1834,7 @@ They are designed to:
 
 ### Surface Styling & Effects
 
-- `container_style` ✅
+- `container_style`
   Structured styling system for containers.
   Encapsulates:
   - padding
@@ -1844,7 +1844,7 @@ They are designed to:
   - border tokens
   Allows reusable container style presets.
 
-- `button_style` ✅
+- `button_style`
   Dedicated styling configuration for buttons.
   Should define:
   - base state
@@ -1855,7 +1855,7 @@ They are designed to:
   - motion behavior
   Encourages consistent interaction language across the system.
 
-- `border` ✅
+- `border`
   Full border system.
   Supports:
   - per-side control
@@ -1863,14 +1863,14 @@ They are designed to:
   - dynamic color linking
   - animated border transitions
 
-- `border_side` ✅
+- `border_side`
   Fine-grained border configuration.
   Enables:
   - different colors per side
   - mixed thickness
   - asymmetric styling
 
-- `glass_blur` ✅
+- `glass_blur`
   Glassmorphism effect layer.
   Combines:
   - background blur
@@ -1879,7 +1879,7 @@ They are designed to:
   - border glow
   Must remain performant and degrade gracefully.
 
-- `glow_effect` ✅
+- `glow_effect`
   Outer glow system.
   Supports:
   - soft glow
@@ -1887,7 +1887,7 @@ They are designed to:
   - animated intensity
   - neon-style highlights
 
-- `neon_edge` ✅
+- `neon_edge`
   High-intensity edge lighting effect.
   Designed for:
   - cyberpunk aesthetics
@@ -1895,7 +1895,7 @@ They are designed to:
   - high contrast modes
   Can combine with glow + animated gradients.
 
-- `grain_overlay` ✅
+- `grain_overlay`
   Film-grain / texture overlay.
   Adds:
   - subtle visual noise
@@ -1905,7 +1905,7 @@ They are designed to:
 
 ### Motion & Celebration Effects
 
-- `confetti_burst` ✅
+- `confetti_burst`
   Particle-based celebratory animation.
   Supports:
   - emission burst
@@ -1917,7 +1917,7 @@ They are designed to:
   - reward events
   - milestone feedback
 
-- `chromatic_shift` ✅
+- `chromatic_shift`
   RGB channel offset distortion effect.
   Used for:
   - glitch aesthetics
@@ -1927,7 +1927,7 @@ They are designed to:
 
 ### Noise & Organic Systems
 
-- `noise_field` ✅
+- `noise_field`
   Procedural noise generator.
   Can generate:
   - Perlin noise
@@ -1938,7 +1938,7 @@ They are designed to:
   - blob fields
   - shader inputs
 
-- `noise_displacement` ✅
+- `noise_displacement`
   Distortion effect based on noise input.
   Used for:
   - liquid effects
@@ -1946,7 +1946,7 @@ They are designed to:
   - heat-wave distortions
   Must allow strength control and animation speed.
 
-- `blob_field` ✅
+- `blob_field`
   Organic shape generator.
   Produces:
   - fluid blobs
@@ -1957,7 +1957,7 @@ They are designed to:
 
 ### Launch & Identity
 
-- `splash` ✅
+- `splash`
   Entry-screen presentation control.
   Used for:
   - application startup
@@ -1971,7 +1971,7 @@ They are designed to:
   - optional skip behavior
   Should integrate with animation + gradient systems.
 
-- `emoji_icon` ✅
+- `emoji_icon`
   Emoji-based icon renderer.
   Used when:
   - lightweight visual symbol is needed
@@ -1981,8 +1981,8 @@ They are designed to:
   - token-based sizing
   - fallback compatibility
 
-- `emoji_picker` ✅
-  Emoji selection  interface.
+- `emoji_picker`
+  Emoji selection interface.
   Supports:
   - category grouping
   - search
@@ -1992,7 +1992,7 @@ They are designed to:
 
 ### Forms & Input Systems
 
-- `auto_form` ✅
+- `auto_form`
   Schema-driven form generator.
   Generates forms automatically based on:
   - field definitions
@@ -2004,7 +2004,7 @@ They are designed to:
   - submit hooks
   - layout configuration
 
-- `combo_box` ✅
+- `combo_box`
   Hybrid input + dropdown selector.
   Supports:
   - free text input
@@ -2012,7 +2012,7 @@ They are designed to:
   - keyboard navigation
   - async options loading
 
-- `dropdown` ✅
+- `dropdown`
   Structured dropdown selector.
   Must support:
   - single-select
@@ -2020,7 +2020,7 @@ They are designed to:
   - disabled options
   - animated open/close
 
-- `multi_pick` ✅
+- `multi_pick`
   Multi-selection input control.
   Used for:
   - tag selection
@@ -2028,7 +2028,7 @@ They are designed to:
   - multi-assign interfaces
   Should integrate with chip system.
 
-- `filepicker` ✅
+- `filepicker`
   File selection control.
   Supports:
   - local file browsing
@@ -2039,7 +2039,7 @@ They are designed to:
 
 ### Date & Time Controls
 
-- `date_select` ✅
+- `date_select`
   Single date picker.
   Must support:
   - calendar view
@@ -2047,14 +2047,14 @@ They are designed to:
   - locale formatting
   - disabled date rules
 
-- `date_range` ✅
+- `date_range`
   Dual date selector for range picking.
   Supports:
   - start/end logic
   - visual range highlighting
   - validation constraints
 
-- `date_span` ✅
+- `date_span`
   Preset-based time span selector.
   Examples:
   - last 7 days
@@ -2065,7 +2065,7 @@ They are designed to:
 
 ### Navigation & Structural UI
 
-- `breadcrumb_bar` ✅
+- `breadcrumb_bar`
   Hierarchical navigation indicator.
   Displays:
   - path structure
@@ -2076,7 +2076,7 @@ They are designed to:
   - settings hierarchy
   - multi-level apps
 
-- `filter_chips_bar` ✅
+- `filter_chips_bar`
   Horizontal list of filter chips.
   Supports:
   - toggling
@@ -2085,14 +2085,14 @@ They are designed to:
   - dynamic chip creation
   Often paired with Gallery or dashboards.
 
-- `drag_region` ✅
+- `drag_region`
   Region that enables window dragging (desktop apps).
   Important for:
   - custom title bars
   - frameless windows
   Must respect platform boundaries.
 
-- `container` ✅
+- `container`
   Flexible structural wrapper.
   Used for:
   - grouping
@@ -2102,7 +2102,7 @@ They are designed to:
 
 ### Chat & Messaging Systems
 
-- `chat` ✅
+- `chat`
   Full conversation container.
   Manages:
   - message list
@@ -2112,7 +2112,7 @@ They are designed to:
   - timestamps
   Designed for AI, support, or social interfaces.
 
-- `chat_bubble` ✅
+- `chat_bubble`
   Individual styled message container.
   Supports:
   - sender alignment
@@ -2120,7 +2120,7 @@ They are designed to:
   - avatar integration
   - status indicators
 
-- `message_bubble` ✅
+- `message_bubble`
   More generic message container.
   Used outside chat contexts (notifications, system messages).
   Can support:
@@ -2130,7 +2130,7 @@ They are designed to:
 
 ### Content Rendering
 
-- `markdown` ✅
+- `markdown`
   Markdown rendering component.
   Must support:
   - headings
@@ -2141,7 +2141,7 @@ They are designed to:
   - inline styling
   Should sanitize input safely.
 
-- `code_block` ✅
+- `code_block`
   Styled code display.
   Supports:
   - syntax highlighting
@@ -2149,7 +2149,7 @@ They are designed to:
   - line numbers
   - optional diff highlight
 
-- `html` ✅
+- `html`
   Safe HTML rendering component.
   Must:
   - sanitize content
@@ -2159,7 +2159,7 @@ They are designed to:
 
 ### Data Visualization
 
-- `bar_chart` ✅
+- `bar_chart`
   Structured bar visualization component.
   Supports:
   - categorical datasets
@@ -2168,7 +2168,7 @@ They are designed to:
   - animated transitions
   - tooltips
 
-- `line_chart` ✅
+- `line_chart`
   Time-series or continuous data visualization.
   Supports:
   - multiple data lines
@@ -2180,7 +2180,7 @@ They are designed to:
 
 ### Gallery Integration
 
-- `item_tile` ✅
+- `item_tile`
   Reusable tile component for content display.
   Can represent:
   - assets
@@ -2194,7 +2194,7 @@ They are designed to:
 
 ### Overlays & System UI
 
-- `notification_host` ✅
+- `notification_host`
   The central overlay manager for notifications and transient UI messages.
   Responsibilities:
   - owns the overlay layer where toasts/snackbars/banners are rendered
@@ -2217,33 +2217,9 @@ They are designed to:
   - background scrim and focus trapping
   - keyboard-safe layout on mobile
 
-- `modal` ✅
-  Focused blocking dialog surface for confirmation and structured workflows.
-  Used for:
-  - destructive confirmations
-  - short forms/wizards
-  - settings or detail popups
-  Should support:
-  - focus trapping and keyboard navigation
-  - backdrop dismiss rules
-  - primary/secondary actions
-  - safe serialization of open state and payload
-
-- `toast` ✅
-  Lightweight transient status message for non-blocking feedback.
-  Useful for:
-  - save success/error feedback
-  - clipboard and quick-action confirmations
-  - short-lived background task updates
-  Should support:
-  - auto-dismiss timing and queueing
-  - optional action button (undo/retry)
-  - placement and stacking coordination
-  - severity styling (info/success/warn/error)
-
 ### Navigation & Routing
 
-- `route` ✅
+- `route`
   Declarative routing node that represents a navigation destination/state.
   Responsibilities:
   - defines route identity (path/name/params)
@@ -2251,7 +2227,7 @@ They are designed to:
   - binds to navigation system (push/pop/replace)
   Should be serializable so navigation can be restored.
 
-- `page_nav` ✅
+- `page_nav`
   Page navigation control (the “navigator UI”).
   Handles:
   - switching between pages/routes
@@ -2259,7 +2235,7 @@ They are designed to:
   - page transition coordination
   Commonly paired with sidebars, tab bars, or breadcrumb systems.
 
-- `page_stepper` ✅
+- `page_stepper`
   Multi-step navigation component for guided flows.
   Great for:
   - onboarding
@@ -2273,7 +2249,7 @@ They are designed to:
 
 ### Progress & Lightweight Insight
 
-- `progress` ✅
+- `progress`
   A reusable progress presentation control.
   Supports:
   - determinate progress (0–100%)
@@ -2284,7 +2260,7 @@ They are designed to:
   - Terminal execution states
   - loading skeleton patterns
 
-- `spark_plot` ✅
+- `spark_plot`
   Compact micro-visualization for quick trends.
   Used for:
   - dashboard cards
@@ -2292,7 +2268,7 @@ They are designed to:
   - inline analytics
   Must be lightweight, fast to render, and readable at small sizes.
 
-- `bar_plot` ✅
+- `bar_plot`
   Bar-style plotting control (often simpler and more compact than a full chart).
   Useful for:
   - tiny distribution previews
@@ -2305,7 +2281,7 @@ They are designed to:
 
 ### Layout & Composition
 
-- `split_pane` ✅
+- `split_pane`
   Resizable split layout system.
   Essential for desktop-style apps (editors, IDEs, Studio-like tools).
   Responsibilities:
@@ -2315,7 +2291,7 @@ They are designed to:
   - optional multi-split (nestable panes)
   This is the backbone of “professional tool” layouts.
 
-- `align` ✅
+- `align`
   Alignment control for positioning a child inside available space.
   Used heavily as glue:
   - aligning overlays
@@ -2325,7 +2301,7 @@ They are designed to:
 
 ### Data Display & Structured Content
 
-- `table_view` ✅
+- `table_view`
   Structured table renderer for datasets.
   Supports:
   - columns/rows with typed cells
@@ -2335,7 +2311,7 @@ They are designed to:
   - sticky headers (optional)
   Used for “real software” screens: logs, downloads, settings lists, analytics.
 
-- `accordion` ✅
+- `accordion`
   Expand/collapse container for grouped content.
   Designed for:
   - settings sections
@@ -2348,7 +2324,7 @@ They are designed to:
 
 ### Action Surfaces & Async UX
 
-- `action_bar` ✅
+- `action_bar`
   A horizontal command strip for high-priority actions.
   Common in:
   - editor toolbars
@@ -2359,7 +2335,7 @@ They are designed to:
   - overflow handling (“…” menu)
   - disabled state logic tied to selection/validation
 
-- `async_action_button` ✅
+- `async_action_button`
   A button specialized for async tasks.
   Must handle the full lifecycle:
   - idle → loading → success/failure
@@ -2370,7 +2346,7 @@ They are designed to:
 
 ### Tooling Panels (Editor-Grade UI)
 
-- `adjustment_panel` ✅
+- `adjustment_panel`
   A panel for controlling continuous adjustments (sliders/knobs/toggles).
   Used for:
   - image/video/audio adjustments
@@ -2381,7 +2357,7 @@ They are designed to:
   - reset-to-default per group
   - fine-grained numeric input
 
-- `brush_panel` ✅
+- `brush_panel`
   Specialized panel for brush-based tools.
   Designed for:
   - drawing/painting
@@ -2394,7 +2370,7 @@ They are designed to:
   - blend mode / brush type
   Often paired with `canvas` and effects.
 
-- `bounds_probe` ✅
+- `bounds_probe`
   Debug/inspection utility that measures layout bounds.
   Useful for:
   - visual debugging (hitboxes, padding, alignment)
@@ -2404,7 +2380,7 @@ They are designed to:
 
 ### Attachments & Media Tiles
 
-- `attachment_tile` ✅
+- `attachment_tile`
   A tile representation for attachments (files/media).
   Used in:
   - chat attachments
@@ -2416,7 +2392,7 @@ They are designed to:
   - actions (open/download/remove)
   - progress indicator when uploading/downloading
 
-- `audio` ✅
+- `audio`
   Audio presentation/control surface.
   Can be:
   - lightweight player (play/pause, seek)
@@ -2426,7 +2402,7 @@ They are designed to:
 
 ### Web & Rendering Surfaces
 
-- `webview` ✅
+- `webview`
   Embedded web content renderer.
   Used for:
   - documentation pages
@@ -2437,7 +2413,7 @@ They are designed to:
   - sizing and focus
   - message bridge (optional) for JS ↔ app communication
 
-- `canvas` ✅
+- `canvas`
   Custom drawing surface for procedural or tool-driven rendering.
   Used for:
   - editors (Studio canvas, brush tools)
@@ -2451,7 +2427,7 @@ They are designed to:
 
 ### Meta: Artifact UI Integration
 
-- `artifact_card` ✅
+- `artifact_card`
   A structured card component for presenting “artifacts” (generated outputs, files, exports, results).
   Intended for:
   - showing an output preview (image/text/file)
@@ -3005,7 +2981,7 @@ This trio (`drag_handle`, `drag_payload`, `drop_zone`) forms a clean drag archit
   - inline actions
   - dismiss controls
 
-- `snackbar` ✅
+- `snackbar`
   Temporary transient notification.
   Used for:
   - quick feedback (“Saved”, “Copied”)

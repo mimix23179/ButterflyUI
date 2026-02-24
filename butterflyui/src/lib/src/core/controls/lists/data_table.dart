@@ -300,6 +300,13 @@ class _ButterflyUIDataTableViewState extends State<ButterflyUIDataTableView> {
         return _state();
       case 'get_state':
         return _state();
+      case 'emit':
+        final event = (args['event'] ?? 'change').toString();
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{};
+        _emit(event, payload);
+        return null;
       default:
         throw UnsupportedError('Unknown data_table method: $method');
     }

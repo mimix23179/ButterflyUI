@@ -76,6 +76,18 @@ class Splash(Component):
         duration_ms: int | None = None,
         radius: float | None = None,
         centered: bool | None = None,
+        title: str | None = None,
+        subtitle: str | None = None,
+        message: str | None = None,
+        loading: bool | None = None,
+        progress: float | None = None,
+        show_progress: bool | None = None,
+        skip_enabled: bool | None = None,
+        auto_start: bool | None = None,
+        hide_on_complete: bool | None = None,
+        min_duration_ms: int | None = None,
+        background: Any | None = None,
+        effect: str | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -89,6 +101,18 @@ class Splash(Component):
             duration_ms=duration_ms,
             radius=radius,
             centered=centered,
+            title=title,
+            subtitle=subtitle,
+            message=message,
+            loading=loading,
+            progress=progress,
+            show_progress=show_progress,
+            skip_enabled=skip_enabled,
+            auto_start=auto_start,
+            hide_on_complete=hide_on_complete,
+            min_duration_ms=min_duration_ms,
+            background=background,
+            effect=effect,
             events=events,
             **kwargs,
         )
@@ -101,6 +125,18 @@ class Splash(Component):
         if y is not None:
             payload["y"] = y
         return self.invoke(session, "trigger", payload)
+
+    def start(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "start", {})
+
+    def stop(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "stop", {})
+
+    def set_progress(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_progress", {"value": float(value)})
+
+    def skip(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "skip", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
@@ -213,6 +249,15 @@ class Modal(Component):
             style=style,
             strict=strict,
         )
+
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class Popover(Component):
@@ -477,6 +522,21 @@ class Toast(Component):
         )
         super().__init__(props=merged, style=style, strict=strict)
 
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def show(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": True})
+
+    def hide(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": False})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
 
 class Snackbar(Toast):
     control_type = "snackbar"
@@ -526,6 +586,7 @@ class ToastHost(Component):
         merged = merge_props(
             props,
             items=items,
+            toasts=items,
             position=position,
             max_items=max_items,
             latest_on_top=latest_on_top,
@@ -533,6 +594,25 @@ class ToastHost(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        payload = [dict(item) for item in items]
+        return self.invoke(session, "set_items", {"items": payload, "toasts": payload})
+
+    def push(self, session: Any, item: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "push", {"item": dict(item)})
+
+    def dismiss(self, session: Any, item_id: str) -> dict[str, Any]:
+        return self.invoke(session, "dismiss", {"id": item_id})
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
+
+    def get_items(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_items", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class NotificationHost(ToastHost):

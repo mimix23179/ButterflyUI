@@ -1,4 +1,5 @@
 from ._shared import Component
+from .aliases import ALIAS_CONTROL_CLASSES, ALIAS_CONTROL_EXPORTS
 from .candy import (
     Candy, 
     CandyTheme
@@ -66,6 +67,7 @@ from .display import (
     AttachmentTile,
     Audio,
     EmojiIcon,
+    Avatar,
     Canvas,
     CodeBlock,
     BarPlot,
@@ -106,6 +108,11 @@ from .display import (
 )
 from .effects import (
     AnimatedBackground,
+    Animation,
+    Transition,
+    Effects,
+    Shadow,
+    Particles,
     FoldLayer,
     Layer,
     LayerList,
@@ -158,6 +165,7 @@ from .inputs import (
     DateRangePicker,
     DateSelect,
     DateSpan,
+    ComboBox,
     DirectoryPicker,
     Dropdown,
     Filepicker,
@@ -204,6 +212,11 @@ from .layout import (
     AdjustmentPanel,
     Align,
     Center,
+    AspectRatio,
+    OverflowBox,
+    FittedBox,
+    DecoratedBox,
+    Clip,
     Box,
     Column,
     Container,
@@ -324,13 +337,17 @@ from .shell import (
 )
 from .webview import WebView
 
+globals().update(ALIAS_CONTROL_CLASSES)
+
 __all__ = [
     "Align",
     "Center",
+    "AspectRatio",
     "ArtifactCard",
     "AsyncActionButton",
     "AttachmentTile",
     "Audio",
+    "Avatar",
     "LiquidMorph",
     "Accordion",
     "ActionBar",
@@ -340,6 +357,11 @@ __all__ = [
     "MessageDivider",
     "MessageMeta",
     "Motion",
+    "Animation",
+    "Transition",
+    "Effects",
+    "Shadow",
+    "Particles",
     "MorphingBorder",
     "AnimatedBackground",
     "NavRing",
@@ -369,6 +391,7 @@ __all__ = [
     "Chip",
     "ChipGroup",
     "Combobox",
+    "ComboBox",
     "CodeView",
     "Chart",
     "Column",
@@ -552,6 +575,7 @@ __all__ = [
     "DateSpan",
     "Dropdown",
     "Container",
+    "DecoratedBox",
     "DetailsPane",
     "FlexSpacer",
     "DragRegion",
@@ -570,6 +594,7 @@ __all__ = [
     "Option",
     "Outline",
     "Overlay",
+    "OverflowBox",
     "OwnershipMarker",
     "PanZoom",
     "PaneSpec",
@@ -620,6 +645,10 @@ __all__ = [
     "Video",
     "ViewStack",
     "Viewport",
+    "FittedBox",
+    "Clip",
     "FileSystem",
     "Visibility",
 ]
+
+__all__.extend(ALIAS_CONTROL_EXPORTS)

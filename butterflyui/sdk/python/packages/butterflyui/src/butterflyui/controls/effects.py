@@ -7,6 +7,11 @@ from ._shared import Component, merge_props
 
 __all__ = [
     "AnimatedBackground",
+    "Animation",
+    "Transition",
+    "Effects",
+    "Shadow",
+    "Particles",
     "FoldLayer",
     "Layer",
     "LayerList",
@@ -764,6 +769,10 @@ class GlowEffect(Component):
         offset_x: float | None = None,
         offset_y: float | None = None,
         clip: bool | None = None,
+        intensity: float | None = None,
+        direction: Any | None = None,
+        animated: bool | None = None,
+        duration_ms: int | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -778,9 +787,16 @@ class GlowEffect(Component):
             offset_x=offset_x,
             offset_y=offset_y,
             clip=clip,
+            intensity=intensity,
+            direction=direction,
+            animated=animated,
+            duration_ms=duration_ms,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def trigger(self, session: Any, **payload: Any) -> dict[str, Any]:
+        return self.invoke(session, "trigger", payload)
 
 
 class GlassBlur(Component):
@@ -796,6 +812,8 @@ class GlassBlur(Component):
         radius: float | None = None,
         border_color: Any | None = None,
         border_width: float | None = None,
+        noise_opacity: float | None = None,
+        border_glow: Any | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -809,9 +827,17 @@ class GlassBlur(Component):
             radius=radius,
             border_color=border_color,
             border_width=border_width,
+            noise_opacity=noise_opacity,
+            border_glow=border_glow,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_style", style_props)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class GradientSweep(Component):
@@ -822,9 +848,17 @@ class GradientSweep(Component):
         child: Any | None = None,
         *,
         colors: list[Any] | None = None,
+        stops: list[float] | None = None,
         duration_ms: int | None = None,
+        duration: int | None = None,
         angle: float | None = None,
+        start_angle: float | None = None,
+        end_angle: float | None = None,
         opacity: float | None = None,
+        loop: bool | None = None,
+        autoplay: bool | None = None,
+        play: bool | None = None,
+        playing: bool | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -833,12 +867,29 @@ class GradientSweep(Component):
         merged = merge_props(
             props,
             colors=colors,
+            stops=stops,
             duration_ms=duration_ms,
+            duration=duration,
             angle=angle,
+            start_angle=start_angle,
+            end_angle=end_angle,
             opacity=opacity,
+            loop=loop,
+            autoplay=autoplay,
+            play=play,
+            playing=playing,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_angle(self, session: Any, angle: float) -> dict[str, Any]:
+        return self.invoke(session, "set_angle", {"angle": float(angle)})
+
+    def set_colors(self, session: Any, colors: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_colors", {"colors": colors})
 
     def play(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "play", {})
@@ -857,7 +908,12 @@ class ConfettiBurst(Component):
         colors: list[Any] | None = None,
         count: int | None = None,
         duration_ms: int | None = None,
+        duration: int | None = None,
         gravity: float | None = None,
+        autoplay: bool | None = None,
+        loop: bool | None = None,
+        emit_on_complete: bool | None = None,
+        hide_button: bool | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -868,7 +924,12 @@ class ConfettiBurst(Component):
             colors=colors,
             count=count,
             duration_ms=duration_ms,
+            duration=duration,
             gravity=gravity,
+            autoplay=autoplay,
+            loop=loop,
+            emit_on_complete=emit_on_complete,
+            hide_button=hide_button,
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
@@ -926,13 +987,33 @@ class ChromaticShift(Component):
         *,
         shift: float | None = None,
         opacity: float | None = None,
+        axis: str | None = None,
+        red: Any | None = None,
+        blue: Any | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
-        merged = merge_props(props, shift=shift, opacity=opacity, **kwargs)
+        merged = merge_props(
+            props,
+            shift=shift,
+            opacity=opacity,
+            axis=axis,
+            red=red,
+            blue=blue,
+            **kwargs,
+        )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_shift(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_shift", {"value": float(value)})
+
+    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_style", style_props)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
 
 class _EventfulEffect(Component):
@@ -976,6 +1057,8 @@ class NeonEdge(_EventfulEffect):
         glow: float | None = None,
         spread: float | None = None,
         radius: float | None = None,
+        animated: bool | None = None,
+        duration_ms: int | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -993,6 +1076,8 @@ class NeonEdge(_EventfulEffect):
             glow=glow,
             spread=spread,
             radius=radius,
+            animated=animated,
+            duration_ms=duration_ms,
             **kwargs,
         )
 
@@ -1008,6 +1093,8 @@ class GrainOverlay(_EventfulEffect):
         density: float | None = None,
         seed: int | None = None,
         color: Any | None = None,
+        animated: bool | None = None,
+        fps: int | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1024,6 +1111,8 @@ class GrainOverlay(_EventfulEffect):
             density=density,
             seed=seed,
             color=color,
+            animated=animated,
+            fps=fps,
             **kwargs,
         )
 
@@ -1096,6 +1185,13 @@ class NoiseDisplacement(_EventfulEffect):
         child: Any | None = None,
         *,
         strength: float | None = None,
+        speed: float | None = None,
+        axis: str | None = None,
+        seed: int | None = None,
+        animated: bool | None = None,
+        loop: bool | None = None,
+        play: bool | None = None,
+        autoplay: bool | None = None,
         duration_ms: int | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -1110,9 +1206,28 @@ class NoiseDisplacement(_EventfulEffect):
             style=style,
             strict=strict,
             strength=strength,
+            speed=speed,
+            axis=axis,
+            seed=seed,
+            animated=animated,
+            loop=loop,
+            play=play,
+            autoplay=autoplay,
             duration_ms=duration_ms,
             **kwargs,
         )
+
+    def trigger(self, session: Any, strength: float | None = None) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if strength is not None:
+            payload["strength"] = float(strength)
+        return self.invoke(session, "trigger", payload)
+
+    def set_strength(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_strength", {"value": float(value)})
+
+    def set_speed(self, session: Any, value: float) -> dict[str, Any]:
+        return self.invoke(session, "set_speed", {"value": float(value)})
 
 
 class NoiseField(_EventfulEffect):
@@ -1126,6 +1241,9 @@ class NoiseField(_EventfulEffect):
         intensity: float | None = None,
         speed: float | None = None,
         color: Any | None = None,
+        kind: str | None = None,
+        height: float | None = None,
+        animated: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1142,6 +1260,9 @@ class NoiseField(_EventfulEffect):
             intensity=intensity,
             speed=speed,
             color=color,
+            kind=kind,
+            height=height,
+            animated=animated,
             **kwargs,
         )
 
@@ -1179,6 +1300,212 @@ class FlowField(_EventfulEffect):
             opacity=opacity,
             **kwargs,
         )
+
+
+class Shadow(Component):
+    control_type = "shadow"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        color: Any | None = None,
+        blur: float | None = None,
+        spread: float | None = None,
+        offset_x: float | None = None,
+        offset_y: float | None = None,
+        radius: float | None = None,
+        shadows: list[Mapping[str, Any]] | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            color=color,
+            blur=blur,
+            spread=spread,
+            offset_x=offset_x,
+            offset_y=offset_y,
+            radius=radius,
+            shadows=[dict(shadow) for shadow in (shadows or [])],
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class Effects(Component):
+    control_type = "effects"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        blur: float | None = None,
+        opacity: float | None = None,
+        color: Any | None = None,
+        blend_mode: str | None = None,
+        brightness: float | None = None,
+        contrast: float | None = None,
+        saturation: float | None = None,
+        hue_rotate: float | None = None,
+        grayscale: float | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            blur=blur,
+            opacity=opacity,
+            color=color,
+            blend_mode=blend_mode,
+            brightness=brightness,
+            contrast=contrast,
+            saturation=saturation,
+            hue_rotate=hue_rotate,
+            grayscale=grayscale,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class Particles(Component):
+    control_type = "particles"
+
+    def __init__(
+        self,
+        *,
+        count: int | None = None,
+        colors: list[Any] | None = None,
+        min_size: float | None = None,
+        max_size: float | None = None,
+        speed: float | None = None,
+        min_speed: float | None = None,
+        max_speed: float | None = None,
+        direction: float | None = None,
+        spread: float | None = None,
+        opacity: float | None = None,
+        seed: int | None = None,
+        loop: bool | None = None,
+        play: bool | None = None,
+        shape: str | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            count=count,
+            colors=colors,
+            min_size=min_size,
+            max_size=max_size,
+            speed=speed,
+            min_speed=min_speed,
+            max_speed=max_speed,
+            direction=direction,
+            spread=spread,
+            opacity=opacity,
+            seed=seed,
+            loop=loop,
+            play=play,
+            shape=shape,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+
+class Animation(Component):
+    control_type = "animation"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        duration_ms: int | None = None,
+        curve: str | None = None,
+        opacity: float | None = None,
+        scale: float | None = None,
+        offset: Any | None = None,
+        rotation: float | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            duration_ms=duration_ms,
+            curve=curve,
+            opacity=opacity,
+            scale=scale,
+            offset=offset,
+            rotation=rotation,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class Transition(Component):
+    control_type = "transition"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        duration_ms: int | None = None,
+        curve: str | None = None,
+        transition_type: str | None = None,
+        preset: str | None = None,
+        state: str | None = None,
+        mode: str | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            duration_ms=duration_ms,
+            curve=curve,
+            transition_type=transition_type if transition_type is not None else preset,
+            preset=preset if preset is not None else transition_type,
+            state=state,
+            mode=mode,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
 
 
 

@@ -32,12 +32,20 @@ Widget buildBreadcrumbsControl(
         }
       }
 
+      if (props['show_root'] == true && items.isNotEmpty) {
+        final first = items.first;
+        if ((first['id']?.toString() ?? '') != '__root__') {
+          items.insert(0, {'id': '__root__', 'label': 'root'});
+        }
+      }
+
       if (items.isEmpty) {
         return const SizedBox.shrink();
       }
 
       final separator = props['separator']?.toString() ?? '/';
-      final dense = props['dense'] == true;
+      final dense = props['dense'] == true || props['compact'] == true;
+      final currentIndex = coerceOptionalInt(props['current_index']);
       final maxItems = (coerceOptionalInt(props['max_items']) ?? 0).clamp(
         0,
         99,
@@ -59,6 +67,7 @@ Widget buildBreadcrumbsControl(
         final isEllipsis = item['id']?.toString() == '__ellipsis__';
         final label =
             item['label']?.toString() ?? item['id']?.toString() ?? 'item';
+        final selectedByIndex = currentIndex != null && currentIndex == i;
 
         Widget crumb;
         if (isEllipsis) {
@@ -91,7 +100,7 @@ Widget buildBreadcrumbsControl(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: isLast
+                    style: (isLast || selectedByIndex)
                         ? Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           )

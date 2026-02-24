@@ -41,12 +41,14 @@ class _EmojiPickerControl extends StatefulWidget {
 class _EmojiPickerControlState extends State<_EmojiPickerControl> {
   late String _value;
   late List<String> _emojis;
+  late String _query;
+  late String _category;
+  late List<String> _recent;
 
   @override
   void initState() {
     super.initState();
-    _value = (widget.props['value'] ?? '').toString();
-    _emojis = _coerceEmojis(widget.props['items'] ?? widget.props['emojis']);
+    _syncFromProps(widget.props);
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -56,6 +58,9 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
     if (oldWidget.controlId != widget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
     }
   }
 
@@ -74,6 +79,14 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
         setState(() => _value = next);
         widget.sendEvent(widget.controlId, 'change', {'value': _value});
         return _value;
+      case 'set_category':
+        final next = (args['category'] ?? '').toString();
+        setState(() => _category = next);
+        return _category;
+      case 'search':
+        final next = (args['query'] ?? '').toString();
+        setState(() => _query = next);
+        return _query;
       case 'emit':
         final event = (args['event'] ?? 'custom').toString();
         final payload = args['payload'] is Map
@@ -90,10 +103,48 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
   Widget build(BuildContext context) {
     final columns = (coerceOptionalInt(widget.props['columns']) ?? 8).clamp(2, 12);
     final spacing = coerceDouble(widget.props['spacing']) ?? 6;
+    final showSearch = widget.props['show_search'] == true;
+    final showRecent = widget.props['show_recent'] == true;
+    final categories = _coerceStringList(widget.props['categories']);
+    final includeMetadata = widget.props['include_metadata'] == true;
+    final filtered = _applyFilter(_emojis, _query);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (showSearch)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: TextField(
+              onChanged: (value) => setState(() => _query = value),
+              decoration: const InputDecoration(
+                hintText: 'Search emoji',
+                isDense: true,
+              ),
+            ),
+          ),
+        if (categories.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: categories
+                  .map(
+                    (item) => ChoiceChip(
+                      selected: _category == item,
+                      label: Text(item),
+                      onSelected: (_) => setState(() => _category = item),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ),
+        if (showRecent && _recent.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text('Recent: ${_recent.join(' ')}'),
+          ),
         if (_value.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -102,7 +153,7 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _emojis.length,
+          itemCount: filtered.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             crossAxisSpacing: spacing,
@@ -110,15 +161,23 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
             mainAxisExtent: 32,
           ),
           itemBuilder: (context, index) {
-            final emoji = _emojis[index];
+            final emoji = filtered[index];
             final selected = emoji == _value;
             return InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () {
                 setState(() => _value = emoji);
+                _recent.remove(emoji);
+                _recent.insert(0, emoji);
                 widget.sendEvent(widget.controlId, 'select', {
                   'index': index,
                   'value': emoji,
+                  if (includeMetadata)
+                    'meta': {
+                      'short_name': emoji,
+                      'category': _category,
+                      'skin_tone': widget.props['skin_tone']?.toString(),
+                    },
                 });
               },
               child: DecoratedBox(
@@ -138,6 +197,14 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
         ),
       ],
     );
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _value = (props['value'] ?? '').toString();
+    _emojis = _coerceEmojis(props['items'] ?? props['emojis']);
+    _query = (props['query'] ?? '').toString();
+    _category = (props['category'] ?? '').toString();
+    _recent = _coerceStringList(props['recent']);
   }
 }
 
@@ -173,4 +240,22 @@ List<String> _coerceEmojis(Object? value) {
     '🌊',
     '🌪',     
   ];
+}
+
+List<String> _coerceStringList(Object? value) {
+  if (value is! List) return const [];
+  final out = <String>[];
+  for (final item in value) {
+    final text = item?.toString() ?? '';
+    if (text.isNotEmpty) {
+      out.add(text);
+    }
+  }
+  return out;
+}
+
+List<String> _applyFilter(List<String> emojis, String query) {
+  final normalized = query.trim();
+  if (normalized.isEmpty) return emojis;
+  return emojis.where((item) => item.contains(normalized)).toList(growable: false);
 }

@@ -20,32 +20,44 @@ Widget buildEmojiIconControl(
   Map<String, Object?> props,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final emoji = (props['emoji'] ?? props['value'] ?? '😀').toString();
+  final emoji = (props['emoji'] ?? props['value'] ?? '').toString();
+  final fallback = (props['fallback'] ?? '😀').toString();
+  final resolvedEmoji = emoji.isEmpty ? fallback : emoji;
   final label = props['label']?.toString();
   final size = coerceDouble(props['size']) ?? 20;
   final color = coerceColor(props['color']);
+  final background = coerceColor(props['background'] ?? props['bgcolor']);
+  final radius = coerceDouble(props['radius']) ?? 8;
+  final padding = coercePadding(props['padding']) ?? const EdgeInsets.all(4);
+  final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
   final text = Text(
-    emoji,
+    resolvedEmoji,
     style: TextStyle(fontSize: size, color: color),
   );
 
   Widget child = text;
+  if (background != null) {
+    child = DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      child: Padding(padding: padding, child: text),
+    );
+  }
   if (label != null && label.isNotEmpty) {
-    child = Tooltip(message: label, child: text);
+    child = Tooltip(message: label, child: child);
   }
 
-  if (controlId.isEmpty) return child;
+  if (controlId.isEmpty || !enabled) return child;
   return InkWell(
     borderRadius: BorderRadius.circular(8),
     onTap: () {
       sendEvent(controlId, 'select', {
-        'emoji': emoji,
+        'emoji': resolvedEmoji,
         'label': label ?? '',
       });
     },
-    child: Padding(
-      padding: const EdgeInsets.all(4),
-      child: child,
-    ),
+    child: child,
   );
 }

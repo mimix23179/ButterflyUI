@@ -20,11 +20,15 @@ class _ChipOption {
 Widget buildChipGroupControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return ButterflyUIChipGroup(
     controlId: controlId,
     props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }
@@ -32,12 +36,16 @@ Widget buildChipGroupControl(
 class ButterflyUIChipGroup extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUIChipGroup({
     super.key,
     required this.controlId,
     required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -47,11 +55,15 @@ class ButterflyUIChipGroup extends StatefulWidget {
 
 class _ButterflyUIChipGroupState extends State<ButterflyUIChipGroup> {
   final Set<String> _selected = <String>{};
+  late List<_ChipOption> _options = _coerceOptions(widget.props);
 
   @override
   void initState() {
     super.initState();
     _syncFromProps();
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
   }
 
   @override
@@ -60,11 +72,28 @@ class _ButterflyUIChipGroupState extends State<ButterflyUIChipGroup> {
     if (oldWidget.props != widget.props) {
       _syncFromProps();
     }
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
   }
 
   void _syncFromProps() {
     final multiSelect = _isMultiSelect(widget.props);
     final selected = _coerceSelected(widget.props, multiSelect: multiSelect);
+    _options = _coerceOptions(widget.props);
     setState(() {
       _selected
         ..clear()
@@ -72,9 +101,41 @@ class _ButterflyUIChipGroupState extends State<ButterflyUIChipGroup> {
     });
   }
 
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_state':
+      case 'get_values':
+        return _selected.toList(growable: false);
+      case 'set_values':
+        final next = <String>{};
+        final values = args['values'];
+        if (values is List) {
+          for (final value in values) {
+            final text = value?.toString();
+            if (text != null && text.isNotEmpty) {
+              next.add(text);
+            }
+          }
+        }
+        setState(() {
+          _selected
+            ..clear()
+            ..addAll(next);
+        });
+        return _selected.toList(growable: false);
+      case 'set_options':
+        setState(() {
+          _options = _coerceOptions({'options': args['options'] ?? args['items']});
+        });
+        return {'count': _options.length};
+      default:
+        throw UnsupportedError('Unknown chip_group method: $method');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final options = _coerceOptions(widget.props);
+    final options = _options;
     final dense = widget.props['dense'] == true;
     final spacing =
         coerceDouble(widget.props['spacing']) ?? (dense ? 4.0 : 8.0);

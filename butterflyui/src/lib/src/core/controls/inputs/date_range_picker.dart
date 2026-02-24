@@ -96,6 +96,18 @@ class _ButterflyUIDateRangePickerState extends State<ButterflyUIDateRangePicker>
           'start': _formatDateValue(_value?.start),
           'end': _formatDateValue(_value?.end),
         };
+      case 'set_value':
+        final start = _parseDateValue(args['start'] ?? args['start_date']);
+        final end = _parseDateValue(args['end'] ?? args['end_date']);
+        if (start != null && end != null) {
+          setState(() {
+            _value = DateTimeRange(start: start, end: end);
+          });
+        }
+        return {
+          'start': _formatDateValue(_value?.start),
+          'end': _formatDateValue(_value?.end),
+        };
       default:
         throw UnsupportedError('Unknown date_range_picker method: $method');
     }

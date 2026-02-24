@@ -33,12 +33,7 @@ class _BorderControlState extends State<_BorderControl> {
   @override
   void initState() {
     super.initState();
-    _color =
-        coerceColor(widget.props['color'] ?? widget.props['border_color']) ??
-            const Color(0xff64748b);
-    _width = coerceDouble(widget.props['width'] ?? widget.props['border_width']) ?? 1;
-    _radius = coerceDouble(widget.props['radius']) ?? 0;
-    _side = (widget.props['side'] ?? 'all').toString().toLowerCase();
+    _syncFromProps(widget.props);
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -49,6 +44,19 @@ class _BorderControlState extends State<_BorderControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      setState(() {
+        _syncFromProps(widget.props);
+      });
+    }
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _color = coerceColor(props['color'] ?? props['border_color']) ??
+        const Color(0xff64748b);
+    _width = coerceDouble(props['width'] ?? props['border_width']) ?? 1;
+    _radius = coerceDouble(props['radius']) ?? 0;
+    _side = (props['side'] ?? 'all').toString().toLowerCase();
   }
 
   @override
@@ -74,6 +82,27 @@ class _BorderControlState extends State<_BorderControl> {
 
   Border _buildBorder() {
     final side = BorderSide(color: _color, width: _width);
+    final sidesRaw = widget.props['sides'];
+    if (sidesRaw is Map) {
+      final sides = coerceObjectMap(sidesRaw);
+      BorderSide resolveSide(String key) {
+        final raw = sides[key];
+        if (raw is Map) {
+          final map = coerceObjectMap(raw);
+          return BorderSide(
+            color: coerceColor(map['color']) ?? _color,
+            width: coerceDouble(map['width']) ?? _width,
+          );
+        }
+        return side;
+      }
+      return Border(
+        top: resolveSide('top'),
+        right: resolveSide('right'),
+        bottom: resolveSide('bottom'),
+        left: resolveSide('left'),
+      );
+    }
     switch (_side) {
       case 'top':
         return Border(top: side);
@@ -96,11 +125,23 @@ class _BorderControlState extends State<_BorderControl> {
     if (widget.rawChildren.isNotEmpty && widget.rawChildren.first is Map) {
       child = widget.buildChild(coerceObjectMap(widget.rawChildren.first as Map));
     }
-    return Container(
-      decoration: BoxDecoration(
-        border: _buildBorder(),
-        borderRadius: BorderRadius.circular(_radius),
-      ),
+    final animated = widget.props['animated'] == true;
+    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 180)
+        .clamp(1, 600000);
+    final decorated = BoxDecoration(
+      border: _buildBorder(),
+      borderRadius: BorderRadius.circular(_radius),
+    );
+    if (!animated) {
+      return Container(
+        decoration: decorated,
+        padding: padding,
+        child: child,
+      );
+    }
+    return AnimatedContainer(
+      duration: Duration(milliseconds: durationMs),
+      decoration: decorated,
       padding: padding,
       child: child,
     );

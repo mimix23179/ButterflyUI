@@ -850,6 +850,18 @@ class TagFilterBar(Component):
         )
         super().__init__(props=merged, style=style, strict=strict)
 
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_values(self, session: Any, values: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_values", {"values": values})
+
+    def set_options(self, session: Any, options: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_options", {"options": options})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
 
 class FilterChipsBar(TagFilterBar):
     control_type = "filter_chips_bar"
@@ -1267,6 +1279,18 @@ class MultiSelect(Component):
         )
         super().__init__(props=merged, style=style, strict=strict)
 
+    def get_values(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_values", {})
+
+    def set_values(self, session: Any, values: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_values", {"values": values})
+
+    def set_options(self, session: Any, options: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_options", {"options": options})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
 
 class MultiPick(MultiSelect):
     control_type = "multi_pick"
@@ -1305,9 +1329,14 @@ class Combobox(Component):
         value: str | None = None,
         *,
         options: list[Any] | None = None,
+        items: list[Any] | None = None,
+        groups: list[Mapping[str, Any]] | None = None,
         label: str | None = None,
         hint: str | None = None,
         placeholder: str | None = None,
+        loading: bool | None = None,
+        async_source: str | None = None,
+        debounce_ms: int | None = None,
         enabled: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -1318,10 +1347,15 @@ class Combobox(Component):
         merged = merge_props(
             props,
             value=value,
-            options=options,
+            options=options if options is not None else items,
+            items=items,
+            groups=[dict(group) for group in (groups or [])],
             label=label,
             hint=hint if hint is not None else placeholder,
             placeholder=placeholder,
+            loading=loading,
+            async_source=async_source,
+            debounce_ms=debounce_ms,
             enabled=enabled,
             events=events,
             **kwargs,
@@ -1334,21 +1368,32 @@ class Combobox(Component):
     def set_value(self, session: Any, value: str) -> dict[str, Any]:
         return self.invoke(session, "set_value", {"value": value})
 
+    def set_options(self, session: Any, options: list[Any]) -> dict[str, Any]:
+        return self.invoke(session, "set_options", {"options": options})
+
+    def set_loading(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_loading", {"value": bool(value)})
+
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
-class Dropdown(Combobox):
-    control_type = "dropdown"
+class ComboBox(Combobox):
+    control_type = "combo_box"
 
     def __init__(
         self,
         value: str | None = None,
         *,
         options: list[Any] | None = None,
+        items: list[Any] | None = None,
+        groups: list[Mapping[str, Any]] | None = None,
         label: str | None = None,
         hint: str | None = None,
         placeholder: str | None = None,
+        loading: bool | None = None,
+        async_source: str | None = None,
+        debounce_ms: int | None = None,
         enabled: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -1359,9 +1404,57 @@ class Dropdown(Combobox):
         super().__init__(
             value=value,
             options=options,
+            items=items,
+            groups=groups,
             label=label,
             hint=hint,
             placeholder=placeholder,
+            loading=loading,
+            async_source=async_source,
+            debounce_ms=debounce_ms,
+            enabled=enabled,
+            events=events,
+            props=props,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class Dropdown(Combobox):
+    control_type = "dropdown"
+
+    def __init__(
+        self,
+        value: str | None = None,
+        *,
+        options: list[Any] | None = None,
+        items: list[Any] | None = None,
+        groups: list[Mapping[str, Any]] | None = None,
+        label: str | None = None,
+        hint: str | None = None,
+        placeholder: str | None = None,
+        loading: bool | None = None,
+        async_source: str | None = None,
+        debounce_ms: int | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            value=value,
+            options=options,
+            items=items,
+            groups=groups,
+            label=label,
+            hint=hint,
+            placeholder=placeholder,
+            loading=loading,
+            async_source=async_source,
+            debounce_ms=debounce_ms,
             enabled=enabled,
             events=events,
             props=props,
@@ -1486,6 +1579,12 @@ class EmojiPicker(Component):
         skin_tone: str | None = None,
         show_search: bool | None = None,
         show_recent: bool | None = None,
+        category: str | None = None,
+        query: str | None = None,
+        include_metadata: bool | None = None,
+        recent_limit: int | None = None,
+        columns: int | None = None,
+        items: list[str] | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1500,6 +1599,12 @@ class EmojiPicker(Component):
             skin_tone=skin_tone,
             show_search=show_search,
             show_recent=show_recent,
+            category=category,
+            query=query,
+            include_metadata=include_metadata,
+            recent_limit=recent_limit,
+            columns=columns,
+            items=items,
             events=events,
             **kwargs,
         )
@@ -1510,6 +1615,12 @@ class EmojiPicker(Component):
 
     def set_value(self, session: Any, value: str) -> dict[str, Any]:
         return self.invoke(session, "set_value", {"value": value})
+
+    def set_category(self, session: Any, category: str) -> dict[str, Any]:
+        return self.invoke(session, "set_category", {"category": category})
+
+    def search(self, session: Any, query: str) -> dict[str, Any]:
+        return self.invoke(session, "search", {"query": query})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

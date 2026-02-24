@@ -741,8 +741,14 @@ class BreadcrumbBar(Component):
         self,
         *,
         items: list[Mapping[str, Any]] | None = None,
+        path: str | None = None,
+        current_index: int | None = None,
         separator: str | None = None,
         max_items: int | None = None,
+        dense: bool | None = None,
+        dropdown_levels: bool | None = None,
+        show_root: bool | None = None,
+        compact: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -752,8 +758,14 @@ class BreadcrumbBar(Component):
         merged = merge_props(
             props,
             items=items,
+            path=path,
+            current_index=current_index,
             separator=separator,
             max_items=max_items,
+            dense=dense,
+            dropdown_levels=dropdown_levels,
+            show_root=show_root,
+            compact=compact,
             events=events,
             **kwargs,
         )
@@ -761,6 +773,12 @@ class BreadcrumbBar(Component):
 
     def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
         return self.invoke(session, "set_items", {"items": items})
+
+    def set_index(self, session: Any, index: int) -> dict[str, Any]:
+        return self.invoke(session, "set_index", {"index": int(index)})
+
+    def navigate_path(self, session: Any, path: str) -> dict[str, Any]:
+        return self.invoke(session, "navigate_path", {"path": path})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

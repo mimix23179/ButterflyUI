@@ -8,6 +8,11 @@ from ._shared import Component, merge_props
 __all__ = [
     "Align",
     "Center",
+    "AspectRatio",
+    "OverflowBox",
+    "FittedBox",
+    "DecoratedBox",
+    "Clip",
     "PageControl",
     "Surface",
     "Box",
@@ -406,6 +411,9 @@ class Container(Component):
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
+
+    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_style", style_props)
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
@@ -1218,5 +1226,167 @@ class InspectorPanel(Component):
     ) -> None:
         merged = merge_props(props, title=title, sections=sections, **kwargs)
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+
+class AspectRatio(Component):
+    control_type = "aspect_ratio"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        ratio: float | None = None,
+        aspect_ratio: float | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            ratio=ratio if ratio is not None else aspect_ratio,
+            aspect_ratio=aspect_ratio if aspect_ratio is not None else ratio,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class OverflowBox(Component):
+    control_type = "overflow_box"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        min_width: float | None = None,
+        min_height: float | None = None,
+        max_width: float | None = None,
+        max_height: float | None = None,
+        alignment: Any | None = None,
+        fit: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            min_width=min_width,
+            min_height=min_height,
+            max_width=max_width,
+            max_height=max_height,
+            alignment=alignment,
+            fit=fit,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class FittedBox(Component):
+    control_type = "fitted_box"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        fit: str | None = None,
+        alignment: Any | None = None,
+        clip_behavior: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            fit=fit,
+            alignment=alignment,
+            clip_behavior=clip_behavior,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class DecoratedBox(Component):
+    control_type = "decorated_box"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        color: Any | None = None,
+        bgcolor: Any | None = None,
+        gradient: Mapping[str, Any] | None = None,
+        image: Mapping[str, Any] | None = None,
+        border_color: Any | None = None,
+        border_width: float | None = None,
+        radius: float | None = None,
+        shape: str | None = None,
+        shadow: Any | None = None,
+        padding: Any | None = None,
+        margin: Any | None = None,
+        clip_behavior: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            color=color,
+            bgcolor=bgcolor if bgcolor is not None else color,
+            gradient=dict(gradient) if gradient is not None else None,
+            image=dict(image) if image is not None else None,
+            border_color=border_color,
+            border_width=border_width,
+            radius=radius,
+            shape=shape,
+            shadow=shadow,
+            padding=padding,
+            margin=margin,
+            clip_behavior=clip_behavior,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+
+
+class Clip(Component):
+    control_type = "clip"
+
+    def __init__(
+        self,
+        child: Any | None = None,
+        *children: Any,
+        shape: str | None = None,
+        radius: float | None = None,
+        clip_behavior: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            shape=shape,
+            radius=radius,
+            clip_behavior=clip_behavior,
+            **kwargs,
+        )
+        resolved_children = list(children)
+        if child is not None:
+            resolved_children.insert(0, child)
+        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
 
 

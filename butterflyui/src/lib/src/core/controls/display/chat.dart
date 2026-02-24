@@ -15,6 +15,11 @@ Widget buildChatMessageControl(
   final role = (props['role'] ?? '').toString().toLowerCase();
   final name = (props['name'] ?? '').toString();
   final showName = props['show_name'] == true && name.isNotEmpty;
+  final showTimestamps = props['show_timestamps'] == true;
+  final timestamp = (props['timestamp'] ?? '').toString();
+  final status = (props['status'] ?? '').toString();
+  final avatar = (props['avatar'] ?? '').toString();
+  final grouped = props['grouped'] == true;
   final clickable = props['clickable'] == true;
   final align = (props['align']?.toString().toLowerCase() ?? '').trim();
   final isUser = role == 'user' || align == 'right' || align == 'end';
@@ -29,7 +34,7 @@ Widget buildChatMessageControl(
 
   Widget bubble = Container(
     constraints: const BoxConstraints(maxWidth: 700),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: grouped ? 7 : 10),
     decoration: BoxDecoration(
       color: bubbleBg,
       borderRadius: BorderRadius.circular(radius),
@@ -53,9 +58,37 @@ Widget buildChatMessageControl(
             ),
           ),
         Text(text, style: TextStyle(color: bubbleFg, height: 1.35)),
+        if ((showTimestamps && timestamp.isNotEmpty) || status.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              [if (showTimestamps && timestamp.isNotEmpty) timestamp, if (status.isNotEmpty) status].join(' • '),
+              style: TextStyle(color: bubbleFg.withOpacity(0.66), fontSize: 11),
+            ),
+          ),
       ],
     ),
   );
+
+  if (avatar.isNotEmpty) {
+    bubble = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (!isUser)
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: CircleAvatar(radius: 12, child: Text(avatar)),
+          ),
+        Flexible(child: bubble),
+        if (isUser)
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: CircleAvatar(radius: 12, child: Text(avatar)),
+          ),
+      ],
+    );
+  }
 
   if (clickable && controlId.isNotEmpty) {
     bubble = InkWell(
@@ -86,6 +119,7 @@ Widget buildChatThreadControl(
       coercePadding(props['padding'] ?? props['content_padding']) ??
       const EdgeInsets.all(8);
   final reverse = props['reverse'] == true;
+  final groupMessages = props['group_messages'] == true;
   final scrollable = props['scrollable'] == null
       ? true
       : (props['scrollable'] == true);
@@ -103,6 +137,13 @@ Widget buildChatThreadControl(
       final message = messages[i];
       if (message is Map) {
         final map = coerceObjectMap(message);
+        if (props['show_timestamps'] == true && map['show_timestamps'] == null) {
+          map['show_timestamps'] = true;
+        }
+        if (groupMessages && i > 0 && messages[i - 1] is Map) {
+          final prev = coerceObjectMap(messages[i - 1] as Map);
+          map['grouped'] = (prev['role']?.toString() ?? '') == (map['role']?.toString() ?? '');
+        }
         final entryId =
             map['id']?.toString() ??
             map['message_id']?.toString() ??

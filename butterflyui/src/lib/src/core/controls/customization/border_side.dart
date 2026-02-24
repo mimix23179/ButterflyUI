@@ -29,10 +29,7 @@ class _BorderSideControlState extends State<_BorderSideControl> {
   @override
   void initState() {
     super.initState();
-    _side = (widget.props['side'] ?? 'bottom').toString().toLowerCase();
-    _color = coerceColor(widget.props['color']) ?? const Color(0xff64748b);
-    _width = coerceDouble(widget.props['width']) ?? 1;
-    _length = coerceDouble(widget.props['length']) ?? double.infinity;
+    _syncFromProps(widget.props);
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -43,6 +40,18 @@ class _BorderSideControlState extends State<_BorderSideControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      setState(() {
+        _syncFromProps(widget.props);
+      });
+    }
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _side = (props['side'] ?? 'bottom').toString().toLowerCase();
+    _color = coerceColor(props['color']) ?? const Color(0xff64748b);
+    _width = coerceDouble(props['width']) ?? 1;
+    _length = coerceDouble(props['length']) ?? double.infinity;
   }
 
   @override
@@ -69,29 +78,60 @@ class _BorderSideControlState extends State<_BorderSideControl> {
   @override
   Widget build(BuildContext context) {
     Border border;
+    final topMap = widget.props['top'];
+    final rightMap = widget.props['right'];
+    final bottomMap = widget.props['bottom'];
+    final leftMap = widget.props['left'];
+    BorderSide parse(Object? raw, BorderSide fallback) {
+      if (raw is! Map) return fallback;
+      final map = coerceObjectMap(raw);
+      return BorderSide(
+        color: coerceColor(map['color']) ?? fallback.color,
+        width: coerceDouble(map['width']) ?? fallback.width,
+      );
+    }
+    final fallbackSide = BorderSide(color: _color, width: _width);
+    if (topMap is Map || rightMap is Map || bottomMap is Map || leftMap is Map) {
+      border = Border(
+        top: parse(topMap, fallbackSide),
+        right: parse(rightMap, fallbackSide),
+        bottom: parse(bottomMap, fallbackSide),
+        left: parse(leftMap, fallbackSide),
+      );
+    } else {
     switch (_side) {
       case 'top':
-        border = Border(top: BorderSide(color: _color, width: _width));
+          border = Border(top: fallbackSide);
         break;
       case 'left':
-        border = Border(left: BorderSide(color: _color, width: _width));
+          border = Border(left: fallbackSide);
         break;
       case 'right':
-        border = Border(right: BorderSide(color: _color, width: _width));
+          border = Border(right: fallbackSide);
         break;
       default:
-        border = Border(bottom: BorderSide(color: _color, width: _width));
+          border = Border(bottom: fallbackSide);
         break;
     }
+    }
+    final animated = widget.props['animated'] == true;
+    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 180)
+        .clamp(1, 600000);
 
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
         width: _length,
-        child: DecoratedBox(
-          decoration: BoxDecoration(border: border),
-          child: const SizedBox(height: 1),
-        ),
+        child: animated
+            ? AnimatedContainer(
+                duration: Duration(milliseconds: durationMs),
+                decoration: BoxDecoration(border: border),
+                child: const SizedBox(height: 1),
+              )
+            : DecoratedBox(
+                decoration: BoxDecoration(border: border),
+                child: const SizedBox(height: 1),
+              ),
       ),
     );
   }

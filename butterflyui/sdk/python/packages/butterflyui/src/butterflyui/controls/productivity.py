@@ -1072,6 +1072,10 @@ class ChatThread(Component):
         spacing: float | None = None,
         reverse: bool | None = None,
         scrollable: bool | None = None,
+        group_messages: bool | None = None,
+        show_timestamps: bool | None = None,
+        auto_scroll: bool | None = None,
+        input_placeholder: str | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1084,6 +1088,10 @@ class ChatThread(Component):
             spacing=spacing,
             reverse=reverse,
             scrollable=scrollable,
+            group_messages=group_messages,
+            show_timestamps=show_timestamps,
+            auto_scroll=auto_scroll,
+            input_placeholder=input_placeholder,
             events=events,
             **kwargs,
         )
@@ -1094,6 +1102,12 @@ class ChatThread(Component):
 
     def set_messages(self, session: Any, messages: list[Any]) -> dict[str, Any]:
         return self.invoke(session, "set_messages", {"messages": messages})
+
+    def append_message(self, session: Any, message: Mapping[str, Any]) -> dict[str, Any]:
+        return self.invoke(session, "append_message", {"message": dict(message)})
+
+    def clear(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "clear", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
@@ -1108,6 +1122,11 @@ class ChatMessage(Component):
         *,
         role: str | None = None,
         name: str | None = None,
+        timestamp: str | None = None,
+        status: str | None = None,
+        avatar: str | None = None,
+        align: str | None = None,
+        grouped: bool | None = None,
         clickable: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -1121,6 +1140,11 @@ class ChatMessage(Component):
             value=text,
             role=role,
             name=name,
+            timestamp=timestamp,
+            status=status,
+            avatar=avatar,
+            align=align,
+            grouped=grouped,
             clickable=clickable,
             events=events,
             **kwargs,
@@ -1147,6 +1171,10 @@ class Chat(ChatThread):
         spacing: float | None = None,
         reverse: bool | None = None,
         scrollable: bool | None = None,
+        group_messages: bool | None = None,
+        show_timestamps: bool | None = None,
+        auto_scroll: bool | None = None,
+        input_placeholder: str | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1159,6 +1187,10 @@ class Chat(ChatThread):
             spacing=spacing,
             reverse=reverse,
             scrollable=scrollable,
+            group_messages=group_messages,
+            show_timestamps=show_timestamps,
+            auto_scroll=auto_scroll,
+            input_placeholder=input_placeholder,
             events=events,
             props=props,
             style=style,
@@ -1176,6 +1208,11 @@ class ChatBubble(ChatMessage):
         *,
         role: str | None = None,
         name: str | None = None,
+        timestamp: str | None = None,
+        status: str | None = None,
+        avatar: str | None = None,
+        align: str | None = None,
+        grouped: bool | None = None,
         clickable: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -1187,6 +1224,11 @@ class ChatBubble(ChatMessage):
             text=text,
             role=role,
             name=name,
+            timestamp=timestamp,
+            status=status,
+            avatar=avatar,
+            align=align,
+            grouped=grouped,
             clickable=clickable,
             events=events,
             props=props,
@@ -1392,6 +1434,13 @@ class AutoForm(Component):
         title: str | None = None,
         description: str | None = None,
         submit_label: str | None = None,
+        layout: str | None = None,
+        columns: int | None = None,
+        dense: bool | None = None,
+        show_labels: bool | None = None,
+        label_width: float | None = None,
+        validation_rules: Mapping[str, Any] | None = None,
+        visibility_rules: Mapping[str, Any] | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -1406,6 +1455,13 @@ class AutoForm(Component):
             title=title,
             description=description,
             submit_label=submit_label,
+            layout=layout,
+            columns=columns,
+            dense=dense,
+            show_labels=show_labels,
+            label_width=label_width,
+            validation_rules=dict(validation_rules) if validation_rules is not None else None,
+            visibility_rules=dict(visibility_rules) if visibility_rules is not None else None,
             events=events,
             **kwargs,
         )
@@ -1417,11 +1473,17 @@ class AutoForm(Component):
     def set_values(self, session: Any, values: Mapping[str, Any]) -> dict[str, Any]:
         return self.invoke(session, "set_values", {"values": dict(values)})
 
+    def set_field_value(self, session: Any, field: str, value: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_field_value", {"field": field, "value": value})
+
     def validate(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "validate", {})
 
     def submit(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "submit", {})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

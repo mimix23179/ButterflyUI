@@ -43,6 +43,11 @@ class _BadgeControlState extends State<_BadgeControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      setState(() {
+        _value = _coerceValue(widget.props);
+      });
+    }
   }
 
   @override
@@ -69,15 +74,36 @@ class _BadgeControlState extends State<_BadgeControl> {
 
   @override
   Widget build(BuildContext context) {
-    final background = coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
-        const Color(0xff2563eb);
+    final severity = widget.props['severity']?.toString().toLowerCase();
+    final Color severityBackground = switch (severity) {
+      'success' => Theme.of(context).colorScheme.tertiaryContainer,
+      'warn' || 'warning' => Theme.of(context).colorScheme.secondaryContainer,
+      'error' || 'danger' => Theme.of(context).colorScheme.errorContainer,
+      _ => Theme.of(context).colorScheme.primary,
+    };
+    final Color severityForeground = switch (severity) {
+      'success' => Theme.of(context).colorScheme.onTertiaryContainer,
+      'warn' || 'warning' => Theme.of(context).colorScheme.onSecondaryContainer,
+      'error' || 'danger' => Theme.of(context).colorScheme.onErrorContainer,
+      _ => Theme.of(context).colorScheme.onPrimary,
+    };
+    final background =
+        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        severityBackground;
     final foreground =
-        coerceColor(widget.props['color'] ?? widget.props['text_color']) ?? Colors.white;
+        coerceColor(widget.props['color'] ?? widget.props['text_color']) ??
+        severityForeground;
     final padding = coercePadding(widget.props['padding']) ??
         const EdgeInsets.symmetric(horizontal: 8, vertical: 3);
+    final dot = widget.props['dot'] == true;
+    final pulse = widget.props['pulse'] == true;
+    final count = coerceOptionalInt(widget.props['count']);
+    final showCount = count != null;
+
+    final textValue = showCount ? count.toString() : _value;
 
     Widget child = Text(
-      _value,
+      textValue,
       style: TextStyle(
         color: foreground,
         fontSize: coerceDouble(widget.props['font_size']) ?? 11,
@@ -93,19 +119,41 @@ class _BadgeControlState extends State<_BadgeControl> {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(
-          coerceDouble(widget.props['radius']) ?? 999,
+          coerceDouble(widget.props['radius']) ?? (dot ? 9999 : 999),
         ),
       ),
-      child: Padding(padding: padding, child: child),
+      child: Padding(
+        padding: dot
+            ? EdgeInsets.all((coerceDouble(widget.props['dot_size']) ?? 8) / 2)
+            : padding,
+        child: dot
+            ? SizedBox(
+                width: coerceDouble(widget.props['dot_size']) ?? 8,
+                height: coerceDouble(widget.props['dot_size']) ?? 8,
+              )
+            : child,
+      ),
     );
+
+    final Widget rendered = pulse
+        ? TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.95, end: 1.05),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeInOut,
+            builder: (context, scale, pulseChild) {
+              return Transform.scale(scale: scale, child: pulseChild);
+            },
+            child: content,
+          )
+        : content;
 
     if (widget.props['clickable'] == true) {
       return InkWell(
-        onTap: () => widget.sendEvent(widget.controlId, 'click', {'value': _value}),
-        child: content,
+        onTap: () => widget.sendEvent(widget.controlId, 'click', {'value': textValue}),
+        child: rendered,
       );
     }
-    return content;
+    return rendered;
   }
 }
 

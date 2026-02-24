@@ -6,59 +6,168 @@ import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 Widget buildToastHostControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final items = _coerceItems(props['items'] ?? props['toasts']);
-  final maxItems = (coerceOptionalInt(props['max_items']) ?? 4).clamp(1, 32);
-  final spacing = coerceDouble(props['spacing']) ?? 8.0;
-  final showLatestOnTop = props['latest_on_top'] == null
-      ? true
-      : (props['latest_on_top'] == true);
-  final dismissible = props['dismissible'] == null
-      ? true
-      : (props['dismissible'] == true);
+  return _ToastHostControl(
+    controlId: controlId,
+    props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
 
-  var toRender = List<Map<String, Object?>>.from(items);
-  if (showLatestOnTop) {
-    toRender = toRender.reversed.toList();
+class _ToastHostControl extends StatefulWidget {
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  const _ToastHostControl({
+    required this.controlId,
+    required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  @override
+  State<_ToastHostControl> createState() => _ToastHostControlState();
+}
+
+class _ToastHostControlState extends State<_ToastHostControl> {
+  late List<Map<String, Object?>> _items =
+      _coerceItems(widget.props['items'] ?? widget.props['toasts']);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
-  if (toRender.length > maxItems) {
-    toRender.removeRange(maxItems, toRender.length);
+
+  @override
+  void didUpdateWidget(covariant _ToastHostControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (oldWidget.props != widget.props) {
+      _items = _coerceItems(widget.props['items'] ?? widget.props['toasts']);
+    }
   }
 
-  final alignment = _resolveAlignment(props['position']?.toString());
-  final padding =
-      coercePadding(props['padding']) ??
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 12);
+  @override
+  void dispose() {
+    widget.unregisterInvokeHandler(widget.controlId);
+    super.dispose();
+  }
 
-  return IgnorePointer(
-    ignoring: false,
-    child: Align(
-      alignment: alignment,
-      child: Padding(
-        padding: padding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: _isRight(alignment)
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          children: toRender
-              .map(
-                (item) => Padding(
-                  padding: EdgeInsets.only(bottom: spacing),
-                  child: _ToastCard(
-                    controlId: controlId,
-                    item: item,
-                    dismissible: dismissible,
-                    sendEvent: sendEvent,
+  int get _maxItems =>
+      (coerceOptionalInt(widget.props['max_items']) ?? 4).clamp(1, 32);
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'set_items':
+        setState(() {
+          _items = _coerceItems(args['items'] ?? args['toasts']);
+        });
+        return null;
+      case 'push':
+      case 'add_item':
+        {
+          final raw = args['item'];
+          if (raw is! Map) return null;
+          final item = coerceObjectMap(raw);
+          setState(() {
+            _items.add(item);
+            if (_items.length > _maxItems) {
+              _items = _items.sublist(_items.length - _maxItems);
+            }
+          });
+          return null;
+        }
+      case 'dismiss':
+      case 'remove':
+        {
+          final id = args['id']?.toString() ?? '';
+          if (id.isEmpty) return null;
+          setState(() {
+            _items.removeWhere(
+              (item) =>
+                  (item['id']?.toString() ?? item['key']?.toString() ?? '') == id,
+            );
+          });
+          return null;
+        }
+      case 'clear':
+      case 'clear_all':
+        setState(() {
+          _items = const <Map<String, Object?>>[];
+        });
+        return null;
+      case 'get_items':
+        return List<Map<String, Object?>>.from(_items, growable: false);
+      default:
+        throw UnsupportedError('Unknown toast_host method: $method');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = coerceDouble(widget.props['spacing']) ?? 8.0;
+    final showLatestOnTop = widget.props['latest_on_top'] == null
+        ? true
+        : (widget.props['latest_on_top'] == true);
+    final dismissible = widget.props['dismissible'] == null
+        ? true
+        : (widget.props['dismissible'] == true);
+
+    var toRender = List<Map<String, Object?>>.from(_items);
+    if (showLatestOnTop) {
+      toRender = toRender.reversed.toList();
+    }
+    if (toRender.length > _maxItems) {
+      toRender.removeRange(_maxItems, toRender.length);
+    }
+
+    final alignment = _resolveAlignment(widget.props['position']?.toString());
+    final padding =
+        coercePadding(widget.props['padding']) ??
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 12);
+
+    return IgnorePointer(
+      ignoring: false,
+      child: Align(
+        alignment: alignment,
+        child: Padding(
+          padding: padding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: _isRight(alignment)
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: toRender
+                .map(
+                  (item) => Padding(
+                    padding: EdgeInsets.only(bottom: spacing),
+                    child: _ToastCard(
+                      controlId: widget.controlId,
+                      item: item,
+                      dismissible: dismissible,
+                      sendEvent: widget.sendEvent,
+                    ),
                   ),
-                ),
-              )
-              .toList(),
+                )
+                .toList(),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _ToastCard extends StatelessWidget {

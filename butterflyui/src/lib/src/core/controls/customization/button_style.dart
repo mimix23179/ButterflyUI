@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -47,6 +48,13 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      final options = _coerceOptions(widget.props);
+      setState(() {
+        _options = options;
+        _current = _coerceCurrent(widget.props, options);
+      });
+    }
   }
 
   @override
@@ -68,7 +76,7 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
         widget.sendEvent(widget.controlId, 'change', {'value': value});
         return value;
       case 'set_options':
-        final next = _coerceOptions({'options': args['options']});
+        final next = _coerceOptions({'options': args['options'] ?? args['items']});
         setState(() {
           _options = next;
           if (!_options.any((item) => item.id == _current)) {
@@ -79,6 +87,16 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
           'options': [for (final option in _options) {'id': option.id, 'label': option.label}],
         });
         return _current;
+      case 'set_state_style':
+        final state = (args['state'] ?? '').toString();
+        final style = args['style'] is Map
+            ? coerceObjectMap(args['style'] as Map)
+            : <String, Object?>{};
+        widget.sendEvent(widget.controlId, 'state_style_change', {
+          'state': state,
+          'style': style,
+        });
+        return true;
       default:
         throw UnsupportedError('Unknown button_style method: $method');
     }
@@ -86,28 +104,67 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    final base = widget.props['base'] is Map
+        ? coerceObjectMap(widget.props['base'] as Map)
+        : const <String, Object?>{};
+    final hover = widget.props['hover'] is Map
+        ? coerceObjectMap(widget.props['hover'] as Map)
+        : const <String, Object?>{};
+    final pressed = widget.props['pressed'] is Map
+        ? coerceObjectMap(widget.props['pressed'] as Map)
+        : const <String, Object?>{};
+
+    final previewBg = coerceColor(base['bgcolor'] ?? base['background']) ??
+        Theme.of(context).colorScheme.primary;
+    final previewFg = coerceColor(base['color'] ?? base['text_color']) ??
+        Theme.of(context).colorScheme.onPrimary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final option in _options)
-          ChoiceChip(
-            label: Text(option.label),
-            selected: option.id == _current,
-            onSelected: (_) {
-              setState(() {
-                _current = option.id;
-              });
-              widget.sendEvent(widget.controlId, 'change', {'value': option.id});
-            },
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final option in _options)
+              ChoiceChip(
+                label: Text(option.label),
+                selected: option.id == _current,
+                onSelected: (_) {
+                  setState(() {
+                    _current = option.id;
+                  });
+                  widget.sendEvent(widget.controlId, 'change', {'value': option.id});
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: previewBg,
+                foregroundColor: previewFg,
+              ),
+              child: const Text('Preview'),
+            ),
+            const SizedBox(width: 8),
+            if (hover.isNotEmpty)
+              Text('hover', style: Theme.of(context).textTheme.labelSmall),
+            if (hover.isNotEmpty) const SizedBox(width: 6),
+            if (pressed.isNotEmpty)
+              Text('pressed', style: Theme.of(context).textTheme.labelSmall),
+          ],
+        ),
       ],
     );
   }
 }
 
 List<_ButtonStylePreset> _coerceOptions(Map<String, Object?> props) {
-  final optionsRaw = props['options'];
+  final optionsRaw = props['options'] ?? props['items'];
   final options = <_ButtonStylePreset>[];
   if (optionsRaw is List) {
     for (var i = 0; i < optionsRaw.length; i += 1) {

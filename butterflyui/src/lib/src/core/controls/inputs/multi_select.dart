@@ -10,6 +10,8 @@ class ButterflyUIMultiSelect extends StatefulWidget {
   final bool enabled;
   final bool dense;
   final String? label;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUIMultiSelect({
@@ -20,6 +22,8 @@ class ButterflyUIMultiSelect extends StatefulWidget {
     required this.enabled,
     required this.dense,
     required this.label,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -29,6 +33,15 @@ class ButterflyUIMultiSelect extends StatefulWidget {
 
 class _ButterflyUIMultiSelectState extends State<ButterflyUIMultiSelect> {
   late Set<String> _selected = Set<String>.from(widget.selected);
+  late List<ButterflyUIOption> _options = List<ButterflyUIOption>.from(widget.options);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
 
   @override
   void didUpdateWidget(covariant ButterflyUIMultiSelect oldWidget) {
@@ -36,11 +49,59 @@ class _ButterflyUIMultiSelectState extends State<ButterflyUIMultiSelect> {
     if (oldWidget.selected != widget.selected) {
       _selected = Set<String>.from(widget.selected);
     }
+    if (oldWidget.options != widget.options) {
+      _options = List<ButterflyUIOption>.from(widget.options);
+    }
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_values':
+        return _selected.toList(growable: false);
+      case 'set_values':
+        final next = <String>{};
+        final values = args['values'];
+        if (values is List) {
+          for (final item in values) {
+            final text = item?.toString();
+            if (text != null && text.isNotEmpty) {
+              next.add(text);
+            }
+          }
+        }
+        setState(() {
+          _selected = next;
+        });
+        return _selected.toList(growable: false);
+      case 'set_options':
+        setState(() {
+          _options = coerceOptionList(args['options'] ?? args['items']);
+        });
+        return {'count': _options.length};
+      default:
+        throw UnsupportedError('Unknown multi_select method: $method');
+    }
   }
 
   void _emit(ButterflyUIOption option) {
     final ids = _selected.toList(growable: false);
-    final labels = widget.options
+    final labels = _options
         .where((item) => _selected.contains(item.key))
         .map((item) => item.label)
         .toList(growable: false);
@@ -60,7 +121,7 @@ class _ButterflyUIMultiSelectState extends State<ButterflyUIMultiSelect> {
 
   @override
   Widget build(BuildContext context) {
-    final chips = widget.options
+    final chips = _options
         .map(
           (option) => FilterChip(
             label: Text(option.label),
@@ -99,6 +160,8 @@ class _ButterflyUIMultiSelectState extends State<ButterflyUIMultiSelect> {
 Widget buildMultiSelectControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final options = coerceOptionList(props['options'] ?? props['items']);
@@ -121,6 +184,8 @@ Widget buildMultiSelectControl(
     enabled: props['enabled'] == null ? true : (props['enabled'] == true),
     dense: props['dense'] == true,
     label: props['label']?.toString(),
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }

@@ -9,6 +9,7 @@ __all__ = [
     "Text",
     "Icon",
     "EmojiIcon",
+    "Avatar",
     "Image",
     "Divider",
     "MarkdownView",
@@ -95,6 +96,12 @@ class EmojiIcon(Component):
         label: str | None = None,
         size: float | None = None,
         color: Any | None = None,
+        fallback: str | None = None,
+        variant: str | None = None,
+        background: Any | None = None,
+        radius: float | None = None,
+        padding: Any | None = None,
+        enabled: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -107,6 +114,12 @@ class EmojiIcon(Component):
             label=label,
             size=size,
             color=color,
+            fallback=fallback,
+            variant=variant,
+            background=background,
+            radius=radius,
+            padding=padding,
+            enabled=enabled,
             events=events,
             **kwargs,
         )
@@ -116,6 +129,59 @@ class EmojiIcon(Component):
         return self.invoke(session, "set_emoji", {"emoji": emoji})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+
+class Avatar(Component):
+    control_type = "avatar"
+
+    def __init__(
+        self,
+        src: str | None = None,
+        *,
+        image: str | None = None,
+        name: str | None = None,
+        initials: str | None = None,
+        icon: str | None = None,
+        size: float | None = None,
+        radius: float | None = None,
+        color: Any | None = None,
+        bgcolor: Any | None = None,
+        status: str | None = None,
+        badge: Any | None = None,
+        enabled: bool | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        merged = merge_props(
+            props,
+            src=src if src is not None else image,
+            image=image if image is not None else src,
+            name=name,
+            initials=initials,
+            icon=icon,
+            size=size,
+            radius=radius,
+            color=color,
+            bgcolor=bgcolor,
+            status=status,
+            badge=badge,
+            enabled=enabled,
+            events=events,
+            **kwargs,
+        )
+        super().__init__(props=merged, style=style, strict=strict)
+
+    def set_src(self, session: Any, src: str) -> dict[str, Any]:
+        return self.invoke(session, "set_src", {"src": src})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
@@ -849,8 +915,13 @@ class BarChart(Component):
         values: list[Any] | None = None,
         points: list[Any] | None = None,
         labels: list[str] | None = None,
+        datasets: list[Mapping[str, Any]] | None = None,
+        grouped: bool | None = None,
+        stacked: bool | None = None,
         fill: bool | None = None,
         color: Any | None = None,
+        animate: bool | None = None,
+        show_tooltip: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -862,16 +933,30 @@ class BarChart(Component):
             values=values if values is not None else points,
             points=points if points is not None else values,
             labels=labels,
+            datasets=[dict(item) for item in (datasets or [])],
+            grouped=grouped,
+            stacked=stacked,
             chart_type="bar",
             fill=fill,
             color=color,
+            animate=animate,
+            show_tooltip=show_tooltip,
             events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
 
-    def set_data(self, session: Any, values: list[Any], labels: list[str] | None = None) -> dict[str, Any]:
-        return self.invoke(session, "set_data", {"values": values, "labels": labels})
+    def set_data(
+        self,
+        session: Any,
+        values: list[Any],
+        labels: list[str] | None = None,
+        datasets: list[Mapping[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {"values": values, "labels": labels}
+        if datasets is not None:
+            payload["datasets"] = [dict(item) for item in datasets]
+        return self.invoke(session, "set_data", payload)
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

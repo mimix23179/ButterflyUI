@@ -12,15 +12,30 @@ Widget buildNeonEdgeControl(
   final color = coerceColor(props['color']) ?? const Color(0xFF22D3EE);
   final width = coerceDouble(props['width']) ?? 1.6;
   final glow = coerceDouble(props['glow']) ?? 10;
+  final spread = coerceDouble(props['spread']) ?? 0;
   final radius = coerceDouble(props['radius']) ?? 12;
+  final animated = props['animated'] == true;
+  final durationMs = (coerceOptionalInt(props['duration_ms']) ?? 300).clamp(1, 600000);
+  final decoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(color: color.withOpacity(0.9), width: width),
+    boxShadow: [
+      BoxShadow(
+        color: color.withOpacity(0.55),
+        blurRadius: glow,
+        spreadRadius: spread,
+      ),
+    ],
+  );
+  if (animated) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: durationMs),
+      decoration: decoration,
+      child: child,
+    );
+  }
   return Container(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: color.withOpacity(0.9), width: width),
-      boxShadow: [
-        BoxShadow(color: color.withOpacity(0.55), blurRadius: glow),
-      ],
-    ),
+    decoration: decoration,
     child: child,
   );
 }
@@ -81,6 +96,12 @@ class _GrainOverlayControlState extends State<_GrainOverlayControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      final nextSeed = coerceOptionalInt(widget.props['seed']);
+      if (nextSeed != null && nextSeed != _seed) {
+        setState(() => _seed = nextSeed);
+      }
+    }
   }
 
   @override
@@ -97,6 +118,15 @@ class _GrainOverlayControlState extends State<_GrainOverlayControl> {
         setState(() => _seed += 1);
         widget.sendEvent(widget.controlId, 'trigger', {'seed': _seed});
         return true;
+      case 'set_props':
+        if (args['props'] is Map) {
+          final next = coerceObjectMap(args['props'] as Map);
+          final seed = coerceOptionalInt(next['seed']);
+          if (seed != null) {
+            setState(() => _seed = seed);
+          }
+        }
+        return {'seed': _seed};
       case 'emit':
         final event = (args['event'] ?? 'custom').toString();
         final payload = args['payload'] is Map
@@ -171,11 +201,14 @@ class _NoiseDisplacementControl extends StatefulWidget {
 class _NoiseDisplacementControlState extends State<_NoiseDisplacementControl> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   int _seed = 0;
+  double _strength = 3;
+  double _speed = 1;
+  bool _playing = false;
 
   @override
   void initState() {
     super.initState();
-    _controller.duration = Duration(milliseconds: (coerceOptionalInt(widget.props['duration_ms']) ?? 350).clamp(50, 4000));
+    _syncFromProps(widget.props);
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -185,6 +218,9 @@ class _NoiseDisplacementControlState extends State<_NoiseDisplacementControl> wi
     if (oldWidget.controlId != widget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
     }
   }
 
@@ -198,10 +234,42 @@ class _NoiseDisplacementControlState extends State<_NoiseDisplacementControl> wi
   Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
     switch (method) {
       case 'trigger':
+        final directStrength = coerceDouble(args['strength']);
+        if (directStrength != null) {
+          _strength = directStrength;
+        }
         setState(() => _seed += 1);
         _controller.forward(from: 0);
-        widget.sendEvent(widget.controlId, 'trigger', {'seed': _seed});
+        widget.sendEvent(widget.controlId, 'trigger', {'seed': _seed, 'strength': _strength});
         return true;
+      case 'set_strength':
+        final value = coerceDouble(args['value']);
+        if (value != null) {
+          setState(() {
+            _strength = value;
+          });
+        }
+        return _strength;
+      case 'set_speed':
+        final value = coerceDouble(args['value']);
+        if (value != null) {
+          setState(() {
+            _speed = value.clamp(0.1, 6).toDouble();
+            _controller.duration = _resolveDuration(widget.props, _speed);
+          });
+        }
+        return _speed;
+      case 'set_playing':
+        final value = args['value'] == true;
+        setState(() {
+          _playing = value;
+          if (_playing) {
+            _controller.repeat(reverse: true);
+          } else {
+            _controller.stop();
+          }
+        });
+        return _playing;
       case 'emit':
         final event = (args['event'] ?? 'custom').toString();
         final payload = args['payload'] is Map
@@ -216,17 +284,44 @@ class _NoiseDisplacementControlState extends State<_NoiseDisplacementControl> wi
 
   @override
   Widget build(BuildContext context) {
-    final strength = coerceDouble(widget.props['strength']) ?? 3;
     return AnimatedBuilder(
       animation: _controller,
       child: widget.child,
       builder: (context, child) {
         final random = math.Random((_controller.value * 1000).floor() + _seed);
-        final dx = (random.nextDouble() - 0.5) * strength * (1 - _controller.value);
-        final dy = (random.nextDouble() - 0.5) * strength * (1 - _controller.value);
+        final taper = _playing ? 1.0 : (1 - _controller.value);
+        final axis = (widget.props['axis'] ?? 'both').toString().toLowerCase();
+        final deltaX = (random.nextDouble() - 0.5) * _strength * taper;
+        final deltaY = (random.nextDouble() - 0.5) * _strength * taper;
+        final dx = axis == 'y' ? 0.0 : deltaX;
+        final dy = axis == 'x' ? 0.0 : deltaY;
         return Transform.translate(offset: Offset(dx, dy), child: child);
       },
     );
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _strength = coerceDouble(props['strength']) ?? _strength;
+    _speed = (coerceDouble(props['speed']) ?? _speed).clamp(0.1, 6).toDouble();
+    _controller.duration = _resolveDuration(props, _speed);
+    final shouldPlay =
+        props['play'] == true ||
+        props['playing'] == true ||
+        props['autoplay'] == true ||
+        props['animated'] == true;
+    if (shouldPlay != _playing) {
+      _playing = shouldPlay;
+      if (_playing) {
+        _controller.repeat(reverse: true);
+      } else {
+        _controller.stop();
+      }
+    }
+  }
+
+  Duration _resolveDuration(Map<String, Object?> props, double speed) {
+    final base = (coerceOptionalInt(props['duration_ms']) ?? 350).clamp(50, 4000);
+    return Duration(milliseconds: (base / speed).round().clamp(30, 4000));
   }
 }
 
@@ -282,6 +377,12 @@ class _NoiseFieldControlState extends State<_NoiseFieldControl> {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+    if (oldWidget.props != widget.props) {
+      final nextSeed = coerceOptionalInt(widget.props['seed']);
+      if (nextSeed != null && nextSeed != _seed) {
+        setState(() => _seed = nextSeed);
+      }
+    }
   }
 
   @override
@@ -318,6 +419,7 @@ class _NoiseFieldControlState extends State<_NoiseFieldControl> {
     final intensity = (coerceDouble(widget.props['intensity']) ?? 0.35).clamp(0, 1).toDouble();
     final color = coerceColor(widget.props['color']) ?? Colors.white;
     final height = coerceDouble(widget.props['height']) ?? 100;
+    final animated = widget.props['animated'] == true;
 
     return GestureDetector(
       onTap: () {
@@ -326,8 +428,18 @@ class _NoiseFieldControlState extends State<_NoiseFieldControl> {
       },
       child: SizedBox(
         height: height,
-        child: CustomPaint(
-          painter: _NoiseFieldPainter(seed: _seed, intensity: intensity, color: color),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: animated ? 1 : 0),
+          duration: const Duration(milliseconds: 350),
+          builder: (context, anim, _) {
+            return CustomPaint(
+              painter: _NoiseFieldPainter(
+                seed: _seed + (anim * 1000).round(),
+                intensity: intensity,
+                color: color,
+              ),
+            );
+          },
         ),
       ),
     );

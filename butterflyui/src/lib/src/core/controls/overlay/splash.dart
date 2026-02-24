@@ -44,12 +44,19 @@ class _SplashControl extends StatefulWidget {
 
 class _SplashControlState extends State<_SplashControl> {
   bool _active = false;
+  double _progress = 0;
 
   @override
   void initState() {
     super.initState();
     _active = widget.props['active'] == true;
+    _progress = (coerceDouble(widget.props['progress']) ?? 0).clamp(0, 1).toDouble();
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    if (!_active && widget.props['auto_start'] == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _trigger();
+      });
+    }
   }
 
   @override
@@ -58,6 +65,12 @@ class _SplashControlState extends State<_SplashControl> {
     if (oldWidget.controlId != widget.controlId) {
       oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (oldWidget.props['active'] != widget.props['active']) {
+      _active = widget.props['active'] == true;
+    }
+    if (oldWidget.props['progress'] != widget.props['progress']) {
+      _progress = (coerceDouble(widget.props['progress']) ?? _progress).clamp(0, 1).toDouble();
     }
   }
 
@@ -71,6 +84,28 @@ class _SplashControlState extends State<_SplashControl> {
     switch (method) {
       case 'trigger':
         _trigger();
+        return true;
+      case 'start':
+        _trigger();
+        return true;
+      case 'stop':
+        setState(() => _active = false);
+        widget.sendEvent(widget.controlId, 'complete', {'skipped': false, 'progress': _progress});
+        return true;
+      case 'set_progress':
+        final value = coerceDouble(args['value']);
+        if (value != null) {
+          setState(() {
+            _progress = value.clamp(0, 1).toDouble();
+          });
+          widget.sendEvent(widget.controlId, 'progress', {'value': _progress});
+        }
+        return _progress;
+      case 'skip':
+        if (widget.props['skip_enabled'] == true) {
+          setState(() => _active = false);
+          widget.sendEvent(widget.controlId, 'skip', {'progress': _progress});
+        }
         return true;
       case 'emit':
         final event = (args['event'] ?? 'custom').toString();
@@ -87,43 +122,94 @@ class _SplashControlState extends State<_SplashControl> {
   void _trigger() {
     setState(() => _active = true);
     widget.sendEvent(widget.controlId, 'splash', {'active': true});
-    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 300).clamp(50, 4000);
+    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 900).clamp(50, 10000);
+    final minDuration = (coerceOptionalInt(widget.props['min_duration_ms']) ?? 0).clamp(0, 10000);
+    final totalMs = durationMs > minDuration ? durationMs : minDuration;
     Future<void>.delayed(Duration(milliseconds: durationMs), () {
       if (!mounted) return;
-      setState(() => _active = false);
+      if (widget.props['hide_on_complete'] != false) {
+        setState(() => _active = false);
+      }
+      widget.sendEvent(widget.controlId, 'complete', {'skipped': false, 'progress': _progress});
     });
+    if (totalMs > 0) {
+      Future<void>.delayed(Duration(milliseconds: totalMs), () {
+        if (!mounted) return;
+        if (_progress < 1) {
+          setState(() => _progress = 1);
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final radius = coerceDouble(widget.props['radius']) ?? 20;
     final splashColor = coerceColor(widget.props['color']) ?? Theme.of(context).colorScheme.primary.withOpacity(0.22);
+    final background = coerceColor(widget.props['background']) ?? Colors.transparent;
+    final showProgress = widget.props['show_progress'] == true || widget.props['loading'] == true;
+    final title = widget.props['title']?.toString();
+    final subtitle = widget.props['subtitle']?.toString() ?? widget.props['message']?.toString();
+    final skipEnabled = widget.props['skip_enabled'] == true;
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(radius),
-        splashColor: splashColor,
-        onTap: () {
-          _trigger();
-          widget.sendEvent(widget.controlId, 'tap', const {});
-        },
-        child: Stack(
-          children: [
-            widget.child,
-            if (_active)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(radius),
-                      color: splashColor.withOpacity(0.35),
+      child: Stack(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(radius),
+            splashColor: splashColor,
+            onTap: () {
+              _trigger();
+              widget.sendEvent(widget.controlId, 'tap', const {});
+            },
+            child: widget.child,
+          ),
+          if (_active)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  color: background == Colors.transparent
+                      ? splashColor.withOpacity(0.35)
+                      : background,
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (title != null && title.isNotEmpty)
+                          Text(title, style: Theme.of(context).textTheme.titleMedium),
+                        if (subtitle != null && subtitle.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                          ),
+                        if (showProgress)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: SizedBox(
+                              width: 220,
+                              child: LinearProgressIndicator(value: _progress <= 0 ? null : _progress),
+                            ),
+                          ),
+                        if (skipEnabled)
+                          TextButton(
+                            onPressed: () {
+                              setState(() => _active = false);
+                              widget.sendEvent(widget.controlId, 'skip', {'progress': _progress});
+                            },
+                            child: const Text('Skip'),
+                          ),
+                      ],
                     ),
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

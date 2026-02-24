@@ -168,6 +168,13 @@ class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
         return _statePayload();
       case 'get_state':
         return _statePayload();
+      case 'emit':
+        final event = (args['event'] ?? 'change').toString();
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{};
+        _emit(event, payload);
+        return null;
       default:
         throw Exception('Unknown paginator method: $method');
     }

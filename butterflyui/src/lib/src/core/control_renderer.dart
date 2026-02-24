@@ -38,6 +38,7 @@ import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
 import 'controls/display/attachment_tile.dart';
+import 'controls/display/avatar.dart';
 import 'controls/display/canvas_control.dart';
 import 'controls/display/download_item.dart';
 import 'controls/display/glyph.dart';
@@ -66,13 +67,12 @@ import 'controls/display/status_mark.dart';
 import 'controls/display/terminal.dart';
 import 'controls/display/typing_indicator.dart';
 import 'controls/display/vector_view.dart';
-import 'controls/productivity/editor_tab_strip.dart';
 import 'controls/productivity/editor_workspace.dart';
 import 'controls/productivity/file_system.dart';
 import 'controls/productivity/output_panel.dart';
-import 'controls/productivity/problems_panel.dart';
-import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
+import 'controls/effects/animation.dart';
+import 'controls/effects/effects.dart';
 import 'controls/effects/fold_layer.dart';
 import 'controls/effects/flow_field.dart';
 import 'controls/effects/layer.dart';
@@ -81,15 +81,18 @@ import 'controls/effects/liquid_morph.dart';
 import 'controls/effects/morphing_border.dart';
 import 'controls/effects/motion.dart';
 import 'controls/effects/parallax.dart';
+import 'controls/effects/particles.dart';
 import 'controls/effects/pixelate.dart';
 import 'controls/effects/pose.dart';
 import 'controls/effects/ripple_burst.dart';
 import 'controls/effects/particle_field.dart';
 import 'controls/effects/noise_fx.dart';
 import 'controls/effects/scanline_overlay.dart';
+import 'controls/effects/shadow.dart';
 import 'controls/effects/shimmer_shadow.dart';
 import 'controls/effects/stagger.dart';
 import 'controls/effects/tilt_hover.dart';
+import 'controls/effects/transition.dart';
 import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
 import 'controls/feedback/progress_indicator.dart';
@@ -144,11 +147,16 @@ import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
 import 'controls/layout/adjustment_panel.dart';
 import 'controls/layout/align_control.dart';
+import 'controls/layout/aspect_ratio.dart';
 import 'controls/layout/bounds_probe.dart';
+import 'controls/layout/clip.dart';
 import 'controls/layout/column.dart';
 import 'controls/layout/container.dart';
+import 'controls/layout/decorated_box.dart';
 import 'controls/layout/divider.dart';
+import 'controls/layout/fitted_box.dart';
 import 'controls/layout/page_scene.dart';
+import 'controls/layout/overflow_box.dart';
 import 'controls/layout/pane_spec.dart';
 import 'controls/layout/resizable_panel.dart';
 import 'controls/layout/row.dart';
@@ -240,6 +248,184 @@ Color _surfaceToken(CandyTokens tokens) {
 
 Color _borderToken(CandyTokens tokens) {
   return tokens.color('border') ?? _textToken(tokens).withOpacity(0.2);
+}
+
+const Set<String> _galleryModuleAliases = {
+  'toolbar',
+  'filter_bar',
+  'grid_layout',
+  'item_actions',
+  'item_badge',
+  'item_meta_row',
+  'item_preview',
+  'item_selectable',
+  'item_tile',
+  'pagination',
+  'section_header',
+  'sort_bar',
+  'empty_state',
+  'loading_skeleton',
+  'search_bar',
+  'fonts',
+  'font_picker',
+  'font_renderer',
+  'audio',
+  'audio_picker',
+  'audio_renderer',
+  'video',
+  'video_picker',
+  'video_renderer',
+  'image',
+  'image_picker',
+  'image_renderer',
+  'document',
+  'document_picker',
+  'document_renderer',
+  'item_drag_handle',
+  'item_drop_target',
+  'item_reorder_handle',
+  'item_selection_checkbox',
+  'item_selection_radio',
+  'item_selection_switch',
+  'apply',
+  'clear',
+  'select_all',
+  'deselect_all',
+  'apply_font',
+  'apply_image',
+  'set_as_wallpaper',
+  'presets',
+  'skins',
+};
+
+const Set<String> _skinsModuleAliases = {
+  'selector',
+  'preset',
+  'editor',
+  'preview',
+  'apply',
+  'clear',
+  'token_mapper',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+  'effects',
+  'particles',
+  'shaders',
+  'materials',
+  'icons',
+  'fonts',
+  'colors',
+  'background',
+  'border',
+  'shadow',
+  'outline',
+  'animation',
+  'transition',
+  'interaction',
+  'layout',
+  'responsive',
+  'effect_editor',
+  'particle_editor',
+  'shader_editor',
+  'material_editor',
+  'icon_editor',
+  'font_editor',
+  'color_editor',
+  'background_editor',
+  'border_editor',
+  'shadow_editor',
+  'outline_editor',
+};
+
+const Set<String> _terminalModuleAliases = {
+  'capabilities',
+  'command_builder',
+  'flow_gate',
+  'output_mapper',
+  'presets',
+  'progress',
+  'progress_view',
+  'prompt',
+  'raw_view',
+  'replay',
+  'session',
+  'stdin',
+  'stdin_injector',
+  'stream',
+  'stream_view',
+  'tabs',
+  'timeline',
+  'view',
+  'workbench',
+  'process_bridge',
+  'execution_lane',
+  'log_viewer',
+  'log_panel',
+};
+
+const Set<String> _studioModuleAliases = {
+  'builder',
+  'canvas',
+  'block_palette',
+  'component_palette',
+  'inspector',
+  'outline_tree',
+  'project_panel',
+  'properties_panel',
+  'responsive_toolbar',
+  'tokens_editor',
+  'actions_editor',
+  'bindings_editor',
+  'asset_browser',
+  'selection_tools',
+  'transform_box',
+  'transform_toolbar',
+};
+
+const Set<String> _codeEditorModuleAliases = {
+  'ide',
+  'editor_surface',
+  'editor_view',
+  'editor_tabs',
+  'document_tab_strip',
+  'file_tabs',
+  'workspace_explorer',
+  'explorer_tree',
+  'search_box',
+  'search_field',
+  'search_results_view',
+  'search_scope_selector',
+  'search_source',
+  'search_provider',
+  'search_history',
+  'search_intent',
+  'search_item',
+  'search_everything_panel',
+  'semantic_search',
+  'command_search',
+  'diff',
+  'diagnostic_stream',
+  'diagnostics_panel',
+  'inline_error_view',
+  'editor_intent_router',
+  'intent_router',
+  'intent_panel',
+  'intent_search',
+  'command_bar',
+  'export_panel',
+  'inspector',
+};
+
+String? _moduleFromPrefixedAlias(
+  String type,
+  String prefix,
+  Set<String> allowed,
+) {
+  if (!type.startsWith(prefix)) return null;
+  final module = type.substring(prefix.length);
+  if (!allowed.contains(module)) return null;
+  return module;
 }
 
 class ControlRenderer {
@@ -366,6 +552,91 @@ class ControlRenderer {
       return const SizedBox.shrink();
     }
 
+    final galleryAlias = _moduleFromPrefixedAlias(
+      type,
+      'gallery_',
+      _galleryModuleAliases,
+    );
+    if (galleryAlias != null) {
+      return buildGalleryFamilyControl(
+        controlId,
+        <String, Object?>{...props, 'module': galleryAlias},
+        rawChildren,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
+    }
+
+    final skinsAlias = _moduleFromPrefixedAlias(
+      type,
+      'skins_',
+      _skinsModuleAliases,
+    );
+    if (skinsAlias != null) {
+      return buildSkinsFamilyControl(
+        controlId,
+        <String, Object?>{...props, 'module': skinsAlias},
+        rawChildren,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
+    }
+
+    final terminalAlias = _moduleFromPrefixedAlias(
+      type,
+      'terminal_',
+      _terminalModuleAliases,
+    );
+    if (terminalAlias != null) {
+      return buildTerminalControl(
+        controlId,
+        <String, Object?>{...props, 'module': terminalAlias},
+        rawChildren,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
+    }
+
+    final studioAlias = _moduleFromPrefixedAlias(
+      type,
+      'studio_',
+      _studioModuleAliases,
+    );
+    if (studioAlias != null) {
+      return buildStudioControl(
+        controlId,
+        <String, Object?>{...props, 'module': studioAlias},
+        rawChildren,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
+    }
+
+    final codeEditorAlias = _moduleFromPrefixedAlias(
+      type,
+      'code_editor_',
+      _codeEditorModuleAliases,
+    );
+    if (codeEditorAlias != null) {
+      return buildCodeEditorControl(
+        controlId,
+        <String, Object?>{...props, 'module': codeEditorAlias},
+        rawChildren,
+        context.buildChild,
+        context.registerInvokeHandler,
+        context.unregisterInvokeHandler,
+        context.sendEvent,
+      );
+    }
+
     switch (type) {
       case 'page':
         {
@@ -414,6 +685,9 @@ class ControlRenderer {
       case 'container':
         return buildContainerControl(props, rawChildren, context.buildChild);
 
+      case 'decorated_box':
+        return buildDecoratedBoxControl(props, rawChildren, context.buildChild);
+
       case 'frame':
         return buildFrameControl(props, rawChildren, context.buildChild);
 
@@ -449,6 +723,18 @@ class ControlRenderer {
           context.unregisterInvokeHandler,
           context.sendEvent,
         );
+
+      case 'aspect_ratio':
+        return buildAspectRatioControl(props, rawChildren, context.buildChild);
+
+      case 'overflow_box':
+        return buildOverflowBoxControl(props, rawChildren, context.buildChild);
+
+      case 'fitted_box':
+        return buildFittedBoxControl(props, rawChildren, context.buildChild);
+
+      case 'clip':
+        return buildClipControl(props, rawChildren, context.buildChild);
 
       case 'candy':
         return buildCandyFamilyControl(
@@ -531,6 +817,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -730,7 +1018,13 @@ class ControlRenderer {
 
       case 'markdown':
       case 'markdown_view':
-        return buildMarkdownViewControl(props);
+        return buildMarkdownViewControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'rich_text_editor':
       case 'rich_text':
@@ -746,7 +1040,13 @@ class ControlRenderer {
       case 'code':
       case 'code_block':
       case 'code_view':
-        return buildCodeViewControl(props);
+        return buildCodeViewControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'diff_view':
       case 'diff':
@@ -758,9 +1058,21 @@ class ControlRenderer {
       case 'bar_chart':
       case 'bar_plot':
         if ((type == 'line_plot')) {
-          return buildLinePlotControl(controlId, props, context.sendEvent);
+          return buildLinePlotControl(
+            controlId,
+            props,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
+            context.sendEvent,
+          );
         }
-        return buildChartControl(controlId, props, context.sendEvent);
+        return buildChartControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'artifact_card':
       case 'result_card':
@@ -794,7 +1106,13 @@ class ControlRenderer {
 
       case 'sparkline':
       case 'spark_plot':
-        return buildSparklineControl(props);
+        return buildSparklineControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'html':
       case 'html_view':
@@ -813,6 +1131,8 @@ class ControlRenderer {
           controlId,
           type == 'semantic_search'
               ? <String, Object?>{...props, 'module': 'semantic_search'}
+              : type == 'ide'
+              ? <String, Object?>{...props, 'module': 'ide'}
               : props,
           rawChildren,
           context.buildChild,
@@ -839,7 +1159,12 @@ class ControlRenderer {
       case 'transform_box':
         return buildStudioControl(
           controlId,
-          (type == 'selection_tools' || type == 'transform_box')
+          type.startsWith('studio_')
+              ? <String, Object?>{
+                  ...props,
+                  'module': type.substring('studio_'.length),
+                }
+              : (type == 'selection_tools' || type == 'transform_box')
               ? <String, Object?>{...props, 'module': type}
               : props,
           rawChildren,
@@ -852,22 +1177,66 @@ class ControlRenderer {
       case 'editor_tab_strip':
       case 'editor_tabs':
       case 'document_tab_strip':
-        return buildEditorTabStripControl(controlId, props, context.sendEvent);
+        return buildCodeEditorControl(
+          controlId,
+          <String, Object?>{
+            ...props,
+            'module': type == 'editor_tab_strip' ? 'document_tab_strip' : type,
+          },
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'workspace_tree':
       case 'workspace_explorer':
       case 'explorer_tree':
-        return buildWorkspaceTreeControl(controlId, props, context.sendEvent);
+        return buildCodeEditorControl(
+          controlId,
+          <String, Object?>{
+            ...props,
+            'module': type == 'workspace_tree' ? 'workspace_explorer' : type,
+          },
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'problems_panel':
       case 'diagnostics_panel':
-        return buildProblemsPanelControl(controlId, props, context.sendEvent);
+        return buildCodeEditorControl(
+          controlId,
+          <String, Object?>{
+            ...props,
+            'module': type == 'problems_panel' ? 'diagnostics_panel' : type,
+          },
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'output_panel':
-      case 'log_panel':
         return buildOutputPanelControl(
           controlId,
           props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'log_panel':
+      case 'log_viewer':
+        return buildTerminalControl(
+          controlId,
+          <String, Object?>{...props, 'module': type},
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -893,6 +1262,9 @@ class ControlRenderer {
 
       case 'emoji_icon':
         return buildEmojiIconControl(controlId, props, context.sendEvent);
+
+      case 'avatar':
+        return buildAvatarControl(controlId, props, context.sendEvent);
 
       case 'glyph':
         return buildGlyphControl(props);
@@ -1158,12 +1530,24 @@ class ControlRenderer {
 
       case 'multi_select':
       case 'multi_pick':
-        return buildMultiSelectControl(controlId, props, context.sendEvent);
+        return buildMultiSelectControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'combobox':
       case 'combo_box':
       case 'dropdown':
-        return buildComboboxControl(controlId, props, context.sendEvent);
+        return buildComboboxControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'date_picker':
       case 'date_select':
@@ -1198,7 +1582,13 @@ class ControlRenderer {
       case 'chip_group':
       case 'tag_filter_bar':
       case 'filter_chips_bar':
-        return buildChipGroupControl(controlId, props, context.sendEvent);
+        return buildChipGroupControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'chip':
         return buildChipControl(
@@ -1303,7 +1693,7 @@ class ControlRenderer {
           return ButterflyUIModal(
             controlId: controlId,
             child: child,
-            open: props['open'] == true,
+            initialOpen: props['open'] == true,
             dismissible: props['dismissible'] == null
                 ? true
                 : (props['dismissible'] == true),
@@ -1333,6 +1723,8 @@ class ControlRenderer {
               props['source_rect'] ?? transition['origin'],
             ),
             scrimColor: coerceColor(props['scrim_color']),
+            registerInvokeHandler: context.registerInvokeHandler,
+            unregisterInvokeHandler: context.unregisterInvokeHandler,
             sendEvent: context.sendEvent,
           );
         }
@@ -1480,7 +1872,13 @@ class ControlRenderer {
 
       case 'toast_host':
       case 'notification_host':
-        return buildToastHostControl(controlId, props, context.sendEvent);
+        return buildToastHostControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'notification_center':
         return buildNotificationCenterControl(
@@ -1510,7 +1908,13 @@ class ControlRenderer {
 
       case 'progress_indicator':
       case 'progress':
-        return buildProgressIndicatorControl(props);
+        return buildProgressIndicatorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'skeleton':
         return buildSkeletonControl(
@@ -1660,7 +2064,8 @@ class ControlRenderer {
           emitOnSearchChange: props['emit_on_search_change'] == null
               ? true
               : (props['emit_on_search_change'] == true),
-          searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+          searchDebounceMs:
+              coerceOptionalInt(props['search_debounce_ms']) ?? 180,
           events: _coerceStringList(props['events']).toSet(),
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
@@ -1706,7 +2111,8 @@ class ControlRenderer {
             emitOnSearchChange: props['emit_on_search_change'] == null
                 ? true
                 : (props['emit_on_search_change'] == true),
-            searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+            searchDebounceMs:
+                coerceOptionalInt(props['search_debounce_ms']) ?? 180,
             events: _coerceStringList(props['events']).toSet(),
             registerInvokeHandler: context.registerInvokeHandler,
             unregisterInvokeHandler: context.unregisterInvokeHandler,
@@ -1775,7 +2181,13 @@ class ControlRenderer {
 
       case 'list_tile':
       case 'item_tile':
-        return buildListTileControl(controlId, props, context.sendEvent);
+        return buildListTileControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'tree_view':
       case 'tree':
@@ -2201,10 +2613,20 @@ class ControlRenderer {
         return buildLiquidMorphControl(props, rawChildren, context.buildChild);
 
       case 'morphing_border':
-        return buildMorphingBorderControl(props, rawChildren, context.buildChild);
+        return buildMorphingBorderControl(
+          props,
+          rawChildren,
+          context.buildChild,
+        );
 
       case 'motion':
         return buildMotionControl(props, rawChildren, context.buildChild);
+
+      case 'animation':
+        return buildAnimationControl(props, rawChildren, context.buildChild);
+
+      case 'transition':
+        return buildTransitionControl(props, rawChildren, context.buildChild);
 
       case 'stagger':
         return buildStaggerControl(
@@ -2428,10 +2850,26 @@ class ControlRenderer {
         );
 
       case 'container_style':
-        return buildContainerStyleControl(props, rawChildren, context.buildChild);
+        return buildContainerStyleControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'gradient':
-        return buildGradientControl(props, rawChildren, context.buildChild);
+        return buildGradientControl(
+          props,
+          rawChildren,
+          context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'gradient_editor':
         return buildGradientEditorControl(
@@ -2444,6 +2882,15 @@ class ControlRenderer {
 
       case 'particle_field':
         return buildParticleFieldControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'particles':
+        return buildParticlesControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -2478,10 +2925,24 @@ class ControlRenderer {
         return buildGlowEffectControl(props, firstChildOrEmpty());
 
       case 'glass_blur':
-        return buildGlassBlurControl(props, firstChildOrEmpty());
+        return buildGlassBlurControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'chromatic_shift':
-        return buildChromaticShiftControl(props, firstChildOrEmpty());
+        return buildChromaticShiftControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'neon_edge':
         return buildNeonEdgeControl(props, firstChildOrEmpty());
@@ -2536,6 +2997,12 @@ class ControlRenderer {
 
       case 'shadow_stack':
         return buildShadowStackControl(props, firstChildOrEmpty());
+
+      case 'shadow':
+        return buildShadowControl(props, firstChildOrEmpty());
+
+      case 'effects':
+        return buildEffectsControl(props, firstChildOrEmpty());
 
       case 'confetti_burst':
         return buildConfettiBurstControl(
@@ -2838,9 +3305,7 @@ class ControlRenderer {
         spec.endOffset.dx != 0 ||
         spec.endOffset.dy != 0;
     final hasScale = spec.beginScale != 1.0 || spec.endScale != 1.0;
-    final preset = hasOffset
-        ? 'slide_and_fade'
-        : (hasScale ? 'scale' : 'fade');
+    final preset = hasOffset ? 'slide_and_fade' : (hasScale ? 'scale' : 'fade');
     return <String, Object?>{
       'preset': preset,
       'duration_ms': spec.duration.inMilliseconds,

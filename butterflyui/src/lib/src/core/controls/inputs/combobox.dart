@@ -8,9 +8,12 @@ class ButterflyUICombobox extends StatefulWidget {
   final List<ButterflyUIOption> options;
   final String value;
   final bool enabled;
+  final bool loading;
   final String? label;
   final String? hint;
   final bool dense;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUICombobox({
@@ -19,9 +22,12 @@ class ButterflyUICombobox extends StatefulWidget {
     required this.options,
     required this.value,
     required this.enabled,
+    required this.loading,
     required this.label,
     required this.hint,
     required this.dense,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -33,6 +39,16 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
+  late List<ButterflyUIOption> _options = List<ButterflyUIOption>.from(widget.options);
+  late bool _loading = widget.loading;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
 
   @override
   void didUpdateWidget(covariant ButterflyUICombobox oldWidget) {
@@ -40,12 +56,55 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
     if (oldWidget.value != widget.value && widget.value != _controller.text) {
       _controller.text = widget.value;
     }
+    if (oldWidget.options != widget.options) {
+      _options = List<ButterflyUIOption>.from(widget.options);
+    }
+    if (oldWidget.loading != widget.loading) {
+      _loading = widget.loading;
+    }
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
   }
 
   @override
   void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'get_value':
+        return _controller.text;
+      case 'set_value':
+        final value = (args['value'] ?? '').toString();
+        setState(() {
+          _controller.text = value;
+        });
+        return _controller.text;
+      case 'set_options':
+        final next = coerceOptionList(args['options'] ?? args['items']);
+        setState(() {
+          _options = next;
+        });
+        return {'count': _options.length};
+      case 'set_loading':
+        setState(() {
+          _loading = args['value'] == true;
+        });
+        return _loading;
+      default:
+        throw UnsupportedError('Unknown combobox method: $method');
+    }
   }
 
   void _emit(String value, {ButterflyUIOption? option}) {
@@ -64,11 +123,14 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
     return Autocomplete<ButterflyUIOption>(
       initialValue: TextEditingValue(text: widget.value),
       optionsBuilder: (text) {
+        if (_loading) {
+          return const Iterable<ButterflyUIOption>.empty();
+        }
         final q = text.text.trim().toLowerCase();
         if (q.isEmpty) {
-          return widget.options.where((option) => option.enabled);
+          return _options.where((option) => option.enabled);
         }
-        return widget.options.where(
+        return _options.where(
           (option) => option.enabled && option.label.toLowerCase().contains(q),
         );
       },
@@ -90,6 +152,16 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
             hintText: widget.hint,
             border: const OutlineInputBorder(),
             isDense: widget.dense,
+            suffixIcon: _loading
+                ? const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : null,
           ),
           onChanged: (value) {
             _controller.text = value;
@@ -108,6 +180,8 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
 Widget buildComboboxControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return ButterflyUICombobox(
@@ -115,9 +189,12 @@ Widget buildComboboxControl(
     options: coerceOptionList(props['options'] ?? props['items']),
     value: (props['value'] ?? props['text'] ?? '').toString(),
     enabled: props['enabled'] == null ? true : (props['enabled'] == true),
+    loading: props['loading'] == true,
     label: props['label']?.toString(),
     hint: (props['hint'] ?? props['placeholder'])?.toString(),
     dense: props['dense'] == true,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }

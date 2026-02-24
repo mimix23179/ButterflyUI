@@ -128,12 +128,18 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   bool _xtermInitialized = false;
 
   bool get _useNativeTerminal {
-    final engine = (_runtimeProps['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    final engine = (_runtimeProps['webview_engine'] ?? 'windows')
+        .toString()
+        .trim()
+        .toLowerCase();
     return engine == 'native' || engine == 'xterm';
   }
 
   bool get _useFlutterWebView {
-    final engine = (_runtimeProps['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    final engine = (_runtimeProps['webview_engine'] ?? 'windows')
+        .toString()
+        .trim()
+        .toLowerCase();
     if (engine == 'native' || engine == 'xterm') return false;
     if (engine == 'flutter' || engine == 'webview_flutter') return true;
     if (engine == 'windows' || engine == 'webview_windows') return false;
@@ -163,7 +169,8 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
 
     final oldUseFlutter = _resolveUseFlutterWebView(oldWidget.initialProps);
     final oldUseNative = _resolveUseNativeTerminal(oldWidget.initialProps);
-    if (_useFlutterWebView != oldUseFlutter || _useNativeTerminal != oldUseNative) {
+    if (_useFlutterWebView != oldUseFlutter ||
+        _useNativeTerminal != oldUseNative) {
       _xtermReady = false;
       _xtermInitialized = false;
       unawaited(_initializeXterm());
@@ -174,21 +181,29 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         if (_useNativeTerminal) {
           _nativeRenderBufferAndInput();
         } else {
-          unawaited(_runXtermJavaScript(
-            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
-          ));
+          unawaited(
+            _runXtermJavaScript(
+              'if(window.ButterflyUIXterm){window.ButterflyUIXterm.setText(${jsonEncode(_latestBuffer)});}',
+            ),
+          );
         }
       }
     }
   }
 
   bool _resolveUseNativeTerminal(Map<String, Object?> props) {
-    final engine = (props['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    final engine = (props['webview_engine'] ?? 'windows')
+        .toString()
+        .trim()
+        .toLowerCase();
     return engine == 'native' || engine == 'xterm';
   }
 
   bool _resolveUseFlutterWebView(Map<String, Object?> props) {
-    final engine = (props['webview_engine'] ?? 'windows').toString().trim().toLowerCase();
+    final engine = (props['webview_engine'] ?? 'windows')
+        .toString()
+        .trim()
+        .toLowerCase();
     if (engine == 'native' || engine == 'xterm') return false;
     if (engine == 'flutter' || engine == 'webview_flutter') return true;
     if (engine == 'windows' || engine == 'webview_windows') return false;
@@ -212,7 +227,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
       if (_useNativeTerminal) {
         _xtermReady = true;
         _nativeRenderBufferAndInput();
-        _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native'});
+        _emitConfiguredEvent('ready', {
+          'engine': 'xterm',
+          'webview_engine': 'native',
+        });
         return;
       }
 
@@ -221,16 +239,23 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         return;
       }
 
-      await _windowsController.initialize().timeout(const Duration(milliseconds: 15000));
+      await _windowsController.initialize().timeout(
+        const Duration(milliseconds: 15000),
+      );
       _windowsMessageSub?.cancel();
-      _windowsMessageSub = _windowsController.webMessage.listen(_handleXtermMessage);
+      _windowsMessageSub = _windowsController.webMessage.listen(
+        _handleXtermMessage,
+      );
 
       final html = _buildXtermHtml();
       await _windowsController.loadStringContent(html);
     } catch (_) {
       _xtermReady = true;
       _nativeRenderBufferAndInput();
-      _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'native_fallback'});
+      _emitConfiguredEvent('ready', {
+        'engine': 'xterm',
+        'webview_engine': 'native_fallback',
+      });
     }
   }
 
@@ -256,7 +281,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         if (_latestInput.isNotEmpty) {
           _latestInput = _latestInput.substring(0, _latestInput.length - 1);
           _nativeRenderBufferAndInput();
-          _emitConfiguredEvent('change', {'value': _latestInput, 'input': _latestInput});
+          _emitConfiguredEvent('change', {
+            'value': _latestInput,
+            'input': _latestInput,
+          });
         }
         return;
       }
@@ -264,7 +292,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
       if (data.isNotEmpty) {
         _latestInput += data;
         _nativeTerminal.write(data);
-        _emitConfiguredEvent('change', {'value': _latestInput, 'input': _latestInput});
+        _emitConfiguredEvent('change', {
+          'value': _latestInput,
+          'input': _latestInput,
+        });
       }
     };
   }
@@ -293,7 +324,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         onPageFinished: (_) {
           if (!_xtermReady) {
             _xtermReady = true;
-            _emitConfiguredEvent('ready', {'engine': 'xterm', 'webview_engine': 'flutter'});
+            _emitConfiguredEvent('ready', {
+              'engine': 'xterm',
+              'webview_engine': 'flutter',
+            });
           }
         },
       ),
@@ -310,8 +344,13 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   }
 
   String _buildXtermHtml() {
-    final bg = _hexColor(coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06));
-    final fg = _hexColor(coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6));
+    final bg = _hexColor(
+      coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ??
+          const Color(0xff050a06),
+    );
+    final fg = _hexColor(
+      coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6),
+    );
     final fontSize = coerceDouble(_runtimeProps['font_size']) ?? 12;
     final prompt = (_runtimeProps['prompt'] ?? '').toString();
     final readOnly = _runtimeProps['read_only'] == true;
@@ -470,18 +509,38 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   }
 
   String _hexColor(Color color) {
-    final a = (color.a * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
-    final r = (color.r * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
-    final g = (color.g * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
-    final b = (color.b * 255.0).round().clamp(0, 255).toRadixString(16).padLeft(2, '0');
+    final a = (color.a * 255.0)
+        .round()
+        .clamp(0, 255)
+        .toRadixString(16)
+        .padLeft(2, '0');
+    final r = (color.r * 255.0)
+        .round()
+        .clamp(0, 255)
+        .toRadixString(16)
+        .padLeft(2, '0');
+    final g = (color.g * 255.0)
+        .round()
+        .clamp(0, 255)
+        .toRadixString(16)
+        .padLeft(2, '0');
+    final b = (color.b * 255.0)
+        .round()
+        .clamp(0, 255)
+        .toRadixString(16)
+        .padLeft(2, '0');
     return '#$a$r$g$b';
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (_norm(method)) {
       case 'get_state':
         return {
-          'schema_version': _runtimeProps['schema_version'] ?? _terminalSchemaVersion,
+          'schema_version':
+              _runtimeProps['schema_version'] ?? _terminalSchemaVersion,
           'module': _runtimeProps['module'],
           'state': _runtimeProps['state'],
           'value': _latestBuffer,
@@ -511,7 +570,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
           return {'ok': false, 'error': 'unknown module: $module'};
         }
         final payload = args['payload'];
-        final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{};
+        final payloadMap = payload is Map
+            ? coerceObjectMap(payload)
+            : <String, Object?>{};
         setState(() {
           final modules = _coerceObjectMap(_runtimeProps['modules']);
           modules[module] = payloadMap;
@@ -520,7 +581,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
           _runtimeProps[module] = payloadMap;
           _runtimeProps = _normalizeProps(_runtimeProps);
         });
-        _emitConfiguredEvent('module_change', {'module': module, 'payload': payloadMap});
+        _emitConfiguredEvent('module_change', {
+          'module': module,
+          'payload': payloadMap,
+        });
         return {'ok': true, 'module': module};
       case 'set_state':
         final state = _norm(args['state']?.toString() ?? '');
@@ -535,19 +599,26 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
       case 'emit':
       case 'trigger':
         final fallback = method == 'trigger' ? 'change' : method;
-        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
+        final event = _norm(
+          (args['event'] ?? args['name'] ?? fallback).toString(),
+        );
         if (!_terminalEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
         final payload = args['payload'];
-        _emitConfiguredEvent(event, payload is Map ? coerceObjectMap(payload) : args);
+        _emitConfiguredEvent(
+          event,
+          payload is Map ? coerceObjectMap(payload) : args,
+        );
         return true;
       case 'clear':
         _latestBuffer = '';
         if (_useNativeTerminal) {
           _nativeRenderBufferAndInput();
         } else {
-          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.clear();}');
+          await _runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.clear();}',
+          );
         }
         return null;
       case 'write':
@@ -589,14 +660,18 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         if (_useNativeTerminal) {
           _nativeFocusNode.requestFocus();
         } else {
-          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.focus();}');
+          await _runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.focus();}',
+          );
         }
         return null;
       case 'blur':
         if (_useNativeTerminal) {
           _nativeFocusNode.unfocus();
         } else {
-          await _runXtermJavaScript('if(window.ButterflyUIXterm){window.ButterflyUIXterm.blur();}');
+          await _runXtermJavaScript(
+            'if(window.ButterflyUIXterm){window.ButterflyUIXterm.blur();}',
+          );
         }
         return null;
       case 'set_input':
@@ -653,7 +728,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         final normalized = _norm(method);
         if (_terminalModules.contains(normalized)) {
           final payload = args['payload'];
-          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{...args};
+          final payloadMap = payload is Map
+              ? coerceObjectMap(payload)
+              : <String, Object?>{...args};
           setState(() {
             final modules = _coerceObjectMap(_runtimeProps['modules']);
             modules[normalized] = payloadMap;
@@ -662,7 +739,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
             _runtimeProps[normalized] = payloadMap;
             _runtimeProps = _normalizeProps(_runtimeProps);
           });
-          _emitConfiguredEvent('module_change', {'module': normalized, 'payload': payloadMap});
+          _emitConfiguredEvent('module_change', {
+            'module': normalized,
+            'payload': payloadMap,
+          });
           return {'ok': true, 'module': normalized};
         }
         return {'ok': false, 'error': 'unknown method: $method'};
@@ -672,7 +752,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   String? _lineFromEntry(Object? item) {
     if (item is Map) {
       final map = coerceObjectMap(item);
-      return map['text']?.toString() ?? map['line']?.toString() ?? map['value']?.toString();
+      return map['text']?.toString() ??
+          map['line']?.toString() ??
+          map['value']?.toString();
     }
     if (item == null) return null;
     final value = item.toString();
@@ -698,7 +780,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     return _latestBuffer;
   }
 
-  Future<Object?> _runXtermJavaScript(String script, {bool expectResult = false}) async {
+  Future<Object?> _runXtermJavaScript(
+    String script, {
+    bool expectResult = false,
+  }) async {
     if (_useFlutterWebView) {
       final controller = _flutterController;
       if (controller == null) return null;
@@ -739,7 +824,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     if (decoded is! Map) return;
     final map = coerceObjectMap(decoded);
     final event = map['event']?.toString() ?? 'message';
-    final payload = map['payload'] is Map ? coerceObjectMap(map['payload'] as Map) : <String, Object?>{};
+    final payload = map['payload'] is Map
+        ? coerceObjectMap(map['payload'] as Map)
+        : <String, Object?>{};
 
     if (event == 'ready') {
       _xtermReady = true;
@@ -752,7 +839,8 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     if (event == 'output' && payload['buffer'] is String) {
       _latestBuffer = payload['buffer']!.toString();
     }
-    if ((event == 'change' || event == 'submit') && payload['input'] is String) {
+    if ((event == 'change' || event == 'submit') &&
+        payload['input'] is String) {
       _latestInput = payload['input']!.toString();
     }
 
@@ -784,7 +872,8 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     }
 
     widget.sendEvent(widget.controlId, normalized, {
-      'schema_version': _runtimeProps['schema_version'] ?? _terminalSchemaVersion,
+      'schema_version':
+          _runtimeProps['schema_version'] ?? _terminalSchemaVersion,
       'module': _runtimeProps['module'],
       'state': _runtimeProps['state'],
       ...payload,
@@ -793,11 +882,14 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
 
   Widget _buildNativeXtermView() {
     final bg =
-        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06);
-    final fg = coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6);
+        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ??
+        const Color(0xff050a06);
+    final fg =
+        coerceColor(_runtimeProps['text_color']) ?? const Color(0xffd1ffd6);
     final fontSize = coerceDouble(_runtimeProps['font_size']) ?? 12;
     final lineHeight = coerceDouble(_runtimeProps['line_height']) ?? 1.35;
-    final fontFamily = (_runtimeProps['font_family'] ?? 'JetBrains Mono').toString();
+    final fontFamily = (_runtimeProps['font_family'] ?? 'JetBrains Mono')
+        .toString();
 
     return xterm.TerminalView(
       _nativeTerminal,
@@ -853,8 +945,14 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     final borderColor = coerceColor(_runtimeProps['border_color']);
     final borderWidth = coerceDouble(_runtimeProps['border_width']) ?? 0;
     final backgroundColor =
-        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ?? const Color(0xff050a06);
+        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ??
+        const Color(0xff050a06);
     final radius = coerceDouble(_runtimeProps['radius']) ?? 10;
+    final placeholder = (_runtimeProps['placeholder'] ?? 'Terminal ready')
+        .toString();
+    final hasVisibleContent =
+        _latestBuffer.trim().isNotEmpty ||
+        (_runtimeProps['prompt']?.toString().isNotEmpty ?? false);
 
     return SizedBox(
       height: 320,
@@ -862,12 +960,36 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         decoration: BoxDecoration(
           color: backgroundColor,
           border: borderColor != null && borderWidth > 0
-              ? Border.all(color: borderColor.withValues(alpha: 0.6), width: borderWidth)
+              ? Border.all(
+                  color: borderColor.withValues(alpha: 0.6),
+                  width: borderWidth,
+                )
               : null,
           borderRadius: BorderRadius.circular(radius),
         ),
         clipBehavior: Clip.antiAlias,
-        child: _buildXtermView(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildXtermView(),
+            if (!hasVisibleContent)
+              IgnorePointer(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      placeholder,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -875,12 +997,15 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   @override
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
-    final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'session');
+    final activeModule = _norm(
+      _runtimeProps['module']?.toString() ?? 'session',
+    );
     final customChildren = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
-    final customLayout = _runtimeProps['custom_layout'] == true ||
+    final customLayout =
+        _runtimeProps['custom_layout'] == true ||
         _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
@@ -908,7 +1033,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         _TerminalHeader(
           state: (_runtimeProps['state'] ?? 'ready').toString(),
           engine: (_runtimeProps['engine'] ?? 'xterm').toString(),
-          webviewEngine: (_runtimeProps['webview_engine'] ?? (_useFlutterWebView ? 'flutter' : 'windows')).toString(),
+          webviewEngine:
+              (_runtimeProps['webview_engine'] ??
+                      (_useFlutterWebView ? 'flutter' : 'windows'))
+                  .toString(),
         ),
         const SizedBox(height: 8),
         _TerminalModuleTabs(
@@ -931,9 +1059,11 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
             title: Text(module.replaceAll('_', ' ')),
             childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             children: [
-              _TerminalGenericModule(
+              _TerminalModulePanel(
                 module: module,
-                props: _sectionProps(_runtimeProps, module) ?? <String, Object?>{'events': _runtimeProps['events']},
+                props:
+                    _sectionProps(_runtimeProps, module) ??
+                    <String, Object?>{'events': _runtimeProps['events']},
                 onEmit: _emitConfiguredEvent,
               ),
             ],
@@ -947,7 +1077,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   final out = Map<String, Object?>.from(input);
-  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _terminalSchemaVersion).clamp(1, 9999);
+  out['schema_version'] =
+      (coerceOptionalInt(out['schema_version']) ?? _terminalSchemaVersion)
+          .clamp(1, 9999);
 
   final module = _norm(out['module']?.toString() ?? '');
   if (module.isNotEmpty && _terminalModules.contains(module)) {
@@ -980,12 +1112,21 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
       final value = coerceObjectMap(topLevel);
       normalizedModules[moduleKey] = value;
       out[moduleKey] = value;
+    } else if (topLevel == true) {
+      normalizedModules[moduleKey] = <String, Object?>{};
+      out[moduleKey] = <String, Object?>{};
     }
   }
   for (final entry in modules.entries) {
     final normalized = _norm(entry.key);
     if (!_terminalModules.contains(normalized)) continue;
+    if (entry.value == true) {
+      normalizedModules[normalized] = <String, Object?>{};
+      out[normalized] = <String, Object?>{};
+      continue;
+    }
     final value = _coerceObjectMap(entry.value);
+    if (value.isEmpty && entry.value is! Map) continue;
     normalizedModules[normalized] = value;
     out[normalized] = value;
   }
@@ -998,12 +1139,23 @@ List<String> _availableModules(Map<String, Object?> props) {
   final modules = <String>[];
   final moduleMap = _coerceObjectMap(props['modules']);
   for (final key in _terminalModuleOrder) {
-    if (props[key] is Map || moduleMap[key] is Map) {
+    if (props[key] is Map ||
+        props[key] == true ||
+        moduleMap[key] is Map ||
+        moduleMap[key] == true) {
       modules.add(key);
     }
   }
   if (modules.isEmpty) {
-    modules.addAll(const ['session', 'view', 'prompt']);
+    modules.addAll(const [
+      'workbench',
+      'session',
+      'prompt',
+      'stream_view',
+      'timeline',
+      'progress_view',
+      'log_panel',
+    ]);
   }
   return modules;
 }
@@ -1012,12 +1164,24 @@ Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
   final normalized = _norm(key);
   final section = props[normalized];
   if (section is Map) {
-    return <String, Object?>{...coerceObjectMap(section), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(section),
+      'events': props['events'],
+    };
+  }
+  if (section == true) {
+    return <String, Object?>{'events': props['events']};
   }
   final modules = _coerceObjectMap(props['modules']);
   final fromModules = modules[normalized];
   if (fromModules is Map) {
-    return <String, Object?>{...coerceObjectMap(fromModules), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(fromModules),
+      'events': props['events'],
+    };
+  }
+  if (fromModules == true) {
+    return <String, Object?>{'events': props['events']};
   }
   return null;
 }
@@ -1032,7 +1196,11 @@ String _norm(String value) {
 }
 
 class _TerminalHeader extends StatelessWidget {
-  const _TerminalHeader({required this.state, required this.engine, required this.webviewEngine});
+  const _TerminalHeader({
+    required this.state,
+    required this.engine,
+    required this.webviewEngine,
+  });
 
   final String state;
   final String engine;
@@ -1047,7 +1215,10 @@ class _TerminalHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Terminal', style: Theme.of(context).textTheme.titleMedium),
-              Text('State: $state', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'State: $state',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
@@ -1085,8 +1256,8 @@ class _TerminalModuleTabs extends StatelessWidget {
   }
 }
 
-class _TerminalGenericModule extends StatelessWidget {
-  const _TerminalGenericModule({
+class _TerminalModulePanel extends StatelessWidget {
+  const _TerminalModulePanel({
     required this.module,
     required this.props,
     required this.onEmit,
@@ -1098,22 +1269,412 @@ class _TerminalGenericModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = props.entries.where((e) => e.key != 'events').toList(growable: false);
+    switch (module) {
+      case 'capabilities':
+        return _TerminalCapabilitiesModule(props: props);
+      case 'command_builder':
+        return _TerminalCommandBuilderModule(props: props, onEmit: onEmit);
+      case 'presets':
+        return _TerminalPresetModule(props: props, onEmit: onEmit);
+      case 'progress':
+      case 'progress_view':
+        return _TerminalProgressModule(props: props);
+      case 'prompt':
+        return _TerminalPromptModule(props: props, onEmit: onEmit);
+      case 'stdin':
+      case 'stdin_injector':
+        return _TerminalInputModule(
+          module: module,
+          props: props,
+          onEmit: onEmit,
+        );
+      case 'stream':
+      case 'stream_view':
+      case 'raw_view':
+      case 'replay':
+      case 'timeline':
+      case 'log_viewer':
+      case 'log_panel':
+        return _TerminalStreamModule(module: module, props: props);
+      default:
+        return _TerminalMetadataModule(
+          module: module,
+          props: props,
+          onEmit: onEmit,
+        );
+    }
+  }
+}
+
+class _TerminalCapabilitiesModule extends StatelessWidget {
+  const _TerminalCapabilitiesModule({required this.props});
+
+  final Map<String, Object?> props;
+
+  @override
+  Widget build(BuildContext context) {
+    final flags = <MapEntry<String, bool>>[
+      MapEntry(
+        'stdin',
+        props['stdin'] == true || props['supports_stdin'] == true,
+      ),
+      MapEntry(
+        'streaming',
+        props['stream'] == true || props['supports_stream'] == true,
+      ),
+      MapEntry('ansi', props['ansi'] == true || props['supports_ansi'] == true),
+      MapEntry('pty', props['pty'] == true || props['supports_pty'] == true),
+    ];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final entry in flags)
+          Chip(
+            avatar: Icon(
+              entry.value
+                  ? Icons.check_circle_outline
+                  : Icons.remove_circle_outline,
+              size: 16,
+            ),
+            label: Text('${entry.key}: ${entry.value ? 'yes' : 'no'}'),
+          ),
+      ],
+    );
+  }
+}
+
+class _TerminalCommandBuilderModule extends StatelessWidget {
+  const _TerminalCommandBuilderModule({
+    required this.props,
+    required this.onEmit,
+  });
+
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final command = (props['command'] ?? props['value'] ?? '')
+        .toString()
+        .trim();
+    final args = props['args'] is List
+        ? (props['args'] as List)
+              .map((e) => e.toString())
+              .toList(growable: false)
+        : const <String>[];
+    final cwd = (props['cwd'] ?? props['working_dir'] ?? '').toString();
+    final preview = command.isEmpty
+        ? '(no command)'
+        : ([command, ...args]).join(' ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SelectableText(preview),
+        if (cwd.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text('cwd: $cwd', style: Theme.of(context).textTheme.bodySmall),
+        ],
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: command.isEmpty
+              ? null
+              : () => onEmit('submit', {
+                  'module': 'command_builder',
+                  'command': command,
+                  'args': args,
+                  'cwd': cwd,
+                }),
+          child: const Text('Run Command'),
+        ),
+      ],
+    );
+  }
+}
+
+class _TerminalPresetModule extends StatelessWidget {
+  const _TerminalPresetModule({required this.props, required this.onEmit});
+
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = props['items'] is List
+        ? (props['items'] as List)
+        : const <dynamic>[];
+    if (items.isEmpty) {
+      return Text(
+        'No presets configured',
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in items.take(24))
+          ActionChip(
+            label: Text(
+              item is Map
+                  ? (item['label'] ?? item['name'] ?? item['id'] ?? 'preset')
+                        .toString()
+                  : item.toString(),
+            ),
+            onPressed: () =>
+                onEmit('submit', {'module': 'presets', 'preset': item}),
+          ),
+      ],
+    );
+  }
+}
+
+class _TerminalProgressModule extends StatelessWidget {
+  const _TerminalProgressModule({required this.props});
+
+  final Map<String, Object?> props;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = coerceDouble(props['value'] ?? props['progress']);
+    final total = coerceDouble(props['total']);
+    double? ratio;
+    if (value != null && total != null && total > 0) {
+      ratio = (value / total).clamp(0.0, 1.0);
+    } else if (value != null) {
+      ratio = value.clamp(0.0, 1.0);
+    }
+    final label = (props['label'] ?? props['status'] ?? '').toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(value: ratio),
+        if (label.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ],
+    );
+  }
+}
+
+class _TerminalPromptModule extends StatefulWidget {
+  const _TerminalPromptModule({required this.props, required this.onEmit});
+
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  State<_TerminalPromptModule> createState() => _TerminalPromptModuleState();
+}
+
+class _TerminalPromptModuleState extends State<_TerminalPromptModule> {
+  late final TextEditingController _controller = TextEditingController(
+    text: (widget.props['value'] ?? '').toString(),
+  );
+
+  @override
+  void didUpdateWidget(covariant _TerminalPromptModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = (widget.props['value'] ?? '').toString();
+    if (_controller.text != next) {
+      _controller.text = next;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final placeholder = (widget.props['placeholder'] ?? 'Enter command')
+        .toString();
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: placeholder,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            onSubmitted: (value) {
+              widget.onEmit('submit', {
+                'module': 'prompt',
+                'value': value,
+                'input': value,
+              });
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        FilledButton(
+          onPressed: () => widget.onEmit('submit', {
+            'module': 'prompt',
+            'value': _controller.text,
+            'input': _controller.text,
+          }),
+          child: const Text('Run'),
+        ),
+      ],
+    );
+  }
+}
+
+class _TerminalInputModule extends StatefulWidget {
+  const _TerminalInputModule({
+    required this.module,
+    required this.props,
+    required this.onEmit,
+  });
+
+  final String module;
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  State<_TerminalInputModule> createState() => _TerminalInputModuleState();
+}
+
+class _TerminalInputModuleState extends State<_TerminalInputModule> {
+  late final TextEditingController _controller = TextEditingController(
+    text: (widget.props['value'] ?? widget.props['input'] ?? '').toString(),
+  );
+
+  @override
+  void didUpdateWidget(covariant _TerminalInputModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = (widget.props['value'] ?? widget.props['input'] ?? '')
+        .toString();
+    if (_controller.text != next) {
+      _controller.text = next;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              hintText: 'stdin',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+            onSubmitted: (value) {
+              widget.onEmit('input', {'module': widget.module, 'value': value});
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        FilledButton.tonal(
+          onPressed: () => widget.onEmit('input', {
+            'module': widget.module,
+            'value': _controller.text,
+          }),
+          child: const Text('Send'),
+        ),
+      ],
+    );
+  }
+}
+
+class _TerminalStreamModule extends StatelessWidget {
+  const _TerminalStreamModule({required this.module, required this.props});
+
+  final String module;
+  final Map<String, Object?> props;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = <String>[];
+    final items = props['items'] is List
+        ? (props['items'] as List)
+        : const <dynamic>[];
+    for (final item in items.take(200)) {
+      if (item is Map) {
+        final map = coerceObjectMap(item);
+        final text = (map['text'] ?? map['line'] ?? map['value'] ?? '')
+            .toString();
+        if (text.isNotEmpty) lines.add(text);
+      } else if (item != null) {
+        final text = item.toString();
+        if (text.isNotEmpty) lines.add(text);
+      }
+    }
+    final raw = (props['raw_text'] ?? props['text'] ?? props['output'] ?? '')
+        .toString();
+    if (raw.isNotEmpty) {
+      lines.insertAll(0, raw.split('\n'));
+    }
+    if (lines.isEmpty) {
+      return Text(
+        'No output for ${module.replaceAll('_', ' ')}',
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    }
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxHeight: 220),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: SingleChildScrollView(
+        child: SelectableText(lines.take(180).join('\n')),
+      ),
+    );
+  }
+}
+
+class _TerminalMetadataModule extends StatelessWidget {
+  const _TerminalMetadataModule({
+    required this.module,
+    required this.props,
+    required this.onEmit,
+  });
+
+  final String module;
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = props.entries
+        .where((entry) => entry.key != 'events')
+        .toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (entries.isEmpty)
-          Text('No payload for ${module.replaceAll('_', ' ')}')
+          Text(
+            'No payload for ${module.replaceAll('_', ' ')}',
+            style: Theme.of(context).textTheme.bodySmall,
+          )
         else
-          for (final entry in entries)
+          for (final entry in entries.take(20))
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Text('${entry.key}: ${entry.value}'),
             ),
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: () => onEmit('select', {'module': module, 'payload': props}),
-          child: const Text('Emit Select'),
+          onPressed: () =>
+              onEmit('change', {'module': module, 'payload': props}),
+          child: const Text('Emit Change'),
         ),
       ],
     );

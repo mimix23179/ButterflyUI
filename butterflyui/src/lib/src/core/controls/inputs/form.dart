@@ -91,11 +91,13 @@ class _AutoFormControl extends StatefulWidget {
 
 class _AutoFormControlState extends State<_AutoFormControl> {
   late Map<String, Object?> _values;
+  final Map<String, TextEditingController> _fieldControllers = <String, TextEditingController>{};
 
   @override
   void initState() {
     super.initState();
     _values = _coerceValues(widget.props['values']);
+    _syncControllers();
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -108,11 +110,15 @@ class _AutoFormControlState extends State<_AutoFormControl> {
     }
     if (oldWidget.props['values'] != widget.props['values']) {
       _values = _coerceValues(widget.props['values']);
+      _syncControllers();
     }
   }
 
   @override
   void dispose() {
+    for (final controller in _fieldControllers.values) {
+      controller.dispose();
+    }
     widget.unregisterInvokeHandler(widget.controlId);
     super.dispose();
   }
@@ -127,9 +133,24 @@ class _AutoFormControlState extends State<_AutoFormControl> {
         return _values;
       case 'validate':
         return {'valid': true, 'errors': const <Object>[]};
+      case 'set_field_value':
+        final field = (args['field'] ?? '').toString();
+        if (field.isNotEmpty) {
+          final value = args['value'];
+          setState(() {
+            _values[field] = value;
+            final controller = _fieldControllers[field];
+            if (controller != null) {
+              controller.text = value?.toString() ?? '';
+            }
+          });
+        }
+        return _values;
       case 'submit':
         widget.sendEvent(widget.controlId, 'submit', {'values': _values});
         return {'submitted': true, 'values': _values};
+      case 'get_state':
+        return {'values': _values};
       case 'emit':
         final event = (args['event'] ?? 'custom').toString();
         final payload = args['payload'] is Map
@@ -145,10 +166,15 @@ class _AutoFormControlState extends State<_AutoFormControl> {
   @override
   Widget build(BuildContext context) {
     final submitLabel = (widget.props['submit_label'] ?? 'Submit').toString();
+    final generatedFields = _buildGeneratedFields();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildFormControl(widget.props, widget.rawChildren, widget.buildChild),
+        if (generatedFields.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          ...generatedFields,
+        ],
         const SizedBox(height: 10),
         Align(
           alignment: Alignment.centerRight,
@@ -162,11 +188,93 @@ class _AutoFormControlState extends State<_AutoFormControl> {
       ],
     );
   }
+
+  List<Widget> _buildGeneratedFields() {
+    final fields = _coerceFieldDefinitions(widget.props['fields'], widget.props['schema']);
+    if (fields.isEmpty) return const [];
+    final spacing = (coerceDouble(widget.props['spacing']) ?? 10).clamp(0, 32).toDouble();
+    final out = <Widget>[];
+    for (var i = 0; i < fields.length; i += 1) {
+      final field = fields[i];
+      final key = (field['name'] ?? field['key'] ?? '').toString();
+      if (key.isEmpty) continue;
+      final label = (field['label'] ?? key).toString();
+      final type = (field['type'] ?? 'text').toString().toLowerCase();
+      final controller = _fieldControllers.putIfAbsent(
+        key,
+        () => TextEditingController(text: _values[key]?.toString() ?? ''),
+      );
+      Widget fieldWidget;
+      if (type == 'bool' || type == 'boolean' || type == 'checkbox') {
+        final current = _values[key] == true;
+        fieldWidget = SwitchListTile(
+          value: current,
+          onChanged: (value) {
+            setState(() => _values[key] = value);
+            widget.sendEvent(widget.controlId, 'change', {'field': key, 'value': value, 'values': _values});
+          },
+          title: Text(label),
+          dense: widget.props['dense'] == true,
+        );
+      } else {
+        fieldWidget = TextField(
+          controller: controller,
+          decoration: InputDecoration(labelText: label, isDense: widget.props['dense'] == true),
+          onChanged: (value) {
+            _values[key] = value;
+            widget.sendEvent(widget.controlId, 'change', {'field': key, 'value': value, 'values': _values});
+          },
+        );
+      }
+      if (out.isNotEmpty && spacing > 0) {
+        out.add(SizedBox(height: spacing));
+      }
+      out.add(fieldWidget);
+    }
+    return out;
+  }
+
+  void _syncControllers() {
+    for (final entry in _fieldControllers.entries) {
+      entry.value.text = _values[entry.key]?.toString() ?? '';
+    }
+  }
 }
 
 Map<String, Object?> _coerceValues(Object? value) {
   if (value is Map) return coerceObjectMap(value);
   return <String, Object?>{};
+}
+
+List<Map<String, Object?>> _coerceFieldDefinitions(Object? fieldsValue, Object? schemaValue) {
+  if (fieldsValue is List) {
+    final out = <Map<String, Object?>>[];
+    for (final item in fieldsValue) {
+      if (item is Map) {
+        out.add(coerceObjectMap(item));
+      }
+    }
+    if (out.isNotEmpty) return out;
+  }
+  if (schemaValue is Map) {
+    final schema = coerceObjectMap(schemaValue);
+    final properties = schema['properties'];
+    if (properties is Map) {
+      final out = <Map<String, Object?>>[];
+      properties.forEach((key, value) {
+        if (key is String && value is Map) {
+          final property = coerceObjectMap(value);
+          out.add({
+            'name': key,
+            'label': property['title'] ?? key,
+            'type': property['type'] ?? 'text',
+          });
+        }
+      });
+      return out;
+    }
+  }
+  return const [];
 }
 
 Widget buildFormFieldControl(

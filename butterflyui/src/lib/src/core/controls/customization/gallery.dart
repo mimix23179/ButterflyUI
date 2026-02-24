@@ -56,7 +56,13 @@ const Set<String> _galleryModules = {
   'skins',
 };
 
-const Set<String> _galleryStates = {'idle', 'loading', 'empty', 'ready', 'disabled'};
+const Set<String> _galleryStates = {
+  'idle',
+  'loading',
+  'empty',
+  'ready',
+  'disabled',
+};
 
 const Set<String> _galleryEvents = {
   'change',
@@ -161,7 +167,9 @@ class _InvokeHost extends StatefulWidget {
 }
 
 class _InvokeHostState extends State<_InvokeHost> {
-  late Map<String, Object?> _runtimeProps = Map<String, Object?>.from(widget.props);
+  late Map<String, Object?> _runtimeProps = Map<String, Object?>.from(
+    widget.props,
+  );
 
   @override
   void initState() {
@@ -193,7 +201,10 @@ class _InvokeHostState extends State<_InvokeHost> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_state':
         return <String, Object?>{
@@ -221,7 +232,13 @@ class _InvokeHostState extends State<_InvokeHost> {
         );
         return true;
       default:
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, method, args);
+        _emitEvent(
+          widget.controlId,
+          _runtimeProps,
+          widget.sendEvent,
+          method,
+          args,
+        );
         return true;
     }
   }
@@ -291,7 +308,10 @@ class _GalleryControlState extends State<_GalleryControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (_norm(method)) {
       case 'get_state':
         return <String, Object?>{
@@ -321,7 +341,9 @@ class _GalleryControlState extends State<_GalleryControl> {
             return {'ok': false, 'error': 'unknown module: $module'};
           }
           final payload = args['payload'];
-          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{};
+          final payloadMap = payload is Map
+              ? coerceObjectMap(payload)
+              : <String, Object?>{};
           setState(() {
             _runtimeProps['module'] = module;
             _runtimeProps[module] = payloadMap;
@@ -329,7 +351,13 @@ class _GalleryControlState extends State<_GalleryControl> {
             modules[module] = payloadMap;
             _runtimeProps['modules'] = modules;
           });
-          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'change', {'module': module});
+          _emitEvent(
+            widget.controlId,
+            _runtimeProps,
+            widget.sendEvent,
+            'change',
+            {'module': module},
+          );
           return {'ok': true, 'module': module};
         }
       case 'set_state':
@@ -341,13 +369,21 @@ class _GalleryControlState extends State<_GalleryControl> {
           setState(() {
             _runtimeProps['state'] = state;
           });
-          _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'change', {'state': state});
+          _emitEvent(
+            widget.controlId,
+            _runtimeProps,
+            widget.sendEvent,
+            'change',
+            {'state': state},
+          );
           return {'ok': true, 'state': state};
         }
       case 'emit':
       case 'trigger':
         final fallback = method == 'trigger' ? 'change' : method;
-        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
+        final event = _norm(
+          (args['event'] ?? args['name'] ?? fallback).toString(),
+        );
         if (!_galleryEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
@@ -371,15 +407,25 @@ class _GalleryControlState extends State<_GalleryControl> {
       case 'apply_font':
       case 'apply_image':
       case 'set_as_wallpaper':
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, _norm(method), {
-          'selected_ids': _selectedIds.toList(growable: false),
-        });
+        _emitEvent(
+          widget.controlId,
+          _runtimeProps,
+          widget.sendEvent,
+          _norm(method),
+          {'selected_ids': _selectedIds.toList(growable: false)},
+        );
         return true;
       case 'clear':
         setState(() {
           _selectedIds.clear();
         });
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'clear', {});
+        _emitEvent(
+          widget.controlId,
+          _runtimeProps,
+          widget.sendEvent,
+          'clear',
+          {},
+        );
         return true;
       case 'select_all':
         setState(() {
@@ -387,15 +433,25 @@ class _GalleryControlState extends State<_GalleryControl> {
             ..clear()
             ..addAll(_items.map((item) => _itemId(item)));
         });
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'select_all', {
-          'selected_ids': _selectedIds.toList(growable: false),
-        });
+        _emitEvent(
+          widget.controlId,
+          _runtimeProps,
+          widget.sendEvent,
+          'select_all',
+          {'selected_ids': _selectedIds.toList(growable: false)},
+        );
         return _selectedIds.length;
       case 'deselect_all':
         setState(() {
           _selectedIds.clear();
         });
-        _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'deselect_all', {});
+        _emitEvent(
+          widget.controlId,
+          _runtimeProps,
+          widget.sendEvent,
+          'deselect_all',
+          {},
+        );
         return 0;
       default:
         throw UnsupportedError('Unknown gallery method: $method');
@@ -411,16 +467,19 @@ class _GalleryControlState extends State<_GalleryControl> {
     final tileRadius = _resolveRadius(_runtimeProps, fallback: 12);
     final selectable = _runtimeProps['selectable'] == null
         ? true
-      : (_runtimeProps['selectable'] == true);
+        : (_runtimeProps['selectable'] == true);
 
     final childControls = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
-    final customLayout = _runtimeProps['custom_layout'] == true ||
+    final customLayout =
+        _runtimeProps['custom_layout'] == true ||
         _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
     final hasBuiltInData =
-        _items.isNotEmpty || _runtimeProps['module'] != null || _coerceObjectMap(_runtimeProps['modules']).isNotEmpty;
+        _items.isNotEmpty ||
+        _runtimeProps['module'] != null ||
+        _coerceObjectMap(_runtimeProps['modules']).isNotEmpty;
 
     if (childControls.isNotEmpty && (customLayout || !hasBuiltInData)) {
       if (childControls.length == 1) {
@@ -458,11 +517,13 @@ class _GalleryControlState extends State<_GalleryControl> {
                       _selectedIds.add(id);
                     }
                   });
-                  _emitEvent(widget.controlId, _runtimeProps, widget.sendEvent, 'select', {
-                    'id': id,
-                    'selected': !selected,
-                    'item': item,
-                  });
+                  _emitEvent(
+                    widget.controlId,
+                    _runtimeProps,
+                    widget.sendEvent,
+                    'select',
+                    {'id': id, 'selected': !selected, 'item': item},
+                  );
                 }
               : null,
           borderRadius: BorderRadius.circular(tileRadius),
@@ -509,23 +570,49 @@ class _GalleryControlState extends State<_GalleryControl> {
     final sectionWidgets = <Widget>[];
     final toolbar = _sectionProps(_runtimeProps, 'toolbar');
     if (toolbar != null) {
-      sectionWidgets.add(_Toolbar(controlId: widget.controlId, props: toolbar, sendEvent: widget.sendEvent));
+      sectionWidgets.add(
+        _Toolbar(
+          controlId: widget.controlId,
+          props: toolbar,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final sectionHeader = _sectionProps(_runtimeProps, 'section_header');
     if (sectionHeader != null) {
-      sectionWidgets.add(_SectionHeader(controlId: widget.controlId, props: sectionHeader, sendEvent: widget.sendEvent));
+      sectionWidgets.add(
+        _SectionHeader(
+          controlId: widget.controlId,
+          props: sectionHeader,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final searchBar = _sectionProps(_runtimeProps, 'search_bar');
     if (searchBar != null) {
-      sectionWidgets.add(buildSearchBarControl(widget.controlId, searchBar, widget.sendEvent));
+      sectionWidgets.add(
+        buildSearchBarControl(widget.controlId, searchBar, widget.sendEvent),
+      );
     }
     final filterBar = _sectionProps(_runtimeProps, 'filter_bar');
     if (filterBar != null) {
-      sectionWidgets.add(_FilterBar(controlId: widget.controlId, props: filterBar, sendEvent: widget.sendEvent));
+      sectionWidgets.add(
+        _FilterBar(
+          controlId: widget.controlId,
+          props: filterBar,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final sortBar = _sectionProps(_runtimeProps, 'sort_bar');
     if (sortBar != null) {
-      sectionWidgets.add(_SortBar(controlId: widget.controlId, props: sortBar, sendEvent: widget.sendEvent));
+      sectionWidgets.add(
+        _SortBar(
+          controlId: widget.controlId,
+          props: sortBar,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final gridLayout = _sectionProps(_runtimeProps, 'grid_layout');
     if (gridLayout != null) {
@@ -540,7 +627,9 @@ class _GalleryControlState extends State<_GalleryControl> {
 
     final allTiles = <Widget>[...itemTiles, ...childControls];
     if (allTiles.isNotEmpty) {
-      sectionWidgets.add(Wrap(spacing: spacing, runSpacing: runSpacing, children: allTiles));
+      sectionWidgets.add(
+        Wrap(spacing: spacing, runSpacing: runSpacing, children: allTiles),
+      );
     } else {
       final loading = _sectionProps(_runtimeProps, 'loading_skeleton');
       final empty = _sectionProps(_runtimeProps, 'empty_state');
@@ -555,7 +644,9 @@ class _GalleryControlState extends State<_GalleryControl> {
         );
       }
       if (empty != null) {
-        sectionWidgets.add(buildEmptyStateControl(widget.controlId, empty, widget.sendEvent));
+        sectionWidgets.add(
+          buildEmptyStateControl(widget.controlId, empty, widget.sendEvent),
+        );
       }
       if (loading == null && empty == null) {
         return const SizedBox.shrink();
@@ -565,11 +656,23 @@ class _GalleryControlState extends State<_GalleryControl> {
     final footerWidgets = <Widget>[];
     final itemTile = _sectionProps(_runtimeProps, 'item_tile');
     if (itemTile != null) {
-      footerWidgets.add(_ItemTile(controlId: widget.controlId, props: itemTile, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _ItemTile(
+          controlId: widget.controlId,
+          props: itemTile,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final itemActions = _sectionProps(_runtimeProps, 'item_actions');
     if (itemActions != null) {
-      footerWidgets.add(_ItemActions(controlId: widget.controlId, props: itemActions, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _ItemActions(
+          controlId: widget.controlId,
+          props: itemActions,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final itemBadge = _sectionProps(_runtimeProps, 'item_badge');
     if (itemBadge != null) {
@@ -586,13 +689,23 @@ class _GalleryControlState extends State<_GalleryControl> {
           props: itemPreview,
           rawChildren: widget.rawChildren,
           buildChild: widget.buildChild,
-          radius: _resolveRadius(itemPreview, parent: _runtimeProps, fallback: 10),
+          radius: _resolveRadius(
+            itemPreview,
+            parent: _runtimeProps,
+            fallback: 10,
+          ),
         ),
       );
     }
     final itemSelectable = _sectionProps(_runtimeProps, 'item_selectable');
     if (itemSelectable != null) {
-      footerWidgets.add(_ItemSelectable(controlId: widget.controlId, props: itemSelectable, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _ItemSelectable(
+          controlId: widget.controlId,
+          props: itemSelectable,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final itemDrag = _sectionProps(_runtimeProps, 'item_drag_handle');
     if (itemDrag != null) {
@@ -627,30 +740,115 @@ class _GalleryControlState extends State<_GalleryControl> {
         ),
       );
     }
-    final selectCheckbox = _sectionProps(_runtimeProps, 'item_selection_checkbox');
+    final selectCheckbox = _sectionProps(
+      _runtimeProps,
+      'item_selection_checkbox',
+    );
     if (selectCheckbox != null) {
-      footerWidgets.add(_SelectionCheckbox(controlId: widget.controlId, props: selectCheckbox, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _SelectionCheckbox(
+          controlId: widget.controlId,
+          props: selectCheckbox,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final selectRadio = _sectionProps(_runtimeProps, 'item_selection_radio');
     if (selectRadio != null) {
-      footerWidgets.add(_SelectionRadio(controlId: widget.controlId, props: selectRadio, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _SelectionRadio(
+          controlId: widget.controlId,
+          props: selectRadio,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final selectSwitch = _sectionProps(_runtimeProps, 'item_selection_switch');
     if (selectSwitch != null) {
-      footerWidgets.add(_SelectionSwitch(controlId: widget.controlId, props: selectSwitch, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _SelectionSwitch(
+          controlId: widget.controlId,
+          props: selectSwitch,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final pagination = _sectionProps(_runtimeProps, 'pagination');
     if (pagination != null) {
-      footerWidgets.add(_Pagination(controlId: widget.controlId, props: pagination, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _Pagination(
+          controlId: widget.controlId,
+          props: pagination,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
     final fontPicker = _sectionProps(_runtimeProps, 'font_picker');
     if (fontPicker != null) {
-      footerWidgets.add(_FontPicker(controlId: widget.controlId, props: fontPicker, sendEvent: widget.sendEvent));
+      footerWidgets.add(
+        _FontPicker(
+          controlId: widget.controlId,
+          props: fontPicker,
+          sendEvent: widget.sendEvent,
+        ),
+      );
     }
-    for (final key in const <String>['audio_picker', 'video_picker', 'image_picker', 'document_picker']) {
+    for (final key in const <String>[
+      'fonts',
+      'audio',
+      'video',
+      'image',
+      'document',
+      'presets',
+      'skins',
+    ]) {
       final section = _sectionProps(_runtimeProps, key);
       if (section != null) {
-        footerWidgets.add(_AssetPicker(controlType: key, controlId: widget.controlId, props: section, sendEvent: widget.sendEvent));
+        footerWidgets.add(
+          _CollectionModule(
+            controlType: key,
+            controlId: widget.controlId,
+            props: section,
+            sendEvent: widget.sendEvent,
+          ),
+        );
+      }
+    }
+    for (final key in const <String>[
+      'font_renderer',
+      'audio_renderer',
+      'video_renderer',
+      'image_renderer',
+      'document_renderer',
+    ]) {
+      final section = _sectionProps(_runtimeProps, key);
+      if (section != null) {
+        footerWidgets.add(
+          _RendererModule(
+            controlType: key,
+            controlId: widget.controlId,
+            props: section,
+            sendEvent: widget.sendEvent,
+          ),
+        );
+      }
+    }
+    for (final key in const <String>[
+      'audio_picker',
+      'video_picker',
+      'image_picker',
+      'document_picker',
+    ]) {
+      final section = _sectionProps(_runtimeProps, key);
+      if (section != null) {
+        footerWidgets.add(
+          _AssetPicker(
+            controlType: key,
+            controlId: widget.controlId,
+            props: section,
+            sendEvent: widget.sendEvent,
+          ),
+        );
       }
     }
     for (final key in const <String>[
@@ -664,13 +862,22 @@ class _GalleryControlState extends State<_GalleryControl> {
     ]) {
       final section = _sectionProps(_runtimeProps, key);
       if (section != null) {
-        footerWidgets.add(_ActionButton(controlType: key, controlId: widget.controlId, props: section, sendEvent: widget.sendEvent));
+        footerWidgets.add(
+          _ActionButton(
+            controlType: key,
+            controlId: widget.controlId,
+            props: section,
+            sendEvent: widget.sendEvent,
+          ),
+        );
       }
     }
 
     if (footerWidgets.isNotEmpty) {
       sectionWidgets.add(const SizedBox(height: 8));
-      sectionWidgets.add(Wrap(spacing: 8, runSpacing: 8, children: footerWidgets));
+      sectionWidgets.add(
+        Wrap(spacing: 8, runSpacing: 8, children: footerWidgets),
+      );
     }
 
     return Column(
@@ -687,7 +894,11 @@ class _GalleryControlState extends State<_GalleryControl> {
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   final out = Map<String, Object?>.from(input);
-  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _gallerySchemaVersion).clamp(1, 9999);
+  out['schema_version'] =
+      (coerceOptionalInt(out['schema_version']) ?? _gallerySchemaVersion).clamp(
+        1,
+        9999,
+      );
 
   final module = _norm(out['module']?.toString() ?? '');
   if (module.isNotEmpty && _galleryModules.contains(module)) {
@@ -718,7 +929,12 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
     for (final entry in modules.entries) {
       final normalizedModule = _norm(entry.key);
       if (!_galleryModules.contains(normalizedModule)) continue;
+      if (entry.value == true) {
+        normalizedModules[normalizedModule] = <String, Object?>{};
+        continue;
+      }
       final payload = _coerceObjectMap(entry.value);
+      if (payload.isEmpty && entry.value is! Map) continue;
       normalizedModules[normalizedModule] = payload;
     }
     out['modules'] = normalizedModules;
@@ -731,7 +947,10 @@ Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
   final normalized = _norm(key);
   final section = props[normalized];
   if (section is Map) {
-    return <String, Object?>{...coerceObjectMap(section), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(section),
+      'events': props['events'],
+    };
   }
   if (section == true) {
     return <String, Object?>{'events': props['events']};
@@ -739,7 +958,13 @@ Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
   final modules = _coerceObjectMap(props['modules']);
   final fromModules = modules[normalized];
   if (fromModules is Map) {
-    return <String, Object?>{...coerceObjectMap(fromModules), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(fromModules),
+      'events': props['events'],
+    };
+  }
+  if (fromModules == true) {
+    return <String, Object?>{'events': props['events']};
   }
   return null;
 }
@@ -780,7 +1005,11 @@ String _itemId(Map<String, Object?> item) {
 }
 
 class _Toolbar extends StatelessWidget {
-  const _Toolbar({required this.controlId, required this.props, required this.sendEvent});
+  const _Toolbar({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -790,7 +1019,9 @@ class _Toolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = (props['title'] ?? 'Gallery').toString();
     final subtitle = (props['subtitle'] ?? '').toString();
-    final actions = props['actions'] is List ? (props['actions'] as List) : const <dynamic>[];
+    final actions = props['actions'] is List
+        ? (props['actions'] as List)
+        : const <dynamic>[];
 
     return Row(
       children: [
@@ -810,7 +1041,8 @@ class _Toolbar extends StatelessWidget {
               if (action is Map) {
                 final map = coerceObjectMap(action);
                 _emitEvent(controlId, props, sendEvent, 'action', {
-                  'id': (map['id'] ?? map['value'] ?? map['label'] ?? '').toString(),
+                  'id': (map['id'] ?? map['value'] ?? map['label'] ?? '')
+                      .toString(),
                   'action': map,
                 });
               }
@@ -823,7 +1055,11 @@ class _Toolbar extends StatelessWidget {
 }
 
 class _FilterBar extends StatelessWidget {
-  const _FilterBar({required this.controlId, required this.props, required this.sendEvent});
+  const _FilterBar({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -831,7 +1067,9 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filters = props['filters'] is List ? (props['filters'] as List) : const <dynamic>[];
+    final filters = props['filters'] is List
+        ? (props['filters'] as List)
+        : const <dynamic>[];
     final selected = <String>{};
     final values = props['values'];
     if (values is List) {
@@ -862,7 +1100,11 @@ class _FilterBar extends StatelessWidget {
 }
 
 class _SortBar extends StatelessWidget {
-  const _SortBar({required this.controlId, required this.props, required this.sendEvent});
+  const _SortBar({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -871,9 +1113,16 @@ class _SortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = props['options'] is List
-        ? (props['options'] as List).map((e) => e?.toString() ?? '').where((e) => e.isNotEmpty).toList(growable: false)
+        ? (props['options'] as List)
+              .map((e) => e?.toString() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList(growable: false)
         : const <String>[];
-    final selected = (props['value'] ?? props['selected'] ?? (options.isEmpty ? '' : options.first)).toString();
+    final selected =
+        (props['value'] ??
+                props['selected'] ??
+                (options.isEmpty ? '' : options.first))
+            .toString();
 
     if (options.isEmpty) {
       return const SizedBox.shrink();
@@ -881,17 +1130,25 @@ class _SortBar extends StatelessWidget {
 
     return DropdownButton<String>(
       value: options.contains(selected) ? selected : options.first,
-      items: options.map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(growable: false),
+      items: options
+          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+          .toList(growable: false),
       onChanged: (value) {
         if (value == null) return;
-        _emitEvent(controlId, props, sendEvent, 'sort_change', {'value': value});
+        _emitEvent(controlId, props, sendEvent, 'sort_change', {
+          'value': value,
+        });
       },
     );
   }
 }
 
 class _GridLayout extends StatelessWidget {
-  const _GridLayout({required this.props, required this.rawChildren, required this.buildChild});
+  const _GridLayout({
+    required this.props,
+    required this.rawChildren,
+    required this.buildChild,
+  });
 
   final Map<String, Object?> props;
   final List<dynamic> rawChildren;
@@ -901,7 +1158,10 @@ class _GridLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final columns = (coerceOptionalInt(props['columns']) ?? 3).clamp(1, 8);
     final spacing = coerceDouble(props['spacing']) ?? 10;
-    final childMaps = rawChildren.whereType<Map>().map((e) => coerceObjectMap(e)).toList(growable: false);
+    final childMaps = rawChildren
+        .whereType<Map>()
+        .map((e) => coerceObjectMap(e))
+        .toList(growable: false);
 
     return GridView.count(
       crossAxisCount: columns,
@@ -917,7 +1177,11 @@ class _GridLayout extends StatelessWidget {
 }
 
 class _ItemTile extends StatelessWidget {
-  const _ItemTile({required this.controlId, required this.props, required this.sendEvent});
+  const _ItemTile({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -931,13 +1195,18 @@ class _ItemTile extends StatelessWidget {
     return ListTile(
       title: Text(title),
       subtitle: subtitle.isEmpty ? null : Text(subtitle),
-      onTap: () => _emitEvent(controlId, props, sendEvent, 'select', {'id': id}),
+      onTap: () =>
+          _emitEvent(controlId, props, sendEvent, 'select', {'id': id}),
     );
   }
 }
 
 class _ItemActions extends StatelessWidget {
-  const _ItemActions({required this.controlId, required this.props, required this.sendEvent});
+  const _ItemActions({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -945,14 +1214,22 @@ class _ItemActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = props['actions'] is List ? (props['actions'] as List) : const <dynamic>[];
+    final actions = props['actions'] is List
+        ? (props['actions'] as List)
+        : const <dynamic>[];
     return Wrap(
       spacing: 6,
       children: [
         for (final action in actions)
           FilledButton.tonal(
-            onPressed: () => _emitEvent(controlId, props, sendEvent, 'action', {'action': action}),
-            child: Text(action is Map ? (action['label'] ?? action['id'] ?? 'Action').toString() : action?.toString() ?? 'Action'),
+            onPressed: () => _emitEvent(controlId, props, sendEvent, 'action', {
+              'action': action,
+            }),
+            child: Text(
+              action is Map
+                  ? (action['label'] ?? action['id'] ?? 'Action').toString()
+                  : action?.toString() ?? 'Action',
+            ),
           ),
       ],
     );
@@ -978,12 +1255,17 @@ class _ItemMetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = props['items'] is List ? (props['items'] as List) : const <dynamic>[];
+    final items = props['items'] is List
+        ? (props['items'] as List)
+        : const <dynamic>[];
     return Wrap(
       spacing: 10,
       children: [
         for (final item in items)
-          Text(item?.toString() ?? '', style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            item?.toString() ?? '',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
       ],
     );
   }
@@ -1029,7 +1311,11 @@ class _ItemPreview extends StatelessWidget {
 }
 
 class _ItemSelectable extends StatelessWidget {
-  const _ItemSelectable({required this.controlId, required this.props, required this.sendEvent});
+  const _ItemSelectable({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1040,14 +1326,26 @@ class _ItemSelectable extends StatelessWidget {
     final selected = props['selected'] == true;
     return CheckboxListTile(
       value: selected,
-      title: Text((props['label'] ?? props['title'] ?? 'Selectable').toString()),
-      onChanged: (value) => _emitEvent(controlId, props, sendEvent, 'select_change', {'selected': value == true}),
+      title: Text(
+        (props['label'] ?? props['title'] ?? 'Selectable').toString(),
+      ),
+      onChanged: (value) => _emitEvent(
+        controlId,
+        props,
+        sendEvent,
+        'select_change',
+        {'selected': value == true},
+      ),
     );
   }
 }
 
 class _Pagination extends StatelessWidget {
-  const _Pagination({required this.controlId, required this.props, required this.sendEvent});
+  const _Pagination({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1056,21 +1354,31 @@ class _Pagination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final page = (coerceOptionalInt(props['page']) ?? 1).clamp(1, 1000000);
-    final pageCount = (coerceOptionalInt(props['page_count'] ?? props['pages']) ?? 1).clamp(1, 1000000);
-    final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
+    final pageCount =
+        (coerceOptionalInt(props['page_count'] ?? props['pages']) ?? 1).clamp(
+          1,
+          1000000,
+        );
+    final enabled = props['enabled'] == null
+        ? true
+        : (props['enabled'] == true);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
           onPressed: enabled && page > 1
-              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {'page': page - 1})
+              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {
+                  'page': page - 1,
+                })
               : null,
           icon: const Icon(Icons.chevron_left),
         ),
         Text('$page / $pageCount'),
         IconButton(
           onPressed: enabled && page < pageCount
-              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {'page': page + 1})
+              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {
+                  'page': page + 1,
+                })
               : null,
           icon: const Icon(Icons.chevron_right),
         ),
@@ -1080,7 +1388,11 @@ class _Pagination extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.controlId, required this.props, required this.sendEvent});
+  const _SectionHeader({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1105,7 +1417,13 @@ class _SectionHeader extends StatelessWidget {
         ),
         if (count.isNotEmpty) Text(count),
         IconButton(
-          onPressed: () => _emitEvent(controlId, props, sendEvent, 'section_action', {'id': props['id']}),
+          onPressed: () => _emitEvent(
+            controlId,
+            props,
+            sendEvent,
+            'section_action',
+            {'id': props['id']},
+          ),
           icon: const Icon(Icons.more_horiz),
         ),
       ],
@@ -1114,7 +1432,11 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _FontPicker extends StatelessWidget {
-  const _FontPicker({required this.controlId, required this.props, required this.sendEvent});
+  const _FontPicker({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1123,12 +1445,17 @@ class _FontPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = props['options'] is List
-        ? (props['options'] as List).map((e) => e?.toString() ?? '').where((e) => e.isNotEmpty).toList(growable: false)
+        ? (props['options'] as List)
+              .map((e) => e?.toString() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList(growable: false)
         : const <String>['Inter', 'Roboto', 'JetBrains Mono'];
     final value = (props['value'] ?? options.first).toString();
     return DropdownButton<String>(
       value: options.contains(value) ? value : options.first,
-      items: options.map((font) => DropdownMenuItem(value: font, child: Text(font))).toList(growable: false),
+      items: options
+          .map((font) => DropdownMenuItem(value: font, child: Text(font)))
+          .toList(growable: false),
       onChanged: (next) {
         if (next == null) return;
         _emitEvent(controlId, props, sendEvent, 'font_change', {'font': next});
@@ -1152,9 +1479,12 @@ class _AssetPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = (props['label'] ?? controlType.replaceAll('_', ' ')).toString();
+    final label = (props['label'] ?? controlType.replaceAll('_', ' '))
+        .toString();
     return OutlinedButton.icon(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, 'pick', {'kind': controlType}),
+      onPressed: () => _emitEvent(controlId, props, sendEvent, 'pick', {
+        'kind': controlType,
+      }),
       icon: const Icon(Icons.attach_file),
       label: Text(label),
     );
@@ -1177,7 +1507,9 @@ class _ItemHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, 'drag_handle', {'kind': controlType}),
+      onPressed: () => _emitEvent(controlId, props, sendEvent, 'drag_handle', {
+        'kind': controlType,
+      }),
       icon: const Icon(Icons.drag_indicator),
     );
   }
@@ -1206,7 +1538,8 @@ class _ItemDropTarget extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       child: TextButton(
-        onPressed: () => _emitEvent(controlId, props, sendEvent, 'drop_target', {}),
+        onPressed: () =>
+            _emitEvent(controlId, props, sendEvent, 'drop_target', {}),
         child: Text((props['label'] ?? 'Drop Target').toString()),
       ),
     );
@@ -1214,7 +1547,11 @@ class _ItemDropTarget extends StatelessWidget {
 }
 
 class _SelectionCheckbox extends StatelessWidget {
-  const _SelectionCheckbox({required this.controlId, required this.props, required this.sendEvent});
+  const _SelectionCheckbox({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1225,13 +1562,23 @@ class _SelectionCheckbox extends StatelessWidget {
     final selected = props['selected'] == true;
     return Checkbox(
       value: selected,
-      onChanged: (value) => _emitEvent(controlId, props, sendEvent, 'select_change', {'selected': value == true}),
+      onChanged: (value) => _emitEvent(
+        controlId,
+        props,
+        sendEvent,
+        'select_change',
+        {'selected': value == true},
+      ),
     );
   }
 }
 
 class _SelectionRadio extends StatelessWidget {
-  const _SelectionRadio({required this.controlId, required this.props, required this.sendEvent});
+  const _SelectionRadio({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1243,13 +1590,23 @@ class _SelectionRadio extends StatelessWidget {
     return Radio<bool>(
       value: true,
       groupValue: selected,
-      onChanged: (value) => _emitEvent(controlId, props, sendEvent, 'select_change', {'selected': value == true}),
+      onChanged: (value) => _emitEvent(
+        controlId,
+        props,
+        sendEvent,
+        'select_change',
+        {'selected': value == true},
+      ),
     );
   }
 }
 
 class _SelectionSwitch extends StatelessWidget {
-  const _SelectionSwitch({required this.controlId, required this.props, required this.sendEvent});
+  const _SelectionSwitch({
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
 
   final String controlId;
   final Map<String, Object?> props;
@@ -1260,7 +1617,13 @@ class _SelectionSwitch extends StatelessWidget {
     final selected = props['selected'] == true;
     return Switch(
       value: selected,
-      onChanged: (value) => _emitEvent(controlId, props, sendEvent, 'select_change', {'selected': value}),
+      onChanged: (value) => _emitEvent(
+        controlId,
+        props,
+        sendEvent,
+        'select_change',
+        {'selected': value},
+      ),
     );
   }
 }
@@ -1280,13 +1643,112 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = (props['label'] ?? controlType.replaceAll('_', ' ')).toString();
+    final label = (props['label'] ?? controlType.replaceAll('_', ' '))
+        .toString();
     return FilledButton.tonal(
       onPressed: () => _emitEvent(controlId, props, sendEvent, controlType, {
         'value': props['value'],
         'payload': props['payload'],
       }),
       child: Text(label),
+    );
+  }
+}
+
+class _CollectionModule extends StatelessWidget {
+  const _CollectionModule({
+    required this.controlType,
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
+
+  final String controlType;
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  Widget build(BuildContext context) {
+    final items = props['items'] is List
+        ? (props['items'] as List)
+        : const <dynamic>[];
+    if (items.isEmpty) {
+      return Text(
+        '${controlType.replaceAll('_', ' ')}: empty',
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final item in items.take(24))
+          ActionChip(
+            label: Text(
+              item is Map
+                  ? (item['label'] ?? item['name'] ?? item['id'] ?? '')
+                        .toString()
+                  : item.toString(),
+            ),
+            onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {
+              'module': controlType,
+              'item': item,
+            }),
+          ),
+      ],
+    );
+  }
+}
+
+class _RendererModule extends StatelessWidget {
+  const _RendererModule({
+    required this.controlType,
+    required this.controlId,
+    required this.props,
+    required this.sendEvent,
+  });
+
+  final String controlType;
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  Widget build(BuildContext context) {
+    final label =
+        (props['label'] ?? props['title'] ?? controlType.replaceAll('_', ' '))
+            .toString();
+    final value = (props['text'] ?? props['src'] ?? props['font'] ?? '')
+        .toString();
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(_resolveRadius(props, fallback: 8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 6),
+          Text(
+            value.isEmpty ? '(no value)' : value,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          FilledButton.tonal(
+            onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {
+              'module': controlType,
+              'value': value,
+            }),
+            child: const Text('Use'),
+          ),
+        ],
+      ),
     );
   }
 }

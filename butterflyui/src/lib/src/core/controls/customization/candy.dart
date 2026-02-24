@@ -130,10 +130,28 @@ const Map<String, String> _candyCommonPayloadTypes = {
 };
 
 const Map<String, Set<String>> _candyModuleAllowedKeys = {
-  'button': {'label', 'text', 'icon', 'loading', 'disabled', 'radius', 'padding', 'bgcolor', 'text_color'},
+  'button': {
+    'label',
+    'text',
+    'icon',
+    'loading',
+    'disabled',
+    'radius',
+    'padding',
+    'bgcolor',
+    'text_color',
+  },
   'card': {'elevation', 'radius', 'padding', 'margin', 'bgcolor'},
   'column': {'spacing', 'alignment', 'main_axis', 'cross_axis'},
-  'container': {'width', 'height', 'padding', 'margin', 'alignment', 'bgcolor', 'radius'},
+  'container': {
+    'width',
+    'height',
+    'padding',
+    'margin',
+    'alignment',
+    'bgcolor',
+    'radius',
+  },
   'row': {'spacing', 'alignment', 'main_axis', 'cross_axis'},
   'stack': {'alignment', 'fit'},
   'surface': {'bgcolor', 'elevation', 'radius', 'border_color', 'border_width'},
@@ -142,24 +160,80 @@ const Map<String, Set<String>> _candyModuleAllowedKeys = {
   'center': {'width_factor', 'height_factor'},
   'spacer': {'width', 'height', 'flex'},
   'aspect_ratio': {'ratio', 'value'},
-  'overflow_box': {'alignment', 'min_width', 'max_width', 'min_height', 'max_height'},
+  'overflow_box': {
+    'alignment',
+    'min_width',
+    'max_width',
+    'min_height',
+    'max_height',
+  },
   'fitted_box': {'fit', 'alignment', 'clip_behavior'},
   'effects': {'shimmer', 'blur', 'opacity', 'overlay'},
-  'particles': {'count', 'speed', 'size', 'gravity', 'drift', 'overlay', 'colors'},
+  'particles': {
+    'count',
+    'speed',
+    'size',
+    'gravity',
+    'drift',
+    'overlay',
+    'colors',
+  },
   'border': {'color', 'width', 'radius', 'side', 'padding'},
   'shadow': {'color', 'blur', 'spread', 'dx', 'dy'},
   'outline': {'outline_color', 'outline_width', 'radius'},
   'gradient': {'variant', 'colors', 'stops', 'begin', 'end', 'angle'},
-  'animation': {'duration_ms', 'curve', 'opacity', 'scale', 'autoplay', 'loop', 'reverse'},
+  'animation': {
+    'duration_ms',
+    'curve',
+    'opacity',
+    'scale',
+    'autoplay',
+    'loop',
+    'reverse',
+  },
   'transition': {'duration_ms', 'curve', 'preset', 'key'},
   'canvas': {'width', 'height', 'commands'},
   'clip': {'shape', 'clip_shape', 'clip_behavior', 'radius'},
-  'decorated_box': {'bgcolor', 'gradient', 'border_color', 'border_width', 'radius', 'shadow'},
-  'badge': {'label', 'text', 'value', 'color', 'bgcolor', 'text_color', 'radius'},
+  'decorated_box': {
+    'bgcolor',
+    'gradient',
+    'border_color',
+    'border_width',
+    'radius',
+    'shadow',
+  },
+  'badge': {
+    'label',
+    'text',
+    'value',
+    'color',
+    'bgcolor',
+    'text_color',
+    'radius',
+  },
   'avatar': {'src', 'label', 'text', 'size', 'color', 'bgcolor'},
   'icon': {'icon', 'size', 'color'},
-  'text': {'text', 'value', 'color', 'font_size', 'size', 'font_weight', 'weight', 'align', 'max_lines', 'overflow'},
-  'motion': {'duration_ms', 'curve', 'opacity', 'scale', 'autoplay', 'loop', 'reverse'},
+  'text': {
+    'text',
+    'value',
+    'color',
+    'font_size',
+    'size',
+    'font_weight',
+    'weight',
+    'align',
+    'max_lines',
+    'overflow',
+  },
+  'motion': {
+    'duration_ms',
+    'curve',
+    'opacity',
+    'scale',
+    'autoplay',
+    'loop',
+    'reverse',
+  },
 };
 
 const Map<String, Map<String, String>> _candyModulePayloadTypes = {
@@ -181,7 +255,12 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'margin': 'padding',
     'bgcolor': 'color',
   },
-  'column': {'spacing': 'num', 'alignment': 'string', 'main_axis': 'string', 'cross_axis': 'string'},
+  'column': {
+    'spacing': 'num',
+    'alignment': 'string',
+    'main_axis': 'string',
+    'cross_axis': 'string',
+  },
   'container': {
     'width': 'dimension',
     'height': 'dimension',
@@ -191,7 +270,12 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'bgcolor': 'color',
     'radius': 'num',
   },
-  'row': {'spacing': 'num', 'alignment': 'string', 'main_axis': 'string', 'cross_axis': 'string'},
+  'row': {
+    'spacing': 'num',
+    'alignment': 'string',
+    'main_axis': 'string',
+    'cross_axis': 'string',
+  },
   'stack': {'alignment': 'alignment', 'fit': 'string'},
   'surface': {
     'bgcolor': 'color',
@@ -200,8 +284,17 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'border_color': 'color',
     'border_width': 'num',
   },
-  'wrap': {'spacing': 'num', 'run_spacing': 'num', 'alignment': 'string', 'run_alignment': 'string'},
-  'align': {'alignment': 'alignment', 'width_factor': 'num', 'height_factor': 'num'},
+  'wrap': {
+    'spacing': 'num',
+    'run_spacing': 'num',
+    'alignment': 'string',
+    'run_alignment': 'string',
+  },
+  'align': {
+    'alignment': 'alignment',
+    'width_factor': 'num',
+    'height_factor': 'num',
+  },
   'center': {'width_factor': 'num', 'height_factor': 'num'},
   'spacer': {'width': 'dimension', 'height': 'dimension', 'flex': 'int'},
   'aspect_ratio': {'ratio': 'num', 'value': 'num'},
@@ -212,8 +305,17 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'min_height': 'dimension',
     'max_height': 'dimension',
   },
-  'fitted_box': {'fit': 'string', 'alignment': 'alignment', 'clip_behavior': 'string'},
-  'effects': {'shimmer': 'bool', 'blur': 'num', 'opacity': 'num', 'overlay': 'bool'},
+  'fitted_box': {
+    'fit': 'string',
+    'alignment': 'alignment',
+    'clip_behavior': 'string',
+  },
+  'effects': {
+    'shimmer': 'bool',
+    'blur': 'num',
+    'opacity': 'num',
+    'overlay': 'bool',
+  },
   'particles': {
     'count': 'int',
     'speed': 'num',
@@ -223,17 +325,80 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'overlay': 'bool',
     'colors': 'list',
   },
-  'border': {'color': 'color', 'width': 'num', 'radius': 'num', 'side': 'string', 'padding': 'padding'},
-  'shadow': {'color': 'color', 'blur': 'num', 'spread': 'num', 'dx': 'num', 'dy': 'num'},
-  'outline': {'outline_color': 'color', 'outline_width': 'num', 'radius': 'num'},
-  'gradient': {'variant': 'string', 'colors': 'list', 'stops': 'list', 'begin': 'any', 'end': 'any', 'angle': 'num'},
-  'animation': {'duration_ms': 'int', 'curve': 'string', 'opacity': 'num', 'scale': 'num', 'autoplay': 'bool', 'loop': 'bool', 'reverse': 'bool'},
-  'transition': {'duration_ms': 'int', 'curve': 'string', 'preset': 'string', 'key': 'any'},
+  'border': {
+    'color': 'color',
+    'width': 'num',
+    'radius': 'num',
+    'side': 'string',
+    'padding': 'padding',
+  },
+  'shadow': {
+    'color': 'color',
+    'blur': 'num',
+    'spread': 'num',
+    'dx': 'num',
+    'dy': 'num',
+  },
+  'outline': {
+    'outline_color': 'color',
+    'outline_width': 'num',
+    'radius': 'num',
+  },
+  'gradient': {
+    'variant': 'string',
+    'colors': 'list',
+    'stops': 'list',
+    'begin': 'any',
+    'end': 'any',
+    'angle': 'num',
+  },
+  'animation': {
+    'duration_ms': 'int',
+    'curve': 'string',
+    'opacity': 'num',
+    'scale': 'num',
+    'autoplay': 'bool',
+    'loop': 'bool',
+    'reverse': 'bool',
+  },
+  'transition': {
+    'duration_ms': 'int',
+    'curve': 'string',
+    'preset': 'string',
+    'key': 'any',
+  },
   'canvas': {'width': 'dimension', 'height': 'dimension', 'commands': 'list'},
-  'clip': {'shape': 'string', 'clip_shape': 'string', 'clip_behavior': 'string', 'radius': 'num'},
-  'decorated_box': {'bgcolor': 'color', 'gradient': 'any', 'border_color': 'color', 'border_width': 'num', 'radius': 'num', 'shadow': 'any'},
-  'badge': {'label': 'string', 'text': 'string', 'value': 'any', 'color': 'color', 'bgcolor': 'color', 'text_color': 'color', 'radius': 'num'},
-  'avatar': {'src': 'string', 'label': 'string', 'text': 'string', 'size': 'num', 'color': 'color', 'bgcolor': 'color'},
+  'clip': {
+    'shape': 'string',
+    'clip_shape': 'string',
+    'clip_behavior': 'string',
+    'radius': 'num',
+  },
+  'decorated_box': {
+    'bgcolor': 'color',
+    'gradient': 'any',
+    'border_color': 'color',
+    'border_width': 'num',
+    'radius': 'num',
+    'shadow': 'any',
+  },
+  'badge': {
+    'label': 'string',
+    'text': 'string',
+    'value': 'any',
+    'color': 'color',
+    'bgcolor': 'color',
+    'text_color': 'color',
+    'radius': 'num',
+  },
+  'avatar': {
+    'src': 'string',
+    'label': 'string',
+    'text': 'string',
+    'size': 'num',
+    'color': 'color',
+    'bgcolor': 'color',
+  },
   'icon': {'icon': 'string', 'size': 'num', 'color': 'color'},
   'text': {
     'text': 'string',
@@ -247,7 +412,15 @@ const Map<String, Map<String, String>> _candyModulePayloadTypes = {
     'max_lines': 'int',
     'overflow': 'string',
   },
-  'motion': {'duration_ms': 'int', 'curve': 'string', 'opacity': 'num', 'scale': 'num', 'autoplay': 'bool', 'loop': 'bool', 'reverse': 'bool'},
+  'motion': {
+    'duration_ms': 'int',
+    'curve': 'string',
+    'opacity': 'num',
+    'scale': 'num',
+    'autoplay': 'bool',
+    'loop': 'bool',
+    'reverse': 'bool',
+  },
 };
 
 Widget buildCandyFamilyControl(
@@ -310,7 +483,12 @@ class _CandyFamilyState extends State<_CandyFamily> {
     super.initState();
     _runtimeProps = _normalizeProps(widget.props);
     _module = _resolveModule(_runtimeProps);
-    _state = _resolveState(_runtimeProps, hovered: false, focused: false, pressed: false);
+    _state = _resolveState(
+      _runtimeProps,
+      hovered: false,
+      focused: false,
+      pressed: false,
+    );
     if (widget.controlId.isNotEmpty) {
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
@@ -346,7 +524,10 @@ class _CandyFamilyState extends State<_CandyFamily> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (_norm(method)) {
       case 'get_state':
         return {
@@ -384,7 +565,10 @@ class _CandyFamilyState extends State<_CandyFamily> {
           _runtimeProps['module'] = module;
           final payload = args['payload'];
           if (payload is Map) {
-            final payloadMap = _sanitizeModulePayload(module, coerceObjectMap(payload));
+            final payloadMap = _sanitizeModulePayload(
+              module,
+              coerceObjectMap(payload),
+            );
             _runtimeProps[module] = payloadMap;
             final modules = _coerceObjectMap(_runtimeProps['modules']);
             modules[module] = payloadMap;
@@ -456,7 +640,9 @@ class _CandyFamilyState extends State<_CandyFamily> {
       case 'trigger':
         {
           final fallback = method == 'trigger' ? 'change' : method;
-          final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
+          final event = _norm(
+            (args['event'] ?? args['name'] ?? fallback).toString(),
+          );
           if (!_candyEvents.contains(event)) {
             return {'ok': false, 'error': 'unknown event: $event'};
           }
@@ -480,7 +666,11 @@ class _CandyFamilyState extends State<_CandyFamily> {
       case 'click':
       case 'tap':
         {
-          _emit('click', {'module': _module, 'state': _state, 'payload': args['payload']});
+          _emit('click', {
+            'module': _module,
+            'state': _state,
+            'payload': args['payload'],
+          });
           return {'ok': true};
         }
 
@@ -509,7 +699,13 @@ class _CandyFamilyState extends State<_CandyFamily> {
 
     Widget base = _buildModule(context, module, merged, style);
 
-    base = _composeSlots(base, _runtimeProps, merged, widget.rawChildren, widget.buildChild);
+    base = _composeSlots(
+      base,
+      _runtimeProps,
+      merged,
+      widget.rawChildren,
+      widget.buildChild,
+    );
     base = _applyVisualPipeline(base, merged, style);
     base = _wrapWithMotion(base, merged);
     base = _wrapWithSemantics(base, merged, module);
@@ -525,34 +721,68 @@ class _CandyFamilyState extends State<_CandyFamily> {
     Map<String, Object?> merged,
     _CandyStyle style,
   ) {
-    final customLayout = merged['custom_layout'] == true ||
+    final customLayout =
+        merged['custom_layout'] == true ||
         _norm((merged['layout'] ?? '').toString()) == 'custom';
     if (customLayout && widget.rawChildren.isNotEmpty) {
-      return buildContainerControl(merged, widget.rawChildren, widget.buildChild);
+      return buildContainerControl(
+        merged,
+        widget.rawChildren,
+        widget.buildChild,
+      );
     }
 
     switch (module) {
       case 'button':
-        return buildButtonControl(widget.controlId, merged, widget.tokens, widget.sendEvent);
+        return buildButtonControl(
+          widget.controlId,
+          merged,
+          widget.tokens,
+          widget.sendEvent,
+        );
 
       case 'card':
-        return buildCardControl(merged, widget.rawChildren, widget.tokens, widget.buildChild);
+        return buildCardControl(
+          merged,
+          widget.rawChildren,
+          widget.tokens,
+          widget.buildChild,
+        );
 
       case 'column':
-        return buildColumnControl(merged, widget.rawChildren, widget.tokens, widget.buildChild);
+        return buildColumnControl(
+          merged,
+          widget.rawChildren,
+          widget.tokens,
+          widget.buildChild,
+        );
 
       case 'container':
       case 'surface':
-        return buildContainerControl(merged, widget.rawChildren, widget.buildChild);
+        return buildContainerControl(
+          merged,
+          widget.rawChildren,
+          widget.buildChild,
+        );
 
       case 'row':
-        return buildRowControl(merged, widget.rawChildren, widget.tokens, widget.buildChild);
+        return buildRowControl(
+          merged,
+          widget.rawChildren,
+          widget.tokens,
+          widget.buildChild,
+        );
 
       case 'stack':
         return buildStackControl(merged, widget.rawChildren, widget.buildChild);
 
       case 'wrap':
-        return buildWrapControl(merged, widget.rawChildren, widget.tokens, widget.buildChild);
+        return buildWrapControl(
+          merged,
+          widget.rawChildren,
+          widget.tokens,
+          widget.buildChild,
+        );
 
       case 'align':
         return buildAlignControl(
@@ -603,7 +833,11 @@ class _CandyFamilyState extends State<_CandyFamily> {
 
       case 'effects':
         {
-          Widget child = buildLayerControl(merged, widget.rawChildren, widget.buildChild);
+          Widget child = buildLayerControl(
+            merged,
+            widget.rawChildren,
+            widget.buildChild,
+          );
           if (merged['shimmer'] == true) {
             child = buildShimmerControl(
               '${widget.controlId}::effects',
@@ -625,14 +859,22 @@ class _CandyFamilyState extends State<_CandyFamily> {
             widget.unregisterInvokeHandler,
             widget.sendEvent,
           );
-          final child = _firstChildOrEmpty(widget.rawChildren, widget.buildChild);
-          final overlay = merged['overlay'] == null ? true : (merged['overlay'] == true);
+          final child = _firstChildOrEmpty(
+            widget.rawChildren,
+            widget.buildChild,
+          );
+          final overlay = merged['overlay'] == null
+              ? true
+              : (merged['overlay'] == true);
           if (!overlay) {
             return particle;
           }
           return Stack(
             fit: StackFit.expand,
-            children: [child, IgnorePointer(child: particle)],
+            children: [
+              child,
+              IgnorePointer(child: particle),
+            ],
           );
         }
 
@@ -665,11 +907,19 @@ class _CandyFamilyState extends State<_CandyFamily> {
         );
 
       case 'gradient':
-        return buildGradientControl(merged, widget.rawChildren, widget.buildChild);
+        return buildGradientControl(
+          merged,
+          widget.rawChildren,
+          widget.buildChild,
+        );
 
       case 'animation':
       case 'motion':
-        return buildMotionControl(merged, widget.rawChildren, widget.buildChild);
+        return buildMotionControl(
+          merged,
+          widget.rawChildren,
+          widget.buildChild,
+        );
 
       case 'transition':
         return _buildTransitionControl(merged);
@@ -685,9 +935,15 @@ class _CandyFamilyState extends State<_CandyFamily> {
 
       case 'clip':
         {
-          final child = _firstChildOrEmpty(widget.rawChildren, widget.buildChild);
-          final shape = _norm((merged['shape'] ?? merged['clip_shape'] ?? 'rect').toString());
-          final clipBehavior = _parseClip(merged['clip_behavior']) ?? Clip.antiAlias;
+          final child = _firstChildOrEmpty(
+            widget.rawChildren,
+            widget.buildChild,
+          );
+          final shape = _norm(
+            (merged['shape'] ?? merged['clip_shape'] ?? 'rect').toString(),
+          );
+          final clipBehavior =
+              _parseClip(merged['clip_behavior']) ?? Clip.antiAlias;
           if (shape == 'oval' || shape == 'circle') {
             return ClipOval(clipBehavior: clipBehavior, child: child);
           }
@@ -726,14 +982,20 @@ class _CandyFamilyState extends State<_CandyFamily> {
           final size = coerceDouble(merged['size']) ?? 36.0;
           final label = (merged['label'] ?? merged['text'] ?? '').toString();
           final src = merged['src']?.toString();
-          final image = (src != null && src.isNotEmpty) ? NetworkImage(src) : null;
+          final image = (src != null && src.isNotEmpty)
+              ? NetworkImage(src)
+              : null;
           return CircleAvatar(
             radius: size / 2,
             backgroundColor: style.background,
             foregroundColor: style.foreground,
             backgroundImage: image,
             child: image == null
-                ? Text(label.isNotEmpty ? label.substring(0, 1).toUpperCase() : '?')
+                ? Text(
+                    label.isNotEmpty
+                        ? label.substring(0, 1).toUpperCase()
+                        : '?',
+                  )
                 : null,
           );
         }
@@ -752,21 +1014,30 @@ class _CandyFamilyState extends State<_CandyFamily> {
           maxLines: coerceOptionalInt(merged['max_lines']),
           overflow: _parseTextOverflow(merged['overflow']),
           style: TextStyle(
-            color: coerceColor(merged['color'] ?? merged['text_color']) ?? style.foreground,
+            color:
+                coerceColor(merged['color'] ?? merged['text_color']) ??
+                style.foreground,
             fontSize: coerceDouble(merged['size'] ?? merged['font_size']),
             fontWeight: _parseWeight(merged['weight'] ?? merged['font_weight']),
           ),
         );
 
       default:
-        return buildContainerControl(merged, widget.rawChildren, widget.buildChild);
+        return buildContainerControl(
+          merged,
+          widget.rawChildren,
+          widget.buildChild,
+        );
     }
   }
 
   Widget _buildTransitionControl(Map<String, Object?> merged) {
     return AnimatedSwitcher(
       duration: Duration(
-        milliseconds: (coerceOptionalInt(merged['duration_ms']) ?? 220).clamp(1, 120000),
+        milliseconds: (coerceOptionalInt(merged['duration_ms']) ?? 220).clamp(
+          1,
+          120000,
+        ),
       ),
       switchInCurve: _parseCurve(merged['curve']) ?? Curves.easeOutCubic,
       switchOutCurve: _parseCurve(merged['curve']) ?? Curves.easeOutCubic,
@@ -777,14 +1048,19 @@ class _CandyFamilyState extends State<_CandyFamily> {
         }
         if (preset == 'slide') {
           return SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0.08, 0), end: Offset.zero).animate(animation),
+            position: Tween<Offset>(
+              begin: const Offset(0.08, 0),
+              end: Offset.zero,
+            ).animate(animation),
             child: FadeTransition(opacity: animation, child: child),
           );
         }
         return FadeTransition(opacity: animation, child: child);
       },
       child: KeyedSubtree(
-        key: ValueKey(merged['key'] ?? merged['state'] ?? merged['value'] ?? _module),
+        key: ValueKey(
+          merged['key'] ?? merged['state'] ?? merged['value'] ?? _module,
+        ),
         child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
       ),
     );
@@ -809,7 +1085,9 @@ class _CandyFamilyState extends State<_CandyFamily> {
     final leading = childFromSlot(slots['leading'] ?? merged['leading']);
     final trailing = childFromSlot(slots['trailing'] ?? merged['trailing']);
     final overlay = childFromSlot(slots['overlay'] ?? merged['overlay']);
-    final background = childFromSlot(slots['background'] ?? merged['background']);
+    final background = childFromSlot(
+      slots['background'] ?? merged['background'],
+    );
     final content = childFromSlot(slots['content']);
 
     Widget composed = base;
@@ -833,9 +1111,11 @@ class _CandyFamilyState extends State<_CandyFamily> {
       composed = Stack(
         fit: StackFit.passthrough,
         children: [
-          if (background is! SizedBox) Positioned.fill(child: IgnorePointer(child: background)),
+          if (background is! SizedBox)
+            Positioned.fill(child: IgnorePointer(child: background)),
           composed,
-          if (overlay is! SizedBox) Positioned.fill(child: IgnorePointer(child: overlay)),
+          if (overlay is! SizedBox)
+            Positioned.fill(child: IgnorePointer(child: overlay)),
         ],
       );
     }
@@ -853,7 +1133,11 @@ class _CandyFamilyState extends State<_CandyFamily> {
     return composed;
   }
 
-  Widget _applyVisualPipeline(Widget base, Map<String, Object?> merged, _CandyStyle style) {
+  Widget _applyVisualPipeline(
+    Widget base,
+    Map<String, Object?> merged,
+    _CandyStyle style,
+  ) {
     Widget out = base;
 
     final clipBehavior = _parseClip(merged['clip_behavior']);
@@ -869,7 +1153,10 @@ class _CandyFamilyState extends State<_CandyFamily> {
     final border = _coerceBorder(merged);
     final gradient = coerceGradient(merged['gradient']);
 
-    if (shadow != null || border != null || gradient != null || style.background != null) {
+    if (shadow != null ||
+        border != null ||
+        gradient != null ||
+        style.background != null) {
       out = DecoratedBox(
         decoration: BoxDecoration(
           color: style.background,
@@ -899,11 +1186,21 @@ class _CandyFamilyState extends State<_CandyFamily> {
     }
 
     final durationMs =
-        (coerceOptionalInt(animation['duration_ms'] ?? transition['duration_ms'] ?? motion['duration_ms']) ?? 220)
+        (coerceOptionalInt(
+                  animation['duration_ms'] ??
+                      transition['duration_ms'] ??
+                      motion['duration_ms'],
+                ) ??
+                220)
             .clamp(1, 120000);
-    final curve = _parseCurve(animation['curve'] ?? transition['curve'] ?? motion['curve']) ?? Curves.easeOutCubic;
+    final curve =
+        _parseCurve(
+          animation['curve'] ?? transition['curve'] ?? motion['curve'],
+        ) ??
+        Curves.easeOutCubic;
     final scale = coerceDouble(animation['scale'] ?? motion['scale']) ?? 1.0;
-    final targetOpacity = coerceDouble(animation['opacity'] ?? motion['opacity']) ?? 1.0;
+    final targetOpacity =
+        coerceDouble(animation['opacity'] ?? motion['opacity']) ?? 1.0;
 
     return AnimatedContainer(
       duration: Duration(milliseconds: durationMs),
@@ -918,15 +1215,30 @@ class _CandyFamilyState extends State<_CandyFamily> {
     );
   }
 
-  Widget _wrapWithSemantics(Widget base, Map<String, Object?> merged, String module) {
+  Widget _wrapWithSemantics(
+    Widget base,
+    Map<String, Object?> merged,
+    String module,
+  ) {
     final semantics = _coerceObjectMap(merged['semantics']);
     final accessibility = _coerceObjectMap(merged['accessibility']);
     final label =
-        (accessibility['label'] ?? semantics['label'] ?? merged['label'] ?? merged['text'])?.toString();
+        (accessibility['label'] ??
+                semantics['label'] ??
+                merged['label'] ??
+                merged['text'])
+            ?.toString();
     final hint = (accessibility['hint'] ?? semantics['hint'])?.toString();
-    final value = (accessibility['value'] ?? semantics['value'] ?? merged['value'])?.toString();
-    final button = accessibility['button'] == true || semantics['button'] == true || module == 'button';
-    final enabled = merged['enabled'] == null ? true : (merged['enabled'] == true);
+    final value =
+        (accessibility['value'] ?? semantics['value'] ?? merged['value'])
+            ?.toString();
+    final button =
+        accessibility['button'] == true ||
+        semantics['button'] == true ||
+        module == 'button';
+    final enabled = merged['enabled'] == null
+        ? true
+        : (merged['enabled'] == true);
 
     return Semantics(
       label: label,
@@ -934,8 +1246,11 @@ class _CandyFamilyState extends State<_CandyFamily> {
       value: value,
       button: button,
       enabled: enabled,
-      focusable: accessibility['focusable'] == true || semantics['focusable'] == true,
-      liveRegion: accessibility['live_region'] == true || semantics['live_region'] == true,
+      focusable:
+          accessibility['focusable'] == true || semantics['focusable'] == true,
+      liveRegion:
+          accessibility['live_region'] == true ||
+          semantics['live_region'] == true,
       child: base,
     );
   }
@@ -958,8 +1273,14 @@ class _CandyFamilyState extends State<_CandyFamily> {
     return out;
   }
 
-  Widget _wrapWithInteraction(Widget base, Map<String, Object?> merged, String module) {
-    final enabled = merged['enabled'] == null ? true : (merged['enabled'] == true);
+  Widget _wrapWithInteraction(
+    Widget base,
+    Map<String, Object?> merged,
+    String module,
+  ) {
+    final enabled = merged['enabled'] == null
+        ? true
+        : (merged['enabled'] == true);
     final interactive = enabled && _isInteractive(module);
 
     if (!interactive) {
@@ -971,16 +1292,29 @@ class _CandyFamilyState extends State<_CandyFamily> {
       onShowFocusHighlight: (value) {
         setState(() {
           _focused = value;
-          _state = _resolveState(_runtimeProps, hovered: _hovered, focused: _focused, pressed: _pressed);
+          _state = _resolveState(
+            _runtimeProps,
+            hovered: _hovered,
+            focused: _focused,
+            pressed: _pressed,
+          );
         });
         _emit('focus_change', {'focused': value, 'state': _state});
       },
       onShowHoverHighlight: (value) {
         setState(() {
           _hovered = value;
-          _state = _resolveState(_runtimeProps, hovered: _hovered, focused: _focused, pressed: _pressed);
+          _state = _resolveState(
+            _runtimeProps,
+            hovered: _hovered,
+            focused: _focused,
+            pressed: _pressed,
+          );
         });
-        _emit(value ? 'hover_enter' : 'hover_exit', {'hovered': value, 'state': _state});
+        _emit(value ? 'hover_enter' : 'hover_exit', {
+          'hovered': value,
+          'state': _state,
+        });
       },
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -997,21 +1331,36 @@ class _CandyFamilyState extends State<_CandyFamily> {
         onTapDown: (_) {
           setState(() {
             _pressed = true;
-            _state = _resolveState(_runtimeProps, hovered: _hovered, focused: _focused, pressed: _pressed);
+            _state = _resolveState(
+              _runtimeProps,
+              hovered: _hovered,
+              focused: _focused,
+              pressed: _pressed,
+            );
           });
           _emit('state_change', {'state': _state});
         },
         onTapUp: (_) {
           setState(() {
             _pressed = false;
-            _state = _resolveState(_runtimeProps, hovered: _hovered, focused: _focused, pressed: _pressed);
+            _state = _resolveState(
+              _runtimeProps,
+              hovered: _hovered,
+              focused: _focused,
+              pressed: _pressed,
+            );
           });
           _emit('state_change', {'state': _state});
         },
         onTapCancel: () {
           setState(() {
             _pressed = false;
-            _state = _resolveState(_runtimeProps, hovered: _hovered, focused: _focused, pressed: _pressed);
+            _state = _resolveState(
+              _runtimeProps,
+              hovered: _hovered,
+              focused: _focused,
+              pressed: _pressed,
+            );
           });
           _emit('state_change', {'state': _state});
         },
@@ -1109,12 +1458,22 @@ _CandyStyle _resolveStyle(
       Theme.of(context).colorScheme.outline;
 
   final outlineWidth =
-      coerceDouble(merged['outline_width'] ?? merged['border_width'] ?? tokenOverrides['outline_width'] ?? tokenMap['outline_width']) ??
-          1.0;
+      coerceDouble(
+        merged['outline_width'] ??
+            merged['border_width'] ??
+            tokenOverrides['outline_width'] ??
+            tokenMap['outline_width'],
+      ) ??
+      1.0;
 
   final radius =
-      coerceDouble(merged['radius'] ?? tokenOverrides['radius'] ?? tokenMap['radius'] ?? tokens.number('radii', 'md')) ??
-          0.0;
+      coerceDouble(
+        merged['radius'] ??
+            tokenOverrides['radius'] ??
+            tokenMap['radius'] ??
+            tokens.number('radii', 'md'),
+      ) ??
+      0.0;
 
   return _CandyStyle(
     background: background,
@@ -1127,7 +1486,11 @@ _CandyStyle _resolveStyle(
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   final out = Map<String, Object?>.from(input);
-  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _candySchemaVersion).clamp(1, 9999);
+  out['schema_version'] =
+      (coerceOptionalInt(out['schema_version']) ?? _candySchemaVersion).clamp(
+        1,
+        9999,
+      );
 
   final module = _norm(out['module']?.toString() ?? '');
   if (module.isNotEmpty && _candyModules.contains(module)) {
@@ -1158,8 +1521,16 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
     for (final entry in modules.entries) {
       final normalizedModule = _norm(entry.key);
       if (!_candyModules.contains(normalizedModule)) continue;
+      if (entry.value == true) {
+        normalizedModules[normalizedModule] = <String, Object?>{};
+        continue;
+      }
       final payload = _coerceObjectMap(entry.value);
-      normalizedModules[normalizedModule] = _sanitizeModulePayload(normalizedModule, payload);
+      if (payload.isEmpty && entry.value is! Map) continue;
+      normalizedModules[normalizedModule] = _sanitizeModulePayload(
+        normalizedModule,
+        payload,
+      );
     }
     out['modules'] = normalizedModules;
   }
@@ -1218,7 +1589,10 @@ String _resolveState(
   return 'idle';
 }
 
-Map<String, Object?> _mergeModuleProps(Map<String, Object?> props, String module) {
+Map<String, Object?> _mergeModuleProps(
+  Map<String, Object?> props,
+  String module,
+) {
   final out = Map<String, Object?>.from(props);
   final modules = _coerceObjectMap(props['modules']);
   final fromModules = modules[module];
@@ -1253,7 +1627,10 @@ Map<String, Object?> _coerceObjectMap(Object? value) {
   return <String, Object?>{};
 }
 
-Map<String, Object?> _sanitizeModulePayload(String module, Map<String, Object?> payload) {
+Map<String, Object?> _sanitizeModulePayload(
+  String module,
+  Map<String, Object?> payload,
+) {
   final normalizedModule = _norm(module);
   final allowed = {
     ..._candyCommonPayloadKeys,
@@ -1293,7 +1670,10 @@ bool _isCandyTypeMatch(String type, Object? value) {
     case 'list':
       return value is List;
     case 'events':
-      return value is List && value.every((item) => item is String && _candyEvents.contains(_norm(item)));
+      return value is List &&
+          value.every(
+            (item) => item is String && _candyEvents.contains(_norm(item)),
+          );
     case 'state':
       return value is String && _candyStates.contains(_norm(value));
     case 'color':
@@ -1301,7 +1681,8 @@ bool _isCandyTypeMatch(String type, Object? value) {
     case 'dimension':
       return value is num || value is String;
     case 'alignment':
-      return _parseAlignment(value) != null || (value is String && _norm(value) == 'center');
+      return _parseAlignment(value) != null ||
+          (value is String && _norm(value) == 'center');
     case 'padding':
       return value is num || value is List || value is Map;
     default:

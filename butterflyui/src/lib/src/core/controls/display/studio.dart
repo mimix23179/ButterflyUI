@@ -111,11 +111,15 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (_norm(method)) {
       case 'get_state':
         return {
-          'schema_version': _runtimeProps['schema_version'] ?? _studioSchemaVersion,
+          'schema_version':
+              _runtimeProps['schema_version'] ?? _studioSchemaVersion,
           'module': _runtimeProps['module'],
           'state': _runtimeProps['state'],
           'props': _runtimeProps,
@@ -135,7 +139,9 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
           return {'ok': false, 'error': 'unknown module: $module'};
         }
         final payload = args['payload'];
-        final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{};
+        final payloadMap = payload is Map
+            ? coerceObjectMap(payload)
+            : <String, Object?>{};
         setState(() {
           final modules = _coerceObjectMap(_runtimeProps['modules']);
           modules[module] = payloadMap;
@@ -144,7 +150,10 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
           _runtimeProps[module] = payloadMap;
           _runtimeProps = _normalizeProps(_runtimeProps);
         });
-        _emitConfiguredEvent('module_change', {'module': module, 'payload': payloadMap});
+        _emitConfiguredEvent('module_change', {
+          'module': module,
+          'payload': payloadMap,
+        });
         return {'ok': true, 'module': module};
       case 'set_state':
         final state = _norm(args['state']?.toString() ?? '');
@@ -159,18 +168,25 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
       case 'emit':
       case 'trigger':
         final fallback = method == 'trigger' ? 'change' : method;
-        final event = _norm((args['event'] ?? args['name'] ?? fallback).toString());
+        final event = _norm(
+          (args['event'] ?? args['name'] ?? fallback).toString(),
+        );
         if (!_studioEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
         final payload = args['payload'];
-        _emitConfiguredEvent(event, payload is Map ? coerceObjectMap(payload) : args);
+        _emitConfiguredEvent(
+          event,
+          payload is Map ? coerceObjectMap(payload) : args,
+        );
         return true;
       default:
         final normalized = _norm(method);
         if (_studioModules.contains(normalized)) {
           final payload = args['payload'];
-          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{...args};
+          final payloadMap = payload is Map
+              ? coerceObjectMap(payload)
+              : <String, Object?>{...args};
           setState(() {
             final modules = _coerceObjectMap(_runtimeProps['modules']);
             modules[normalized] = payloadMap;
@@ -179,7 +195,10 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
             _runtimeProps[normalized] = payloadMap;
             _runtimeProps = _normalizeProps(_runtimeProps);
           });
-          _emitConfiguredEvent('module_change', {'module': normalized, 'payload': payloadMap});
+          _emitConfiguredEvent('module_change', {
+            'module': normalized,
+            'payload': payloadMap,
+          });
           return {'ok': true, 'module': normalized};
         }
         return {'ok': false, 'error': 'unknown method: $method'};
@@ -224,6 +243,8 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         final gridSize = coerceDouble(section['grid_size']) ?? 8;
         final moduleRadius =
             coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 10;
+        final canvasHeight =
+            coerceDouble(section['height']) ?? (module == 'canvas' ? 280 : 220);
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -236,10 +257,31 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
             children: [
               Text('Selected: ${selected.isEmpty ? '-' : selected}'),
               const SizedBox(height: 6),
-              Text('Grid: ${showGrid ? 'on' : 'off'} · Snap: ${snapToGrid ? 'on' : 'off'} · Size: $gridSize'),
+              Text(
+                'Grid: ${showGrid ? 'on' : 'off'} - Snap: ${snapToGrid ? 'on' : 'off'} - Size: $gridSize',
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: canvasHeight,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(moduleRadius - 2),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Center(
+                  child: Text(
+                    module == 'canvas' ? 'Canvas Surface' : 'Builder Workspace',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ),
               const SizedBox(height: 10),
               FilledButton.tonal(
-                onPressed: () => _emitConfiguredEvent('select', {'module': module, 'selected_id': selected}),
+                onPressed: () => _emitConfiguredEvent('select', {
+                  'module': module,
+                  'selected_id': selected,
+                }),
                 child: const Text('Emit Select'),
               ),
             ],
@@ -247,31 +289,59 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         );
       case 'block_palette':
       case 'component_palette':
-        return _StudioSearchModule(module: module, props: section, onEmit: _emitConfiguredEvent);
+        return _StudioSearchModule(
+          module: module,
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
       case 'asset_browser':
       case 'outline_tree':
       case 'project_panel':
       case 'selection_tools':
       case 'transform_toolbar':
       case 'responsive_toolbar':
-        return _StudioListModule(module: module, props: section, onEmit: _emitConfiguredEvent);
+        return _StudioListModule(
+          module: module,
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
+      case 'inspector':
+      case 'properties_panel':
+      case 'tokens_editor':
+      case 'actions_editor':
+      case 'bindings_editor':
+        return _StudioPropertyModule(
+          module: module,
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
       case 'transform_box':
-        return _StudioTransformModule(props: section, onEmit: _emitConfiguredEvent);
+        return _StudioTransformModule(
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
       default:
-        return _StudioGenericModule(module: module, props: section, onEmit: _emitConfiguredEvent);
+        return _StudioGenericModule(
+          module: module,
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
-    final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'builder');
+    final activeModule = _norm(
+      _runtimeProps['module']?.toString() ?? 'builder',
+    );
     final customChildren = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
     final showChrome =
-        _runtimeProps['show_modules'] == true || _runtimeProps['show_chrome'] == true;
+        _runtimeProps['show_modules'] == true ||
+        _runtimeProps['show_chrome'] == true;
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
       return const Center(child: CircularProgressIndicator());
@@ -320,7 +390,8 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
             children: [
               _buildModuleSection(
                 module,
-                _sectionProps(_runtimeProps, module) ?? <String, Object?>{'events': _runtimeProps['events']},
+                _sectionProps(_runtimeProps, module) ??
+                    <String, Object?>{'events': _runtimeProps['events']},
               ),
             ],
           ),
@@ -333,7 +404,11 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   final out = Map<String, Object?>.from(input);
-  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _studioSchemaVersion).clamp(1, 9999);
+  out['schema_version'] =
+      (coerceOptionalInt(out['schema_version']) ?? _studioSchemaVersion).clamp(
+        1,
+        9999,
+      );
 
   final module = _norm(out['module']?.toString() ?? '');
   if (module.isNotEmpty && _studioModules.contains(module)) {
@@ -366,12 +441,21 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
       final value = coerceObjectMap(topLevel);
       normalizedModules[moduleKey] = value;
       out[moduleKey] = value;
+    } else if (topLevel == true) {
+      normalizedModules[moduleKey] = <String, Object?>{};
+      out[moduleKey] = <String, Object?>{};
     }
   }
   for (final entry in modules.entries) {
     final normalized = _norm(entry.key);
     if (!_studioModules.contains(normalized)) continue;
+    if (entry.value == true) {
+      normalizedModules[normalized] = <String, Object?>{};
+      out[normalized] = <String, Object?>{};
+      continue;
+    }
     final value = _coerceObjectMap(entry.value);
+    if (value.isEmpty && entry.value is! Map) continue;
     normalizedModules[normalized] = value;
     out[normalized] = value;
   }
@@ -384,12 +468,27 @@ List<String> _availableModules(Map<String, Object?> props) {
   final modules = <String>[];
   final moduleMap = _coerceObjectMap(props['modules']);
   for (final key in _studioModuleOrder) {
-    if (props[key] is Map || moduleMap[key] is Map) {
+    if (props[key] is Map ||
+        props[key] == true ||
+        moduleMap[key] is Map ||
+        moduleMap[key] == true) {
       modules.add(key);
     }
   }
   if (modules.isEmpty) {
-    modules.addAll(const ['builder', 'canvas', 'inspector']);
+    modules.addAll(const [
+      'builder',
+      'responsive_toolbar',
+      'block_palette',
+      'component_palette',
+      'canvas',
+      'outline_tree',
+      'inspector',
+      'properties_panel',
+      'tokens_editor',
+      'actions_editor',
+      'bindings_editor',
+    ]);
   }
   return modules;
 }
@@ -398,12 +497,24 @@ Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
   final normalized = _norm(key);
   final section = props[normalized];
   if (section is Map) {
-    return <String, Object?>{...coerceObjectMap(section), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(section),
+      'events': props['events'],
+    };
+  }
+  if (section == true) {
+    return <String, Object?>{'events': props['events']};
   }
   final modules = _coerceObjectMap(props['modules']);
   final fromModules = modules[normalized];
   if (fromModules is Map) {
-    return <String, Object?>{...coerceObjectMap(fromModules), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(fromModules),
+      'events': props['events'],
+    };
+  }
+  if (fromModules == true) {
+    return <String, Object?>{'events': props['events']};
   }
   return null;
 }
@@ -432,7 +543,10 @@ class _StudioHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Studio', style: Theme.of(context).textTheme.titleMedium),
-              Text('State: $state', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'State: $state',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
@@ -544,9 +658,15 @@ class _StudioSearchModuleState extends State<_StudioSearchModule> {
             children: [
               for (final block in blocks.take(24))
                 ActionChip(
-                  label: Text(block is Map
-                      ? (block['label'] ?? block['title'] ?? block['id'] ?? '').toString()
-                      : block.toString()),
+                  label: Text(
+                    block is Map
+                        ? (block['label'] ??
+                                  block['title'] ??
+                                  block['id'] ??
+                                  '')
+                              .toString()
+                        : block.toString(),
+                  ),
                   onPressed: () => widget.onEmit('select', {
                     'module': widget.module,
                     'item': block,
@@ -599,9 +719,15 @@ class _StudioListModule extends StatelessWidget {
         for (final value in values.take(30))
           ListTile(
             dense: true,
-            title: Text(value is Map
-                ? (value['label'] ?? value['name'] ?? value['id'] ?? value.toString()).toString()
-                : value.toString()),
+            title: Text(
+              value is Map
+                  ? (value['label'] ??
+                            value['name'] ??
+                            value['id'] ??
+                            value.toString())
+                        .toString()
+                  : value.toString(),
+            ),
             onTap: () => onEmit('select', {'module': module, 'item': value}),
           ),
       ],
@@ -644,6 +770,74 @@ class _StudioTransformModule extends StatelessWidget {
   }
 }
 
+class _StudioPropertyModule extends StatefulWidget {
+  const _StudioPropertyModule({
+    required this.module,
+    required this.props,
+    required this.onEmit,
+  });
+
+  final String module;
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  State<_StudioPropertyModule> createState() => _StudioPropertyModuleState();
+}
+
+class _StudioPropertyModuleState extends State<_StudioPropertyModule> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.props.entries
+        .where((entry) => entry.key != 'events')
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join('\n'),
+  );
+
+  @override
+  void didUpdateWidget(covariant _StudioPropertyModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = widget.props.entries
+        .where((entry) => entry.key != 'events')
+        .map((entry) => '${entry.key}: ${entry.value}')
+        .join('\n');
+    if (_controller.text != next) {
+      _controller.text = next;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _controller,
+          minLines: 4,
+          maxLines: 12,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'module payload',
+          ),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.tonal(
+          onPressed: () => widget.onEmit('change', {
+            'module': widget.module,
+            'value': _controller.text,
+          }),
+          child: const Text('Apply Module Value'),
+        ),
+      ],
+    );
+  }
+}
+
 class _StudioGenericModule extends StatelessWidget {
   const _StudioGenericModule({
     required this.module,
@@ -657,24 +851,38 @@ class _StudioGenericModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = props.entries.where((e) => e.key != 'events').toList(growable: false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (entries.isEmpty)
-          Text('No payload for ${module.replaceAll('_', ' ')}')
-        else
-          for (final entry in entries)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text('${entry.key}: ${entry.value}'),
-            ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () => onEmit('select', {'module': module, 'payload': props}),
-          child: const Text('Emit Select'),
-        ),
-      ],
+    final entries = props.entries
+        .where((e) => e.key != 'events')
+        .toList(growable: false);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (entries.isEmpty)
+            Text(
+              'No payload for ${module.replaceAll('_', ' ')}',
+              style: Theme.of(context).textTheme.bodySmall,
+            )
+          else
+            for (final entry in entries.take(24))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('${entry.key}: ${entry.value}'),
+              ),
+          const SizedBox(height: 8),
+          FilledButton.tonal(
+            onPressed: () =>
+                onEmit('change', {'module': module, 'payload': props}),
+            child: const Text('Emit Change'),
+          ),
+        ],
+      ),
     );
   }
 }

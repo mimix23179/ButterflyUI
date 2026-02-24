@@ -7,7 +7,7 @@ import 'package:butterflyui_runtime/src/core/control_theme.dart';
 class ButterflyUIModal extends StatefulWidget {
   final String controlId;
   final Widget child;
-  final bool open;
+  final bool initialOpen;
   final bool dismissible;
   final bool closeOnEscape;
   final bool trapFocus;
@@ -16,13 +16,15 @@ class ButterflyUIModal extends StatefulWidget {
   final Curve transitionCurve;
   final Rect? sourceRect;
   final Color? scrimColor;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUIModal({
     super.key,
     required this.controlId,
     required this.child,
-    required this.open,
+    required this.initialOpen,
     required this.dismissible,
     this.closeOnEscape = true,
     this.trapFocus = true,
@@ -31,6 +33,8 @@ class ButterflyUIModal extends StatefulWidget {
     this.transitionCurve = Curves.easeOutCubic,
     this.sourceRect,
     required this.scrimColor,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -44,6 +48,7 @@ class _ButterflyUIModalState extends State<ButterflyUIModal>
   late Animation<double> _opacity;
   late Animation<double> _scale;
   late Animation<Offset> _slide;
+  late bool _open = widget.initialOpen;
   bool _present = false;
   bool _dismissSent = false;
 
@@ -66,22 +71,30 @@ class _ButterflyUIModalState extends State<ButterflyUIModal>
         .animate(
           CurvedAnimation(parent: _controller, curve: widget.transitionCurve),
         );
-    _present = widget.open;
-    if (widget.open) {
+    _present = _open;
+    if (_open) {
       _controller.value = 1.0;
     } else {
       _controller.value = 0.0;
     }
+    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUIModal oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (oldWidget.initialOpen != widget.initialOpen) {
+      _open = widget.initialOpen;
+    }
     if (oldWidget.duration != widget.duration) {
       _controller.duration = widget.duration;
       _controller.reverseDuration = widget.duration;
     }
-    if (widget.open) {
+    if (_open) {
       _dismissSent = false;
       if (!_present) {
         setState(() => _present = true);
@@ -90,7 +103,7 @@ class _ButterflyUIModalState extends State<ButterflyUIModal>
       return;
     }
     _controller.reverse().whenComplete(() {
-      if (!mounted || widget.open) return;
+      if (!mounted || _open) return;
       if (_present) {
         setState(() => _present = false);
       }
@@ -99,8 +112,35 @@ class _ButterflyUIModalState extends State<ButterflyUIModal>
 
   @override
   void dispose() {
+    widget.unregisterInvokeHandler(widget.controlId);
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'set_open':
+        setState(() {
+          _open = args['value'] == true;
+          if (_open) {
+            _dismissSent = false;
+            _present = true;
+            _controller.forward();
+          } else {
+            _controller.reverse().whenComplete(() {
+              if (!mounted || _open) return;
+              setState(() {
+                _present = false;
+              });
+            });
+          }
+        });
+        return null;
+      case 'get_state':
+        return {'open': _open, 'present': _present};
+      default:
+        throw UnsupportedError('Unknown modal method: $method');
+    }
   }
 
   void _dismiss() {
@@ -113,16 +153,16 @@ class _ButterflyUIModalState extends State<ButterflyUIModal>
 
   @override
   Widget build(BuildContext context) {
-    if (!_present && !widget.open) {
+    if (!_present && !_open) {
       return const SizedBox.shrink();
     }
 
     final scope = IgnorePointer(
-      ignoring: !widget.open,
+      ignoring: !_open,
       child: FocusTraversalGroup(
         policy: OrderedTraversalPolicy(),
         child: FocusScope(
-          autofocus: widget.open,
+          autofocus: _open,
           canRequestFocus: widget.trapFocus,
           child: Stack(
             children: [

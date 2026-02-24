@@ -1,21 +1,22 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/controls/display/chart.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/particle_field.dart';
 
-Widget buildLinePlotControl(
+Widget buildParticlesControl(
   String controlId,
   Map<String, Object?> props,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return buildChartControl(
+  final mapped = <String, Object?>{...props};
+  if (mapped.containsKey('density') && !mapped.containsKey('count')) {
+    mapped['count'] = mapped['density'];
+  }
+  return buildParticleFieldControl(
     controlId,
-    {
-      ...props,
-      'chart_type': 'line',
-    },
+    mapped,
     registerInvokeHandler,
     unregisterInvokeHandler,
     sendEvent,

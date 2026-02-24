@@ -373,7 +373,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         const Duration(milliseconds: 15000),
       );
       _windowsMessageSub?.cancel();
-      _windowsMessageSub = _windowsController.webMessage.listen(_handleMonacoMessage);
+      _windowsMessageSub = _windowsController.webMessage.listen(
+        _handleMonacoMessage,
+      );
 
       final html = await _buildMonacoHtml();
       await _windowsController.loadStringContent(html);
@@ -416,8 +418,12 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     final template = await rootBundle.loadString(
       'assets/editor/monaco_editor.html',
     );
-    final script = await rootBundle.loadString('assets/editor/monaco_editor.js');
-    final style = await rootBundle.loadString('assets/editor/monaco_editor.css');
+    final script = await rootBundle.loadString(
+      'assets/editor/monaco_editor.js',
+    );
+    final style = await rootBundle.loadString(
+      'assets/editor/monaco_editor.css',
+    );
 
     final config = <String, Object?>{
       'language': widget.language ?? 'plaintext',
@@ -453,7 +459,8 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     switch (_norm(method)) {
       case 'get_state':
         return {
-          'schema_version': _runtimeProps['schema_version'] ?? _codeEditorSchemaVersion,
+          'schema_version':
+              _runtimeProps['schema_version'] ?? _codeEditorSchemaVersion,
           'module': _runtimeProps['module'],
           'state': _runtimeProps['state'],
           'value': _latestValue,
@@ -463,7 +470,10 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         final incoming = args['props'];
         if (incoming is Map) {
           final incomingMap = coerceObjectMap(incoming);
-          final nextValue = incomingMap['value'] ?? incomingMap['text'] ?? incomingMap['code'];
+          final nextValue =
+              incomingMap['value'] ??
+              incomingMap['text'] ??
+              incomingMap['code'];
           setState(() {
             _runtimeProps.addAll(incomingMap);
             _runtimeProps = _normalizeProps(_runtimeProps);
@@ -493,7 +503,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           return {'ok': false, 'error': 'unknown module: $module'};
         }
         final payload = args['payload'];
-        final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{};
+        final payloadMap = payload is Map
+            ? coerceObjectMap(payload)
+            : <String, Object?>{};
         setState(() {
           final modules = _coerceObjectMap(_runtimeProps['modules']);
           modules[module] = payloadMap;
@@ -502,7 +514,10 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           _runtimeProps[module] = payloadMap;
           _runtimeProps = _normalizeProps(_runtimeProps);
         });
-        _emitConfiguredEvent('module_change', {'module': module, 'payload': payloadMap});
+        _emitConfiguredEvent('module_change', {
+          'module': module,
+          'payload': payloadMap,
+        });
         return {'ok': true, 'module': module};
       case 'set_state':
         final state = _norm(args['state']?.toString() ?? '');
@@ -516,18 +531,25 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         return {'ok': true, 'state': state};
       case 'emit':
       case 'trigger':
-        final event = _norm((args['event'] ?? args['name'] ?? method).toString());
+        final event = _norm(
+          (args['event'] ?? args['name'] ?? method).toString(),
+        );
         if (!_codeEditorEvents.contains(event)) {
           return {'ok': false, 'error': 'unknown event: $event'};
         }
         final payload = args['payload'];
-        _emitConfiguredEvent(event, payload is Map ? coerceObjectMap(payload) : args);
+        _emitConfiguredEvent(
+          event,
+          payload is Map ? coerceObjectMap(payload) : args,
+        );
         return true;
       default:
         final normalized = _norm(method);
         if (_codeEditorModules.contains(normalized)) {
           final payload = args['payload'];
-          final payloadMap = payload is Map ? coerceObjectMap(payload) : <String, Object?>{...args};
+          final payloadMap = payload is Map
+              ? coerceObjectMap(payload)
+              : <String, Object?>{...args};
           setState(() {
             final modules = _coerceObjectMap(_runtimeProps['modules']);
             modules[normalized] = payloadMap;
@@ -536,7 +558,10 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
             _runtimeProps[normalized] = payloadMap;
             _runtimeProps = _normalizeProps(_runtimeProps);
           });
-          _emitConfiguredEvent('module_change', {'module': normalized, 'payload': payloadMap});
+          _emitConfiguredEvent('module_change', {
+            'module': normalized,
+            'payload': payloadMap,
+          });
           return {'ok': true, 'module': normalized};
         }
     }
@@ -689,10 +714,14 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     final lineNumbers = _runtimeProps['line_numbers'] == false ? 'off' : 'on';
     final minimap = _runtimeProps['show_minimap'] == true;
     final glyphMargin = _runtimeProps['glyph_margin'] == true;
-    final tabSize = coerceOptionalInt(_runtimeProps['tab_size']) ?? widget.tabSize;
-    final fontSize = coerceDouble(_runtimeProps['font_size']) ?? widget.fontSize;
-    final fontFamily = (_runtimeProps['font_family'] ?? widget.fontFamily).toString();
-    final theme = (_runtimeProps['theme'] ?? widget.theme ?? 'vs-dark').toString();
+    final tabSize =
+        coerceOptionalInt(_runtimeProps['tab_size']) ?? widget.tabSize;
+    final fontSize =
+        coerceDouble(_runtimeProps['font_size']) ?? widget.fontSize;
+    final fontFamily = (_runtimeProps['font_family'] ?? widget.fontFamily)
+        .toString();
+    final theme = (_runtimeProps['theme'] ?? widget.theme ?? 'vs-dark')
+        .toString();
 
     await _runMonacoJavaScript(
       'if(window.ButterflyUIMonaco){'
@@ -825,7 +854,8 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
       return;
     }
     widget.sendEvent(widget.controlId, normalized, {
-      'schema_version': _runtimeProps['schema_version'] ?? _codeEditorSchemaVersion,
+      'schema_version':
+          _runtimeProps['schema_version'] ?? _codeEditorSchemaVersion,
       'module': _runtimeProps['module'],
       'state': _runtimeProps['state'],
       ...payload,
@@ -875,9 +905,7 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           return KeyEventResult.handled;
         }
         if (ctrl && key == LogicalKeyboardKey.keyS) {
-          _emitConfiguredEvent('save', {
-            'value': _fallbackController.text,
-          });
+          _emitConfiguredEvent('save', {'value': _fallbackController.text});
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
@@ -961,12 +989,15 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   @override
   Widget build(BuildContext context) {
     final availableModules = _availableModules(_runtimeProps);
-    final activeModule = _norm(_runtimeProps['module']?.toString() ?? 'editor_surface');
+    final activeModule = _norm(
+      _runtimeProps['module']?.toString() ?? 'editor_surface',
+    );
     final customChildren = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
         .toList(growable: false);
-    final customLayout = _runtimeProps['custom_layout'] == true ||
+    final customLayout =
+        _runtimeProps['custom_layout'] == true ||
         _norm((_runtimeProps['layout'] ?? '').toString()) == 'custom';
 
     if ((_runtimeProps['state']?.toString() ?? '') == 'loading') {
@@ -1013,9 +1044,14 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
 
     var editorPlaced = false;
     for (final module in availableModules) {
-      final section = _sectionProps(_runtimeProps, module) ?? <String, Object?>{'events': _runtimeProps['events']};
+      final section =
+          _sectionProps(_runtimeProps, module) ??
+          <String, Object?>{'events': _runtimeProps['events']};
       Widget child;
-      if (!editorPlaced && (module == 'ide' || module == 'editor_surface' || module == 'editor_view')) {
+      if (!editorPlaced &&
+          (module == 'ide' ||
+              module == 'editor_surface' ||
+              module == 'editor_view')) {
         child = _buildEditorContainer();
         editorPlaced = true;
       } else if (module.contains('search') || module == 'command_search') {
@@ -1032,15 +1068,31 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           props: section,
           onEmit: _emitConfiguredEvent,
         );
-      } else if (module.contains('tree') || module.contains('explorer') || module == 'workspace_explorer') {
+      } else if (module.contains('tree') ||
+          module.contains('explorer') ||
+          module == 'workspace_explorer') {
         child = _TreeModule(
           controlId: widget.controlId,
           module: module,
           props: section,
           onEmit: _emitConfiguredEvent,
         );
-      } else if (module.contains('diagnostic') || module == 'gutter' || module == 'inline_error_view') {
+      } else if (module.contains('diagnostic') ||
+          module == 'gutter' ||
+          module == 'inline_error_view') {
         child = _DiagnosticsModule(module: module, props: section);
+      } else if (module == 'command_bar' ||
+          module == 'intent_panel' ||
+          module == 'intent_router' ||
+          module == 'editor_intent_router' ||
+          module == 'scope_picker' ||
+          module == 'export_panel' ||
+          module == 'query_token') {
+        child = _ActionListModule(
+          module: module,
+          props: section,
+          onEmit: _emitConfiguredEvent,
+        );
       } else if (module == 'diff') {
         child = _DiffModule(
           controlId: widget.controlId,
@@ -1085,7 +1137,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
   final out = Map<String, Object?>.from(input);
-  out['schema_version'] = (coerceOptionalInt(out['schema_version']) ?? _codeEditorSchemaVersion).clamp(1, 9999);
+  out['schema_version'] =
+      (coerceOptionalInt(out['schema_version']) ?? _codeEditorSchemaVersion)
+          .clamp(1, 9999);
 
   final module = _norm(out['module']?.toString() ?? '');
   if (module.isNotEmpty && _codeEditorModules.contains(module)) {
@@ -1118,12 +1172,21 @@ Map<String, Object?> _normalizeProps(Map<String, Object?> input) {
       final value = coerceObjectMap(topLevel);
       normalizedModules[moduleKey] = value;
       out[moduleKey] = value;
+    } else if (topLevel == true) {
+      normalizedModules[moduleKey] = <String, Object?>{};
+      out[moduleKey] = <String, Object?>{};
     }
   }
   for (final entry in modules.entries) {
     final normalized = _norm(entry.key);
     if (!_codeEditorModules.contains(normalized)) continue;
+    if (entry.value == true) {
+      normalizedModules[normalized] = <String, Object?>{};
+      out[normalized] = <String, Object?>{};
+      continue;
+    }
     final value = _coerceObjectMap(entry.value);
+    if (value.isEmpty && entry.value is! Map) continue;
     normalizedModules[normalized] = value;
     out[normalized] = value;
   }
@@ -1136,12 +1199,25 @@ List<String> _availableModules(Map<String, Object?> props) {
   final modules = <String>[];
   final moduleMap = _coerceObjectMap(props['modules']);
   for (final key in _codeEditorModuleOrder) {
-    if (props[key] is Map || moduleMap[key] is Map) {
+    if (props[key] is Map ||
+        props[key] == true ||
+        moduleMap[key] is Map ||
+        moduleMap[key] == true) {
       modules.add(key);
     }
   }
   if (modules.isEmpty) {
-    modules.addAll(const ['ide', 'editor_surface', 'editor_view']);
+    modules.addAll(const [
+      'ide',
+      'editor_tabs',
+      'workspace_explorer',
+      'editor_surface',
+      'editor_view',
+      'search_box',
+      'diagnostics_panel',
+      'inspector',
+      'command_bar',
+    ]);
   }
   return modules;
 }
@@ -1150,12 +1226,24 @@ Map<String, Object?>? _sectionProps(Map<String, Object?> props, String key) {
   final normalized = _norm(key);
   final section = props[normalized];
   if (section is Map) {
-    return <String, Object?>{...coerceObjectMap(section), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(section),
+      'events': props['events'],
+    };
+  }
+  if (section == true) {
+    return <String, Object?>{'events': props['events']};
   }
   final modules = _coerceObjectMap(props['modules']);
   final fromModules = modules[normalized];
   if (fromModules is Map) {
-    return <String, Object?>{...coerceObjectMap(fromModules), 'events': props['events']};
+    return <String, Object?>{
+      ...coerceObjectMap(fromModules),
+      'events': props['events'],
+    };
+  }
+  if (fromModules == true) {
+    return <String, Object?>{'events': props['events']};
   }
   return null;
 }
@@ -1170,7 +1258,11 @@ String _norm(String value) {
 }
 
 class _CodeEditorHeader extends StatelessWidget {
-  const _CodeEditorHeader({required this.state, required this.language, required this.engine});
+  const _CodeEditorHeader({
+    required this.state,
+    required this.language,
+    required this.engine,
+  });
 
   final String state;
   final String language;
@@ -1184,8 +1276,14 @@ class _CodeEditorHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Code Editor', style: Theme.of(context).textTheme.titleMedium),
-              Text('State: $state', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Code Editor',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text(
+                'State: $state',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
@@ -1248,6 +1346,21 @@ class _SearchModuleState extends State<_SearchModule> {
   );
 
   @override
+  void didUpdateWidget(covariant _SearchModule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final next = (widget.props['query'] ?? '').toString();
+    if (_controller.text != next) {
+      _controller.text = next;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
@@ -1290,7 +1403,9 @@ class _TabsModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = props['tabs'] is List ? (props['tabs'] as List) : const <dynamic>[];
+    final tabs = props['tabs'] is List
+        ? (props['tabs'] as List)
+        : const <dynamic>[];
     if (tabs.isEmpty) {
       return const Text('No tabs');
     }
@@ -1300,7 +1415,11 @@ class _TabsModule extends StatelessWidget {
       children: [
         for (final tab in tabs)
           ActionChip(
-            label: Text(tab is Map ? (tab['label'] ?? tab['title'] ?? tab['id'] ?? '').toString() : tab.toString()),
+            label: Text(
+              tab is Map
+                  ? (tab['label'] ?? tab['title'] ?? tab['id'] ?? '').toString()
+                  : tab.toString(),
+            ),
             onPressed: () {
               onEmit('select', {'module': module, 'tab': tab});
             },
@@ -1327,7 +1446,9 @@ class _TreeModule extends StatelessWidget {
   Widget build(BuildContext context) {
     final nodes = props['nodes'] is List
         ? (props['nodes'] as List)
-        : (props['items'] is List ? (props['items'] as List) : const <dynamic>[]);
+        : (props['items'] is List
+              ? (props['items'] as List)
+              : const <dynamic>[]);
     if (nodes.isEmpty) {
       return const Text('No nodes');
     }
@@ -1337,7 +1458,12 @@ class _TreeModule extends StatelessWidget {
         for (final node in nodes.take(20))
           ListTile(
             dense: true,
-            title: Text(node is Map ? (node['label'] ?? node['name'] ?? node['id'] ?? '').toString() : node.toString()),
+            title: Text(
+              node is Map
+                  ? (node['label'] ?? node['name'] ?? node['id'] ?? '')
+                        .toString()
+                  : node.toString(),
+            ),
             onTap: () => onEmit('select', {'module': module, 'node': node}),
           ),
       ],
@@ -1355,7 +1481,9 @@ class _DiagnosticsModule extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = props['items'] is List
         ? (props['items'] as List)
-        : (props['diagnostics'] is List ? (props['diagnostics'] as List) : const <dynamic>[]);
+        : (props['diagnostics'] is List
+              ? (props['diagnostics'] as List)
+              : const <dynamic>[]);
     if (items.isEmpty) {
       return Text('No diagnostics for ${module.replaceAll('_', ' ')}');
     }
@@ -1393,8 +1521,18 @@ class _DiffModule extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text('Before', style: Theme.of(context).textTheme.titleSmall)),
-            Expanded(child: Text('After', style: Theme.of(context).textTheme.titleSmall)),
+            Expanded(
+              child: Text(
+                'Before',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                'After',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 6),
@@ -1408,7 +1546,11 @@ class _DiffModule extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         FilledButton.tonal(
-          onPressed: () => onEmit('select', {'module': 'diff', 'left': left, 'right': right}),
+          onPressed: () => onEmit('select', {
+            'module': 'diff',
+            'left': left,
+            'right': right,
+          }),
           child: const Text('Use Diff'),
         ),
       ],
@@ -1431,23 +1573,89 @@ class _GenericModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final entries = props.entries.where((e) => e.key != 'events').toList(growable: false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final entries = props.entries
+        .where((e) => e.key != 'events')
+        .toList(growable: false);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (entries.isEmpty)
+            Text(
+              'No payload for ${module.replaceAll('_', ' ')}',
+              style: Theme.of(context).textTheme.bodySmall,
+            )
+          else
+            for (final entry in entries.take(24))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('${entry.key}: ${entry.value}'),
+              ),
+          const SizedBox(height: 8),
+          FilledButton.tonal(
+            onPressed: () =>
+                onEmit('change', {'module': module, 'payload': props}),
+            child: const Text('Emit Change'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionListModule extends StatelessWidget {
+  const _ActionListModule({
+    required this.module,
+    required this.props,
+    required this.onEmit,
+  });
+
+  final String module;
+  final Map<String, Object?> props;
+  final void Function(String event, Map<String, Object?> payload) onEmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final candidates = <Object?>[
+      props['items'],
+      props['actions'],
+      props['routes'],
+      props['options'],
+      props['tokens'],
+    ];
+    List<dynamic> values = const <dynamic>[];
+    for (final candidate in candidates) {
+      if (candidate is List) {
+        values = candidate;
+        break;
+      }
+    }
+    if (values.isEmpty) {
+      final message = (props['message'] ?? props['hint'] ?? 'No options')
+          .toString();
+      return Text(message, style: Theme.of(context).textTheme.bodySmall);
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: [
-        if (entries.isEmpty)
-          Text('No payload for ${module.replaceAll('_', ' ')}')
-        else
-          for (final entry in entries)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text('${entry.key}: ${entry.value}'),
+        for (final value in values.take(30))
+          ActionChip(
+            label: Text(
+              value is Map
+                  ? (value['label'] ?? value['name'] ?? value['id'] ?? '')
+                        .toString()
+                  : value.toString(),
             ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () => onEmit('select', {'module': module, 'payload': props}),
-          child: const Text('Emit Select'),
-        ),
+            onPressed: () =>
+                onEmit('select', {'module': module, 'item': value}),
+          ),
       ],
     );
   }
@@ -1498,8 +1706,8 @@ Widget buildCodeEditorControl(
         ? true
         : (props['show_gutter'] == true),
     showMinimap: props['show_minimap'] == true || props['minimap'] == true,
-    glyphMargin: props['glyph_margin'] == true ||
-        props['show_breakpoints'] == true,
+    glyphMargin:
+        props['glyph_margin'] == true || props['show_breakpoints'] == true,
     emitOnChange: props['emit_on_change'] == null
         ? true
         : (props['emit_on_change'] == true),

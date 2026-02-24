@@ -8,6 +8,8 @@ Widget buildSplitViewControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final children = <Widget>[];
@@ -32,6 +34,8 @@ Widget buildSplitViewControl(
     controlId: controlId,
     props: props,
     children: children,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }
@@ -40,6 +44,8 @@ class ButterflyUISplitView extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final List<Widget> children;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   const ButterflyUISplitView({
@@ -47,6 +53,8 @@ class ButterflyUISplitView extends StatefulWidget {
     required this.controlId,
     required this.props,
     required this.children,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -58,11 +66,72 @@ class _ButterflyUISplitViewState extends State<ButterflyUISplitView> {
   double? _ratio;
 
   @override
+  void initState() {
+    super.initState();
+    _ratio = _coerceRatio(widget.props['ratio']);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant ButterflyUISplitView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
     if (widget.props['ratio'] != oldWidget.props['ratio']) {
       _ratio = _coerceRatio(widget.props['ratio']) ?? _ratio;
     }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+    switch (method) {
+      case 'set_ratio':
+        final next = _coerceRatio(args['ratio']);
+        if (next != null) {
+          setState(() => _ratio = next);
+          _emitRatio('change');
+        }
+        return _statePayload();
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+        final event = (args['event'] ?? 'change').toString();
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{};
+        if (widget.controlId.isNotEmpty) {
+          widget.sendEvent(widget.controlId, event, payload);
+        }
+        return null;
+      default:
+        throw UnsupportedError('Unknown split_view method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'ratio': _ratio ?? _coerceRatio(widget.props['ratio']) ?? 0.5,
+      'axis':
+          (_parseAxis(widget.props['axis'] ?? widget.props['direction']) ==
+              Axis.horizontal)
+          ? 'horizontal'
+          : 'vertical',
+    };
   }
 
   @override
@@ -219,14 +288,7 @@ class _ButterflyUISplitViewState extends State<ButterflyUISplitView> {
 
   void _emitRatio(String event) {
     if (widget.controlId.isEmpty) return;
-    widget.sendEvent(widget.controlId, event, {
-      'ratio': _ratio ?? _coerceRatio(widget.props['ratio']) ?? 0.5,
-      'axis':
-          (_parseAxis(widget.props['axis'] ?? widget.props['direction']) ==
-              Axis.horizontal)
-          ? 'horizontal'
-          : 'vertical',
-    });
+    widget.sendEvent(widget.controlId, event, _statePayload());
   }
 }
 
