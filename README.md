@@ -1,173 +1,311 @@
 ![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
 
-# ButterflyUI
+# 🦋 ButterflyUI
 
-ButterflyUI is a programmable Python UI framework with a Flutter rendering runtime.
+**ButterflyUI** is a layered application platform built on composable UI primitives, token-driven styling, and modular umbrella controls.
 
-The short version:
-- Python is the remote (authoritative app logic + UI declarations)
-- Flutter is the receiver (renders controls + emits runtime events)
-- Both sides communicate through structured JSON control payloads
+It is not just a UI toolkit.
 
-If you know Flet, the mental model is similar at a high level, but ButterflyUI is designed around a larger modular control catalog and explicit umbrella-control systems.
+It is an ecosystem where entire application domains — IDEs, visual builders, terminals, asset browsers, and theme systems — are constructed from structured control families.
 
-## What ButterflyUI Is
+---
 
-ButterflyUI is a cross-runtime UI system where your application defines and mutates UI from Python, and a Dart/Flutter runtime renders that UI in real time.
+# ✨ Core Philosophy
 
-It is not just a widget library.
-It is a protocol-driven UI runtime with:
-- Declarative control trees
-- Runtime control invocation
-- Event forwarding from Flutter back to Python
-- Schema validation and normalization on the Python side
-- A large control catalog, including umbrella controls for complex domains
+ButterflyUI follows a clear architectural hierarchy:
 
-## Core Architecture
-
-ButterflyUI has two ends:
-
-1. Python SDK (authoring and orchestration)
-- You create control trees with Python control classes
-- Controls serialize to JSON payloads (`type`, `id`, `props`, `children`)
-- Python can call runtime methods on controls (`invoke`)
-- Python receives user/runtime events emitted by Flutter
-
-2. Flutter Runtime (rendering and interaction)
-- Receives JSON control payloads
-- Routes each control type through the control renderer
-- Builds Flutter widgets and module-specific workbenches
-- Registers invoke handlers for runtime calls
-- Sends structured events back to Python
-
-The bridge between both ends is JSON-first and method/event based.
-
-## What ButterflyUI Does
-
-ButterflyUI is built to support both simple app UI and complex interactive tooling.
-
-Examples of what it handles well:
-- Standard form and layout UIs
-- Token-aware visual systems
-- Asset-centric galleries
-- IDE-like editing surfaces
-- Embedded execution/terminal workbenches
-- Visual builder workflows
-
-In practice, ButterflyUI lets you keep app logic in Python while still getting a rich, reactive Flutter surface.
-
-## Control Model
-
-A ButterflyUI control has:
-- `control_type`: semantic control ID (for example `button`, `gallery`, `terminal`)
-- `props`: validated configuration/state payload
-- `children`: nested controls
-- optional runtime methods (`set_props`, `set_module`, `set_state`, etc.)
-
-Runtime flow:
-1. Python declares/updates controls
-2. JSON is sent to Flutter
-3. Flutter renders and binds handlers
-4. User interacts in Flutter
-5. Flutter emits events back to Python
-6. Python updates state/controls and sends next payload
-
-## Umbrella Controls
-
-ButterflyUI includes umbrella controls for complex systems. These are single control identities with many focused submodules under the same control.
-
-Primary umbrella controls:
-- `candy`: low-level composable visual/structural primitives
-- `skins`: token and visual identity system
-- `gallery`: resource and asset interaction system
-- `code_editor`: logic/code authoring environment
-- `studio`: visual builder workspace
-- `terminal`: execution and process workbench
-
-Why umbrella controls matter:
-- One control ID keeps orchestration clear
-- Submodules keep internals composable
-- Python and Flutter stay in sync around the same domain contract
-
-## Python-Dart Contract
-
-ButterflyUI relies on explicit control contracts:
-- Python control classes define ergonomic API and normalization behavior
-- Python schema definitions validate payload shape
-- Flutter builders implement runtime behavior for each control/module
-- Renderer routing maps JSON `type` to the correct builder path
-
-This contract-centric design is what keeps large control catalogs maintainable.
-
-## Event and Invoke System
-
-ButterflyUI is not static rendering. Controls can be interactive runtime actors.
-
-Common patterns:
-- Python calls `set_props` to mutate control state
-- Python calls `set_module` on umbrella controls to switch active module payload
-- Flutter emits `change`, `select`, `submit`, `module_change`, `state_change`, etc.
-- Python reacts and publishes the next state
-
-This makes the UI loop explicit, testable, and deterministic.
-
-## Repository Layout (High Level)
-
-- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/`
-  Python control definitions and API surface
-- `butterflyui/sdk/python/packages/butterflyui/src/butterflyui/core/schema.py`
-  Control schema validation/contract layer
-- `butterflyui/src/lib/src/core/control_renderer.dart`
-  Main Flutter control dispatch/router
-- `butterflyui/src/lib/src/core/controls/`
-  Flutter control builders by domain
-- `LIST.md`
-  Detailed control catalog and umbrella/submodule contracts
-
-## Example Mental Model
-
-Conceptually:
-
-```python
-from butterflyui.controls import Column, Button, Terminal
-
-ui = Column(
-    Button(text="Run"),
-    Terminal(
-        module="workbench",
-        modules={
-            "prompt": {"placeholder": "enter command"},
-            "stream_view": True,
-            "log_panel": True,
-        },
-    ),
-)
 ```
 
-The important part is not the exact snippet syntax, but the flow:
-- Python declares the control graph
-- Runtime renders it
-- Events come back to Python
-- Python drives subsequent updates
+Candy     → Structural & visual primitives
+Skins     → Token-driven visual identity
+Gallery   → Asset intelligence layer
+Terminal  → Execution workbench
+CodeEditor→ IDE-grade logic engineering surface
+Studio    → Visual construction environment
 
-## Design Goals
+````
 
-- Keep Python as the app orchestration layer
-- Keep Flutter as the rendering and interaction engine
-- Keep control contracts explicit and evolvable
-- Support both simple controls and complex workbenches
-- Stay deterministic under runtime mutation
+Each of these is an **umbrella control**:
+- One control ID
+- Many focused submodules
+- Shared registries
+- Manifest-driven configuration
 
-## Current Project State
+This creates a predictable, plugin-style architecture similar to traditional IDEs and professional creative software.
 
-ButterflyUI is under active development.
-The control surface is broad and continues to be refined, especially around deep umbrella-control behavior and Python<->Flutter wiring consistency.
+---
 
-## Summary
+# 🧱 Umbrella Controls
 
-ButterflyUI is a protocol-driven Python-to-Flutter UI runtime.
+## 🍬 Candy — The Craft Layer
 
-Python defines and controls UI behavior.
-Flutter renders and interacts with users.
-JSON carries the contract between both ends.
-The umbrella-control architecture allows ButterflyUI to scale from standard UI to tool-grade systems without abandoning a single coherent model.
+Candy is the foundational primitive layer.
+
+It provides:
+
+- Layout primitives (`row`, `column`, `stack`, `container`, `wrap`, etc.)
+- Surfaces and decoration
+- Effects (glow, glass, noise, neon, pixelate)
+- Motion systems (animation, transition, stagger)
+- Interaction wrappers (pressable, gesture_area, hover_region)
+- Structural helpers (split_pane, grid, viewport, layer)
+
+Candy is:
+- Token-aware
+- Deterministic
+- Composable
+- Performance-focused
+
+Everything in ButterflyUI is built on top of Candy.
+
+---
+
+## 🎨 Skins — Visual Identity System
+
+Skins defines the visual identity of your entire application.
+
+It manages:
+
+- Color tokens
+- Typography systems
+- Elevation & shadow models
+- Borders & outlines
+- Materials (glass, matte, neon)
+- Effects & shaders
+- Motion defaults
+- Responsive breakpoints
+
+Skins is:
+- Token-driven
+- Runtime switchable
+- Serializable
+- Integrated with Candy & Studio
+
+If Candy provides the structure,
+Skins provides the soul.
+
+---
+
+## 🖼 Gallery — Asset Intelligence Layer
+
+Gallery is not just a grid of images.
+
+It is a structured asset orchestration system supporting:
+
+- Fonts
+- Images
+- Video
+- Audio
+- Documents
+- Skins
+- Presets
+
+It includes:
+
+- Grid & list layouts
+- Filtering & search
+- Pagination
+- Selection systems
+- Media-specific preview renderers
+- Apply adapters for Studio & Skins
+
+Gallery connects assets to tools in a clean, type-aware way.
+
+---
+
+## 💻 CodeEditor — Modular IDE Surface
+
+CodeEditor is a Monaco-powered IDE workbench.
+
+It includes:
+
+- Editor surface
+- Tabs & split views
+- Workspace explorer
+- File tree
+- Search system (text + semantic)
+- Diff viewer
+- Diagnostics pipeline
+- Docking layout system
+- Intent routing & command palette
+
+Providers are pluggable:
+
+- Diagnostics provider
+- Formatter provider
+- Semantic search provider
+- LSP backends
+- AI-assisted tooling
+
+It is built for scale and modularity.
+
+---
+
+## 🖥 Terminal — Execution Workbench
+
+Terminal is a full execution runtime, not a text box.
+
+It supports:
+
+- Multiple sessions & tabs
+- Structured command builder
+- Presets
+- Streaming output
+- ANSI parsing
+- Progress pipelines
+- Timeline view
+- Log panels
+- Execution lanes & concurrency control
+- Backend bridge abstraction (local, PTY, remote)
+
+It separates:
+
+- Backend execution
+- Output shaping
+- UI rendering
+- Session management
+
+Terminal is built for real application workflows.
+
+---
+
+## 🏗 Studio — Visual Builder Environment
+
+Studio is the structured visual construction environment.
+
+It includes:
+
+- Canvas surface
+- Outline tree
+- Inspector
+- Properties panel
+- Component & block palettes
+- Selection tools
+- Transform box
+- Undo/redo command system
+- Token editor integration
+- Dockable panel system
+
+Studio edits real control schemas — not visual approximations.
+
+It produces deterministic output suitable for production.
+
+---
+
+# 🧩 Modular Architecture
+
+Every umbrella control follows the same pattern:
+
+## 1️⃣ Host
+The main control orchestrates:
+- Layout
+- Registries
+- Persistence
+- Services
+
+## 2️⃣ Submodules
+Each module declares:
+- `id`
+- `version`
+- `depends_on`
+- contributions (panels, tools, providers, surfaces)
+
+## 3️⃣ Manifest
+Users define:
+
+```json
+{
+  "enabledModules": [],
+  "layout": {},
+  "providers": {},
+  "keymap": "default"
+}
+````
+
+This allows building:
+
+* A lightweight editor
+* A full IDE
+* A video studio
+* A design tool
+* A dashboard platform
+* A terminal-only tool
+* A custom OS-like interface
+
+---
+
+# 📚 Control Catalog
+
+ButterflyUI includes an extensive catalog of advanced controls such as:
+
+* `animated_gradient`
+* `glass_blur`
+* `neon_edge`
+* `blob_field`
+* `noise_displacement`
+* `confetti_burst`
+* `split_pane`
+* `table_view`
+* `spark_plot`
+* `curve_editor`
+* `layer_mask_editor`
+* `scrollable_column`
+* `reorderable_tree`
+* `scene_view`
+* `viewport`
+* `webview`
+* `chat`
+* `markdown`
+* `video`
+* `progress`
+* `notification_host`
+* `overlay`
+* `route`
+* `page_nav`
+* and many more…
+
+All controls are:
+
+* Token-aware
+* Composable
+* Deterministic
+* Designed for real software
+
+---
+
+# 🧠 Architectural Goals
+
+ButterflyUI is designed to:
+
+* Scale from small apps to professional tools
+* Keep visual identity centralized
+* Keep execution logic isolated
+* Separate structure from decoration
+* Allow runtime composition of features
+* Avoid framework magic
+* Remain predictable and maintainable
+
+---
+
+# 🚀 What ButterflyUI Is
+
+ButterflyUI is:
+
+* A layered UI platform
+* A plugin-oriented architecture
+* A schema-driven runtime
+* A modular application foundation
+* A serious foundation for IDEs, builders, dashboards, and tools
+
+---
+
+# 🦋 Final Thought
+
+Candy is the craft.
+Skins is the identity.
+Gallery supplies the resources.
+Terminal executes.
+CodeEditor engineers.
+Studio constructs.
+
+Together, they form ButterflyUI.
