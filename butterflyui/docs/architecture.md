@@ -2281,8 +2281,6 @@ Below is the “extra layer” you’re asking for: how to make **Candy / CodeEd
 
 ---
 
-## The shared pattern for all umbrella controls
-
 Give every umbrella control the same 3-part architecture:
 
 ### 1) A Host (the control itself)

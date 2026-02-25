@@ -881,6 +881,56 @@ def _control_text() -> str:
             return out
 
 
+        def _coerce_string(value: Any, *, fallback: str = "") -> str:
+            text = str(value).strip() if value is not None else ""
+            if text:
+                return text
+            return fallback
+
+
+        def _coerce_contributions(value: Any) -> dict[str, Any]:
+            if not isinstance(value, Mapping):
+                return {}
+            out: dict[str, Any] = {}
+            for raw_key, raw_value in value.items():
+                key = _normalize_token(str(raw_key))
+                if not key:
+                    continue
+                out[key] = raw_value
+            return out
+
+
+        def _normalize_dependencies(values: Any) -> tuple[str, ...]:
+            out: list[str] = []
+            if isinstance(values, (list, tuple, set)):
+                for item in values:
+                    token = _normalize_token(str(item))
+                    if token and token not in out:
+                        out.append(token)
+            elif values is not None:
+                token = _normalize_token(str(values))
+                if token:
+                    out.append(token)
+            return tuple(out)
+
+
+        def _module_metadata(submodule: "GallerySubmodule") -> dict[str, Any]:
+            canonical_module = _normalize_token(
+                str(getattr(submodule, "canonical_module", getattr(submodule, "module_token", "")))
+            )
+            module_token = _normalize_token(str(getattr(submodule, "module_token", canonical_module)))
+            module_id = _coerce_string(getattr(submodule, "module_id", None), fallback=module_token)
+            module_version = _coerce_string(getattr(submodule, "module_version", None), fallback="1.0.0")
+            depends_on = list(_normalize_dependencies(getattr(submodule, "module_depends_on", ())))
+            contributions = _coerce_contributions(getattr(submodule, "module_contributions", {}))
+            return {
+                "id": module_id,
+                "version": module_version,
+                "depends_on": depends_on,
+                "contributions": contributions,
+            }
+
+
         def _is_color_like(value: Any) -> bool:
             if isinstance(value, int):
                 return True
@@ -958,6 +1008,10 @@ def _control_text() -> str:
         class GallerySubmodule(Gallery):
             module_token: str = ""
             canonical_module: str = ""
+            module_id: str = ""
+            module_version: str = "1.0.0"
+            module_depends_on: tuple[str, ...] = ()
+            module_contributions: dict[str, Any] = {}
             module_props: tuple[str, ...] = ()
             module_prop_types: dict[str, str] = {}
             supported_events: tuple[str, ...] = tuple(sorted(GALLERY_EVENTS))
@@ -1008,6 +1062,11 @@ def _control_text() -> str:
                 canonical_module = _normalize_token(str(getattr(cls, "canonical_module", module_token)))
                 if not canonical_module:
                     canonical_module = module_token
+                if module_token and not _normalize_token(str(getattr(cls, "module_id", ""))):
+                    cls.module_id = module_token
+                cls.module_version = _coerce_string(getattr(cls, "module_version", None), fallback="1.0.0")
+                cls.module_depends_on = _normalize_dependencies(getattr(cls, "module_depends_on", ()))
+                cls.module_contributions = _coerce_contributions(getattr(cls, "module_contributions", {}))
                 if module_token:
                     cls.module_props = tuple(sorted(MODULE_ALLOWED_KEYS.get(module_token, set())))
                     cls.module_prop_types = dict(MODULE_PAYLOAD_TYPES.get(module_token, {}))
@@ -1066,6 +1125,7 @@ def _control_text() -> str:
                     merged_payload.update(_coerce_mapping(canonical_payload))
                 merged_payload.update({k: v for k, v in kwargs.items() if v is not None})
                 merged_payload = _sanitize_module_payload(canonical_module, merged_payload)
+                submodule_meta = _module_metadata(self)
 
                 merged_modules = _coerce_modules(modules)
                 section_payload = _coerce_mapping(merged_modules.get(canonical_module))
@@ -1083,6 +1143,12 @@ def _control_text() -> str:
                 if canonical_module and canonical_module not in enabled_modules:
                     enabled_modules.append(canonical_module)
                 manifest_payload["enabled_modules"] = enabled_modules
+                module_versions = _coerce_mapping(manifest_payload.get("module_versions"))
+                module_versions[canonical_module] = submodule_meta["version"]
+                manifest_payload["module_versions"] = module_versions
+                module_dependencies = _coerce_mapping(manifest_payload.get("module_dependencies"))
+                module_dependencies[canonical_module] = list(submodule_meta["depends_on"])
+                manifest_payload["module_dependencies"] = module_dependencies
 
                 normalized_events = _normalize_events(events)
                 if normalized_events is None:
@@ -1102,6 +1168,7 @@ def _control_text() -> str:
                     manifest=manifest_payload,
                     registries=dict(registries or {}),
                     modules=merged_modules,
+                    submodule_meta=submodule_meta,
                     schema_version=GALLERY_SCHEMA_VERSION,
                 )
 
@@ -1114,8 +1181,10 @@ def _control_text() -> str:
                 module_section = _coerce_mapping(module_map.get(canonical_module))
                 module_section.update(top_level_payload)
                 module_section = _sanitize_module_payload(canonical_module, module_section)
+                module_section["submodule_meta"] = dict(submodule_meta)
                 module_map[canonical_module] = module_section
                 merged["modules"] = module_map
+                merged["submodule_meta"] = dict(submodule_meta)
 
                 super().__init__(
                     *children,
@@ -1131,6 +1200,7 @@ def _control_text() -> str:
                 self.props.setdefault("supported_props", list(self.supported_props))
                 self.props.setdefault("module_props", list(self.module_props))
                 self.props.setdefault("module_prop_types", dict(self.module_prop_types))
+                self.props.setdefault("submodule_meta", dict(submodule_meta))
 
             def set_payload(
                 self,
@@ -1225,10 +1295,16 @@ def _control_text() -> str:
                 return self.emit(session, normalized_event, payload_dict)
 
             def describe_contract(self) -> dict[str, Any]:
+                metadata = _module_metadata(self)
                 return {
                     "module": getattr(self, "canonical_module", self.module_token),
                     "module_id": getattr(self, "module_token", ""),
                     "control_type": getattr(self, "control_type", "gallery"),
+                    "id": metadata["id"],
+                    "version": metadata["version"],
+                    "depends_on": list(metadata["depends_on"]),
+                    "contributions": dict(metadata["contributions"]),
+                    "submodule_meta": dict(metadata),
                     "supported_events": list(self.supported_events),
                     "supported_actions": list(self.supported_actions),
                     "supported_props": list(self.supported_props),
@@ -1247,8 +1323,8 @@ def _root_init_text(modules: list[str], class_names: dict[str, str]) -> str:
     bind_lines: list[str] = []
     for module in modules:
         cls = class_names[module]
-        bind_lines.append(f"Gallery.{module}: type[{cls}] = {cls}")
-        bind_lines.append(f"Gallery.{cls}: type[{cls}] = {cls}")
+        bind_lines.append(f"Gallery.{module} = {cls}")
+        bind_lines.append(f"Gallery.{cls} = {cls}")
     module_exports = ",\n    ".join(f'"{class_names[module]}"' for module in modules)
     return (
         "from __future__ import annotations\n\n"
@@ -1266,6 +1342,45 @@ def _root_init_text(modules: list[str], class_names: dict[str, str]) -> str:
         "    STATES,\n"
         ")\n\n"
         f"{chr(10).join(bind_lines)}\n\n"
+        "__all__ = [\n"
+        '    "Gallery",\n'
+        '    "SCHEMA_VERSION",\n'
+        '    "MODULES",\n'
+        '    "STATES",\n'
+        '    "EVENTS",\n'
+        '    "REGISTRY_ROLE_ALIASES",\n'
+        '    "REGISTRY_MANIFEST_LISTS",\n'
+        '    "MODULE_COMPONENTS",\n'
+        f"    {module_exports},\n"
+        "]\n"
+    )
+
+
+def _root_stub_text(modules: list[str], class_names: dict[str, str]) -> str:
+    class_imports = ",\n    ".join(class_names[module] for module in modules)
+    class_attrs: list[str] = []
+    for module in modules:
+        cls = class_names[module]
+        class_attrs.append(f"    {module}: type[{cls}]")
+        class_attrs.append(f"    {cls}: type[{cls}]")
+    module_exports = ",\n    ".join(f'"{class_names[module]}"' for module in modules)
+    return (
+        "from __future__ import annotations\n\n"
+        "from .components import MODULE_COMPONENTS\n"
+        "from .control import Gallery as _Gallery\n"
+        "from .submodules import (\n"
+        f"    {class_imports},\n"
+        ")\n"
+        "from .schema import (\n"
+        "    EVENTS,\n"
+        "    MODULES,\n"
+        "    REGISTRY_MANIFEST_LISTS,\n"
+        "    REGISTRY_ROLE_ALIASES,\n"
+        "    SCHEMA_VERSION,\n"
+        "    STATES,\n"
+        ")\n\n"
+        "class Gallery(_Gallery):\n"
+        f"{chr(10).join(class_attrs)}\n\n"
         "__all__ = [\n"
         '    "Gallery",\n'
         '    "SCHEMA_VERSION",\n'
@@ -1328,6 +1443,10 @@ def main() -> None:
     (SUBMODULES_DIR / "__init__.py").write_text(_submodules_init_text(), encoding="utf-8")
     (SUBMODULES_DIR / "family.py").write_text(_family_text(), encoding="utf-8")
     ROOT_INIT_PATH.write_text(_root_init_text(modules, class_names), encoding="utf-8")
+    ROOT_INIT_PATH.with_suffix(".pyi").write_text(
+        _root_stub_text(modules, class_names),
+        encoding="utf-8",
+    )
 
     dart_modules = _parse_dart_registry_modules(DART_REGISTRY, "galleryRegistryModules")
     py_modules = set(modules)

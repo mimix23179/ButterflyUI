@@ -5,6 +5,7 @@ src/butterflyui/assets.py
 src/butterflyui/callbacks.py
 src/butterflyui/cli.py
 src/butterflyui/components.py
+src/butterflyui/py.typed
 src/butterflyui/schema.py
 src/butterflyui/state.py
 src/butterflyui/style_packs.py
@@ -34,6 +35,7 @@ src/butterflyui/controls/productivity.py
 src/butterflyui/controls/shell.py
 src/butterflyui/controls/webview.py
 src/butterflyui/controls/candy/__init__.py
+src/butterflyui/controls/candy/__init__.pyi
 src/butterflyui/controls/candy/components.py
 src/butterflyui/controls/candy/control.py
 src/butterflyui/controls/candy/schema.py
@@ -73,6 +75,7 @@ src/butterflyui/controls/candy/submodules/text.py
 src/butterflyui/controls/candy/submodules/transition.py
 src/butterflyui/controls/candy/submodules/wrap.py
 src/butterflyui/controls/code_editor/__init__.py
+src/butterflyui/controls/code_editor/__init__.pyi
 src/butterflyui/controls/code_editor/components.py
 src/butterflyui/controls/code_editor/control.py
 src/butterflyui/controls/code_editor/schema.py
@@ -136,6 +139,7 @@ src/butterflyui/controls/code_editor/submodules/tree.py
 src/butterflyui/controls/code_editor/submodules/workbench_editor.py
 src/butterflyui/controls/code_editor/submodules/workspace_explorer.py
 src/butterflyui/controls/gallery/__init__.py
+src/butterflyui/controls/gallery/__init__.pyi
 src/butterflyui/controls/gallery/components.py
 src/butterflyui/controls/gallery/control.py
 src/butterflyui/controls/gallery/schema.py
@@ -190,6 +194,7 @@ src/butterflyui/controls/gallery/submodules/video.py
 src/butterflyui/controls/gallery/submodules/video_picker.py
 src/butterflyui/controls/gallery/submodules/video_renderer.py
 src/butterflyui/controls/skins/__init__.py
+src/butterflyui/controls/skins/__init__.pyi
 src/butterflyui/controls/skins/components.py
 src/butterflyui/controls/skins/control.py
 src/butterflyui/controls/skins/schema.py
@@ -236,6 +241,7 @@ src/butterflyui/controls/skins/submodules/shadow_editor.py
 src/butterflyui/controls/skins/submodules/token_mapper.py
 src/butterflyui/controls/skins/submodules/transition.py
 src/butterflyui/controls/studio/__init__.py
+src/butterflyui/controls/studio/__init__.pyi
 src/butterflyui/controls/studio/components.py
 src/butterflyui/controls/studio/control.py
 src/butterflyui/controls/studio/schema.py
@@ -281,6 +287,7 @@ src/butterflyui/controls/studio/submodules/transform_box.py
 src/butterflyui/controls/studio/submodules/transform_toolbar.py
 src/butterflyui/controls/studio/submodules/transform_tools.py
 src/butterflyui/controls/terminal/__init__.py
+src/butterflyui/controls/terminal/__init__.pyi
 src/butterflyui/controls/terminal/components.py
 src/butterflyui/controls/terminal/control.py
 src/butterflyui/controls/terminal/schema.py

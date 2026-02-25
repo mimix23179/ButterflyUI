@@ -30,10 +30,7 @@ Map<String, Object?> umbrellaRuntimeMap(Object? value) {
   return <String, Object?>{};
 }
 
-List<String> umbrellaRuntimeStringList(
-  Object? value, {
-  Set<String>? allowed,
-}) {
+List<String> umbrellaRuntimeStringList(Object? value, {Set<String>? allowed}) {
   if (value is! List) return const <String>[];
   final out = <String>[];
   for (final entry in value) {
@@ -104,6 +101,80 @@ List<String> _normalizedDependencyList(Object? value, Set<String> modules) {
   return out;
 }
 
+Map<String, Object?> _normalizedModuleMetaEntry({
+  required String module,
+  required Object? value,
+  required Set<String> modules,
+}) {
+  final payload = umbrellaRuntimeMap(value);
+  final id = umbrellaRuntimeNorm((payload['id'] ?? module).toString());
+  final version = (payload['version'] ?? payload['module_version'] ?? '1.0.0')
+      .toString()
+      .trim();
+  final dependsOn = _normalizedDependencyList(
+    payload['depends_on'] ??
+        payload['dependsOn'] ??
+        payload['module_dependencies'],
+    modules,
+  );
+  final contributions = umbrellaRuntimeMap(payload['contributions']);
+  return <String, Object?>{
+    'id': id.isEmpty ? module : id,
+    'version': version.isEmpty ? '1.0.0' : version,
+    'depends_on': dependsOn,
+    'contributions': contributions,
+  };
+}
+
+Map<String, Object?> normalizeUmbrellaSubmoduleMeta({
+  required Map<String, Object?> props,
+  required Set<String> modules,
+}) {
+  final out = <String, Object?>{};
+
+  void upsert(String module, Object? value) {
+    final normalizedModule = umbrellaRuntimeNorm(module);
+    if (!modules.contains(normalizedModule)) return;
+    final next = _normalizedModuleMetaEntry(
+      module: normalizedModule,
+      value: value,
+      modules: modules,
+    );
+    final current = umbrellaRuntimeMap(out[normalizedModule]);
+    out[normalizedModule] = <String, Object?>{...current, ...next};
+  }
+
+  final globalMeta = umbrellaRuntimeMap(props['submodule_meta']);
+  for (final entry in globalMeta.entries) {
+    final token = umbrellaRuntimeNorm(entry.key);
+    if (!modules.contains(token)) continue;
+    upsert(token, entry.value);
+  }
+  final activeModule = umbrellaRuntimeNorm((props['module'] ?? '').toString());
+  if (modules.contains(activeModule) &&
+      (globalMeta.containsKey('id') ||
+          globalMeta.containsKey('version') ||
+          globalMeta.containsKey('depends_on') ||
+          globalMeta.containsKey('dependsOn') ||
+          globalMeta.containsKey('contributions'))) {
+    upsert(activeModule, globalMeta);
+  }
+
+  final moduleMap = umbrellaRuntimeMap(props['modules']);
+  for (final module in modules) {
+    final sectionFromModules = umbrellaRuntimeMap(moduleMap[module]);
+    final sectionFromTopLevel = umbrellaRuntimeMap(props[module]);
+    final fromSectionMeta =
+        sectionFromModules['submodule_meta'] ??
+        sectionFromTopLevel['submodule_meta'];
+    if (fromSectionMeta != null) {
+      upsert(module, fromSectionMeta);
+    }
+  }
+
+  return out;
+}
+
 List<String> _moduleDependencies({
   required Map<String, Object?> props,
   required String module,
@@ -123,16 +194,35 @@ List<String> _moduleDependencies({
   final moduleMap = umbrellaRuntimeMap(props['modules']);
   final modulePayload = umbrellaRuntimeMap(moduleMap[module]);
   addAll(modulePayload['depends_on'] ?? modulePayload['dependsOn']);
+  final modulePayloadMeta = umbrellaRuntimeMap(modulePayload['submodule_meta']);
+  addAll(modulePayloadMeta['depends_on'] ?? modulePayloadMeta['dependsOn']);
 
   final topLevelPayload = umbrellaRuntimeMap(props[module]);
   addAll(topLevelPayload['depends_on'] ?? topLevelPayload['dependsOn']);
+  final topLevelPayloadMeta = umbrellaRuntimeMap(
+    topLevelPayload['submodule_meta'],
+  );
+  addAll(topLevelPayloadMeta['depends_on'] ?? topLevelPayloadMeta['dependsOn']);
 
   final manifest = umbrellaRuntimeMap(props['manifest']);
-  final manifestDependencies = umbrellaRuntimeMap(manifest['module_dependencies']);
+  final manifestDependencies = umbrellaRuntimeMap(
+    manifest['module_dependencies'],
+  );
   addAll(manifestDependencies[module]);
+  final manifestMeta = umbrellaRuntimeMap(manifest['submodule_meta']);
+  final manifestMetaForModule = umbrellaRuntimeMap(manifestMeta[module]);
+  addAll(
+    manifestMetaForModule['depends_on'] ?? manifestMetaForModule['dependsOn'],
+  );
 
   final propDependencies = umbrellaRuntimeMap(props['module_dependencies']);
   addAll(propDependencies[module]);
+  final propSubmoduleMeta = umbrellaRuntimeMap(props['submodule_meta']);
+  final propMetaForModule = umbrellaRuntimeMap(propSubmoduleMeta[module]);
+  addAll(propMetaForModule['depends_on'] ?? propMetaForModule['dependsOn']);
+  if (module == umbrellaRuntimeNorm((props['module'] ?? '').toString())) {
+    addAll(propSubmoduleMeta['depends_on'] ?? propSubmoduleMeta['dependsOn']);
+  }
 
   final registries = umbrellaRuntimeMap(props['registries']);
   final moduleRegistry = umbrellaRuntimeMap(registries['module_registry']);
@@ -220,9 +310,7 @@ Map<String, Object?> buildUmbrellaManifest({
     normalizedDefaults[key] = entry.value;
   }
 
-  final manifest = <String, Object?>{
-    ...umbrellaRuntimeMap(props['manifest']),
-  };
+  final manifest = <String, Object?>{...umbrellaRuntimeMap(props['manifest'])};
 
   List<String> readList(
     String key,
@@ -258,11 +346,7 @@ Map<String, Object?> buildUmbrellaManifest({
   for (final key in listKeys) {
     final fallback = normalizedDefaults[key] ?? const <String>[];
     if (key == 'enabled_modules') {
-      final seed = readList(
-        key,
-        fallback,
-        allowed: modules,
-      );
+      final seed = readList(key, fallback, allowed: modules);
       manifest[key] = resolveUmbrellaEnabledModules(
         props: props,
         modules: modules,
@@ -308,6 +392,44 @@ Map<String, Object?> buildUmbrellaManifest({
     manifest['providers'] = providers;
   }
 
+  final submoduleMeta = normalizeUmbrellaSubmoduleMeta(
+    props: props,
+    modules: modules,
+  );
+  if (submoduleMeta.isNotEmpty) {
+    manifest['submodule_meta'] = submoduleMeta;
+    final moduleVersions = umbrellaRuntimeMap(manifest['module_versions']);
+    final moduleDependencies = umbrellaRuntimeMap(
+      manifest['module_dependencies'],
+    );
+    for (final entry in submoduleMeta.entries) {
+      final meta = umbrellaRuntimeMap(entry.value);
+      final version = (meta['version'] ?? '').toString().trim();
+      if (version.isNotEmpty) {
+        moduleVersions[entry.key] = version;
+      }
+      final dependsOn = _normalizedDependencyList(
+        meta['depends_on'] ?? meta['dependsOn'],
+        modules,
+      );
+      if (dependsOn.isNotEmpty) {
+        moduleDependencies[entry.key] = dependsOn;
+      }
+    }
+    if (moduleVersions.isNotEmpty) {
+      manifest['module_versions'] = moduleVersions;
+    } else {
+      manifest.remove('module_versions');
+    }
+    if (moduleDependencies.isNotEmpty) {
+      manifest['module_dependencies'] = moduleDependencies;
+    } else {
+      manifest.remove('module_dependencies');
+    }
+  } else {
+    manifest.remove('submodule_meta');
+  }
+
   return manifest;
 }
 
@@ -323,7 +445,14 @@ Map<String, Object?> normalizeUmbrellaHostProps({
     modules: modules,
     defaults: manifestDefaults,
   );
-  out['registries'] = normalizeUmbrellaRegistries(out['registries'], roleAliases);
+  out['registries'] = normalizeUmbrellaRegistries(
+    out['registries'],
+    roleAliases,
+  );
+  out['submodule_meta'] = normalizeUmbrellaSubmoduleMeta(
+    props: out,
+    modules: modules,
+  );
   return out;
 }
 
@@ -346,7 +475,10 @@ Map<String, Object?> registerUmbrellaModule({
     };
   }
 
-  final registries = normalizeUmbrellaRegistries(props['registries'], roleAliases);
+  final registries = normalizeUmbrellaRegistries(
+    props['registries'],
+    roleAliases,
+  );
   final roleRegistry = umbrellaRuntimeMap(registries[normalizedRole]);
   roleRegistry[normalizedModule] = definition;
   registries[normalizedRole] = roleRegistry;
@@ -362,7 +494,8 @@ Map<String, Object?> registerUmbrellaModule({
     manifest['enabled_modules'],
     allowed: modules,
   ).toList(growable: true);
-  if (modules.contains(normalizedModule) && !enabledSeed.contains(normalizedModule)) {
+  if (modules.contains(normalizedModule) &&
+      !enabledSeed.contains(normalizedModule)) {
     enabledSeed.add(normalizedModule);
   }
   manifest['enabled_modules'] = resolveUmbrellaEnabledModules(
@@ -381,6 +514,23 @@ Map<String, Object?> registerUmbrellaModule({
   }
 
   props['manifest'] = manifest;
+  final submoduleMeta = normalizeUmbrellaSubmoduleMeta(
+    props: props,
+    modules: modules,
+  );
+  if (definition.containsKey('version') ||
+      definition.containsKey('depends_on') ||
+      definition.containsKey('dependsOn') ||
+      definition.containsKey('contributions') ||
+      definition.containsKey('id') ||
+      definition.containsKey('module_version')) {
+    submoduleMeta[normalizedModule] = _normalizedModuleMetaEntry(
+      module: normalizedModule,
+      value: definition,
+      modules: modules,
+    );
+  }
+  props['submodule_meta'] = submoduleMeta;
   if (modules.contains(normalizedModule)) {
     final modulePayload = <String, Object?>{};
     final moduleMap = umbrellaRuntimeMap(props['modules']);

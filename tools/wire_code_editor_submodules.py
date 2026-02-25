@@ -764,8 +764,8 @@ def _root_init_text(modules: list[str], class_names: dict[str, str]) -> str:
     bind_lines: list[str] = []
     for module in modules:
         cls = class_names[module]
-        bind_lines.append(f"CodeEditor.{module}: type[{cls}] = {cls}")
-        bind_lines.append(f"CodeEditor.{cls}: type[{cls}] = {cls}")
+        bind_lines.append(f"CodeEditor.{module} = {cls}")
+        bind_lines.append(f"CodeEditor.{cls} = {cls}")
     module_exports = ",\n    ".join(f'"{class_names[module]}"' for module in modules)
     return (
         "from __future__ import annotations\n\n"
@@ -785,6 +785,49 @@ def _root_init_text(modules: list[str], class_names: dict[str, str]) -> str:
         "    STATES,\n"
         ")\n\n"
         f"{chr(10).join(bind_lines)}\n\n"
+        "__all__ = [\n"
+        '    "CodeEditor",\n'
+        '    "SCHEMA_VERSION",\n'
+        '    "DEFAULT_ENGINE",\n'
+        '    "DEFAULT_WEBVIEW_ENGINE",\n'
+        '    "MODULES",\n'
+        '    "STATES",\n'
+        '    "EVENTS",\n'
+        '    "REGISTRY_ROLE_ALIASES",\n'
+        '    "REGISTRY_MANIFEST_LISTS",\n'
+        '    "MODULE_COMPONENTS",\n'
+        f"    {module_exports},\n"
+        "]\n"
+    )
+
+
+def _root_stub_text(modules: list[str], class_names: dict[str, str]) -> str:
+    class_imports = ",\n    ".join(class_names[module] for module in modules)
+    class_attrs: list[str] = []
+    for module in modules:
+        cls = class_names[module]
+        class_attrs.append(f"    {module}: type[{cls}]")
+        class_attrs.append(f"    {cls}: type[{cls}]")
+    module_exports = ",\n    ".join(f'"{class_names[module]}"' for module in modules)
+    return (
+        "from __future__ import annotations\n\n"
+        "from .components import MODULE_COMPONENTS\n"
+        "from .control import CodeEditor as _CodeEditor\n"
+        "from .submodules import (\n"
+        f"    {class_imports},\n"
+        ")\n"
+        "from .schema import (\n"
+        "    DEFAULT_ENGINE,\n"
+        "    DEFAULT_WEBVIEW_ENGINE,\n"
+        "    EVENTS,\n"
+        "    MODULES,\n"
+        "    REGISTRY_MANIFEST_LISTS,\n"
+        "    REGISTRY_ROLE_ALIASES,\n"
+        "    SCHEMA_VERSION,\n"
+        "    STATES,\n"
+        ")\n\n"
+        "class CodeEditor(_CodeEditor):\n"
+        f"{chr(10).join(class_attrs)}\n\n"
         "__all__ = [\n"
         '    "CodeEditor",\n'
         '    "SCHEMA_VERSION",\n'
@@ -896,6 +939,10 @@ def main() -> None:
     (SUBMODULES_DIR / "__init__.py").write_text(_init_text(), encoding="utf-8")
     (SUBMODULES_DIR / "family.py").write_text(_family_text(), encoding="utf-8")
     ROOT_INIT_PATH.write_text(_root_init_text(modules, class_names), encoding="utf-8")
+    ROOT_INIT_PATH.with_suffix(".pyi").write_text(
+        _root_stub_text(modules, class_names),
+        encoding="utf-8",
+    )
 
     dart_modules = _parse_dart_registry_modules(DART_REGISTRY, "codeEditorRegistryModules")
     py_modules = set(modules)

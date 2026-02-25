@@ -32,3 +32,9 @@ include = [
     "butterflyui_desktop",
     "butterflyui_desktop.*",
 ]
+
+[tool.setuptools.package-data]
+butterflyui = [
+    "py.typed",
+    "**/*.pyi",
+]

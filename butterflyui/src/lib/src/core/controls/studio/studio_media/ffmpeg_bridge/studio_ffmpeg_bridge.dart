@@ -32,6 +32,16 @@ class StudioFfmpegBridge {
     return job;
   }
 
+  Map<String, Object?>? startNext() {
+    final index = _jobs.indexWhere(
+      (job) => (job['status'] ?? 'queued') == 'queued',
+    );
+    if (index < 0) return null;
+    _jobs[index]['status'] = 'running';
+    _jobs[index]['started_ms'] = DateTime.now().millisecondsSinceEpoch;
+    return _jobs[index];
+  }
+
   bool updateStatus(String jobId, String status, {String? message}) {
     final index = _jobs.indexWhere((job) => (job['job_id'] ?? '') == jobId);
     if (index < 0) return false;
@@ -40,6 +50,29 @@ class StudioFfmpegBridge {
       _jobs[index]['message'] = message;
     }
     _jobs[index]['updated_ms'] = DateTime.now().millisecondsSinceEpoch;
+    return true;
+  }
+
+  bool complete(
+    String jobId, {
+    Map<String, Object?> result = const <String, Object?>{},
+  }) {
+    final updated = updateStatus(jobId, 'completed');
+    if (!updated) return false;
+    final index = _jobs.indexWhere((job) => (job['job_id'] ?? '') == jobId);
+    if (index < 0) return false;
+    _jobs[index]['completed_ms'] = DateTime.now().millisecondsSinceEpoch;
+    _jobs[index]['result'] = result;
+    return true;
+  }
+
+  bool fail(String jobId, {String error = ''}) {
+    final updated = updateStatus(jobId, 'failed', message: error);
+    if (!updated) return false;
+    final index = _jobs.indexWhere((job) => (job['job_id'] ?? '') == jobId);
+    if (index < 0) return false;
+    _jobs[index]['failed_ms'] = DateTime.now().millisecondsSinceEpoch;
+    _jobs[index]['error'] = error;
     return true;
   }
 

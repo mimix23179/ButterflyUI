@@ -303,6 +303,48 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
           }
           return result;
         });
+      case 'render_start_next':
+      case 'start_next_render':
+      case 'render_update_progress':
+      case 'render_progress':
+      case 'render_complete':
+      case 'complete_render':
+      case 'render_fail':
+      case 'fail_render':
+      case 'ffmpeg_enqueue':
+      case 'ffmpeg_start_next':
+      case 'start_next_ffmpeg':
+      case 'ffmpeg_update_status':
+      case 'ffmpeg_status':
+      case 'ffmpeg_complete':
+      case 'complete_ffmpeg':
+      case 'ffmpeg_fail':
+      case 'fail_ffmpeg':
+      case 'recording_start':
+      case 'start_recording':
+      case 'recording_stop':
+      case 'stop_recording':
+      case 'recording_set_supported':
+      case 'set_recording_supported':
+      case 'recording_clear_sessions':
+      case 'clear_recording_sessions':
+        return _withState(() {
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{...args};
+          final result = _engine.executeCommand(<String, Object?>{
+            'type': normalized,
+            'payload': payload,
+          });
+          if (result['ok'] == true) {
+            _emitConfiguredEvent('change', <String, Object?>{
+              'module': 'builder',
+              'intent': normalized,
+              'result': result,
+            });
+          }
+          return result;
+        });
       case 'execute_command':
       case 'command':
       case 'route_command':

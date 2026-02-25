@@ -36,6 +36,56 @@ def _coerce_modules(value: Mapping[str, Any] | None) -> dict[str, Any]:
     return out
 
 
+def _coerce_string(value: Any, *, fallback: str = "") -> str:
+    text = str(value).strip() if value is not None else ""
+    if text:
+        return text
+    return fallback
+
+
+def _coerce_contributions(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        return {}
+    out: dict[str, Any] = {}
+    for raw_key, raw_value in value.items():
+        key = _normalize_token(str(raw_key))
+        if not key:
+            continue
+        out[key] = raw_value
+    return out
+
+
+def _normalize_dependencies(values: Any) -> tuple[str, ...]:
+    out: list[str] = []
+    if isinstance(values, (list, tuple, set)):
+        for item in values:
+            token = _normalize_studio_module(str(item)) or _normalize_token(str(item))
+            if token and token not in out:
+                out.append(token)
+    elif values is not None:
+        token = _normalize_studio_module(str(values)) or _normalize_token(str(values))
+        if token:
+            out.append(token)
+    return tuple(out)
+
+
+def _module_metadata(submodule: "StudioSubmodule") -> dict[str, Any]:
+    canonical_module = _normalize_studio_module(
+        str(getattr(submodule, "canonical_module", getattr(submodule, "module_token", "")))
+    ) or _normalize_token(str(getattr(submodule, "canonical_module", getattr(submodule, "module_token", ""))))
+    module_token = _normalize_studio_module(str(getattr(submodule, "module_token", canonical_module))) or canonical_module
+    module_id = _coerce_string(getattr(submodule, "module_id", None), fallback=module_token)
+    module_version = _coerce_string(getattr(submodule, "module_version", None), fallback="1.0.0")
+    depends_on = list(_normalize_dependencies(getattr(submodule, "module_depends_on", ())))
+    contributions = _coerce_contributions(getattr(submodule, "module_contributions", {}))
+    return {
+        "id": module_id,
+        "version": module_version,
+        "depends_on": depends_on,
+        "contributions": contributions,
+    }
+
+
 def _is_color_like(value: Any) -> bool:
     if isinstance(value, int):
         return True
@@ -124,6 +174,10 @@ def _sanitize_module_payload(module: str, payload: Mapping[str, Any]) -> dict[st
 class StudioSubmodule(Studio):
     module_token: str = ""
     canonical_module: str = ""
+    module_id: str = ""
+    module_version: str = "1.0.0"
+    module_depends_on: tuple[str, ...] = ()
+    module_contributions: dict[str, Any] = {}
     module_props: tuple[str, ...] = ()
     module_prop_types: dict[str, str] = {}
     supported_events: tuple[str, ...] = tuple(sorted(STUDIO_EVENTS))
@@ -151,6 +205,12 @@ class StudioSubmodule(Studio):
         if not canonical_module:
             canonical_module = module_token
 
+        if module_token and not _normalize_token(str(getattr(cls, "module_id", ""))):
+            cls.module_id = module_token
+        cls.module_version = _coerce_string(getattr(cls, "module_version", None), fallback="1.0.0")
+        cls.module_depends_on = _normalize_dependencies(getattr(cls, "module_depends_on", ()))
+        cls.module_contributions = _coerce_contributions(getattr(cls, "module_contributions", {}))
+
         if module_token:
             cls.module_props = tuple(sorted(MODULE_ALLOWED_KEYS.get(module_token, set())))
             cls.module_prop_types = dict(MODULE_PAYLOAD_TYPES.get(module_token, {}))
@@ -168,6 +228,7 @@ class StudioSubmodule(Studio):
 
     def __init__(
         self,
+        *children: Any,
         payload: Mapping[str, Any] | None = None,
         module_payload: Mapping[str, Any] | None = None,
         events: Iterable[str] | None = None,
@@ -205,6 +266,7 @@ class StudioSubmodule(Studio):
 
         merged_payload.update({key: value for key, value in kwargs.items() if value is not None})
         merged_payload = _sanitize_module_payload(canonical_module, merged_payload)
+        submodule_meta = _module_metadata(self)
 
         merged_modules = _coerce_modules(modules)
         section_payload = _coerce_mapping(merged_modules.get(canonical_module))
@@ -223,6 +285,12 @@ class StudioSubmodule(Studio):
         if canonical_module and canonical_module not in manifest_modules:
             manifest_modules.append(canonical_module)
         manifest_payload["enabled_modules"] = manifest_modules
+        module_versions = _coerce_mapping(manifest_payload.get("module_versions"))
+        module_versions[canonical_module] = submodule_meta["version"]
+        manifest_payload["module_versions"] = module_versions
+        module_dependencies = _coerce_mapping(manifest_payload.get("module_dependencies"))
+        module_dependencies[canonical_module] = list(submodule_meta["depends_on"])
+        manifest_payload["module_dependencies"] = module_dependencies
 
         normalized_events = _normalize_events(events)
         if normalized_events is None and self.supported_events:
@@ -239,6 +307,7 @@ class StudioSubmodule(Studio):
             manifest=manifest_payload,
             registries=dict(registries or {}),
             modules=merged_modules,
+            submodule_meta=submodule_meta,
             schema_version=STUDIO_SCHEMA_VERSION,
         )
 
@@ -251,10 +320,13 @@ class StudioSubmodule(Studio):
         module_section = _coerce_mapping(module_map.get(canonical_module))
         module_section.update(top_level_payload)
         module_section = _sanitize_module_payload(canonical_module, module_section)
+        module_section["submodule_meta"] = dict(submodule_meta)
         module_map[canonical_module] = module_section
         merged["modules"] = module_map
+        merged["submodule_meta"] = dict(submodule_meta)
 
         super().__init__(
+            *children,
             module=canonical_module,
             modules=module_map,
             props=merged,
@@ -267,6 +339,7 @@ class StudioSubmodule(Studio):
         self.props.setdefault("supported_props", list(self.supported_props))
         self.props.setdefault("module_props", list(self.module_props))
         self.props.setdefault("module_prop_types", dict(self.module_prop_types))
+        self.props.setdefault("submodule_meta", dict(submodule_meta))
 
     def set_payload(self, session: Any, payload: Mapping[str, Any] | None = None, **kwargs: Any) -> dict[str, Any]:
         update_payload = _coerce_mapping(payload)
@@ -366,10 +439,16 @@ class StudioSubmodule(Studio):
         return self.emit(session, normalized_event, {})
 
     def describe_contract(self) -> dict[str, Any]:
+        metadata = _module_metadata(self)
         return {
             "module": getattr(self, "canonical_module", self.module_token),
             "module_id": getattr(self, "module_token", ""),
             "control_type": getattr(self, "control_type", "studio"),
+            "id": metadata["id"],
+            "version": metadata["version"],
+            "depends_on": list(metadata["depends_on"]),
+            "contributions": dict(metadata["contributions"]),
+            "submodule_meta": dict(metadata),
             "supported_events": list(self.supported_events),
             "supported_actions": list(self.supported_actions),
             "supported_props": list(self.supported_props),

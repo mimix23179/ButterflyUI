@@ -381,6 +381,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
   bool _isSyncingGutter = false;
   String _latestValue = '';
   late Map<String, Object?> _runtimeProps;
+  int _providerRequestSerial = 0;
+  final Map<String, Map<String, Object?>> _pendingProviderRequests =
+      <String, Map<String, Object?>>{};
 
   bool get _useMonaco {
     return true;
@@ -538,6 +541,167 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     );
   }
 
+  String _resolveProviderName([String? explicit]) {
+    final normalizedExplicit = _norm(explicit ?? '');
+    if (normalizedExplicit.isNotEmpty) {
+      return normalizedExplicit;
+    }
+    final searchProvider =
+        _sectionProps(_runtimeProps, 'search_provider') ?? const {};
+    final fromModule = _norm((searchProvider['provider'] ?? '').toString());
+    if (fromModule.isNotEmpty) {
+      return fromModule;
+    }
+    final registries = _coerceObjectMap(_runtimeProps['registries']);
+    final providerRegistry = _coerceObjectMap(registries['provider_registry']);
+    if (providerRegistry.isNotEmpty) {
+      return _norm(providerRegistry.keys.first);
+    }
+    return 'local_provider';
+  }
+
+  void _upsertModuleSection(String module, Map<String, Object?> patch) {
+    final normalizedModule = _norm(module);
+    if (normalizedModule.isEmpty) return;
+    final modules = _coerceObjectMap(_runtimeProps['modules']);
+    final section = _coerceObjectMap(modules[normalizedModule]);
+    section.addAll(patch);
+    modules[normalizedModule] = section;
+    _runtimeProps['modules'] = modules;
+    _runtimeProps[normalizedModule] = section;
+  }
+
+  Map<String, Object?> _dispatchProviderRequest({
+    required String action,
+    String? provider,
+    Map<String, Object?> payload = const <String, Object?>{},
+    String source = 'invoke',
+  }) {
+    final normalizedAction = _norm(action);
+    final resolvedProvider = _resolveProviderName(provider);
+    final requestId = 'provider_req_${++_providerRequestSerial}';
+    final request = <String, Object?>{
+      'request_id': requestId,
+      'provider': resolvedProvider,
+      'action': normalizedAction,
+      'payload': payload,
+      'source': source,
+      'created_ms': DateTime.now().millisecondsSinceEpoch,
+    };
+    _pendingProviderRequests[requestId] = request;
+
+    final providerSection = _coerceObjectMap(
+      (_coerceObjectMap(_runtimeProps['modules']))['search_provider'],
+    );
+    providerSection['status'] = 'waiting';
+    providerSection['last_request_id'] = requestId;
+    providerSection['last_action'] = normalizedAction;
+    providerSection['provider'] = resolvedProvider;
+    providerSection['last_request_payload'] = payload;
+    _upsertModuleSection('search_provider', providerSection);
+
+    final eventName = normalizedAction == 'format_document'
+        ? 'format_request'
+        : (normalizedAction.contains('search') ? 'search' : 'change');
+    _emitConfiguredEvent(eventName, {
+      ...request,
+      'module': 'search_provider',
+      'intent': 'provider_request',
+    });
+    return <String, Object?>{
+      'ok': true,
+      'request_id': requestId,
+      'provider': resolvedProvider,
+      'action': normalizedAction,
+    };
+  }
+
+  Future<void> _applyProviderResponse(
+    Map<String, Object?> request,
+    Map<String, Object?> response, {
+    String? error,
+  }) async {
+    final requestId = request['request_id']?.toString() ?? '';
+    final action = _norm(request['action']?.toString() ?? '');
+    final provider = request['provider']?.toString() ?? '';
+    final hasError = error != null && error.trim().isNotEmpty;
+
+    if (action == 'format_document' && !hasError) {
+      final value = response['value'] ?? response['text'] ?? response['code'];
+      if (value != null) {
+        final text = value.toString();
+        _latestValue = text;
+        if (_useMonaco) {
+          await _setMonacoValue(text);
+        } else if (_fallbackController.text != text) {
+          _fallbackSuppressChange = true;
+          _fallbackController.value = _fallbackController.value.copyWith(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+          _fallbackSuppressChange = false;
+        }
+      }
+    }
+
+    if ((action == 'search' || action.contains('search')) && !hasError) {
+      final results = response['results'];
+      if (results is List) {
+        _upsertModuleSection('search_results_view', <String, Object?>{
+          'items': List<dynamic>.from(results),
+          'provider': provider,
+          'request_id': requestId,
+        });
+      }
+    }
+
+    final providerSection = _coerceObjectMap(
+      (_coerceObjectMap(_runtimeProps['modules']))['search_provider'],
+    );
+    providerSection['status'] = hasError ? 'error' : 'ready';
+    providerSection['last_request_id'] = requestId;
+    providerSection['last_action'] = action;
+    providerSection['last_response'] = response;
+    providerSection['error'] = hasError ? error : '';
+    _upsertModuleSection('search_provider', providerSection);
+    _runtimeProps['last_provider_response'] = <String, Object?>{
+      'request_id': requestId,
+      'provider': provider,
+      'action': action,
+      'error': hasError ? error : '',
+      'response': response,
+    };
+    _emitConfiguredEvent('change', {
+      'module': 'search_provider',
+      'intent': hasError ? 'provider_error' : 'provider_response',
+      'request_id': requestId,
+      'provider': provider,
+      'action': action,
+      'error': hasError ? error : '',
+      'response': response,
+    });
+  }
+
+  Future<Map<String, Object?>> _resolveProviderRequest({
+    required String requestId,
+    Map<String, Object?> response = const <String, Object?>{},
+    String? error,
+  }) async {
+    final request = _pendingProviderRequests.remove(requestId);
+    if (request == null) {
+      return <String, Object?>{
+        'ok': false,
+        'error': 'unknown provider request id: $requestId',
+      };
+    }
+    await _applyProviderResponse(request, response, error: error);
+    return <String, Object?>{
+      'ok': true,
+      'request_id': requestId,
+      'pending': _pendingProviderRequests.length,
+    };
+  }
+
   Future<Object?> _handleInvoke(
     String method,
     Map<String, Object?> args,
@@ -552,6 +716,9 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           'manifest': _runtimeProps['manifest'],
           'registries': _runtimeProps['registries'],
           'value': _latestValue,
+          'pending_provider_requests': _pendingProviderRequests.values
+              .map((request) => Map<String, Object?>.from(request))
+              .toList(growable: false),
           'props': _runtimeProps,
         };
       case 'set_props':
@@ -645,6 +812,43 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
           payload is Map ? coerceObjectMap(payload) : args,
         );
         return true;
+      case 'request_provider':
+      case 'provider_request':
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{...args};
+        return _dispatchProviderRequest(
+          action: (args['action'] ?? payload['action'] ?? 'query').toString(),
+          provider: (args['provider'] ?? payload['provider'])?.toString(),
+          payload: payload,
+          source: 'invoke',
+        );
+      case 'resolve_provider_request':
+      case 'provider_response':
+      case 'set_provider_response':
+        return _resolveProviderRequest(
+          requestId: (args['request_id'] ?? args['id'] ?? '').toString(),
+          response: args['response'] is Map
+              ? coerceObjectMap(args['response'] as Map)
+              : (args['payload'] is Map
+                    ? coerceObjectMap(args['payload'] as Map)
+                    : <String, Object?>{}),
+        );
+      case 'reject_provider_request':
+      case 'provider_error':
+        return _resolveProviderRequest(
+          requestId: (args['request_id'] ?? args['id'] ?? '').toString(),
+          response: args['response'] is Map
+              ? coerceObjectMap(args['response'] as Map)
+              : <String, Object?>{},
+          error: (args['error'] ?? 'provider request rejected').toString(),
+        );
+      case 'list_provider_requests':
+        return <String, Object?>{
+          'pending': _pendingProviderRequests.values
+              .map((request) => Map<String, Object?>.from(request))
+              .toList(growable: false),
+        };
       default:
         final normalized = _norm(method);
         if (normalized.startsWith('register_')) {
@@ -758,11 +962,17 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         if (mounted) setState(() {});
         return null;
       case 'format_document':
-        _emitConfiguredEvent('format_request', {
-          'value': _fallbackController.text,
-          'language': widget.language ?? '',
-        });
-        return null;
+        return _dispatchProviderRequest(
+          action: 'format_document',
+          provider: args['provider']?.toString(),
+          payload: <String, Object?>{
+            'value': _fallbackController.text,
+            'language': (_runtimeProps['language'] ?? widget.language ?? '')
+                .toString(),
+            'module': _runtimeProps['module'],
+          },
+          source: 'editor',
+        );
       default:
         throw UnsupportedError('Unknown code_editor method: $method');
     }
@@ -810,11 +1020,17 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         return null;
       case 'format_document':
         await controller.format();
-        _emitConfiguredEvent('format_request', {
-          'value': _latestValue,
-          'language': widget.language ?? '',
-        });
-        return null;
+        return _dispatchProviderRequest(
+          action: 'format_document',
+          provider: args['provider']?.toString(),
+          payload: <String, Object?>{
+            'value': _latestValue,
+            'language': (_runtimeProps['language'] ?? widget.language ?? '')
+                .toString(),
+            'module': _runtimeProps['module'],
+          },
+          source: 'editor',
+        );
       case 'reveal_line':
         final line = coerceOptionalInt(args['line']) ?? 1;
         await controller.revealLine(line, center: true);

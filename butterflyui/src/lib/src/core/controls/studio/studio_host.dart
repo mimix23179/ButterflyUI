@@ -562,6 +562,71 @@ class StudioHostEngine implements StudioPluginHost {
           payload: payload,
           recordHistory: true,
         );
+      case 'render_start_next':
+      case 'start_next_render':
+        Map<String, Object?>? startedRenderJob;
+        return _mutate(
+          label: 'render_start_next',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            startedRenderJob = renderService.startNext();
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{
+            'ok': true,
+            'job': startedRenderJob,
+          },
+        );
+      case 'render_update_progress':
+      case 'render_progress':
+        var updated = false;
+        return _mutate(
+          label: 'render_update_progress',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            updated = renderService.updateProgress(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              coerceDouble(payload['progress']) ?? 0.0,
+              stage: payload['stage']?.toString(),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{'ok': updated},
+        );
+      case 'render_complete':
+      case 'complete_render':
+        return _mutate(
+          label: 'render_complete',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            renderService.completeJob(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              result: studioCoerceObjectMap(payload['result']),
+            );
+          },
+          result: <String, Object?>{'ok': true},
+        );
+      case 'render_fail':
+      case 'fail_render':
+        return _mutate(
+          label: 'render_fail',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            renderService.failJob(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              error: (payload['error'] ?? '').toString(),
+            );
+          },
+          result: <String, Object?>{'ok': true},
+        );
       case 'set_zoom':
         return _mutate(
           label: 'set_zoom',
@@ -637,6 +702,148 @@ class StudioHostEngine implements StudioPluginHost {
           },
           result: <String, Object?>{'ok': true},
         );
+      case 'ffmpeg_start_next':
+      case 'start_next_ffmpeg':
+        Map<String, Object?>? startedFfmpegJob;
+        return _mutate(
+          label: 'ffmpeg_start_next',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            startedFfmpegJob = ffmpegBridge.startNext();
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{
+            'ok': true,
+            'job': startedFfmpegJob,
+          },
+        );
+      case 'ffmpeg_update_status':
+      case 'ffmpeg_status':
+        var ffmpegUpdated = false;
+        return _mutate(
+          label: 'ffmpeg_update_status',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            ffmpegUpdated = ffmpegBridge.updateStatus(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              (payload['status'] ?? 'unknown').toString(),
+              message: payload['message']?.toString(),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{'ok': ffmpegUpdated},
+        );
+      case 'ffmpeg_complete':
+      case 'complete_ffmpeg':
+        var ffmpegCompleted = false;
+        return _mutate(
+          label: 'ffmpeg_complete',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            ffmpegCompleted = ffmpegBridge.complete(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              result: studioCoerceObjectMap(payload['result']),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{'ok': ffmpegCompleted},
+        );
+      case 'ffmpeg_fail':
+      case 'fail_ffmpeg':
+        var ffmpegFailed = false;
+        return _mutate(
+          label: 'ffmpeg_fail',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            ffmpegFailed = ffmpegBridge.fail(
+              (payload['job_id'] ?? payload['id'] ?? '').toString(),
+              error: (payload['error'] ?? '').toString(),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{'ok': ffmpegFailed},
+        );
+      case 'recording_start':
+      case 'start_recording':
+        Map<String, Object?>? recordingStart;
+        return _mutate(
+          label: 'recording_start',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            if (payload['supported'] != null) {
+              recordingBridge.supported = payload['supported'] == true;
+            }
+            recordingStart = recordingBridge.start(
+              outputPath: (payload['output_path'] ?? payload['path'] ?? '')
+                  .toString(),
+              includeMic: payload['include_mic'] == null
+                  ? true
+                  : payload['include_mic'] == true,
+              includeSystemAudio: payload['include_system_audio'] == true,
+              format: (payload['format'] ?? 'mp4').toString(),
+              sessionId: (payload['session_id'] ?? '').toString(),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{
+            'ok': true,
+            'recording': recordingStart,
+          },
+        );
+      case 'recording_stop':
+      case 'stop_recording':
+        Map<String, Object?>? recordingStop;
+        return _mutate(
+          label: 'recording_stop',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            recordingStop = recordingBridge.stop(
+              reason: (payload['reason'] ?? '').toString(),
+            );
+          },
+          result: const <String, Object?>{},
+          resultBuilder: () => <String, Object?>{
+            'ok': true,
+            'recording': recordingStop,
+          },
+        );
+      case 'recording_set_supported':
+      case 'set_recording_supported':
+        return _mutate(
+          label: 'recording_set_supported',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: () {
+            recordingBridge.supported = payload['supported'] == true;
+          },
+          result: <String, Object?>{
+            'ok': true,
+            'supported': recordingBridge.supported,
+          },
+        );
+      case 'recording_clear_sessions':
+      case 'clear_recording_sessions':
+        return _mutate(
+          label: 'recording_clear_sessions',
+          kind: 'change',
+          payload: payload,
+          recordHistory: true,
+          mutate: recordingBridge.clearSessions,
+          result: <String, Object?>{'ok': true},
+        );
       case 'update_module':
       default:
         final module = (payload['module'] ?? '').toString();
@@ -693,6 +900,7 @@ class StudioHostEngine implements StudioPluginHost {
     required bool recordHistory,
     required void Function() mutate,
     required Map<String, Object?> result,
+    Map<String, Object?> Function()? resultBuilder,
   }) {
     final before = deepCopyStudioMap(_props);
     mutate();
@@ -712,8 +920,9 @@ class StudioHostEngine implements StudioPluginHost {
     } else {
       commandService.appendAudit(kind: kind, label: label, payload: payload);
     }
+    final resolvedResult = resultBuilder == null ? result : resultBuilder();
     return <String, Object?>{
-      ...result,
+      ...resolvedResult,
       'undo_depth': undoDepth,
       'redo_depth': redoDepth,
     };

@@ -16,6 +16,10 @@ class StreamView(TerminalSubmodule):
     umbrella = 'terminal'
     module_token = MODULE_TOKEN
     canonical_module = MODULE_TOKEN
+    module_id = MODULE_TOKEN
+    module_version = '1.0.0'
+    module_depends_on = ()
+    module_contributions = {}
 
     module_props = tuple(sorted(MODULE_ALLOWED_KEYS.get(MODULE_TOKEN, set())))
     module_prop_types = dict(MODULE_PAYLOAD_TYPES.get(MODULE_TOKEN, {}))
@@ -24,6 +28,7 @@ class StreamView(TerminalSubmodule):
 
     def __init__(
         self,
+        *children: object,
         payload: Mapping[str, object] | None = None,
         props: Mapping[str, object] | None = None,
         style: Mapping[str, object] | None = None,
@@ -107,6 +112,7 @@ class StreamView(TerminalSubmodule):
         if wrap_lines is not None:
             resolved_payload['wrap_lines'] = wrap_lines
         super().__init__(
+            *children,
             payload=resolved_payload,
             props=props,
             style=style,

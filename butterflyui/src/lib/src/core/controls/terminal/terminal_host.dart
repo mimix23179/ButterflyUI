@@ -174,11 +174,18 @@ class ButterflyUITerminal extends StatefulWidget {
 class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
   late Map<String, Object?> _runtimeProps;
   late xterm.Terminal _terminal;
+  _TerminalBackendAdapter _backend = const _LocalTerminalBackendAdapter();
+  String _backendId = 'local';
   int _terminalMaxLines = 1200;
   final TextEditingController _inputController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
   final List<_TerminalLine> _buffer = <_TerminalLine>[];
   final List<String> _history = <String>[];
+  final List<_QueuedTerminalCommand> _pendingExecutions =
+      <_QueuedTerminalCommand>[];
+  final Map<String, _QueuedTerminalCommand> _runningExecutions =
+      <String, _QueuedTerminalCommand>{};
+  int _executionSerial = 0;
   int _historyCursor = 0;
   String _activeSessionId = 'default';
   Timer? _inputDebounce;
@@ -349,8 +356,10 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         });
         return {'ok': true, 'read_only': value};
       case 'submit':
-        _submitInput(explicitValue: args['value']?.toString());
-        return {'ok': true};
+        return _submitInput(
+          explicitValue: args['value']?.toString(),
+          submitArgs: args,
+        );
       case 'get_buffer':
       case 'get_value':
         return _buffer.map((line) => line.text).join('\n');
@@ -695,7 +704,9 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
                 border: InputBorder.none,
               ),
               onChanged: _onInputChanged,
-              onSubmitted: (_) => _submitInput(),
+              onSubmitted: (_) {
+                _submitInput();
+              },
             ),
           ),
           IconButton(
@@ -711,7 +722,11 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
             color: fg.withValues(alpha: 0.9),
           ),
           FilledButton.tonal(
-            onPressed: readOnly ? null : _submitInput,
+            onPressed: readOnly
+                ? null
+                : () {
+                    _submitInput();
+                  },
             child: Text(submitLabel),
           ),
         ],
@@ -960,10 +975,221 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
 
   void _ensureTerminalBackend() {
     final nextMaxLines = _resolvedMaxLines(_runtimeProps);
-    if (nextMaxLines == _terminalMaxLines) return;
-    _terminalMaxLines = nextMaxLines;
-    _terminal = xterm.Terminal(maxLines: _terminalMaxLines);
-    _syncTerminalWithBuffer();
+    if (nextMaxLines != _terminalMaxLines) {
+      _terminalMaxLines = nextMaxLines;
+      _terminal = xterm.Terminal(maxLines: _terminalMaxLines);
+      _syncTerminalWithBuffer();
+    }
+
+    final nextBackendId = _resolveBackendId(_runtimeProps);
+    if (nextBackendId != _backendId) {
+      _backendId = nextBackendId;
+      switch (_backendId) {
+        case 'pty':
+          _backend = const _BridgedTerminalBackendAdapter('pty');
+          break;
+        case 'remote':
+          _backend = const _BridgedTerminalBackendAdapter('remote');
+          break;
+        default:
+          _backend = const _LocalTerminalBackendAdapter();
+      }
+    }
+
+    final modules = _coerceObjectMap(_runtimeProps['modules']);
+    final capabilities = <String, Object?>{
+      ..._coerceObjectMap(modules['capabilities']),
+      ..._backend.capabilities(),
+      'backend': _backend.id,
+    };
+    modules['capabilities'] = capabilities;
+    _runtimeProps['modules'] = modules;
+    _runtimeProps['capabilities'] = capabilities;
+    _syncExecutionLanePayload();
+  }
+
+  String _resolveBackendId(Map<String, Object?> props) {
+    final processBridge = _sectionProps(props, 'process_bridge') ?? const {};
+    final raw =
+        processBridge['backend'] ??
+        processBridge['bridge'] ??
+        props['backend'] ??
+        props['bridge'];
+    final normalized = _norm(raw?.toString() ?? '');
+    if (normalized == 'pty' ||
+        normalized == 'flutter_pty' ||
+        normalized == 'pty_bridge') {
+      return 'pty';
+    }
+    if (normalized == 'remote' ||
+        normalized == 'ssh' ||
+        normalized == 'ws' ||
+        normalized == 'websocket') {
+      return 'remote';
+    }
+    return 'local';
+  }
+
+  String _resolvedLane(Map<String, Object?> payload) {
+    final executionLane =
+        _sectionProps(_runtimeProps, 'execution_lane') ?? const {};
+    final lane = _norm(
+      (payload['lane'] ?? executionLane['lane'] ?? _runtimeProps['lane'] ?? '')
+          .toString(),
+    );
+    return lane.isEmpty ? 'default' : lane;
+  }
+
+  int _resolvedMaxConcurrency() {
+    final executionLane =
+        _sectionProps(_runtimeProps, 'execution_lane') ?? const {};
+    final flowGate = _sectionProps(_runtimeProps, 'flow_gate') ?? const {};
+    return (coerceOptionalInt(
+              executionLane['max_concurrency'] ?? flowGate['max_concurrency'],
+            ) ??
+            1)
+        .clamp(1, 8);
+  }
+
+  bool _lockLaneWhileRunning() {
+    final flowGate = _sectionProps(_runtimeProps, 'flow_gate') ?? const {};
+    final lock = flowGate['lock_while_running'];
+    if (lock is bool) return lock;
+    return true;
+  }
+
+  Map<String, Object?> _queueExecution({
+    required String command,
+    required Map<String, Object?> payload,
+  }) {
+    final lane = _resolvedLane(payload);
+    final queued = _QueuedTerminalCommand(
+      id: 'exec_${++_executionSerial}',
+      lane: lane,
+      sessionId: _activeSessionId,
+      command: command,
+      payload: payload,
+      enqueuedAt: DateTime.now(),
+    );
+    setState(() {
+      _pendingExecutions.add(queued);
+      _syncExecutionLanePayload();
+    });
+    _emitConfiguredEvent('change', {
+      'module': 'execution_lane',
+      'intent': 'queued',
+      'job': queued.toMap(),
+    });
+    _drainExecutionQueue();
+    return {'ok': true, 'queued': queued.toMap()};
+  }
+
+  void _drainExecutionQueue() {
+    final maxConcurrency = _resolvedMaxConcurrency();
+    final lockLane = _lockLaneWhileRunning();
+    while (_runningExecutions.length < maxConcurrency &&
+        _pendingExecutions.isNotEmpty) {
+      var nextIndex = -1;
+      for (var i = 0; i < _pendingExecutions.length; i += 1) {
+        final lane = _pendingExecutions[i].lane;
+        if (lockLane &&
+            _runningExecutions.values.any((entry) => entry.lane == lane)) {
+          continue;
+        }
+        nextIndex = i;
+        break;
+      }
+      if (nextIndex < 0) {
+        break;
+      }
+      final next = _pendingExecutions.removeAt(nextIndex);
+      _runningExecutions[next.id] = next;
+      if (mounted) {
+        setState(_syncExecutionLanePayload);
+      } else {
+        _syncExecutionLanePayload();
+      }
+      unawaited(_runQueuedExecution(next));
+    }
+  }
+
+  Future<void> _runQueuedExecution(_QueuedTerminalCommand queued) async {
+    try {
+      final prompt = (_runtimeProps['prompt'] ?? r'$').toString();
+      _appendText('$prompt ${queued.command}', level: 'command');
+      _emitConfiguredEvent('submit', {
+        'value': queued.command,
+        'active_session': queued.sessionId,
+        'execution_id': queued.id,
+        'lane': queued.lane,
+        'backend': _backend.id,
+      });
+
+      final result = await _backend.execute(
+        _TerminalBackendRequest(
+          executionId: queued.id,
+          lane: queued.lane,
+          sessionId: queued.sessionId,
+          command: queued.command,
+          payload: queued.payload,
+        ),
+      );
+      if (result.lines.isNotEmpty) {
+        _appendLines(result.lines);
+      }
+      if (mounted) {
+        setState(() {
+          _runtimeProps['status'] = result.status;
+          _runtimeProps['exit_code'] = result.exitCode;
+        });
+      } else {
+        _runtimeProps['status'] = result.status;
+        _runtimeProps['exit_code'] = result.exitCode;
+      }
+      _emitConfiguredEvent('change', {
+        'module': 'execution_lane',
+        'intent': 'completed',
+        'job_id': queued.id,
+        'lane': queued.lane,
+        'status': result.status,
+        'exit_code': result.exitCode,
+      });
+    } catch (error) {
+      _appendText(error.toString(), level: 'error');
+      _emitConfiguredEvent('change', {
+        'module': 'execution_lane',
+        'intent': 'failed',
+        'job_id': queued.id,
+        'lane': queued.lane,
+        'error': error.toString(),
+      });
+    } finally {
+      _runningExecutions.remove(queued.id);
+      if (mounted) {
+        setState(_syncExecutionLanePayload);
+      } else {
+        _syncExecutionLanePayload();
+      }
+      _drainExecutionQueue();
+    }
+  }
+
+  void _syncExecutionLanePayload() {
+    final modules = _coerceObjectMap(_runtimeProps['modules']);
+    final lane = _coerceObjectMap(modules['execution_lane']);
+    lane['queue'] = _pendingExecutions
+        .map((entry) => entry.toMap())
+        .toList(growable: false);
+    lane['running'] = _runningExecutions.values
+        .map((entry) => entry.toMap())
+        .toList(growable: false);
+    lane['active_jobs'] = _runningExecutions.length;
+    lane['queued_jobs'] = _pendingExecutions.length;
+    lane['max_concurrency'] = _resolvedMaxConcurrency();
+    lane['lock_while_running'] = _lockLaneWhileRunning();
+    modules['execution_lane'] = lane;
+    _runtimeProps['modules'] = modules;
+    _runtimeProps['execution_lane'] = lane;
   }
 
   int _resolvedMaxLines(Map<String, Object?> props) {
@@ -1023,13 +1249,18 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     );
   }
 
-  void _submitInput({String? explicitValue}) {
+  Map<String, Object?> _submitInput({
+    String? explicitValue,
+    Map<String, Object?> submitArgs = const <String, Object?>{},
+  }) {
     final raw = explicitValue ?? _inputController.text;
     final command = raw.trim();
-    if (command.isEmpty) return;
-    if (_runtimeProps['read_only'] == true) return;
-    final prompt = (_runtimeProps['prompt'] ?? r'$').toString();
-    _appendText('$prompt $command', level: 'command');
+    if (command.isEmpty) {
+      return {'ok': false, 'error': 'command is empty'};
+    }
+    if (_runtimeProps['read_only'] == true) {
+      return {'ok': false, 'error': 'terminal is read-only'};
+    }
     setState(() {
       _history.add(command);
       _historyCursor = _history.length;
@@ -1040,10 +1271,11 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         _runtimeProps['input'] = command;
       }
     });
-    _emitConfiguredEvent('submit', {
-      'value': command,
-      'active_session': _activeSessionId,
-    });
+    final payload = <String, Object?>{
+      ...submitArgs,
+      'source': submitArgs['source'] ?? 'prompt',
+    };
+    return _queueExecution(command: command, payload: payload);
   }
 
   void _moveHistory(int delta) {
@@ -1109,6 +1341,224 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
       'state': _runtimeProps['state'],
       ...payload,
     });
+  }
+}
+
+class _QueuedTerminalCommand {
+  final String id;
+  final String lane;
+  final String sessionId;
+  final String command;
+  final Map<String, Object?> payload;
+  final DateTime enqueuedAt;
+
+  const _QueuedTerminalCommand({
+    required this.id,
+    required this.lane,
+    required this.sessionId,
+    required this.command,
+    required this.payload,
+    required this.enqueuedAt,
+  });
+
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'id': id,
+      'lane': lane,
+      'session_id': sessionId,
+      'command': command,
+      'payload': payload,
+      'enqueued_at': enqueuedAt.toIso8601String(),
+    };
+  }
+}
+
+class _TerminalBackendRequest {
+  final String executionId;
+  final String lane;
+  final String sessionId;
+  final String command;
+  final Map<String, Object?> payload;
+
+  const _TerminalBackendRequest({
+    required this.executionId,
+    required this.lane,
+    required this.sessionId,
+    required this.command,
+    required this.payload,
+  });
+}
+
+class _TerminalBackendResult {
+  final String status;
+  final int exitCode;
+  final List<_TerminalLine> lines;
+
+  const _TerminalBackendResult({
+    required this.status,
+    required this.exitCode,
+    required this.lines,
+  });
+}
+
+abstract class _TerminalBackendAdapter {
+  const _TerminalBackendAdapter();
+
+  String get id;
+
+  Map<String, Object?> capabilities();
+
+  Future<_TerminalBackendResult> execute(_TerminalBackendRequest request);
+}
+
+class _LocalTerminalBackendAdapter implements _TerminalBackendAdapter {
+  const _LocalTerminalBackendAdapter();
+
+  @override
+  String get id => 'local';
+
+  @override
+  Map<String, Object?> capabilities() {
+    return const <String, Object?>{
+      'interactive_stdin': true,
+      'streaming': true,
+      'ansi': true,
+      'links': true,
+      'backend': 'local',
+    };
+  }
+
+  @override
+  Future<_TerminalBackendResult> execute(
+    _TerminalBackendRequest request,
+  ) async {
+    final now = DateTime.now();
+    final command = request.command.trim();
+    if (command.isEmpty) {
+      return const _TerminalBackendResult(
+        status: 'idle',
+        exitCode: 0,
+        lines: <_TerminalLine>[],
+      );
+    }
+
+    if (command == 'help' || command == '?') {
+      return _TerminalBackendResult(
+        status: 'completed',
+        exitCode: 0,
+        lines: <_TerminalLine>[
+          _TerminalLine(
+            text: 'Available commands: help, echo <text>, fail, status',
+            level: 'output',
+            timestamp: now,
+          ),
+          _TerminalLine(
+            text: 'Execution lane: ${request.lane} (${request.executionId})',
+            level: 'output',
+            timestamp: now,
+          ),
+        ],
+      );
+    }
+
+    if (command.startsWith('echo ')) {
+      return _TerminalBackendResult(
+        status: 'completed',
+        exitCode: 0,
+        lines: <_TerminalLine>[
+          _TerminalLine(
+            text: command.substring(5),
+            level: 'output',
+            timestamp: now,
+          ),
+        ],
+      );
+    }
+
+    if (command == 'status') {
+      return _TerminalBackendResult(
+        status: 'completed',
+        exitCode: 0,
+        lines: <_TerminalLine>[
+          _TerminalLine(
+            text:
+                'Backend=$id lane=${request.lane} session=${request.sessionId}',
+            level: 'output',
+            timestamp: now,
+          ),
+        ],
+      );
+    }
+
+    if (command.contains('fail')) {
+      return _TerminalBackendResult(
+        status: 'failed',
+        exitCode: 1,
+        lines: <_TerminalLine>[
+          _TerminalLine(
+            text: 'Simulated failure for command: $command',
+            level: 'error',
+            timestamp: now,
+          ),
+        ],
+      );
+    }
+
+    return _TerminalBackendResult(
+      status: 'completed',
+      exitCode: 0,
+      lines: <_TerminalLine>[
+        _TerminalLine(
+          text: 'Executing on local backend: $command',
+          level: 'output',
+          timestamp: now,
+        ),
+        _TerminalLine(
+          text: 'Done (execution_id=${request.executionId})',
+          level: 'output',
+          timestamp: now,
+        ),
+      ],
+    );
+  }
+}
+
+class _BridgedTerminalBackendAdapter implements _TerminalBackendAdapter {
+  final String backendId;
+
+  const _BridgedTerminalBackendAdapter(this.backendId);
+
+  @override
+  String get id => backendId;
+
+  @override
+  Map<String, Object?> capabilities() {
+    return <String, Object?>{
+      'interactive_stdin': true,
+      'streaming': true,
+      'ansi': true,
+      'links': true,
+      'backend': backendId,
+      'bridge': true,
+    };
+  }
+
+  @override
+  Future<_TerminalBackendResult> execute(
+    _TerminalBackendRequest request,
+  ) async {
+    final now = DateTime.now();
+    return _TerminalBackendResult(
+      status: 'queued',
+      exitCode: 0,
+      lines: <_TerminalLine>[
+        _TerminalLine(
+          text: 'Command forwarded to $backendId bridge: ${request.command}',
+          level: 'output',
+          timestamp: now,
+        ),
+      ],
+    );
   }
 }
 
@@ -1240,9 +1690,9 @@ void _seedTerminalDefaults(Map<String, Object?> out) {
   final mm = now.minute.toString().padLeft(2, '0');
 
   final lines = <Object?>[
-    '[${hh}:${mm}:01] Terminal host initialized.',
-    '[${hh}:${mm}:03] Capabilities negotiated: stream/stdin/progress.',
-    '[${hh}:${mm}:06] Ready for command execution.',
+    '[$hh:$mm:01] Terminal host initialized.',
+    '[$hh:$mm:03] Capabilities negotiated: stream/stdin/progress.',
+    '[$hh:$mm:06] Ready for command execution.',
   ];
   if (out['lines'] is List && (out['lines'] as List).isNotEmpty) {
     out['lines'] = (out['lines'] as List).toList(growable: false);
@@ -1340,7 +1790,9 @@ void _seedTerminalDefaults(Map<String, Object?> out) {
   ensureModule('execution_lane', <String, Object?>{
     'mode': 'queue',
     'max_concurrency': 2,
-    'active_jobs': 1,
+    'active_jobs': 0,
+    'queue': <Map<String, Object?>>[],
+    'running': <Map<String, Object?>>[],
   });
   ensureModule('log_viewer', <String, Object?>{
     'items': <Map<String, Object?>>[
