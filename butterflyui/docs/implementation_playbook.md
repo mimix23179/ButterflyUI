@@ -33,6 +33,26 @@ Dart (Runtime):
 - `butterflyui/src/lib/src/core/style/style_packs.dart`
 - `butterflyui/src/lib/src/core/candy/theme.dart`
 
+## Umbrella Submodule API Contract
+
+For umbrella controls that expose submodules (Candy, CodeEditor, Gallery):
+
+- Use direct static access only: `Candy.*`, `CodeEditor.*`, `Gallery.*`.
+- Do **not** use `Candy.Modules.*`, `CodeEditor.Modules.*`, or `Gallery.Modules.*`.
+- Every submodule class must have its own file in the umbrella `submodules/` folder.
+- Umbrella root `__init__.py` must bind typed static aliases on the host class
+  (for example: `Candy.Button`, `CodeEditor.SearchBox`, `Gallery.Toolbar`).
+- Python-side umbrella registration must remain wired via:
+  - `<umbrella>.MODULE_COMPONENTS` (token -> class map)
+  - `controls.__init__.py` exports:
+    - `CANDY_MODULE_COMPONENTS`
+    - `CODE_EDITOR_MODULE_COMPONENTS`
+    - `GALLERY_MODULE_COMPONENTS`
+    - `UMBRELLA_SUBMODULE_COMPONENTS`
+
+This keeps submodules serializable and discoverable while preserving the
+intended host-control API shape.
+
 ## Checklist: Add a New Control
 
 1) Define the Python control class

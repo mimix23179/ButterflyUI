@@ -2,7 +2,8 @@ from ._shared import Component
 from .aliases import ALIAS_CONTROL_CLASSES, ALIAS_CONTROL_EXPORTS
 from .candy import (
     Candy, 
-    CandyTheme
+    CandyTheme,
+    MODULE_COMPONENTS as CANDY_MODULE_COMPONENTS,
 )
 from .customization import (
     AnimatedGradient,
@@ -146,6 +147,7 @@ from .effects import (
 )
 from .gallery import (
     Gallery,
+    MODULE_COMPONENTS as GALLERY_MODULE_COMPONENTS,
 )
 from .inputs import (
     AsyncActionButton,
@@ -280,8 +282,6 @@ from .productivity import (
     ChatBubble,
     ChatMessage,
     ChatThread,
-    CodeEditor,
-    Studio,
     EditorTabStrip,
     EditorWorkspace,
     Form,
@@ -291,15 +291,27 @@ from .productivity import (
     OutputPanel,
     ProblemsPanel,
     PromptComposer,
-    Terminal,
     ValidationSummary,
     WorkspaceTree,
     FileSystem,
     AutoForm,
     SubmitScope,
 )
+from .code_editor import (
+    CodeEditor,
+    MODULE_COMPONENTS as CODE_EDITOR_MODULE_COMPONENTS,
+)
+from .studio import (
+    Studio,
+    MODULE_COMPONENTS as STUDIO_MODULE_COMPONENTS,
+)
+from .terminal import (
+    Terminal,
+    MODULE_COMPONENTS as TERMINAL_MODULE_COMPONENTS,
+)
 from .skins import (
     Skins,
+    MODULE_COMPONENTS as SKINS_MODULE_COMPONENTS,
 )
 from .overlay import (
     BottomSheet,
@@ -336,6 +348,15 @@ from .shell import (
     WindowControls,
 )
 from .webview import WebView
+
+UMBRELLA_SUBMODULE_COMPONENTS = {
+    "candy": dict(CANDY_MODULE_COMPONENTS),
+    "code_editor": dict(CODE_EDITOR_MODULE_COMPONENTS),
+    "gallery": dict(GALLERY_MODULE_COMPONENTS),
+    "skins": dict(SKINS_MODULE_COMPONENTS),
+    "studio": dict(STUDIO_MODULE_COMPONENTS),
+    "terminal": dict(TERMINAL_MODULE_COMPONENTS),
+}
 
 globals().update(ALIAS_CONTROL_CLASSES)
 
@@ -649,6 +670,13 @@ __all__ = [
     "Clip",
     "FileSystem",
     "Visibility",
+    "CANDY_MODULE_COMPONENTS",
+    "CODE_EDITOR_MODULE_COMPONENTS",
+    "GALLERY_MODULE_COMPONENTS",
+    "SKINS_MODULE_COMPONENTS",
+    "STUDIO_MODULE_COMPONENTS",
+    "TERMINAL_MODULE_COMPONENTS",
+    "UMBRELLA_SUBMODULE_COMPONENTS",
 ]
 
 __all__.extend(ALIAS_CONTROL_EXPORTS)

@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from ..core.schema import ButterflyUIContractError, ensure_valid_props
-from ._shared import Component, merge_props
+from ...core.schema import ButterflyUIContractError, ensure_valid_props
+from .._shared import Component, merge_props
 
 __all__ = ["CandySchemaError", "CandyTheme", "Candy"]
 
@@ -720,3 +720,4 @@ class Candy(Component):
         if key:
             payload["key"] = key
         return self.invoke(session, "pause_motion", payload)
+

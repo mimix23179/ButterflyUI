@@ -230,6 +230,12 @@ import 'controls/overlay/progress_overlay.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
+import 'controls/candy/candy_renderer.dart';
+import 'controls/gallery/gallery_renderer.dart';
+import 'controls/skins/skins_renderer.dart';
+import 'controls/terminal/terminal_renderer.dart';
+import 'controls/code_editor/code_editor_renderer.dart';
+import 'controls/studio/studio_renderer.dart';
 import 'style/style_pack.dart';
 import 'style/control_style_resolver.dart';
 import 'style/style_packs.dart';
@@ -248,260 +254,6 @@ Color _surfaceToken(CandyTokens tokens) {
 
 Color _borderToken(CandyTokens tokens) {
   return tokens.color('border') ?? _textToken(tokens).withOpacity(0.2);
-}
-
-const Set<String> _galleryModuleAliases = {
-  'toolbar',
-  'filter_bar',
-  'grid_layout',
-  'item_actions',
-  'item_badge',
-  'item_meta_row',
-  'item_preview',
-  'item_selectable',
-  'item_tile',
-  'pagination',
-  'section_header',
-  'sort_bar',
-  'empty_state',
-  'loading_skeleton',
-  'search_bar',
-  'fonts',
-  'font_picker',
-  'font_renderer',
-  'audio',
-  'audio_picker',
-  'audio_renderer',
-  'video',
-  'video_picker',
-  'video_renderer',
-  'image',
-  'image_picker',
-  'image_renderer',
-  'document',
-  'document_picker',
-  'document_renderer',
-  'item_drag_handle',
-  'item_drop_target',
-  'item_reorder_handle',
-  'item_selection_checkbox',
-  'item_selection_radio',
-  'item_selection_switch',
-  'apply',
-  'clear',
-  'select_all',
-  'deselect_all',
-  'apply_font',
-  'apply_image',
-  'set_as_wallpaper',
-  'presets',
-  'skins',
-};
-
-const Set<String> _candyModuleAliases = {
-  'button',
-  'card',
-  'column',
-  'container',
-  'row',
-  'stack',
-  'surface',
-  'wrap',
-  'align',
-  'center',
-  'spacer',
-  'aspect_ratio',
-  'overflow_box',
-  'fitted_box',
-  'effects',
-  'particles',
-  'border',
-  'shadow',
-  'outline',
-  'gradient',
-  'animation',
-  'transition',
-  'canvas',
-  'clip',
-  'decorated_box',
-  'badge',
-  'avatar',
-  'icon',
-  'text',
-  'motion',
-};
-
-const Set<String> _skinsModuleAliases = {
-  'selector',
-  'preset',
-  'editor',
-  'preview',
-  'apply',
-  'clear',
-  'token_mapper',
-  'create_skin',
-  'edit_skin',
-  'delete_skin',
-  'effects',
-  'particles',
-  'shaders',
-  'materials',
-  'icons',
-  'fonts',
-  'colors',
-  'background',
-  'border',
-  'shadow',
-  'outline',
-  'animation',
-  'transition',
-  'interaction',
-  'layout',
-  'responsive',
-  'effect_editor',
-  'particle_editor',
-  'shader_editor',
-  'material_editor',
-  'icon_editor',
-  'font_editor',
-  'color_editor',
-  'background_editor',
-  'border_editor',
-  'shadow_editor',
-  'outline_editor',
-};
-
-const Set<String> _terminalModuleAliases = {
-  'capabilities',
-  'command_builder',
-  'flow_gate',
-  'output_mapper',
-  'presets',
-  'progress',
-  'progress_view',
-  'prompt',
-  'raw_view',
-  'replay',
-  'session',
-  'stdin',
-  'stdin_injector',
-  'stream',
-  'stream_view',
-  'tabs',
-  'timeline',
-  'view',
-  'workbench',
-  'process_bridge',
-  'execution_lane',
-  'log_viewer',
-  'log_panel',
-};
-
-const Set<String> _studioModuleAliases = {
-  'builder',
-  'canvas',
-  'canvas_surface',
-  'timeline_surface',
-  'node_surface',
-  'preview_surface',
-  'block_palette',
-  'component_palette',
-  'inspector',
-  'outline_tree',
-  'project_panel',
-  'properties_panel',
-  'responsive_toolbar',
-  'tokens_editor',
-  'actions_editor',
-  'bindings_editor',
-  'asset_browser',
-  'selection_tools',
-  'transform_box',
-  'transform_toolbar',
-  'assets',
-  'assets_panel',
-  'layers',
-  'layers_panel',
-  'node',
-  'node_graph',
-  'preview',
-  'properties',
-  'responsive',
-  'timeline',
-  'timeline_editor',
-  'token_editor',
-  'tokens',
-  'toolbox',
-  'transform',
-  'transform_tools',
-};
-
-const Set<String> _codeEditorModuleAliases = {
-  'ide',
-  'editor_surface',
-  'editor_view',
-  'editor_tabs',
-  'document_tab_strip',
-  'file_tabs',
-  'file_tree',
-  'workspace_explorer',
-  'explorer_tree',
-  'tree',
-  'code_document',
-  'code_buffer',
-  'code_category_layer',
-  'smart_search_bar',
-  'search_box',
-  'search_field',
-  'search_history',
-  'search_intent',
-  'search_item',
-  'search_results_view',
-  'search_scope_selector',
-  'search_source',
-  'search_provider',
-  'search_everything_panel',
-  'semantic_search',
-  'query_token',
-  'scoped_search_replace',
-  'inline_search_overlay',
-  'inline_widget',
-  'ghost_editor',
-  'gutter',
-  'hint',
-  'mini_map',
-  'editor_minimap',
-  'dock_graph',
-  'dock',
-  'dock_pane',
-  'workbench_editor',
-  'empty_state_view',
-  'empty_view',
-  'command_search',
-  'diff',
-  'diff_narrator',
-  'diagnostic_stream',
-  'diagnostics_panel',
-  'inline_error_view',
-  'editor_intent_router',
-  'intent_router',
-  'intent_panel',
-  'intent_search',
-  'command_bar',
-  'export_panel',
-  'scope_picker',
-  'inspector',
-};
-
-String? _moduleFromPrefixedAlias(
-  String type,
-  String prefix,
-  Set<String> allowed,
-) {
-  if (!type.startsWith(prefix)) return null;
-  final module = type.substring(prefix.length);
-  if (!allowed.contains(module)) return null;
-  return module;
 }
 
 class ControlRenderer {
@@ -628,104 +380,78 @@ class ControlRenderer {
       return const SizedBox.shrink();
     }
 
-    final candyAlias = _moduleFromPrefixedAlias(type, 'candy_', _candyModuleAliases);
-    if (candyAlias != null) {
-      return buildCandyFamilyControl(
-        controlId,
-        <String, Object?>{...props, 'module': candyAlias},
-        rawChildren,
-        context.tokens,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
-
-    final galleryAlias = _moduleFromPrefixedAlias(
-      type,
-      'gallery_',
-      _galleryModuleAliases,
+    final candyAlias = buildCandyAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      tokens: context.tokens,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
     );
-    if (galleryAlias != null) {
-      return buildGalleryFamilyControl(
-        controlId,
-        <String, Object?>{...props, 'module': galleryAlias},
-        rawChildren,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
+    if (candyAlias != null) return candyAlias;
 
-    final skinsAlias = _moduleFromPrefixedAlias(
-      type,
-      'skins_',
-      _skinsModuleAliases,
+    final galleryAlias = buildGalleryAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
     );
-    if (skinsAlias != null) {
-      return buildSkinsFamilyControl(
-        controlId,
-        <String, Object?>{...props, 'module': skinsAlias},
-        rawChildren,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
+    if (galleryAlias != null) return galleryAlias;
 
-    final terminalAlias = _moduleFromPrefixedAlias(
-      type,
-      'terminal_',
-      _terminalModuleAliases,
+    final skinsAlias = buildSkinsAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
     );
-    if (terminalAlias != null) {
-      return buildTerminalControl(
-        controlId,
-        <String, Object?>{...props, 'module': terminalAlias},
-        rawChildren,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
+    if (skinsAlias != null) return skinsAlias;
 
-    final studioAlias = _moduleFromPrefixedAlias(
-      type,
-      'studio_',
-      _studioModuleAliases,
+    final terminalAlias = buildTerminalAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
     );
-    if (studioAlias != null) {
-      return buildStudioControl(
-        controlId,
-        <String, Object?>{...props, 'module': studioAlias},
-        rawChildren,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
+    if (terminalAlias != null) return terminalAlias;
 
-    final codeEditorAlias = _moduleFromPrefixedAlias(
-      type,
-      'code_editor_',
-      _codeEditorModuleAliases,
+    final studioAlias = buildStudioAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
     );
-    if (codeEditorAlias != null) {
-      return buildCodeEditorControl(
-        controlId,
-        <String, Object?>{...props, 'module': codeEditorAlias},
-        rawChildren,
-        context.buildChild,
-        context.registerInvokeHandler,
-        context.unregisterInvokeHandler,
-        context.sendEvent,
-      );
-    }
+    if (studioAlias != null) return studioAlias;
+
+    final codeEditorAlias = buildCodeEditorAliasedControl(
+      type: type,
+      controlId: controlId,
+      props: props,
+      rawChildren: rawChildren,
+      buildChild: context.buildChild,
+      registerInvokeHandler: context.registerInvokeHandler,
+      unregisterInvokeHandler: context.unregisterInvokeHandler,
+      sendEvent: context.sendEvent,
+    );
+    if (codeEditorAlias != null) return codeEditorAlias;
 
     switch (type) {
       case 'page':

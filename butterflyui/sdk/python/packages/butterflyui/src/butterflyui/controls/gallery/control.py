@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from ..core.schema import ButterflyUIContractError, ensure_valid_props
-from ._shared import Component, merge_props
+from ...core.schema import ButterflyUIContractError, ensure_valid_props
+from .._shared import Component, merge_props
 
 __all__ = ["Gallery"]
 
@@ -596,3 +596,4 @@ class Gallery(Component):
         if value is not None:
             payload["value"] = value
         return self.invoke(session, "set_as_wallpaper", payload)
+

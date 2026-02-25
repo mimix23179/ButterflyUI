@@ -3,8 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from ..core.schema import ButterflyUIContractError, ensure_valid_props
-from ._shared import Component, merge_props
+from ...core.schema import ButterflyUIContractError, ensure_valid_props
+from .._shared import Component, merge_props
 
 __all__ = ["Skins"]
 
@@ -629,3 +629,4 @@ class Skins(Component):
 
     def set_token_mapping(self, session: Any, mapping: Mapping[str, Any]) -> dict[str, Any]:
         return self.set_module(session, "token_mapper", {"mapping": dict(mapping)})
+
