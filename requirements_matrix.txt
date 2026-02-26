@@ -1,6 +1,0 @@
-﻿requests
-huggingface_hub
-bitnet
-llama-cpp-python
-sentencepiece
-transformers
