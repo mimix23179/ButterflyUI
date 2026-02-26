@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+# Delegate entirely to dispatch — all class imports and dicts live there.
+from .dispatch import *  # noqa: F401, F403
+from .dispatch import __all__
+from .dispatch import MODULE_COMPONENTS  # explicit for tools that do static analysis
+
+# Keep a backward-compatible direct import so existing code is not broken.
 from .code_buffer import CodeBuffer
 from .code_category_layer import CodeCategoryLayer
 from .code_document import CodeDocument

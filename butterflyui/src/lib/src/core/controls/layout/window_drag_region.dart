@@ -26,6 +26,8 @@ Widget buildWindowDragRegionControl(
   final nativeMaximizeAction = props['native_maximize_action'] == null
       ? true
       : (props['native_maximize_action'] == true);
+    final moveEventThrottleMs =
+      (coerceOptionalInt(props['move_event_throttle_ms']) ?? 48).clamp(0, 1000);
   final minHeight = coerceDouble(props['min_height']) ?? 32;
 
   Widget child = const SizedBox.shrink();
@@ -56,18 +58,20 @@ Widget buildWindowDragRegionControl(
     emitMove: emitMove,
     nativeDrag: nativeDrag,
     nativeMaximizeAction: nativeMaximizeAction,
+    moveEventThrottleMs: moveEventThrottleMs,
     sendEvent: sendEvent,
     child: hasChild ? child : fallback,
   );
 }
 
-class _ButterflyUIWindowDragRegion extends StatelessWidget {
+class _ButterflyUIWindowDragRegion extends StatefulWidget {
   final String controlId;
   final bool draggable;
   final bool maximizeOnDoubleTap;
   final bool emitMove;
   final bool nativeDrag;
   final bool nativeMaximizeAction;
+  final int moveEventThrottleMs;
   final ButterflyUISendRuntimeEvent sendEvent;
   final Widget child;
 
@@ -78,53 +82,85 @@ class _ButterflyUIWindowDragRegion extends StatelessWidget {
     required this.emitMove,
     required this.nativeDrag,
     required this.nativeMaximizeAction,
+    required this.moveEventThrottleMs,
     required this.sendEvent,
     required this.child,
   });
+
+  @override
+  State<_ButterflyUIWindowDragRegion> createState() =>
+      _ButterflyUIWindowDragRegionState();
+}
+
+class _ButterflyUIWindowDragRegionState
+    extends State<_ButterflyUIWindowDragRegion> {
+  bool _dragStarted = false;
+  DateTime? _lastMoveEventAt;
 
   void _emit(
     String name, [
     Map<String, Object?> payload = const <String, Object?>{},
   ]) {
-    if (controlId.isEmpty) return;
-    sendEvent(controlId, name, payload);
+    if (widget.controlId.isEmpty) return;
+    widget.sendEvent(widget.controlId, name, payload);
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    if (!widget.draggable) return;
+    if (!_dragStarted) {
+      _dragStarted = true;
+      if (widget.nativeDrag) {
+        unawaited(ButterflyUIWindowApi.instance.startDrag());
+      }
+    }
+    _emit('drag_start', {
+      'global_x': details.globalPosition.dx,
+      'global_y': details.globalPosition.dy,
+      'local_x': details.localPosition.dx,
+      'local_y': details.localPosition.dy,
+    });
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (!widget.draggable || !widget.emitMove) return;
+    if (widget.moveEventThrottleMs > 0) {
+      final now = DateTime.now();
+      if (_lastMoveEventAt != null &&
+          now.difference(_lastMoveEventAt!).inMilliseconds <
+              widget.moveEventThrottleMs) {
+        return;
+      }
+      _lastMoveEventAt = now;
+    }
+    _emit('move', {
+      'dx': details.delta.dx,
+      'dy': details.delta.dy,
+      'global_x': details.globalPosition.dx,
+      'global_y': details.globalPosition.dy,
+      'local_x': details.localPosition.dx,
+      'local_y': details.localPosition.dy,
+    });
+  }
+
+  void _onPanEnd() {
+    if (!widget.draggable) return;
+    _dragStarted = false;
+    _emit('drag_end');
   }
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: draggable ? SystemMouseCursors.move : MouseCursor.defer,
+      cursor: widget.draggable ? SystemMouseCursors.move : MouseCursor.defer,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onPanDown: draggable
-            ? (details) {
-                if (nativeDrag) {
-                  unawaited(ButterflyUIWindowApi.instance.startDrag());
-                }
-                _emit('drag_start', {
-                  'global_x': details.globalPosition.dx,
-                  'global_y': details.globalPosition.dy,
-                  'local_x': details.localPosition.dx,
-                  'local_y': details.localPosition.dy,
-                });
-              }
-            : null,
-        onPanUpdate: draggable && emitMove
-            ? (details) {
-                _emit('move', {
-                  'dx': details.delta.dx,
-                  'dy': details.delta.dy,
-                  'global_x': details.globalPosition.dx,
-                  'global_y': details.globalPosition.dy,
-                  'local_x': details.localPosition.dx,
-                  'local_y': details.localPosition.dy,
-                });
-              }
-            : null,
-        onPanEnd: draggable ? (_) => _emit('drag_end') : null,
-        onDoubleTap: draggable && maximizeOnDoubleTap
+        onPanStart: widget.draggable ? _onPanStart : null,
+        onPanUpdate: widget.draggable && widget.emitMove ? _onPanUpdate : null,
+        onPanEnd: widget.draggable ? (_) => _onPanEnd() : null,
+        onPanCancel: widget.draggable ? _onPanEnd : null,
+        onDoubleTap: widget.draggable && widget.maximizeOnDoubleTap
             ? () {
-                if (nativeMaximizeAction) {
+                if (widget.nativeMaximizeAction) {
                   unawaited(
                     ButterflyUIWindowApi.instance.performAction('toggle_maximize'),
                   );
@@ -132,7 +168,7 @@ class _ButterflyUIWindowDragRegion extends StatelessWidget {
                 _emit('toggle_maximize', {'action': 'toggle_maximize'});
               }
             : null,
-        child: child,
+        child: widget.child,
       ),
     );
   }

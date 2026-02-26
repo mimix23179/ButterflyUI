@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:diff_match_patch/diff_match_patch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -15,6 +14,17 @@ import 'package:flutter_monaco/src/platform/platform_webview.dart'
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+
+import 'submodules/code_editor_submodule_context.dart';
+import 'submodules/commands.dart';
+import 'submodules/diagnostics.dart';
+import 'submodules/diff.dart';
+import 'submodules/document.dart';
+import 'submodules/editor.dart';
+import 'submodules/explorer.dart';
+import 'submodules/layout_modules.dart';
+import 'submodules/search.dart';
+import 'submodules/tabs.dart';
 
 const int _codeEditorSchemaVersion = 2;
 
@@ -1432,66 +1442,22 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
     }
 
     Widget buildModuleSurface(String module, Map<String, Object?> section) {
-      if (module.contains('search') || module == 'command_search') {
-        return _SearchModule(
-          controlId: widget.controlId,
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      }
-      if (module.contains('tab')) {
-        return _TabsModule(
-          controlId: widget.controlId,
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      }
-      if (module.contains('tree') ||
-          module.contains('explorer') ||
-          module == 'workspace_explorer') {
-        return _TreeModule(
-          controlId: widget.controlId,
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      }
-      if (module.contains('diagnostic') ||
-          module == 'gutter' ||
-          module == 'inline_error_view') {
-        return _DiagnosticsModule(module: module, props: section);
-      }
-      if (module == 'command_bar' ||
-          module == 'intent_panel' ||
-          module == 'intent_router' ||
-          module == 'editor_intent_router' ||
-          module == 'scope_picker' ||
-          module == 'export_panel' ||
-          module == 'query_token') {
-        return _ActionListModule(
-          module: module,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      }
-      if (module == 'diff') {
-        return _DiffModule(
-          controlId: widget.controlId,
-          props: section,
-          onEmit: _emitConfiguredEvent,
-        );
-      }
-      if (module == 'diff_narrator') {
-        return _DiffNarratorModule(props: section);
-      }
-      return _GenericModule(
+      final ctx = CodeEditorSubmoduleContext(
         controlId: widget.controlId,
         module: module,
-        props: section,
+        section: section,
         onEmit: _emitConfiguredEvent,
       );
+      return buildCodeEditorEditorModule(module, ctx) ??
+          buildCodeEditorDocumentModule(module, ctx) ??
+          buildCodeEditorTabsModule(module, ctx) ??
+          buildCodeEditorExplorerModule(module, ctx) ??
+          buildCodeEditorSearchModule(module, ctx) ??
+          buildCodeEditorDiagnosticsModule(module, ctx) ??
+          buildCodeEditorDiffModule(module, ctx) ??
+          buildCodeEditorCommandsModule(module, ctx) ??
+          buildCodeEditorLayoutModule(module, ctx) ??
+          buildCodeEditorGeneric(ctx);
     }
 
     final editorModules = <String>{
@@ -1511,17 +1477,33 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
         _sectionProps(_runtimeProps, panelModule) ??
         <String, Object?>{'events': _runtimeProps['events']};
     final panelWidget = editorModules.contains(activeModule)
-        ? _GenericModule(
-            controlId: widget.controlId,
-            module: 'workbench_editor',
-            props: <String, Object?>{
-              'active_module': activeModule,
-              'language': _runtimeProps['language'] ?? widget.language,
-              'engine': _runtimeProps['engine'] ?? widget.engine,
-              'enabled_modules': availableModules.join(', '),
-            },
-            onEmit: _emitConfiguredEvent,
-          )
+        ? buildCodeEditorEditorModule(
+                'workbench_editor',
+                CodeEditorSubmoduleContext(
+                  controlId: widget.controlId,
+                  module: 'workbench_editor',
+                  section: <String, Object?>{
+                    'active_module': activeModule,
+                    'language': _runtimeProps['language'] ?? widget.language,
+                    'engine': _runtimeProps['engine'] ?? widget.engine,
+                    'enabled_modules': availableModules.join(', '),
+                  },
+                  onEmit: _emitConfiguredEvent,
+                ),
+              ) ??
+            buildCodeEditorGeneric(
+              CodeEditorSubmoduleContext(
+                controlId: widget.controlId,
+                module: 'workbench_editor',
+                section: <String, Object?>{
+                  'active_module': activeModule,
+                  'language': _runtimeProps['language'] ?? widget.language,
+                  'engine': _runtimeProps['engine'] ?? widget.engine,
+                  'enabled_modules': availableModules.join(', '),
+                },
+                onEmit: _emitConfiguredEvent,
+              ),
+            )
         : buildModuleSurface(panelModule, panelSection);
     final workbenchHeight = (coerceDouble(_runtimeProps['height']) ?? 760)
         .clamp(360, 2200)
@@ -2128,534 +2110,9 @@ class _ModuleTabs extends StatelessWidget {
   }
 }
 
-class _SearchModule extends StatefulWidget {
-  const _SearchModule({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
 
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
 
-  @override
-  State<_SearchModule> createState() => _SearchModuleState();
-}
 
-class _SearchModuleState extends State<_SearchModule> {
-  late final TextEditingController _controller = TextEditingController(
-    text: (widget.props['query'] ?? '').toString(),
-  );
-
-  @override
-  void didUpdateWidget(covariant _SearchModule oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final next = (widget.props['query'] ?? '').toString();
-    if (_controller.text != next) {
-      _controller.text = next;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: (widget.props['placeholder'] ?? 'Search...').toString(),
-              border: const OutlineInputBorder(),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        FilledButton.tonal(
-          onPressed: () {
-            widget.onEmit('search', {
-              'module': widget.module,
-              'query': _controller.text,
-            });
-          },
-          child: const Text('Search'),
-        ),
-      ],
-    );
-  }
-}
-
-class _TabsModule extends StatelessWidget {
-  const _TabsModule({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final tabs = props['tabs'] is List
-        ? (props['tabs'] as List)
-        : const <dynamic>[];
-    if (tabs.isEmpty) {
-      return const Text('No tabs');
-    }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final tab in tabs)
-          ActionChip(
-            label: Text(
-              tab is Map
-                  ? (tab['label'] ?? tab['title'] ?? tab['id'] ?? '').toString()
-                  : tab.toString(),
-            ),
-            onPressed: () {
-              onEmit('select', {'module': module, 'tab': tab});
-            },
-          ),
-      ],
-    );
-  }
-}
-
-class _TreeModule extends StatelessWidget {
-  const _TreeModule({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final nodes = props['nodes'] is List
-        ? (props['nodes'] as List)
-        : (props['items'] is List
-              ? (props['items'] as List)
-              : const <dynamic>[]);
-    if (nodes.isEmpty) {
-      return const Text('No nodes');
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final node in nodes.take(20))
-          ListTile(
-            dense: true,
-            title: Text(
-              node is Map
-                  ? (node['label'] ?? node['name'] ?? node['id'] ?? '')
-                        .toString()
-                  : node.toString(),
-            ),
-            onTap: () => onEmit('select', {'module': module, 'node': node}),
-          ),
-      ],
-    );
-  }
-}
-
-class _DiagnosticsModule extends StatelessWidget {
-  const _DiagnosticsModule({required this.module, required this.props});
-
-  final String module;
-  final Map<String, Object?> props;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = props['items'] is List
-        ? (props['items'] as List)
-        : (props['diagnostics'] is List
-              ? (props['diagnostics'] as List)
-              : const <dynamic>[]);
-    if (items.isEmpty) {
-      return Text('No diagnostics for ${module.replaceAll('_', ' ')}');
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final item in items.take(20))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(item.toString()),
-          ),
-      ],
-    );
-  }
-}
-
-class _DiffModule extends StatelessWidget {
-  const _DiffModule({
-    required this.controlId,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final left = (props['left'] ?? props['before'] ?? '').toString();
-    final right = (props['right'] ?? props['after'] ?? '').toString();
-    final differ = DiffMatchPatch();
-    final diffs = differ.diff(left, right);
-
-    var addedChars = 0;
-    var removedChars = 0;
-    var unchangedChars = 0;
-    final changedDiffs = <Diff>[];
-    for (final diff in diffs) {
-      if (diff.operation == DIFF_INSERT) {
-        addedChars += diff.text.length;
-        if (changedDiffs.length < 24 && diff.text.trim().isNotEmpty) {
-          changedDiffs.add(diff);
-        }
-      } else if (diff.operation == DIFF_DELETE) {
-        removedChars += diff.text.length;
-        if (changedDiffs.length < 24 && diff.text.trim().isNotEmpty) {
-          changedDiffs.add(diff);
-        }
-      } else {
-        unchangedChars += diff.text.length;
-      }
-    }
-
-    String clip(String text, {int max = 180}) {
-      final compact = text.replaceAll('\r\n', '\n').replaceAll('\n', ' ');
-      if (compact.length <= max) return compact;
-      return '${compact.substring(0, max - 3)}...';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            Chip(
-              label: Text('Added $addedChars'),
-              backgroundColor: Colors.green.withValues(alpha: 0.14),
-            ),
-            Chip(
-              label: Text('Removed $removedChars'),
-              backgroundColor: Colors.red.withValues(alpha: 0.14),
-            ),
-            Chip(
-              label: Text('Unchanged $unchangedChars'),
-              backgroundColor: Colors.blueGrey.withValues(alpha: 0.12),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(maxHeight: 180),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: changedDiffs.isEmpty
-              ? const Text('No textual delta')
-              : ListView(
-                  children: [
-                    for (final diff in changedDiffs)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          '${diff.operation == DIFF_INSERT ? '+' : '-'} ${clip(diff.text)}',
-                          style: TextStyle(
-                            color: diff.operation == DIFF_INSERT
-                                ? Colors.green.shade700
-                                : Colors.red.shade700,
-                            fontFamily: 'JetBrains Mono',
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-        ),
-        const SizedBox(height: 8),
-        ExpansionTile(
-          title: const Text('Raw Before / After'),
-          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _DiffTextPane(
-                    title: 'Before',
-                    value: left,
-                    background: Colors.red.withValues(alpha: 0.06),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _DiffTextPane(
-                    title: 'After',
-                    value: right,
-                    background: Colors.green.withValues(alpha: 0.06),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () => onEmit('select', {
-            'module': 'diff',
-            'left': left,
-            'right': right,
-          }),
-          child: const Text('Use Diff'),
-        ),
-      ],
-    );
-  }
-}
-
-class _DiffTextPane extends StatelessWidget {
-  const _DiffTextPane({
-    required this.title,
-    required this.value,
-    required this.background,
-  });
-
-  final String title;
-  final String value;
-  final Color background;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 120, maxHeight: 280),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: background,
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 6),
-          Expanded(
-            child: SingleChildScrollView(
-              child: SelectableText(
-                value.isEmpty ? '-' : value,
-                style: const TextStyle(fontFamily: 'JetBrains Mono'),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DiffNarratorModule extends StatelessWidget {
-  const _DiffNarratorModule({required this.props});
-
-  final Map<String, Object?> props;
-
-  @override
-  Widget build(BuildContext context) {
-    final explicit =
-        (props['text'] ?? props['summary'] ?? props['message'] ?? '')
-            .toString()
-            .trim();
-    if (explicit.isNotEmpty) {
-      return SelectableText(explicit);
-    }
-
-    final before = (props['left'] ?? props['before'] ?? '').toString();
-    final after = (props['right'] ?? props['after'] ?? '').toString();
-    if (before.isEmpty && after.isEmpty) {
-      return const Text('No diff context available');
-    }
-    if (before == after) {
-      return const Text(
-        'No semantic change detected between compared versions.',
-      );
-    }
-
-    final differ = DiffMatchPatch();
-    final diffs = differ.diff(before, after);
-    var addedChars = 0;
-    var removedChars = 0;
-    final highlights = <String>[];
-    for (final diff in diffs) {
-      final text = diff.text.trim();
-      if (diff.operation == DIFF_INSERT) {
-        addedChars += diff.text.length;
-        if (text.isNotEmpty && highlights.length < 5) {
-          highlights.add('Added: ${_clipNarrator(text)}');
-        }
-      } else if (diff.operation == DIFF_DELETE) {
-        removedChars += diff.text.length;
-        if (text.isNotEmpty && highlights.length < 5) {
-          highlights.add('Removed: ${_clipNarrator(text)}');
-        }
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Change summary: +$addedChars / -$removedChars characters',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 8),
-        if (highlights.isEmpty)
-          const Text('No highlightable segments.')
-        else
-          for (final highlight in highlights)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(highlight),
-            ),
-      ],
-    );
-  }
-}
-
-String _clipNarrator(String text) {
-  final compact = text.replaceAll('\r\n', '\n').replaceAll('\n', ' ');
-  if (compact.length <= 100) return compact;
-  return '${compact.substring(0, 97)}...';
-}
-
-class _GenericModule extends StatelessWidget {
-  const _GenericModule({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final entries = props.entries
-        .where((e) => e.key != 'events')
-        .toList(growable: false);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (entries.isEmpty)
-            Text(
-              'No payload for ${module.replaceAll('_', ' ')}',
-              style: Theme.of(context).textTheme.bodySmall,
-            )
-          else
-            for (final entry in entries.take(24))
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('${entry.key}: ${entry.value}'),
-              ),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () =>
-                onEmit('change', {'module': module, 'payload': props}),
-            child: const Text('Emit Change'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionListModule extends StatelessWidget {
-  const _ActionListModule({
-    required this.module,
-    required this.props,
-    required this.onEmit,
-  });
-
-  final String module;
-  final Map<String, Object?> props;
-  final void Function(String event, Map<String, Object?> payload) onEmit;
-
-  @override
-  Widget build(BuildContext context) {
-    final candidates = <Object?>[
-      props['items'],
-      props['actions'],
-      props['routes'],
-      props['options'],
-      props['tokens'],
-    ];
-    List<dynamic> values = const <dynamic>[];
-    for (final candidate in candidates) {
-      if (candidate is List) {
-        values = candidate;
-        break;
-      }
-    }
-    if (values.isEmpty) {
-      final message = (props['message'] ?? props['hint'] ?? 'No options')
-          .toString();
-      return Text(message, style: Theme.of(context).textTheme.bodySmall);
-    }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final value in values.take(30))
-          ActionChip(
-            label: Text(
-              value is Map
-                  ? (value['label'] ?? value['name'] ?? value['id'] ?? '')
-                        .toString()
-                  : value.toString(),
-            ),
-            onPressed: () =>
-                onEmit('select', {'module': module, 'item': value}),
-          ),
-      ],
-    );
-  }
-}
 
 class _CodeEditorMonacoError extends StatelessWidget {
   const _CodeEditorMonacoError({required this.error, required this.onRetry});

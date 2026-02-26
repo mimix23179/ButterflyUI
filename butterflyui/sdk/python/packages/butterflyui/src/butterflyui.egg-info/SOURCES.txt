@@ -5,7 +5,6 @@ src/butterflyui/assets.py
 src/butterflyui/callbacks.py
 src/butterflyui/cli.py
 src/butterflyui/components.py
-src/butterflyui/py.typed
 src/butterflyui/schema.py
 src/butterflyui/state.py
 src/butterflyui/style_packs.py
@@ -56,6 +55,7 @@ src/butterflyui/controls/candy/submodules/components.py
 src/butterflyui/controls/candy/submodules/container.py
 src/butterflyui/controls/candy/submodules/control.py
 src/butterflyui/controls/candy/submodules/decorated_box.py
+src/butterflyui/controls/candy/submodules/dispatch.py
 src/butterflyui/controls/candy/submodules/effects.py
 src/butterflyui/controls/candy/submodules/family.py
 src/butterflyui/controls/candy/submodules/fitted_box.py
@@ -91,6 +91,7 @@ src/butterflyui/controls/code_editor/submodules/diagnostic_stream.py
 src/butterflyui/controls/code_editor/submodules/diagnostics_panel.py
 src/butterflyui/controls/code_editor/submodules/diff.py
 src/butterflyui/controls/code_editor/submodules/diff_narrator.py
+src/butterflyui/controls/code_editor/submodules/dispatch.py
 src/butterflyui/controls/code_editor/submodules/dock.py
 src/butterflyui/controls/code_editor/submodules/dock_graph.py
 src/butterflyui/controls/code_editor/submodules/dock_pane.py
@@ -154,6 +155,7 @@ src/butterflyui/controls/gallery/submodules/clear.py
 src/butterflyui/controls/gallery/submodules/components.py
 src/butterflyui/controls/gallery/submodules/control.py
 src/butterflyui/controls/gallery/submodules/deselect_all.py
+src/butterflyui/controls/gallery/submodules/dispatch.py
 src/butterflyui/controls/gallery/submodules/document.py
 src/butterflyui/controls/gallery/submodules/document_picker.py
 src/butterflyui/controls/gallery/submodules/document_renderer.py
@@ -212,6 +214,7 @@ src/butterflyui/controls/skins/submodules/components.py
 src/butterflyui/controls/skins/submodules/control.py
 src/butterflyui/controls/skins/submodules/create_skin.py
 src/butterflyui/controls/skins/submodules/delete_skin.py
+src/butterflyui/controls/skins/submodules/dispatch.py
 src/butterflyui/controls/skins/submodules/edit_skin.py
 src/butterflyui/controls/skins/submodules/editor.py
 src/butterflyui/controls/skins/submodules/effect_editor.py
@@ -258,6 +261,7 @@ src/butterflyui/controls/studio/submodules/canvas_surface.py
 src/butterflyui/controls/studio/submodules/component_palette.py
 src/butterflyui/controls/studio/submodules/components.py
 src/butterflyui/controls/studio/submodules/control.py
+src/butterflyui/controls/studio/submodules/dispatch.py
 src/butterflyui/controls/studio/submodules/family.py
 src/butterflyui/controls/studio/submodules/inspector.py
 src/butterflyui/controls/studio/submodules/layers.py
@@ -296,6 +300,7 @@ src/butterflyui/controls/terminal/submodules/capabilities.py
 src/butterflyui/controls/terminal/submodules/command_builder.py
 src/butterflyui/controls/terminal/submodules/components.py
 src/butterflyui/controls/terminal/submodules/control.py
+src/butterflyui/controls/terminal/submodules/dispatch.py
 src/butterflyui/controls/terminal/submodules/execution_lane.py
 src/butterflyui/controls/terminal/submodules/family.py
 src/butterflyui/controls/terminal/submodules/flow_gate.py

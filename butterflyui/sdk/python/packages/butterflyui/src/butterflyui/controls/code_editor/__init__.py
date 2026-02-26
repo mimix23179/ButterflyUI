@@ -1,6 +1,22 @@
 from __future__ import annotations
 
-from .components import MODULE_COMPONENTS
+from .components import (
+    CATEGORY_COMPONENTS,
+    MODULE_CATEGORY,
+    MODULE_COMPONENTS,
+    get_code_editor_category_components,
+    get_code_editor_commands_component,
+    get_code_editor_component,
+    get_code_editor_diagnostics_component,
+    get_code_editor_diff_component,
+    get_code_editor_document_component,
+    get_code_editor_editor_component,
+    get_code_editor_explorer_component,
+    get_code_editor_layout_component,
+    get_code_editor_module_category,
+    get_code_editor_search_component,
+    get_code_editor_tabs_component,
+)
 from .control import CodeEditor
 from .submodules import (
     CodeBuffer,
@@ -189,6 +205,20 @@ __all__ = [
     "REGISTRY_ROLE_ALIASES",
     "REGISTRY_MANIFEST_LISTS",
     "MODULE_COMPONENTS",
+    "CATEGORY_COMPONENTS",
+    "MODULE_CATEGORY",
+    "get_code_editor_component",
+    "get_code_editor_editor_component",
+    "get_code_editor_document_component",
+    "get_code_editor_tabs_component",
+    "get_code_editor_explorer_component",
+    "get_code_editor_search_component",
+    "get_code_editor_diagnostics_component",
+    "get_code_editor_diff_component",
+    "get_code_editor_commands_component",
+    "get_code_editor_layout_component",
+    "get_code_editor_category_components",
+    "get_code_editor_module_category",
     "CodeBuffer",
     "CodeCategoryLayer",
     "CodeDocument",

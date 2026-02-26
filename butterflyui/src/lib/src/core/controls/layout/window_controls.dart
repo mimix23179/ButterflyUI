@@ -121,6 +121,7 @@ class _WindowControlButton extends StatefulWidget {
 class _WindowControlButtonState extends State<_WindowControlButton> {
   bool _hovered = false;
   bool _pressed = false;
+  bool _actionLocked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -162,10 +163,15 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   }
 
   Future<void> _performAction() async {
+    if (_actionLocked) return;
+    _actionLocked = true;
     unawaited(ButterflyUIWindowApi.instance.performAction(widget.action));
-    if (widget.controlId.isEmpty) return;
-    widget.sendEvent(widget.controlId, 'action', <String, Object?>{
-      'window_action': widget.action,
-    });
+    if (widget.controlId.isNotEmpty) {
+      widget.sendEvent(widget.controlId, 'action', <String, Object?>{
+        'window_action': widget.action,
+      });
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    _actionLocked = false;
   }
 }

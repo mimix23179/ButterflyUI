@@ -4922,7 +4922,17 @@ BREADCRUMB_BAR_SCHEMA = _control_schema(
         "compact": BOOL_SCHEMA,
     }
 )
-STATUS_BAR_SCHEMA = INFO_BAR_SCHEMA
+STATUS_BAR_SCHEMA = _control_schema(
+    {
+        "items": {"type": "array", "items": INFO_ITEM_SCHEMA},
+        "text": STRING_SCHEMA,
+        "dense": BOOL_SCHEMA,
+        "padding": PADDING_SCHEMA,
+        "bgcolor": COLOR_SCHEMA,
+        "background": COLOR_SCHEMA,
+        "border_color": COLOR_SCHEMA,
+    }
+)
 COMMAND_PALETTE_SCHEMA = COMMAND_SEARCH_SCHEMA
 
 CONTEXT_ACTION_BAR_SCHEMA = _control_schema(
@@ -5234,7 +5244,22 @@ CONTROL_SCHEMAS = {
     "async_action_button": _control_schema({"label": STRING_SCHEMA, "text": STRING_SCHEMA, "value": ANY_SCHEMA, "variant": STRING_SCHEMA, "busy": BOOL_SCHEMA, "loading": BOOL_SCHEMA, "disabled_while_busy": BOOL_SCHEMA, "busy_label": STRING_SCHEMA}),
     "prompt_composer": PROMPT_COMPOSER_SCHEMA,
     "mention_pill": MENTION_PILL_SCHEMA,
-    "persona": _control_schema({"name": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "avatar": STRING_SCHEMA, "status": STRING_SCHEMA, "initials": STRING_SCHEMA, "dense": BOOL_SCHEMA}),
+    "persona": _control_schema({
+        "name": STRING_SCHEMA,
+        "subtitle": STRING_SCHEMA,
+        "avatar": STRING_SCHEMA,
+        "status": STRING_SCHEMA,
+        "initials": STRING_SCHEMA,
+        "layout": STRING_SCHEMA,
+        "show_avatar": BOOL_SCHEMA,
+        "avatar_color": COLOR_SCHEMA,
+        "leading": ANY_SCHEMA,
+        "title_widget": ANY_SCHEMA,
+        "subtitle_widget": ANY_SCHEMA,
+        "trailing": ANY_SCHEMA,
+        "content": ANY_SCHEMA,
+        "dense": BOOL_SCHEMA,
+    }),
     "message_divider": MESSAGE_DIVIDER_SCHEMA,
     "glow_effect": GLOW_EFFECT_SCHEMA,
     "neon_edge": NEON_EDGE_SCHEMA,
@@ -5412,7 +5437,7 @@ CONTROL_SCHEMAS = {
     "action_bar": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "dense": BOOL_SCHEMA, "spacing": NUMBER_SCHEMA, "wrap": BOOL_SCHEMA, "alignment": STRING_SCHEMA, "bgcolor": COLOR_SCHEMA}),
     "inspector_panel": _control_schema(),
     "route": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA}),
-    "route_view": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA, "child": ANY_SCHEMA}),
+    "route_view": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA, "child": ANY_SCHEMA, "children": {"type": "array", "items": ANY_SCHEMA}, "layout": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
     "route_host": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA, "child": ANY_SCHEMA}),
     "sidebar": SIDEBAR_SCHEMA,
     "app_bar": APP_BAR_SCHEMA,
@@ -5547,7 +5572,7 @@ CONTROL_SCHEMAS = {
     "visibility": _control_schema({"visible": BOOL_SCHEMA, "maintain_state": BOOL_SCHEMA, "maintain_size": BOOL_SCHEMA, "maintain_animation": BOOL_SCHEMA, "replacement": ANY_SCHEMA}),
     "cursor": _control_schema({"cursor": STRING_SCHEMA, "enabled": BOOL_SCHEMA, "opaque": BOOL_SCHEMA}),
     "nav_ring": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "policy": STRING_SCHEMA, "dense": BOOL_SCHEMA}),
-    "rail_nav": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "dense": BOOL_SCHEMA, "extended": BOOL_SCHEMA}),
+    "rail_nav": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "selected_index": INTEGER_SCHEMA, "dense": BOOL_SCHEMA, "extended": BOOL_SCHEMA}),
     "navigator": SIDEBAR_SCHEMA,
     "notice_bar": _control_schema({"text": STRING_SCHEMA, "variant": STRING_SCHEMA, "icon": STRING_SCHEMA, "dismissible": BOOL_SCHEMA, "action_label": STRING_SCHEMA, "action_id": STRING_SCHEMA}),
     "numeric_field": _control_schema({"value": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA, "step": NUMBER_SCHEMA, "decimals": INTEGER_SCHEMA, "label": STRING_SCHEMA, "placeholder": STRING_SCHEMA, "enabled": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
@@ -5722,7 +5747,25 @@ CONTROL_SCHEMAS.update(
         "tooltip": _control_schema({"message": STRING_SCHEMA, "text": STRING_SCHEMA, "placement": STRING_SCHEMA}),
         "tree_node": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "children": {"type": "array", "items": ANY_SCHEMA}}),
         "window_drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
-        "window_frame": _control_schema({"title": STRING_SCHEMA, "show_controls": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
+        "window_frame": _control_schema({
+            "title": STRING_SCHEMA,
+            "show_controls": BOOL_SCHEMA,
+            "dense": BOOL_SCHEMA,
+            "show_close": BOOL_SCHEMA,
+            "show_maximize": BOOL_SCHEMA,
+            "show_minimize": BOOL_SCHEMA,
+            "draggable": BOOL_SCHEMA,
+            "custom_frame": BOOL_SCHEMA,
+            "use_native_title_bar": BOOL_SCHEMA,
+            "native_window_actions": BOOL_SCHEMA,
+            "show_default_controls": BOOL_SCHEMA,
+            "emit_move": BOOL_SCHEMA,
+            "emit_move_events": BOOL_SCHEMA,
+            "move_event_throttle_ms": INTEGER_SCHEMA,
+            "title_leading": ANY_SCHEMA,
+            "title_content": ANY_SCHEMA,
+            "title_trailing": ANY_SCHEMA,
+        }),
         "wrap": WRAP_SCHEMA,
         "empty_state_view": CONTROL_SCHEMAS["empty_state"],
         "tree": CONTROL_SCHEMAS["tree_view"],
@@ -6391,7 +6434,7 @@ RUNTIME_PROP_HINTS.update(
             "keep_alive",
             "lightweight_transitions",
         ],
-        "route_view": ["route_id", "title", "label", "child"],
+        "route_view": ["route_id", "title", "label", "child", "children", "layout", "spacing"],
         "route_host": ["route_id", "title", "label", "child"],
         "page_scene": [
             "background_layer",

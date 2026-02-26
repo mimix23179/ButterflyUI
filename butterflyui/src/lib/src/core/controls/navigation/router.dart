@@ -16,18 +16,88 @@ class _RouteSpec {
   });
 }
 
+class _ClampedAnimation extends Animation<double>
+    with AnimationWithParentMixin<double> {
+  _ClampedAnimation(this.parent);
+
+  @override
+  final Animation<double> parent;
+
+  @override
+  double get value {
+    final raw = parent.value;
+    if (raw.isNaN) return 0.0;
+    return raw.clamp(0.0, 1.0).toDouble();
+  }
+}
+
 Widget buildRouteViewControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
 ) {
-  if (rawChildren.isNotEmpty) {
-    final first = rawChildren.first;
-    if (first is Map) return buildChild(coerceObjectMap(first));
+  final children = <Widget>[];
+  for (final raw in rawChildren) {
+    if (raw is Map) {
+      children.add(buildChild(coerceObjectMap(raw)));
+    }
   }
+
+  final propChildren = props['children'];
+  if (children.isEmpty && propChildren is List) {
+    for (final raw in propChildren) {
+      if (raw is Map) {
+        children.add(buildChild(coerceObjectMap(raw)));
+      }
+    }
+  }
+
   final rawChild = props['child'];
-  if (rawChild is Map) return buildChild(coerceObjectMap(rawChild));
-  return const SizedBox.shrink();
+  if (children.isEmpty && rawChild is Map) {
+    children.add(buildChild(coerceObjectMap(rawChild)));
+  }
+
+  if (children.isEmpty) return const SizedBox.shrink();
+  if (children.length == 1) return children.first;
+
+  final layout = (props['layout'] ?? props['child_layout'] ?? 'column')
+      .toString()
+      .toLowerCase();
+  final spacing = coerceDouble(props['spacing']) ?? 0.0;
+
+  switch (layout) {
+    case 'row':
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _withSpacing(children, spacing, Axis.horizontal),
+      );
+    case 'stack':
+      return Stack(children: children);
+    case 'wrap':
+      return Wrap(spacing: spacing, runSpacing: spacing, children: children);
+    case 'column':
+    default:
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: _withSpacing(children, spacing, Axis.vertical),
+      );
+  }
+}
+
+List<Widget> _withSpacing(List<Widget> children, double spacing, Axis axis) {
+  if (spacing <= 0 || children.length <= 1) return children;
+  final out = <Widget>[];
+  for (var index = 0; index < children.length; index += 1) {
+    if (index > 0) {
+      out.add(
+        axis == Axis.horizontal
+            ? SizedBox(width: spacing)
+            : SizedBox(height: spacing),
+      );
+    }
+    out.add(children[index]);
+  }
+  return out;
 }
 
 Widget buildRouteControl(
@@ -70,11 +140,14 @@ class _ButterflyUIRouteControl extends StatefulWidget {
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
-  State<_ButterflyUIRouteControl> createState() => _ButterflyUIRouteControlState();
+  State<_ButterflyUIRouteControl> createState() =>
+      _ButterflyUIRouteControlState();
 }
 
 class _ButterflyUIRouteControlState extends State<_ButterflyUIRouteControl> {
   String? _routeId;
+  String? _lastEmittedRouteId;
+  DateTime? _lastRouteEmitAt;
 
   @override
   void initState() {
@@ -110,7 +183,10 @@ class _ButterflyUIRouteControlState extends State<_ButterflyUIRouteControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method.trim().toLowerCase()) {
       case 'set_route_id':
       case 'set_route':
@@ -121,9 +197,7 @@ class _ButterflyUIRouteControlState extends State<_ButterflyUIRouteControl> {
         setState(() {
           _routeId = next;
         });
-        if (widget.controlId.isNotEmpty) {
-          widget.sendEvent(widget.controlId, 'route_change', {'route_id': next});
-        }
+        _emitRouteChange(next);
         return {'ok': true, 'route_id': _routeId};
       case 'get_state':
         return {'route_id': _routeId};
@@ -141,9 +215,33 @@ class _ButterflyUIRouteControlState extends State<_ButterflyUIRouteControl> {
     }
   }
 
+  void _emitRouteChange(String routeId) {
+    if (widget.controlId.isEmpty) return;
+    final now = DateTime.now();
+    final throttleMs =
+        (coerceOptionalInt(widget.props['route_event_throttle_ms']) ?? 48)
+            .clamp(0, 1000);
+    if (throttleMs > 0 &&
+        _lastEmittedRouteId == routeId &&
+        _lastRouteEmitAt != null &&
+        now.difference(_lastRouteEmitAt!).inMilliseconds < throttleMs) {
+      return;
+    }
+    _lastEmittedRouteId = routeId;
+    _lastRouteEmitAt = now;
+    widget.sendEvent(widget.controlId, 'change', {'route_id': routeId});
+    if (widget.props['emit_route_change_alias'] == true) {
+      widget.sendEvent(widget.controlId, 'route_change', {'route_id': routeId});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return buildRouteViewControl(widget.props, widget.rawChildren, widget.buildChild);
+    return buildRouteViewControl(
+      widget.props,
+      widget.rawChildren,
+      widget.buildChild,
+    );
   }
 }
 
@@ -196,6 +294,9 @@ class _ButterflyUIRouter extends StatefulWidget {
 
 class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
   String? _activeId;
+  final Set<String> _visitedRoutes = <String>{};
+  String? _lastEmittedRouteId;
+  DateTime? _lastRouteEmitAt;
 
   @override
   void initState() {
@@ -204,6 +305,9 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
     _activeId =
         _resolveExplicitActive(widget.props, routes) ??
         _resolveFallbackActive(routes);
+    if (_activeId != null && _activeId!.isNotEmpty) {
+      _visitedRoutes.add(_activeId!);
+    }
     if (widget.controlId.isNotEmpty) {
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
@@ -214,7 +318,7 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
       if (oldWidget.controlId.isNotEmpty) {
-        widget.unregisterInvokeHandler(oldWidget.controlId);
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
       }
       if (widget.controlId.isNotEmpty) {
         widget.registerInvokeHandler(widget.controlId, _handleInvoke);
@@ -225,12 +329,14 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
     if (explicit != null) {
       if (explicit != _activeId) {
         _activeId = explicit;
+        _visitedRoutes.add(explicit);
       }
     } else {
       final fallback = _resolveFallbackActive(routes);
       final exists = routes.any((route) => route.id == _activeId);
       if (!exists && fallback != _activeId) {
         _activeId = fallback;
+        _visitedRoutes.add(fallback);
       }
     }
   }
@@ -272,13 +378,33 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
 
   void _setRoute(String id) {
     if (id == _activeId) return;
-    setState(() => _activeId = id);
-    if (widget.controlId.isNotEmpty) {
-      widget.sendEvent(widget.controlId, 'change', <String, Object?>{
-        'route_id': id,
-      });
+    setState(() {
+      _activeId = id;
+      _visitedRoutes.add(id);
+    });
+    _emitRouteChange(id);
+  }
+
+  void _emitRouteChange(String routeId) {
+    if (widget.controlId.isEmpty) return;
+    final now = DateTime.now();
+    final throttleMs =
+        (coerceOptionalInt(widget.props['route_event_throttle_ms']) ?? 48)
+            .clamp(0, 1000);
+    if (throttleMs > 0 &&
+        _lastEmittedRouteId == routeId &&
+        _lastRouteEmitAt != null &&
+        now.difference(_lastRouteEmitAt!).inMilliseconds < throttleMs) {
+      return;
+    }
+    _lastEmittedRouteId = routeId;
+    _lastRouteEmitAt = now;
+    widget.sendEvent(widget.controlId, 'change', <String, Object?>{
+      'route_id': routeId,
+    });
+    if (widget.props['emit_route_change_alias'] == true) {
       widget.sendEvent(widget.controlId, 'route_change', <String, Object?>{
-        'route_id': id,
+        'route_id': routeId,
       });
     }
   }
@@ -324,9 +450,8 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
               : null),
     );
     final showTabs = widget.props['show_tabs'] == true;
-    final keepAlive =
-        widget.props['keep_alive'] == null
-        ? true
+    final keepAlive = widget.props['keep_alive'] == null
+        ? false
         : (widget.props['keep_alive'] == true);
 
     return LayoutBuilder(
@@ -346,7 +471,10 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
             index: activeIndex < 0 ? 0 : activeIndex,
             children: routes
                 .map((route) {
-                  final routeChild = route.child == null
+                  final shouldBuild =
+                      route.id == active.id ||
+                      _visitedRoutes.contains(route.id);
+                  final routeChild = !shouldBuild || route.child == null
                       ? const SizedBox.shrink()
                       : widget.buildChild(route.child!);
                   return KeyedSubtree(
@@ -425,7 +553,8 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
     required Rect? sourceRect,
     required Size viewport,
   }) {
-    final curved = CurvedAnimation(parent: animation, curve: motion.curve);
+    final bounded = _ClampedAnimation(animation);
+    final curved = CurvedAnimation(parent: bounded, curve: motion.curve);
     switch (transitionType) {
       case 'fade':
         return FadeTransition(opacity: curved, child: child);
@@ -508,14 +637,7 @@ class _ButterflyUIRouterState extends State<_ButterflyUIRouter> {
           'route_$i';
       final title =
           props['title']?.toString() ?? props['label']?.toString() ?? id;
-      Map<String, Object?>? routeChild;
-      final grandChildren = child['children'];
-      if (grandChildren is List && grandChildren.isNotEmpty) {
-        final first = grandChildren.first;
-        if (first is Map) routeChild = coerceObjectMap(first);
-      } else if (props['child'] is Map) {
-        routeChild = coerceObjectMap(props['child'] as Map);
-      }
+      Map<String, Object?>? routeChild = child;
       routes.add(_RouteSpec(id: id, title: title, child: routeChild));
     }
     return routes;

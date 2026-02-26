@@ -1,11 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
-import 'package:butterflyui_runtime/src/core/controls/display/empty_state.dart';
-import 'package:butterflyui_runtime/src/core/controls/feedback/skeleton.dart';
-import 'package:butterflyui_runtime/src/core/controls/inputs/search_bar.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+
+import 'submodules/commands.dart';
+import 'submodules/customization.dart';
+import 'submodules/gallery_submodule_context.dart';
+import 'submodules/items.dart';
+import 'submodules/layout.dart';
+import 'submodules/media.dart';
 
 const int _gallerySchemaVersion = 2;
 
@@ -744,63 +748,41 @@ class _GalleryControlState extends State<_GalleryControl> {
       );
     }
 
+    Widget? buildSection(String module) {
+      final sec = _sectionProps(_runtimeProps, module);
+      if (sec == null) return null;
+      final ctx = GallerySubmoduleContext(
+        controlId: widget.controlId,
+        module: module,
+        section: sec,
+        onEmit: (event, payload) =>
+            _emitEvent(widget.controlId, sec, widget.sendEvent, event, payload),
+        sendEvent: widget.sendEvent,
+        rawChildren: widget.rawChildren,
+        buildChild: widget.buildChild,
+        radius: _resolveRadius(sec, parent: _runtimeProps, fallback: tileRadius),
+        registerInvokeHandler: widget.registerInvokeHandler,
+        unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      );
+      return buildGalleryLayoutSection(module, ctx) ??
+          buildGalleryItemsSection(module, ctx) ??
+          buildGalleryMediaSection(module, ctx) ??
+          buildGalleryCommandsSection(module, ctx) ??
+          buildGalleryCustomizationSection(module, ctx);
+    }
+
+    void addSection(List<Widget> list, String module) {
+      final w = buildSection(module);
+      if (w != null) list.add(w);
+    }
+
     final sectionWidgets = <Widget>[];
-    final toolbar = _sectionProps(_runtimeProps, 'toolbar');
-    if (toolbar != null) {
-      sectionWidgets.add(
-        _Toolbar(
-          controlId: widget.controlId,
-          props: toolbar,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final sectionHeader = _sectionProps(_runtimeProps, 'section_header');
-    if (sectionHeader != null) {
-      sectionWidgets.add(
-        _SectionHeader(
-          controlId: widget.controlId,
-          props: sectionHeader,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final searchBar = _sectionProps(_runtimeProps, 'search_bar');
-    if (searchBar != null) {
-      sectionWidgets.add(
-        buildSearchBarControl(widget.controlId, searchBar, widget.sendEvent),
-      );
-    }
-    final filterBar = _sectionProps(_runtimeProps, 'filter_bar');
-    if (filterBar != null) {
-      sectionWidgets.add(
-        _FilterBar(
-          controlId: widget.controlId,
-          props: filterBar,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final sortBar = _sectionProps(_runtimeProps, 'sort_bar');
-    if (sortBar != null) {
-      sectionWidgets.add(
-        _SortBar(
-          controlId: widget.controlId,
-          props: sortBar,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final gridLayout = _sectionProps(_runtimeProps, 'grid_layout');
-    if (gridLayout != null) {
-      sectionWidgets.add(
-        _GridLayout(
-          props: gridLayout,
-          rawChildren: widget.rawChildren,
-          buildChild: widget.buildChild,
-        ),
-      );
-    }
+    addSection(sectionWidgets, 'toolbar');
+    addSection(sectionWidgets, 'section_header');
+    addSection(sectionWidgets, 'search_bar');
+    addSection(sectionWidgets, 'filter_bar');
+    addSection(sectionWidgets, 'sort_bar');
+    addSection(sectionWidgets, 'grid_layout');
 
     final allTiles = <Widget>[...itemTiles, ...childControls];
     if (allTiles.isNotEmpty) {
@@ -808,169 +790,29 @@ class _GalleryControlState extends State<_GalleryControl> {
         Wrap(spacing: spacing, runSpacing: runSpacing, children: allTiles),
       );
     } else {
-      final loading = _sectionProps(_runtimeProps, 'loading_skeleton');
-      final empty = _sectionProps(_runtimeProps, 'empty_state');
-      if (loading != null) {
-        sectionWidgets.add(
-          buildSkeletonLoaderControl(
-            widget.controlId,
-            loading,
-            widget.registerInvokeHandler,
-            widget.unregisterInvokeHandler,
-          ),
-        );
-      }
-      if (empty != null) {
-        sectionWidgets.add(
-          buildEmptyStateControl(widget.controlId, empty, widget.sendEvent),
-        );
-      }
-      if (loading == null && empty == null) {
-        return const SizedBox.shrink();
-      }
+      final loading = buildSection('loading_skeleton');
+      final empty = buildSection('empty_state');
+      if (loading != null) sectionWidgets.add(loading);
+      if (empty != null) sectionWidgets.add(empty);
+      if (loading == null && empty == null) return const SizedBox.shrink();
     }
 
     final footerWidgets = <Widget>[];
-    final itemTile = _sectionProps(_runtimeProps, 'item_tile');
-    if (itemTile != null) {
-      footerWidgets.add(
-        _ItemTile(
-          controlId: widget.controlId,
-          props: itemTile,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final itemActions = _sectionProps(_runtimeProps, 'item_actions');
-    if (itemActions != null) {
-      footerWidgets.add(
-        _ItemActions(
-          controlId: widget.controlId,
-          props: itemActions,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final itemBadge = _sectionProps(_runtimeProps, 'item_badge');
-    if (itemBadge != null) {
-      footerWidgets.add(_ItemBadge(props: itemBadge));
-    }
-    final itemMeta = _sectionProps(_runtimeProps, 'item_meta_row');
-    if (itemMeta != null) {
-      footerWidgets.add(_ItemMetaRow(props: itemMeta));
-    }
-    final itemPreview = _sectionProps(_runtimeProps, 'item_preview');
-    if (itemPreview != null) {
-      footerWidgets.add(
-        _ItemPreview(
-          props: itemPreview,
-          rawChildren: widget.rawChildren,
-          buildChild: widget.buildChild,
-          radius: _resolveRadius(
-            itemPreview,
-            parent: _runtimeProps,
-            fallback: 10,
-          ),
-        ),
-      );
-    }
-    final itemSelectable = _sectionProps(_runtimeProps, 'item_selectable');
-    if (itemSelectable != null) {
-      footerWidgets.add(
-        _ItemSelectable(
-          controlId: widget.controlId,
-          props: itemSelectable,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final itemDrag = _sectionProps(_runtimeProps, 'item_drag_handle');
-    if (itemDrag != null) {
-      footerWidgets.add(
-        _ItemHandle(
-          controlType: 'item_drag_handle',
-          controlId: widget.controlId,
-          props: itemDrag,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final itemDrop = _sectionProps(_runtimeProps, 'item_drop_target');
-    if (itemDrop != null) {
-      footerWidgets.add(
-        _ItemDropTarget(
-          controlId: widget.controlId,
-          props: itemDrop,
-          radius: _resolveRadius(itemDrop, parent: _runtimeProps, fallback: 8),
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final itemReorder = _sectionProps(_runtimeProps, 'item_reorder_handle');
-    if (itemReorder != null) {
-      footerWidgets.add(
-        _ItemHandle(
-          controlType: 'item_reorder_handle',
-          controlId: widget.controlId,
-          props: itemReorder,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final selectCheckbox = _sectionProps(
-      _runtimeProps,
+    for (final module in const <String>[
+      'item_tile',
+      'item_actions',
+      'item_badge',
+      'item_meta_row',
+      'item_preview',
+      'item_selectable',
+      'item_drag_handle',
+      'item_drop_target',
+      'item_reorder_handle',
       'item_selection_checkbox',
-    );
-    if (selectCheckbox != null) {
-      footerWidgets.add(
-        _SelectionCheckbox(
-          controlId: widget.controlId,
-          props: selectCheckbox,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final selectRadio = _sectionProps(_runtimeProps, 'item_selection_radio');
-    if (selectRadio != null) {
-      footerWidgets.add(
-        _SelectionRadio(
-          controlId: widget.controlId,
-          props: selectRadio,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final selectSwitch = _sectionProps(_runtimeProps, 'item_selection_switch');
-    if (selectSwitch != null) {
-      footerWidgets.add(
-        _SelectionSwitch(
-          controlId: widget.controlId,
-          props: selectSwitch,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final pagination = _sectionProps(_runtimeProps, 'pagination');
-    if (pagination != null) {
-      footerWidgets.add(
-        _Pagination(
-          controlId: widget.controlId,
-          props: pagination,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    final fontPicker = _sectionProps(_runtimeProps, 'font_picker');
-    if (fontPicker != null) {
-      footerWidgets.add(
-        _FontPicker(
-          controlId: widget.controlId,
-          props: fontPicker,
-          sendEvent: widget.sendEvent,
-        ),
-      );
-    }
-    for (final key in const <String>[
+      'item_selection_radio',
+      'item_selection_switch',
+      'pagination',
+      'font_picker',
       'fonts',
       'audio',
       'video',
@@ -978,57 +820,15 @@ class _GalleryControlState extends State<_GalleryControl> {
       'document',
       'presets',
       'skins',
-    ]) {
-      final section = _sectionProps(_runtimeProps, key);
-      if (section != null) {
-        footerWidgets.add(
-          _CollectionModule(
-            controlType: key,
-            controlId: widget.controlId,
-            props: section,
-            sendEvent: widget.sendEvent,
-          ),
-        );
-      }
-    }
-    for (final key in const <String>[
       'font_renderer',
       'audio_renderer',
       'video_renderer',
       'image_renderer',
       'document_renderer',
-    ]) {
-      final section = _sectionProps(_runtimeProps, key);
-      if (section != null) {
-        footerWidgets.add(
-          _RendererModule(
-            controlType: key,
-            controlId: widget.controlId,
-            props: section,
-            sendEvent: widget.sendEvent,
-          ),
-        );
-      }
-    }
-    for (final key in const <String>[
       'audio_picker',
       'video_picker',
       'image_picker',
       'document_picker',
-    ]) {
-      final section = _sectionProps(_runtimeProps, key);
-      if (section != null) {
-        footerWidgets.add(
-          _AssetPicker(
-            controlType: key,
-            controlId: widget.controlId,
-            props: section,
-            sendEvent: widget.sendEvent,
-          ),
-        );
-      }
-    }
-    for (final key in const <String>[
       'apply',
       'clear',
       'select_all',
@@ -1037,17 +837,7 @@ class _GalleryControlState extends State<_GalleryControl> {
       'apply_image',
       'set_as_wallpaper',
     ]) {
-      final section = _sectionProps(_runtimeProps, key);
-      if (section != null) {
-        footerWidgets.add(
-          _ActionButton(
-            controlType: key,
-            controlId: widget.controlId,
-            props: section,
-            sendEvent: widget.sendEvent,
-          ),
-        );
-      }
+      addSection(footerWidgets, module);
     }
 
     if (footerWidgets.isNotEmpty) {
@@ -1424,753 +1214,4 @@ List<Map<String, Object?>> _coerceItems(Object? value) {
 
 String _itemId(Map<String, Object?> item) {
   return (item['id'] ?? item['value'] ?? item['title'] ?? '').toString();
-}
-
-class _Toolbar extends StatelessWidget {
-  const _Toolbar({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final title = (props['title'] ?? 'Gallery').toString();
-    final subtitle = (props['subtitle'] ?? '').toString();
-    final actions = props['actions'] is List
-        ? (props['actions'] as List)
-        : const <dynamic>[];
-
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              if (subtitle.isNotEmpty)
-                Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
-        for (final action in actions)
-          IconButton(
-            onPressed: () {
-              if (action is Map) {
-                final map = coerceObjectMap(action);
-                _emitEvent(controlId, props, sendEvent, 'action', {
-                  'id': (map['id'] ?? map['value'] ?? map['label'] ?? '')
-                      .toString(),
-                  'action': map,
-                });
-              }
-            },
-            icon: const Icon(Icons.more_horiz),
-          ),
-      ],
-    );
-  }
-}
-
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final filters = props['filters'] is List
-        ? (props['filters'] as List)
-        : const <dynamic>[];
-    final selected = <String>{};
-    final values = props['values'];
-    if (values is List) {
-      for (final value in values) {
-        final s = value?.toString();
-        if (s != null && s.isNotEmpty) selected.add(s);
-      }
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final filter in filters)
-          FilterChip(
-            selected: selected.contains(filter?.toString()),
-            label: Text(filter?.toString() ?? ''),
-            onSelected: (next) {
-              _emitEvent(controlId, props, sendEvent, 'filter_change', {
-                'filter': filter?.toString(),
-                'selected': next,
-              });
-            },
-          ),
-      ],
-    );
-  }
-}
-
-class _SortBar extends StatelessWidget {
-  const _SortBar({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final options = props['options'] is List
-        ? (props['options'] as List)
-              .map((e) => e?.toString() ?? '')
-              .where((e) => e.isNotEmpty)
-              .toList(growable: false)
-        : const <String>[];
-    final selected =
-        (props['value'] ??
-                props['selected'] ??
-                (options.isEmpty ? '' : options.first))
-            .toString();
-
-    if (options.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return DropdownButton<String>(
-      value: options.contains(selected) ? selected : options.first,
-      items: options
-          .map((value) => DropdownMenuItem(value: value, child: Text(value)))
-          .toList(growable: false),
-      onChanged: (value) {
-        if (value == null) return;
-        _emitEvent(controlId, props, sendEvent, 'sort_change', {
-          'value': value,
-        });
-      },
-    );
-  }
-}
-
-class _GridLayout extends StatelessWidget {
-  const _GridLayout({
-    required this.props,
-    required this.rawChildren,
-    required this.buildChild,
-  });
-
-  final Map<String, Object?> props;
-  final List<dynamic> rawChildren;
-  final Widget Function(Map<String, Object?> child) buildChild;
-
-  @override
-  Widget build(BuildContext context) {
-    final columns = (coerceOptionalInt(props['columns']) ?? 3).clamp(1, 8);
-    final spacing = coerceDouble(props['spacing']) ?? 10;
-    final childMaps = rawChildren
-        .whereType<Map>()
-        .map((e) => coerceObjectMap(e))
-        .toList(growable: false);
-
-    return GridView.count(
-      crossAxisCount: columns,
-      crossAxisSpacing: spacing,
-      mainAxisSpacing: spacing,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: childMaps.isEmpty
-          ? const <Widget>[]
-          : childMaps.map(buildChild).toList(growable: false),
-    );
-  }
-}
-
-class _ItemTile extends StatelessWidget {
-  const _ItemTile({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final title = (props['title'] ?? '').toString();
-    final subtitle = (props['subtitle'] ?? '').toString();
-    final id = (props['id'] ?? props['value'] ?? title).toString();
-    return ListTile(
-      title: Text(title),
-      subtitle: subtitle.isEmpty ? null : Text(subtitle),
-      onTap: () =>
-          _emitEvent(controlId, props, sendEvent, 'select', {'id': id}),
-    );
-  }
-}
-
-class _ItemActions extends StatelessWidget {
-  const _ItemActions({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = props['actions'] is List
-        ? (props['actions'] as List)
-        : const <dynamic>[];
-    return Wrap(
-      spacing: 6,
-      children: [
-        for (final action in actions)
-          FilledButton.tonal(
-            onPressed: () => _emitEvent(controlId, props, sendEvent, 'action', {
-              'action': action,
-            }),
-            child: Text(
-              action is Map
-                  ? (action['label'] ?? action['id'] ?? 'Action').toString()
-                  : action?.toString() ?? 'Action',
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _ItemBadge extends StatelessWidget {
-  const _ItemBadge({required this.props});
-
-  final Map<String, Object?> props;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = (props['text'] ?? props['label'] ?? '').toString();
-    return Chip(label: Text(text));
-  }
-}
-
-class _ItemMetaRow extends StatelessWidget {
-  const _ItemMetaRow({required this.props});
-
-  final Map<String, Object?> props;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = props['items'] is List
-        ? (props['items'] as List)
-        : const <dynamic>[];
-    return Wrap(
-      spacing: 10,
-      children: [
-        for (final item in items)
-          Text(
-            item?.toString() ?? '',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-      ],
-    );
-  }
-}
-
-class _ItemPreview extends StatelessWidget {
-  const _ItemPreview({
-    required this.props,
-    required this.rawChildren,
-    required this.buildChild,
-    required this.radius,
-  });
-
-  final Map<String, Object?> props;
-  final List<dynamic> rawChildren;
-  final Widget Function(Map<String, Object?> child) buildChild;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    Map<String, Object?>? childMap;
-    for (final raw in rawChildren) {
-      if (raw is Map) {
-        childMap = coerceObjectMap(raw);
-        break;
-      }
-    }
-    if (childMap != null) {
-      return buildChild(childMap);
-    }
-    final label = (props['label'] ?? props['title'] ?? 'Preview').toString();
-    return Container(
-      height: coerceDouble(props['height']) ?? 120,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Text(label),
-    );
-  }
-}
-
-class _ItemSelectable extends StatelessWidget {
-  const _ItemSelectable({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = props['selected'] == true;
-    return CheckboxListTile(
-      value: selected,
-      title: Text(
-        (props['label'] ?? props['title'] ?? 'Selectable').toString(),
-      ),
-      onChanged: (value) => _emitEvent(
-        controlId,
-        props,
-        sendEvent,
-        'select_change',
-        {'selected': value == true},
-      ),
-    );
-  }
-}
-
-class _Pagination extends StatelessWidget {
-  const _Pagination({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final page = (coerceOptionalInt(props['page']) ?? 1).clamp(1, 1000000);
-    final pageCount =
-        (coerceOptionalInt(props['page_count'] ?? props['pages']) ?? 1).clamp(
-          1,
-          1000000,
-        );
-    final enabled = props['enabled'] == null
-        ? true
-        : (props['enabled'] == true);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: enabled && page > 1
-              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {
-                  'page': page - 1,
-                })
-              : null,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        Text('$page / $pageCount'),
-        IconButton(
-          onPressed: enabled && page < pageCount
-              ? () => _emitEvent(controlId, props, sendEvent, 'page_change', {
-                  'page': page + 1,
-                })
-              : null,
-          icon: const Icon(Icons.chevron_right),
-        ),
-      ],
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final title = (props['title'] ?? '').toString();
-    final subtitle = (props['subtitle'] ?? '').toString();
-    final count = (props['count'] ?? '').toString();
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleSmall),
-              if (subtitle.isNotEmpty)
-                Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
-        if (count.isNotEmpty) Text(count),
-        IconButton(
-          onPressed: () => _emitEvent(
-            controlId,
-            props,
-            sendEvent,
-            'section_action',
-            {'id': props['id']},
-          ),
-          icon: const Icon(Icons.more_horiz),
-        ),
-      ],
-    );
-  }
-}
-
-class _FontPicker extends StatelessWidget {
-  const _FontPicker({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final options = props['options'] is List
-        ? (props['options'] as List)
-              .map((e) => e?.toString() ?? '')
-              .where((e) => e.isNotEmpty)
-              .toList(growable: false)
-        : const <String>['Inter', 'Roboto', 'JetBrains Mono'];
-    final value = (props['value'] ?? options.first).toString();
-    return DropdownButton<String>(
-      value: options.contains(value) ? value : options.first,
-      items: options
-          .map((font) => DropdownMenuItem(value: font, child: Text(font)))
-          .toList(growable: false),
-      onChanged: (next) {
-        if (next == null) return;
-        _emitEvent(controlId, props, sendEvent, 'font_change', {'font': next});
-      },
-    );
-  }
-}
-
-class _AssetPicker extends StatelessWidget {
-  const _AssetPicker({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = (props['label'] ?? controlType.replaceAll('_', ' '))
-        .toString();
-    return OutlinedButton.icon(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, 'pick', {
-        'kind': controlType,
-      }),
-      icon: const Icon(Icons.attach_file),
-      label: Text(label),
-    );
-  }
-}
-
-class _ItemHandle extends StatelessWidget {
-  const _ItemHandle({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, 'drag_handle', {
-        'kind': controlType,
-      }),
-      icon: const Icon(Icons.drag_indicator),
-    );
-  }
-}
-
-class _ItemDropTarget extends StatelessWidget {
-  const _ItemDropTarget({
-    required this.controlId,
-    required this.props,
-    required this.radius,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final double radius;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: coerceDouble(props['height']) ?? 36,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: TextButton(
-        onPressed: () =>
-            _emitEvent(controlId, props, sendEvent, 'drop_target', {}),
-        child: Text((props['label'] ?? 'Drop Target').toString()),
-      ),
-    );
-  }
-}
-
-class _SelectionCheckbox extends StatelessWidget {
-  const _SelectionCheckbox({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = props['selected'] == true;
-    return Checkbox(
-      value: selected,
-      onChanged: (value) => _emitEvent(
-        controlId,
-        props,
-        sendEvent,
-        'select_change',
-        {'selected': value == true},
-      ),
-    );
-  }
-}
-
-class _SelectionRadio extends StatelessWidget {
-  const _SelectionRadio({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = props['selected'] == true;
-    return Radio<bool>(
-      value: true,
-      groupValue: selected,
-      onChanged: (value) => _emitEvent(
-        controlId,
-        props,
-        sendEvent,
-        'select_change',
-        {'selected': value == true},
-      ),
-    );
-  }
-}
-
-class _SelectionSwitch extends StatelessWidget {
-  const _SelectionSwitch({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = props['selected'] == true;
-    return Switch(
-      value: selected,
-      onChanged: (value) => _emitEvent(
-        controlId,
-        props,
-        sendEvent,
-        'select_change',
-        {'selected': value},
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = (props['label'] ?? controlType.replaceAll('_', ' '))
-        .toString();
-    return FilledButton.tonal(
-      onPressed: () => _emitEvent(controlId, props, sendEvent, controlType, {
-        'value': props['value'],
-        'payload': props['payload'],
-      }),
-      child: Text(label),
-    );
-  }
-}
-
-class _CollectionModule extends StatelessWidget {
-  const _CollectionModule({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = props['items'] is List
-        ? (props['items'] as List)
-        : const <dynamic>[];
-    if (items.isEmpty) {
-      return Text(
-        '${controlType.replaceAll('_', ' ')}: empty',
-        style: Theme.of(context).textTheme.bodySmall,
-      );
-    }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final item in items.take(24))
-          ActionChip(
-            label: Text(
-              item is Map
-                  ? (item['label'] ?? item['name'] ?? item['id'] ?? '')
-                        .toString()
-                  : item.toString(),
-            ),
-            onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {
-              'module': controlType,
-              'item': item,
-            }),
-          ),
-      ],
-    );
-  }
-}
-
-class _RendererModule extends StatelessWidget {
-  const _RendererModule({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final label =
-        (props['label'] ?? props['title'] ?? controlType.replaceAll('_', ' '))
-            .toString();
-    final value = (props['text'] ?? props['src'] ?? props['font'] ?? '')
-        .toString();
-    return Container(
-      width: 220,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(_resolveRadius(props, fallback: 8)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 6),
-          Text(
-            value.isEmpty ? '(no value)' : value,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () => _emitEvent(controlId, props, sendEvent, 'select', {
-              'module': controlType,
-              'value': value,
-            }),
-            child: const Text('Use'),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -7,6 +7,11 @@ import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
+import 'submodules/terminal_submodule_context.dart';
+import 'submodules/views.dart';
+import 'submodules/inputs.dart';
+import 'submodules/providers.dart';
+
 const int _terminalSchemaVersion = 2;
 
 const List<String> _terminalModuleOrder = [
@@ -526,7 +531,7 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
                   children: [
                     Expanded(child: _buildOutput(fg, border)),
                     const SizedBox(width: 8),
-                    SizedBox(width: 300, child: _buildModulePanel(fg, section)),
+                    SizedBox(width: 300, child: _buildModulePanel(fg, activeModule, section)),
                   ],
                 ),
               ),
@@ -734,16 +739,40 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
     );
   }
 
-  Widget _buildModulePanel(Color fg, Map<String, Object?> section) {
-    final sessions = _extractSessions(_runtimeProps);
-    final activeSession = sessions.firstWhere(
-      (value) => value.id == _activeSessionId,
-      orElse: () => sessions.first,
+  TerminalSubmoduleContext _makeCtx(
+    Color fg,
+    String module,
+    Map<String, Object?> section,
+  ) {
+    final bg =
+        coerceColor(_runtimeProps['bgcolor'] ?? _runtimeProps['background']) ??
+        const Color(0xff070d0a);
+    return TerminalSubmoduleContext(
+      controlId: widget.controlId,
+      module: module,
+      section: section,
+      runtimeProps: _runtimeProps,
+      activeSessionId: _activeSessionId,
+      fg: fg,
+      bg: bg,
+      sendEvent: widget.sendEvent,
+      rawChildren: widget.rawChildren,
+      buildChild: widget.buildChild,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
     );
-    final entries = section.entries
-        .where((entry) => entry.key != 'events')
-        .toList(growable: false);
-    final listItems = _extractList(section);
+  }
+
+  Widget _buildModulePanel(
+    Color fg,
+    String module,
+    Map<String, Object?> section,
+  ) {
+    final ctx = _makeCtx(fg, module, section);
+    final inner = buildTerminalViewsSection(ctx) ??
+        buildTerminalInputsSection(ctx) ??
+        buildTerminalProvidersSection(ctx) ??
+        _fallbackModulePanel(ctx);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -751,90 +780,48 @@ class _ButterflyUITerminalState extends State<ButterflyUITerminal> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: fg.withValues(alpha: 0.16)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Session: ${activeSession.label}',
-            style: TextStyle(color: fg, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          if (entries.isEmpty && listItems.isEmpty)
-            Text(
-              'No module payload.',
-              style: TextStyle(color: fg.withValues(alpha: 0.7)),
-            )
-          else
-            Expanded(
-              child: ListView(
-                children: [
-                  for (final entry in entries.take(24))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        '${entry.key}: ${entry.value}',
-                        style: TextStyle(
-                          color: fg.withValues(alpha: 0.9),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  for (final item in listItems.take(40))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        _labelFromItem(item),
-                        style: TextStyle(
-                          color: fg.withValues(alpha: 0.85),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-        ],
-      ),
+      child: inner,
     );
   }
 
-  List<_TerminalSession> _extractSessions(Map<String, Object?> props) {
-    final out = <_TerminalSession>[];
-    final tabs = _sectionProps(props, 'tabs');
-    final session = _sectionProps(props, 'session');
-    final candidates = <Object?>[
-      tabs?['items'],
-      tabs?['tabs'],
-      props['tabs'],
-      props['sessions'],
-      session?['items'],
-    ];
-    for (final candidate in candidates) {
-      if (candidate is! List) continue;
-      for (final item in candidate) {
-        if (item is Map) {
-          final map = coerceObjectMap(item);
-          final id = (map['id'] ?? map['session_id'] ?? map['key'] ?? '')
-              .toString()
-              .trim();
-          if (id.isEmpty) continue;
-          final label = (map['label'] ?? map['title'] ?? map['name'] ?? id)
-              .toString();
-          out.add(_TerminalSession(id: id, label: label));
-        } else if (item != null) {
-          final id = item.toString().trim();
-          if (id.isNotEmpty) out.add(_TerminalSession(id: id, label: id));
-        }
-      }
-      if (out.isNotEmpty) break;
+  Widget _fallbackModulePanel(TerminalSubmoduleContext ctx) {
+    final fg = ctx.fg;
+    final entries = ctx.section.entries
+        .where((entry) => entry.key != 'events')
+        .toList(growable: false);
+    final listItems = _extractList(ctx.section);
+    if (entries.isEmpty && listItems.isEmpty) {
+      return Text(
+        'No module payload.',
+        style: TextStyle(color: fg.withValues(alpha: 0.7)),
+      );
     }
-    if (out.isEmpty) {
-      out.add(const _TerminalSession(id: 'default', label: 'Session'));
-    }
-    if (!out.any((entry) => entry.id == _activeSessionId)) {
-      _activeSessionId = out.first.id;
-    }
-    return out;
+    return ListView(
+      children: [
+        for (final entry in entries.take(24))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              '${entry.key}: ${entry.value}',
+              style: TextStyle(
+                color: fg.withValues(alpha: 0.9),
+                fontSize: 12,
+              ),
+            ),
+          ),
+        for (final item in listItems.take(40))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              _labelFromItem(item),
+              style: TextStyle(
+                color: fg.withValues(alpha: 0.85),
+                fontSize: 12,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   List<dynamic> _extractList(Map<String, Object?> section) {
@@ -1580,13 +1567,6 @@ class _TerminalLine {
       'timestamp': timestamp.toIso8601String(),
     };
   }
-}
-
-class _TerminalSession {
-  final String id;
-  final String label;
-
-  const _TerminalSession({required this.id, required this.label});
 }
 
 Map<String, Object?> _normalizeProps(Map<String, Object?> input) {

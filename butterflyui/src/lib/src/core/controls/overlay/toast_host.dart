@@ -45,15 +45,21 @@ class _ToastHostControlState extends State<_ToastHostControl> {
   @override
   void initState() {
     super.initState();
-    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
   }
 
   @override
   void didUpdateWidget(covariant _ToastHostControl oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
-      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
-      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
     }
     if (oldWidget.props != widget.props) {
       _items = _coerceItems(widget.props['items'] ?? widget.props['toasts']);
@@ -62,7 +68,9 @@ class _ToastHostControlState extends State<_ToastHostControl> {
 
   @override
   void dispose() {
-    widget.unregisterInvokeHandler(widget.controlId);
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
     super.dispose();
   }
 
@@ -111,6 +119,16 @@ class _ToastHostControlState extends State<_ToastHostControl> {
         return null;
       case 'get_items':
         return List<Map<String, Object?>>.from(_items, growable: false);
+      case 'emit':
+        {
+          if (widget.controlId.isEmpty) return null;
+          final event = (args['event'] ?? 'change').toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          widget.sendEvent(widget.controlId, event, payload);
+          return null;
+        }
       default:
         throw UnsupportedError('Unknown toast_host method: $method');
     }

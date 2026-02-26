@@ -1,6 +1,18 @@
 from __future__ import annotations
 
-from .components import MODULE_COMPONENTS
+from .components import (
+    CATEGORY_COMPONENTS,
+    MODULE_CATEGORY,
+    MODULE_COMPONENTS,
+    get_gallery_category_components,
+    get_gallery_commands_component,
+    get_gallery_component,
+    get_gallery_customization_component,
+    get_gallery_items_component,
+    get_gallery_layout_component,
+    get_gallery_media_component,
+    get_gallery_module_category,
+)
 from .control import Gallery
 from .submodules import (
     Toolbar,
@@ -158,6 +170,16 @@ __all__ = [
     "REGISTRY_ROLE_ALIASES",
     "REGISTRY_MANIFEST_LISTS",
     "MODULE_COMPONENTS",
+    "CATEGORY_COMPONENTS",
+    "MODULE_CATEGORY",
+    "get_gallery_component",
+    "get_gallery_layout_component",
+    "get_gallery_items_component",
+    "get_gallery_media_component",
+    "get_gallery_commands_component",
+    "get_gallery_customization_component",
+    "get_gallery_category_components",
+    "get_gallery_module_category",
     "Toolbar",
     "FilterBar",
     "GridLayout",

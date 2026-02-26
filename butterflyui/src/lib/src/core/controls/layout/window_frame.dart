@@ -103,6 +103,7 @@ class _ButterflyUIWindowFrame extends StatefulWidget {
 class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
   bool _customFrame = true;
   bool _nativeActions = true;
+  DateTime? _lastMoveEventAt;
 
   @override
   void initState() {
@@ -157,9 +158,14 @@ class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
         widget.props['acrylic_effect'] == true || widget.props['glass'] == true;
     final acrylicOpacity =
         coerceDouble(widget.props['acrylic_opacity']) ?? 0.88;
+    final blurSigma = coerceDouble(widget.props['blur']) ?? 0.0;
     final showMinimize = widget.props['show_minimize'] != false;
     final showMaximize = widget.props['show_maximize'] != false;
     final showClose = widget.props['show_close'] != false;
+    final emitMoveEvents =
+      widget.props['emit_move_events'] == true || widget.props['emit_move'] == true;
+    final moveEventThrottleMs =
+      (coerceOptionalInt(widget.props['move_event_throttle_ms']) ?? 48).clamp(0, 1000);
     final showDefaultControls = widget.props['show_default_controls'] == true
         ? true
         : (widget.props['show_default_controls'] == false
@@ -195,7 +201,16 @@ class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
             trailing: widget.titleTrailing,
             showDefaultControls: showDefaultControls,
             onMove: (delta) {
-              if (widget.controlId.isEmpty) return;
+              if (!emitMoveEvents || widget.controlId.isEmpty) return;
+              if (moveEventThrottleMs > 0) {
+                final now = DateTime.now();
+                final last = _lastMoveEventAt;
+                if (last != null &&
+                    now.difference(last).inMilliseconds < moveEventThrottleMs) {
+                  return;
+                }
+                _lastMoveEventAt = now;
+              }
               widget.sendEvent(widget.controlId, 'move', <String, Object?>{
                 'dx': delta.dx,
                 'dy': delta.dy,
@@ -236,13 +251,13 @@ class _ButterflyUIWindowFrameState extends State<_ButterflyUIWindowFrame> {
       ),
     );
 
-    if (glass) {
+    if (glass && blurSigma > 0) {
       panel = ClipRRect(
         borderRadius: BorderRadius.circular(radius),
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: coerceDouble(widget.props['blur']) ?? 20.0,
-            sigmaY: coerceDouble(widget.props['blur']) ?? 20.0,
+            sigmaX: blurSigma,
+            sigmaY: blurSigma,
           ),
           child: panel,
         ),
@@ -377,7 +392,7 @@ class _WindowTitleBar extends StatelessWidget {
   }
 }
 
-class _WindowDragRegion extends StatelessWidget {
+class _WindowDragRegion extends StatefulWidget {
   final bool draggable;
   final ValueChanged<Offset> onMove;
   final VoidCallback onDragStart;
@@ -393,14 +408,31 @@ class _WindowDragRegion extends StatelessWidget {
   });
 
   @override
+  State<_WindowDragRegion> createState() => _WindowDragRegionState();
+}
+
+class _WindowDragRegionState extends State<_WindowDragRegion> {
+  bool _dragStarted = false;
+
+  void _resetDrag() {
+    _dragStarted = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!draggable) return child;
+    if (!widget.draggable) return widget.child;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onPanDown: (_) => onDragStart(),
-      onPanUpdate: (details) => onMove(details.delta),
-      onDoubleTap: () => onAction('toggle_maximize'),
-      child: Align(alignment: Alignment.centerLeft, child: child),
+      onPanStart: (_) {
+        if (_dragStarted) return;
+        _dragStarted = true;
+        widget.onDragStart();
+      },
+      onPanUpdate: (details) => widget.onMove(details.delta),
+      onPanEnd: (_) => _resetDrag(),
+      onPanCancel: _resetDrag,
+      onDoubleTap: () => widget.onAction('toggle_maximize'),
+      child: Align(alignment: Alignment.centerLeft, child: widget.child),
     );
   }
 }

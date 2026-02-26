@@ -2,7 +2,23 @@ from __future__ import annotations
 
 from .components import MODULE_COMPONENTS
 from .components import __all__ as _component_all
-from .components import *
+from .components import *  # noqa: F401, F403
+from .dispatch import (
+    CATEGORY_COMPONENTS,
+    MODULE_CATEGORY,
+    get_code_editor_category_components,
+    get_code_editor_commands_component,
+    get_code_editor_component,
+    get_code_editor_diagnostics_component,
+    get_code_editor_diff_component,
+    get_code_editor_document_component,
+    get_code_editor_editor_component,
+    get_code_editor_explorer_component,
+    get_code_editor_layout_component,
+    get_code_editor_module_category,
+    get_code_editor_search_component,
+    get_code_editor_tabs_component,
+)
 from .schema import CONTROL_PREFIX, MODULE_CANONICAL, MODULE_CLASS_NAMES, MODULE_TOKENS, SUPPORTED_EVENTS
 
 __all__ = [
@@ -12,5 +28,19 @@ __all__ = [
     "SUPPORTED_EVENTS",
     "MODULE_CLASS_NAMES",
     "MODULE_COMPONENTS",
+    "CATEGORY_COMPONENTS",
+    "MODULE_CATEGORY",
+    "get_code_editor_component",
+    "get_code_editor_editor_component",
+    "get_code_editor_document_component",
+    "get_code_editor_tabs_component",
+    "get_code_editor_explorer_component",
+    "get_code_editor_search_component",
+    "get_code_editor_diagnostics_component",
+    "get_code_editor_diff_component",
+    "get_code_editor_commands_component",
+    "get_code_editor_layout_component",
+    "get_code_editor_category_components",
+    "get_code_editor_module_category",
     *_component_all,
 ]

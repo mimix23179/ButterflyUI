@@ -441,6 +441,14 @@ class Persona(Component):
         avatar: str | None = None,
         status: str | None = None,
         initials: str | None = None,
+        layout: str | None = None,
+        show_avatar: bool | None = None,
+        avatar_color: Any | None = None,
+        leading: Any | None = None,
+        title_widget: Any | None = None,
+        subtitle_widget: Any | None = None,
+        trailing: Any | None = None,
+        content: Any | None = None,
         dense: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
@@ -455,11 +463,25 @@ class Persona(Component):
             avatar=avatar,
             status=status,
             initials=initials,
+            layout=layout,
+            show_avatar=show_avatar,
+            avatar_color=avatar_color,
+            leading=leading,
+            title_widget=title_widget,
+            subtitle_widget=subtitle_widget,
+            trailing=trailing,
+            content=content,
             dense=dense,
             events=events,
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, 'set_props', props)
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, 'get_state', {})
 
     def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

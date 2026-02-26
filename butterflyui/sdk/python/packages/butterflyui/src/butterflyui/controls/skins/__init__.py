@@ -1,6 +1,17 @@
 from __future__ import annotations
 
-from .components import MODULE_COMPONENTS
+from .components import (
+    CATEGORY_COMPONENTS,
+    MODULE_CATEGORY,
+    MODULE_COMPONENTS,
+    get_skins_category_components,
+    get_skins_commands_component,
+    get_skins_component,
+    get_skins_core_component,
+    get_skins_editors_component,
+    get_skins_module_category,
+    get_skins_tokens_component,
+)
 from .control import Skins
 from .submodules import (
     Selector,
@@ -138,6 +149,15 @@ __all__ = [
     "DEFAULT_NAMES",
     "DEFAULT_PRESETS",
     "MODULE_COMPONENTS",
+    "CATEGORY_COMPONENTS",
+    "MODULE_CATEGORY",
+    "get_skins_component",
+    "get_skins_core_component",
+    "get_skins_tokens_component",
+    "get_skins_editors_component",
+    "get_skins_commands_component",
+    "get_skins_category_components",
+    "get_skins_module_category",
     "Selector",
     "Preset",
     "Editor",

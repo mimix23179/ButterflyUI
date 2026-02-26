@@ -121,6 +121,62 @@ class Router(Component):
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
 
+    def to_json(self) -> dict[str, Any]:
+        payload = super().to_json()
+        props = payload.get("props")
+        if not isinstance(props, dict):
+            return payload
+
+        keep_alive = props.get("keep_alive") is True
+        if keep_alive:
+            return payload
+
+        children = payload.get("children")
+        if not isinstance(children, list) or not children:
+            return payload
+
+        active = props.get("active")
+        active_id = str(active) if active is not None else None
+        active_index_raw = props.get("index")
+        active_index = active_index_raw if isinstance(active_index_raw, int) else None
+
+        for index, child in enumerate(children):
+            if not isinstance(child, dict):
+                continue
+            control_type = str(child.get("type") or "").lower()
+            if control_type not in {"route_view", "route_host", "route"}:
+                continue
+
+            child_props = child.get("props")
+            if not isinstance(child_props, dict):
+                child_props = {}
+                child["props"] = child_props
+
+            route_id_raw = (
+                child_props.get("route_id")
+                or child_props.get("id")
+                or child.get("id")
+            )
+            route_id = str(route_id_raw) if route_id_raw is not None else ""
+
+            is_active = False
+            if active_id is not None:
+                is_active = route_id == active_id
+            elif active_index is not None:
+                is_active = index == active_index
+            elif index == 0:
+                is_active = True
+
+            if is_active:
+                continue
+
+            child["children"] = []
+            for key in ("child", "content", "children"):
+                if key in child_props:
+                    child_props.pop(key, None)
+
+        return payload
+
 
 class Launcher(Component):
     control_type = "launcher"
@@ -244,6 +300,8 @@ class WindowFrame(Component):
         use_native_title_bar: bool | None = None,
         native_window_actions: bool | None = None,
         show_default_controls: bool | None = None,
+        emit_move_events: bool | None = None,
+        move_event_throttle_ms: int | None = None,
         title_leading: Any | None = None,
         title_content: Any | None = None,
         title_trailing: Any | None = None,
@@ -265,6 +323,8 @@ class WindowFrame(Component):
             use_native_title_bar=use_native_title_bar,
             native_window_actions=native_window_actions,
             show_default_controls=show_default_controls,
+            emit_move_events=emit_move_events,
+            move_event_throttle_ms=move_event_throttle_ms,
             title_leading=title_leading,
             title_content=title_content,
             title_trailing=title_trailing,

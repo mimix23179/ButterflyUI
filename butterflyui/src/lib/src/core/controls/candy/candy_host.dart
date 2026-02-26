@@ -20,6 +20,12 @@ import 'package:butterflyui_runtime/src/core/controls/layout/row.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/stack.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/wrap.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/candy_submodule_context.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/decoration.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/effects.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/interactive.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/layout.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/motion.dart';
 
 const int _candySchemaVersion = 2;
 
@@ -855,7 +861,25 @@ class _CandyFamilyState extends State<_CandyFamily> {
     final merged = _mergeModuleProps(_runtimeProps, module);
     final style = _resolveStyle(context, widget.tokens, _runtimeProps, merged);
 
-    Widget base = _buildModule(context, module, merged, style);
+    final ctx = CandySubmoduleContext(
+      context: context,
+      controlId: widget.controlId,
+      merged: merged,
+      rawChildren: widget.rawChildren,
+      tokens: widget.tokens,
+      style: CandyStyle(
+        background: style.background,
+        foreground: style.foreground,
+        outlineColor: style.outlineColor,
+        outlineWidth: style.outlineWidth,
+        radius: style.radius,
+      ),
+      buildChild: widget.buildChild,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      sendEvent: widget.sendEvent,
+    );
+    Widget base = _buildModule(ctx);
 
     base = _composeSlots(
       base,
@@ -879,355 +903,25 @@ class _CandyFamilyState extends State<_CandyFamily> {
     );
   }
 
-  Widget _buildModule(
-    BuildContext context,
-    String module,
-    Map<String, Object?> merged,
-    _CandyStyle style,
-  ) {
+  Widget _buildModule(CandySubmoduleContext ctx) {
+    final merged = ctx.merged;
+    final module = _module;
+
+    // Custom layout override: bypass module dispatch and render a plain container.
     final customLayout =
         merged['custom_layout'] == true ||
         _norm((merged['layout'] ?? '').toString()) == 'custom';
     if (customLayout && widget.rawChildren.isNotEmpty) {
-      return buildContainerControl(
-        merged,
-        widget.rawChildren,
-        widget.buildChild,
-      );
+      return buildContainerControl(merged, widget.rawChildren, widget.buildChild);
     }
 
-    switch (module) {
-      case 'button':
-        return buildButtonControl(
-          widget.controlId,
-          merged,
-          widget.tokens,
-          widget.sendEvent,
-        );
-
-      case 'card':
-        return buildCardControl(
-          merged,
-          widget.rawChildren,
-          widget.tokens,
-          widget.buildChild,
-        );
-
-      case 'column':
-        return buildColumnControl(
-          merged,
-          widget.rawChildren,
-          widget.tokens,
-          widget.buildChild,
-        );
-
-      case 'container':
-      case 'surface':
-        return buildContainerControl(
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-        );
-
-      case 'row':
-        return buildRowControl(
-          merged,
-          widget.rawChildren,
-          widget.tokens,
-          widget.buildChild,
-        );
-
-      case 'stack':
-        return buildStackControl(merged, widget.rawChildren, widget.buildChild);
-
-      case 'wrap':
-        return buildWrapControl(
-          merged,
-          widget.rawChildren,
-          widget.tokens,
-          widget.buildChild,
-        );
-
-      case 'align':
-        return buildAlignControl(
-          '${widget.controlId}::align',
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-          widget.registerInvokeHandler,
-          widget.unregisterInvokeHandler,
-          widget.sendEvent,
-        );
-
-      case 'center':
-        return Align(
-          alignment: Alignment.center,
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'spacer':
-        return SizedBox(
-          width: coerceDouble(merged['width']),
-          height: coerceDouble(merged['height']),
-        );
-
-      case 'aspect_ratio':
-        return AspectRatio(
-          aspectRatio: coerceDouble(merged['value'] ?? merged['ratio']) ?? 1.0,
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'overflow_box':
-        return OverflowBox(
-          alignment: _parseAlignment(merged['alignment']) ?? Alignment.center,
-          minWidth: coerceDouble(merged['min_width']),
-          maxWidth: coerceDouble(merged['max_width']),
-          minHeight: coerceDouble(merged['min_height']),
-          maxHeight: coerceDouble(merged['max_height']),
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'fitted_box':
-        return FittedBox(
-          fit: _parseBoxFit(merged['fit']) ?? BoxFit.contain,
-          alignment: _parseAlignment(merged['alignment']) ?? Alignment.center,
-          clipBehavior: _parseClip(merged['clip_behavior']) ?? Clip.none,
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'effects':
-        {
-          Widget child = buildLayerControl(
-            merged,
-            widget.rawChildren,
-            widget.buildChild,
-          );
-          if (merged['shimmer'] == true) {
-            child = buildShimmerControl(
-              '${widget.controlId}::effects',
-              merged,
-              child,
-              widget.registerInvokeHandler,
-              widget.unregisterInvokeHandler,
-            );
-          }
-          return child;
-        }
-
-      case 'particles':
-        {
-          final particle = buildParticleFieldControl(
-            '${widget.controlId}::particles',
-            merged,
-            widget.registerInvokeHandler,
-            widget.unregisterInvokeHandler,
-            widget.sendEvent,
-          );
-          final child = _firstChildOrEmpty(
-            widget.rawChildren,
-            widget.buildChild,
-          );
-          final overlay = merged['overlay'] == null
-              ? true
-              : (merged['overlay'] == true);
-          if (!overlay) {
-            return particle;
-          }
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              child,
-              IgnorePointer(child: particle),
-            ],
-          );
-        }
-
-      case 'border':
-        return buildBorderControl(
-          '${widget.controlId}::border',
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-          widget.registerInvokeHandler,
-          widget.unregisterInvokeHandler,
-        );
-
-      case 'shadow':
-        return buildShadowStackControl(
-          merged,
-          _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'outline':
-        return Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: style.outlineColor,
-              width: style.outlineWidth,
-            ),
-            borderRadius: BorderRadius.circular(style.radius),
-          ),
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'gradient':
-        return buildGradientControl(
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-        );
-
-      case 'animation':
-      case 'motion':
-        return buildMotionControl(
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-        );
-
-      case 'transition':
-        return _buildTransitionControl(merged);
-
-      case 'canvas':
-        return buildCanvasControl(
-          '${widget.controlId}::canvas',
-          merged,
-          widget.registerInvokeHandler,
-          widget.unregisterInvokeHandler,
-          widget.sendEvent,
-        );
-
-      case 'clip':
-        {
-          final child = _firstChildOrEmpty(
-            widget.rawChildren,
-            widget.buildChild,
-          );
-          final shape = _norm(
-            (merged['shape'] ?? merged['clip_shape'] ?? 'rect').toString(),
-          );
-          final clipBehavior =
-              _parseClip(merged['clip_behavior']) ?? Clip.antiAlias;
-          if (shape == 'oval' || shape == 'circle') {
-            return ClipOval(clipBehavior: clipBehavior, child: child);
-          }
-          return ClipRRect(
-            clipBehavior: clipBehavior,
-            borderRadius: BorderRadius.circular(style.radius),
-            child: child,
-          );
-        }
-
-      case 'decorated_box':
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: style.background,
-            gradient: coerceGradient(merged['gradient']),
-            border: _coerceBorder(merged),
-            borderRadius: BorderRadius.circular(style.radius),
-            boxShadow: coerceBoxShadow(merged['shadow']),
-          ),
-          child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-        );
-
-      case 'badge':
-        return buildBadgeControl(
-          '${widget.controlId}::badge',
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-          widget.registerInvokeHandler,
-          widget.unregisterInvokeHandler,
-          widget.sendEvent,
-        );
-
-      case 'avatar':
-        {
-          final size = coerceDouble(merged['size']) ?? 36.0;
-          final label = (merged['label'] ?? merged['text'] ?? '').toString();
-          final src = merged['src']?.toString();
-          final image = (src != null && src.isNotEmpty)
-              ? NetworkImage(src)
-              : null;
-          return CircleAvatar(
-            radius: size / 2,
-            backgroundColor: style.background,
-            foregroundColor: style.foreground,
-            backgroundImage: image,
-            child: image == null
-                ? Text(
-                    label.isNotEmpty
-                        ? label.substring(0, 1).toUpperCase()
-                        : '?',
-                  )
-                : null,
-          );
-        }
-
-      case 'icon':
-        return Icon(
-          _parseIcon(merged['icon']) ?? Icons.help_outline,
-          size: coerceDouble(merged['size']),
-          color: coerceColor(merged['color']) ?? style.foreground,
-        );
-
-      case 'text':
-        return Text(
-          (merged['text'] ?? merged['value'] ?? '').toString(),
-          textAlign: _parseTextAlign(merged['align']) ?? TextAlign.start,
-          maxLines: coerceOptionalInt(merged['max_lines']),
-          overflow: _parseTextOverflow(merged['overflow']),
-          style: TextStyle(
-            color:
-                coerceColor(merged['color'] ?? merged['text_color']) ??
-                style.foreground,
-            fontSize: coerceDouble(merged['size'] ?? merged['font_size']),
-            fontWeight: _parseWeight(merged['weight'] ?? merged['font_weight']),
-          ),
-        );
-
-      default:
-        return buildContainerControl(
-          merged,
-          widget.rawChildren,
-          widget.buildChild,
-        );
-    }
-  }
-
-  Widget _buildTransitionControl(Map<String, Object?> merged) {
-    return AnimatedSwitcher(
-      duration: Duration(
-        milliseconds: (coerceOptionalInt(merged['duration_ms']) ?? 220).clamp(
-          1,
-          120000,
-        ),
-      ),
-      switchInCurve: _parseCurve(merged['curve']) ?? Curves.easeOutCubic,
-      switchOutCurve: _parseCurve(merged['curve']) ?? Curves.easeOutCubic,
-      transitionBuilder: (child, animation) {
-        final preset = _norm((merged['preset'] ?? 'fade').toString());
-        if (preset == 'scale') {
-          return ScaleTransition(scale: animation, child: child);
-        }
-        if (preset == 'slide') {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.08, 0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        }
-        return FadeTransition(opacity: animation, child: child);
-      },
-      child: KeyedSubtree(
-        key: ValueKey(
-          merged['key'] ?? merged['state'] ?? merged['value'] ?? _module,
-        ),
-        child: _firstChildOrEmpty(widget.rawChildren, widget.buildChild),
-      ),
-    );
+    // Chain of category dispatchers — each returns null for unrecognised modules.
+    return buildCandyLayoutModule(module, ctx) ??
+        buildCandyInteractiveModule(module, ctx) ??
+        buildCandyDecorationModule(module, ctx) ??
+        buildCandyEffectsModule(module, ctx) ??
+        buildCandyMotionModule(module, ctx) ??
+        buildContainerControl(merged, widget.rawChildren, widget.buildChild);
   }
 
   Widget _composeSlots(

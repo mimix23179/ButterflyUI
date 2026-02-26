@@ -9,6 +9,10 @@ class ButterflyUIWindowApi {
 
   bool _customFrameInitialized = false;
   bool _customFrameEnabled = false;
+  bool _dragInFlight = false;
+  String? _lastAction;
+  DateTime? _lastActionAt;
+  DateTime? _lastDragAt;
 
   bool get _supportsBridge => !kIsWeb;
 
@@ -32,6 +36,14 @@ class ButterflyUIWindowApi {
     if (!_supportsBridge) return;
     final value = action.trim().toLowerCase();
     if (value.isEmpty) return;
+    final now = DateTime.now();
+    if (_lastAction == value &&
+        _lastActionAt != null &&
+        now.difference(_lastActionAt!).inMilliseconds < 140) {
+      return;
+    }
+    _lastAction = value;
+    _lastActionAt = now;
     try {
       await _channel.invokeMethod<void>('windowAction', <String, Object?>{
         'action': value,
@@ -45,12 +57,22 @@ class ButterflyUIWindowApi {
 
   Future<void> startDrag() async {
     if (!_supportsBridge) return;
+    if (_dragInFlight) return;
+    final now = DateTime.now();
+    if (_lastDragAt != null &&
+        now.difference(_lastDragAt!).inMilliseconds < 180) {
+      return;
+    }
+    _dragInFlight = true;
+    _lastDragAt = now;
     try {
       await _channel.invokeMethod<void>('startDrag');
     } on MissingPluginException {
       // Ignore when runner support is unavailable on the active target.
     } on PlatformException {
       // Keep runtime functional even if host channel fails.
+    } finally {
+      _dragInFlight = false;
     }
   }
 

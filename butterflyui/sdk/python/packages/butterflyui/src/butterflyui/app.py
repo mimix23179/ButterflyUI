@@ -11,7 +11,7 @@ import json
 import logging
 import sys
 import warnings
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Awaitable, Callable, Optional, Iterable
 import uuid
 import threading
 import hashlib
@@ -197,9 +197,11 @@ class ButterflyUISession:
 	async def send_ui_apply(self, root: dict[str, Any]) -> None:
 		self._last_root = root
 		self._cache_tree(root)
+		self._prune_runtime_caches()
 		await self._server.send("ui.apply", {"root": root})
 
 	async def send_ui_payload(self, payload: dict[str, Any]) -> None:
+		has_tree_delta = any(key in payload for key in ("root", "screen", "overlay", "splash"))
 		root = payload.get("root")
 		if isinstance(root, dict):
 			self._last_root = root
@@ -227,6 +229,9 @@ class ButterflyUISession:
 			self._cache_tree(splash)
 		elif "splash" in payload:
 			self._last_splash = None
+
+		if has_tree_delta:
+			self._prune_runtime_caches()
 
 		await self._server.send("ui.apply", payload)
 
@@ -423,7 +428,9 @@ class ButterflyUISession:
 	def on(self, control_id: str, event: str, handler: Callable[[dict[str, Any]], Any]) -> None:
 		self._ensure_event_subscription(control_id, event)
 		key = (str(control_id), str(event))
-		self._event_handlers.setdefault(key, []).append(handler)
+		handlers = self._event_handlers.setdefault(key, [])
+		if handler not in handlers:
+			handlers.append(handler)
 
 	def _ensure_event_subscription(self, control_id: str, event: str) -> None:
 		"""Best-effort subscription to ensure the runtime emits requested events."""
@@ -577,16 +584,71 @@ class ButterflyUISession:
 				return
 
 	def _cache_tree(self, node: dict[str, Any]) -> None:
-		control_id = node.get("id")
-		if control_id:
-			props = node.get("props")
+		for control in self._iter_control_nodes(node):
+			control_id = control.get("id")
+			if control_id is None:
+				continue
+			props = control.get("props")
 			if isinstance(props, dict):
 				self._values[str(control_id)] = dict(props)
-		children = node.get("children")
-		if isinstance(children, list):
-			for child in children:
-				if isinstance(child, dict):
-					self._cache_tree(child)
+
+	def _collect_control_ids(self, node: dict[str, Any], out: set[str]) -> None:
+		for control in self._iter_control_nodes(node):
+			control_id = control.get("id")
+			if control_id is not None:
+				out.add(str(control_id))
+
+	def _iter_control_nodes(self, root: Any) -> Iterable[dict[str, Any]]:
+		seen: set[int] = set()
+
+		def is_control_like(value: Any) -> bool:
+			return isinstance(value, dict) and (
+				"id" in value and ("type" in value or "props" in value or "children" in value)
+			)
+
+		def walk(value: Any) -> Iterable[dict[str, Any]]:
+			if isinstance(value, dict):
+				marker = id(value)
+				if marker in seen:
+					return
+				seen.add(marker)
+				if is_control_like(value):
+					yield value
+				for nested in value.values():
+					yield from walk(nested)
+				return
+			if isinstance(value, list):
+				for nested in value:
+					yield from walk(nested)
+
+		yield from walk(root)
+
+	def _prune_runtime_caches(self) -> None:
+		active_ids: set[str] = set()
+		for node in (self._last_root, self._last_screen, self._last_overlay, self._last_splash):
+			if isinstance(node, dict):
+				self._collect_control_ids(node, active_ids)
+
+		if active_ids:
+			self._values = {
+				control_id: props
+				for control_id, props in self._values.items()
+				if control_id in active_ids
+			}
+			self._patch_buffer = {
+				control_id: props
+				for control_id, props in self._patch_buffer.items()
+				if control_id in active_ids
+			}
+			self._event_handlers = {
+				key: handlers
+				for key, handlers in self._event_handlers.items()
+				if key[0] in active_ids
+			}
+		else:
+			self._values.clear()
+			self._patch_buffer.clear()
+			self._event_handlers.clear()
 
 
 class WebSession(ButterflyUISession):
@@ -825,6 +887,8 @@ class Page:
 		self._style_pack_revision: int = 0
 		# Track pending update tasks to ensure they complete before runtime.ready
 		self._pending_updates: list[asyncio.Task[Any]] = []
+		self._pending_update_task: asyncio.Task[Any] | None = None
+		self._queued_update_payload: dict[str, Any] | None = None
 
 	def _bind_inline_handlers(self) -> None:
 		visited: set[int] = set()
@@ -868,8 +932,6 @@ class Page:
 		"""
 		if not self._has_payload():
 			return
-
-		self._bind_inline_handlers()
 
 		root_payload = self._coerce_root(self.root) if self.root is not None else None
 		# If root is present but not serializable, warn and abort.
@@ -926,9 +988,25 @@ class Page:
 		except RuntimeError:
 			warnings.warn("Page.update() called outside of runtime loop", RuntimeWarning)
 			return
-		# Store tasks so we can await them before sending runtime.ready
-		apply_task = loop.create_task(self.session.send_ui_payload(payload))
-		self._pending_updates.append(apply_task)
+		if self._pending_update_task is not None and not self._pending_update_task.done():
+			self._queued_update_payload = payload
+			return
+
+		# Store tasks so we can await them before sending runtime.ready.
+		# Coalesce bursts of update() calls into sequential latest-payload sends.
+		self._pending_update_task = loop.create_task(self._flush_updates(payload))
+		self._pending_updates.append(self._pending_update_task)
+
+	async def _flush_updates(self, initial_payload: dict[str, Any]) -> None:
+		payload = initial_payload
+		while True:
+			self._bind_inline_handlers()
+			await self.session.send_ui_payload(payload)
+			next_payload = self._queued_update_payload
+			self._queued_update_payload = None
+			if next_payload is None:
+				break
+			payload = next_payload
 
 	def clear_overlay(self) -> None:
 		self.overlay = None
@@ -1047,6 +1125,8 @@ class Page:
 			return
 		await asyncio.gather(*self._pending_updates, return_exceptions=True)
 		self._pending_updates.clear()
+		self._pending_update_task = None
+		self._queued_update_payload = None
 
 	def _has_payload(self) -> bool:
 		if self.root is not None or self.screen is not None or self.overlay is not None or self.splash is not None:

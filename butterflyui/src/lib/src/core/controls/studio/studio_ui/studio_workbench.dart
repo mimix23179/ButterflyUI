@@ -2,10 +2,15 @@ import 'dart:math' as math;
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 import 'package:flutter/material.dart';
 
 import '../studio_contract.dart';
 import '../studio_surfaces/studio_surface_router.dart';
+import '../submodules/studio_submodule_context.dart';
+import '../submodules/surfaces.dart';
+import '../submodules/panels.dart';
+import '../submodules/tools.dart';
 
 typedef StudioEmitCallback =
     void Function(String event, Map<String, Object?> payload);
@@ -14,26 +19,38 @@ typedef StudioModuleSelectCallback = void Function(String module);
 class StudioWorkbench extends StatefulWidget {
   const StudioWorkbench({
     super.key,
+    required this.controlId,
     required this.runtimeProps,
     required this.availableModules,
     required this.activeModule,
     required this.history,
     required this.undoDepth,
     required this.redoDepth,
+    required this.rawChildren,
     required this.customChildren,
     required this.onSelectModule,
     required this.onEmit,
+    required this.sendEvent,
+    required this.buildChild,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
   });
 
+  final String controlId;
   final Map<String, Object?> runtimeProps;
   final List<String> availableModules;
   final String activeModule;
   final List<Map<String, Object?>> history;
   final int undoDepth;
   final int redoDepth;
+  final List<dynamic> rawChildren;
   final List<Widget> customChildren;
   final StudioModuleSelectCallback onSelectModule;
   final StudioEmitCallback onEmit;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final Widget Function(Map<String, Object?> child) buildChild;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
 
   @override
   State<StudioWorkbench> createState() => _StudioWorkbenchState();
@@ -391,6 +408,7 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -524,7 +542,34 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
     });
   }
 
+  StudioSubmoduleContext _makeCtx(String module) {
+    return StudioSubmoduleContext(
+      controlId: widget.controlId,
+      module: module,
+      section: _section(module),
+      runtimeProps: widget.runtimeProps,
+      activeSurface: _activeSurface,
+      selectedIds: _selectedIds,
+      zoom: _zoom,
+      onEmit: widget.onEmit,
+      onSelectEntity: _pick,
+      sendEvent: widget.sendEvent,
+      rawChildren: widget.rawChildren,
+      buildChild: widget.buildChild,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+  }
+
   Widget _modulePanel(BuildContext context, String module) {
+    final ctx = _makeCtx(module);
+    return buildStudioSurfacesSection(ctx) ??
+        buildStudioPanelsSection(ctx) ??
+        buildStudioToolsSection(ctx) ??
+        _fallbackModulePanel(context, module);
+  }
+
+  Widget _fallbackModulePanel(BuildContext context, String module) {
     final section = _section(module);
     final list = studioCoerceMapList(
       section['items'] ??
@@ -533,28 +578,9 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
           section['actions'] ??
           section['tools'],
     );
-
-    if (module == 'inspector' ||
-        module == 'properties_panel' ||
-        module == 'tokens_editor' ||
-        module == 'bindings_editor') {
-      final values = section.entries.where((entry) => entry.key != 'events');
-      return ListView(
-        children: [
-          for (final entry in values.take(80))
-            ListTile(
-              dense: true,
-              title: Text(entry.key),
-              subtitle: Text(entry.value.toString()),
-            ),
-        ],
-      );
-    }
-
     if (list.isEmpty) {
       return Center(child: Text('No data for ${module.replaceAll('_', ' ')}'));
     }
-
     return ListView(
       children: [
         for (final item in list.take(120))
@@ -580,6 +606,7 @@ class _StudioWorkbenchState extends State<StudioWorkbench> {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(10),
       ),

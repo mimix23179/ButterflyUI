@@ -1,8 +1,10 @@
-env/*
-__pycache__/*
-Matrix/*
+env/
+__pycache__/
+MatrixApp/
+./vscode/
+./pytest_cache/
 *.pyc
 CustomizationEngine.md
-images/*
-demo/*
-flet/*
+images/
+demo/
+tests/

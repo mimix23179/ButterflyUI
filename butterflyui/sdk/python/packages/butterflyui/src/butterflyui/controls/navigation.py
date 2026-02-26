@@ -175,6 +175,9 @@ class RailNav(Component):
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
 
 class NoticeBar(Component):
     control_type = "notice_bar"
@@ -840,6 +843,18 @@ class StatusBar(Component):
             **kwargs,
         )
         super().__init__(props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(session, "set_items", {"items": [dict(item) for item in items]})
+
+    def set_text(self, session: Any, text: str) -> dict[str, Any]:
+        return self.invoke(session, "set_text", {"text": text})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
 
 class CommandPalette(Component):

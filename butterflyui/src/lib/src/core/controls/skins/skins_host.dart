@@ -1,8 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+
+import 'submodules/commands.dart';
+import 'submodules/core.dart';
+import 'submodules/editors.dart';
+import 'submodules/skins_submodule_context.dart';
+import 'submodules/tokens.dart';
 
 const int _skinsSchemaVersion = 2;
 
@@ -94,6 +100,41 @@ const Set<String> _actionModules = {
   'delete_skin',
 };
 
+const Set<String> _skinsWorkbenchModules = {
+  'editor',
+  'token_mapper',
+  'create_skin',
+  'edit_skin',
+  'delete_skin',
+  'effects',
+  'particles',
+  'shaders',
+  'materials',
+  'icons',
+  'fonts',
+  'colors',
+  'background',
+  'border',
+  'shadow',
+  'outline',
+  'animation',
+  'transition',
+  'interaction',
+  'layout',
+  'responsive',
+  'effect_editor',
+  'particle_editor',
+  'shader_editor',
+  'material_editor',
+  'icon_editor',
+  'font_editor',
+  'color_editor',
+  'background_editor',
+  'border_editor',
+  'shadow_editor',
+  'outline_editor',
+};
+
 const Set<String> _skinsStates = {
   'idle',
   'loading',
@@ -156,65 +197,14 @@ const Map<String, List<String>> _skinsManifestDefaults = {
     'selector',
     'preset',
     'preview',
-    'editor',
-    'token_mapper',
-    'icons',
-    'colors',
-    'fonts',
-    'background',
-    'border',
-    'shadow',
-    'outline',
-    'animation',
-    'transition',
-    'interaction',
-    'layout',
-    'responsive',
-    'effects',
-    'particles',
-    'shaders',
-    'materials',
-    'effect_editor',
-    'particle_editor',
-    'shader_editor',
-    'material_editor',
-    'icon_editor',
-    'font_editor',
-    'color_editor',
-    'background_editor',
-    'border_editor',
-    'shadow_editor',
-    'outline_editor',
     'apply',
     'clear',
-    'create_skin',
-    'edit_skin',
-    'delete_skin',
   ],
-  'enabled_pipelines': <String>[
-    'token_mapper',
-    'colors',
-    'fonts',
-    'animation',
-    'transition',
-    'effects',
-    'materials',
-    'icons',
-  ],
-  'enabled_editors': <String>[
-    'editor',
-    'color_editor',
-    'font_editor',
-    'material_editor',
-    'effect_editor',
-    'icon_editor',
-    'border_editor',
-    'shadow_editor',
-    'outline_editor',
-  ],
+  'enabled_pipelines': <String>[],
+  'enabled_editors': <String>[],
   'enabled_previews': <String>['preview'],
-  'enabled_distribution': <String>['preset', 'create_skin', 'edit_skin'],
-  'enabled_commands': <String>['apply', 'clear', 'create_skin', 'edit_skin'],
+  'enabled_distribution': <String>['preset'],
+  'enabled_commands': <String>['apply', 'clear'],
 };
 
 const List<String> _defaultSkinNames = <String>[
@@ -665,6 +655,10 @@ class _SkinsControlState extends State<_SkinsControl> {
     final currentModule = availableModules.contains(requestedModule)
         ? requestedModule
         : fallbackModule;
+    final showWorkbench =
+      _runtimeProps['workbench'] == true ||
+      _runtimeProps['show_workbench'] == true ||
+      availableModules.any(_skinsWorkbenchModules.contains);
     final customChildren = widget.rawChildren
         .whereType<Map>()
         .map((child) => widget.buildChild(coerceObjectMap(child)))
@@ -701,32 +695,24 @@ class _SkinsControlState extends State<_SkinsControl> {
       if (section == null && module != currentModule) {
         continue;
       }
+      final effectiveSection =
+          section ?? <String, Object?>{'events': _runtimeProps['events']};
       actionWidgets.add(
-        _ActionButton(
-          controlType: module,
-          controlId: widget.controlId,
-          props:
-              section ?? <String, Object?>{'events': _runtimeProps['events']},
-          sendEvent: widget.sendEvent,
-        ),
+        buildSkinsCommandsSection(
+          module,
+          _makeCtx(module, effectiveSection),
+        )!,
       );
     }
 
     final currentSection =
         _sectionProps(_runtimeProps, currentModule) ??
         <String, Object?>{'events': _runtimeProps['events']};
-    final activeModuleWidget =
-        _buildModuleWidget(
+    final activeModuleWidget = _buildModuleWidget(
           currentModule,
           currentSection,
           onSelectSkin: _selectSkinLocal,
-        ) ??
-        _CollectionModule(
-          controlId: widget.controlId,
-          module: currentModule,
-          props: currentSection,
-          sendEvent: widget.sendEvent,
-        );
+        )!;
     final selectorSection =
         _sectionProps(_runtimeProps, 'selector') ??
         <String, Object?>{
@@ -774,16 +760,16 @@ class _SkinsControlState extends State<_SkinsControl> {
         coerceColor(_runtimeProps['workspace_bg'] ?? _runtimeProps['panel_bg']) ??
         Theme.of(context).colorScheme.surface.withValues(alpha: 0.35);
 
-    final body = Column(
+    final workbenchBody = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Header(
+        SkinsHeader(
           state: state,
           selectedSkin: _selectedSkin,
           skinCount: _skins.length,
         ),
         const SizedBox(height: 8),
-        _ModuleTabs(
+        SkinsModuleTabs(
           modules: availableModules,
           currentModule: currentModule,
           onSelected: (module) {
@@ -951,12 +937,92 @@ class _SkinsControlState extends State<_SkinsControl> {
         ],
       ],
     );
+    final compactBody = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SkinsHeader(
+          state: state,
+          selectedSkin: _selectedSkin,
+          skinCount: _skins.length,
+        ),
+        const SizedBox(height: 8),
+        if (selectorWidget case final selectedWidget?) ...[
+          selectedWidget,
+          const SizedBox(height: 8),
+        ],
+        if (presetWidget case final presetPanelWidget?) ...[
+          presetPanelWidget,
+          const SizedBox(height: 8),
+        ],
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: workspaceBg,
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Preview',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 6),
+              SizedBox(height: 220, child: previewWidget),
+              if (currentModule != 'preview' &&
+                  currentModule != 'selector' &&
+                  currentModule != 'preset') ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Module: ${currentModule.replaceAll('_', ' ')}',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                activeModuleWidget,
+              ],
+              if (actionWidgets.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: actionWidgets,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+    final body = showWorkbench ? workbenchBody : compactBody;
     return ensureUmbrellaLayoutBounds(
       props: _runtimeProps,
       child: body,
-      defaultHeight: workbenchHeight + 180,
+      defaultHeight: showWorkbench ? workbenchHeight + 180 : 520,
       minHeight: 420,
       maxHeight: 3200,
+    );
+  }
+
+  SkinsSubmoduleContext _makeCtx(
+    String module,
+    Map<String, Object?> section, {
+    ValueChanged<String>? onSelectSkin,
+  }) {
+    return SkinsSubmoduleContext(
+      controlId: widget.controlId,
+      module: module,
+      section: section,
+      onEmit: (event, payload) =>
+          _emitEvent(widget.controlId, section, widget.sendEvent, event, payload),
+      sendEvent: widget.sendEvent,
+      rawChildren: widget.rawChildren,
+      buildChild: widget.buildChild,
+      radius: coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 12,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      onSelectSkin: onSelectSkin,
     );
   }
 
@@ -965,66 +1031,10 @@ class _SkinsControlState extends State<_SkinsControl> {
     Map<String, Object?> section, {
     ValueChanged<String>? onSelectSkin,
   }) {
-    switch (module) {
-      case 'selector':
-        return _Selector(
-          controlId: widget.controlId,
-          props: section,
-          sendEvent: widget.sendEvent,
-          onSelectSkin: onSelectSkin,
-        );
-      case 'preset':
-        return _PresetList(
-          controlId: widget.controlId,
-          props: section,
-          sendEvent: widget.sendEvent,
-          onSelectSkin: onSelectSkin,
-        );
-      case 'editor':
-        return _Editor(
-          controlId: widget.controlId,
-          props: section,
-          sendEvent: widget.sendEvent,
-        );
-      case 'preview':
-        return _Preview(
-          props: section,
-          rawChildren: widget.rawChildren,
-          buildChild: widget.buildChild,
-          radius:
-              coerceDouble(section['radius'] ?? _runtimeProps['radius']) ?? 12,
-        );
-      case 'token_mapper':
-        return _TokenMapper(
-          controlId: widget.controlId,
-          props: section,
-          sendEvent: widget.sendEvent,
-        );
-      case 'effect_editor':
-      case 'particle_editor':
-      case 'shader_editor':
-      case 'material_editor':
-      case 'icon_editor':
-      case 'font_editor':
-      case 'color_editor':
-      case 'background_editor':
-      case 'border_editor':
-      case 'shadow_editor':
-      case 'outline_editor':
-        return _NamedEditor(
-          controlId: widget.controlId,
-          module: module,
-          props: section,
-          sendEvent: widget.sendEvent,
-        );
-      default:
-        return _CollectionModule(
-          controlId: widget.controlId,
-          module: module,
-          props: section,
-          sendEvent: widget.sendEvent,
-        );
-    }
+    final ctx = _makeCtx(module, section, onSelectSkin: onSelectSkin);
+    return buildSkinsCoreSection(module, ctx) ??
+        buildSkinsEditorsSection(module, ctx) ??
+        buildSkinsTokensSection(module, ctx);
   }
 }
 
@@ -1327,11 +1337,20 @@ void _seedSkinsDefaults(Map<String, Object?> out) {
       _skinsManifestDefaults['enabled_modules'] ?? const <String>[],
     );
   } else {
+    final ordered = <String>[];
     for (final module in _skinsModuleOrder) {
-      if (_skinsModules.contains(module) && !enabledModules.contains(module)) {
-        enabledModules.add(module);
+      if (enabledModules.contains(module)) {
+        ordered.add(module);
       }
     }
+    for (final module in enabledModules) {
+      if (_skinsModules.contains(module) && !ordered.contains(module)) {
+        ordered.add(module);
+      }
+    }
+    enabledModules
+      ..clear()
+      ..addAll(ordered);
   }
   manifest['enabled_modules'] = enabledModules;
   out['manifest'] = manifest;
@@ -1402,7 +1421,7 @@ List<String> _availableModules(
     }
   }
   if (out.isEmpty) {
-    out.addAll(const ['selector', 'preview', 'editor', 'apply']);
+    out.addAll(const ['selector', 'preset', 'preview', 'apply', 'clear']);
   }
   return out;
 }
@@ -1441,505 +1460,4 @@ String? _resolveSelected(Map<String, Object?> props, List<String> skins) {
     return skins.first;
   }
   return null;
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.state,
-    required this.selectedSkin,
-    required this.skinCount,
-  });
-
-  final String state;
-  final String? selectedSkin;
-  final int skinCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Skins', style: Theme.of(context).textTheme.titleMedium),
-              Text(
-                'State: $state',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        Text('Selected: ${selectedSkin ?? 'none'}'),
-        const SizedBox(width: 8),
-        Text('Total: $skinCount'),
-      ],
-    );
-  }
-}
-
-class _ModuleTabs extends StatelessWidget {
-  const _ModuleTabs({
-    required this.modules,
-    required this.currentModule,
-    required this.onSelected,
-  });
-
-  final List<String> modules;
-  final String currentModule;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        for (final module in modules)
-          ChoiceChip(
-            selected: currentModule == module,
-            label: Text(module.replaceAll('_', ' ')),
-            onSelected: (_) => onSelected(module),
-          ),
-      ],
-    );
-  }
-}
-
-class _Selector extends StatelessWidget {
-  const _Selector({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-    this.onSelectSkin,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-  final ValueChanged<String>? onSelectSkin;
-
-  @override
-  Widget build(BuildContext context) {
-    final options = _coerceSkins(
-      props['skins'] ?? props['options'] ?? props['items'],
-    );
-    if (options.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final selected = _resolveSelected(props, options) ?? options.first;
-    return DropdownButton<String>(
-      value: options.contains(selected) ? selected : options.first,
-      items: options
-          .map(
-            (skin) => DropdownMenuItem<String>(value: skin, child: Text(skin)),
-          )
-          .toList(growable: false),
-      onChanged: (next) {
-        if (next == null) return;
-        onSelectSkin?.call(next);
-        _emitEvent(controlId, props, sendEvent, 'select', {'skin': next});
-      },
-    );
-  }
-}
-
-class _PresetList extends StatelessWidget {
-  const _PresetList({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-    this.onSelectSkin,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-  final ValueChanged<String>? onSelectSkin;
-
-  @override
-  Widget build(BuildContext context) {
-    final presets = _coerceSkins(
-      props['presets'] ?? props['items'] ?? props['options'],
-    );
-    if (presets.isEmpty) {
-      final label = (props['label'] ?? props['name'] ?? 'Preset').toString();
-      return OutlinedButton(
-        onPressed: () {
-          onSelectSkin?.call(label);
-          _emitEvent(controlId, props, sendEvent, 'select', {'skin': label});
-        },
-        child: Text(label),
-      );
-    }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final preset in presets)
-          OutlinedButton(
-            onPressed: () {
-              onSelectSkin?.call(preset);
-              _emitEvent(controlId, props, sendEvent, 'select', {
-                'skin': preset,
-              });
-            },
-            child: Text(preset),
-          ),
-      ],
-    );
-  }
-}
-
-class _Editor extends StatefulWidget {
-  const _Editor({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  State<_Editor> createState() => _EditorState();
-}
-
-class _EditorState extends State<_Editor> {
-  late final TextEditingController _controller = TextEditingController(
-    text: (widget.props['value'] ?? widget.props['text'] ?? '').toString(),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _controller,
-          minLines: 4,
-          maxLines: 12,
-          decoration: const InputDecoration(
-            hintText: 'Edit skin JSON/tokens…',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () {
-            _emitEvent(
-              widget.controlId,
-              widget.props,
-              widget.sendEvent,
-              'edit_skin',
-              {
-                'name': widget.props['name']?.toString(),
-                'value': _controller.text,
-              },
-            );
-          },
-          child: const Text('Save Skin'),
-        ),
-      ],
-    );
-  }
-}
-
-class _NamedEditor extends StatefulWidget {
-  const _NamedEditor({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  State<_NamedEditor> createState() => _NamedEditorState();
-}
-
-class _NamedEditorState extends State<_NamedEditor> {
-  late final TextEditingController _controller = TextEditingController(
-    text: (widget.props['value'] ?? widget.props['text'] ?? '').toString(),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final title = (widget.props['title'] ?? widget.module.replaceAll('_', ' '))
-        .toString();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(title, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _controller,
-          minLines: 3,
-          maxLines: 10,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-        ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () {
-            _emitEvent(
-              widget.controlId,
-              widget.props,
-              widget.sendEvent,
-              'change',
-              {
-                'module': widget.module,
-                'name': widget.props['name']?.toString(),
-                'value': _controller.text,
-              },
-            );
-          },
-          child: const Text('Save Module'),
-        ),
-      ],
-    );
-  }
-}
-
-class _Preview extends StatelessWidget {
-  const _Preview({
-    required this.props,
-    required this.rawChildren,
-    required this.buildChild,
-    required this.radius,
-  });
-
-  final Map<String, Object?> props;
-  final List<dynamic> rawChildren;
-  final Widget Function(Map<String, Object?> child) buildChild;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    Map<String, Object?>? firstChild;
-    for (final raw in rawChildren) {
-      if (raw is Map) {
-        firstChild = coerceObjectMap(raw);
-        break;
-      }
-    }
-    final previewBg =
-        coerceColor(props['preview_bg'] ?? props['background'] ?? props['bgcolor']) ??
-        Theme.of(context).colorScheme.surfaceContainerHighest;
-    final borderColor =
-        coerceColor(props['border_color']) ??
-        Theme.of(context).dividerColor.withValues(alpha: 0.85);
-
-    final swatches = <Color>[];
-    final rawSwatches = props['swatches'];
-    if (rawSwatches is List) {
-      for (final entry in rawSwatches) {
-        final color = coerceColor(entry);
-        if (color != null) swatches.add(color);
-      }
-    }
-    if (swatches.isEmpty) {
-      final rawColors = props['colors'];
-      if (rawColors is List) {
-        for (final entry in rawColors) {
-          if (entry is Map) {
-            final map = coerceObjectMap(entry);
-            final color = coerceColor(
-              map['value'] ?? map['color'] ?? map['hex'] ?? map['token'],
-            );
-            if (color != null) swatches.add(color);
-          }
-        }
-      }
-    }
-    if (swatches.isEmpty) {
-      swatches.addAll(<Color>[
-        Theme.of(context).colorScheme.primary,
-        Theme.of(context).colorScheme.secondary,
-        Theme.of(context).colorScheme.tertiary,
-      ]);
-    }
-
-    final skinName =
-        (props['skin'] ?? props['active'] ?? props['selected_skin'] ?? 'Preview')
-            .toString();
-    final preview = firstChild == null
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                skinName,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                (props['label'] ?? 'Live skin preview').toString(),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final color in swatches.take(8))
-                    Container(
-                      width: 40,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.12),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          )
-        : buildChild(firstChild);
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: previewBg,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: preview,
-    );
-  }
-}
-
-class _TokenMapper extends StatelessWidget {
-  const _TokenMapper({
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final mapping = props['mapping'];
-    if (mapping is! Map) {
-      return const SizedBox.shrink();
-    }
-    final entries = coerceObjectMap(mapping).entries.toList(growable: false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final entry in entries)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text('${entry.key}: ${entry.value}'),
-          ),
-        const SizedBox(height: 8),
-        FilledButton.tonal(
-          onPressed: () {
-            _emitEvent(controlId, props, sendEvent, 'token_map', {
-              'mapping': mapping,
-            });
-          },
-          child: const Text('Emit Mapping'),
-        ),
-      ],
-    );
-  }
-}
-
-class _CollectionModule extends StatelessWidget {
-  const _CollectionModule({
-    required this.controlId,
-    required this.module,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlId;
-  final String module;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = props['items'] is List
-        ? (props['items'] as List)
-        : (props['options'] is List
-              ? (props['options'] as List)
-              : const <dynamic>[]);
-
-    if (items.isEmpty) {
-      return FilledButton.tonal(
-        onPressed: () {
-          _emitEvent(controlId, props, sendEvent, 'change', {
-            'module': module,
-            'action': 'touch',
-          });
-        },
-        child: Text('Update ${module.replaceAll('_', ' ')}'),
-      );
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final item in items)
-          FilterChip(
-            selected: false,
-            label: Text(
-              item is Map
-                  ? (item['label'] ?? item['name'] ?? item['id'] ?? '')
-                        .toString()
-                  : item.toString(),
-            ),
-            onSelected: (selected) {
-              _emitEvent(controlId, props, sendEvent, 'change', {
-                'module': module,
-                'selected': selected,
-                'value': item,
-              });
-            },
-          ),
-      ],
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.controlType,
-    required this.controlId,
-    required this.props,
-    required this.sendEvent,
-  });
-
-  final String controlType;
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = (props['label'] ?? controlType.replaceAll('_', ' '))
-        .toString();
-    return FilledButton.tonal(
-      onPressed: () {
-        _emitEvent(controlId, props, sendEvent, controlType, {
-          'name': props['name'],
-          'skin': props['skin'] ?? props['value'],
-          'payload': props['payload'],
-        });
-      },
-      child: Text(label),
-    );
-  }
 }

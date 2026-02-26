@@ -13,6 +13,13 @@ import '../../core/style/style_packs.dart';
 import '../../core/style/style_pack.dart';
 import '../../core/modifiers/control_capabilities.dart';
 
+class _PatchApplyResult {
+  final bool patched;
+  final bool usedFallback;
+
+  const _PatchApplyResult({required this.patched, required this.usedFallback});
+}
+
 class AppRenderer extends StatefulWidget {
   final RuntimeClient client;
   final ValueChanged<ThemeData?> onThemeChanged;
@@ -172,66 +179,73 @@ class _AppRendererState extends State<AppRenderer> {
           _stylePackHash = (raw == null || raw.isEmpty) ? null : raw;
         }
         final patchesRaw = payload['patches'];
-        var structureChanged = false;
-        if (payload.containsKey('root')) {
-          final rootRaw = payload['root'];
-          setState(() {
-            _root = rootRaw is Map ? rootRaw.cast<String, Object?>() : null;
-          });
-          structureChanged = true;
-        }
-        if (payload.containsKey('screen')) {
-          final screenRaw = payload['screen'];
-          setState(() {
-            _screen = screenRaw is Map
-                ? screenRaw.cast<String, Object?>()
-                : null;
-          });
-          structureChanged = true;
-        }
-        if (payload.containsKey('overlay')) {
-          final overlayRaw = payload['overlay'];
-          setState(() {
-            _overlay = overlayRaw is Map
-                ? overlayRaw.cast<String, Object?>()
-                : null;
-          });
-          structureChanged = true;
-        }
-        if (payload.containsKey('splash')) {
-          final splashRaw = payload['splash'];
-          setState(() {
-            _splash = splashRaw is Map
-                ? splashRaw.cast<String, Object?>()
-                : null;
-          });
-          structureChanged = true;
-        }
-        if (structureChanged) {
-          _rebuildNodeIndex();
-        }
         final patchRaw = payload['patch'];
-        if (patchesRaw is List) {
+        final hasRootUpdate = payload.containsKey('root');
+        final hasScreenUpdate = payload.containsKey('screen');
+        final hasOverlayUpdate = payload.containsKey('overlay');
+        final hasSplashUpdate = payload.containsKey('splash');
+        final structureChanged =
+            hasRootUpdate ||
+            hasScreenUpdate ||
+            hasOverlayUpdate ||
+            hasSplashUpdate;
+        final hasPatches = patchesRaw is List || patchRaw is Map;
+        var usedFallbackPatch = false;
+
+        if (structureChanged || hasPatches) {
           setState(() {
-            for (final entry in patchesRaw) {
-              if (entry is! Map) continue;
-              final patch = entry.cast<Object?, Object?>();
-              final id = patch['id']?.toString();
-              final propsRaw = patch['props'];
-              if (id == null || id.isEmpty || propsRaw is! Map) continue;
-              final props = propsRaw.cast<String, Object?>();
-              _applyPatchFast(id, props);
+            if (hasRootUpdate) {
+              final rootRaw = payload['root'];
+              _root = rootRaw is Map ? rootRaw.cast<String, Object?>() : null;
+            }
+            if (hasScreenUpdate) {
+              final screenRaw = payload['screen'];
+              _screen = screenRaw is Map
+                  ? screenRaw.cast<String, Object?>()
+                  : null;
+            }
+            if (hasOverlayUpdate) {
+              final overlayRaw = payload['overlay'];
+              _overlay = overlayRaw is Map
+                  ? overlayRaw.cast<String, Object?>()
+                  : null;
+            }
+            if (hasSplashUpdate) {
+              final splashRaw = payload['splash'];
+              _splash = splashRaw is Map
+                  ? splashRaw.cast<String, Object?>()
+                  : null;
+            }
+
+            if (structureChanged) {
+              _rebuildNodeIndex();
+            }
+
+            if (patchesRaw is List) {
+              for (final entry in patchesRaw) {
+                if (entry is! Map) continue;
+                final patch = entry.cast<Object?, Object?>();
+                final id = patch['id']?.toString();
+                final propsRaw = patch['props'];
+                if (id == null || id.isEmpty || propsRaw is! Map) continue;
+                final props = propsRaw.cast<String, Object?>();
+                final result = _applyPatchFast(id, props);
+                usedFallbackPatch = usedFallbackPatch || result.usedFallback;
+              }
+            }
+
+            if (patchRaw is Map) {
+              final id = patchRaw['id']?.toString();
+              final propsRaw = patchRaw['props'];
+              if (id != null && propsRaw is Map) {
+                final props = propsRaw.cast<String, Object?>();
+                final result = _applyPatchFast(id, props);
+                usedFallbackPatch = usedFallbackPatch || result.usedFallback;
+              }
             }
           });
-        }
-        if (patchRaw is Map) {
-          final id = patchRaw['id']?.toString();
-          final propsRaw = patchRaw['props'];
-          if (id != null && propsRaw is Map) {
-            setState(() {
-              final props = propsRaw.cast<String, Object?>();
-              _applyPatchFast(id, props);
-            });
+          if (usedFallbackPatch) {
+            _rebuildNodeIndex();
           }
         }
         final registeredPacks = _registerStylePacks(payload['style_packs']);
@@ -354,7 +368,7 @@ class _AppRendererState extends State<AppRenderer> {
     return false;
   }
 
-  bool _applyPatchFast(String id, Map<String, Object?> props) {
+  _PatchApplyResult _applyPatchFast(String id, Map<String, Object?> props) {
     final indexed = _nodeIndex[id];
     if (indexed != null) {
       final rawProps = indexed['props'];
@@ -363,17 +377,14 @@ class _AppRendererState extends State<AppRenderer> {
           : <String, Object?>{};
       mapProps.addAll(props);
       indexed['props'] = mapProps;
-      return true;
+      return const _PatchApplyResult(patched: true, usedFallback: false);
     }
     final patched =
         _applyPatch(_root, id, props) ||
         _applyPatch(_screen, id, props) ||
         _applyPatch(_overlay, id, props) ||
         _applyPatch(_splash, id, props);
-    if (patched) {
-      _rebuildNodeIndex();
-    }
-    return patched;
+    return _PatchApplyResult(patched: patched, usedFallback: patched);
   }
 
   void _rebuildNodeIndex() {
@@ -418,19 +429,13 @@ class _AppRendererState extends State<AppRenderer> {
       return;
     }
 
-    for (final key in _embeddedControlMapKeys) {
-      if (map.containsKey(key)) {
-        _indexControlValue(map[key], parentKey: key);
+    for (final entry in map.entries) {
+      final key = entry.key?.toString();
+      if (key == null) continue;
+      if (_embeddedControlMapKeys.contains(key) ||
+          _embeddedControlListKeys.contains(key)) {
+        _indexControlValue(entry.value, parentKey: key);
       }
-    }
-    for (final key in _embeddedControlListKeys) {
-      if (map.containsKey(key)) {
-        _indexControlValue(map[key], parentKey: key);
-      }
-    }
-    if (parentKey == 'routes') {
-      _indexControlValue(map['child'], parentKey: 'child');
-      _indexControlValue(map['content'], parentKey: 'content');
     }
   }
 
@@ -472,25 +477,12 @@ class _AppRendererState extends State<AppRenderer> {
       }
     }
 
-    for (final key in _embeddedControlMapKeys) {
-      if (!map.containsKey(key)) continue;
-      if (_applyPatchInValue(map[key], id, props, parentKey: key)) {
-        return true;
-      }
-    }
-
-    for (final key in _embeddedControlListKeys) {
-      if (!map.containsKey(key)) continue;
-      if (_applyPatchInValue(map[key], id, props, parentKey: key)) {
-        return true;
-      }
-    }
-
-    if (parentKey == 'routes') {
-      if (_applyPatchInValue(map['child'], id, props, parentKey: 'child')) {
-        return true;
-      }
-      if (_applyPatchInValue(map['content'], id, props, parentKey: 'content')) {
+    for (final entry in map.entries) {
+      final key = entry.key?.toString();
+      if (key == null) continue;
+      if ((_embeddedControlMapKeys.contains(key) ||
+              _embeddedControlListKeys.contains(key)) &&
+          _applyPatchInValue(entry.value, id, props, parentKey: key)) {
         return true;
       }
     }
@@ -782,7 +774,10 @@ class _AppRendererState extends State<AppRenderer> {
     return fallback;
   }
 
-  void _registerInvokeHandler(String controlId, ButterflyUIInvokeHandler handler) {
+  void _registerInvokeHandler(
+    String controlId,
+    ButterflyUIInvokeHandler handler,
+  ) {
     _invokeHandlers[controlId] = handler;
   }
 

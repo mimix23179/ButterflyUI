@@ -1116,7 +1116,15 @@ class ControlRenderer {
         return buildOutlineControl(controlId, props, context.sendEvent);
 
       case 'persona':
-        return buildPersonaControl(controlId, props, context.sendEvent);
+        return buildPersonaControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'pie_plot':
         return buildPiePlotControl(controlId, props, context.sendEvent);
@@ -1804,7 +1812,13 @@ class ControlRenderer {
         return buildCrumbTrailControl(controlId, props, context.sendEvent);
 
       case 'status_bar':
-        return buildStatusBarControl(controlId, props, context.sendEvent);
+        return buildStatusBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'status_mark':
         return buildStatusMarkControl(controlId, props, context.sendEvent);
@@ -1822,13 +1836,25 @@ class ControlRenderer {
         return buildNavRingControl(controlId, props, context.sendEvent);
 
       case 'rail_nav':
-        return buildRailNavControl(controlId, props, context.sendEvent);
+        return buildRailNavControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'notice_bar':
         return buildNoticeBarControl(controlId, props, context.sendEvent);
 
       case 'info_bar':
-        return buildInfoBarControl(controlId, props, context.sendEvent);
+        return buildInfoBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'command_palette':
       case 'command_search':
@@ -1895,9 +1921,16 @@ class ControlRenderer {
       case 'app_bar':
       case 'top_bar':
         {
-          final leading = props['leading'] is Map
+          final hasLeadingProp = props['leading'] is Map;
+          final hasActionsProp =
+              props['actions'] is List && (props['actions'] as List).isNotEmpty;
+          final hasSlotProps = hasLeadingProp || hasActionsProp;
+
+          final leading = hasLeadingProp
               ? context.buildChild(coerceObjectMap(props['leading'] as Map))
-              : (children.isEmpty ? null : context.buildChild(children.first));
+              : (!hasSlotProps && children.isNotEmpty
+                    ? context.buildChild(children.first)
+                    : null);
           final actions = <Widget>[];
           if (props['actions'] is List) {
             for (final item in props['actions'] as List) {
@@ -1906,8 +1939,10 @@ class ControlRenderer {
               }
             }
           }
-          for (var i = leading == null ? 0 : 1; i < children.length; i += 1) {
-            actions.add(context.buildChild(children[i]));
+          if (!hasSlotProps) {
+            for (var i = leading == null ? 0 : 1; i < children.length; i += 1) {
+              actions.add(context.buildChild(children[i]));
+            }
           }
           return ButterflyUIAppBar(
             controlId: controlId,

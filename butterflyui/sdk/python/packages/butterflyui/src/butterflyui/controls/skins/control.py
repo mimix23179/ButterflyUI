@@ -255,7 +255,7 @@ class Skins(Component):
         animation: Mapping[str, Any] | None = None,
         transition: Mapping[str, Any] | None = None,
         interaction: Mapping[str, Any] | None = None,
-        layout: Mapping[str, Any] | None = None,
+        layout: Mapping[str, Any] | str | None = None,
         responsive: Mapping[str, Any] | None = None,
         effect_editor: Mapping[str, Any] | None = None,
         particle_editor: Mapping[str, Any] | None = None,
@@ -370,6 +370,8 @@ class Skins(Component):
 
     @staticmethod
     def _normalize_legacy_props(props: dict[str, Any]) -> None:
+        if isinstance(props.get("layout"), str):
+            props["layout"] = {"mode": str(props["layout"])}
         modules = dict(props.get("modules") or {})
         changed = False
         for legacy_key, canonical_key in SKINS_MODULE_ALIASES.items():

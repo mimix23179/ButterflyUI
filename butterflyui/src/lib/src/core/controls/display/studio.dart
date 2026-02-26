@@ -479,13 +479,19 @@ class _ButterflyUIStudioState extends State<ButterflyUIStudio> {
         .toList(growable: false);
 
     return StudioWorkbench(
+      controlId: widget.controlId,
       runtimeProps: _engine.props,
       availableModules: availableModules,
       activeModule: activeModule,
       history: _engine.history,
       undoDepth: _engine.undoDepth,
       redoDepth: _engine.redoDepth,
+      rawChildren: widget.rawChildren,
       customChildren: customChildren,
+      sendEvent: widget.sendEvent,
+      buildChild: widget.buildChild,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
       onSelectModule: (module) {
         setState(() {
           final normalizedModule = normalizeStudioModuleToken(module);

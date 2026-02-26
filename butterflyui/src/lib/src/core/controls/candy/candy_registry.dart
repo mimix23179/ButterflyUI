@@ -1,36 +1,12 @@
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
+import 'package:butterflyui_runtime/src/core/controls/candy/submodules/candy_submodule_registry.dart';
 
-const Set<String> candyRegistryModules = {
-  'button',
-  'card',
-  'column',
-  'container',
-  'row',
-  'stack',
-  'surface',
-  'wrap',
-  'align',
-  'center',
-  'spacer',
-  'aspect_ratio',
-  'overflow_box',
-  'fitted_box',
-  'effects',
-  'particles',
-  'border',
-  'shadow',
-  'outline',
-  'gradient',
-  'animation',
-  'transition',
-  'canvas',
-  'clip',
-  'decorated_box',
-  'badge',
-  'avatar',
-  'icon',
-  'text',
-  'motion',
+final Set<String> candyRegistryModules = {
+  ...candyLayoutModules,
+  ...candyInteractiveModules,
+  ...candyDecorationModules,
+  ...candyEffectsModules,
+  ...candyMotionModules,
 };
 
 String? candyModuleFromControlType(String type) {
