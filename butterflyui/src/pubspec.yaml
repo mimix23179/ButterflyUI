@@ -11,7 +11,6 @@ dependencies:
     sdk: flutter
   web_socket_channel:
   webview_windows:
-  webview_flutter:
   native_preview_host:
     path: packages/native_preview_host
   collection:
@@ -51,7 +50,6 @@ dependencies:
   super_drag_and_drop:
   flutter_box_transform:
   flutter_portal:
-  flutter_inappwebview:
   google_fonts:
   xterm:
   flutter_glow:

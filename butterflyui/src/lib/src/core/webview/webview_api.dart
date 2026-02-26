@@ -45,7 +45,7 @@ class ButterflyUIWebViewProps {
     this.html = '',
     this.baseUrl,
     this.bgcolor,
-    this.engine = 'inapp',
+    this.engine = 'windows',
     this.fallbackEngine = '',
     this.requestHeaders = const <String, String>{},
     this.userAgent,
@@ -85,6 +85,17 @@ class ButterflyUIWebViewProps {
     return fallback;
   }
 
+  static String _normalizeEngine(Object? value) {
+    final normalized = value?.toString().trim().toLowerCase() ?? '';
+    if (normalized == 'windows' ||
+        normalized == 'webview_windows' ||
+        normalized == 'win' ||
+        normalized == 'win32') {
+      return 'windows';
+    }
+    return 'windows';
+  }
+
   static int _readInt(
     Object? value, {
     required int fallback,
@@ -108,20 +119,8 @@ class ButterflyUIWebViewProps {
     final url = props['url']?.toString() ?? '';
     final html = props['html']?.toString() ?? '';
     final baseUrl = props['base_url']?.toString();
-    final useInApp = props['use_inapp'] == true;
-    final engineRaw =
-        props['engine']?.toString() ?? props['webview_engine']?.toString();
-    final engine = (engineRaw == null || engineRaw.isEmpty)
-        ? (useInApp
-              ? 'inapp'
-              : (kIsWeb
-                    ? 'flutter'
-                    : (defaultTargetPlatform == TargetPlatform.windows
-                          ? 'windows'
-                          : 'flutter')))
-        : engineRaw.toLowerCase();
-    final fallbackEngine =
-        props['fallback_engine']?.toString().trim().toLowerCase() ?? '';
+    final engine = _normalizeEngine(props['engine'] ?? props['webview_engine']);
+    final fallbackEngine = '';
 
     final preventLinksRaw = props['prevent_links'];
     final preventLinks = <String>[];

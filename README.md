@@ -1,6 +1,6 @@
 ![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
 
-# 🦋 ButterflyUI - Built with Codex & Copilot
+# 🦋 ButterflyUI - Built with Codex & Copilot & TRAE AI ✨
 
 **ButterflyUI** is a layered application platform built on composable UI primitives, token-driven styling, and modular umbrella controls.
 

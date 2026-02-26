@@ -8,6 +8,13 @@ from ._shared import Component, merge_props
 __all__ = ["WebView"]
 
 
+def _normalize_webview_engine(value: str | None) -> str:
+    normalized = (value or "").strip().lower()
+    if normalized in {"windows", "webview_windows", "win", "win32"}:
+        return "windows"
+    return "windows"
+
+
 class WebView(Component):
     control_type = "webview"
 
@@ -41,14 +48,15 @@ class WebView(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        resolved_engine = _normalize_webview_engine(engine or webview_engine)
         merged = merge_props(
             props,
             url=url,
             html=html,
             base_url=base_url,
-            engine=engine,
-            webview_engine=webview_engine,
-            fallback_engine=fallback_engine,
+            engine=resolved_engine,
+            webview_engine=resolved_engine,
+            fallback_engine="",
             prevent_links=prevent_links,
             request_headers=dict(request_headers) if request_headers is not None else None,
             user_agent=user_agent,

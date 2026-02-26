@@ -6,10 +6,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_monaco/flutter_monaco.dart' as monaco;
 import 'package:flutter_monaco/src/platform/platform_webview.dart'
     as monaco_platform;
+import 'package:webview_windows/webview_windows.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/umbrella_runtime.dart';
@@ -1491,19 +1491,19 @@ class _ButterflyUICodeEditorState extends State<ButterflyUICodeEditor> {
                   onEmit: _emitConfiguredEvent,
                 ),
               ) ??
-            buildCodeEditorGeneric(
-              CodeEditorSubmoduleContext(
-                controlId: widget.controlId,
-                module: 'workbench_editor',
-                section: <String, Object?>{
-                  'active_module': activeModule,
-                  'language': _runtimeProps['language'] ?? widget.language,
-                  'engine': _runtimeProps['engine'] ?? widget.engine,
-                  'enabled_modules': availableModules.join(', '),
-                },
-                onEmit: _emitConfiguredEvent,
-              ),
-            )
+              buildCodeEditorGeneric(
+                CodeEditorSubmoduleContext(
+                  controlId: widget.controlId,
+                  module: 'workbench_editor',
+                  section: <String, Object?>{
+                    'active_module': activeModule,
+                    'language': _runtimeProps['language'] ?? widget.language,
+                    'engine': _runtimeProps['engine'] ?? widget.engine,
+                    'enabled_modules': availableModules.join(', '),
+                  },
+                  onEmit: _emitConfiguredEvent,
+                ),
+              )
         : buildModuleSurface(panelModule, panelSection);
     final workbenchHeight = (coerceDouble(_runtimeProps['height']) ?? 760)
         .clamp(360, 2200)
@@ -2110,10 +2110,6 @@ class _ModuleTabs extends StatelessWidget {
   }
 }
 
-
-
-
-
 class _CodeEditorMonacoError extends StatelessWidget {
   const _CodeEditorMonacoError({required this.error, required this.onRetry});
 
@@ -2168,36 +2164,30 @@ class _MonacoInAppWindowsWebViewController
     : _readyTimeout = Duration(
         milliseconds: readyTimeoutMs.clamp(5000, 180000),
       ) {
-    _widget = InAppWebView(
-      initialSettings: _defaultSettings,
-      onWebViewCreated: _onWebViewCreated,
-      onLoadStop: _onLoadStop,
-      onConsoleMessage: (controller, message) {
-        debugPrint('[Monaco/InApp] ${message.message}');
+    _widget = ValueListenableBuilder<WebviewValue>(
+      valueListenable: _controller,
+      builder: (context, value, child) {
+        if (!value.isInitialized) {
+          return const SizedBox.shrink();
+        }
+        return Webview(_controller);
       },
     );
   }
 
-  static final InAppWebViewSettings _defaultSettings = InAppWebViewSettings(
-    javaScriptEnabled: true,
-    transparentBackground: true,
-    mediaPlaybackRequiresUserGesture: false,
-    allowFileAccessFromFileURLs: true,
-    allowUniversalAccessFromFileURLs: true,
-    allowFileAccess: true,
-    supportZoom: false,
-    useShouldOverrideUrlLoading: false,
-  );
-
   late final Widget _widget;
-  InAppWebViewController? _controller;
-  final Completer<InAppWebViewController> _controllerReady =
-      Completer<InAppWebViewController>();
+  final WebviewController _controller = WebviewController();
+  StreamSubscription<LoadingState>? _loadingStateSub;
+  StreamSubscription<dynamic>? _messageSub;
+  Completer<void>? _initializeCompleter;
   final Map<String, void Function(String)> _channels =
       <String, void Function(String)>{};
   final Set<String> _boundChannels = <String>{};
   final List<String> _pendingScripts = <String>[];
   final Duration _readyTimeout;
+  final Map<String, Completer<Object?>> _pendingJsResults =
+      <String, Completer<Object?>>{};
+  int _jsRequestSerial = 0;
   String? _pendingHtmlPath;
   String? _pendingCustomCss;
   bool _pendingAllowCdnFonts = false;
@@ -2213,44 +2203,6 @@ class _MonacoInAppWindowsWebViewController
 
   @override
   Widget get widget => _widget;
-
-  void _onWebViewCreated(InAppWebViewController controller) {
-    _controller = controller;
-    if (!_controllerReady.isCompleted) {
-      _controllerReady.complete(controller);
-    }
-    for (final entry in _channels.entries) {
-      _bindChannel(entry.key, entry.value);
-    }
-    unawaited(
-      controller.setSettings(
-        settings: InAppWebViewSettings(javaScriptEnabled: _javascriptEnabled),
-      ),
-    );
-    unawaited(_flushPendingLoad());
-    if (_readySignaled) {
-      unawaited(_flushPendingScripts());
-    }
-  }
-
-  void _onLoadStop(InAppWebViewController controller, WebUri? url) {
-    unawaited(_injectChannelObjects());
-  }
-
-  Future<InAppWebViewController> _ensureController() async {
-    if (_controller != null) {
-      return _controller!;
-    }
-    return _controllerReady.future.timeout(
-      _readyTimeout,
-      onTimeout: () {
-        throw StateError(
-          'Monaco InApp WebView controller did not initialize in '
-          '${_readyTimeout.inMilliseconds}ms.',
-        );
-      },
-    );
-  }
 
   static String _escapeForSingleQuoteJs(String value) {
     return value
@@ -2293,30 +2245,59 @@ class _MonacoInAppWindowsWebViewController
     }
   }
 
+  void _bindSubscriptions() {
+    _loadingStateSub ??= _controller.loadingState.listen((state) {
+      if (state == LoadingState.navigationCompleted) {
+        unawaited(_injectChannelObjects());
+      }
+    });
+    _messageSub ??= _controller.webMessage.listen(_handleWebMessage);
+  }
+
+  void _handleWebMessage(dynamic message) {
+    Object? payload = message;
+    if (message is String) {
+      try {
+        payload = jsonDecode(message);
+      } catch (_) {
+        payload = message;
+      }
+    }
+    if (payload is Map) {
+      final replyId = payload['__monaco_reply__']?.toString();
+      if (replyId != null) {
+        final completer = _pendingJsResults.remove(replyId);
+        if (completer != null && !completer.isCompleted) {
+          final error = payload['error'];
+          if (error != null) {
+            completer.completeError(StateError(error.toString()));
+          } else {
+            completer.complete(payload['result']);
+          }
+        }
+        return;
+      }
+      final channel = payload['channel']?.toString();
+      if (channel != null) {
+        final handler = _channels[channel];
+        if (handler != null) {
+          final channelPayload = payload['payload'];
+          _maybeSignalMonacoReady(channelPayload);
+          handler(_toMessageString(channelPayload));
+        }
+      }
+    }
+  }
+
   void _bindChannel(String name, void Function(String) onMessage) {
-    final controller = _controller;
-    if (controller == null) return;
     if (_boundChannels.contains(name)) return;
-    controller.addJavaScriptHandler(
-      handlerName: name,
-      callback: (arguments) {
-        final payload = arguments.isEmpty ? null : arguments.first;
-        _maybeSignalMonacoReady(payload);
-        final message = _toMessageString(payload);
-        onMessage(message);
-        return null;
-      },
-    );
     _boundChannels.add(name);
   }
 
   Future<void> _ensureChannelObject(String name) async {
-    final controller = _controller;
-    if (controller == null) return;
     final escaped = _escapeForSingleQuoteJs(name);
-    await controller.evaluateJavascript(
-      source:
-          '''
+    await _controller.executeScript(
+      '''
 if (typeof window['$escaped'] === 'undefined') {
   window['$escaped'] = {
     postMessage: function(message) {
@@ -2324,8 +2305,11 @@ if (typeof window['$escaped'] === 'undefined') {
         if (typeof message !== 'string') {
           message = JSON.stringify(message);
         }
-        if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
-          window.flutter_inappwebview.callHandler('$escaped', message);
+        if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+          window.chrome.webview.postMessage(JSON.stringify({
+            channel: '$escaped',
+            payload: message
+          }));
         }
       } catch (_) {}
     }
@@ -2345,22 +2329,19 @@ if (typeof window['$escaped'] === 'undefined') {
 
   Future<void> _flushPendingScripts() async {
     if (!_readySignaled || _pendingScripts.isEmpty) return;
-    final controller = _controller;
-    if (controller == null) return;
     final scripts = List<String>.from(_pendingScripts);
     _pendingScripts.clear();
     for (final script in scripts) {
       try {
-        await controller.evaluateJavascript(source: script);
+        await _controller.executeScript(script);
       } catch (_) {}
     }
   }
 
   Future<void> _flushPendingLoad() async {
     if (_loading || _disposed) return;
-    final controller = _controller;
     final htmlPath = _pendingHtmlPath;
-    if (controller == null || htmlPath == null || htmlPath.isEmpty) return;
+    if (htmlPath == null || htmlPath.isEmpty) return;
 
     _loading = true;
     _readySignaled = false;
@@ -2368,11 +2349,7 @@ if (typeof window['$escaped'] === 'undefined') {
       _readyCompleter = Completer<void>();
     }
     try {
-      await controller.loadUrl(
-        urlRequest: URLRequest(
-          url: WebUri(Uri.file(htmlPath, windows: true).toString()),
-        ),
-      );
+      await _controller.loadUrl(Uri.file(htmlPath, windows: true).toString());
     } finally {
       _loading = false;
     }
@@ -2405,7 +2382,7 @@ if (typeof window['$escaped'] === 'undefined') {
     for (final name in _channels.keys) {
       final escaped = _escapeForSingleQuoteJs(name);
       script.write(
-        "window['$escaped']=window['$escaped']||{postMessage:function(message){try{if(typeof message!=='string'){message=JSON.stringify(message);}if(window.flutter_inappwebview&&window.flutter_inappwebview.callHandler){window.flutter_inappwebview.callHandler('$escaped',message);}}catch(_){}}};",
+        "window['$escaped']=window['$escaped']||{postMessage:function(message){try{if(typeof message!=='string'){message=JSON.stringify(message);}if(window.chrome&&window.chrome.webview&&window.chrome.webview.postMessage){window.chrome.webview.postMessage(JSON.stringify({channel:'$escaped',payload:message}));}}catch(_){}}};",
       );
     }
     script.write('})();</script>');
@@ -2420,37 +2397,33 @@ if (typeof window['$escaped'] === 'undefined') {
         'Monaco InApp controller requires Windows runtime.',
       );
     }
+    await _ensureInitialized();
     _initialized = true;
   }
 
   @override
   Future<void> enableJavaScript() async {
     _javascriptEnabled = true;
-    final controller = _controller;
-    if (controller != null) {
-      await controller.setSettings(
-        settings: InAppWebViewSettings(javaScriptEnabled: true),
-      );
-    }
   }
 
   @override
   Future<Object?> runJavaScript(String script) async {
+    if (!_javascriptEnabled) return null;
     await _ensureLoadRequested();
-    final controller = _controller;
-    if (controller == null || !_readySignaled) {
+    if (!_readySignaled) {
       _pendingScripts.add(script);
       return null;
     }
-    return controller.evaluateJavascript(source: script);
+    await _controller.executeScript(script);
+    return null;
   }
 
   @override
   Future<Object?> runJavaScriptReturningResult(String script) async {
+    if (!_javascriptEnabled) return null;
     await _ensureLoadRequested();
-    final controller = await _ensureController();
     await _waitForMonacoReady();
-    return controller.evaluateJavascript(source: script);
+    return _evaluateScriptWithResult(script);
   }
 
   @override
@@ -2459,9 +2432,7 @@ if (typeof window['$escaped'] === 'undefined') {
     void Function(String) onMessage,
   ) async {
     _channels[name] = onMessage;
-    if (_controller != null) {
-      _bindChannel(name, onMessage);
-    }
+    _bindChannel(name, onMessage);
     await _ensureLoadRequested();
     return null;
   }
@@ -2470,16 +2441,10 @@ if (typeof window['$escaped'] === 'undefined') {
   Future<Object?> removeJavaScriptChannel(String name) async {
     _channels.remove(name);
     _boundChannels.remove(name);
-    final controller = _controller;
-    if (controller != null) {
-      try {
-        controller.removeJavaScriptHandler(handlerName: name);
-      } catch (_) {}
-      final escaped = _escapeForSingleQuoteJs(name);
-      await controller.evaluateJavascript(
-        source: "try { delete window['$escaped']; } catch (_) {}",
-      );
-    }
+    final escaped = _escapeForSingleQuoteJs(name);
+    await _controller.executeScript(
+      "try { delete window['$escaped']; } catch (_) {}",
+    );
     return null;
   }
 
@@ -2530,30 +2495,98 @@ try {
   if (document.body) document.body.style.background = _color;
 } catch (_) {}
 ''';
-    final controller = _controller;
-    if (controller == null || !_readySignaled) {
+    if (!_readySignaled) {
       _pendingScripts.add(script);
       return;
     }
-    await controller.evaluateJavascript(source: script);
+    await _controller.executeScript(script);
   }
 
   @override
   void dispose() {
     if (_disposed) return;
     _disposed = true;
-    final controller = _controller;
-    if (controller != null) {
-      for (final name in _channels.keys) {
-        try {
-          controller.removeJavaScriptHandler(handlerName: name);
-        } catch (_) {}
-      }
-    }
+    _loadingStateSub?.cancel();
+    _messageSub?.cancel();
+    _loadingStateSub = null;
+    _messageSub = null;
     _channels.clear();
     _boundChannels.clear();
     _pendingScripts.clear();
     _pendingHtmlPath = null;
+    _pendingJsResults.clear();
+    // ignore: discarded_futures
+    _controller.dispose();
+  }
+
+  Future<void> _ensureInitialized() async {
+    if (_controller.value.isInitialized) {
+      _bindSubscriptions();
+      return;
+    }
+    final completer = _initializeCompleter;
+    if (completer != null) {
+      return completer.future;
+    }
+    final nextCompleter = Completer<void>();
+    _initializeCompleter = nextCompleter;
+    try {
+      await _controller.initialize().timeout(_readyTimeout);
+      _bindSubscriptions();
+      nextCompleter.complete();
+    } catch (error, stackTrace) {
+      nextCompleter.completeError(error, stackTrace);
+      rethrow;
+    } finally {
+      _initializeCompleter = null;
+    }
+  }
+
+  Future<Object?> _evaluateScriptWithResult(String script) async {
+    final requestId = (++_jsRequestSerial).toString();
+    final escapedId = _escapeForSingleQuoteJs(requestId);
+    final completer = Completer<Object?>();
+    _pendingJsResults[requestId] = completer;
+    final wrappedScript =
+        '''
+(function(){
+  let result;
+  try {
+    result = (function(){ $script })();
+  } catch (e) {
+    if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+      window.chrome.webview.postMessage(JSON.stringify({"__monaco_reply__":"$escapedId","error":String(e)}));
+    }
+    return;
+  }
+  try {
+    if (typeof result === 'undefined') {
+      result = null;
+    }
+    if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+      window.chrome.webview.postMessage(JSON.stringify({"__monaco_reply__":"$escapedId","result":result}));
+    }
+  } catch (e) {
+    if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+      window.chrome.webview.postMessage(JSON.stringify({"__monaco_reply__":"$escapedId","error":String(e)}));
+    }
+  }
+})();
+''';
+    await _controller.executeScript(wrappedScript);
+    try {
+      return await completer.future.timeout(
+        _readyTimeout,
+        onTimeout: () {
+          throw StateError(
+            'Monaco WebView did not return a script result in '
+            '${_readyTimeout.inMilliseconds}ms.',
+          );
+        },
+      );
+    } finally {
+      _pendingJsResults.remove(requestId);
+    }
   }
 }
 

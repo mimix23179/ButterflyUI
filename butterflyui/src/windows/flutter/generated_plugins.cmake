@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
-  flutter_inappwebview_windows
   hotkey_manager_windows
   irondash_engine_context
   media_kit_libs_windows_audio
