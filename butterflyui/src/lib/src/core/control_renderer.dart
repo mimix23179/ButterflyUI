@@ -14,6 +14,7 @@ import 'controls/buttons/filled_button.dart';
 import 'controls/buttons/outlined_button.dart';
 import 'controls/buttons/text_button.dart';
 import 'controls/common/option_types.dart';
+import 'controls/common/icon_value.dart';
 import 'controls/customization/animated_gradient.dart';
 import 'controls/customization/avatar_stack.dart';
 import 'controls/customization/badge.dart';
@@ -948,8 +949,13 @@ class ControlRenderer {
 
       case 'icon':
         {
-          final iconData = _parseIconData(props['icon']) ?? Icons.help_outline;
-          return buildIconControl(iconData, props);
+          final iconValue = props['icon'] ?? props['value'] ?? props['name'];
+          final size = coerceDouble(props['size']);
+          final color = coerceColor(props['color']);
+          final tooltip = props['tooltip']?.toString();
+          final widget = buildIconValue(iconValue, size: size, color: color) ?? const Icon(Icons.help_outline);
+          if (tooltip == null || tooltip.isEmpty) return widget;
+          return Tooltip(message: tooltip, child: widget);
         }
 
       case 'emoji_icon':

@@ -31,6 +31,8 @@ include = [
     "butterflyui.*",
     "butterflyui_desktop",
     "butterflyui_desktop.*",
+    "butterflyui_web", 
+    "butterflyui_web.*",
 ]
 
 [tool.setuptools.package-data]

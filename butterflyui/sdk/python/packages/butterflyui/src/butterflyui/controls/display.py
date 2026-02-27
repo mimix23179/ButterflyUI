@@ -75,7 +75,7 @@ class Icon(Component):
 
     def __init__(
         self,
-        icon: str | None = None,
+        icon: str | int | None = None,
         *,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -190,9 +190,9 @@ class Glyph(Icon):
 
     def __init__(
         self,
-        glyph: str | None = None,
+        glyph: str | int | None = None,
         *,
-        icon: str | None = None,
+        icon: str | int | None = None,
         tooltip: str | None = None,
         size: float | None = None,
         color: Any | None = None,
@@ -215,9 +215,9 @@ class GlyphButton(Component):
 
     def __init__(
         self,
-        glyph: str | None = None,
+        glyph: str | int | None = None,
         *,
-        icon: str | None = None,
+        icon: str | int | None = None,
         tooltip: str | None = None,
         size: float | None = None,
         color: Any | None = None,

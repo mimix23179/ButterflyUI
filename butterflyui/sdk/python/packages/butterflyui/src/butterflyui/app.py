@@ -28,6 +28,7 @@ from .controls.candy.control import CandyTheme
 from .controls._shared import modifier_capabilities_manifest
 
 import butterflyui_desktop
+import butterflyui_web
 
 _log = logging.getLogger(__name__)
 
@@ -670,6 +671,32 @@ class WebSession(ButterflyUISession):
 	def url(self) -> str:
 		return self._server.url
 
+	def launch_runtime(
+		self,
+		*,
+		wait: bool = False,
+		open_browser: bool = True,
+		http_host: str | None = None,
+		http_port: int | None = None,
+		auto_install: bool = True,
+	) -> Any:
+		if butterflyui_web is None:
+			raise ButterflyUIError("butterflyui_web is not available")
+		ws_url = self.url
+		host = http_host or self._config.host
+		return butterflyui_web.run(
+			ws_url=ws_url,
+			session_token=self._config.token,
+			host=host,
+			port=self._server.port,
+			path=self._config.path,
+			wait=wait,
+			open_browser=open_browser,
+			http_host=host,
+			http_port=http_port,
+			auto_install=auto_install,
+		)
+
 
 class DesktopSession(WebSession):
 	"""Desktop runtime session using butterflyui_desktop."""
@@ -807,10 +834,14 @@ class RuntimeApp(BaseApp):
 			if isinstance(session, DesktopSession):
 				session.launch_runtime(wait=False)
 			else:
-				print(f"App running at: 127.0.0.1:{port}")
-				print(f"App running at: localhost:{port}")
-				if host not in ("127.0.0.1", "localhost"):
-					print(f"App running at: {host}:{port}")
+				web_runtime = session.launch_runtime(wait=False)
+				if web_runtime is not None and hasattr(web_runtime, "url"):
+					print(f"App running at: {web_runtime.url}")
+				else:
+					print(f"App running at: 127.0.0.1:{port}")
+					print(f"App running at: localhost:{port}")
+					if host not in ("127.0.0.1", "localhost"):
+						print(f"App running at: {host}:{port}")
 
 			await session.wait_for_hello(timeout=self._config.hello_timeout)
 

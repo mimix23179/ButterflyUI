@@ -33,7 +33,6 @@ dependencies:
   media_kit_video:
   material_color_utilities:
   shared_preferences:
-  share_plus:
   undo:
   photo_view:
   flutter_staggered_grid_view:

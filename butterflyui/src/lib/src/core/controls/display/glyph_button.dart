@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildGlyphButtonControl(
@@ -12,8 +13,13 @@ Widget buildGlyphButtonControl(
   final tooltip = props['tooltip']?.toString();
   final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
 
+  final size = coerceDouble(props['size']);
+  final color = coerceColor(props['color']);
+  final iconWidget =
+      buildIconValue(glyph, size: size, color: color) ??
+      Icon(Icons.circle, size: size, color: color);
   final button = IconButton(
-    icon: Icon(_parseIconData(glyph), size: coerceDouble(props['size']), color: coerceColor(props['color'])),
+    icon: iconWidget,
     onPressed: !enabled
         ? null
         : () {
@@ -28,29 +34,3 @@ Widget buildGlyphButtonControl(
   return Tooltip(message: tooltip, child: button);
 }
 
-IconData _parseIconData(String name) {
-  switch (name.toLowerCase()) {
-    case 'add':
-      return Icons.add;
-    case 'close':
-      return Icons.close;
-    case 'check':
-      return Icons.check;
-    case 'edit':
-      return Icons.edit;
-    case 'delete':
-      return Icons.delete;
-    case 'search':
-      return Icons.search;
-    case 'menu':
-      return Icons.menu;
-    case 'more':
-    case 'more_horiz':
-      return Icons.more_horiz;
-    case 'drag':
-    case 'drag_indicator':
-      return Icons.drag_indicator;
-    default:
-      return Icons.circle;
-  }
-}

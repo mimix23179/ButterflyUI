@@ -1664,7 +1664,7 @@ class IconButton(Button):
 
     def __init__(
         self,
-        icon: str | None = None,
+        icon: str | int | None = None,
         *,
         tooltip: str | None = None,
         size: float | None = None,
@@ -1750,6 +1750,87 @@ class ElevatedButton(Button):
             text=text,
             value=value,
             variant="elevated",
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class FilledButton(Button):
+    control_type = "filled_button"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        text: str | None = None,
+        value: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            text=text,
+            value=value,
+            variant="filled",
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class OutlinedButton(Button):
+    control_type = "outlined_button"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        text: str | None = None,
+        value: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            text=text,
+            value=value,
+            variant="outlined",
+            props=merge_props(props, events=events),
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+
+
+class TextButton(Button):
+    control_type = "text_button"
+
+    def __init__(
+        self,
+        label: str | None = None,
+        *,
+        text: str | None = None,
+        value: Any | None = None,
+        events: list[str] | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            label=label,
+            text=text,
+            value=value,
+            variant="text",
             props=merge_props(props, events=events),
             style=style,
             strict=strict,

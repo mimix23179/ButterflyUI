@@ -1,2 +1,3 @@
 butterflyui
 butterflyui_desktop
+butterflyui_web

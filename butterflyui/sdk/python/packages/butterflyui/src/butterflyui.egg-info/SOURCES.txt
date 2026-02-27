@@ -65,4 +65,4 @@ src/butterflyui/ui/events.py
 src/butterflyui/ui/queue.py
 src/butterflyui/ui/state.py
 src/butterflyui_desktop/__init__.py
-src/butterflyui_desktop/__version__.py
+src/butterflyui_web/__init__.py
