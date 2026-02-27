@@ -275,6 +275,7 @@ class ControlRenderer {
        styleTokens = styleTokens ?? const <String, Object?>{} {
     // Register candy controls into the registry
     registerCandyControls(this.registry);
+    registerSkinsControls(this.registry);
   }
 
   Widget buildFromControl(
@@ -496,23 +497,17 @@ class ControlRenderer {
         return buildClipControl(props, rawChildren, context.buildChild);
 
       case 'candy':
-        // Use registry to build candy controls
-        final builder = registry.builderFor('candy');
-        if (builder != null) {
-          return builder(
-            ButterflyUIControlContext(
-              tokens: tokens,
-              stylePack: stylePack,
-              sendEvent: sendEvent,
-              sendSystemEvent: sendSystemEvent,
-              registerInvokeHandler: registerInvokeHandler,
-              unregisterInvokeHandler: unregisterInvokeHandler,
-              buildChild: context.buildChild,
-            ),
-            {'id': controlId, 'type': 'candy', 'props': props, 'children': rawChildren},
-          );
-        }
-        return const SizedBox.shrink();
+        final candyControl = buildCandyControl(
+          controlId,
+          props,
+          rawChildren,
+          tokens,
+          sendEvent,
+          registerInvokeHandler,
+          unregisterInvokeHandler,
+          context.buildChild,
+        );
+        return candyControl ?? const SizedBox.shrink();
 
       case 'gallery':
         return buildGalleryControl(

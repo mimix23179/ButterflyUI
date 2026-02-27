@@ -9,7 +9,7 @@ different themed skins like shadow, fire, earth, gaming, etc.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, Iterable, Mapping
 
 from ...core import Control
 
@@ -189,6 +189,36 @@ class SkinsScope(Control):
     
     # Children
     children: list[Control] = field(default_factory=list)
+
+    def __init__(
+        self,
+        *children: Control,
+        skin: str = "default",
+        tokens: Optional[SkinsTokens] = None,
+        brightness: str = "light",
+        children_list: Optional[Iterable[Control]] = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        self.skin = skin
+        self.tokens = tokens
+        self.brightness = brightness
+
+        merged_children = list(children)
+        if children_list is not None:
+            merged_children.extend(list(children_list))
+
+        super().__init__(
+            self.control_type,
+            props=props,
+            children=merged_children,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+        self.__post_init__()
     
     def __post_init__(self):
         # Convert tokens to dict if provided
@@ -272,6 +302,86 @@ class Skins(Control):
     
     # Children
     children: list[Control] = field(default_factory=list)
+
+    def __init__(
+        self,
+        *children: Control,
+        module: str = "container",
+        main: Optional[str] = None,
+        cross: Optional[str] = None,
+        size: Optional[str] = None,
+        direction: Optional[str] = None,
+        alignment: Optional[str] = None,
+        width: Optional[float] = None,
+        height: Optional[float] = None,
+        fit: Optional[str] = None,
+        spacing: Optional[float] = None,
+        run_spacing: Optional[float] = None,
+        padding: Optional[Any] = None,
+        margin: Optional[Any] = None,
+        radius: Optional[float] = None,
+        gradient: Optional[Any] = None,
+        bgcolor: Optional[str] = None,
+        background: Optional[str] = None,
+        shadow: Optional[Any] = None,
+        border: Optional[Any] = None,
+        shape: Optional[str] = None,
+        color: Optional[str] = None,
+        elevation: Optional[float] = None,
+        shadow_color: Optional[str] = None,
+        shimmer: Optional[bool] = None,
+        overlay: Optional[bool] = None,
+        duration_ms: Optional[int] = None,
+        curve: Optional[str] = None,
+        preset: Optional[str] = None,
+        children_list: Optional[Iterable[Control]] = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        self.module = module
+        self.main = main
+        self.cross = cross
+        self.size = size
+        self.direction = direction
+        self.alignment = alignment
+        self.width = width
+        self.height = height
+        self.fit = fit
+        self.spacing = spacing
+        self.run_spacing = run_spacing
+        self.padding = padding
+        self.margin = margin
+        self.radius = radius
+        self.gradient = gradient
+        self.bgcolor = bgcolor
+        self.background = background
+        self.shadow = shadow
+        self.border = border
+        self.shape = shape
+        self.color = color
+        self.elevation = elevation
+        self.shadow_color = shadow_color
+        self.shimmer = shimmer
+        self.overlay = overlay
+        self.duration_ms = duration_ms
+        self.curve = curve
+        self.preset = preset
+
+        merged_children = list(children)
+        if children_list is not None:
+            merged_children.extend(list(children_list))
+
+        super().__init__(
+            self.control_type,
+            props=props,
+            children=merged_children,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+        self.__post_init__()
     
     def __post_init__(self):
         # Map props

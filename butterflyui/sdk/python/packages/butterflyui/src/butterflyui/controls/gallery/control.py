@@ -239,6 +239,54 @@ class Gallery(Control):
     
     # Children
     children: list[Control] = field(default_factory=list)
+
+    def __init__(
+        self,
+        *children: Control,
+        items: Optional[Iterable[GalleryItem]] = None,
+        layout: str = "grid",
+        columns: Optional[int] = None,
+        spacing: Optional[float] = None,
+        main_axis_spacing: Optional[float] = None,
+        cross_axis_spacing: Optional[float] = None,
+        radius: Optional[float] = None,
+        show_selection: bool = False,
+        multi_select: bool = False,
+        show_actions: bool = True,
+        show_meta: bool = True,
+        scroll_direction: str = "vertical",
+        children_list: Optional[Iterable[Control]] = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        self.items = items
+        self.layout = layout
+        self.columns = columns
+        self.spacing = spacing
+        self.main_axis_spacing = main_axis_spacing
+        self.cross_axis_spacing = cross_axis_spacing
+        self.radius = radius
+        self.show_selection = show_selection
+        self.multi_select = multi_select
+        self.show_actions = show_actions
+        self.show_meta = show_meta
+        self.scroll_direction = scroll_direction
+
+        merged_children = list(children)
+        if children_list is not None:
+            merged_children.extend(list(children_list))
+
+        super().__init__(
+            self.control_type,
+            props=props,
+            children=merged_children,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+        self.__post_init__()
     
     def __post_init__(self):
         # Convert items to list of dicts
@@ -322,6 +370,42 @@ class GalleryScope(Control):
     
     # Children
     children: list[Control] = field(default_factory=list)
+
+    def __init__(
+        self,
+        *children: Control,
+        layout: str = "grid",
+        columns: Optional[int] = None,
+        spacing: Optional[float] = None,
+        main_axis_spacing: Optional[float] = None,
+        cross_axis_spacing: Optional[float] = None,
+        radius: Optional[float] = None,
+        children_list: Optional[Iterable[Control]] = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        self.layout = layout
+        self.columns = columns
+        self.spacing = spacing
+        self.main_axis_spacing = main_axis_spacing
+        self.cross_axis_spacing = cross_axis_spacing
+        self.radius = radius
+
+        merged_children = list(children)
+        if children_list is not None:
+            merged_children.extend(list(children_list))
+
+        super().__init__(
+            self.control_type,
+            props=props,
+            children=merged_children,
+            style=style,
+            strict=strict,
+            **kwargs,
+        )
+        self.__post_init__()
     
     def __post_init__(self):
         if self.layout:

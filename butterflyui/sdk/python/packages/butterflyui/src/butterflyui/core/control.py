@@ -340,7 +340,7 @@ class Control:
 
     def __init__(
         self,
-        control_type: str,
+        control_type: str | None = None,
         *,
         control_id: str | None = None,
         props: Mapping[str, Any] | None = None,
@@ -350,7 +350,12 @@ class Control:
         strict: bool = False,
         **extra_props: Any,
     ) -> None:
-        self.control_type = str(control_type)
+        resolved_type = control_type
+        if not resolved_type:
+            resolved_type = getattr(self, "control_type", None)
+        if not resolved_type:
+            resolved_type = self.__class__.__name__.lower()
+        self.control_type = str(resolved_type)
         self.control_id = str(control_id) if control_id else uuid.uuid4().hex
         self.props = {}
         self.children = list(children) if children else []
