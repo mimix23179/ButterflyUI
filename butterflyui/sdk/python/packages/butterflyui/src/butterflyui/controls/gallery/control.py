@@ -1,599 +1,429 @@
+"""
+Gallery Control - A unified gallery control for displaying media items.
+
+Gallery is a control that uses various existing components from ButterflyUI
+to let users build gallery views for their programs. Users can create
+different gallery layouts like grid, masonry, list, carousel, virtualGrid, virtualList.
+"""
+
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Optional, Iterable, Mapping, List
 
-from ...core.schema import ButterflyUIContractError, ensure_valid_props
-from .._shared import Component, merge_props
-
-__all__ = ["Gallery"]
-
-GALLERY_SCHEMA_VERSION = 2
-
-GALLERY_MODULES = {
-    "toolbar",
-    "filter_bar",
-    "grid_layout",
-    "item_actions",
-    "item_badge",
-    "item_meta_row",
-    "item_preview",
-    "item_selectable",
-    "item_tile",
-    "pagination",
-    "section_header",
-    "sort_bar",
-    "empty_state",
-    "loading_skeleton",
-    "search_bar",
-    "fonts",
-    "font_picker",
-    "font_renderer",
-    "audio",
-    "audio_picker",
-    "audio_renderer",
-    "video",
-    "video_picker",
-    "video_renderer",
-    "image",
-    "image_picker",
-    "image_renderer",
-    "document",
-    "document_picker",
-    "document_renderer",
-    "item_drag_handle",
-    "item_drop_target",
-    "item_reorder_handle",
-    "item_selection_checkbox",
-    "item_selection_radio",
-    "item_selection_switch",
-    "apply",
-    "clear",
-    "select_all",
-    "deselect_all",
-    "apply_font",
-    "apply_image",
-    "set_as_wallpaper",
-    "presets",
-    "skins",
-}
-
-GALLERY_STATES = {"idle", "loading", "empty", "ready", "disabled"}
-
-GALLERY_EVENTS = {
-    "change",
-    "select",
-    "select_change",
-    "page_change",
-    "sort_change",
-    "filter_change",
-    "action",
-    "apply",
-    "clear",
-    "select_all",
-    "deselect_all",
-    "apply_font",
-    "apply_image",
-    "set_as_wallpaper",
-    "pick",
-    "drag_handle",
-    "drop_target",
-    "section_action",
-    "font_change",
-}
-
-GALLERY_REGISTRY_ROLE_ALIASES = {
-    "module": "module_registry",
-    "modules": "module_registry",
-    "source": "source_registry",
-    "sources": "source_registry",
-    "type": "type_registry",
-    "types": "type_registry",
-    "handler": "type_registry",
-    "view": "view_registry",
-    "views": "view_registry",
-    "panel": "panel_registry",
-    "panels": "panel_registry",
-    "apply": "apply_registry",
-    "adapter": "apply_registry",
-    "adapters": "apply_registry",
-    "command": "command_registry",
-    "commands": "command_registry",
-    "module_registry": "module_registry",
-    "source_registry": "source_registry",
-    "type_registry": "type_registry",
-    "view_registry": "view_registry",
-    "panel_registry": "panel_registry",
-    "apply_registry": "apply_registry",
-    "command_registry": "command_registry",
-}
-
-GALLERY_REGISTRY_MANIFEST_LISTS = {
-    "module_registry": "enabled_modules",
-    "source_registry": "enabled_sources",
-    "type_registry": "enabled_types",
-    "view_registry": "enabled_views",
-    "panel_registry": "enabled_panels",
-    "apply_registry": "enabled_adapters",
-    "command_registry": "enabled_commands",
-}
+from ...core import Control
 
 
-def _normalize_token(value: str | None) -> str:
-    if value is None:
-        return ""
-    return value.strip().lower().replace("-", "_").replace(" ", "_")
+# ============================================================================
+# Gallery Layout Types
+# ============================================================================
 
-
-def _normalize_module(value: str | None) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    return normalized
-
-
-def _normalize_state(value: str | None) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    return normalized
-
-
-def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
-    if values is None:
-        return None
-    out: list[str] = []
-    for entry in values:
-        value = _normalize_token(str(entry))
-        if value and value not in out:
-            out.append(value)
-    return out
-
-
-def _normalize_registry_role(
-    value: str | None,
-    aliases: Mapping[str, str],
-) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    return aliases.get(normalized, f"{normalized}_registry")
-
-
-def _register_runtime_module(
-    props: dict[str, Any],
-    *,
-    role: str,
-    module_id: str,
-    definition: Mapping[str, Any] | None,
-) -> dict[str, Any]:
-    normalized_role = _normalize_registry_role(role, GALLERY_REGISTRY_ROLE_ALIASES)
-    normalized_module = _normalize_module(module_id)
-    if normalized_module is None:
-        normalized_module = _normalize_token(module_id)
-    if not normalized_role or not normalized_module:
-        return {"ok": False, "error": "role and module_id are required"}
-
-    registries = dict(props.get("registries") or {})
-    role_registry = dict(registries.get(normalized_role) or {})
-    role_registry[normalized_module] = dict(definition or {})
-    registries[normalized_role] = role_registry
-    props["registries"] = registries
-
-    manifest = dict(props.get("manifest") or {})
-    enabled_modules = _normalize_events(manifest.get("enabled_modules")) or []
-    if normalized_module in GALLERY_MODULES and normalized_module not in enabled_modules:
-        enabled_modules.append(normalized_module)
-    manifest["enabled_modules"] = enabled_modules
-
-    list_key = GALLERY_REGISTRY_MANIFEST_LISTS.get(normalized_role)
-    if list_key:
-        values = _normalize_events(manifest.get(list_key)) or []
-        if normalized_module not in values:
-            values.append(normalized_module)
-        manifest[list_key] = values
-    props["manifest"] = manifest
-
-    if normalized_module in GALLERY_MODULES:
-        modules = dict(props.get("modules") or {})
-        modules.setdefault(normalized_module, {})
-        props["modules"] = modules
-        props.setdefault(normalized_module, modules[normalized_module])
-
-    return {
-        "ok": True,
-        "role": normalized_role,
-        "module_id": normalized_module,
-        "definition": dict(definition or {}),
-    }
-
-
-class Gallery(Component):
-    control_type = "gallery"
-
-    def __init__(
-        self,
-        *children: Any,
-        items: list[Any] | None = None,
-        module: str | None = None,
-        state: str | None = None,
-        custom_layout: bool | None = None,
-        layout: str | None = None,
-        modules: Mapping[str, Any] | None = None,
-        radius: float | None = None,
-        spacing: float | None = None,
-        run_spacing: float | None = None,
-        tile_width: float | None = None,
-        tile_height: float | None = None,
-        selectable: bool | None = None,
-        enabled: bool | None = None,
-        events: Iterable[str] | None = None,
-        toolbar: Mapping[str, Any] | None = None,
-        filter_bar: Mapping[str, Any] | None = None,
-        grid_layout: Mapping[str, Any] | None = None,
-        item_actions: Mapping[str, Any] | None = None,
-        item_badge: Mapping[str, Any] | None = None,
-        item_meta_row: Mapping[str, Any] | None = None,
-        item_preview: Mapping[str, Any] | None = None,
-        item_selectable: Mapping[str, Any] | None = None,
-        item_tile: Mapping[str, Any] | None = None,
-        pagination: Mapping[str, Any] | None = None,
-        section_header: Mapping[str, Any] | None = None,
-        sort_bar: Mapping[str, Any] | None = None,
-        empty_state: Mapping[str, Any] | None = None,
-        loading_skeleton: Mapping[str, Any] | None = None,
-        search_bar: Mapping[str, Any] | None = None,
-        fonts: Mapping[str, Any] | None = None,
-        font_picker: Mapping[str, Any] | None = None,
-        font_renderer: Mapping[str, Any] | None = None,
-        audio: Mapping[str, Any] | None = None,
-        audio_picker: Mapping[str, Any] | None = None,
-        audio_renderer: Mapping[str, Any] | None = None,
-        video: Mapping[str, Any] | None = None,
-        video_picker: Mapping[str, Any] | None = None,
-        video_renderer: Mapping[str, Any] | None = None,
-        image: Mapping[str, Any] | None = None,
-        image_picker: Mapping[str, Any] | None = None,
-        image_renderer: Mapping[str, Any] | None = None,
-        document: Mapping[str, Any] | None = None,
-        document_picker: Mapping[str, Any] | None = None,
-        document_renderer: Mapping[str, Any] | None = None,
-        item_drag_handle: Mapping[str, Any] | None = None,
-        item_drop_target: Mapping[str, Any] | None = None,
-        item_reorder_handle: Mapping[str, Any] | None = None,
-        item_selection_checkbox: Mapping[str, Any] | None = None,
-        item_selection_radio: Mapping[str, Any] | None = None,
-        item_selection_switch: Mapping[str, Any] | None = None,
-        apply: Mapping[str, Any] | None = None,
-        clear: Mapping[str, Any] | None = None,
-        select_all: Mapping[str, Any] | None = None,
-        deselect_all: Mapping[str, Any] | None = None,
-        apply_font: Mapping[str, Any] | None = None,
-        apply_image: Mapping[str, Any] | None = None,
-        set_as_wallpaper: Mapping[str, Any] | None = None,
-        presets: Mapping[str, Any] | None = None,
-        skins: Mapping[str, Any] | None = None,
-        schema_version: int = GALLERY_SCHEMA_VERSION,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        module_map: dict[str, Any] = {
-            "toolbar": toolbar,
-            "filter_bar": filter_bar,
-            "grid_layout": grid_layout,
-            "item_actions": item_actions,
-            "item_badge": item_badge,
-            "item_meta_row": item_meta_row,
-            "item_preview": item_preview,
-            "item_selectable": item_selectable,
-            "item_tile": item_tile,
-            "pagination": pagination,
-            "section_header": section_header,
-            "sort_bar": sort_bar,
-            "empty_state": empty_state,
-            "loading_skeleton": loading_skeleton,
-            "search_bar": search_bar,
-            "fonts": fonts,
-            "font_picker": font_picker,
-            "font_renderer": font_renderer,
-            "audio": audio,
-            "audio_picker": audio_picker,
-            "audio_renderer": audio_renderer,
-            "video": video,
-            "video_picker": video_picker,
-            "video_renderer": video_renderer,
-            "image": image,
-            "image_picker": image_picker,
-            "image_renderer": image_renderer,
-            "document": document,
-            "document_picker": document_picker,
-            "document_renderer": document_renderer,
-            "item_drag_handle": item_drag_handle,
-            "item_drop_target": item_drop_target,
-            "item_reorder_handle": item_reorder_handle,
-            "item_selection_checkbox": item_selection_checkbox,
-            "item_selection_radio": item_selection_radio,
-            "item_selection_switch": item_selection_switch,
-            "apply": apply,
-            "clear": clear,
-            "select_all": select_all,
-            "deselect_all": deselect_all,
-            "apply_font": apply_font,
-            "apply_image": apply_image,
-            "set_as_wallpaper": set_as_wallpaper,
-            "presets": presets,
-            "skins": skins,
-        }
-
-        merged_modules: dict[str, Any] = {}
-        if isinstance(modules, Mapping):
-            for key, value in modules.items():
-                normalized = _normalize_module(str(key))
-                if normalized and normalized in GALLERY_MODULES and value is not None:
-                    merged_modules[normalized] = value
-        for key, value in module_map.items():
-            if value is not None:
-                merged_modules[key] = value
-
-        merged = merge_props(
-            props,
-            schema_version=int(schema_version),
-            module=_normalize_module(module),
-            state=_normalize_state(state),
-            custom_layout=custom_layout,
-            layout=layout,
-            manifest=dict(kwargs.pop("manifest", {}) or {}),
-            registries=dict(kwargs.pop("registries", {}) or {}),
-            items=items,
-            radius=radius,
-            spacing=spacing,
-            run_spacing=run_spacing,
-            tile_width=tile_width,
-            tile_height=tile_height,
-            selectable=selectable,
-            enabled=enabled,
-            events=_normalize_events(events),
-            modules=merged_modules,
-            **merged_modules,
-            **kwargs,
-        )
-        self._strict_contract = strict
-        self._validate_props(merged, strict=strict)
-        super().__init__(*children, props=merged, style=style, strict=strict)
+class GalleryLayoutType:
+    """Gallery layout type enumeration."""
+    GRID = "grid"
+    MASONRY = "masonry"
+    LIST = "list"
+    CAROUSEL = "carousel"
+    VIRTUAL_GRID = "virtual_grid"
+    VIRTUAL_LIST = "virtual_list"
 
     @staticmethod
-    def _validate_props(props: Mapping[str, Any], *, strict: bool) -> None:
-        try:
-            ensure_valid_props("gallery", props, strict=strict)
-        except ButterflyUIContractError as exc:
-            raise ValueError("\n".join(exc.errors)) from exc
+    def all() -> List[str]:
+        return [
+            GalleryLayoutType.GRID,
+            GalleryLayoutType.MASONRY,
+            GalleryLayoutType.LIST,
+            GalleryLayoutType.CAROUSEL,
+            GalleryLayoutType.VIRTUAL_GRID,
+            GalleryLayoutType.VIRTUAL_LIST,
+        ]
 
-    def set_module(self, session: Any, module: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        normalized = _normalize_module(module)
-        if normalized is None or normalized not in GALLERY_MODULES:
-            return {"ok": False, "error": f"Unknown gallery module '{module}'"}
-        payload_dict = dict(payload or {})
-        self.props["module"] = normalized
-        modules = dict(self.props.get("modules") or {})
-        modules[normalized] = payload_dict
-        self.props["modules"] = modules
-        self.props[normalized] = payload_dict
-        self._validate_props(self.props, strict=self._strict_contract)
-        return self.invoke(session, "set_module", {"module": normalized, "payload": payload_dict})
 
-    def update_module(self, session: Any, module: str, **payload: Any) -> dict[str, Any]:
-        return self.set_module(session, module, payload)
+# ============================================================================
+# Gallery Item Model
+# ============================================================================
 
-    def set_state(self, session: Any, state: str) -> dict[str, Any]:
-        normalized = _normalize_state(state)
-        if normalized is None or normalized not in GALLERY_STATES:
-            return {"ok": False, "error": f"Unknown gallery state '{state}'"}
-        self.props["state"] = normalized
-        self._validate_props(self.props, strict=self._strict_contract)
-        return self.invoke(session, "set_state", {"state": normalized})
+@dataclass
+class GalleryItem:
+    """Gallery item model for displaying media in gallery views."""
+    id: str
+    name: Optional[str] = None
+    path: Optional[str] = None
+    url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    type: str = "image"
+    metadata: Optional[dict[str, Any]] = None
+    is_selected: bool = False
+    is_loading: bool = False
+    subtitle: Optional[str] = None
+    description: Optional[str] = None
+    author_name: Optional[str] = None
+    author_avatar: Optional[str] = None
+    like_count: Optional[int] = None
+    view_count: Optional[int] = None
+    created_at: Optional[str] = None
+    aspect_ratio: Optional[float] = None
+    tags: Optional[List[str]] = None
+    status: Optional[str] = None
 
-    def get_state(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "get_state", {})
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        result = {"id": self.id}
+        
+        if self.name is not None:
+            result["name"] = self.name
+        if self.path is not None:
+            result["path"] = self.path
+        if self.url is not None:
+            result["url"] = self.url
+        if self.thumbnail_url is not None:
+            result["thumbnailUrl"] = self.thumbnail_url
+        if self.type != "image":
+            result["type"] = self.type
+        if self.metadata is not None:
+            result["metadata"] = self.metadata
+        if self.is_selected:
+            result["isSelected"] = self.is_selected
+        if self.is_loading:
+            result["isLoading"] = self.is_loading
+        if self.subtitle is not None:
+            result["subtitle"] = self.subtitle
+        if self.description is not None:
+            result["description"] = self.description
+        if self.author_name is not None:
+            result["authorName"] = self.author_name
+        if self.author_avatar is not None:
+            result["authorAvatar"] = self.author_avatar
+        if self.like_count is not None:
+            result["likeCount"] = self.like_count
+        if self.view_count is not None:
+            result["viewCount"] = self.view_count
+        if self.created_at is not None:
+            result["createdAt"] = self.created_at
+        if self.aspect_ratio is not None:
+            result["aspectRatio"] = self.aspect_ratio
+        if self.tags is not None:
+            result["tags"] = self.tags
+        if self.status is not None:
+            result["status"] = self.status
+            
+        return result
 
-    def set_items(self, session: Any, items: list[Any]) -> dict[str, Any]:
-        self.props["items"] = items
-        return self.invoke(session, "set_items", {"items": items})
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> GalleryItem:
+        """Create GalleryItem from dictionary."""
+        return GalleryItem(
+            id=data.get("id", ""),
+            name=data.get("name"),
+            path=data.get("path"),
+            url=data.get("url"),
+            thumbnail_url=data.get("thumbnailUrl") or data.get("thumbnail_url"),
+            type=data.get("type", "image"),
+            metadata=data.get("metadata"),
+            is_selected=data.get("isSelected", False) or data.get("is_selected", False),
+            is_loading=data.get("isLoading", False) or data.get("is_loading", False),
+            subtitle=data.get("subtitle"),
+            description=data.get("description"),
+            author_name=data.get("authorName") or data.get("author_name"),
+            author_avatar=data.get("authorAvatar") or data.get("author_avatar"),
+            like_count=data.get("likeCount") or data.get("like_count"),
+            view_count=data.get("viewCount") or data.get("view_count"),
+            created_at=data.get("createdAt") or data.get("created_at"),
+            aspect_ratio=data.get("aspectRatio") or data.get("aspect_ratio"),
+            tags=data.get("tags"),
+            status=data.get("status"),
+        )
 
-    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
-        if "module" in props:
-            props["module"] = _normalize_module(props.get("module"))
-        if "state" in props:
-            props["state"] = _normalize_state(props.get("state"))
-        if "events" in props and isinstance(props.get("events"), Iterable):
-            props["events"] = _normalize_events(props.get("events"))
-        if "modules" in props and isinstance(props.get("modules"), Mapping):
-            normalized_modules: dict[str, Any] = {}
-            for key, value in dict(props["modules"]).items():
-                normalized = _normalize_module(str(key))
-                if normalized and normalized in GALLERY_MODULES and value is not None:
-                    normalized_modules[normalized] = value
-            props["modules"] = normalized_modules
-        next_props = dict(self.props)
-        next_props.update({k: v for k, v in props.items() if v is not None})
-        self._validate_props(next_props, strict=self._strict_contract)
-        self.props.update({k: v for k, v in props.items() if v is not None})
-        return self.invoke(session, "set_props", {"props": props})
-
-    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
-        manifest_payload = dict(manifest or {})
-        current_manifest = dict(self.props.get("manifest") or {})
-        current_manifest.update(manifest_payload)
-        self.props["manifest"] = current_manifest
-        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
-
-    def register_module(
+    def copy_with(
         self,
-        session: Any,
-        *,
-        role: str,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        result = _register_runtime_module(
-            self.props,
-            role=role,
-            module_id=module_id,
-            definition=definition,
-        )
-        if result.get("ok") is not True:
-            return result
-        return self.invoke(
-            session,
-            "register_module",
-            {
-                "role": result["role"],
-                "module_id": result["module_id"],
-                "definition": dict(definition or {}),
-            },
-        )
-
-    def register_source(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="source",
-            module_id=module_id,
-            definition=definition,
-        )
-
-    def register_type_handler(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="type",
-            module_id=module_id,
-            definition=definition,
+        id: Optional[str] = None,
+        name: Optional[str] = None,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        thumbnail_url: Optional[str] = None,
+        type: Optional[str] = None,
+        metadata: Optional[dict[str, Any]] = None,
+        is_selected: Optional[bool] = None,
+        is_loading: Optional[bool] = None,
+        subtitle: Optional[str] = None,
+        description: Optional[str] = None,
+        author_name: Optional[str] = None,
+        author_avatar: Optional[str] = None,
+        like_count: Optional[int] = None,
+        view_count: Optional[int] = None,
+        created_at: Optional[str] = None,
+        aspect_ratio: Optional[float] = None,
+        tags: Optional[List[str]] = None,
+        status: Optional[str] = None,
+    ) -> GalleryItem:
+        """Create a copy with updated fields."""
+        return GalleryItem(
+            id=id if id is not None else self.id,
+            name=name if name is not None else self.name,
+            path=path if path is not None else self.path,
+            url=url if url is not None else self.url,
+            thumbnail_url=thumbnail_url if thumbnail_url is not None else self.thumbnail_url,
+            type=type if type is not None else self.type,
+            metadata=metadata if metadata is not None else self.metadata,
+            is_selected=is_selected if is_selected is not None else self.is_selected,
+            is_loading=is_loading if is_loading is not None else self.is_loading,
+            subtitle=subtitle if subtitle is not None else self.subtitle,
+            description=description if description is not None else self.description,
+            author_name=author_name if author_name is not None else self.author_name,
+            author_avatar=author_avatar if author_avatar is not None else self.author_avatar,
+            like_count=like_count if like_count is not None else self.like_count,
+            view_count=view_count if view_count is not None else self.view_count,
+            created_at=created_at if created_at is not None else self.created_at,
+            aspect_ratio=aspect_ratio if aspect_ratio is not None else self.aspect_ratio,
+            tags=tags if tags is not None else self.tags,
+            status=status if status is not None else self.status,
         )
 
-    def register_type(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_type_handler(
-            session,
-            module_id=module_id,
-            definition=definition,
+
+# ============================================================================
+# Gallery Control
+# ============================================================================
+
+@dataclass
+class Gallery(Control):
+    """
+    Gallery is a control that displays media items in various layouts.
+    
+    Supports layouts: grid, masonry, list, carousel, virtualGrid, virtualList
+    
+    Example:
+        Gallery(
+            items=[...],
+            layout="grid",
+            columns=3,
+            spacing=10,
         )
+    """
+    control_type: str = "gallery"
+    
+    # Items to display in the gallery
+    items: Optional[Iterable[GalleryItem]] = None
+    
+    # Layout type: grid, masonry, list, carousel, virtual_grid, virtual_list
+    layout: str = "grid"
+    
+    # Number of columns for grid layouts
+    columns: Optional[int] = None
+    
+    # Spacing between items
+    spacing: Optional[float] = None
+    
+    # Main axis spacing
+    main_axis_spacing: Optional[float] = None
+    
+    # Cross axis spacing
+    cross_axis_spacing: Optional[float] = None
+    
+    # Border radius for items
+    radius: Optional[float] = None
+    
+    # Show selection checkbox
+    show_selection: bool = False
+    
+    # Enable multi-select
+    multi_select: bool = False
+    
+    # Show item actions (like, share, etc.)
+    show_actions: bool = True
+    
+    # Show item metadata
+    show_meta: bool = True
+    
+    # Scroll direction
+    scroll_direction: str = "vertical"
+    
+    # Children
+    children: list[Control] = field(default_factory=list)
+    
+    def __post_init__(self):
+        # Convert items to list of dicts
+        if self.items is not None:
+            items_list = []
+            for item in self.items:
+                if isinstance(item, GalleryItem):
+                    items_list.append(item.to_dict())
+                else:
+                    items_list.append(item)
+            self.props["items"] = items_list
+        
+        if self.layout:
+            self.props["layout"] = self.layout
+        if self.columns is not None:
+            self.props["columns"] = self.columns
+        if self.spacing is not None:
+            self.props["spacing"] = self.spacing
+        if self.main_axis_spacing is not None:
+            self.props["mainAxisSpacing"] = self.main_axis_spacing
+        if self.cross_axis_spacing is not None:
+            self.props["crossAxisSpacing"] = self.cross_axis_spacing
+        if self.radius is not None:
+            self.props["radius"] = self.radius
+        if self.show_selection:
+            self.props["showSelection"] = self.show_selection
+        if self.multi_select:
+            self.props["multiSelect"] = self.multi_select
+        if not self.show_actions:
+            self.props["showActions"] = self.show_actions
+        if not self.show_meta:
+            self.props["showMeta"] = self.show_meta
+        if self.scroll_direction != "vertical":
+            self.props["scrollDirection"] = self.scroll_direction
+    
+    def to_dict(self) -> dict[str, Any]:
+        result = super().to_dict()
+        # Add children
+        if self.children:
+            result["children"] = [child.to_dict() for child in self.children]
+        return result
 
-    def register_view(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="view",
-            module_id=module_id,
-            definition=definition,
+
+# ============================================================================
+# GalleryScope Control
+# ============================================================================
+
+@dataclass
+class GalleryScope(Control):
+    """
+    GalleryScope is a wrapper control that applies gallery configuration to its children.
+    
+    Use this to wrap components that should be displayed within a gallery context.
+    
+    Example:
+        GalleryScope(
+            layout="grid",
+            columns=3,
+            children=[...],
         )
+    """
+    control_type: str = "gallery_scope"
+    
+    # Layout type
+    layout: str = "grid"
+    
+    # Number of columns
+    columns: Optional[int] = None
+    
+    # Spacing between items
+    spacing: Optional[float] = None
+    
+    # Main axis spacing
+    main_axis_spacing: Optional[float] = None
+    
+    # Cross axis spacing
+    cross_axis_spacing: Optional[float] = None
+    
+    # Border radius
+    radius: Optional[float] = None
+    
+    # Children
+    children: list[Control] = field(default_factory=list)
+    
+    def __post_init__(self):
+        if self.layout:
+            self.props["layout"] = self.layout
+        if self.columns is not None:
+            self.props["columns"] = self.columns
+        if self.spacing is not None:
+            self.props["spacing"] = self.spacing
+        if self.main_axis_spacing is not None:
+            self.props["mainAxisSpacing"] = self.main_axis_spacing
+        if self.cross_axis_spacing is not None:
+            self.props["crossAxisSpacing"] = self.cross_axis_spacing
+        if self.radius is not None:
+            self.props["radius"] = self.radius
+    
+    def to_dict(self) -> dict[str, Any]:
+        result = super().to_dict()
+        # Add children
+        if self.children:
+            result["children"] = [child.to_dict() for child in self.children]
+        return result
 
-    def register_panel(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="panel",
-            module_id=module_id,
-            definition=definition,
-        )
 
-    def register_apply_adapter(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="apply",
-            module_id=module_id,
-            definition=definition,
-        )
+# ============================================================================
+# Convenience Functions
+# ============================================================================
 
-    def register_command(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="command",
-            module_id=module_id,
-            definition=definition,
-        )
+def gallery_grid(
+    *children: Control,
+    columns: Optional[int] = None,
+    spacing: Optional[float] = None,
+    radius: Optional[float] = None,
+) -> Gallery:
+    """Create a grid gallery."""
+    return Gallery(
+        layout="grid",
+        columns=columns,
+        spacing=spacing,
+        radius=radius,
+        children=list(children),
+    )
 
-    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        event_name = _normalize_token(event)
-        if event_name not in GALLERY_EVENTS:
-            return {"ok": False, "error": f"Unknown gallery event '{event}'"}
-        return self.invoke(
-            session,
-            "emit",
-            {
-                "event": event_name,
-                "payload": dict(payload or {}),
-            },
-        )
 
-    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
-        return self.emit(session, event, payload)
+def gallery_masonry(
+    *children: Control,
+    columns: Optional[int] = None,
+    spacing: Optional[float] = None,
+) -> Gallery:
+    """Create a masonry gallery."""
+    return Gallery(
+        layout="masonry",
+        columns=columns,
+        spacing=spacing,
+        children=list(children),
+    )
 
-    def apply(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "apply", {})
 
-    def clear(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "clear", {})
+def gallery_list(
+    *children: Control,
+    spacing: Optional[float] = None,
+) -> Gallery:
+    """Create a list gallery."""
+    return Gallery(
+        layout="list",
+        spacing=spacing,
+        children=list(children),
+    )
 
-    def select_all(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "select_all", {})
 
-    def deselect_all(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "deselect_all", {})
+def gallery_carousel(
+    *children: Control,
+    spacing: Optional[float] = None,
+) -> Gallery:
+    """Create a carousel gallery."""
+    return Gallery(
+        layout="carousel",
+        spacing=spacing,
+        children=list(children),
+    )
 
-    def apply_font(self, session: Any, font: str | None = None) -> dict[str, Any]:
-        payload: dict[str, Any] = {}
-        if font is not None:
-            payload["font"] = font
-        return self.invoke(session, "apply_font", payload)
 
-    def apply_image(self, session: Any, image: Any | None = None) -> dict[str, Any]:
-        payload: dict[str, Any] = {}
-        if image is not None:
-            payload["image"] = image
-        return self.invoke(session, "apply_image", payload)
+def gallery_virtual_grid(
+    *children: Control,
+    columns: Optional[int] = None,
+    spacing: Optional[float] = None,
+) -> Gallery:
+    """Create a virtual grid gallery."""
+    return Gallery(
+        layout="virtual_grid",
+        columns=columns,
+        spacing=spacing,
+        children=list(children),
+    )
 
-    def set_as_wallpaper(self, session: Any, value: Any | None = None) -> dict[str, Any]:
-        payload: dict[str, Any] = {}
-        if value is not None:
-            payload["value"] = value
-        return self.invoke(session, "set_as_wallpaper", payload)
 
+def gallery_virtual_list(
+    *children: Control,
+    spacing: Optional[float] = None,
+) -> Gallery:
+    """Create a virtual list gallery."""
+    return Gallery(
+        layout="virtual_list",
+        spacing=spacing,
+        children=list(children),
+    )

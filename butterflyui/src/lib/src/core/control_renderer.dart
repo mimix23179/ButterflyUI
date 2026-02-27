@@ -10,6 +10,9 @@ import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/buttons/elevated_button.dart';
 import 'controls/buttons/icon_button.dart';
+import 'controls/buttons/filled_button.dart';
+import 'controls/buttons/outlined_button.dart';
+import 'controls/buttons/text_button.dart';
 import 'controls/common/option_types.dart';
 import 'controls/customization/animated_gradient.dart';
 import 'controls/customization/avatar_stack.dart';
@@ -19,7 +22,8 @@ import 'controls/customization/blob_field.dart';
 import 'controls/customization/border.dart';
 import 'controls/customization/border_side.dart';
 import 'controls/customization/button_style.dart';
-import 'controls/customization/candy.dart';
+import 'controls/gallery/gallery.dart';
+import 'controls/candy/candy.dart';
 import 'controls/customization/crop_box.dart';
 import 'controls/customization/curve_editor.dart';
 import 'controls/customization/guides_manager.dart';
@@ -32,8 +36,7 @@ import 'controls/customization/rulers_overlay.dart';
 import 'controls/customization/ownership_marker.dart';
 import 'controls/customization/brush_panel.dart';
 import 'controls/customization/color_tools.dart';
-import 'controls/customization/gallery.dart';
-import 'controls/customization/skins.dart';
+import 'controls/skins/skins.dart';
 import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
@@ -54,8 +57,6 @@ import 'controls/display/quoted_message.dart';
 import 'controls/display/rating_display.dart';
 import 'controls/display/reaction_bar.dart';
 import 'controls/display/code_view.dart';
-import 'controls/display/code_editor.dart';
-import 'controls/display/studio.dart';
 import 'controls/display/diff_view.dart';
 import 'controls/display/empty_state.dart';
 import 'controls/display/error_state.dart';
@@ -64,7 +65,6 @@ import 'controls/display/icon.dart';
 import 'controls/display/markdown_view.dart';
 import 'controls/display/rich_text_editor.dart';
 import 'controls/display/status_mark.dart';
-import 'controls/display/terminal.dart';
 import 'controls/display/typing_indicator.dart';
 import 'controls/display/vector_view.dart';
 import 'controls/productivity/editor_workspace.dart';
@@ -230,12 +230,6 @@ import 'controls/overlay/progress_overlay.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
-import 'controls/candy/candy_renderer.dart';
-import 'controls/gallery/gallery_renderer.dart';
-import 'controls/skins/skins_renderer.dart';
-import 'controls/terminal/terminal_renderer.dart';
-import 'controls/code_editor/code_editor_renderer.dart';
-import 'controls/studio/studio_renderer.dart';
 import 'style/style_pack.dart';
 import 'style/control_style_resolver.dart';
 import 'style/style_packs.dart';
@@ -277,7 +271,10 @@ class ControlRenderer {
     Map<String, Object?>? styleTokens,
   }) : registry = registry ?? ButterflyUIControlRegistry(),
        stylePack = stylePack ?? stylePackRegistry.defaultPack,
-       styleTokens = styleTokens ?? const <String, Object?>{};
+       styleTokens = styleTokens ?? const <String, Object?>{} {
+    // Register candy controls into the registry
+    registerCandyControls(this.registry);
+  }
 
   Widget buildFromControl(
     Map<String, Object?> control, {
@@ -380,78 +377,23 @@ class ControlRenderer {
       return const SizedBox.shrink();
     }
 
-    final candyAlias = buildCandyAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      tokens: context.tokens,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (candyAlias != null) return candyAlias;
-
-    final galleryAlias = buildGalleryAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (galleryAlias != null) return galleryAlias;
-
-    final skinsAlias = buildSkinsAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (skinsAlias != null) return skinsAlias;
-
-    final terminalAlias = buildTerminalAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (terminalAlias != null) return terminalAlias;
-
-    final studioAlias = buildStudioAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (studioAlias != null) return studioAlias;
-
-    final codeEditorAlias = buildCodeEditorAliasedControl(
-      type: type,
-      controlId: controlId,
-      props: props,
-      rawChildren: rawChildren,
-      buildChild: context.buildChild,
-      registerInvokeHandler: context.registerInvokeHandler,
-      unregisterInvokeHandler: context.unregisterInvokeHandler,
-      sendEvent: context.sendEvent,
-    );
-    if (codeEditorAlias != null) return codeEditorAlias;
+    // Candy umbrella - check registry for candy builder
+    final candyBuilder = registry.builderFor('candy');
+    if (candyBuilder != null) {
+      final candyResult = candyBuilder(
+        ButterflyUIControlContext(
+          tokens: tokens,
+          stylePack: stylePack,
+          sendEvent: sendEvent,
+          sendSystemEvent: sendSystemEvent,
+          registerInvokeHandler: registerInvokeHandler,
+          unregisterInvokeHandler: unregisterInvokeHandler,
+          buildChild: context.buildChild,
+        ),
+        {'id': controlId, 'type': 'candy', 'props': props, 'children': rawChildren},
+      );
+      if (candyResult != null) return candyResult;
+    }
 
     switch (type) {
       case 'page':
@@ -553,7 +495,26 @@ class ControlRenderer {
         return buildClipControl(props, rawChildren, context.buildChild);
 
       case 'candy':
-        return buildCandyFamilyControl(
+        // Use registry to build candy controls
+        final builder = registry.builderFor('candy');
+        if (builder != null) {
+          return builder(
+            ButterflyUIControlContext(
+              tokens: tokens,
+              stylePack: stylePack,
+              sendEvent: sendEvent,
+              sendSystemEvent: sendSystemEvent,
+              registerInvokeHandler: registerInvokeHandler,
+              unregisterInvokeHandler: unregisterInvokeHandler,
+              buildChild: context.buildChild,
+            ),
+            {'id': controlId, 'type': 'candy', 'props': props, 'children': rawChildren},
+          );
+        }
+        return const SizedBox.shrink();
+
+      case 'gallery':
+        return buildGalleryControl(
           controlId,
           props,
           rawChildren,
@@ -564,27 +525,27 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'gallery':
-        return buildGalleryFamilyControl(
+      case 'gallery_scope':
+        return buildGalleryScopeControl(
           controlId,
           props,
           rawChildren,
           context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
         );
 
-      case 'skins':
-        return buildSkinsFamilyControl(
+      case 'skins': {
+        final skinsTokens = SkinsTokens.fromCandyTokens(context.tokens);
+        return buildSkinsControl(
           controlId,
           props,
           rawChildren,
-          context.buildChild,
+          skinsTokens,
+          context.sendEvent,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
+          context.buildChild,
+        ) ?? const SizedBox.shrink();
+      }
 
       case 'page_scene':
         return buildPageSceneControl(props, rawChildren, context.buildChild);
@@ -778,6 +739,30 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'filled_button':
+        return buildFilledButtonControl(
+          controlId,
+          props,
+          context.tokens,
+          context.sendEvent,
+        );
+
+      case 'outlined_button':
+        return buildOutlinedButtonControl(
+          controlId,
+          props,
+          context.tokens,
+          context.sendEvent,
+        );
+
+      case 'text_button':
+        return buildTextButtonControl(
+          controlId,
+          props,
+          context.tokens,
+          context.sendEvent,
+        );
+
       case 'divider':
         return buildDividerControl(
           controlId,
@@ -940,123 +925,10 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'code_editor':
-      case 'ide':
-      case 'semantic_search':
-        return buildCodeEditorControl(
-          controlId,
-          type == 'semantic_search'
-              ? <String, Object?>{...props, 'module': 'semantic_search'}
-              : type == 'ide'
-              ? <String, Object?>{...props, 'module': 'ide'}
-              : props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'studio':
-      case 'studio_builder':
-      case 'studio_canvas':
-      case 'studio_canvas_surface':
-      case 'studio_timeline_surface':
-      case 'studio_node_surface':
-      case 'studio_preview_surface':
-      case 'studio_block_palette':
-      case 'studio_component_palette':
-      case 'studio_inspector':
-      case 'studio_outline_tree':
-      case 'studio_project_panel':
-      case 'studio_properties_panel':
-      case 'studio_responsive_toolbar':
-      case 'studio_tokens_editor':
-      case 'studio_actions_editor':
-      case 'studio_bindings_editor':
-      case 'studio_asset_browser':
-      case 'selection_tools':
-      case 'transform_box':
-        return buildStudioControl(
-          controlId,
-          type.startsWith('studio_')
-              ? <String, Object?>{
-                  ...props,
-                  'module': type.substring('studio_'.length),
-                }
-              : (type == 'selection_tools' || type == 'transform_box')
-              ? <String, Object?>{...props, 'module': type}
-              : props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'editor_tab_strip':
-      case 'editor_tabs':
-      case 'document_tab_strip':
-        return buildCodeEditorControl(
-          controlId,
-          <String, Object?>{
-            ...props,
-            'module': type == 'editor_tab_strip' ? 'document_tab_strip' : type,
-          },
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'workspace_tree':
-      case 'workspace_explorer':
-      case 'explorer_tree':
-        return buildCodeEditorControl(
-          controlId,
-          <String, Object?>{
-            ...props,
-            'module': type == 'workspace_tree' ? 'workspace_explorer' : type,
-          },
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'problems_panel':
-      case 'diagnostics_panel':
-        return buildCodeEditorControl(
-          controlId,
-          <String, Object?>{
-            ...props,
-            'module': type == 'problems_panel' ? 'diagnostics_panel' : type,
-          },
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'output_panel':
         return buildOutputPanelControl(
           controlId,
           props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'log_panel':
-      case 'log_viewer':
-        return buildTerminalControl(
-          controlId,
-          <String, Object?>{...props, 'module': type},
-          rawChildren,
-          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -2896,17 +2768,6 @@ class ControlRenderer {
         return buildVideoControl(
           controlId,
           props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'terminal':
-        return buildTerminalControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,

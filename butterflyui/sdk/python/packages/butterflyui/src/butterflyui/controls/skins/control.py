@@ -1,634 +1,428 @@
+"""
+Skins Control - Allows users to create custom skins for their programs.
+
+Skins is a control that uses various existing components from ButterflyUI
+to let users build their own skins for their programs. Users can create
+different themed skins like shadow, fire, earth, gaming, etc.
+"""
+
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Optional
 
-from ...core.schema import ButterflyUIContractError, ensure_valid_props
-from .._shared import Component, merge_props
-
-__all__ = ["Skins"]
-
-SKINS_SCHEMA_VERSION = 2
-SKINS_DEFAULT_NAMES = ["Obsidian Neon", "Linen Paper", "Matrix Terminal"]
-SKINS_DEFAULT_PRESETS = ["Dark", "Light", "Glass", "Neon"]
-
-SKINS_MODULES = {
-    "selector",
-    "preset",
-    "editor",
-    "preview",
-    "apply",
-    "clear",
-    "token_mapper",
-    "create_skin",
-    "edit_skin",
-    "delete_skin",
-    "effects",
-    "particles",
-    "shaders",
-    "materials",
-    "icons",
-    "fonts",
-    "colors",
-    "background",
-    "border",
-    "shadow",
-    "outline",
-    "animation",
-    "transition",
-    "interaction",
-    "layout",
-    "responsive",
-    "effect_editor",
-    "particle_editor",
-    "shader_editor",
-    "material_editor",
-    "icon_editor",
-    "font_editor",
-    "color_editor",
-    "background_editor",
-    "border_editor",
-    "shadow_editor",
-    "outline_editor",
-}
-
-SKINS_STATES = {"idle", "loading", "ready", "editing", "preview", "disabled"}
-
-SKINS_EVENTS = {
-    "change",
-    "select",
-    "apply",
-    "clear",
-    "create_skin",
-    "edit_skin",
-    "delete_skin",
-    "state_change",
-    "module_change",
-    "token_map",
-}
-
-SKINS_MODULE_ALIASES = {
-    "skins_selector": "selector",
-    "skins_preset": "preset",
-    "skins_editor": "editor",
-    "skins_preview": "preview",
-    "skins_apply": "apply",
-    "skins_clear": "clear",
-    "skins_token_mapper": "token_mapper",
-}
-
-SKINS_EVENT_ALIASES = {
-    "skins_apply": "apply",
-    "skins_clear": "clear",
-}
-
-SKINS_REGISTRY_ROLE_ALIASES = {
-    "module": "module_registry",
-    "modules": "module_registry",
-    "pipeline": "pipeline_registry",
-    "pipelines": "pipeline_registry",
-    "editor": "editor_registry",
-    "editors": "editor_registry",
-    "preview": "preview_registry",
-    "previews": "preview_registry",
-    "distribution": "distribution_registry",
-    "distributions": "distribution_registry",
-    "registry": "distribution_registry",
-    "provider": "pipeline_registry",
-    "providers": "pipeline_registry",
-    "panel": "editor_registry",
-    "panels": "editor_registry",
-    "command": "command_registry",
-    "commands": "command_registry",
-    "module_registry": "module_registry",
-    "pipeline_registry": "pipeline_registry",
-    "editor_registry": "editor_registry",
-    "preview_registry": "preview_registry",
-    "distribution_registry": "distribution_registry",
-    "command_registry": "command_registry",
-}
-
-SKINS_REGISTRY_MANIFEST_LISTS = {
-    "module_registry": "enabled_modules",
-    "pipeline_registry": "enabled_pipelines",
-    "editor_registry": "enabled_editors",
-    "preview_registry": "enabled_previews",
-    "distribution_registry": "enabled_distribution",
-    "command_registry": "enabled_commands",
-}
+from ...core import Control
 
 
-def _normalize_token(value: str | None) -> str:
-    if value is None:
-        return ""
-    return value.strip().lower().replace("-", "_").replace(" ", "_")
-
-
-def _normalize_module(value: str | None) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    normalized = SKINS_MODULE_ALIASES.get(normalized, normalized)
-    return normalized
-
-
-def _normalize_state(value: str | None) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    return normalized
-
-
-def _normalize_events(values: Iterable[Any] | None) -> list[str] | None:
-    if values is None:
-        return None
-    out: list[str] = []
-    for entry in values:
-        value = _normalize_token(str(entry))
-        if value and value not in out:
-            out.append(value)
-    return out
-
-
-def _normalize_registry_role(
-    value: str | None,
-    aliases: Mapping[str, str],
-) -> str | None:
-    normalized = _normalize_token(value)
-    if not normalized:
-        return None
-    return aliases.get(normalized, f"{normalized}_registry")
-
-
-def _register_runtime_module(
-    props: dict[str, Any],
-    *,
-    role: str,
-    module_id: str,
-    definition: Mapping[str, Any] | None,
-) -> dict[str, Any]:
-    normalized_role = _normalize_registry_role(role, SKINS_REGISTRY_ROLE_ALIASES)
-    normalized_module = _normalize_module(module_id)
-    if normalized_module is None:
-        normalized_module = _normalize_token(module_id)
-    if not normalized_role or not normalized_module:
-        return {"ok": False, "error": "role and module_id are required"}
-
-    registries = dict(props.get("registries") or {})
-    role_registry = dict(registries.get(normalized_role) or {})
-    role_registry[normalized_module] = dict(definition or {})
-    registries[normalized_role] = role_registry
-    props["registries"] = registries
-
-    manifest = dict(props.get("manifest") or {})
-    enabled_modules = _normalize_events(manifest.get("enabled_modules")) or []
-    if normalized_module in SKINS_MODULES and normalized_module not in enabled_modules:
-        enabled_modules.append(normalized_module)
-    manifest["enabled_modules"] = enabled_modules
-
-    list_key = SKINS_REGISTRY_MANIFEST_LISTS.get(normalized_role)
-    if list_key:
-        values = _normalize_events(manifest.get(list_key)) or []
-        if normalized_module not in values:
-            values.append(normalized_module)
-        manifest[list_key] = values
-    props["manifest"] = manifest
-
-    if normalized_module in SKINS_MODULES:
-        modules = dict(props.get("modules") or {})
-        modules.setdefault(normalized_module, {})
-        props["modules"] = modules
-        props.setdefault(normalized_module, modules[normalized_module])
-
-    return {
-        "ok": True,
-        "role": normalized_role,
-        "module_id": normalized_module,
-        "definition": dict(definition or {}),
-    }
-
-
-class Skins(Component):
-    control_type = "skins"
-
-    def __init__(
-        self,
-        *children: Any,
-        skins: list[Any] | None = None,
-        selected_skin: str | None = None,
-        presets: list[Any] | None = None,
-        value: str | None = None,
-        enabled: bool | None = None,
-        module: str | None = None,
-        state: str | None = None,
-        custom_layout: bool | None = None,
-        events: Iterable[str] | None = None,
-        modules: Mapping[str, Any] | None = None,
-        skins_selector: Mapping[str, Any] | None = None,
-        skins_preset: Mapping[str, Any] | None = None,
-        skins_editor: Mapping[str, Any] | None = None,
-        skins_preview: Mapping[str, Any] | None = None,
-        skins_apply: Mapping[str, Any] | None = None,
-        skins_clear: Mapping[str, Any] | None = None,
-        skins_token_mapper: Mapping[str, Any] | None = None,
-        selector: Mapping[str, Any] | None = None,
-        preset: Mapping[str, Any] | None = None,
-        editor: Mapping[str, Any] | None = None,
-        preview: Mapping[str, Any] | None = None,
-        apply: Mapping[str, Any] | None = None,
-        clear: Mapping[str, Any] | None = None,
-        token_mapper: Mapping[str, Any] | None = None,
-        create_skin: Mapping[str, Any] | None = None,
-        edit_skin: Mapping[str, Any] | None = None,
-        delete_skin: Mapping[str, Any] | None = None,
-        effects: Mapping[str, Any] | None = None,
-        particles: Mapping[str, Any] | None = None,
-        shaders: Mapping[str, Any] | None = None,
-        materials: Mapping[str, Any] | None = None,
-        icons: Mapping[str, Any] | None = None,
-        fonts: Mapping[str, Any] | None = None,
-        colors: Mapping[str, Any] | None = None,
-        background: Mapping[str, Any] | None = None,
-        border: Mapping[str, Any] | None = None,
-        shadow: Mapping[str, Any] | None = None,
-        outline: Mapping[str, Any] | None = None,
-        animation: Mapping[str, Any] | None = None,
-        transition: Mapping[str, Any] | None = None,
-        interaction: Mapping[str, Any] | None = None,
-        layout: Mapping[str, Any] | str | None = None,
-        responsive: Mapping[str, Any] | None = None,
-        effect_editor: Mapping[str, Any] | None = None,
-        particle_editor: Mapping[str, Any] | None = None,
-        shader_editor: Mapping[str, Any] | None = None,
-        material_editor: Mapping[str, Any] | None = None,
-        icon_editor: Mapping[str, Any] | None = None,
-        font_editor: Mapping[str, Any] | None = None,
-        color_editor: Mapping[str, Any] | None = None,
-        background_editor: Mapping[str, Any] | None = None,
-        border_editor: Mapping[str, Any] | None = None,
-        shadow_editor: Mapping[str, Any] | None = None,
-        outline_editor: Mapping[str, Any] | None = None,
-        schema_version: int = SKINS_SCHEMA_VERSION,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        module_map: dict[str, Any] = {
-            "selector": selector,
-            "preset": preset,
-            "editor": editor,
-            "preview": preview,
-            "apply": apply,
-            "clear": clear,
-            "token_mapper": token_mapper,
-            "create_skin": create_skin,
-            "edit_skin": edit_skin,
-            "delete_skin": delete_skin,
-            "effects": effects,
-            "particles": particles,
-            "shaders": shaders,
-            "materials": materials,
-            "icons": icons,
-            "fonts": fonts,
-            "colors": colors,
-            "background": background,
-            "border": border,
-            "shadow": shadow,
-            "outline": outline,
-            "animation": animation,
-            "transition": transition,
-            "interaction": interaction,
-            "layout": layout,
-            "responsive": responsive,
-            "effect_editor": effect_editor,
-            "particle_editor": particle_editor,
-            "shader_editor": shader_editor,
-            "material_editor": material_editor,
-            "icon_editor": icon_editor,
-            "font_editor": font_editor,
-            "color_editor": color_editor,
-            "background_editor": background_editor,
-            "border_editor": border_editor,
-            "shadow_editor": shadow_editor,
-            "outline_editor": outline_editor,
+@dataclass
+class SkinsTokens:
+    """Tokens configuration for a skin."""
+    background: str = "#FAFAFA"
+    surface: str = "#F5F5F5"
+    surface_alt: str = "#EEEEEE"
+    text: str = "#1A1A1A"
+    muted_text: str = "#666666"
+    border: str = "#E0E0E0"
+    primary: str = "#6366F1"
+    secondary: str = "#8B5CF6"
+    success: str = "#22C55E"
+    warning: str = "#F59E0B"
+    info: str = "#3B82F6"
+    error: str = "#EF4444"
+    radius_sm: float = 6
+    radius_md: float = 12
+    radius_lg: float = 18
+    spacing_xs: float = 4
+    spacing_sm: float = 8
+    spacing_md: float = 12
+    spacing_lg: float = 20
+    glass_blur: float = 18
+    
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "background": self.background,
+            "surface": self.surface,
+            "surfaceAlt": self.surface_alt,
+            "text": self.text,
+            "mutedText": self.muted_text,
+            "border": self.border,
+            "primary": self.primary,
+            "secondary": self.secondary,
+            "success": self.success,
+            "warning": self.warning,
+            "info": self.info,
+            "error": self.error,
+            "radius": {
+                "sm": self.radius_sm,
+                "md": self.radius_md,
+                "lg": self.radius_lg,
+            },
+            "spacing": {
+                "xs": self.spacing_xs,
+                "sm": self.spacing_sm,
+                "md": self.spacing_md,
+                "lg": self.spacing_lg,
+            },
+            "effects": {
+                "glassBlur": self.glass_blur,
+            },
         }
 
-        legacy_module_map: dict[str, Any] = {
-            "selector": skins_selector,
-            "preset": skins_preset,
-            "editor": skins_editor,
-            "preview": skins_preview,
-            "apply": skins_apply,
-            "clear": skins_clear,
-            "token_mapper": skins_token_mapper,
-        }
-        for key, value in legacy_module_map.items():
-            if value is not None and module_map.get(key) is None:
-                module_map[key] = value
 
-        merged_modules: dict[str, Any] = {}
-        if isinstance(modules, Mapping):
-            for key, value in modules.items():
-                normalized = _normalize_module(str(key))
-                if normalized and normalized in SKINS_MODULES and value is not None:
-                    merged_modules[normalized] = value
-        for key, value in module_map.items():
-            if value is not None:
-                merged_modules[key] = value
-
-        resolved_skins = list(skins) if skins is not None else list(SKINS_DEFAULT_NAMES)
-        resolved_presets = (
-            list(presets) if presets is not None else list(SKINS_DEFAULT_PRESETS)
-        )
-        resolved_selected = selected_skin
-        if not resolved_selected and resolved_skins:
-            resolved_selected = str(resolved_skins[0])
-
-        merged = merge_props(
-            props,
-            schema_version=int(schema_version),
-            module=_normalize_module(module),
-            state=_normalize_state(state),
-            custom_layout=custom_layout,
-            manifest=dict(kwargs.pop("manifest", {}) or {}),
-            registries=dict(kwargs.pop("registries", {}) or {}),
-            skins=resolved_skins,
-            selected_skin=resolved_selected,
-            presets=resolved_presets,
-            value=value,
-            enabled=enabled,
-            events=_normalize_events(events),
-            modules=merged_modules,
-            **merged_modules,
-            **kwargs,
-        )
-        self._normalize_legacy_props(merged)
-        self._strict_contract = strict
-        self._validate_props(merged, strict=strict)
-        super().__init__(*children, props=merged, style=style, strict=strict)
-
+# Predefined skin presets
+class SkinsPresets:
+    """Predefined skin presets."""
+    
     @staticmethod
-    def _normalize_legacy_props(props: dict[str, Any]) -> None:
-        if isinstance(props.get("layout"), str):
-            props["layout"] = {"mode": str(props["layout"])}
-        modules = dict(props.get("modules") or {})
-        changed = False
-        for legacy_key, canonical_key in SKINS_MODULE_ALIASES.items():
-            if legacy_key in props and canonical_key not in props:
-                props[canonical_key] = props[legacy_key]
-                changed = True
-            if legacy_key in modules and canonical_key not in modules:
-                modules[canonical_key] = modules[legacy_key]
-                changed = True
-        if changed:
-            props["modules"] = modules
-
+    def default() -> SkinsTokens:
+        """Default skin preset."""
+        return SkinsTokens()
+    
     @staticmethod
-    def _validate_props(props: Mapping[str, Any], *, strict: bool) -> None:
-        try:
-            ensure_valid_props("skins", props, strict=strict)
-        except ButterflyUIContractError as exc:
-            raise ValueError("\n".join(exc.errors)) from exc
-
-    def set_module(self, session: Any, module: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        normalized = _normalize_module(module)
-        if normalized is None or normalized not in SKINS_MODULES:
-            return {"ok": False, "error": f"Unknown skins module '{module}'"}
-        payload_dict = dict(payload or {})
-        self.props["module"] = normalized
-        modules = dict(self.props.get("modules") or {})
-        modules[normalized] = payload_dict
-        self.props["modules"] = modules
-        self.props[normalized] = payload_dict
-        self._validate_props(self.props, strict=self._strict_contract)
-        return self.invoke(session, "set_module", {"module": normalized, "payload": payload_dict})
-
-    def update_module(self, session: Any, module: str, **payload: Any) -> dict[str, Any]:
-        return self.set_module(session, module, payload)
-
-    def set_state(self, session: Any, state: str) -> dict[str, Any]:
-        normalized = _normalize_state(state)
-        if normalized is None or normalized not in SKINS_STATES:
-            return {"ok": False, "error": f"Unknown skins state '{state}'"}
-        self.props["state"] = normalized
-        self._validate_props(self.props, strict=self._strict_contract)
-        return self.invoke(session, "set_state", {"state": normalized})
-
-    def get_state(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "get_state", {})
-
-    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
-        if "module" in props:
-            props["module"] = _normalize_module(props.get("module"))
-        if "state" in props:
-            props["state"] = _normalize_state(props.get("state"))
-        if "events" in props and isinstance(props.get("events"), Iterable):
-            props["events"] = _normalize_events(props.get("events"))
-        if "modules" in props and isinstance(props.get("modules"), Mapping):
-            normalized_modules: dict[str, Any] = {}
-            for key, value in dict(props["modules"]).items():
-                normalized = _normalize_module(str(key))
-                if normalized and normalized in SKINS_MODULES and value is not None:
-                    normalized_modules[normalized] = value
-            props["modules"] = normalized_modules
-            self._normalize_legacy_props(props)
-        next_props = dict(self.props)
-        next_props.update({k: v for k, v in props.items() if v is not None})
-        self._validate_props(next_props, strict=self._strict_contract)
-        self.props.update({k: v for k, v in props.items() if v is not None})
-        return self.invoke(session, "set_props", {"props": props})
-
-    def set_manifest(self, session: Any, manifest: Mapping[str, Any]) -> dict[str, Any]:
-        manifest_payload = dict(manifest or {})
-        current_manifest = dict(self.props.get("manifest") or {})
-        current_manifest.update(manifest_payload)
-        self.props["manifest"] = current_manifest
-        return self.invoke(session, "set_manifest", {"manifest": manifest_payload})
-
-    def register_module(
-        self,
-        session: Any,
-        *,
-        role: str,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        result = _register_runtime_module(
-            self.props,
-            role=role,
-            module_id=module_id,
-            definition=definition,
+    def shadow() -> SkinsTokens:
+        """Shadow skin preset - dark theme with purple accents."""
+        return SkinsTokens(
+            background="#1A1A2E",
+            surface="#16213E",
+            surface_alt="#0F3460",
+            text="#EAEAEA",
+            muted_text="#A0A0A0",
+            border="#2D2D44",
+            primary="#7B68EE",
+            secondary="#9370DB",
+            radius_sm=8,
+            radius_md=16,
+            radius_lg=24,
+            spacing_xs=4,
+            spacing_sm=8,
+            spacing_md=16,
+            spacing_lg=24,
+            glass_blur=20,
         )
-        if result.get("ok") is not True:
-            return result
-        return self.invoke(
-            session,
-            "register_module",
-            {
-                "role": result["role"],
-                "module_id": result["module_id"],
-                "definition": dict(definition or {}),
-            },
+    
+    @staticmethod
+    def fire() -> SkinsTokens:
+        """Fire skin preset - warm red/orange theme."""
+        return SkinsTokens(
+            background="#1A0A0A",
+            surface="#2D1515",
+            surface_alt="#4A1C1C",
+            text="#FFE4D6",
+            muted_text="#CC9988",
+            border="#5C2020",
+            primary="#FF4500",
+            secondary="#FF6347",
+            radius_sm=4,
+            radius_md=8,
+            radius_lg=16,
+            spacing_xs=2,
+            spacing_sm=6,
+            spacing_md=10,
+            spacing_lg=18,
+            glass_blur=10,
         )
-
-    def register_pipeline(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="pipeline",
-            module_id=module_id,
-            definition=definition,
+    
+    @staticmethod
+    def earth() -> SkinsTokens:
+        """Earth skin preset - natural brown/green theme."""
+        return SkinsTokens(
+            background="#1A1A14",
+            surface="#2D2D1F",
+            surface_alt="#3D3D2A",
+            text="#E8E4D6",
+            muted_text="#A8A490",
+            border="#4A4A35",
+            primary="#8B7355",
+            secondary="#A0826D",
+            radius_sm=2,
+            radius_md=6,
+            radius_lg=12,
+            spacing_xs=4,
+            spacing_sm=8,
+            spacing_md=12,
+            spacing_lg=20,
+            glass_blur=15,
+        )
+    
+    @staticmethod
+    def gaming() -> SkinsTokens:
+        """Gaming skin preset - cyber/neon green theme."""
+        return SkinsTokens(
+            background="#0D0D1A",
+            surface="#151525",
+            surface_alt="#1E1E30",
+            text="#00FF88",
+            muted_text="#00AA55",
+            border="#2A2A40",
+            primary="#00FF88",
+            secondary="#00DDFF",
+            radius_sm=2,
+            radius_md=4,
+            radius_lg=8,
+            spacing_xs=2,
+            spacing_sm=4,
+            spacing_md=8,
+            spacing_lg=16,
+            glass_blur=25,
         )
 
-    def register_editor(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="editor",
-            module_id=module_id,
-            definition=definition,
+
+@dataclass
+class SkinsScope(Control):
+    """
+    SkinsScope is a wrapper control that applies a custom skin to its children.
+    
+    Use this to apply a predefined or custom skin to a section of your UI.
+    
+    Example:
+        SkinsScope(
+            skin="shadow",
+            children=[...],
         )
+    """
+    control_type: str = "skins_scope"
+    
+    # Skin configuration
+    skin: str = "default"  # Preset name: "default", "shadow", "fire", "earth", "gaming"
+    tokens: Optional[SkinsTokens] = None  # Custom tokens
+    brightness: str = "light"  # "light" or "dark"
+    
+    # Children
+    children: list[Control] = field(default_factory=list)
+    
+    def __post_init__(self):
+        # Convert tokens to dict if provided
+        tokens_dict = None
+        if self.tokens is not None:
+            tokens_dict = self.tokens.to_dict()
+        
+        self.props["skin"] = self.skin
+        if tokens_dict is not None:
+            self.props["tokens"] = tokens_dict
+        self.props["brightness"] = self.brightness
+    
+    def to_dict(self) -> dict[str, Any]:
+        result = super().to_dict()
+        # Add children
+        if self.children:
+            result["children"] = [child.to_dict() for child in self.children]
+        return result
 
-    def register_preview(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="preview",
-            module_id=module_id,
-            definition=definition,
+
+@dataclass
+class Skins(Control):
+    """
+    Skins is a control that allows users to build custom UI components
+    using various layout, decoration, effects, and motion modules.
+    
+    This is similar to Candy but focused on creating custom skin themes
+    for applications.
+    
+    Example:
+        Skins(
+            module="row",
+            main="center",
+            cross="center",
+            children=[...],
         )
+    """
+    control_type: str = "skins"
+    
+    # Module type - determines what kind of component to build
+    # Layout: row, column, stack, wrap, align, container, card, button, badge, border
+    # Decoration: gradient, decorated, clip
+    # Effects: effects, particles, canvas
+    # Motion: animation, motion, transition
+    module: str = "container"
+    
+    # Layout properties
+    main: Optional[str] = None  # Main axis alignment
+    cross: Optional[str] = None  # Cross axis alignment
+    size: Optional[str] = None  # Main axis size
+    direction: Optional[str] = None  # Direction for wrap
+    alignment: Optional[str] = None  # Alignment for align control
+    width: Optional[float] = None  # Width factor for align
+    height: Optional[float] = None  # Height factor for align
+    fit: Optional[str] = None  # Stack fit
+    spacing: Optional[float] = None  # Wrap spacing
+    run_spacing: Optional[float] = None  # Wrap run spacing
+    
+    # Decoration properties
+    padding: Optional[Any] = None
+    margin: Optional[Any] = None
+    radius: Optional[float] = None
+    gradient: Optional[Any] = None
+    bgcolor: Optional[str] = None
+    background: Optional[str] = None
+    shadow: Optional[Any] = None
+    border: Optional[Any] = None
+    shape: Optional[str] = None
+    color: Optional[str] = None
+    elevation: Optional[float] = None
+    shadow_color: Optional[str] = None
+    
+    # Effects properties
+    shimmer: Optional[bool] = None
+    overlay: Optional[bool] = None
+    
+    # Motion properties
+    duration_ms: Optional[int] = None
+    curve: Optional[str] = None
+    preset: Optional[str] = None
+    
+    # Children
+    children: list[Control] = field(default_factory=list)
+    
+    def __post_init__(self):
+        # Map props
+        if self.module:
+            self.props["module"] = self.module
+        if self.main:
+            self.props["main"] = self.main
+        if self.cross:
+            self.props["cross"] = self.cross
+        if self.size:
+            self.props["size"] = self.size
+        if self.direction:
+            self.props["direction"] = self.direction
+        if self.alignment:
+            self.props["alignment"] = self.alignment
+        if self.width is not None:
+            self.props["width"] = self.width
+        if self.height is not None:
+            self.props["height"] = self.height
+        if self.fit:
+            self.props["fit"] = self.fit
+        if self.spacing is not None:
+            self.props["spacing"] = self.spacing
+        if self.run_spacing is not None:
+            self.props["runSpacing"] = self.run_spacing
+        if self.padding is not None:
+            self.props["padding"] = self.padding
+        if self.margin is not None:
+            self.props["margin"] = self.margin
+        if self.radius is not None:
+            self.props["radius"] = self.radius
+        if self.gradient is not None:
+            self.props["gradient"] = self.gradient
+        if self.bgcolor:
+            self.props["bgcolor"] = self.bgcolor
+        if self.background:
+            self.props["background"] = self.background
+        if self.shadow is not None:
+            self.props["shadow"] = self.shadow
+        if self.border is not None:
+            self.props["border"] = self.border
+        if self.shape:
+            self.props["shape"] = self.shape
+        if self.color:
+            self.props["color"] = self.color
+        if self.elevation is not None:
+            self.props["elevation"] = self.elevation
+        if self.shadow_color:
+            self.props["shadowColor"] = self.shadow_color
+        if self.shimmer is not None:
+            self.props["shimmer"] = self.shimmer
+        if self.overlay is not None:
+            self.props["overlay"] = self.overlay
+        if self.duration_ms is not None:
+            self.props["duration_ms"] = self.duration_ms
+        if self.curve:
+            self.props["curve"] = self.curve
+        if self.preset:
+            self.props["preset"] = self.preset
+    
+    def to_dict(self) -> dict[str, Any]:
+        result = super().to_dict()
+        # Add children
+        if self.children:
+            result["children"] = [child.to_dict() for child in self.children]
+        return result
 
-    def register_distribution(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="distribution",
-            module_id=module_id,
-            definition=definition,
-        )
 
-    def register_provider(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="provider",
-            module_id=module_id,
-            definition=definition,
-        )
+# Convenience functions for creating Skins controls
 
-    def register_panel(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="panel",
-            module_id=module_id,
-            definition=definition,
-        )
+def skins_row(
+    *children: Control,
+    main: Optional[str] = None,
+    cross: Optional[str] = None,
+    size: Optional[str] = None,
+) -> Skins:
+    """Create a row layout with Skins styling."""
+    return Skins(
+        module="row",
+        main=main,
+        cross=cross,
+        size=size,
+        children=list(children),
+    )
 
-    def register_command(
-        self,
-        session: Any,
-        *,
-        module_id: str,
-        definition: Mapping[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        return self.register_module(
-            session,
-            role="command",
-            module_id=module_id,
-            definition=definition,
-        )
 
-    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        event_name = _normalize_token(event)
-        event_name = SKINS_EVENT_ALIASES.get(event_name, event_name)
-        if event_name not in SKINS_EVENTS:
-            return {"ok": False, "error": f"Unknown skins event '{event}'"}
-        return self.invoke(
-            session,
-            "emit",
-            {
-                "event": event_name,
-                "payload": dict(payload or {}),
-            },
-        )
+def skins_column(
+    *children: Control,
+    main: Optional[str] = None,
+    cross: Optional[str] = None,
+    size: Optional[str] = None,
+) -> Skins:
+    """Create a column layout with Skins styling."""
+    return Skins(
+        module="column",
+        main=main,
+        cross=cross,
+        size=size,
+        children=list(children),
+    )
 
-    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
-        return self.emit(session, event, payload)
 
-    def apply(self, session: Any, skin: str | None = None) -> dict[str, Any]:
-        payload: dict[str, Any] = {}
-        if skin is not None:
-            payload["skin"] = skin
-        return self.invoke(session, "apply", payload)
+def skins_container(
+    *children: Control,
+    padding: Optional[Any] = None,
+    margin: Optional[Any] = None,
+    radius: Optional[float] = None,
+    bgcolor: Optional[str] = None,
+    gradient: Optional[Any] = None,
+    border: Optional[Any] = None,
+) -> Skins:
+    """Create a container with Skins styling."""
+    return Skins(
+        module="container",
+        padding=padding,
+        margin=margin,
+        radius=radius,
+        bgcolor=bgcolor,
+        gradient=gradient,
+        border=border,
+        children=list(children),
+    )
 
-    def clear(self, session: Any) -> dict[str, Any]:
-        return self.invoke(session, "clear", {})
 
-    def create_skin(self, session: Any, name: str, payload: Any | None = None) -> dict[str, Any]:
-        args: dict[str, Any] = {"name": name}
-        if payload is not None:
-            args["payload"] = payload
-        return self.invoke(session, "create_skin", args)
+def skins_card(
+    *children: Control,
+    elevation: Optional[float] = None,
+    color: Optional[str] = None,
+    radius: Optional[float] = None,
+) -> Skins:
+    """Create a card with Skins styling."""
+    return Skins(
+        module="card",
+        elevation=elevation,
+        color=color,
+        radius=radius,
+        children=list(children),
+    )
 
-    def edit_skin(self, session: Any, name: str, payload: Any | None = None) -> dict[str, Any]:
-        args: dict[str, Any] = {"name": name}
-        if payload is not None:
-            args["payload"] = payload
-        return self.invoke(session, "edit_skin", args)
 
-    def delete_skin(self, session: Any, name: str) -> dict[str, Any]:
-        return self.invoke(session, "delete_skin", {"name": name})
-
-    def set_skins(
-        self,
-        session: Any,
-        skins: list[Any],
-        *,
-        selected_skin: str | None = None,
-    ) -> dict[str, Any]:
-        payload: dict[str, Any] = {"skins": skins}
-        if selected_skin is not None:
-            payload["selected_skin"] = selected_skin
-        return self.set_props(session, **payload)
-
-    def set_presets(self, session: Any, presets: list[Any]) -> dict[str, Any]:
-        return self.set_props(session, presets=presets)
-
-    def select(self, session: Any, skin: str) -> dict[str, Any]:
-        return self.emit(session, "select", {"skin": skin})
-
-    def set_token_mapping(self, session: Any, mapping: Mapping[str, Any]) -> dict[str, Any]:
-        return self.set_module(session, "token_mapper", {"mapping": dict(mapping)})
-
+def skins_transition(
+    *children: Control,
+    duration_ms: Optional[int] = 220,
+    curve: Optional[str] = "ease",
+    preset: Optional[str] = "fade",
+) -> Skins:
+    """Create a transition with Skins styling."""
+    return Skins(
+        module="transition",
+        duration_ms=duration_ms,
+        curve=curve,
+        preset=preset,
+        children=list(children),
+    )

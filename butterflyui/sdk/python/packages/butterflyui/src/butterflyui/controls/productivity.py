@@ -10,9 +10,6 @@ __all__ = [
     "Chat",
     "ChatBubble",
     "MessageBubble",
-    "CodeEditor",
-    "Studio",
-    "Terminal",
     "OutputPanel",
     "EditorTabStrip",
     "WorkspaceTree",
@@ -65,38 +62,6 @@ class OwnershipMarker(Component):
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
 
-
-from .code_editor.control import (
-    CODE_EDITOR_DEFAULT_ENGINE,
-    CODE_EDITOR_DEFAULT_WEBVIEW_ENGINE,
-    CODE_EDITOR_EVENTS,
-    CODE_EDITOR_MODULES,
-    CODE_EDITOR_REGISTRY_MANIFEST_LISTS,
-    CODE_EDITOR_REGISTRY_ROLE_ALIASES,
-    CODE_EDITOR_SCHEMA_VERSION,
-    CODE_EDITOR_STATES,
-    CodeEditor,
-)
-from .studio.control import (
-    STUDIO_EVENTS,
-    STUDIO_MODULE_ALIASES,
-    STUDIO_MODULES,
-    STUDIO_REGISTRY_MANIFEST_LISTS,
-    STUDIO_REGISTRY_ROLE_ALIASES,
-    STUDIO_SCHEMA_VERSION,
-    STUDIO_STATES,
-    Studio,
-)
-from .terminal.control import (
-    TERMINAL_DEFAULT_ENGINE,
-    TERMINAL_EVENTS,
-    TERMINAL_MODULES,
-    TERMINAL_REGISTRY_MANIFEST_LISTS,
-    TERMINAL_REGISTRY_ROLE_ALIASES,
-    TERMINAL_SCHEMA_VERSION,
-    TERMINAL_STATES,
-    Terminal,
-)
 
 class OutputPanel(Component):
     control_type = "output_panel"

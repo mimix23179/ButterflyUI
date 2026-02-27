@@ -1,6 +1,10 @@
 ![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
 
-# 🦋 ButterflyUI - Built with Codex & Copilot & TRAE AI ✨
+# 🦋 ButterflyUI - Built with these AI Coders:
+- Codex ✨
+- Copilot ✨
+- TRAE AI ✨
+- Kilo Code ✨
 
 **ButterflyUI** is a layered application platform built on composable UI primitives, token-driven styling, and modular umbrella controls.
 
@@ -19,9 +23,6 @@ ButterflyUI follows a clear architectural hierarchy:
 Candy     → Structural & visual primitives
 Skins     → Token-driven visual identity
 Gallery   → Asset intelligence layer
-Terminal  → Execution workbench
-CodeEditor→ IDE-grade logic engineering surface
-Studio    → Visual construction environment
 
 ````
 
@@ -31,7 +32,7 @@ Each of these is an **umbrella control**:
 - Shared registries
 - Manifest-driven configuration
 
-This creates a predictable, plugin-style architecture similar to traditional IDEs and professional creative software.
+This creates a predictable, plugin-style architecture similar to professional creative software.
 
 ---
 
@@ -110,85 +111,6 @@ It includes:
 - Apply adapters for Studio & Skins
 
 Gallery connects assets to tools in a clean, type-aware way.
-
----
-
-## 💻 CodeEditor — Modular IDE Surface
-
-CodeEditor is a Monaco-powered IDE workbench.
-
-It includes:
-
-- Editor surface
-- Tabs & split views
-- Workspace explorer
-- File tree
-- Search system (text + semantic)
-- Diff viewer
-- Diagnostics pipeline
-- Docking layout system
-- Intent routing & command palette
-
-Providers are pluggable:
-
-- Diagnostics provider
-- Formatter provider
-- Semantic search provider
-- LSP backends
-- AI-assisted tooling
-
-It is built for scale and modularity.
-
----
-
-## 🖥 Terminal — Execution Workbench
-
-Terminal is a full execution runtime, not a text box.
-
-It supports:
-
-- Multiple sessions & tabs
-- Structured command builder
-- Presets
-- Streaming output
-- ANSI parsing
-- Progress pipelines
-- Timeline view
-- Log panels
-- Execution lanes & concurrency control
-- Backend bridge abstraction (local, PTY, remote)
-
-It separates:
-
-- Backend execution
-- Output shaping
-- UI rendering
-- Session management
-
-Terminal is built for real application workflows.
-
----
-
-## 🏗 Studio — Visual Builder Environment
-
-Studio is the structured visual construction environment.
-
-It includes:
-
-- Canvas surface
-- Outline tree
-- Inspector
-- Properties panel
-- Component & block palettes
-- Selection tools
-- Transform box
-- Undo/redo command system
-- Token editor integration
-- Dockable panel system
-
-Studio edits real control schemas — not visual approximations.
-
-It produces deterministic output suitable for production.
 
 ---
 
@@ -304,8 +226,5 @@ ButterflyUI is:
 Candy is the craft.
 Skins is the identity.
 Gallery supplies the resources.
-Terminal executes.
-CodeEditor engineers.
-Studio constructs.
 
 Together, they form ButterflyUI.

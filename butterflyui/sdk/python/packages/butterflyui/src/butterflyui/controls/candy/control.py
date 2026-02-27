@@ -390,6 +390,67 @@ class Candy(Component):
         self._strict_contract = strict
         super().__init__(*children, props=merged, style=style, strict=strict)
 
+    def __call__(
+        self,
+        component_class: type,
+        *args: Any,
+        tokens: Mapping[str, Any] | None = None,
+        theme: Mapping[str, Any] | CandyTheme | None = None,
+        brightness: str | None = None,
+        radius: Mapping[str, Any] | None = None,
+        colors: Mapping[str, Any] | None = None,
+        typography: Mapping[str, Any] | None = None,
+        spacing: Mapping[str, Any] | None = None,
+        elevation: Mapping[str, Any] | None = None,
+        motion: Mapping[str, Any] | None = None,
+        **kwargs: Any,
+    ):
+        """
+        Wrap a component class in a CandyScope to apply Candy styling.
+        
+        This enables the `ui.Candy(Button)` pattern where a component class
+        is wrapped in a CandyScope to apply candy tokens and theme.
+        
+        Args:
+            component_class: The component class to wrap (e.g., Button, Card)
+            *args: Positional arguments to pass to the component constructor
+            tokens: Candy design tokens
+            theme: Theme configuration
+            brightness: 'light' or 'dark'
+            radius: Border radius tokens
+            colors: Color overrides
+            typography: Typography tokens
+            spacing: Spacing tokens
+            elevation: Elevation/shadow tokens
+            motion: Motion/animation tokens
+            **kwargs: Additional arguments to pass to the component constructor
+        
+        Returns:
+            CandyScope: A scope wrapper containing the instantiated component
+        
+        Example:
+            ui.Candy(Button, variant='primary')  # Returns CandyScope wrapping Button instance
+        """
+        # Import here to avoid circular imports
+        from .scope import CandyScope
+        
+        # Instantiate the component class with the provided args/kwargs
+        component = component_class(*args, **kwargs) if args or kwargs else component_class()
+        
+        # Wrap in CandyScope and return
+        return CandyScope(
+            child=component,
+            tokens=tokens,
+            theme=theme,
+            brightness=brightness,
+            radius=radius,
+            colors=colors,
+            typography=typography,
+            spacing=spacing,
+            elevation=elevation,
+            motion=motion,
+        )
+
     @staticmethod
     def _validate_props(props: Mapping[str, Any], *, strict: bool) -> None:
         try:

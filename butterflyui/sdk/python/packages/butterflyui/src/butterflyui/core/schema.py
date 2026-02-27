@@ -1125,6 +1125,20 @@ CANDY_SCHEMA = _control_schema(
     }
 )
 
+CANDY_SCOPE_SCHEMA = _control_schema(
+    {
+        "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "brightness": STRING_SCHEMA,
+        "radius": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "colors": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "typography": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "spacing": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "elevation": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "motion": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    }
+)
+
 PAN_ZOOM_SCHEMA = {
     "type": "object",
     "properties": {
@@ -1832,6 +1846,52 @@ IMAGE_SCHEMA = _control_schema(
 
 GALLERY_SCHEMA_VERSION = 2
 
+# Gallery layout types for the new unified Gallery control
+GALLERY_LAYOUT_TYPES = [
+    "grid",
+    "masonry",
+    "list",
+    "carousel",
+    "virtual_grid",
+    "virtual_list",
+]
+
+# Gallery item schema
+GALLERY_ITEM_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "id": STRING_SCHEMA,
+        "name": STRING_SCHEMA,
+        "path": STRING_SCHEMA,
+        "url": STRING_SCHEMA,
+        "thumbnailUrl": STRING_SCHEMA,
+        "thumbnail_url": STRING_SCHEMA,
+        "type": STRING_SCHEMA,
+        "metadata": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "isSelected": BOOL_SCHEMA,
+        "is_selected": BOOL_SCHEMA,
+        "isLoading": BOOL_SCHEMA,
+        "is_loading": BOOL_SCHEMA,
+        "subtitle": STRING_SCHEMA,
+        "description": STRING_SCHEMA,
+        "authorName": STRING_SCHEMA,
+        "author_name": STRING_SCHEMA,
+        "authorAvatar": STRING_SCHEMA,
+        "author_avatar": STRING_SCHEMA,
+        "likeCount": INTEGER_SCHEMA,
+        "like_count": INTEGER_SCHEMA,
+        "viewCount": INTEGER_SCHEMA,
+        "view_count": INTEGER_SCHEMA,
+        "createdAt": STRING_SCHEMA,
+        "created_at": STRING_SCHEMA,
+        "aspectRatio": NUMBER_SCHEMA,
+        "aspect_ratio": NUMBER_SCHEMA,
+        "tags": {"type": "array", "items": STRING_SCHEMA},
+        "status": STRING_SCHEMA,
+    },
+    "required": ["id"],
+}
+
 GALLERY_MODULE_ENUM = [
     "toolbar",
     "filter_bar",
@@ -1902,61 +1962,6 @@ GALLERY_EVENT_ENUM = [
     "drop_target",
     "section_action",
     "font_change",
-]
-
-SKINS_MODULE_ENUM = [
-    "selector",
-    "preset",
-    "editor",
-    "preview",
-    "apply",
-    "clear",
-    "token_mapper",
-    "create_skin",
-    "edit_skin",
-    "delete_skin",
-    "effects",
-    "particles",
-    "shaders",
-    "materials",
-    "icons",
-    "fonts",
-    "colors",
-    "background",
-    "border",
-    "shadow",
-    "outline",
-    "animation",
-    "transition",
-    "interaction",
-    "layout",
-    "responsive",
-    "effect_editor",
-    "particle_editor",
-    "shader_editor",
-    "material_editor",
-    "icon_editor",
-    "font_editor",
-    "color_editor",
-    "background_editor",
-    "border_editor",
-    "shadow_editor",
-    "outline_editor",
-]
-
-SKINS_STATE_ENUM = ["idle", "loading", "ready", "editing", "preview", "disabled"]
-
-SKINS_EVENT_ENUM = [
-    "change",
-    "select",
-    "apply",
-    "clear",
-    "create_skin",
-    "edit_skin",
-    "delete_skin",
-    "state_change",
-    "module_change",
-    "token_map",
 ]
 
 CODE_EDITOR_MODULE_ENUM = [
@@ -2264,52 +2269,10 @@ GALLERY_MODULE_SCHEMAS = {
     "skins": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
 }
 
-SKINS_MODULE_SCHEMAS = {
-    "selector": _skins_module_schema(
-        {
-            "skins": {"type": "array", "items": ANY_SCHEMA},
-            "options": {"type": "array", "items": ANY_SCHEMA},
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "selected_skin": STRING_SCHEMA,
-        }
-    ),
-    "preset": _skins_module_schema({"presets": {"type": "array", "items": ANY_SCHEMA}}),
-    "editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "preview": _skins_module_schema({"skin": STRING_SCHEMA}),
-    "apply": _skins_module_schema({"skin": STRING_SCHEMA}),
-    "clear": _skins_module_schema({}),
-    "token_mapper": _skins_module_schema({"mapping": {"type": "object", "additionalProperties": ANY_SCHEMA}}),
-    "create_skin": _skins_module_schema({"name": STRING_SCHEMA}),
-    "edit_skin": _skins_module_schema({"name": STRING_SCHEMA}),
-    "delete_skin": _skins_module_schema({"name": STRING_SCHEMA}),
-    "effects": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "particles": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "shaders": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "materials": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "icons": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "fonts": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "colors": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "background": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "border": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "shadow": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "outline": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "animation": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "transition": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "interaction": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "layout": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "responsive": _skins_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "effect_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "particle_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "shader_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "material_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "icon_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "font_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "color_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "background_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "border_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "shadow_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "outline_editor": _skins_module_schema({"name": STRING_SCHEMA, "text": STRING_SCHEMA}),
-}
+
+# ============================================================================
+# Skins Module Types (defined below after SKINS_SCHEMA)
+# ============================================================================
 
 CODE_EDITOR_MODULE_SCHEMAS = {
     "editor_intent_router": _code_editor_module_schema({"shortcuts": {"type": "array", "items": ANY_SCHEMA}}),
@@ -2573,18 +2536,28 @@ TERMINAL_MODULE_SCHEMAS = {
 GALLERY_SCHEMA = _control_schema(
     {
         "schema_version": INTEGER_SCHEMA,
+        # Layout type (new unified approach)
+        "layout": {"type": "string", "enum": GALLERY_LAYOUT_TYPES},
+        # Item properties
+        "items": {"type": "array", "items": GALLERY_ITEM_SCHEMA},
+        # Layout configuration
+        "columns": INTEGER_SCHEMA,
+        "spacing": NUMBER_SCHEMA,
+        "mainAxisSpacing": NUMBER_SCHEMA,
+        "crossAxisSpacing": NUMBER_SCHEMA,
+        "radius": NUMBER_SCHEMA,
+        # Display options
+        "showSelection": BOOL_SCHEMA,
+        "multiSelect": BOOL_SCHEMA,
+        "showActions": BOOL_SCHEMA,
+        "showMeta": BOOL_SCHEMA,
+        "scrollDirection": STRING_SCHEMA,
+        # Legacy module support (for backward compatibility)
         "module": {"type": "string", "enum": GALLERY_MODULE_ENUM},
         "state": {"type": "string", "enum": GALLERY_STATE_ENUM},
         "custom_layout": BOOL_SCHEMA,
-        "layout": STRING_SCHEMA,
         "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
         "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "radius": NUMBER_SCHEMA,
-        "items": {"type": "array", "items": ANY_SCHEMA},
-        "spacing": NUMBER_SCHEMA,
-        "run_spacing": NUMBER_SCHEMA,
-        "tile_width": NUMBER_SCHEMA,
-        "tile_height": NUMBER_SCHEMA,
         "selectable": BOOL_SCHEMA,
         "enabled": BOOL_SCHEMA,
         "events": {"type": "array", "items": {"type": "string", "enum": GALLERY_EVENT_ENUM}},
@@ -2641,63 +2614,145 @@ GALLERY_SCHEMA = _control_schema(
     }
 )
 
+GALLERY_SCOPE_SCHEMA = _control_schema(
+    {
+        "schema_version": INTEGER_SCHEMA,
+        # Layout type
+        "layout": {"type": "string", "enum": GALLERY_LAYOUT_TYPES},
+        # Layout configuration
+        "columns": INTEGER_SCHEMA,
+        "spacing": NUMBER_SCHEMA,
+        "mainAxisSpacing": NUMBER_SCHEMA,
+        "crossAxisSpacing": NUMBER_SCHEMA,
+        "radius": NUMBER_SCHEMA,
+    }
+)
+
+# ============================================================================
+# Skins Module Types - New unified Skins control
+# Uses existing components from ButterflyUI to let users build their own skins
+# ============================================================================
+
+SKINS_MODULE_TYPES = [
+    # Layout modules
+    "row",
+    "column",
+    "stack",
+    "wrap",
+    "align",
+    "container",
+    "card",
+    "button",
+    "badge",
+    "border",
+    # Decoration modules
+    "gradient",
+    "decorated",
+    "clip",
+    # Effects modules
+    "effects",
+    "particles",
+    "canvas",
+    # Motion modules
+    "animation",
+    "motion",
+    "transition",
+]
+
+# Skins tokens schema for theme customization
+SKINS_TOKENS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "background": STRING_SCHEMA,
+        "surface": STRING_SCHEMA,
+        "surfaceAlt": STRING_SCHEMA,
+        "text": STRING_SCHEMA,
+        "mutedText": STRING_SCHEMA,
+        "border": STRING_SCHEMA,
+        "primary": STRING_SCHEMA,
+        "secondary": STRING_SCHEMA,
+        "success": STRING_SCHEMA,
+        "warning": STRING_SCHEMA,
+        "info": STRING_SCHEMA,
+        "error": STRING_SCHEMA,
+        "radius": {
+            "type": "object",
+            "properties": {
+                "sm": NUMBER_SCHEMA,
+                "md": NUMBER_SCHEMA,
+                "lg": NUMBER_SCHEMA,
+            },
+        },
+        "spacing": {
+            "type": "object",
+            "properties": {
+                "xs": NUMBER_SCHEMA,
+                "sm": NUMBER_SCHEMA,
+                "md": NUMBER_SCHEMA,
+                "lg": NUMBER_SCHEMA,
+            },
+        },
+        "effects": {
+            "type": "object",
+            "properties": {
+                "glassBlur": NUMBER_SCHEMA,
+                "shadow": BOOL_SCHEMA,
+                "glow": BOOL_SCHEMA,
+                "fire": BOOL_SCHEMA,
+                "cyber": BOOL_SCHEMA,
+            },
+        },
+    },
+}
+
 SKINS_SCHEMA = _control_schema(
     {
         "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": SKINS_MODULE_ENUM},
-        "state": {"type": "string", "enum": SKINS_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "module": {"type": "string", "enum": SKINS_MODULE_TYPES},
+        "skin": STRING_SCHEMA,  # Preset skin name: "default", "shadow", "fire", "earth", "gaming"
+        "tokens": SKINS_TOKENS_SCHEMA,  # Custom tokens for skin
+        "brightness": STRING_SCHEMA,  # "light" or "dark"
+        # Layout properties
+        "main": STRING_SCHEMA,  # Main axis alignment
+        "cross": STRING_SCHEMA,  # Cross axis alignment
+        "size": STRING_SCHEMA,  # Main axis size
+        "direction": STRING_SCHEMA,  # Direction for wrap
+        "alignment": STRING_SCHEMA,  # Alignment for align control
+        "width": NUMBER_SCHEMA,  # Width factor for align
+        "height": NUMBER_SCHEMA,  # Height factor for align
+        "fit": STRING_SCHEMA,  # Stack fit
+        "spacing": NUMBER_SCHEMA,  # Wrap spacing
+        "runSpacing": NUMBER_SCHEMA,  # Wrap run spacing
+        # Decoration properties
+        "padding": ANY_SCHEMA,
+        "margin": ANY_SCHEMA,
         "radius": NUMBER_SCHEMA,
-        "skins": {"type": "array", "items": ANY_SCHEMA},
-        "selected_skin": STRING_SCHEMA,
-        "presets": {"type": "array", "items": ANY_SCHEMA},
-        "value": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "events": {"type": "array", "items": {"type": "string", "enum": SKINS_EVENT_ENUM}},
-        "modules": {
-            "type": "object",
-            "properties": {name: SKINS_MODULE_SCHEMAS[name] for name in SKINS_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        "selector": SKINS_MODULE_SCHEMAS["selector"],
-        "preset": SKINS_MODULE_SCHEMAS["preset"],
-        "editor": SKINS_MODULE_SCHEMAS["editor"],
-        "preview": SKINS_MODULE_SCHEMAS["preview"],
-        "apply": SKINS_MODULE_SCHEMAS["apply"],
-        "clear": SKINS_MODULE_SCHEMAS["clear"],
-        "token_mapper": SKINS_MODULE_SCHEMAS["token_mapper"],
-        "create_skin": SKINS_MODULE_SCHEMAS["create_skin"],
-        "edit_skin": SKINS_MODULE_SCHEMAS["edit_skin"],
-        "delete_skin": SKINS_MODULE_SCHEMAS["delete_skin"],
-        "effects": SKINS_MODULE_SCHEMAS["effects"],
-        "particles": SKINS_MODULE_SCHEMAS["particles"],
-        "shaders": SKINS_MODULE_SCHEMAS["shaders"],
-        "materials": SKINS_MODULE_SCHEMAS["materials"],
-        "icons": SKINS_MODULE_SCHEMAS["icons"],
-        "fonts": SKINS_MODULE_SCHEMAS["fonts"],
-        "colors": SKINS_MODULE_SCHEMAS["colors"],
-        "background": SKINS_MODULE_SCHEMAS["background"],
-        "border": SKINS_MODULE_SCHEMAS["border"],
-        "shadow": SKINS_MODULE_SCHEMAS["shadow"],
-        "outline": SKINS_MODULE_SCHEMAS["outline"],
-        "animation": SKINS_MODULE_SCHEMAS["animation"],
-        "transition": SKINS_MODULE_SCHEMAS["transition"],
-        "interaction": SKINS_MODULE_SCHEMAS["interaction"],
-        "layout": SKINS_MODULE_SCHEMAS["layout"],
-        "responsive": SKINS_MODULE_SCHEMAS["responsive"],
-        "effect_editor": SKINS_MODULE_SCHEMAS["effect_editor"],
-        "particle_editor": SKINS_MODULE_SCHEMAS["particle_editor"],
-        "shader_editor": SKINS_MODULE_SCHEMAS["shader_editor"],
-        "material_editor": SKINS_MODULE_SCHEMAS["material_editor"],
-        "icon_editor": SKINS_MODULE_SCHEMAS["icon_editor"],
-        "font_editor": SKINS_MODULE_SCHEMAS["font_editor"],
-        "color_editor": SKINS_MODULE_SCHEMAS["color_editor"],
-        "background_editor": SKINS_MODULE_SCHEMAS["background_editor"],
-        "border_editor": SKINS_MODULE_SCHEMAS["border_editor"],
-        "shadow_editor": SKINS_MODULE_SCHEMAS["shadow_editor"],
-        "outline_editor": SKINS_MODULE_SCHEMAS["outline_editor"],
+        "gradient": ANY_SCHEMA,
+        "bgcolor": STRING_SCHEMA,
+        "background": STRING_SCHEMA,
+        "shadow": ANY_SCHEMA,
+        "border": ANY_SCHEMA,
+        "shape": STRING_SCHEMA,
+        "color": STRING_SCHEMA,
+        "elevation": NUMBER_SCHEMA,
+        "shadowColor": STRING_SCHEMA,
+        # Effects properties
+        "shimmer": BOOL_SCHEMA,
+        "overlay": BOOL_SCHEMA,
+        # Motion properties
+        "duration_ms": INTEGER_SCHEMA,
+        "curve": STRING_SCHEMA,
+        "preset": STRING_SCHEMA,
+    }
+)
+
+# SkinsScope schema for applying skins to children
+SKINS_SCOPE_SCHEMA = _control_schema(
+    {
+        "schema_version": INTEGER_SCHEMA,
+        "skin": STRING_SCHEMA,  # Preset skin name
+        "tokens": SKINS_TOKENS_SCHEMA,  # Custom tokens
+        "brightness": STRING_SCHEMA,  # "light" or "dark"
     }
 )
 
@@ -5414,7 +5469,9 @@ CONTROL_SCHEMAS = {
     "canvas": CANVAS_SCHEMA,
     "vector_view": VECTOR_VIEW_SCHEMA,
     "gallery": GALLERY_SCHEMA,
+    "gallery_scope": GALLERY_SCOPE_SCHEMA,
     "skins": SKINS_SCHEMA,
+    "skins_scope": SKINS_SCOPE_SCHEMA,
     "video": VIDEO_SCHEMA,
     "sprite": SPRITE_SCHEMA,
     "snap_grid": _control_schema(SNAP_GRID_SCHEMA["properties"]),
@@ -5633,6 +5690,7 @@ CONTROL_SCHEMAS = {
 
     # Candy
     "candy": CANDY_SCHEMA,
+    "candy_scope": CANDY_SCOPE_SCHEMA,
     "emoji_icon": EMOJI_ICON_SCHEMA,
     "color_picker": COLOR_PICKER_SCHEMA,
 
@@ -5844,7 +5902,9 @@ _ALL_CONTROL_TYPES = {
     "button_style",
     "callout",
     "candy",
+    "candy_scope",
     "gallery",
+    "gallery_scope",
     "skins",
     "canvas",
     "card",
@@ -6154,6 +6214,9 @@ RUNTIME_PROP_HINTS = {
     'border': ['color', 'width', 'radius', 'side', 'padding'],
     'border_side': ['side', 'color', 'width', 'length'],
     'button_style': ['value', 'options'],
+    'candy_scope': [
+        'tokens', 'theme', 'brightness', 'radius', 'colors', 'typography', 'spacing', 'elevation', 'motion'
+    ],
     'gallery': [
         'schema_version', 'module', 'state', 'items', 'spacing', 'run_spacing', 'tile_width', 'tile_height', 'selectable', 'enabled', 'events', 'modules',
         'manifest', 'registries',
@@ -6169,6 +6232,9 @@ RUNTIME_PROP_HINTS = {
         'item_selection_switch', 'apply', 'clear', 'select_all',
         'deselect_all', 'apply_font', 'apply_image', 'set_as_wallpaper',
         'presets', 'skins', 'payload'
+    ],
+    'gallery_scope': [
+        'layout', 'spacing', 'radius', 'columns', 'cross_axis_count', 'cross_axis_spacing', 'main_axis_spacing'
     ],
     'skins': [
         'schema_version', 'module', 'state', 'skins', 'selected_skin', 'presets', 'value', 'enabled', 'events', 'modules',

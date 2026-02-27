@@ -1,9 +1,19 @@
 from ._shared import Component
-from .aliases import ALIAS_CONTROL_CLASSES, ALIAS_CONTROL_EXPORTS
 from .candy import (
-    Candy, 
+    Candy,
+    CandyScope, # Internal implementation detail, not intended for direct use
     CandyTheme,
-    MODULE_COMPONENTS as CANDY_MODULE_COMPONENTS,
+)
+from .skins import (
+    Skins,
+    SkinsScope,
+    SkinsTokens,
+    SkinsPresets,
+    skins_row,
+    skins_column,
+    skins_container,
+    skins_card,
+    skins_transition,
 )
 from .customization import (
     AnimatedGradient,
@@ -147,7 +157,15 @@ from .effects import (
 )
 from .gallery import (
     Gallery,
-    MODULE_COMPONENTS as GALLERY_MODULE_COMPONENTS,
+    GalleryScope,
+    GalleryItem,
+    GalleryLayoutType,
+    gallery_grid,
+    gallery_masonry,
+    gallery_list,
+    gallery_carousel,
+    gallery_virtual_grid,
+    gallery_virtual_list,
 )
 from .inputs import (
     AsyncActionButton,
@@ -297,21 +315,8 @@ from .productivity import (
     AutoForm,
     SubmitScope,
 )
-from .code_editor import (
-    CodeEditor,
-    MODULE_COMPONENTS as CODE_EDITOR_MODULE_COMPONENTS,
-)
-from .studio import (
-    Studio,
-    MODULE_COMPONENTS as STUDIO_MODULE_COMPONENTS,
-)
-from .terminal import (
-    Terminal,
-    MODULE_COMPONENTS as TERMINAL_MODULE_COMPONENTS,
-)
 from .skins import (
     Skins,
-    MODULE_COMPONENTS as SKINS_MODULE_COMPONENTS,
 )
 from .overlay import (
     BottomSheet,
@@ -348,17 +353,6 @@ from .shell import (
     WindowControls,
 )
 from .webview import WebView
-
-UMBRELLA_SUBMODULE_COMPONENTS = {
-    "candy": dict(CANDY_MODULE_COMPONENTS),
-    "code_editor": dict(CODE_EDITOR_MODULE_COMPONENTS),
-    "gallery": dict(GALLERY_MODULE_COMPONENTS),
-    "skins": dict(SKINS_MODULE_COMPONENTS),
-    "studio": dict(STUDIO_MODULE_COMPONENTS),
-    "terminal": dict(TERMINAL_MODULE_COMPONENTS),
-}
-
-globals().update(ALIAS_CONTROL_CLASSES)
 
 __all__ = [
     "Align",
@@ -404,6 +398,7 @@ __all__ = [
     "Button",
     "ButtonStyle",
     "Candy",
+    "CandyScope",
     "CandyTheme",
     "Card",
     "Canvas",
@@ -433,7 +428,6 @@ __all__ = [
     "Expanded",
     "ElevatedButton",
     "FilePicker",
-    "Filepicker",
     "FilterChipsBar",
     "FieldGroup",
     "FilterDrawer",
@@ -442,6 +436,7 @@ __all__ = [
     "Frame",
     "GridView",
     "Gallery",
+    "GalleryScope",
     "HtmlView",
     "Html",
     "Icon",
@@ -479,9 +474,6 @@ __all__ = [
     "CommandPalette",
     "Splash",
     "CommandItem",
-    "CodeEditor",
-    "Studio",
-    "Terminal",
     "OutputPanel",
     "EditorTabStrip",
     "WorkspaceTree",
@@ -670,13 +662,5 @@ __all__ = [
     "Clip",
     "FileSystem",
     "Visibility",
-    "CANDY_MODULE_COMPONENTS",
-    "CODE_EDITOR_MODULE_COMPONENTS",
-    "GALLERY_MODULE_COMPONENTS",
-    "SKINS_MODULE_COMPONENTS",
-    "STUDIO_MODULE_COMPONENTS",
-    "TERMINAL_MODULE_COMPONENTS",
-    "UMBRELLA_SUBMODULE_COMPONENTS",
 ]
 
-__all__.extend(ALIAS_CONTROL_EXPORTS)

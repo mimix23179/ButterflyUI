@@ -24,7 +24,7 @@ from .runtime import set_current_session
 from .runtime.runner import RunTarget, RuntimePlan, build_runtime_plan
 from .core.control import Control, coerce_json_value
 from .core.performance import PerformanceConfig
-from .controls.candy import CandyTheme
+from .controls.candy.control import CandyTheme
 from .controls._shared import modifier_capabilities_manifest
 
 import butterflyui_desktop
