@@ -1,10 +1,11 @@
 ![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
 
-# 🦋 ButterflyUI - Built with these AI Coders:
+# 🦋 ButterflyUI - AI Coders used when building this:
 - Codex ✨
 - Copilot ✨
 - TRAE AI ✨
 - Kilo Code ✨
+- Antigravity ✨
 
 **ButterflyUI** is a layered application platform built on composable UI primitives, token-driven styling, and modular umbrella controls.
 

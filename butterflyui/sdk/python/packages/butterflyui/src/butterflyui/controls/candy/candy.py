@@ -42,6 +42,7 @@ CANDY_MODULES = {
     "icon",
     "text",
     "motion",
+    "page",
 }
 
 CANDY_STATES = {
@@ -254,6 +255,25 @@ def _register_runtime_module(
     }
 
 
+@dataclass
+class CandyTokens:
+    """Design tokens for Candy."""
+    _data: dict[str, Any] = field(default_factory=dict)
+
+    def __init__(self, data: dict[str, Any] | None = None, **kwargs: Any) -> None:
+        self._data = dict(data or {})
+        self._data.update(kwargs)
+
+    def to_json(self) -> dict[str, Any]:
+        return self._data
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self._data[key] = value
+
+    def __getitem__(self, key: str) -> Any:
+        return self._data[key]
+
+
 class Candy(Component):
     control_type = "candy"
 
@@ -432,7 +452,7 @@ class Candy(Component):
             ui.Candy(Button, variant='primary')  # Returns CandyScope wrapping Button instance
         """
         # Import here to avoid circular imports
-        from .scope import CandyScope
+        from .candy_scope import CandyScope
         
         # Instantiate the component class with the provided args/kwargs
         component = component_class(*args, **kwargs) if args or kwargs else component_class()

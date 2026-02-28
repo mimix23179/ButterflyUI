@@ -4,7 +4,7 @@ ButterflyUI Gallery Controls
 This module provides controls for creating gallery views for your applications.
 """
 
-from .control import (
+from .gallery import (
     Gallery,
     GalleryScope,
     GalleryItem,

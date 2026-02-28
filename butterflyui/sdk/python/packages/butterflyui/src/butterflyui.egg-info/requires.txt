@@ -1,9 +1,0 @@
-colorama
-pillow
-tree-sitter
-tree-sitter-languages
-websockets
-typing_extensions
-
-[:python_version < "3.11"]
-tomli

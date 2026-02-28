@@ -237,6 +237,12 @@ class Gallery(Control):
     # Scroll direction
     scroll_direction: str = "vertical"
     
+    # Scroll physics (bouncing, clamping, never, always)
+    physics: Optional[str] = None
+    
+    # Whether to shrink wrap the scroll view
+    shrink_wrap: Optional[bool] = None
+    
     # Children
     children: list[Control] = field(default_factory=list)
 
@@ -255,6 +261,8 @@ class Gallery(Control):
         show_actions: bool = True,
         show_meta: bool = True,
         scroll_direction: str = "vertical",
+        physics: Optional[str] = None,
+        shrink_wrap: Optional[bool] = None,
         children_list: Optional[Iterable[Control]] = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -273,6 +281,8 @@ class Gallery(Control):
         self.show_actions = show_actions
         self.show_meta = show_meta
         self.scroll_direction = scroll_direction
+        self.physics = physics
+        self.shrink_wrap = shrink_wrap
 
         merged_children = list(children)
         if children_list is not None:
@@ -321,6 +331,10 @@ class Gallery(Control):
             self.props["showMeta"] = self.show_meta
         if self.scroll_direction != "vertical":
             self.props["scrollDirection"] = self.scroll_direction
+        if self.physics:
+            self.props["physics"] = self.physics
+        if self.shrink_wrap is not None:
+            self.props["shrinkWrap"] = self.shrink_wrap
     
     def to_dict(self) -> dict[str, Any]:
         result = super().to_dict()

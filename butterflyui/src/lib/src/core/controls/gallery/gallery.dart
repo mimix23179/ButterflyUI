@@ -30,8 +30,11 @@ import 'package:butterflyui_runtime/src/core/controls/display/icon.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/avatar.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/empty_state.dart';
 import 'package:butterflyui_runtime/src/core/controls/customization/badge.dart';
-import 'package:butterflyui_runtime/src/core/controls/feedback/progress_indicator.dart' as bfi;
+import 'package:butterflyui_runtime/src/core/controls/feedback/progress_indicator.dart'
+    as bfi;
 import 'package:butterflyui_runtime/src/core/controls/media/image.dart';
+import 'package:butterflyui_runtime/src/core/controls/media/video.dart';
+import 'package:butterflyui_runtime/src/core/controls/media/audio.dart';
 import 'package:butterflyui_runtime/src/core/controls/lists/list_tile.dart';
 import 'package:butterflyui_runtime/src/core/controls/lists/virtual_grid.dart';
 import 'package:butterflyui_runtime/src/core/controls/lists/virtual_list.dart';
@@ -159,19 +162,25 @@ class GalleryItem {
       name: json['name']?.toString(),
       path: json['path']?.toString(),
       url: json['url']?.toString(),
-      thumbnailUrl: json['thumbnailUrl']?.toString() ?? json['thumbnail_url']?.toString(),
+      thumbnailUrl:
+          json['thumbnailUrl']?.toString() ?? json['thumbnail_url']?.toString(),
       type: json['type']?.toString() ?? 'image',
       metadata: json['metadata'] as Map<String, dynamic>?,
       isSelected: json['isSelected'] == true || json['is_selected'] == true,
       isLoading: json['isLoading'] == true || json['is_loading'] == true,
       subtitle: json['subtitle']?.toString(),
       description: json['description']?.toString(),
-      authorName: json['authorName']?.toString() ?? json['author_name']?.toString(),
-      authorAvatar: json['authorAvatar']?.toString() ?? json['author_avatar']?.toString(),
+      authorName:
+          json['authorName']?.toString() ?? json['author_name']?.toString(),
+      authorAvatar:
+          json['authorAvatar']?.toString() ?? json['author_avatar']?.toString(),
       likeCount: json['likeCount'] as int? ?? json['like_count'] as int?,
       viewCount: json['viewCount'] as int? ?? json['view_count'] as int?,
-      createdAt: json['createdAt']?.toString() ?? json['created_at']?.toString(),
-      aspectRatio: (json['aspectRatio'] as num?)?.toDouble() ?? (json['aspect_ratio'] as num?)?.toDouble(),
+      createdAt:
+          json['createdAt']?.toString() ?? json['created_at']?.toString(),
+      aspectRatio:
+          (json['aspectRatio'] as num?)?.toDouble() ??
+          (json['aspect_ratio'] as num?)?.toDouble(),
       tags: (json['tags'] as List?)?.map((e) => e.toString()).toList(),
       status: json['status']?.toString(),
     );
@@ -200,6 +209,17 @@ class GalleryItem {
       'status': status,
     };
   }
+}
+
+ScrollPhysics? _parseScrollPhysics(String? value) {
+  final v = value?.toLowerCase();
+  return switch (v) {
+    'bouncing' => const BouncingScrollPhysics(),
+    'clamping' => const ClampingScrollPhysics(),
+    'never' => const NeverScrollableScrollPhysics(),
+    'always' => const AlwaysScrollableScrollPhysics(),
+    _ => null,
+  };
 }
 
 // ============================================================================
@@ -248,7 +268,7 @@ Widget buildGalleryControl(
   // Parse items from props
   final itemsData = props['items'];
   List<GalleryItem> items = [];
-  
+
   if (itemsData is List) {
     items = itemsData
         .whereType<Map>()
@@ -257,21 +277,25 @@ Widget buildGalleryControl(
   }
 
   final layout = parseGalleryLayout(props['layout']);
-  final crossAxisCount = coerceOptionalInt(
-        props['cross_axis_count'] ?? props['crossAxisCount'] ?? props['columns'],
+  final crossAxisCount =
+      coerceOptionalInt(
+        props['cross_axis_count'] ??
+            props['crossAxisCount'] ??
+            props['columns'],
       ) ??
       3;
-  final mainAxisSpacing = coerceDouble(
+  final mainAxisSpacing =
+      coerceDouble(
         props['main_axis_spacing'] ??
             props['mainAxisSpacing'] ??
             props['spacing'],
       ) ??
       8.0;
-  final crossAxisSpacing = coerceDouble(
-        props['cross_axis_spacing'] ?? props['crossAxisSpacing'],
-      ) ??
+  final crossAxisSpacing =
+      coerceDouble(props['cross_axis_spacing'] ?? props['crossAxisSpacing']) ??
       8.0;
-  final itemBorderRadius = coerceDouble(
+  final itemBorderRadius =
+      coerceDouble(
         props['item_border_radius'] ??
             props['itemBorderRadius'] ??
             props['radius'],
@@ -309,6 +333,12 @@ Widget buildGalleryControl(
     props['enable_drag'] ?? props['enableDrag'],
     fallback: false,
   );
+  final shrinkWrap = coerceBoolValue(
+    props['shrink_wrap'] ?? props['shrinkWrap'],
+    fallback: false,
+  );
+  final physics = props['physics']?.toString();
+
   final useControlWidgets = coerceBoolValue(
     props['use_control_widgets'] ??
         props['use_control_layouts'] ??
@@ -322,9 +352,9 @@ Widget buildGalleryControl(
   final rawActions = props['actions'] ?? props['toolbar_actions'];
   final toolbarActions = rawActions is List
       ? rawActions
-          .whereType<Map>()
-          .map((action) => coerceObjectMap(action))
-          .toList()
+            .whereType<Map>()
+            .map((action) => coerceObjectMap(action))
+            .toList()
       : <Map<String, Object?>>[];
 
   final layoutWidget = _buildGalleryLayout(
@@ -349,6 +379,8 @@ Widget buildGalleryControl(
     enableDrag: enableDrag,
     useControlWidgets: useControlWidgets,
     useControlLayouts: useControlLayouts,
+    shrinkWrap: shrinkWrap,
+    physics: _parseScrollPhysics(physics),
   );
   final toolbarWidget = toolbarActions.isEmpty
       ? null
@@ -379,47 +411,36 @@ Widget buildGalleryControl(
             return buildChild(child);
           },
         );
-  
+
   final containerChildren = rawChildren.isEmpty
       ? [
-          {
-            'type': '__gallery_content',
-            'props': {},
-          },
+          {'type': '__gallery_content', 'props': {}},
         ]
       : rawChildren;
 
-  return buildContainerControl(
-    props,
-    containerChildren,
-    (childProps) {
-      final childType = childProps['type']?.toString();
-      if (childType != '__gallery_content') {
-        return buildChild(childProps);
-      }
-      if (isLoading) {
-        return bfi.buildProgressIndicatorControl(
-          _galleryControlId(controlId, 'loading'),
-          {'variant': 'circular'},
-          registerInvokeHandler,
-          unregisterInvokeHandler,
-          sendEvent,
-        );
-      }
-      if (items.isEmpty) {
-        return buildEmptyStateControl(
-          controlId,
-          {
-            'icon': 'photo_library',
-            'title': 'No items in gallery',
-            'message': 'Add some items to get started',
-          },
-          sendEvent,
-        );
-      }
-      return content;
-    },
-  );
+  return buildContainerControl(props, containerChildren, (childProps) {
+    final childType = childProps['type']?.toString();
+    if (childType != '__gallery_content') {
+      return buildChild(childProps);
+    }
+    if (isLoading) {
+      return bfi.buildProgressIndicatorControl(
+        _galleryControlId(controlId, 'loading'),
+        {'variant': 'circular'},
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
+    }
+    if (items.isEmpty) {
+      return buildEmptyStateControl(controlId, {
+        'icon': 'photo_library',
+        'title': 'No items in gallery',
+        'message': 'Add some items to get started',
+      }, sendEvent);
+    }
+    return content;
+  });
 }
 
 Widget _buildGalleryLayout({
@@ -444,10 +465,14 @@ Widget _buildGalleryLayout({
   required bool enableDrag,
   required bool useControlWidgets,
   required bool useControlLayouts,
+  required bool shrinkWrap,
+  ScrollPhysics? physics,
 }) {
   switch (layout) {
     case GalleryLayoutType.masonry:
       return MasonryGridView.count(
+        shrinkWrap: shrinkWrap,
+        physics: physics,
         padding: EdgeInsets.all(mainAxisSpacing),
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: mainAxisSpacing,
@@ -477,7 +502,9 @@ Widget _buildGalleryLayout({
     case GalleryLayoutType.list:
       if (useControlLayouts) {
         final listChildren = items
-            .map((item) => {'type': '__gallery_list_item', 'props': item.toJson()})
+            .map(
+              (item) => {'type': '__gallery_list_item', 'props': item.toJson()},
+            )
             .toList();
         return buildScrollViewControl(
           _galleryControlId(controlId, 'list_scroll'),
@@ -529,6 +556,8 @@ Widget _buildGalleryLayout({
         );
       }
       return ListView.separated(
+        shrinkWrap: shrinkWrap,
+        physics: physics,
         padding: EdgeInsets.all(mainAxisSpacing),
         itemCount: items.length,
         separatorBuilder: (_, __) => SizedBox(height: mainAxisSpacing),
@@ -553,7 +582,12 @@ Widget _buildGalleryLayout({
         },
       );
     case GalleryLayoutType.carousel:
+      // Carousel typically requires fixed height or expands.
+      // We wrap in AspectRatio or SizedBox if needed, but PageView expands.
+      // If shrinkWrap is true, we might need a fixed height container.
+      // For now, we assume user handles height if shrinkWrap is true.
       return PageView.builder(
+        physics: physics,
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
@@ -575,12 +609,18 @@ Widget _buildGalleryLayout({
           'columns': crossAxisCount,
           'spacing': mainAxisSpacing,
           'child_aspect_ratio': 1.0,
+          'shrink_wrap': shrinkWrap,
+          if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
         },
-        items.map((item) => {
-          'id': item.id,
-          'type': 'gallery_item',
-          'props': item.toJson(),
-        }).toList(),
+        items
+            .map(
+              (item) => {
+                'id': item.id,
+                'type': 'gallery_item',
+                'props': item.toJson(),
+              },
+            )
+            .toList(),
         (child) => _buildGalleryItemFromControl(
           controlId: controlId,
           child: child,
@@ -606,14 +646,20 @@ Widget _buildGalleryLayout({
       return buildVirtualListControl(
         _galleryControlId(controlId, 'virtual_list'),
         {
-          'spacing': mainAxisSpacing,
+          'spacing': mainAxisSpacing, 
           'item_extent': 80.0,
+          'shrink_wrap': shrinkWrap,
+          if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
         },
-        items.map((item) => {
-          'id': item.id,
-          'type': 'gallery_item',
-          'props': item.toJson(),
-        }).toList(),
+        items
+            .map(
+              (item) => {
+                'id': item.id,
+                'type': 'gallery_item',
+                'props': item.toJson(),
+              },
+            )
+            .toList(),
         (child) => _buildGalleryItemFromControl(
           controlId: controlId,
           child: child,
@@ -638,7 +684,9 @@ Widget _buildGalleryLayout({
     case GalleryLayoutType.grid:
       if (useControlLayouts) {
         final gridChildren = items
-            .map((item) => {'type': '__gallery_grid_item', 'props': item.toJson()})
+            .map(
+              (item) => {'type': '__gallery_grid_item', 'props': item.toJson()},
+            )
             .toList();
         return buildGridControl(
           _galleryControlId(controlId, 'grid'),
@@ -648,6 +696,8 @@ Widget _buildGalleryLayout({
             'run_spacing': crossAxisSpacing,
             'child_aspect_ratio': 1.0,
             'content_padding': EdgeInsets.all(mainAxisSpacing),
+            'shrink_wrap': shrinkWrap,
+            if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
           },
           gridChildren,
           (child) => _buildGalleryItemFromControl(
@@ -671,6 +721,8 @@ Widget _buildGalleryLayout({
         );
       }
       return GridView.builder(
+        shrinkWrap: shrinkWrap,
+        physics: physics,
         padding: EdgeInsets.all(mainAxisSpacing),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
@@ -824,8 +876,12 @@ Widget _buildCardItem({
             {
               'radius': borderRadius,
               'elevation': isHovered ? 4 : 1,
-              'bgcolor': showSelection && item.isSelected ? selectionColor : null,
-              'border_color': showSelection && item.isSelected ? selectedColor : null,
+              'bgcolor': showSelection && item.isSelected
+                  ? selectionColor
+                  : null,
+              'border_color': showSelection && item.isSelected
+                  ? selectedColor
+                  : null,
               'border_width': showSelection && item.isSelected ? 2 : 0,
             },
             [
@@ -892,10 +948,10 @@ Widget _buildCardItem({
                         (iconChild) {
                           final iconType = iconChild['type']?.toString();
                           if (iconType == '__gallery_check_icon') {
-                            return buildIconControl(
-                              Icons.check,
-                              {'color': Colors.white, 'size': 16},
-                            );
+                            return buildIconControl(Icons.check, {
+                              'color': Colors.white,
+                              'size': 16,
+                            });
                           }
                           return buildChild(iconChild);
                         },
@@ -923,19 +979,31 @@ Widget _buildCardItem({
                         children: [
                           buildIconButtonControl(
                             _galleryControlId(controlId, 'favorite_${item.id}'),
-                            {'icon': 'favorite_border', 'size': 32, 'bgcolor': Colors.black54},
+                            {
+                              'icon': 'favorite_border',
+                              'size': 32,
+                              'bgcolor': Colors.black54,
+                            },
                             sendEvent,
                           ),
                           const SizedBox(width: 8),
                           buildIconButtonControl(
                             _galleryControlId(controlId, 'share_${item.id}'),
-                            {'icon': 'share', 'size': 32, 'bgcolor': Colors.black54},
+                            {
+                              'icon': 'share',
+                              'size': 32,
+                              'bgcolor': Colors.black54,
+                            },
                             sendEvent,
                           ),
                           const SizedBox(width: 8),
                           buildIconButtonControl(
                             _galleryControlId(controlId, 'more_${item.id}'),
-                            {'icon': 'more_vert', 'size': 32, 'bgcolor': Colors.black54},
+                            {
+                              'icon': 'more_vert',
+                              'size': 32,
+                              'bgcolor': Colors.black54,
+                            },
                             sendEvent,
                           ),
                         ],
@@ -971,14 +1039,20 @@ Widget _buildCardItem({
                             Row(
                               children: [
                                 buildAvatarControl(
-                                  _galleryControlId(controlId, 'avatar_${item.id}'),
+                                  _galleryControlId(
+                                    controlId,
+                                    'avatar_${item.id}',
+                                  ),
                                   {'src': item.authorAvatar, 'size': 16},
                                   sendEvent,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   item.authorName!,
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ],
                             ),
@@ -987,14 +1061,17 @@ Widget _buildCardItem({
                               padding: const EdgeInsets.only(left: 8),
                               child: Row(
                                 children: [
-                                  buildIconControl(
-                                    Icons.visibility,
-                                    {'size': 14, 'color': Colors.grey},
-                                  ),
+                                  buildIconControl(Icons.visibility, {
+                                    'size': 14,
+                                    'color': Colors.grey,
+                                  }),
                                   const SizedBox(width: 4),
                                   Text(
                                     _formatCount(item.viewCount!),
-                                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1036,7 +1113,7 @@ Widget _buildTileItem({
   const selectedColor = Color(0xFF2196F3);
   final resolvedSelectedColor = tokens.color('primary') ?? selectedColor;
   final resolvedRadius = borderRadius <= 0 ? 6.0 : borderRadius;
-  
+
   if (useControlWidgets) {
     return GestureDetector(
       child: buildStackControl(
@@ -1092,10 +1169,10 @@ Widget _buildTileItem({
               (iconChild) {
                 if (iconChild['type']?.toString() == '__gallery_tile_check') {
                   return Center(
-                    child: buildIconControl(
-                      Icons.check_circle,
-                      {'color': Colors.white, 'size': 32},
-                    ),
+                    child: buildIconControl(Icons.check_circle, {
+                      'color': Colors.white,
+                      'size': 32,
+                    }),
                   );
                 }
                 return buildChild(iconChild);
@@ -1119,14 +1196,20 @@ Widget _buildTileItem({
                   if (item.name != null)
                     Text(
                       item.name!,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   if (item.subtitle != null)
                     Text(
                       item.subtitle!,
-                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1145,7 +1228,10 @@ Widget _buildTileItem({
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  buildIconControl(Icons.favorite, {'color': Colors.white, 'size': 14}),
+                  buildIconControl(Icons.favorite, {
+                    'color': Colors.white,
+                    'size': 14,
+                  }),
                   const SizedBox(width: 4),
                   Text(
                     _formatCount(item.likeCount!),
@@ -1210,9 +1296,25 @@ Widget _buildTileItem({
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (item.name != null)
-                    Text(item.name!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      item.name!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   if (item.subtitle != null)
-                    Text(item.subtitle!, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      item.subtitle!,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
@@ -1226,7 +1328,10 @@ Widget _buildTileItem({
               children: [
                 if (item.likeCount != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black54,
                       borderRadius: BorderRadius.circular(12),
@@ -1234,9 +1339,19 @@ Widget _buildTileItem({
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.favorite, color: Colors.white, size: 14),
+                        const Icon(
+                          Icons.favorite,
+                          color: Colors.white,
+                          size: 14,
+                        ),
                         const SizedBox(width: 4),
-                        Text(_formatCount(item.likeCount!), style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        Text(
+                          _formatCount(item.likeCount!),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1298,7 +1413,7 @@ Widget _buildListItem({
   const selectedColor = Color(0xFF2196F3);
   final resolvedSelectedColor = tokens.color('primary') ?? selectedColor;
   final resolvedRadius = itemBorderRadius <= 0 ? 6.0 : itemBorderRadius;
-  
+
   if (useControlWidgets) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -1360,14 +1475,20 @@ Widget _buildListItem({
                           if (item.authorName != null)
                             Text(
                               item.authorName!,
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           if (item.createdAt != null)
                             Padding(
                               padding: const EdgeInsets.only(left: 12),
                               child: Text(
                                 item.createdAt!,
-                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ),
                         ],
@@ -1401,14 +1522,15 @@ Widget _buildListItem({
     margin: const EdgeInsets.only(bottom: 8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
-      border: showSelection && item.isSelected ? Border.all(color: selectedColor, width: 2) : null,
-      color: showSelection && item.isSelected ? selectedColor.withOpacity(0.1) : Colors.grey[100],
+      border: showSelection && item.isSelected
+          ? Border.all(color: selectedColor, width: 2)
+          : null,
+      color: showSelection && item.isSelected
+          ? selectedColor.withOpacity(0.1)
+          : Colors.grey[100],
     ),
     child: buildRowControl(
-      {
-        'spacing': 12,
-        'padding': 12,
-      },
+      {'spacing': 12, 'padding': 12},
       [
         {
           'type': 'clip',
@@ -1437,12 +1559,22 @@ Widget _buildListItem({
           'children': [
             {
               'type': 'text',
-              'props': {'value': item.name ?? 'Untitled', 'font_weight': 'w600', 'max_lines': 1, 'overflow': 'ellipsis'},
+              'props': {
+                'value': item.name ?? 'Untitled',
+                'font_weight': 'w600',
+                'max_lines': 1,
+                'overflow': 'ellipsis',
+              },
             },
             if (item.subtitle != null)
               {
                 'type': 'text',
-                'props': {'value': item.subtitle, 'max_lines': 1, 'overflow': 'ellipsis', 'color': Colors.grey},
+                'props': {
+                  'value': item.subtitle,
+                  'max_lines': 1,
+                  'overflow': 'ellipsis',
+                  'color': Colors.grey,
+                },
               },
             if (showMeta)
               {
@@ -1452,12 +1584,20 @@ Widget _buildListItem({
                   if (item.authorName != null)
                     {
                       'type': 'text',
-                      'props': {'value': item.authorName, 'font_size': 12, 'color': Colors.grey},
+                      'props': {
+                        'value': item.authorName,
+                        'font_size': 12,
+                        'color': Colors.grey,
+                      },
                     },
                   if (item.createdAt != null)
                     {
                       'type': 'text',
-                      'props': {'value': item.createdAt, 'font_size': 12, 'color': Colors.grey},
+                      'props': {
+                        'value': item.createdAt,
+                        'font_size': 12,
+                        'color': Colors.grey,
+                      },
                     },
                 ],
               },
@@ -1468,8 +1608,14 @@ Widget _buildListItem({
             'type': 'column',
             'props': {'spacing': 4},
             'children': [
-              {'type': 'icon_button', 'props': {'icon': 'favorite_border', 'size': 20}},
-              {'type': 'icon_button', 'props': {'icon': 'share', 'size': 20}},
+              {
+                'type': 'icon_button',
+                'props': {'icon': 'favorite_border', 'size': 20},
+              },
+              {
+                'type': 'icon_button',
+                'props': {'icon': 'share', 'size': 20},
+              },
             ],
           },
       ],
@@ -1500,13 +1646,17 @@ Widget _buildGalleryListItem({
   required bool useControlWidgets,
 }) {
   const selectedColor = Color(0xFF2196F3);
-  
+
   return Container(
     padding: const EdgeInsets.all(8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
-      border: showSelection && item.isSelected ? Border.all(color: selectedColor, width: 2) : null,
-      color: showSelection && item.isSelected ? selectedColor.withOpacity(0.1) : Colors.grey[100],
+      border: showSelection && item.isSelected
+          ? Border.all(color: selectedColor, width: 2)
+          : null,
+      color: showSelection && item.isSelected
+          ? selectedColor.withOpacity(0.1)
+          : Colors.grey[100],
     ),
     child: Row(
       children: [
@@ -1553,13 +1703,22 @@ Widget _buildGalleryListItem({
                 Row(
                   children: [
                     if (item.authorName != null) ...[
-                      Text(item.authorName!, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                      Text(
+                        item.authorName!,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      ),
                       const SizedBox(width: 8),
                     ],
                     if (item.viewCount != null) ...[
-                      buildIconControl(Icons.visibility, {'size': 12, 'color': Colors.grey[600]}),
+                      buildIconControl(Icons.visibility, {
+                        'size': 12,
+                        'color': Colors.grey[600],
+                      }),
                       const SizedBox(width: 2),
-                      Text(_formatCount(item.viewCount!), style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                      Text(
+                        _formatCount(item.viewCount!),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      ),
                     ],
                   ],
                 ),
@@ -1639,9 +1798,19 @@ Widget _buildGalleryCarouselTile({
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (item.name != null)
-                    Text(item.name!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(
+                      item.name!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                   if (item.subtitle != null)
-                    Text(item.subtitle!, style: const TextStyle(color: Colors.white70)),
+                    Text(
+                      item.subtitle!,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
                 ],
               ),
             ),
@@ -1699,7 +1868,9 @@ Widget _buildGalleryItemFromControl({
     return buildChild(child);
   }
   final rawProps = child['props'];
-  final props = rawProps is Map ? coerceObjectMap(rawProps) : <String, Object?>{};
+  final props = rawProps is Map
+      ? coerceObjectMap(rawProps)
+      : <String, Object?>{};
   final item = GalleryItem.fromJson(Map<String, dynamic>.from(props));
   return _buildGalleryItem(
     controlId: controlId,
@@ -1741,7 +1912,9 @@ Widget _buildGalleryListItemFromControl({
     return buildChild(child);
   }
   final rawProps = child['props'];
-  final props = rawProps is Map ? coerceObjectMap(rawProps) : <String, Object?>{};
+  final props = rawProps is Map
+      ? coerceObjectMap(rawProps)
+      : <String, Object?>{};
   final item = GalleryItem.fromJson(Map<String, dynamic>.from(props));
   return _buildGalleryListItem(
     controlId: controlId,
@@ -1775,7 +1948,9 @@ Widget _buildGalleryPreviewFromControl({
     return buildChild(child);
   }
   final rawProps = child['props'];
-  final props = rawProps is Map ? coerceObjectMap(rawProps) : <String, Object?>{};
+  final props = rawProps is Map
+      ? coerceObjectMap(rawProps)
+      : <String, Object?>{};
   final item = GalleryItem.fromJson(Map<String, dynamic>.from(props));
   return _buildPreview(
     controlId: controlId,
@@ -1845,25 +2020,24 @@ Widget _buildGalleryToolbar({
   final children = actions
       .map((action) => {'type': '__gallery_action', 'props': action})
       .toList();
-  return buildRowControl(
-    {'spacing': 8, 'main_axis': 'end'},
-    children,
-    tokens,
-    (child) {
-      final type = child['type']?.toString();
-      if (type == '__gallery_action') {
-        final rawProps = child['props'];
-        final props = rawProps is Map ? coerceObjectMap(rawProps) : <String, Object?>{};
-        return _buildGalleryActionButton(
-          controlId: controlId,
-          action: props,
-          tokens: tokens,
-          sendEvent: sendEvent,
-        );
-      }
-      return buildChild(child);
-    },
-  );
+  return buildRowControl({'spacing': 8, 'main_axis': 'end'}, children, tokens, (
+    child,
+  ) {
+    final type = child['type']?.toString();
+    if (type == '__gallery_action') {
+      final rawProps = child['props'];
+      final props = rawProps is Map
+          ? coerceObjectMap(rawProps)
+          : <String, Object?>{};
+      return _buildGalleryActionButton(
+        controlId: controlId,
+        action: props,
+        tokens: tokens,
+        sendEvent: sendEvent,
+      );
+    }
+    return buildChild(child);
+  });
 }
 
 Widget _buildGalleryActionButton({
@@ -1889,11 +2063,10 @@ Widget _buildGalleryActionButton({
     if (color != null) 'color': color,
   };
   if (icon != null && (label == null || label.isEmpty)) {
-    return buildIconButtonControl(
-      actionId,
-      {'icon': icon, if (color != null) 'color': color},
-      sendEvent,
-    );
+    return buildIconButtonControl(actionId, {
+      'icon': icon,
+      if (color != null) 'color': color,
+    }, sendEvent);
   }
   switch (variant) {
     case 'filled':
@@ -1933,15 +2106,51 @@ Widget _buildPreview({
   }
 
   final imageUrl = item.thumbnailUrl ?? item.url;
-  if (useControlWidgets && imageUrl != null && imageUrl.isNotEmpty) {
-    return buildImageControl(
-      {
-        'src': imageUrl,
-        'fit': 'cover',
-      },
-      const [],
-      buildChild,
-    );
+  final itemType = item.type.toLowerCase();
+
+  if (useControlWidgets) {
+    if (itemType == 'video' && item.url != null) {
+      return buildVideoControl(
+        _galleryControlId(controlId, 'video_${item.id}'),
+        {
+          'source': item.url,
+          'autoplay': false,
+          'controls': true,
+          'fit': 'cover',
+        },
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
+    }
+
+    if (itemType == 'audio' && item.url != null) {
+      return buildAudioControl(
+        _galleryControlId(controlId, 'audio_${item.id}'),
+        {
+          'src': item.url,
+          'autoplay': false,
+          'controls': true,
+          'title': item.name,
+          'artist': item.authorName,
+        },
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
+    }
+
+    if (itemType == 'font' || itemType == 'document') {
+      return _buildFallback(item, useControlWidgets);
+    }
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return buildImageControl(
+        {'src': imageUrl, 'fit': 'cover'},
+        const [],
+        buildChild,
+      );
+    }
   }
 
   if (imageUrl != null && imageUrl.startsWith('http')) {
@@ -1969,10 +2178,10 @@ Widget _buildFallback(GalleryItem item, bool useControlWidgets) {
       (child) {
         if (child['type']?.toString() == '__gallery_fallback_icon') {
           return Center(
-            child: buildIconControl(
-              _getIconForType(item.type),
-              {'size': 48, 'color': Colors.grey[600]},
-            ),
+            child: buildIconControl(_getIconForType(item.type), {
+              'size': 48,
+              'color': Colors.grey[600],
+            }),
           );
         }
         return const SizedBox.shrink();
@@ -1982,7 +2191,11 @@ Widget _buildFallback(GalleryItem item, bool useControlWidgets) {
   return Container(
     color: Colors.grey[300],
     child: Center(
-      child: Icon(_getIconForType(item.type), size: 48, color: Colors.grey[600]),
+      child: Icon(
+        _getIconForType(item.type),
+        size: 48,
+        color: Colors.grey[600],
+      ),
     ),
   );
 }
@@ -2044,7 +2257,7 @@ class GalleryFilePicker {
       return result.files.map((file) {
         final mimeType = lookupMimeType(file.path ?? '');
         String type = 'document';
-        
+
         if (mimeType != null) {
           if (mimeType.startsWith('image/')) {
             type = 'image';
@@ -2067,7 +2280,7 @@ class GalleryFilePicker {
       return [];
     }
   }
-  
+
   static Future<List<GalleryItem>> pickImages({
     bool allowMultiple = true,
   }) async {
@@ -2076,7 +2289,7 @@ class GalleryFilePicker {
       allowMultiple: allowMultiple,
     );
   }
-  
+
   static Future<List<GalleryItem>> pickVideos({
     bool allowMultiple = true,
   }) async {
@@ -2085,7 +2298,7 @@ class GalleryFilePicker {
       allowMultiple: allowMultiple,
     );
   }
-  
+
   static Future<List<GalleryItem>> pickAudio({
     bool allowMultiple = true,
   }) async {

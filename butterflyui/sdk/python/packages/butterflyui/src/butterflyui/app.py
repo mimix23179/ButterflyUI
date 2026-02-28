@@ -906,6 +906,7 @@ class Page:
 		self.splash: Any = None
 		self._overlay_cleared: bool = False
 		self.bgcolor: str | None = None
+		self.padding: Any = None
 		self.background: Any = None
 		self.style_pack: str | None = None
 		# Theme/accessory for Candy; can be a CandyTheme or a plain dict
@@ -996,6 +997,8 @@ class Page:
 			payload["style_packs"] = list(self._style_packs.values())
 		if self.bgcolor:
 			payload["bgcolor"] = self.bgcolor
+		if self.padding is not None:
+			payload["padding"] = coerce_json_value(self.padding)
 		if self.background is not None:
 			payload["background"] = coerce_json_value(self.background)
 		if self.candy is not None:
@@ -1038,6 +1041,12 @@ class Page:
 			if next_payload is None:
 				break
 			payload = next_payload
+
+	def clean(self) -> None:
+		"""Remove all content from the page."""
+		self.root = None
+		self._overlay_cleared = True
+		self.splash = None
 
 	def clear_overlay(self) -> None:
 		self.overlay = None

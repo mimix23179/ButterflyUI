@@ -4,7 +4,7 @@ ButterflyUI Skins Controls
 This module provides controls for creating custom skins/themes for your applications.
 """
 
-from .control import (
+from .skins import (
     Skins,
     SkinsScope,
     SkinsTokens,

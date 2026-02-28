@@ -3,6 +3,7 @@ from .candy import (
     Candy,
     CandyScope, # Internal implementation detail, not intended for direct use
     CandyTheme,
+    CandyTokens,
 )
 from .skins import (
     Skins,
@@ -403,6 +404,7 @@ __all__ = [
     "Candy",
     "CandyScope",
     "CandyTheme",
+    "CandyTokens",
     "Card",
     "Canvas",
     "CheckList",

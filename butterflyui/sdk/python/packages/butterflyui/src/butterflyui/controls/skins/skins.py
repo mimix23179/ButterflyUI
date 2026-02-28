@@ -37,9 +37,10 @@ class SkinsTokens:
     spacing_md: float = 12
     spacing_lg: float = 20
     glass_blur: float = 18
+    sound: Optional[dict[str, str]] = None
     
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "background": self.background,
             "surface": self.surface,
             "surfaceAlt": self.surface_alt,
@@ -67,6 +68,9 @@ class SkinsTokens:
                 "glassBlur": self.glass_blur,
             },
         }
+        if self.sound:
+            result["sound"] = self.sound
+        return result
 
 
 # Predefined skin presets
@@ -534,5 +538,14 @@ def skins_transition(
         duration_ms=duration_ms,
         curve=curve,
         preset=preset,
+        children=list(children),
+    )
+
+def skins_page(
+    *children: Control,
+) -> Skins:
+    """Create a page with Skins styling."""
+    return Skins(
+        module="page",
         children=list(children),
     )

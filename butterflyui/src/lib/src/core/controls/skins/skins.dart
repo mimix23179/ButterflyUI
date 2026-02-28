@@ -133,12 +133,53 @@ class SkinsTokens {
     return null;
   }
 
+  // Physics & Atmosphere Getters
+  Curve get motionCurve {
+    final curveStr = string('physics', 'motion_curve') ?? 'easeOutCubic';
+    switch (curveStr.toLowerCase()) {
+      case 'linear':
+        return Curves.linear;
+      case 'easein':
+        return Curves.easeIn;
+      case 'easeinout':
+        return Curves.easeInOut;
+      case 'bounceout':
+        return Curves.bounceOut;
+      case 'elasticout':
+        return Curves.elasticOut;
+      case 'fastoutslown':
+        return Curves.fastOutSlowIn;
+      default:
+        return Curves.easeOutCubic;
+    }
+  }
+
+  double get glassBlur => number('physics', 'glass_blur') ?? 10.0;
+
+  double get shadowPhysics => number('physics', 'shadow_physics') ?? 1.0;
+
+  String get hoverBehavior => string('physics', 'hover_behavior') ?? 'lift';
+
+  String get clickEffect => string('physics', 'click_effect') ?? 'ripple';
+
+  Duration get transitionSpeed {
+    final ms = number('physics', 'transition_speed_ms') ?? 250;
+    return Duration(milliseconds: ms.toInt());
+  }
+
+  String? get soundClick => string('sound', 'click');
+  String? get soundHover => string('sound', 'hover');
+  String? get soundSuccess => string('sound', 'success');
+  String? get soundError => string('sound', 'error');
+  String? get soundWarning => string('sound', 'warning');
+  String? get soundInfo => string('sound', 'info');
+
   // Build a Flutter ThemeData from tokens
   ThemeData buildTheme({bool isDark = false}) {
     final bg = color('background') ?? const Color(0xFFFAFAFA);
     final primary = color('primary') ?? const Color(0xFF6366F1);
     final brightness = isDark ? Brightness.dark : Brightness.light;
-    
+
     return ThemeData(
       brightness: brightness,
       scaffoldBackgroundColor: bg,
@@ -486,7 +527,11 @@ double skinsParseOpacity(Object? value) {
 }
 
 String skinsNorm(String v) {
-  return v.toLowerCase().replaceAll('_', '').replaceAll('-', '').replaceAll(' ', '');
+  return v
+      .toLowerCase()
+      .replaceAll('_', '')
+      .replaceAll('-', '')
+      .replaceAll(' ', '');
 }
 
 // ============================================================================
@@ -496,9 +541,9 @@ String skinsNorm(String v) {
 EdgeInsets? skinsCoercePadding(Object? value) {
   if (value == null) return null;
   if (value is EdgeInsets) return value;
-  
+
   double? top, right, bottom, left;
-  
+
   if (value is num) {
     final v = value.toDouble();
     top = right = bottom = left = v;
@@ -512,11 +557,11 @@ EdgeInsets? skinsCoercePadding(Object? value) {
     right = (value['right'] as num?)?.toDouble();
     bottom = (value['bottom'] as num?)?.toDouble();
     left = (value['left'] as num?)?.toDouble();
-    
+
     // Handle symmetric padding
     final vertical = (value['vertical'] as num?)?.toDouble();
     final horizontal = (value['horizontal'] as num?)?.toDouble();
-    
+
     if (vertical != null) {
       top ??= vertical;
       bottom ??= vertical;
@@ -526,11 +571,11 @@ EdgeInsets? skinsCoercePadding(Object? value) {
       right ??= horizontal;
     }
   }
-  
+
   if (top == null && right == null && bottom == null && left == null) {
     return null;
   }
-  
+
   return EdgeInsets.only(
     top: top ?? 0,
     right: right ?? 0,
@@ -547,14 +592,15 @@ Border? skinsCoerceBorder(Map<String, Object?> m) {
 
   if (borderData is Map) {
     final width = coerceDouble(borderData['width'] ?? borderData['size']) ?? 1;
-    final color = coerceColor(borderData['color'] ?? borderData['stroke']) ?? Colors.grey;
+    final color =
+        coerceColor(borderData['color'] ?? borderData['stroke']) ?? Colors.grey;
 
     final style = borderData['style']?.toString() ?? 'solid';
     if (style == 'none') return null;
 
     return Border.all(color: color, width: width);
   }
-  
+
   return null;
 }
 
@@ -575,8 +621,17 @@ Widget? buildSkinsLayoutModule(String module, SkinsContext ctx) {
     'button' || 'btn' => _buildButton(ctx),
     'badge' => _buildBadge(ctx),
     'border' => _buildBorder(ctx),
+    'page' => _buildPage(ctx),
     _ => null,
   };
+}
+
+Widget _buildPage(SkinsContext ctx) {
+  final child = skinsFirstChildOrEmpty(ctx.rawChildren, ctx.buildChild);
+  return Scaffold(
+    backgroundColor: Colors.transparent,
+    body: SafeArea(child: child),
+  );
 }
 
 Widget _buildRow(SkinsContext ctx) {
@@ -652,13 +707,13 @@ Widget _buildCard(SkinsContext ctx) {
 
 Widget _buildButton(SkinsContext ctx) {
   final m = ctx.merged;
-  
+
   // Convert SkinsTokens to a map that can be used as props
   final buttonProps = Map<String, Object?>.from(m);
-  
+
   // Convert SkinsTokens to CandyTokens
   final candyTokens = _createCandyTokensFromSkins(ctx.tokens);
-  
+
   // Build button using the existing button control with converted tokens
   return buildButtonControl(
     ctx.controlId,
@@ -702,7 +757,10 @@ BoxDecoration? _buildSkinDecoration(SkinsContext ctx) {
   final shadows = coerceBoxShadow(m['shadow']);
   final border = skinsCoerceBorder(m);
 
-  if (gradient == null && bgcolor == null && shadows == null && border == null) {
+  if (gradient == null &&
+      bgcolor == null &&
+      shadows == null &&
+      border == null) {
     return null;
   }
 
@@ -721,7 +779,7 @@ ShapeBorder? _buildSkinShape(SkinsContext ctx) {
   final border = skinsCoerceBorder(m);
 
   final shapeType = m['shape']?.toString().toLowerCase();
-  
+
   switch (shapeType) {
     case 'circle':
       return CircleBorder(side: border?.top ?? BorderSide.none);
@@ -833,7 +891,9 @@ Widget _buildClip(SkinsContext ctx) {
 
   return ClipRRect(
     clipBehavior: clipBehavior,
-    borderRadius: radius > 0 ? BorderRadius.circular(radius) : BorderRadius.zero,
+    borderRadius: radius > 0
+        ? BorderRadius.circular(radius)
+        : BorderRadius.zero,
     child: child,
   );
 }
@@ -911,7 +971,10 @@ Widget _buildAnimation(SkinsContext ctx) {
 
 Widget _buildTransition(SkinsContext ctx) {
   final m = ctx.merged;
-  final durationMs = (coerceOptionalInt(m['duration_ms']) ?? 220).clamp(1, 120000);
+  final durationMs = (coerceOptionalInt(m['duration_ms']) ?? 220).clamp(
+    1,
+    120000,
+  );
   final curve = skinsParseCurve(m['curve']);
   final preset = skinsNorm((m['preset'] ?? 'fade').toString());
 
@@ -921,19 +984,28 @@ Widget _buildTransition(SkinsContext ctx) {
       builder = (child, anim) => ScaleTransition(scale: anim, child: child);
     case 'slide':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0.08, 0), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0.08, 0),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     case 'slide_up':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     case 'slide_down':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, -0.08), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0, -0.08),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     default:
       builder = (child, anim) => FadeTransition(opacity: anim, child: child);
   }
@@ -1085,7 +1157,12 @@ Widget _buildSkinsScope(
   return _SkinsScopeWidget(
     tokens: tokens,
     isDark: isDark,
-    child: childWidget,
+    child: AnimatedTheme(
+      data: theme,
+      duration: tokens.transitionSpeed,
+      curve: tokens.motionCurve,
+      child: childWidget,
+    ),
   );
 }
 
@@ -1098,6 +1175,10 @@ class _SkinsScopeWidget extends InheritedWidget {
     required this.isDark,
     required super.child,
   });
+
+  static _SkinsScopeWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_SkinsScopeWidget>();
+  }
 
   @override
   bool updateShouldNotify(_SkinsScopeWidget oldWidget) {

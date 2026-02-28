@@ -22,7 +22,7 @@ import webbrowser
 
 # ----------------------------- CONFIGURATION -----------------------------
 
-RUNTIME_ZIP_URL: str = "https://github.com/mimix23179/ButterflyUI/releases/download/0.1.0/butterflyui-web.zip"
+RUNTIME_ZIP_URL: str = "https://github.com/mimix23179/ButterflyUI/releases/download/0.1.0-Alpha/butterfly-web.zip"
 RUNTIME_ZIP_SHA256: str = ""
 _RUNTIME_DIR_NAME = "web_app"
 

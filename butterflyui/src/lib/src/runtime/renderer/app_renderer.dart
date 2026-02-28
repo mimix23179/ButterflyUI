@@ -99,6 +99,7 @@ class _AppRendererState extends State<AppRenderer> {
   Map<String, Object?>? _overlay;
   Map<String, Object?>? _splash;
   Object? _backgroundSpec;
+  Object? _paddingSpec;
   String? _stylePackName;
   StylePack _stylePack = stylePackRegistry.defaultPack;
   StreamSubscription<RuntimeMessage>? _subscription;
@@ -136,6 +137,7 @@ class _AppRendererState extends State<AppRenderer> {
           _overlay = null;
           _splash = null;
           _nodeIndex.clear();
+          _paddingSpec = null;
         });
         _notifyRootChanged(false);
         _sentFirstRender = false;
@@ -263,6 +265,9 @@ class _AppRendererState extends State<AppRenderer> {
           _backgroundSpec = payload['background'];
         } else if (payload.containsKey('bgcolor')) {
           _backgroundSpec = payload['bgcolor'];
+        }
+        if (payload.containsKey('padding')) {
+          _paddingSpec = payload['padding'];
         }
         final stylePayloadChanged =
             hasTokens || payload.containsKey('style_pack') || registeredPacks;
@@ -719,9 +724,15 @@ class _AppRendererState extends State<AppRenderer> {
     final splash = _splash != null ? renderer.buildFromControl(_splash!) : null;
     final background = _buildBackground(context);
 
-    Widget content = _root != null
-        ? Scaffold(backgroundColor: Colors.transparent, body: base)
-        : base;
+    Widget content = base;
+    final padding = coercePadding(_paddingSpec);
+    if (padding != null) {
+      content = Padding(padding: padding, child: content);
+    }
+
+    if (_root != null) {
+      content = Scaffold(backgroundColor: Colors.transparent, body: content);
+    }
     if (_stylePack.wrapRoot != null) {
       content = _stylePack.wrapRoot!(context, _tokens, content);
     }

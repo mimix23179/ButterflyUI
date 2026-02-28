@@ -2555,6 +2555,8 @@ GALLERY_SCHEMA = _control_schema(
         "showActions": BOOL_SCHEMA,
         "showMeta": BOOL_SCHEMA,
         "scrollDirection": STRING_SCHEMA,
+        "physics": STRING_SCHEMA,
+        "shrinkWrap": BOOL_SCHEMA,
         # Legacy module support (for backward compatibility)
         "module": {"type": "string", "enum": GALLERY_MODULE_ENUM},
         "state": {"type": "string", "enum": GALLERY_STATE_ENUM},
@@ -2703,6 +2705,17 @@ SKINS_TOKENS_SCHEMA = {
                 "glow": BOOL_SCHEMA,
                 "fire": BOOL_SCHEMA,
                 "cyber": BOOL_SCHEMA,
+            },
+        },
+        "sound": {
+            "type": "object",
+            "properties": {
+                "click": STRING_SCHEMA,
+                "hover": STRING_SCHEMA,
+                "success": STRING_SCHEMA,
+                "error": STRING_SCHEMA,
+                "warning": STRING_SCHEMA,
+                "info": STRING_SCHEMA,
             },
         },
     },
@@ -6830,6 +6843,35 @@ RUNTIME_PROP_HINTS.setdefault(
         "text",
         "motion",
     ],
+)
+
+RUNTIME_PROP_HINTS.setdefault(
+    "skins",
+    [
+        "module", "main", "cross", "size", "direction", "alignment", "width", "height",
+        "fit", "spacing", "run_spacing", "padding", "margin", "radius", "gradient",
+        "bgcolor", "background", "shadow", "border", "shape", "color", "elevation",
+        "shadow_color", "shimmer", "overlay", "duration_ms", "curve", "preset",
+        "skin", "tokens", "brightness"
+    ],
+)
+
+RUNTIME_PROP_HINTS.setdefault(
+    "skins_scope",
+    ["skin", "tokens", "brightness"],
+)
+
+RUNTIME_PROP_HINTS.setdefault(
+    "gallery",
+    [
+        "items", "layout", "columns", "spacing", "mainAxisSpacing", "crossAxisSpacing",
+        "radius", "showSelection", "multiSelect", "showActions", "showMeta", "scrollDirection"
+    ],
+)
+
+RUNTIME_PROP_HINTS.setdefault(
+    "gallery_scope",
+    ["layout", "columns", "spacing", "mainAxisSpacing", "crossAxisSpacing", "radius"],
 )
 
 for _name, _props in RUNTIME_PROP_HINTS.items():

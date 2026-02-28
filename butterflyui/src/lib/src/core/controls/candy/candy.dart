@@ -25,6 +25,12 @@ import 'package:butterflyui_runtime/src/core/controls/effects/particle_field.dar
 import 'package:butterflyui_runtime/src/core/controls/effects/motion.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/canvas_control.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/scanline_overlay.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/vignette.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/animated_background.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/liquid_morph.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/parallax.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/visual_fx.dart';
 
 // ============================================================================
 // Candy Context - provides environment for building candy controls
@@ -199,7 +205,8 @@ FontWeight? candyParseWeight(Object? value) {
   if (value == null) return null;
   final v = value.toString();
   final num? weight = coerceDouble(v);
-  if (weight != null) return FontWeight.values[(weight / 100).round().clamp(1, 9)];
+  if (weight != null)
+    return FontWeight.values[(weight / 100).round().clamp(1, 9)];
   return switch (candyNorm(v)) {
     '100' || 'thin' => FontWeight.w100,
     '200' || 'extralight' => FontWeight.w200,
@@ -285,14 +292,15 @@ Border? candyCoerceBorder(Map<String, Object?> m) {
   if (color == null) return null;
   final width = coerceDouble(m['border_width']) ?? 1.0;
   final radius = coerceDouble(m['border_radius']);
-  
+
   if (radius != null && radius > 0) {
     return Border.all(color: color, width: width);
   }
   return Border.all(color: color, width: width);
 }
 
-String candyNorm(String v) => v.replaceAll('-', '_').replaceAll(' ', '_').toLowerCase();
+String candyNorm(String v) =>
+    v.replaceAll('-', '_').replaceAll(' ', '_').toLowerCase();
 
 // ============================================================================
 // Candy Control Builders
@@ -313,8 +321,18 @@ Widget? buildCandyLayoutModule(String module, CandyContext ctx) {
     'overflow_box' || 'overflowbox' => _buildOverflowBox(ctx),
     'fitted_box' || 'fittedbox' => _buildFittedBox(ctx),
     'card' => _buildCard(ctx),
+    'page' => _buildPage(ctx),
     _ => null,
   };
+}
+
+Widget _buildPage(CandyContext ctx) {
+  final child = candyFirstChildOrEmpty(ctx.rawChildren, ctx.buildChild);
+  // Apply page-specific styling if needed
+  return Scaffold(
+    backgroundColor: Colors.transparent, // Let underlying container handle background
+    body: SafeArea(child: child),
+  );
 }
 
 Widget _buildRow(CandyContext ctx) {
@@ -362,11 +380,7 @@ Widget _buildColumn(CandyContext ctx) {
 }
 
 Widget _buildStack(CandyContext ctx) {
-  return buildStackControl(
-    ctx.merged,
-    ctx.rawChildren,
-    ctx.buildChild,
-  );
+  return buildStackControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
 }
 
 Widget _buildWrap(CandyContext ctx) {
@@ -379,11 +393,7 @@ Widget _buildWrap(CandyContext ctx) {
 }
 
 Widget _buildContainer(CandyContext ctx) {
-  return buildContainerControl(
-    ctx.merged,
-    ctx.rawChildren,
-    ctx.buildChild,
-  );
+  return buildContainerControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
 }
 
 Widget _buildAlign(CandyContext ctx) {
@@ -419,7 +429,8 @@ Widget _buildSpacer(CandyContext ctx) {
 
 Widget _buildAspectRatio(CandyContext ctx) {
   return AspectRatio(
-    aspectRatio: coerceDouble(ctx.merged['value'] ?? ctx.merged['ratio']) ?? 1.6,
+    aspectRatio:
+        coerceDouble(ctx.merged['value'] ?? ctx.merged['ratio']) ?? 1.6,
     child: candyFirstChildOrEmpty(ctx.rawChildren, ctx.buildChild),
   );
 }
@@ -447,7 +458,12 @@ Widget _buildFittedBox(CandyContext ctx) {
 }
 
 Widget _buildCard(CandyContext ctx) {
-  return buildCardControl(ctx.merged, ctx.rawChildren, ctx.tokens, ctx.buildChild);
+  return buildCardControl(
+    ctx.merged,
+    ctx.rawChildren,
+    ctx.tokens,
+    ctx.buildChild,
+  );
 }
 
 // Interactive controls
@@ -463,7 +479,12 @@ Widget? buildCandyInteractiveModule(String module, CandyContext ctx) {
 }
 
 Widget _buildButton(CandyContext ctx) {
-  return buildButtonControl(ctx.controlId, ctx.merged, ctx.tokens, ctx.sendEvent);
+  return buildButtonControl(
+    ctx.controlId,
+    ctx.merged,
+    ctx.tokens,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildBadge(CandyContext ctx) {
@@ -649,7 +670,9 @@ Widget _buildClip(CandyContext ctx) {
 
   return ClipRRect(
     clipBehavior: clipBehavior,
-    borderRadius: radius > 0 ? BorderRadius.circular(radius) : BorderRadius.zero,
+    borderRadius: radius > 0
+        ? BorderRadius.circular(radius)
+        : BorderRadius.zero,
     child: child,
   );
 }
@@ -727,7 +750,10 @@ Widget _buildAnimation(CandyContext ctx) {
 
 Widget _buildTransition(CandyContext ctx) {
   final m = ctx.merged;
-  final durationMs = (coerceOptionalInt(m['duration_ms']) ?? 220).clamp(1, 120000);
+  final durationMs = (coerceOptionalInt(m['duration_ms']) ?? 220).clamp(
+    1,
+    120000,
+  );
   final curve = candyParseCurve(m['curve']);
   final preset = candyNorm((m['preset'] ?? 'fade').toString());
 
@@ -737,19 +763,28 @@ Widget _buildTransition(CandyContext ctx) {
       builder = (child, anim) => ScaleTransition(scale: anim, child: child);
     case 'slide':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0.08, 0), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0.08, 0),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     case 'slide_up':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     case 'slide_down':
       builder = (child, anim) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, -0.08), end: Offset.zero).animate(anim),
-            child: FadeTransition(opacity: anim, child: child),
-          );
+        position: Tween<Offset>(
+          begin: const Offset(0, -0.08),
+          end: Offset.zero,
+        ).animate(anim),
+        child: FadeTransition(opacity: anim, child: child),
+      );
     default:
       builder = (child, anim) => FadeTransition(opacity: anim, child: child);
   }
@@ -783,7 +818,7 @@ ButterflyUIThemeTokens _createThemeTokensFromTokens(CandyTokens tokens) {
   final warning = tokens.color('warning') ?? const Color(0xFFF59E0B);
   final info = tokens.color('info') ?? const Color(0xFF3B82F6);
   final error = tokens.color('error') ?? const Color(0xFFEF4444);
-  
+
   return ButterflyUIThemeTokens(
     background: bg,
     surface: surface,
@@ -823,10 +858,10 @@ Widget? buildCandyControl(
 ) {
   final module = merged['module']?.toString();
   if (module == null) return null;
-  
+
   // Build style from tokens - create a fallback ButterflyUIThemeTokens
   final style = _createThemeTokensFromTokens(tokens);
-  
+
   final ctx = CandyContext(
     controlId: controlId,
     merged: merged,
@@ -855,8 +890,8 @@ Widget? buildCandyControl(
 void registerCandyControls(ButterflyUIControlRegistry registry) {
   // Register candy_scope - the scope wrapper widget
   registry.register('candy_scope', _buildCandyScope);
-  
-  // Note: Individual candy controls (candy_row, candy_column, etc.) 
+
+  // Note: Individual candy controls (candy_row, candy_column, etc.)
   // are handled via the main 'candy' case in control_renderer.dart
   // which calls buildCandyControl directly
 }
@@ -867,25 +902,147 @@ Widget _buildCandyScope(
   Map<String, Object?> control,
 ) {
   final props = context.propsOf(control);
-  
-  // Extract scope properties
-  final tokensMap = props['tokens'];
-  final tokens = tokensMap is Map 
-      ? CandyTokens.fromMap(coerceObjectMap(tokensMap)) 
-      : context.tokens;
-  
-  final theme = tokens.buildTheme();
-  
-  // Get the child
-  final childMaps = context.childMapsOf(control);
-  final childWidget = childMaps.isNotEmpty 
-      ? context.buildChild(childMaps.first) 
-      : const SizedBox.shrink();
-  
-  // Build theme data
   final brightness = props['brightness'] as String? ?? 'light';
   final isDark = brightness.toLowerCase().startsWith('dark');
-  
+
+  // Extract scope properties
+  final tokensMap = props['tokens'];
+  final tokens = tokensMap is Map
+      ? CandyTokens.fromMap(coerceObjectMap(tokensMap))
+      : context.tokens;
+
+  final theme = tokens.buildTheme();
+
+  // Get the child
+  final childMaps = context.childMapsOf(control);
+  Widget childWidget = childMaps.isNotEmpty
+      ? context.buildChild(childMaps.first)
+      : const SizedBox.shrink();
+
+  // 1. Effects wrapper pipeline: seamlessly inject requested Dart Controls
+  final controlId = control['id']?.toString() ?? 'candy_scope';
+  final registerInvokeHandler = context.registerInvokeHandler;
+  final unregisterInvokeHandler = context.unregisterInvokeHandler;
+  final sendEvent = context.sendEvent;
+
+  // Particles
+  if (props['particles'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildParticleFieldControl(
+            '$controlId::particles',
+            props,
+            registerInvokeHandler,
+            unregisterInvokeHandler,
+            sendEvent,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Scanline
+  // Scanline
+  if (props['scanline'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildScanlineOverlayControl(
+            '$controlId::scanline',
+            props,
+            childWidget,
+            defaultText: isDark ? Colors.white : Colors.black,
+            registerInvokeHandler: registerInvokeHandler,
+            unregisterInvokeHandler: unregisterInvokeHandler,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Shimmer
+  if (props['shimmer'] == true) {
+    childWidget = buildShimmerControl(
+      '$controlId::effects',
+      props,
+      childWidget,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+    );
+  }
+
+  // Vignette
+  if (props['vignette'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildVignetteControl(
+            '$controlId::vignette',
+            props,
+            childWidget,
+            defaultColor: isDark ? Colors.black : Colors.white,
+            registerInvokeHandler: registerInvokeHandler,
+            unregisterInvokeHandler: unregisterInvokeHandler,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Animated Background
+  if (props['animated_background'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        Positioned.fill(
+          child: buildAnimatedBackgroundControl(
+            props,
+            const [],
+            (_) => const SizedBox.shrink(),
+          ),
+        ),
+        childWidget,
+      ],
+    );
+  }
+
+  // Liquid Morph
+  if (props['liquid_morph'] == true) {
+    childWidget = buildLiquidMorphControl(props, const [
+      {"placeholder": true},
+    ], (_) => childWidget);
+  }
+
+  // Parallax
+  if (props['parallax'] == true) {
+    childWidget = buildParallaxControl(props, const [
+      {"placeholder": true},
+    ], (_) => childWidget);
+  }
+
+  // Visual FX (Glow)
+  if (props['glow'] == true) {
+    childWidget = buildGlowEffectControl(props, childWidget);
+  }
+
+  // 2. Page logic
+  final module = props['module']?.toString();
+  if (module == 'page') {
+    childWidget = Scaffold(
+      backgroundColor:
+          Colors.transparent, // Let underlying container handle background
+      body: SafeArea(child: childWidget),
+    );
+  }
+
+  // Build theme data
   return _CandyScopeWidget(
     tokens: tokens,
     isDark: isDark,
@@ -896,13 +1053,13 @@ Widget _buildCandyScope(
 class _CandyScopeWidget extends InheritedWidget {
   final CandyTokens tokens;
   final bool isDark;
-  
+
   const _CandyScopeWidget({
     required this.tokens,
     required this.isDark,
-    required Widget child,
-  }) : super(child: child);
-  
+    required super.child,
+  });
+
   @override
   bool updateShouldNotify(_CandyScopeWidget oldWidget) {
     return tokens != oldWidget.tokens || isDark != oldWidget.isDark;
