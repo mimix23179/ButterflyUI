@@ -13,5 +13,6 @@ dist/
 docs/
 plans/
 tools/
+flet/
 controls_reference.txt
 list.md

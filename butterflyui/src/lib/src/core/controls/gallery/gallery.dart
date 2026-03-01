@@ -248,6 +248,18 @@ Widget buildGalleryScopeControl(
   if (child == null) {
     return const SizedBox.shrink();
   }
+  if (child['type']?.toString() == 'gallery') {
+    final childProps = child['props'] is Map
+        ? coerceObjectMap(child['props'] as Map)
+        : <String, Object?>{};
+    final mergedProps = {...props, ...childProps};
+    return buildChild({
+      'id': child['id']?.toString() ?? controlId,
+      'type': 'gallery',
+      'props': mergedProps,
+      'children': child['children'] is List ? child['children'] : const [],
+    });
+  }
   return buildChild(child);
 }
 
@@ -302,7 +314,7 @@ Widget buildGalleryControl(
       ) ??
       8.0;
   final showSelections = coerceBoolValue(
-    props['show_selections'] ?? props['showSelections'],
+    props['show_selections'] ?? props['showSelections'] ?? props['showSelection'],
     fallback: true,
   );
   final isLoading = coerceBoolValue(
@@ -320,7 +332,7 @@ Widget buildGalleryControl(
   final selectionMode =
       props['selection_mode']?.toString() ??
       props['selectionMode']?.toString() ??
-      'none';
+      (props['multiSelect'] == true ? 'multi' : 'none');
   final itemStyle =
       props['item_style']?.toString() ??
       props['itemStyle']?.toString() ??

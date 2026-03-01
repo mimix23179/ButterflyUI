@@ -810,12 +810,26 @@ Widget? buildSkinsControl(
   final module = merged['module']?.toString();
   if (module == null) return null;
 
+  final normalized = Map<String, Object?>.from(merged);
+  if (normalized['main_axis'] == null && normalized['main'] != null) {
+    normalized['main_axis'] = normalized['main'];
+  }
+  if (normalized['cross_axis'] == null && normalized['cross'] != null) {
+    normalized['cross_axis'] = normalized['cross'];
+  }
+  if (normalized['main_axis_size'] == null && normalized['size'] != null) {
+    normalized['main_axis_size'] = normalized['size'];
+  }
+  if (normalized['run_spacing'] == null && normalized['runSpacing'] != null) {
+    normalized['run_spacing'] = normalized['runSpacing'];
+  }
+
   // Build style from tokens
   final style = _createThemeTokensFromTokens(tokens);
 
   final ctx = SkinsContext(
     controlId: controlId,
-    merged: merged,
+    merged: normalized,
     rawChildren: rawChildren,
     tokens: tokens,
     style: style,

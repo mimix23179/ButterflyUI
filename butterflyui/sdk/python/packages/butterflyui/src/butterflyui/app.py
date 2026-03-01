@@ -1,6 +1,20 @@
-"""ButterflyUI app entrypoints (transport-only bootstrap).
+"""ButterflyUI application entrypoints.
 
-This module intentionally keeps the runtime surface minimal for step 1.
+This module exposes the public, Python-side runtime bootstrap for ButterflyUI.
+It is intentionally transport-focused: Python builds a control tree, serializes
+it to JSON, and streams updates to the Flutter runtime via WebSocket. The
+runtime renders widgets based on control `type` and `props`.
+
+Key concepts:
+- `Page`: mutable container for root/screen/overlay/splash trees plus app metadata.
+- `ButterflyUISession`: transport session responsible for sending/receiving
+	events, invocations, and UI payloads.
+- `run()` / `run_web()` / `run_desktop()`: convenience entrypoints that build
+	a runtime plan and start the appropriate target.
+
+This file is intentionally self-contained to keep startup behavior explicit and
+easy to audit. All functions here are synchronous wrappers around the underlying
+async session and runtime launcher.
 """
 
 from __future__ import annotations
@@ -24,7 +38,7 @@ from .runtime import set_current_session
 from .runtime.runner import RunTarget, RuntimePlan, build_runtime_plan
 from .core.control import Control, coerce_json_value
 from .core.performance import PerformanceConfig
-from .controls.candy.control import CandyTheme
+from .controls.candy import CandyTheme
 from .controls._shared import modifier_capabilities_manifest
 
 import butterflyui_desktop
@@ -39,6 +53,19 @@ class ButterflyUIError(RuntimeError):
 
 @dataclass(slots=True)
 class AppConfig:
+	"""Configuration used by runtime sessions.
+
+	Attributes:
+		host: Host/IP for the WebSocket server.
+		port: TCP port for the WebSocket server.
+		path: WebSocket path.
+		token: Optional session token used by desktop/web runtimes.
+		require_token: Whether the runtime requires a token to connect.
+		protocol: Protocol version for the runtime handshake.
+		target_fps: Target FPS for client pacing and performance reporting.
+		hello_timeout: Timeout waiting for the runtime hello.
+		first_render_timeout: Timeout waiting for the first render.
+	"""
 	host: str = "127.0.0.1"
 	port: int = 8765
 	path: str = "/ws"
@@ -51,7 +78,12 @@ class AppConfig:
 
 
 class ButterflyUISession:
-	"""Represents an active runtime transport session (step 1 only)."""
+	"""Represents an active runtime transport session.
+
+	The session owns the WebSocket transport, event subscriptions, invoke handlers,
+	and UI patch buffering. It also tracks the last rendered root/screen/overlay
+	state to support reconnection logic and runtime stall diagnostics.
+	"""
 
 	def __init__(self, server: WebSocketRuntimeServer, config: AppConfig) -> None:
 		self._server = server
@@ -653,7 +685,7 @@ class ButterflyUISession:
 
 
 class WebSession(ButterflyUISession):
-	"""WebSocket-based runtime session."""
+	"""WebSocket-based runtime session for browser targets."""
 
 	def __init__(self, config: AppConfig) -> None:
 		server = WebSocketRuntimeServer(
@@ -740,7 +772,12 @@ def _minimal_boot_root() -> dict[str, Any]:
 
 
 class RuntimeApp(BaseApp):
-	"""Runtime app entrypoint (transport-only step)."""
+	"""Runtime app entrypoint (transport-only step).
+
+	This class wires together the session, runtime launcher, and the user-provided
+	`main(page)` callback. It ensures an initial render occurs (or falls back to a
+	minimal root) before telling the runtime it is ready.
+	"""
 
 	def __init__(
 		self,
@@ -875,7 +912,10 @@ class App(RuntimeApp):
 
 
 class ButterflyUIWeb:
-	"""Web session configuration helper."""
+	"""Web session configuration helper.
+
+	Wraps `RuntimeApp` with `target="web"`.
+	"""
 
 	def __init__(self, **kwargs: Any) -> None:
 		self.config = AppConfig(**kwargs)
@@ -885,7 +925,10 @@ class ButterflyUIWeb:
 
 
 class ButterflyUIDesktop:
-	"""Desktop session configuration helper."""
+	"""Desktop session configuration helper.
+
+	Wraps `RuntimeApp` with `target="desktop"`.
+	"""
 
 	def __init__(self, **kwargs: Any) -> None:
 		self.config = AppConfig(**kwargs)
@@ -895,7 +938,12 @@ class ButterflyUIDesktop:
 
 
 class Page:
-	"""Minimal Page container for step 1 (no UI diffing yet)."""
+	"""Mutable page container passed to user `main` callbacks.
+
+	`Page` holds references to the root tree and optional screen/overlay/splash
+	controls, plus metadata like title and styling. Calling `page.update()` pushes
+	the current state to the runtime.
+	"""
 
 	def __init__(self, *, session: ButterflyUISession) -> None:
 		self.session = session
@@ -1253,7 +1301,17 @@ def run(
 	config: str | None = None,
 	**kwargs: Any,
 ) -> int:
-	"""Run a ButterflyUI app using deterministic target boot profiles."""
+	"""Run a ButterflyUI app using deterministic target boot profiles.
+
+	Args:
+		main: Application entry point. Handler must accept a single `Page`.
+		target: Target runtime, e.g. "desktop" or "web".
+		config: Optional runtime plan config path.
+		**kwargs: Overrides for runtime plan configuration.
+
+	Returns:
+		Exit code (0 on success).
+	"""
 	plan = _build_plan_for_app(target=target, config=config, kwargs=kwargs)
 	app_config = AppConfig(**plan.as_app_config_kwargs())
 	return RuntimeApp(

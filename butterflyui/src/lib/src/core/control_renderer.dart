@@ -69,8 +69,11 @@ import 'controls/display/status_mark.dart';
 import 'controls/display/typing_indicator.dart';
 import 'controls/display/vector_view.dart';
 import 'controls/productivity/editor_workspace.dart';
+import 'controls/productivity/editor_tab_strip.dart';
 import 'controls/productivity/file_system.dart';
+import 'controls/productivity/problems_panel.dart';
 import 'controls/productivity/output_panel.dart';
+import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/animation.dart';
 import 'controls/effects/effects.dart';
@@ -399,6 +402,7 @@ class ControlRenderer {
 
     switch (type) {
       case 'page':
+      case 'page_control':
         {
           Widget pageBody;
           if (children.isEmpty) {
@@ -930,9 +934,18 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'editor_tab_strip':
+        return buildEditorTabStripControl(controlId, props, context.sendEvent);
+
       case 'editor_workspace':
       case 'workbench_editor':
         return buildEditorWorkspaceControl(controlId, props, context.sendEvent);
+
+      case 'problems_panel':
+        return buildProblemsPanelControl(controlId, props, context.sendEvent);
+
+      case 'workspace_tree':
+        return buildWorkspaceTreeControl(controlId, props, context.sendEvent);
 
       case 'empty_state':
       case 'empty_state_view':

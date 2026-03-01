@@ -41,6 +41,151 @@ class _AsyncActionButtonControl extends StatefulWidget {
 class _AsyncActionButtonControlState extends State<_AsyncActionButtonControl> {
   late bool _busy;
 
+  String _normalizeEventName(String value) {
+    final input = value.trim().replaceAll('-', '_');
+    if (input.isEmpty) return '';
+    final out = StringBuffer();
+    for (var i = 0; i < input.length; i += 1) {
+      final ch = input[i];
+      final isUpper = ch.toUpperCase() == ch && ch.toLowerCase() != ch;
+      if (isUpper && i > 0 && input[i - 1] != '_') {
+        out.write('_');
+      }
+      out.write(ch.toLowerCase());
+    }
+    return out.toString();
+  }
+
+  Set<String>? _subscribedEvents() {
+    final events = widget.props['events'];
+    if (events is! List) return null;
+    return events
+        .map((e) => _normalizeEventName(e?.toString() ?? ''))
+        .where((name) => name.isNotEmpty)
+        .toSet();
+  }
+
+  bool _isSubscribed(String name) {
+    final subscribed = _subscribedEvents();
+    if (subscribed == null) return name == 'click';
+    return subscribed.contains(_normalizeEventName(name));
+  }
+
+  Map<String, Object?> _basePayload() {
+    final label =
+        (widget.props['text'] ?? widget.props['label'] ?? 'Run').toString();
+    final payload = <String, Object?>{
+      'label': label,
+      if (widget.props['value'] != null) 'value': widget.props['value'],
+      'busy': _busy,
+      'loading': _busy,
+    };
+    final actionId = widget.props['action_id']?.toString();
+    final actionEventName = widget.props['action_event']?.toString();
+    final actionPayload = widget.props['action_payload'];
+    if (actionId != null && actionId.isNotEmpty) {
+      payload['action_id'] = actionId;
+    }
+    if (actionEventName != null && actionEventName.isNotEmpty) {
+      payload['action_event'] = actionEventName;
+    }
+    if (actionPayload != null) {
+      payload['action_payload'] = actionPayload;
+    }
+    return payload;
+  }
+
+  void _emitPressEvents() {
+    final payload = _basePayload();
+    final actionId = widget.props['action_id']?.toString();
+    final actionEventName = widget.props['action_event']?.toString();
+    final actionPayload = widget.props['action_payload'];
+
+    void emitDeclarativeAction(Object? actionSpec, {bool force = false}) {
+      var eventName = actionEventName;
+      String? resolvedActionId = actionId;
+      Object? resolvedActionPayload = actionPayload;
+
+      if (actionSpec == null) {
+      } else if (actionSpec is String) {
+        final trimmed = actionSpec.trim();
+        if (trimmed.isNotEmpty) {
+          resolvedActionId = trimmed;
+        }
+      } else if (actionSpec is Map) {
+        final map = coerceObjectMap(actionSpec);
+        final mapId =
+            map['id']?.toString() ??
+            map['action_id']?.toString() ??
+            map['name']?.toString();
+        if (mapId != null && mapId.isNotEmpty) {
+          resolvedActionId = mapId;
+        }
+        final mapEvent = map['event']?.toString();
+        if (mapEvent != null && mapEvent.trim().isNotEmpty) {
+          eventName = mapEvent;
+        }
+        if (map.containsKey('payload')) {
+          resolvedActionPayload = map['payload'];
+        }
+      }
+
+      final resolvedEvent = _normalizeEventName(
+        (eventName == null || eventName.isEmpty) ? 'action' : eventName,
+      );
+      if (resolvedEvent.isEmpty || (!force && !_isSubscribed(resolvedEvent))) {
+        return;
+      }
+
+      final actionEventPayload = <String, Object?>{
+        ...payload,
+        if (resolvedActionId != null && resolvedActionId.isNotEmpty)
+          'action_id': resolvedActionId,
+      };
+      if (resolvedActionPayload is Map) {
+        actionEventPayload.addAll(coerceObjectMap(resolvedActionPayload));
+      } else if (resolvedActionPayload != null) {
+        actionEventPayload['action_payload'] = resolvedActionPayload;
+      }
+      _emit(resolvedEvent, actionEventPayload);
+    }
+
+    final events = widget.props['events'];
+    if (events is! List) {
+      _emit('click', payload);
+      emitDeclarativeAction(widget.props['action'], force: true);
+      if (widget.props['actions'] is List) {
+        for (final actionSpec in widget.props['actions'] as List) {
+          emitDeclarativeAction(actionSpec, force: true);
+        }
+      } else if (actionId != null || actionPayload != null) {
+        emitDeclarativeAction(const <String, Object?>{}, force: true);
+      }
+      return;
+    }
+
+    if (_isSubscribed('click')) {
+      _emit('click', payload);
+    }
+    if (_isSubscribed('press')) {
+      _emit('press', payload);
+    }
+    if (_isSubscribed('tap')) {
+      _emit('tap', payload);
+    }
+    if (_isSubscribed('action')) {
+      _emit('action', payload);
+    }
+    emitDeclarativeAction(widget.props['action']);
+    if (widget.props['actions'] is List) {
+      for (final actionSpec in widget.props['actions'] as List) {
+        emitDeclarativeAction(actionSpec);
+      }
+    } else if (actionId != null || actionPayload != null) {
+      emitDeclarativeAction(const <String, Object?>{});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +207,13 @@ class _AsyncActionButtonControlState extends State<_AsyncActionButtonControl> {
       }
     }
     if (oldWidget.props != widget.props) {
-      _busy = widget.props['busy'] == true || widget.props['loading'] == true;
+      final nextBusy =
+          widget.props['busy'] == true || widget.props['loading'] == true;
+      if (_busy != nextBusy) {
+        setState(() => _busy = nextBusy);
+      } else {
+        _busy = nextBusy;
+      }
     }
   }
 
@@ -114,7 +265,7 @@ class _AsyncActionButtonControlState extends State<_AsyncActionButtonControl> {
     return FilledButton.icon(
       onPressed: canPress
           ? () {
-              _emit('click', <String, Object?>{'busy': _busy});
+              _emitPressEvents();
             }
           : null,
       icon: _busy

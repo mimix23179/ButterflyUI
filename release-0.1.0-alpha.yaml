@@ -1,0 +1,396 @@
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
+
+# First release of the ButterflyUI runtime for windows!
+
+- Added Animations.
+  - Blur Fade
+  - Curtain
+  - Elastic
+  - Fade
+  - Fade Scale
+  - Fade Through
+  - Flip
+  - Grow from Point
+  - Scale
+  - Slide and Fade
+  - Slide
+  - Staggered
+
+---
+
+- Added Style/Style Packs.
+  - Base Pack
+  - Terminal Pack
+  - Windsurf Pack
+  - Retro Pack
+  - Sci-Fi Pack
+  - Comfy Pack
+  - Noir Pack
+  - Minimal Pack
+  - Glass Pack
+  - Solarized Pack
+  - Vapor Pack
+  - Neon Pack
+
+---
+
+- Added Data Controls.
+  - Card
+  - DataSourceView
+  - DataGrid
+  - DataTable
+  - SortableHeader
+  - DownloadItem
+  - FileBrowser
+  - GridView
+  - ItemTile
+  - ListTile
+  - ListView
+  - Progress
+  - ProgressIndicator
+  - ProgressTimeline
+  - QueueList
+  - ReorderableList
+  - ReorderableTree
+  - Skeleton
+  - SkeletonLoader
+  - Table
+  - TableView
+  - TaskList
+  - TreeNode
+  - TreeView
+  - VirtualGrid
+  - VirtualList
+  - SnapGrid
+  - StickyList
+
+---
+
+- Added Customization Controls.
+  - AnimatedGradient
+  - AvatarStack
+  - Badge
+  - BlendModePicker
+  - BlobField
+  - Border
+  - BorderSide
+  - ButtonStyle
+  - ColorPicker
+  - ColorSwatchGrid
+  - ContainerStyle
+  - Gradient
+  - GradientEditor
+  - BrushPanel
+  - CropBox
+  - CurveEditor
+  - GuidesManager
+  - RulerGuides
+  - RulersOverlay
+  - SceneView
+  - HistoryStack
+  - HistogramOverlay
+  - HistogramView
+  - InfoBar
+  - LayerMaskEditor
+
+---
+
+- Added Display Controls.
+  - ArtifactCard
+  - ResultCard
+  - AttachmentTile
+  - Audio
+  - EmojiIcon
+  - Avatar
+  - Canvas
+  - CodeBlock
+  - BarPlot
+  - Chart
+  - CodeView
+  - DiffView
+  - Divider
+  - BarChart
+  - EmptyState
+  - ErrorState
+  - Glyph
+  - GlyphButton
+  - Html
+  - HtmlView
+  - Icon
+  - Image
+  - LineChart
+  - LinePlot
+  - MentionPill
+  - MessageDivider
+  - MessageMeta
+  - QuotedMessage
+  - RatingDisplay
+  - ReactionBar
+  - StatusMark
+  - Persona
+  - PiePlot
+  - TypingIndicator
+  - VectorView
+  - Video
+  - Markdown
+  - MarkdownView
+  - RichText
+  - RichTextEditor
+  - SparkPlot
+  - Sparkline
+  - Text
+
+---
+
+- Added Effect Controls.
+  - AnimatedBackground
+  - Animation
+  - Transition
+  - Effects
+  - Shadow
+  - Particles
+  - FoldLayer
+  - Layer
+  - LayerList
+  - LiquidMorph
+  - MorphingBorder
+  - Motion
+  - PanZoom
+  - Parallax
+  - Pixelate
+  - Pose
+  - RippleBurst
+  - FlowField
+  - ParticleField
+  - ScanlineOverlay
+  - Vignette
+  - ChromaticShift
+  - ConfettiBurst
+  - GlassBlur
+  - GlowEffect
+  - GradientSweep
+  - Shimmer
+  - ShadowStack
+  - Stagger
+  - TiltHover
+  - Timeline
+  - TimeTravel
+  - GrainOverlay
+  - NeonEdge
+  - NoiseDisplacement
+  - NoiseField
+
+---
+
+- Added Input Controls.
+  - AsyncActionButton
+  - Button
+  - ElevatedButton
+  - FilledButton
+  - OutlinedButton
+  - TextButton
+  - IconButton
+  - IconPicker
+  - CheckList
+  - Checkbox
+  - Chip
+  - TagChip
+  - ChipGroup
+  - Combobox
+  - DatePicker
+  - TimeSelect
+  - DateRange
+  - DateRangePicker
+  - DateSelect
+  - DateSpan
+  - DirectoryPicker
+  - Dropdown
+  - FilePicker
+  - FilterChipsBar
+  - FieldGroup
+  - FilterDrawer
+  - KeybindRecorder
+  - MultiPick
+  - MultiSelect
+  - Radio
+  - SearchBar
+  - Select
+  - Slider
+  - CountStepper
+  - NumericField
+  - Option
+  - SelectOption
+  - PathField
+  - SegmentBar
+  - SegmentedSwitch
+  - SpanSlider
+  - Switch
+  - TagFilterBar
+  - TextField
+  - TextArea
+  - TextFieldStyle
+  - EmojiPicker
+
+---
+
+- Added Interactions Controls.
+  - Cursor
+  - DragHandle
+  - DragPayload
+  - DropZone
+  - FocusAnchor
+  - GestureArea
+  - HoverRegion
+  - KeyListener
+  - Pressable
+  - ShortcutMap
+
+---
+
+- Added Layout Controls.
+  - Accordion
+  - AdjustmentPanel
+  - Align
+  - Center
+  - AspectRatio
+  - OverflowBox
+  - FittedBox
+  - DecoratedBox
+  - Clip
+  - Box
+  - Column
+  - Container
+  - DockLayout
+  - DetailsPane
+  - Frame
+  - Expanded
+  - FlexSpacer
+  - InspectorPanel
+  - BoundsProbe
+  - PageControl
+  - Pane
+  - PaneSpec
+  - ResizablePanel
+  - Row
+  - SafeArea
+  - ScrollView
+  - ScrollableColumn
+  - ScrollableRow
+  - Spacer
+  - SplitPane
+  - SplitView
+  - Stack
+  - ViewStack
+  - Viewport
+  - Visibility
+  - Surface
+  - Grid
+  - Wrap
+
+---
+
+- Added Navigation Controls.
+  - ActionBar
+  - AppBar
+  - TopBar
+  - BreadcrumbBar
+  - Breadcrumbs
+  - ContextActionBar
+  - CrumbTrail
+  - CommandItem
+  - CommandPalette
+  - Drawer
+  - SideDrawer
+  - MenuBar
+  - MenuItem
+  - Navigator
+  - NavRing
+  - RailNav
+  - NoticeBar
+  - Outline
+  - SymbolTree
+  - PageNav
+  - PageStepper
+  - Paginator
+  - Sidebar
+  - StatusBar
+  - Tabs
+
+---
+
+- Added Productivity Controls.
+  - OwnershipMarker
+  - Chat
+  - ChatBubble
+  - ChatMessage
+  - ChatThread
+  - EditorTabStrip
+  - EditorWorkspace
+  - Form
+  - FormField
+  - MessageBubble
+  - MessageComposer
+  - OutputPanel
+  - ProblemsPanel
+  - PromptComposer
+  - ValidationSummary
+  - WorkspaceTree
+  - FileSystem
+  - AutoForm
+  - SubmitScope
+
+---
+
+- Added Overlay Controls.
+  - BottomSheet
+  - ContextMenu
+  - Modal
+  - NotificationCenter
+  - NotificationHost
+  - Overlay
+  - Popover
+  - PreviewSurface
+  - ProgressOverlay
+  - Portal
+  - SidePanel
+  - SlidePanel
+  - Snackbar
+  - Toast
+  - ToastHost
+  - Tooltip
+  - Splash
+
+---
+
+- Added Shell Controls.
+  - AnimationAsset
+  - Sprite
+  - DragRegion
+  - Launcher
+  - OverlayHost
+  - PageScene
+  - Route
+  - RouteHost
+  - RouteView
+  - Router
+  - WindowDragRegion
+  - WindowFrame
+  - WindowControls
+
+---
+
+- Added Modifier Control.
+- Added Candy Control[still being worked on].
+- Added Gallery Control[still being worked on].
+- Added Skins Control[still being worked on].
+- Added a bunch of controls.
+- Added Windows support.
+- Added Web support.
+- Added Window Control.
+- Added WebView Control.
+- Added Motion Control.
+- Added Notification Control.
+
+--- 
+
+Feel free to test out this release, If anything is wrong, Please feel free to let it know in the [Issues] section!

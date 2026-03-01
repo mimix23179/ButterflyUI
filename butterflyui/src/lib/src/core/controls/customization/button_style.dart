@@ -33,6 +33,127 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
   late List<_ButtonStylePreset> _options;
   late String _current;
 
+  String _normalizeEventName(String value) {
+    final input = value.trim().replaceAll('-', '_');
+    if (input.isEmpty) return '';
+    final out = StringBuffer();
+    for (var i = 0; i < input.length; i += 1) {
+      final ch = input[i];
+      final isUpper = ch.toUpperCase() == ch && ch.toLowerCase() != ch;
+      if (isUpper && i > 0 && input[i - 1] != '_') {
+        out.write('_');
+      }
+      out.write(ch.toLowerCase());
+    }
+    return out.toString();
+  }
+
+  Set<String>? _subscribedEvents() {
+    final events = widget.props['events'];
+    if (events is! List) return null;
+    return events
+        .map((e) => _normalizeEventName(e?.toString() ?? ''))
+        .where((name) => name.isNotEmpty)
+        .toSet();
+  }
+
+  bool _isSubscribed(String name) {
+    final subscribed = _subscribedEvents();
+    if (subscribed == null) return name == 'change';
+    return subscribed.contains(_normalizeEventName(name));
+  }
+
+  void _emitSelectionEvents(String value) {
+    final payload = <String, Object?>{'value': value};
+    final actionId = widget.props['action_id']?.toString();
+    final actionEventName = widget.props['action_event']?.toString();
+    final actionPayload = widget.props['action_payload'];
+    if (actionId != null && actionId.isNotEmpty) {
+      payload['action_id'] = actionId;
+    }
+    if (actionEventName != null && actionEventName.isNotEmpty) {
+      payload['action_event'] = actionEventName;
+    }
+    if (actionPayload != null) {
+      payload['action_payload'] = actionPayload;
+    }
+
+    final events = widget.props['events'];
+    if (events is! List || _isSubscribed('change')) {
+      widget.sendEvent(widget.controlId, 'change', payload);
+    }
+
+    void emitDeclarativeAction(Object? actionSpec, {bool force = false}) {
+      var eventName = actionEventName;
+      String? resolvedActionId = actionId;
+      Object? resolvedActionPayload = actionPayload;
+
+      if (actionSpec == null) {
+      } else if (actionSpec is String) {
+        final trimmed = actionSpec.trim();
+        if (trimmed.isNotEmpty) {
+          resolvedActionId = trimmed;
+        }
+      } else if (actionSpec is Map) {
+        final map = coerceObjectMap(actionSpec);
+        final mapId =
+            map['id']?.toString() ??
+            map['action_id']?.toString() ??
+            map['name']?.toString();
+        if (mapId != null && mapId.isNotEmpty) {
+          resolvedActionId = mapId;
+        }
+        final mapEvent = map['event']?.toString();
+        if (mapEvent != null && mapEvent.trim().isNotEmpty) {
+          eventName = mapEvent;
+        }
+        if (map.containsKey('payload')) {
+          resolvedActionPayload = map['payload'];
+        }
+      }
+
+      final resolvedEvent = _normalizeEventName(
+        (eventName == null || eventName.isEmpty) ? 'action' : eventName,
+      );
+      if (resolvedEvent.isEmpty || (!force && !_isSubscribed(resolvedEvent))) {
+        return;
+      }
+
+      final actionEventPayload = <String, Object?>{
+        ...payload,
+        if (resolvedActionId != null && resolvedActionId.isNotEmpty)
+          'action_id': resolvedActionId,
+      };
+      if (resolvedActionPayload is Map) {
+        actionEventPayload.addAll(coerceObjectMap(resolvedActionPayload));
+      } else if (resolvedActionPayload != null) {
+        actionEventPayload['action_payload'] = resolvedActionPayload;
+      }
+      widget.sendEvent(widget.controlId, resolvedEvent, actionEventPayload);
+    }
+
+    if (events is! List) {
+      emitDeclarativeAction(widget.props['action'], force: true);
+      if (widget.props['actions'] is List) {
+        for (final actionSpec in widget.props['actions'] as List) {
+          emitDeclarativeAction(actionSpec, force: true);
+        }
+      } else if (actionId != null || actionPayload != null) {
+        emitDeclarativeAction(const <String, Object?>{}, force: true);
+      }
+      return;
+    }
+
+    emitDeclarativeAction(widget.props['action']);
+    if (widget.props['actions'] is List) {
+      for (final actionSpec in widget.props['actions'] as List) {
+        emitDeclarativeAction(actionSpec);
+      }
+    } else if (actionId != null || actionPayload != null) {
+      emitDeclarativeAction(const <String, Object?>{});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,7 +194,7 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
         setState(() {
           _current = value;
         });
-        widget.sendEvent(widget.controlId, 'change', {'value': value});
+        _emitSelectionEvents(value);
         return value;
       case 'set_options':
         final next = _coerceOptions({'options': args['options'] ?? args['items']});
@@ -134,7 +255,7 @@ class _ButtonStyleControlState extends State<_ButtonStyleControl> {
                   setState(() {
                     _current = option.id;
                   });
-                  widget.sendEvent(widget.controlId, 'change', {'value': option.id});
+                  _emitSelectionEvents(option.id);
                 },
               ),
           ],

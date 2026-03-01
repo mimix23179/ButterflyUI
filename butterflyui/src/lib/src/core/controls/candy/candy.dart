@@ -856,15 +856,31 @@ Widget? buildCandyControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   Widget Function(Map<String, Object?> control) buildChild,
 ) {
-  final module = merged['module']?.toString();
-  if (module == null) return null;
+  final module =
+      merged['module']?.toString() ?? merged['layout']?.toString() ?? '';
+  final resolvedModule = candyNorm(module);
+  final effectiveModule = resolvedModule.isEmpty ? 'container' : resolvedModule;
+
+  final normalized = Map<String, Object?>.from(merged);
+  if (normalized['main_axis'] == null && normalized['main'] != null) {
+    normalized['main_axis'] = normalized['main'];
+  }
+  if (normalized['cross_axis'] == null && normalized['cross'] != null) {
+    normalized['cross_axis'] = normalized['cross'];
+  }
+  if (normalized['main_axis_size'] == null && normalized['size'] != null) {
+    normalized['main_axis_size'] = normalized['size'];
+  }
+  if (normalized['run_spacing'] == null && normalized['runSpacing'] != null) {
+    normalized['run_spacing'] = normalized['runSpacing'];
+  }
 
   // Build style from tokens - create a fallback ButterflyUIThemeTokens
   final style = _createThemeTokensFromTokens(tokens);
 
   final ctx = CandyContext(
     controlId: controlId,
-    merged: merged,
+    merged: normalized,
     rawChildren: rawChildren,
     tokens: tokens,
     style: style,
@@ -875,11 +891,20 @@ Widget? buildCandyControl(
   );
 
   // Chain through all module builders
-  return buildCandyLayoutModule(module, ctx) ??
-      buildCandyInteractiveModule(module, ctx) ??
-      buildCandyDecorationModule(module, ctx) ??
-      buildCandyEffectsModule(module, ctx) ??
-      buildCandyMotionModule(module, ctx);
+  final built =
+      buildCandyLayoutModule(effectiveModule, ctx) ??
+      buildCandyInteractiveModule(effectiveModule, ctx) ??
+      buildCandyDecorationModule(effectiveModule, ctx) ??
+      buildCandyEffectsModule(effectiveModule, ctx) ??
+      buildCandyMotionModule(effectiveModule, ctx);
+  if (built != null) return built;
+  if (effectiveModule == 'candy') return null;
+  return buildChild({
+    'id': controlId,
+    'type': effectiveModule,
+    'props': normalized,
+    'children': rawChildren,
+  });
 }
 
 // ============================================================================

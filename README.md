@@ -1,10 +1,28 @@
 ![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/banner.png?raw=true)
 
+---
+
+Before you read this, Please consider to give Codex, Copilot, TRAE, Kilo, and Antigravity a try, They are really great tools to build programs/apps/websites/etc.
+
+Right now, Trae[🤖] has a free 3 dollar tier that refreshes once a month, I know it's slow, But hey, it's free, And based on my experience, It has bonus usage too! 
+
+Kilo[🧲] is great for certain things, If it understands ButterflyUI's structure, It could be a great tool to build your idea's with.
+
+Antigravity[✨] is also a great tool, It's still new, But based on my experience, It's really great, Even if the refresh rates are slow, It's still a great tool, And it's free! 
+
+And based on my experience with Copilot[🤖], It could be a great tool if you have patience to deal with the free models, But the premium models deliver really well if i'm being honest, 
+
+And most of all, Codex[🧱] helped me ALOT building this as well, I used Codex more than other tools building ButterflyUI.
+
+I'm not sponsored to say this, I just wanted to give them a shoutout.
+
+---
+
 # 🦋 ButterflyUI - AI Coders used when building this:
 - Codex ✨
 - Copilot ✨
-- TRAE AI ✨
-- Kilo Code ✨
+- TRAE ✨
+- Kilo ✨
 - Antigravity ✨
 
 **ButterflyUI** is a layered application platform built on composable UI primitives, token-driven styling, and modular umbrella controls.

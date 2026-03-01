@@ -689,10 +689,14 @@ CANDY_MODULE_ENUM = [
     "fitted_box",
     "effects",
     "particles",
+    "particle_field",
     "border",
+    "border_side",
     "shadow",
     "outline",
     "gradient",
+    "animated_gradient",
+    "animated_background",
     "animation",
     "transition",
     "canvas",
@@ -703,6 +707,25 @@ CANDY_MODULE_ENUM = [
     "icon",
     "text",
     "motion",
+    "flow_field",
+    "liquid_morph",
+    "morphing_border",
+    "parallax",
+    "pixelate",
+    "ripple_burst",
+    "scanline_overlay",
+    "shimmer",
+    "tilt_hover",
+    "vignette",
+    "glow_effect",
+    "neon_edge",
+    "grain_overlay",
+    "noise_displacement",
+    "noise_field",
+    "chromatic_shift",
+    "gradient_sweep",
+    "button_style",
+    "page",
 ]
 
 CANDY_STATE_ENUM = ["idle", "hover", "pressed", "focused", "disabled", "selected", "loading"]
@@ -1049,6 +1072,29 @@ CANDY_MODULE_SCHEMAS = {
             "reverse": BOOL_SCHEMA,
         }
     ),
+    "particle_field": _candy_module_schema({}),
+    "border_side": _candy_module_schema({}),
+    "animated_gradient": _candy_module_schema({}),
+    "animated_background": _candy_module_schema({}),
+    "flow_field": _candy_module_schema({}),
+    "liquid_morph": _candy_module_schema({}),
+    "morphing_border": _candy_module_schema({}),
+    "parallax": _candy_module_schema({}),
+    "pixelate": _candy_module_schema({}),
+    "ripple_burst": _candy_module_schema({}),
+    "scanline_overlay": _candy_module_schema({}),
+    "shimmer": _candy_module_schema({}),
+    "tilt_hover": _candy_module_schema({}),
+    "vignette": _candy_module_schema({}),
+    "glow_effect": _candy_module_schema({}),
+    "neon_edge": _candy_module_schema({}),
+    "grain_overlay": _candy_module_schema({}),
+    "noise_displacement": _candy_module_schema({}),
+    "noise_field": _candy_module_schema({}),
+    "chromatic_shift": _candy_module_schema({}),
+    "gradient_sweep": _candy_module_schema({}),
+    "button_style": _candy_module_schema({}),
+    "page": _candy_module_schema({}),
 }
 
 CANDY_MODULE_PAYLOAD_SCHEMA = {
@@ -1123,6 +1169,29 @@ CANDY_SCHEMA = _control_schema(
         "icon": CANDY_MODULE_SCHEMAS["icon"],
         "text": CANDY_MODULE_SCHEMAS["text"],
         "motion": CANDY_MODULE_SCHEMAS["motion"],
+        "particle_field": CANDY_MODULE_SCHEMAS["particle_field"],
+        "border_side": CANDY_MODULE_SCHEMAS["border_side"],
+        "animated_gradient": CANDY_MODULE_SCHEMAS["animated_gradient"],
+        "animated_background": CANDY_MODULE_SCHEMAS["animated_background"],
+        "flow_field": CANDY_MODULE_SCHEMAS["flow_field"],
+        "liquid_morph": CANDY_MODULE_SCHEMAS["liquid_morph"],
+        "morphing_border": CANDY_MODULE_SCHEMAS["morphing_border"],
+        "parallax": CANDY_MODULE_SCHEMAS["parallax"],
+        "pixelate": CANDY_MODULE_SCHEMAS["pixelate"],
+        "ripple_burst": CANDY_MODULE_SCHEMAS["ripple_burst"],
+        "scanline_overlay": CANDY_MODULE_SCHEMAS["scanline_overlay"],
+        "shimmer": CANDY_MODULE_SCHEMAS["shimmer"],
+        "tilt_hover": CANDY_MODULE_SCHEMAS["tilt_hover"],
+        "vignette": CANDY_MODULE_SCHEMAS["vignette"],
+        "glow_effect": CANDY_MODULE_SCHEMAS["glow_effect"],
+        "neon_edge": CANDY_MODULE_SCHEMAS["neon_edge"],
+        "grain_overlay": CANDY_MODULE_SCHEMAS["grain_overlay"],
+        "noise_displacement": CANDY_MODULE_SCHEMAS["noise_displacement"],
+        "noise_field": CANDY_MODULE_SCHEMAS["noise_field"],
+        "chromatic_shift": CANDY_MODULE_SCHEMAS["chromatic_shift"],
+        "gradient_sweep": CANDY_MODULE_SCHEMAS["gradient_sweep"],
+        "button_style": CANDY_MODULE_SCHEMAS["button_style"],
+        "page": CANDY_MODULE_SCHEMAS["page"],
     }
 )
 
@@ -1706,8 +1775,16 @@ BUTTON_SCHEMA = _control_schema(
     {
         "text": STRING_SCHEMA,
         "label": STRING_SCHEMA,
+        "value": ANY_SCHEMA,
         "variant": STRING_SCHEMA,
         "enabled": BOOL_SCHEMA,
+        "action": ANY_SCHEMA,
+        "actions": {"type": "array", "items": ANY_SCHEMA},
+        "action_id": STRING_SCHEMA,
+        "action_event": STRING_SCHEMA,
+        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "window_action": STRING_SCHEMA,
+        "window_action_delay_ms": INTEGER_SCHEMA,
         "color": COLOR_SCHEMA,
         "bgcolor": COLOR_SCHEMA,
         "background": COLOR_SCHEMA,
@@ -1717,6 +1794,16 @@ BUTTON_SCHEMA = _control_schema(
         "radius": NUMBER_SCHEMA,
         "content_padding": PADDING_SCHEMA,
         "border_color": COLOR_SCHEMA,
+        "border_width": NUMBER_SCHEMA,
+        "elevation": NUMBER_SCHEMA,
+        "shadow_color": COLOR_SCHEMA,
+        "overlay_color": COLOR_SCHEMA,
+        "splash_color": COLOR_SCHEMA,
+        "font_size": NUMBER_SCHEMA,
+        "font_family": STRING_SCHEMA,
+        "font_weight": STRING_SCHEMA,
+        "weight": STRING_SCHEMA,
+        "letter_spacing": NUMBER_SCHEMA,
     }
 )
 
@@ -2650,6 +2737,7 @@ SKINS_MODULE_TYPES = [
     "button",
     "badge",
     "border",
+    "page",
     # Decoration modules
     "gradient",
     "decorated",
@@ -4005,6 +4093,11 @@ BUTTON_STYLE_SCHEMA = _control_schema(
         "disabled": {"type": "object", "additionalProperties": True},
         "focus_ring": {"type": "object", "additionalProperties": True},
         "motion_behavior": {"type": "object", "additionalProperties": True},
+        "action": ANY_SCHEMA,
+        "actions": {"type": "array", "items": ANY_SCHEMA},
+        "action_id": STRING_SCHEMA,
+        "action_event": STRING_SCHEMA,
+        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
     }
 )
 
@@ -4530,6 +4623,9 @@ PROBLEM_SCREEN_SCHEMA = _control_schema(
         "session_id": STRING_SCHEMA,
         "ui_snapshot": {"type": "object"},
         "error_classes": {"type": "array", "items": STRING_SCHEMA},
+        "error_class": STRING_SCHEMA,
+        "error_kind": STRING_SCHEMA,
+        "hint": STRING_SCHEMA,
         "actions": {"type": "array", "items": {"type": "object"}},
         "variant": STRING_SCHEMA,
     }
@@ -5312,7 +5408,23 @@ CONTROL_SCHEMAS = {
     "rating_display": _control_schema({"value": NUMBER_SCHEMA, "max": INTEGER_SCHEMA, "allow_half": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
     "typing_indicator": TYPING_INDICATOR_SCHEMA,
     "message_composer": MESSAGE_COMPOSER_SCHEMA,
-    "async_action_button": _control_schema({"label": STRING_SCHEMA, "text": STRING_SCHEMA, "value": ANY_SCHEMA, "variant": STRING_SCHEMA, "busy": BOOL_SCHEMA, "loading": BOOL_SCHEMA, "disabled_while_busy": BOOL_SCHEMA, "busy_label": STRING_SCHEMA}),
+    "async_action_button": _control_schema({
+        "label": STRING_SCHEMA,
+        "text": STRING_SCHEMA,
+        "value": ANY_SCHEMA,
+        "variant": STRING_SCHEMA,
+        "busy": BOOL_SCHEMA,
+        "loading": BOOL_SCHEMA,
+        "disabled_while_busy": BOOL_SCHEMA,
+        "busy_label": STRING_SCHEMA,
+        "action": ANY_SCHEMA,
+        "actions": {"type": "array", "items": ANY_SCHEMA},
+        "action_id": STRING_SCHEMA,
+        "action_event": STRING_SCHEMA,
+        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "window_action": STRING_SCHEMA,
+        "window_action_delay_ms": INTEGER_SCHEMA,
+    }),
     "prompt_composer": PROMPT_COMPOSER_SCHEMA,
     "mention_pill": MENTION_PILL_SCHEMA,
     "persona": _control_schema({
@@ -5371,7 +5483,20 @@ CONTROL_SCHEMAS = {
     "progress_indicator": PROGRESS_SCHEMA,
     "button": BUTTON_SCHEMA,
     "icon": _control_schema({"icon": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "tooltip": STRING_SCHEMA}),
-    "icon_button": _control_schema({"icon": ICON_VALUE_SCHEMA, "glyph": STRING_SCHEMA, "tooltip": STRING_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "enabled": BOOL_SCHEMA}),
+    "icon_button": _control_schema({
+        "icon": ICON_VALUE_SCHEMA,
+        "glyph": STRING_SCHEMA,
+        "tooltip": STRING_SCHEMA,
+        "size": NUMBER_SCHEMA,
+        "color": COLOR_SCHEMA,
+        "enabled": BOOL_SCHEMA,
+        "value": ANY_SCHEMA,
+        "action": ANY_SCHEMA,
+        "actions": {"type": "array", "items": ANY_SCHEMA},
+        "action_id": STRING_SCHEMA,
+        "action_event": STRING_SCHEMA,
+        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    }),
     "elevated_button": BUTTON_SCHEMA,
     "filled_button": BUTTON_SCHEMA,
     "outlined_button": BUTTON_SCHEMA,
@@ -6667,8 +6792,77 @@ for _prop in [
         _window_hints.append(_prop)
 
 _button_hints = RUNTIME_PROP_HINTS.setdefault("button", [])
-if "window_action" not in _button_hints:
-    _button_hints.append("window_action")
+for _prop in [
+    "window_action",
+    "window_action_delay_ms",
+    "action",
+    "actions",
+    "action_id",
+    "action_event",
+    "action_payload",
+    "value",
+]:
+    if _prop not in _button_hints:
+        _button_hints.append(_prop)
+
+_icon_button_hints = RUNTIME_PROP_HINTS.setdefault("icon_button", [])
+for _prop in [
+    "icon",
+    "glyph",
+    "tooltip",
+    "size",
+    "color",
+    "enabled",
+    "value",
+    "action",
+    "actions",
+    "action_id",
+    "action_event",
+    "action_payload",
+]:
+    if _prop not in _icon_button_hints:
+        _icon_button_hints.append(_prop)
+
+_async_action_button_hints = RUNTIME_PROP_HINTS.setdefault("async_action_button", [])
+for _prop in [
+    "label",
+    "text",
+    "value",
+    "variant",
+    "busy",
+    "loading",
+    "disabled_while_busy",
+    "busy_label",
+    "window_action",
+    "window_action_delay_ms",
+    "action",
+    "actions",
+    "action_id",
+    "action_event",
+    "action_payload",
+]:
+    if _prop not in _async_action_button_hints:
+        _async_action_button_hints.append(_prop)
+
+_button_style_hints = RUNTIME_PROP_HINTS.setdefault("button_style", [])
+for _prop in [
+    "value",
+    "options",
+    "items",
+    "base",
+    "hover",
+    "pressed",
+    "disabled",
+    "focus_ring",
+    "motion_behavior",
+    "action",
+    "actions",
+    "action_id",
+    "action_event",
+    "action_payload",
+]:
+    if _prop not in _button_style_hints:
+        _button_style_hints.append(_prop)
 
 RUNTIME_PROP_HINTS.update(
     {
