@@ -7,6 +7,52 @@ from .._shared import Component, merge_props
 __all__ = ["ChatThread"]
 
 class ChatThread(Component):
+    """
+    Scrollable thread of chat messages with optional input and grouping.
+
+    The runtime renders a vertical list of chat messages. ``messages``
+    provides an initial list of message specs. ``spacing`` controls gap
+    between messages. ``reverse`` inverts scroll direction (latest at bottom).
+    ``scrollable`` enables/disables the scroll container. ``group_messages``
+    clusters consecutive messages from the same author.
+    ``show_timestamps`` toggles timestamp display. ``auto_scroll`` keeps the
+    view scrolled to the newest message. ``input_placeholder`` sets the
+    placeholder of an attached composer.
+
+    ```python
+    import butterflyui as bui
+
+    bui.ChatThread(
+        messages=[],
+        auto_scroll=True,
+        show_timestamps=True,
+        events=["send", "select"],
+    )
+    ```
+
+    Args:
+        messages:
+            Initial list of message spec mappings.
+        spacing:
+            Vertical gap in logical pixels between message items.
+        reverse:
+            When ``True`` new messages appear at the bottom of the list.
+        scrollable:
+            When ``False`` the thread does not scroll.
+        group_messages:
+            When ``True`` consecutive messages from the same author are
+            grouped visually.
+        show_timestamps:
+            When ``True`` timestamps are shown beneath each message.
+        auto_scroll:
+            When ``True`` the view automatically scrolls to the latest
+            message.
+        input_placeholder:
+            Placeholder text for an attached message composer.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "chat_thread"
 
     def __init__(

@@ -7,6 +7,59 @@ from .._shared import Component, merge_props
 __all__ = ["AutoForm"]
 
 class AutoForm(Component):
+    """
+    Schema-driven form that auto-generates fields from a data schema.
+
+    The runtime renders a complete form based on ``schema`` or an explicit
+    ``fields`` list. ``values`` seeds initial field values. ``title`` and
+    ``description`` add a header. ``layout`` and ``columns`` control the
+    field arrangement. ``dense`` reduces padding; ``show_labels`` toggles
+    label visibility; ``label_width`` fixes the label column width.
+    ``validation_rules`` declares validation constraints; ``visibility_rules``
+    conditionally show or hide fields.
+
+    ```python
+    import butterflyui as bui
+
+    bui.AutoForm(
+        schema={"name": "string", "age": "number"},
+        submit_label="Save",
+        events=["submit", "change"],
+    )
+    ```
+
+    Args:
+        schema:
+            JSON-schema-style mapping that drives field generation.
+        fields:
+            Explicit list of field spec mappings, used instead of
+            ``schema`` when provided.
+        values:
+            Initial values mapping keyed by field name.
+        title:
+            Optional heading displayed above the form.
+        description:
+            Optional description text below the title.
+        submit_label:
+            Label for the submit button.
+        layout:
+            Field layout mode. Values: ``"vertical"``, ``"horizontal"``.
+        columns:
+            Number of columns in a multi-column field grid.
+        dense:
+            When ``True`` reduces vertical padding between fields.
+        show_labels:
+            When ``False`` field labels are hidden.
+        label_width:
+            Fixed width in logical pixels for the label column.
+        validation_rules:
+            Mapping of field names to validation rule definitions.
+        visibility_rules:
+            Mapping of field names to conditional visibility expressions.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "auto_form"
 
     def __init__(

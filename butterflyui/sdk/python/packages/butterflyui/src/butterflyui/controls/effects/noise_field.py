@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from ._eventful_effect import _EventfulEffect
 
 __all__ = ["NoiseField"]
 
-class NoiseField(_EventfulEffect):
+class NoiseField(Component):
     """Procedural noise-texture field rendered with a ``CustomPainter``.
 
     The Flutter runtime paints a grid of 2×2-pixel rectangles whose

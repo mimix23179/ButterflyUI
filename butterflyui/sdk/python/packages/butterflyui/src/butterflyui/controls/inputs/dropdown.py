@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from .combobox import Combobox
 
 __all__ = ["Dropdown"]
 
-class Dropdown(Combobox):
+class Dropdown(Component):
     """
     Non-editable drop-down select rendered as a ``Combobox``.
 

@@ -21,6 +21,30 @@ __all__ = [
 
 
 class GalleryLayoutType:
+    """
+    Enumeration of supported ``Gallery`` layout modes.
+
+    Class attributes map layout names to the string constants consumed by
+    the Flutter runtime:
+
+    * ``GRID`` — fixed-column image/media grid.
+    * ``MASONRY`` — variable-height masonry grid.
+    * ``LIST`` — single-column list with metadata rows.
+    * ``CAROUSEL`` — full-width horizontally scrolling carousel.
+    * ``VIRTUAL_GRID`` — virtualised grid for large item counts.
+    * ``VIRTUAL_LIST`` — virtualised list for large item counts.
+
+    Use ``GalleryLayoutType.all()`` to get a list of all valid values.
+    Pass the string constants directly to ``Gallery(layout=...)``.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Gallery(layout=bui.GalleryLayoutType.MASONRY, items=[...])
+    # equivalent to
+    bui.gallery_masonry(items=[...])
+    ```
+    """
     GRID = "grid"
     MASONRY = "masonry"
     LIST = "list"
@@ -42,6 +66,34 @@ class GalleryLayoutType:
 
 @dataclass
 class GalleryItem:
+    """
+    Data container representing a single item in a ``Gallery``.
+
+    Fields map directly to the JSON payload consumed by the Flutter gallery
+    renderer. ``id`` is mandatory. ``url`` / ``thumbnail_url`` control what
+    image or media is displayed. ``type`` hints the renderer:
+    ``"image"`` (default), ``"video"``, ``"audio"``, ``"document"``,
+    ``"font"``, or ``"folder"``.
+
+    Social metadata (``like_count``, ``view_count``, ``author_name``,
+    ``author_avatar``, ``created_at``) is rendered when ``show_meta`` /
+    ``show_actions`` are enabled on the parent ``Gallery``.
+    ``is_selected`` / ``is_loading`` reflect transient display states.
+
+    Construct directly or via ``GalleryItem.from_dict(mapping)``.
+
+    ```python
+    import butterflyui as bui
+
+    item = bui.GalleryItem(
+        id="img-1",
+        url="https://picsum.photos/400",
+        name="Sunset",
+        type="image",
+        like_count=42,
+    )
+    ```
+    """
     id: str
     name: str | None = None
     path: str | None = None
@@ -128,6 +180,26 @@ class GalleryItem:
 
 
 class GalleryScope(Component):
+    """
+    Scope wrapper that provides ambient Gallery theming context to its children.
+
+    Currently acts as a transparent pass-through container. Future versions
+    will provide shared selection state and theming tokens to nested
+    ``Gallery`` controls. No meaningful init parameters beyond child widgets
+    and layout props forwarded via keyword arguments.
+
+    ```python
+    import butterflyui as bui
+
+    bui.GalleryScope(
+        bui.Gallery(
+            items=[bui.GalleryItem(id="1", url="https://picsum.photos/400")],
+            layout="grid",
+        )
+    )
+    ```
+    """
+
     control_type = "gallery_scope"
 
     def __init__(
@@ -144,6 +216,61 @@ class GalleryScope(Component):
 
 
 class Gallery(Component):
+    """
+    Media gallery control supporting grid, masonry, list, carousel, and virtual layouts.
+
+    The runtime renders a scrollable collection of ``GalleryItem`` objects
+    in the style selected by ``layout``. ``items`` accepts sequences of
+    ``GalleryItem`` dataclass instances or raw dict mappings. Each item
+    can carry an image URL, thumbnail, metadata, and social counters.
+
+    Additional Dart-side props can be forwarded as keyword arguments:
+    ``item_border_radius``, ``show_selections``, ``show_actions``,
+    ``show_meta``, ``selection_mode`` (``"none"``, ``"single"``,
+    ``"multi"``), ``item_style`` (``"card"``, ``"compact"``),
+    ``enable_reorder``, ``enable_drag``, ``shrink_wrap``,
+    ``physics``, and ``actions`` (toolbar action specs).
+
+    Convenience factories ``gallery_grid``, ``gallery_masonry``,
+    ``gallery_list``, ``gallery_carousel``, ``gallery_virtual_grid``, and
+    ``gallery_virtual_list`` pre-set the ``layout`` prop.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Gallery(
+        items=[
+            bui.GalleryItem(id="1", url="https://picsum.photos/400", name="Sunset"),
+            bui.GalleryItem(id="2", url="https://picsum.photos/401", name="Forest"),
+        ],
+        layout="grid",
+        columns=3,
+        spacing=8,
+        events=["select", "open"],
+    )
+    ```
+
+    Args:
+        items:
+            List of ``GalleryItem`` instances or raw dict mappings to display.
+        layout:
+            Display layout. Values: ``"grid"``, ``"masonry"``, ``"list"``,
+            ``"carousel"``, ``"virtual_grid"``, ``"virtual_list"``.
+            Defaults to ``"grid"``.
+        columns:
+            Number of columns for grid and virtual-grid layouts. Defaults
+            to ``3``.
+        spacing:
+            Uniform gap in logical pixels between items; also used as
+            ``main_axis_spacing`` fallback.
+        main_axis_spacing:
+            Gap along the main scroll axis (vertical for grids).
+        cross_axis_spacing:
+            Gap along the cross axis (horizontal for grids).
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "gallery"
 
     def __init__(

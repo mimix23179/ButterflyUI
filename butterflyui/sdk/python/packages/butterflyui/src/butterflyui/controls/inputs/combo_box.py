@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from .combobox import Combobox
 
 __all__ = ["ComboBox"]
 
-class ComboBox(Combobox):
+class ComboBox(Component):
     """
     Alias for :class:`Combobox` with a PascalCase class name.
 

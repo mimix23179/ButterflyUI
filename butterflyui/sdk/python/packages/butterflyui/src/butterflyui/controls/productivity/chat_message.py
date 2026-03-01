@@ -7,6 +7,53 @@ from .._shared import Component, merge_props
 __all__ = ["ChatMessage"]
 
 class ChatMessage(Component):
+    """
+    A single chat message item with author metadata and interaction support.
+
+    The runtime renders one message row within a chat thread. ``text`` is
+    the message body. ``role`` identifies the author type (e.g. ``"user"``,
+    ``"assistant"``). ``name`` displays a human-readable author name.
+    ``timestamp`` shows a send-time label. ``status`` reflects delivery
+    state. ``avatar`` sets a URL or icon identifier for the author avatar.
+    ``align`` controls horizontal placement. ``grouped`` suppresses the
+    avatar when adjacent messages share an author. ``clickable`` enables
+    tap events.
+
+    ```python
+    import butterflyui as bui
+
+    bui.ChatMessage(
+        text="Hello!",
+        role="user",
+        name="Alice",
+        align="right",
+        events=["click"],
+    )
+    ```
+
+    Args:
+        text:
+            The message body text.
+        role:
+            Author role identifier, e.g. ``"user"`` or ``"assistant"``.
+        name:
+            Human-readable display name of the message author.
+        timestamp:
+            Timestamp string displayed below the message.
+        status:
+            Delivery status label, e.g. ``"sent"``, ``"delivered"``.
+        avatar:
+            URL or icon identifier for the author avatar image.
+        align:
+            Horizontal alignment. Values: ``"left"``, ``"right"``.
+        grouped:
+            When ``True`` the avatar is hidden to tighten grouped messages.
+        clickable:
+            When ``True`` the message row emits tap events.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "chat_message"
 
     def __init__(

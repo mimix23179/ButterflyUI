@@ -8,6 +8,46 @@ from .message_composer import MessageComposer
 __all__ = ["PromptComposer"]
 
 class PromptComposer(MessageComposer):
+    """
+    AI-prompt composer with a labeled send area and optional attachment support.
+
+    A specialization of ``MessageComposer`` tailored for prompt-entry UIs
+    (e.g. LLM chat interfaces). Adds ``prompt_label`` to annotate the
+    composer with a role or model name. Inherits all ``MessageComposer``
+    properties.
+
+    ```python
+    import butterflyui as bui
+
+    bui.PromptComposer(
+        placeholder="Ask me anything…",
+        prompt_label="Copilot",
+        clear_on_send=True,
+    )
+    ```
+
+    Args:
+        value:
+            Initial text content of the composer.
+        placeholder:
+            Hint text shown when the composer is empty.
+        send_label:
+            Label or icon identifier for the send button.
+        emit_on_change:
+            When ``True`` a change event is emitted on every keystroke.
+        clear_on_send:
+            When ``True`` the input is cleared after the send action.
+        min_lines:
+            Minimum number of visible text lines.
+        max_lines:
+            Maximum number of visible text lines before scrolling.
+        show_attach:
+            When ``True`` an attachment button is shown.
+        prompt_label:
+            Label shown above or beside the composer identifying the
+            prompt context or AI role.
+    """
+
     control_type = "prompt_composer"
 
     def __init__(

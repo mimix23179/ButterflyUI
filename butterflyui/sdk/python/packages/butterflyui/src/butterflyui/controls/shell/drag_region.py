@@ -6,6 +6,43 @@ from .._shared import Component, merge_props
 __all__ = ["DragRegion"]
 
 class DragRegion(Component):
+    """
+    Transparent hit-test region that enables native window dragging on desktop.
+
+    The runtime registers its area as a window-drag surface. ``draggable``
+    enables the drag gesture. ``maximize_on_double_tap`` maximises the window
+    on double-tap/double-click. ``emit_move`` fires move events to Python
+    as the window is dragged. ``native_drag`` delegates to the OS drag
+    implementation. ``native_maximize_action`` uses the OS double-click
+    maximize behaviour.
+
+    ```python
+    import butterflyui as bui
+
+    bui.DragRegion(
+        bui.Text("Drag here"),
+        draggable=True,
+        maximize_on_double_tap=True,
+        events=["move"],
+    )
+    ```
+
+    Args:
+        draggable:
+            When ``True`` the region participates in window dragging.
+        maximize_on_double_tap:
+            When ``True`` double-tapping the region maximises the window.
+        emit_move:
+            When ``True`` window-move events are emitted to Python.
+        native_drag:
+            When ``True`` the OS native drag handler is used.
+        native_maximize_action:
+            When ``True`` the OS native maximize-on-double-click behaviour
+            is used.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "drag_region"
 
     def __init__(

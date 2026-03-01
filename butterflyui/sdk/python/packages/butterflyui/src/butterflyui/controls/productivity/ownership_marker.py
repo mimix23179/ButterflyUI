@@ -7,6 +7,38 @@ from .._shared import Component, merge_props
 __all__ = ["OwnershipMarker"]
 
 class OwnershipMarker(Component):
+    """
+    Inline ownership or authorship marker for collaborative document editing.
+
+    The runtime renders a set of user-attribution markers overlaid on a
+    document. ``document_id`` targets the associated document. ``items``
+    provides a list of ownership range specs (author, range, color, etc.).
+    ``enabled`` activates the feature. ``dense`` reduces marker size.
+
+    ```python
+    import butterflyui as bui
+
+    bui.OwnershipMarker(
+        document_id="doc-1",
+        items=[{"author": "alice", "start": 0, "end": 50}],
+        enabled=True,
+        events=["select"],
+    )
+    ```
+
+    Args:
+        document_id:
+            ID of the document these ownership markers are associated with.
+        items:
+            List of ownership range spec mappings.
+        enabled:
+            When ``True`` ownership markers are rendered.
+        dense:
+            When ``True`` markers are rendered in a compact size.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "ownership_marker"
 
     def __init__(

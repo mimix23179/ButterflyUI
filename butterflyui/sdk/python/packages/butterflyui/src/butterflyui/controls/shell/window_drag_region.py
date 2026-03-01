@@ -6,6 +6,41 @@ from .._shared import Component, merge_props
 __all__ = ["WindowDragRegion"]
 
 class WindowDragRegion(Component):
+    """
+    Native window-drag hit area typically placed in a custom title bar.
+
+    The runtime registers the region as a native window-drag surface on
+    supported desktop platforms. ``draggable`` enables the interaction.
+    ``maximize_on_double_tap`` triggers window maximization on double-click.
+    ``emit_move`` fires window-position events to Python as the window moves.
+    ``native_drag`` delegates to the platform's native drag API.
+    ``native_maximize_action`` uses the OS-level maximize-on-double-click
+    behaviour.
+
+    ```python
+    import butterflyui as bui
+
+    bui.WindowDragRegion(
+        bui.Text("My App"),
+        draggable=True,
+        maximize_on_double_tap=True,
+    )
+    ```
+
+    Args:
+        draggable:
+            When ``True`` the region participates in native window dragging.
+        maximize_on_double_tap:
+            When ``True`` double-clicking the region maximises the window.
+        emit_move:
+            When ``True`` window-position events are emitted to Python.
+        native_drag:
+            When ``True`` the platform's native drag API is used.
+        native_maximize_action:
+            When ``True`` the OS-level maximize-on-double-click behaviour
+            is used.
+    """
+
     control_type = "window_drag_region"
 
     def __init__(

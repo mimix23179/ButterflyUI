@@ -7,6 +7,30 @@ from .._shared import Component, merge_props
 __all__ = ["EditorTabStrip"]
 
 class EditorTabStrip(Component):
+    """
+    Horizontal strip of document tabs for a code or content editor.
+
+    The runtime renders a row of closeable, reorderable tab items. Each
+    entry in ``tabs`` is a mapping describing a single tab (id, label,
+    modified state, icon, etc.).
+
+    ```python
+    import butterflyui as bui
+
+    bui.EditorTabStrip(
+        tabs=[
+            {"id": "file1", "label": "main.py"},
+            {"id": "file2", "label": "utils.py", "modified": True},
+        ],
+    )
+    ```
+
+    Args:
+        tabs:
+            List of tab spec mappings. Each mapping should include at least
+            ``id`` and ``label``.
+    """
+
     control_type = "editor_tab_strip"
 
     def __init__(

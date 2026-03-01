@@ -7,6 +7,41 @@ from .._shared import Component, merge_props
 __all__ = ["SubmitScope"]
 
 class SubmitScope(Component):
+    """
+    Scope wrapper that intercepts Enter/Ctrl+Enter key presses and fires submit events.
+
+    The runtime wraps its children with a keyboard listener that fires a
+    submit action when the configured keys are pressed. ``enabled`` toggles
+    the listener. ``submit_on_enter`` triggers on Enter; ``submit_on_ctrl_enter``
+    triggers on Ctrl+Enter. ``debounce_ms`` throttles rapid submissions.
+    ``payload`` attaches a static data mapping to each submit event.
+
+    ```python
+    import butterflyui as bui
+
+    bui.SubmitScope(
+        bui.TextInput(placeholder="Search…"),
+        submit_on_enter=True,
+        debounce_ms=300,
+        events=["submit"],
+    )
+    ```
+
+    Args:
+        enabled:
+            When ``True`` the submit keyboard listener is active.
+        submit_on_enter:
+            When ``True`` pressing Enter triggers the submit action.
+        submit_on_ctrl_enter:
+            When ``True`` pressing Ctrl+Enter triggers the submit action.
+        debounce_ms:
+            Minimum milliseconds between consecutive submit events.
+        payload:
+            Static mapping attached to every submit event payload.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "submit_scope"
 
     def __init__(

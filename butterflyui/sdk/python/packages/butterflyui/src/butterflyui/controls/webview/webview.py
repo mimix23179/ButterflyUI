@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from ._shared import Component, merge_props
+from .._shared import Component, merge_props
 
 __all__ = ["WebView"]
 
@@ -16,6 +16,81 @@ def _normalize_webview_engine(value: str | None) -> str:
 
 
 class WebView(Component):
+    """
+    Embedded browser window powered by a platform WebView engine.
+
+    The runtime embeds a native webview (WebView2 on Windows, etc.) that
+    loads ``url`` or inline ``html``. ``engine`` / ``webview_engine`` selects
+    the rendering backend — currently normalised to ``"windows"`` on desktop.
+    ``base_url`` sets the origin for local HTML content. ``prevent_links``
+    intercepts navigation to matching URL patterns before they load.
+
+    Full browser-capability flags control JavaScript, DOM storage, cookies,
+    caching, incognito mode, media playback, file access, and popup
+    behaviour. ``init_timeout_ms`` caps the engine startup wait.
+
+    Programmatic methods (``reload``, ``go_back``, ``load_url``,
+    ``run_javascript``, *etc.*) are invoked via a session handle.
+
+    ```python
+    import butterflyui as bui
+
+    view = bui.WebView(
+        url="https://example.com",
+        javascript_enabled=True,
+        allow_popups=False,
+        init_timeout_ms=10000,
+    )
+    ```
+
+    Args:
+        url:
+            Initial URL to load in the webview.
+        html:
+            Inline HTML string to render, used instead of ``url``.
+        base_url:
+            Origin URL used when loading ``html`` from a string.
+        engine:
+            Webview rendering engine. Normalised to ``"windows"`` on desktop.
+        webview_engine:
+            Alias for ``engine``.
+        fallback_engine:
+            Fallback engine identifier if the primary engine fails.
+        prevent_links:
+            List of URL patterns whose navigation is intercepted and blocked.
+        request_headers:
+            Custom HTTP headers sent with every request.
+        user_agent:
+            Custom User-Agent string override.
+        javascript_enabled:
+            When ``True`` (default) JavaScript execution is enabled.
+        dom_storage_enabled:
+            When ``True`` DOM/localStorage storage is enabled.
+        third_party_cookies_enabled:
+            When ``True`` third-party cookies are allowed.
+        cache_enabled:
+            When ``True`` the browser cache is active.
+        clear_cache_on_start:
+            When ``True`` the cache is cleared when the view initialises.
+        incognito:
+            When ``True`` no browsing data is persisted between sessions.
+        media_playback_requires_user_gesture:
+            When ``True`` media autoplay requires a user interaction first.
+        allows_inline_media_playback:
+            When ``True`` media can play inline without entering fullscreen.
+        allow_file_access:
+            When ``True`` ``file://`` URLs can be loaded.
+        allow_universal_access_from_file_urls:
+            When ``True`` file-origin pages can access cross-origin content.
+        allow_popups:
+            When ``True`` ``window.open()`` calls are permitted.
+        open_external_links:
+            When ``True`` external links open in the system browser.
+        init_timeout_ms:
+            Maximum milliseconds to wait for the WebView engine to
+            initialise. Defaults to ``15000``.
+    """
+
     control_type = "webview"
 
     def __init__(

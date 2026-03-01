@@ -43,6 +43,11 @@ from .segment_bar import SegmentBar
 from .segmented_switch import SegmentedSwitch
 from .span_slider import SpanSlider
 
+# Compatibility aliases expected by butterflyui.controls.__init__
+FilledButton = ElevatedButton
+OutlinedButton = Button
+TextButton = Button
+
 __all__ = [
     "Button",
     "AsyncActionButton",
@@ -77,6 +82,9 @@ __all__ = [
     "TagChip",
     "CountStepper",
     "ElevatedButton",
+    "FilledButton",
+    "OutlinedButton",
+    "TextButton",
     "IconButton",
     "IconPicker",
     "KeybindRecorder",

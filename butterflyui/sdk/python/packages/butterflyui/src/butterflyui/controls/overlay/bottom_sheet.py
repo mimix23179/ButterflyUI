@@ -6,23 +6,40 @@ from .._shared import Component, merge_props
 __all__ = ["BottomSheet"]
 
 class BottomSheet(Component):
-    """Bottom sheet that slides up from the bottom of the screen.
+    """
+    Modal bottom sheet that slides up from the bottom edge of the screen.
 
-    Renders a persistent or modal panel anchored to the bottom edge of the
-    Flutter widget tree, used for supplementary content or quick actions.
+    The runtime renders a Flutter ``BottomSheet``-style overlay. ``open``
+    shows or hides the sheet. ``dismissible`` allows the user to close it
+    by tapping the scrim. ``scrim_color`` tints the background overlay.
+    ``height`` fixes the sheet height; ``max_height`` caps it when content
+    is dynamic.
 
-    Example:
-        ```python
-        sheet = BottomSheet(open=True, dismissible=True, height=300)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.BottomSheet(
+        bui.Text("Sheet content"),
+        open=True,
+        height=300,
+        dismissible=True,
+        events=["close"],
+    )
+    ```
 
     Args:
-        open: Whether the bottom sheet is visible.
-        dismissible: Whether tapping the scrim closes the sheet.
-        scrim_color: Color of the background scrim overlay.
-        height: Initial height of the sheet in logical pixels.
-        max_height: Maximum height the sheet may expand to.
-        events: Flutter client events to subscribe to.
+        open:
+            When ``True`` the bottom sheet is visible.
+        dismissible:
+            When ``True`` tapping the scrim closes the sheet.
+        scrim_color:
+            Color of the background scrim overlay.
+        height:
+            Fixed sheet height in logical pixels.
+        max_height:
+            Maximum sheet height when content determines its size.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "bottom_sheet"

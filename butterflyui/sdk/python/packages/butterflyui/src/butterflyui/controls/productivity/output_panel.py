@@ -7,6 +7,31 @@ from .._shared import Component, merge_props
 __all__ = ["OutputPanel"]
 
 class OutputPanel(Component):
+    """
+    Multi-channel output log panel similar to a terminal or IDE output view.
+
+    The runtime renders a scrollable, read-only text log with support for
+    multiple named channels. ``channels`` provides an initial mapping of
+    channel name to content. ``active_channel`` sets the currently visible
+    channel. Use ``append`` to add lines, ``clear_channel`` to empty a
+    channel, and ``set_channel`` to switch the active channel.
+
+    ```python
+    import butterflyui as bui
+
+    panel = bui.OutputPanel(
+        channels={"stdout": "", "stderr": ""},
+        active_channel="stdout",
+    )
+    ```
+
+    Args:
+        channels:
+            Mapping of channel name to initial text content.
+        active_channel:
+            Name of the channel displayed on first render.
+    """
+
     control_type = "output_panel"
 
     def __init__(

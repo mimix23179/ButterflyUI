@@ -6,22 +6,38 @@ from .._shared import Component, merge_props
 __all__ = ["Toast"]
 
 class Toast(Component):
-    """Transient notification toast displayed briefly to the user.
+    """
+    Ephemeral notification toast that appears briefly and auto-dismisses.
 
-    Renders a short-lived floating message within the Flutter widget tree with
-    optional action and configurable visual style.
+    The runtime renders a transient message overlay. ``message`` sets the
+    notification text. ``open`` controls visibility. ``duration_ms`` sets
+    the auto-dismiss delay. ``action_label`` adds an inline action button.
+    ``variant`` applies a semantic color scheme.
 
-    Example:
-        ```python
-        t = Toast(message="File saved", open=True, duration_ms=2500)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Toast(
+        message="Changes saved!",
+        open=True,
+        duration_ms=3000,
+        variant="success",
+    )
+    ```
 
     Args:
-        message: Text content of the toast notification.
-        open: Whether the toast is currently visible.
-        duration_ms: Time in milliseconds before auto-dismissal.
-        action_label: Label for the optional inline action button.
-        variant: Visual style variant (e.g., info, success, warning, error).
+        message:
+            The notification message text.
+        open:
+            When ``True`` the toast is visible.
+        duration_ms:
+            Milliseconds before the toast auto-dismisses. Use ``0`` to
+            disable auto-dismiss.
+        action_label:
+            Label for an optional inline action button.
+        variant:
+            Semantic color variant. Values: ``"info"``, ``"success"``,
+            ``"warning"``, ``"error"``.
     """
 
     control_type = "toast"

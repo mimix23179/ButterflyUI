@@ -7,23 +7,40 @@ from .slide_panel import SlidePanel
 __all__ = ["SidePanel"]
 
 class SidePanel(SlidePanel):
-    """Persistent side panel that slides in from a screen edge.
+    """
+    Persistent or overlay side panel that slides from a screen edge.
 
-    Extends SlidePanel to provide a named side-panel variant within the Flutter
-    widget tree using the same edge-anchored slide behaviour.
+    A named specialization of ``SlidePanel`` with side-panel semantics.
+    Inherits all ``SlidePanel`` properties. Commonly used for settings
+    drawers, detail panels, and secondary navigation layers.
 
-    Example:
-        ```python
-        panel = SidePanel(open=True, side="left", size=320)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.SidePanel(
+        bui.Text("Side panel content"),
+        side="right",
+        size=320,
+        open=False,
+        events=["open", "close"],
+    )
+    ```
 
     Args:
-        open: Whether the panel is currently visible.
-        side: Edge from which the panel slides in (left, right, top, bottom).
-        size: Width or height of the panel in logical pixels.
-        dismissible: Whether tapping the scrim closes the panel.
-        scrim_color: Color of the background scrim overlay.
-        events: Flutter client events to subscribe to.
+        open:
+            When ``True`` the panel is visible.
+        side:
+            Edge from which the panel slides. Values: ``"left"``,
+            ``"right"``, ``"top"``, ``"bottom"``.
+        size:
+            Panel width (left/right) or height (top/bottom) in logical
+            pixels.
+        dismissible:
+            When ``True`` tapping the scrim closes the panel.
+        scrim_color:
+            Color of the background scrim overlay.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "side_panel"

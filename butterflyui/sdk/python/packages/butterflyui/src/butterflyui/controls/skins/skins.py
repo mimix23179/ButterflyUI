@@ -21,6 +21,25 @@ __all__ = [
 
 @dataclass
 class SkinsTokens:
+    """
+    Flat design-token store for a Skins skin, used by ``SkinsScope``.
+
+    ``data`` holds raw key-value pairs describing colors, radii, spacing,
+    and effects. Use ``from_dict`` to create from an existing mapping
+    and ``to_json`` to serialise back to a plain dict.
+
+    See ``SkinsPresets`` for ready-made named skin presets.
+
+    ```python
+    import butterflyui as bui
+
+    tokens = bui.SkinsTokens.from_dict({
+        "background": "#1A1A2E",
+        "primary": "#7B68EE",
+        "radius": {"sm": 8, "md": 16},
+    })
+    ```
+    """
     data: dict[str, Any] = field(default_factory=dict)
 
     @staticmethod
@@ -32,6 +51,28 @@ class SkinsTokens:
 
 
 class SkinsPresets:
+    """
+    Factory providing named built-in skin token presets.
+
+    Each static method returns a ``SkinsTokens`` instance ready to pass
+    to ``SkinsScope(tokens=...)``. Available presets:
+
+    * ``default()`` — light neutral palette with indigo primary.
+    * ``shadow()`` — deep navy dark theme with medium-blue accent.
+    * ``fire()`` — dark red/orange high-contrast fire theme.
+    * ``earth()`` — warm earthtone dark theme.
+    * ``gaming()`` — dark neon green/cyan gaming aesthetic.
+
+    ```python
+    import butterflyui as bui
+
+    bui.SkinsScope(
+        bui.Skins(bui.Text("Gaming!"), module="card"),
+        tokens=bui.SkinsPresets.gaming(),
+        brightness="dark",
+    )
+    ```
+    """
     @staticmethod
     def default() -> SkinsTokens:
         return SkinsTokens(
@@ -124,6 +165,35 @@ class SkinsPresets:
 
 
 class SkinsScope(Component):
+    """
+    Skin-scope wrapper that injects a named or custom skin token set.
+
+    The runtime resolves the active ``SkinsTokens`` from either the named
+    ``skin`` preset or a custom ``tokens`` mapping, then provides them to
+    all descendant ``Skins`` controls via an ``InheritedWidget``.
+    ``brightness`` overrides the light/dark mode of the resolved skin.
+
+    ```python
+    import butterflyui as bui
+
+    bui.SkinsScope(
+        bui.Skins(bui.Text("Styled card"), module="card"),
+        skin="shadow",
+        brightness="dark",
+    )
+    ```
+
+    Args:
+        skin:
+            Named built-in skin preset. Values: ``"default"``,
+            ``"shadow"``, ``"fire"``, ``"earth"``, ``"gaming"``.
+        tokens:
+            Custom ``SkinsTokens`` instance or raw mapping that overrides
+            the preset.
+        brightness:
+            Color mode override. Values: ``"light"``, ``"dark"``.
+    """
+
     control_type = "skins_scope"
 
     def __init__(
@@ -154,6 +224,49 @@ class SkinsScope(Component):
 
 
 class Skins(Component):
+    """
+    Skin-aware compositor that renders a named layout or decoration module.
+
+    The Flutter runtime resolves ambient ``SkinsScope`` tokens and dispatches
+    to the module named by ``module``. Layout modules: ``"row"``,
+    ``"column"``, ``"stack"``, ``"wrap"``, ``"align"`` / ``"alignment"``,
+    ``"container"``, ``"card"``, ``"button"`` / ``"btn"``, ``"badge"``,
+    ``"border"``, ``"page"``. Decoration modules: ``"gradient"``,
+    ``"decorated"``, ``"clip"``. Effects and motion modules are also
+    available.
+
+    Convenience factories ``skins_row``, ``skins_column``,
+    ``skins_container``, ``skins_card``, and ``skins_transition`` pre-set
+    the ``module`` prop.
+
+    ``state`` and ``states`` enable state-machine-driven styling.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Skins(
+        bui.Text("Card content"),
+        module="card",
+        events=["tap"],
+    )
+    # or using the convenience factory:
+    bui.skins_card(bui.Text("Card content"), events=["tap"])
+    ```
+
+    Args:
+        module:
+            Name of the Flutter module to render. Values include
+            ``"row"``, ``"column"``, ``"stack"``, ``"wrap"``,
+            ``"container"``, ``"card"``, ``"button"``, ``"gradient"``,
+            ``"clip"``, ``"page"``, and more.
+        state:
+            Active state name used for state-driven styling.
+        states:
+            List of all recognised state names for this control.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "skins"
 
     def __init__(

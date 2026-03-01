@@ -6,23 +6,42 @@ from .._shared import Component, merge_props
 __all__ = ["SlidePanel"]
 
 class SlidePanel(Component):
-    """Slide-in panel anchored to a screen edge.
+    """
+    Animated panel that slides in from any screen edge as an overlay.
 
-    Renders a panel that animates into view from a specified edge of the Flutter
-    widget tree, with optional scrim and dismiss support.
+    The runtime renders a panel that animates in from the edge specified by
+    ``side``. ``open`` controls visibility. ``size`` fixes the panel width
+    (left/right) or height (top/bottom). ``dismissible`` allows closing
+    by tapping the scrim. ``scrim_color`` tints the dimmed background.
 
-    Example:
-        ```python
-        panel = SlidePanel(open=True, side="right", size=360)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.SlidePanel(
+        bui.Text("Panel content"),
+        side="right",
+        size=320,
+        open=False,
+        dismissible=True,
+        events=["open", "close"],
+    )
+    ```
 
     Args:
-        open: Whether the panel is currently visible.
-        side: Edge from which the panel slides in (left, right, top, bottom).
-        size: Width or height of the panel in logical pixels.
-        dismissible: Whether tapping the scrim closes the panel.
-        scrim_color: Color of the background scrim overlay.
-        events: Flutter client events to subscribe to.
+        open:
+            When ``True`` the panel is visible.
+        side:
+            Edge from which the panel slides. Values: ``"left"``,
+            ``"right"``, ``"top"``, ``"bottom"``.
+        size:
+            Panel width (left/right) or height (top/bottom) in logical
+            pixels.
+        dismissible:
+            When ``True`` tapping the scrim closes the panel.
+        scrim_color:
+            Color of the background scrim overlay.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "slide_panel"

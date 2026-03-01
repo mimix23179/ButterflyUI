@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from ._eventful_effect import _EventfulEffect
 
 __all__ = ["NeonEdge"]
 
-class NeonEdge(_EventfulEffect):
+class NeonEdge(Component):
     """Neon-glow border effect rendered as a ``BoxDecoration`` with a
     coloured ``Border.all`` stroke and a matching ``BoxShadow``.
 

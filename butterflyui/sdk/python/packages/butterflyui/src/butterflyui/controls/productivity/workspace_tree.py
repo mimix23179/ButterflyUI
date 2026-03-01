@@ -7,6 +7,30 @@ from .._shared import Component, merge_props
 __all__ = ["WorkspaceTree"]
 
 class WorkspaceTree(Component):
+    """
+    Tree view of a workspace file structure for an IDE-style file explorer.
+
+    The runtime renders a collapsible tree of workspace nodes. ``nodes``
+    provides the root-level node list. Each node spec may include id,
+    label, icon, children, and metadata fields.
+
+    ```python
+    import butterflyui as bui
+
+    bui.WorkspaceTree(
+        nodes=[
+            {"id": "src", "label": "src", "children": [
+                {"id": "main.py", "label": "main.py"},
+            ]},
+        ],
+    )
+    ```
+
+    Args:
+        nodes:
+            List of root-level tree node spec mappings.
+    """
+
     control_type = "workspace_tree"
 
     def __init__(

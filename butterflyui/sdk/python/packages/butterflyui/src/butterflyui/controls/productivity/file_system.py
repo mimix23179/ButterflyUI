@@ -7,6 +7,40 @@ from .._shared import Component, merge_props
 __all__ = ["FileSystem"]
 
 class FileSystem(Component):
+    """
+    Interactive file-system browser backed by a virtual or real directory tree.
+
+    The runtime renders a tree-style file browser. ``root`` sets the root
+    directory path. ``nodes`` provides a pre-built virtual tree. ``selected_path``
+    marks the initially selected path. ``show_hidden`` toggles hidden files.
+    ``readonly`` disables file-system mutations.
+
+    ```python
+    import butterflyui as bui
+
+    bui.FileSystem(
+        root="/home/user/project",
+        show_hidden=False,
+        readonly=True,
+        events=["select", "open"],
+    )
+    ```
+
+    Args:
+        root:
+            Absolute root directory path displayed at the top of the tree.
+        nodes:
+            Pre-built virtual tree node list (id, label, children, etc.).
+        selected_path:
+            Initially selected file or directory path.
+        show_hidden:
+            When ``True`` hidden files and directories are shown.
+        readonly:
+            When ``True`` file-system write operations are disabled.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "file_system"
 
     def __init__(

@@ -7,6 +7,33 @@ from .route_view import RouteView
 __all__ = ["Route"]
 
 class Route(RouteView):
+    """
+    Route slot with optional event emission for navigation lifecycle hooks.
+
+    A specialization of ``RouteView`` that adds ``events`` support so
+    Python can receive route-activation and deactivation notices.
+    Inherits ``route_id`` and ``title`` from ``RouteView``.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Route(
+        bui.Text("Dashboard"),
+        route_id="dashboard",
+        title="Dashboard",
+        events=["activate", "deactivate"],
+    )
+    ```
+
+    Args:
+        route_id:
+            Unique identifier for this route, matched by the parent router.
+        title:
+            Page title string used for navigation history entries.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "route"
 
     def __init__(

@@ -6,21 +6,32 @@ from .._shared import Component, merge_props
 __all__ = ["Tooltip"]
 
 class Tooltip(Component):
-    """Tooltip that reveals a short descriptive message on hover.
+    """
+    Hover tooltip that displays a short message near its child widget.
 
-    Wraps a child widget within the Flutter widget tree and shows a floating
-    label after a configurable delay.
+    The runtime wraps Flutter's ``Tooltip`` widget. ``message`` is the
+    text shown in the tooltip bubble. ``prefer_below`` positions the
+    tooltip below the child when ``True`` (default) or above when ``False``.
+    ``wait_ms`` sets the hover delay before the tooltip appears.
 
-    Example:
-        ```python
-        tip = Tooltip(icon_widget, message="Delete item", wait_ms=500)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Tooltip(
+        bui.IconButton(icon="info"),
+        message="Show information",
+        prefer_below=True,
+        wait_ms=500,
+    )
+    ```
 
     Args:
-        child: Widget that triggers the tooltip on hover.
-        message: Text displayed in the tooltip balloon.
-        prefer_below: Whether to prefer placing the tooltip below the child.
-        wait_ms: Hover duration in milliseconds before the tooltip appears.
+        message:
+            Text displayed inside the tooltip bubble.
+        prefer_below:
+            When ``True`` the tooltip prefers to appear below the child.
+        wait_ms:
+            Hover delay in milliseconds before the tooltip is shown.
     """
 
     control_type = "tooltip"

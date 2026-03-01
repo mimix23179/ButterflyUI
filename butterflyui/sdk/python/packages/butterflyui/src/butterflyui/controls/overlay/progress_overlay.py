@@ -6,23 +6,42 @@ from .._shared import Component, merge_props
 __all__ = ["ProgressOverlay"]
 
 class ProgressOverlay(Component):
-    """Full-screen progress overlay displayed during long-running operations.
+    """
+    Semi-transparent progress overlay blocking interaction during an operation.
 
-    Renders a blocking overlay with an optional progress indicator and cancel
-    affordance within the Flutter widget tree.
+    The runtime renders a blocking overlay on top of its child. ``open``
+    shows or hides the overlay. ``progress`` drives a determinate progress
+    bar (0.0--1.0); setting ``indeterminate`` shows a spinner instead.
+    ``label`` displays a status message. ``cancellable`` adds a cancel
+    button that emits a cancellation event.
 
-    Example:
-        ```python
-        overlay = ProgressOverlay(open=True, indeterminate=True, label="Loading\u2026")
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.ProgressOverlay(
+        bui.Text("Main content"),
+        open=True,
+        indeterminate=True,
+        label="Loading…",
+        cancellable=False,
+        events=["cancel"],
+    )
+    ```
 
     Args:
-        open: Whether the overlay is currently visible.
-        progress: Current progress value between 0.0 and 1.0.
-        indeterminate: Whether to show an indeterminate spinner.
-        label: Text label displayed beneath the progress indicator.
-        cancellable: Whether a cancel button is shown to the user.
-        events: Flutter client events to subscribe to.
+        open:
+            When ``True`` the progress overlay is visible and blocks input.
+        progress:
+            Determinate progress value in the range 0.0--1.0.
+        indeterminate:
+            When ``True`` an indeterminate spinner is shown instead of a
+            progress bar.
+        label:
+            Status message displayed below the spinner or progress bar.
+        cancellable:
+            When ``True`` a cancel button is shown that emits a cancel event.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "progress_overlay"

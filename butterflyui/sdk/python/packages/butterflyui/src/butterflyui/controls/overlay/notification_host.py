@@ -7,23 +7,42 @@ from .toast_host import ToastHost
 __all__ = ["NotificationHost"]
 
 class NotificationHost(ToastHost):
-    """Host layer that manages and displays queued notification toasts.
+    """
+    Overlay host that queues and displays dismissible notification banners.
 
-    Extends ToastHost to provide a notification-specific overlay within the
-    Flutter widget tree, with positional stacking and event support.
+    Extends ``ToastHost`` with richer notification styling and event
+    emission. ``items`` populates the initial notification list.
+    ``position`` anchors the stack to a screen corner. ``max_items`` caps
+    the visible count. ``latest_on_top`` controls stack order.
+    ``dismissible`` adds a close button on each notification.
 
-    Example:
-        ```python
-        host = NotificationHost(position="top_right", max_items=5)
-        ```
+    ```python
+    import butterflyui as bui
+
+    host = bui.NotificationHost(
+        position="top_right",
+        max_items=5,
+        dismissible=True,
+        events=["dismiss"],
+    )
+    ```
 
     Args:
-        items: List of notification item descriptors in the queue.
-        position: Screen corner or edge where notifications appear.
-        max_items: Maximum notifications visible at once.
-        latest_on_top: Whether newer notifications stack above older ones.
-        dismissible: Whether individual notifications can be swiped away.
-        events: Flutter client events to subscribe to.
+        items:
+            Initial list of notification spec mappings.
+        position:
+            Screen corner where the notification stack is anchored.
+            Values: ``"top_left"``, ``"top_right"``, ``"bottom_left"``,
+            ``"bottom_right"``.
+        max_items:
+            Maximum number of notifications shown simultaneously.
+        latest_on_top:
+            When ``True`` the most recent notification appears at the top
+            of the stack.
+        dismissible:
+            When ``True`` each notification shows a close button.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "notification_host"

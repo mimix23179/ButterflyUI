@@ -6,22 +6,39 @@ from .._shared import Component, merge_props
 __all__ = ["ToastHost"]
 
 class ToastHost(Component):
-    """Host layer that manages and renders a queue of toast notifications.
+    """
+    Container that manages and displays a stack of toast notifications.
 
-    Renders a positioned overlay within the Flutter widget tree that displays
-    multiple stacked toast items with configurable ordering and limits.
+    The runtime maintains a queue of toast items, rendering them at a
+    specified screen corner. ``position`` anchors the stack.
+    ``max_items`` limits simultaneously displayed toasts. ``latest_on_top``
+    controls stack order. ``dismissible`` adds a close button to each toast.
+    Use ``push`` to add toasts, ``dismiss`` to remove one by ID, and
+    ``clear`` to remove all.
 
-    Example:
-        ```python
-        host = ToastHost(position="bottom_center", max_items=3, latest_on_top=True)
-        ```
+    ```python
+    import butterflyui as bui
+
+    host = bui.ToastHost(
+        position="bottom_right",
+        max_items=3,
+        dismissible=True,
+    )
+    ```
 
     Args:
-        items: List of toast item descriptors in the display queue.
-        position: Screen corner or edge where toasts are stacked.
-        max_items: Maximum number of toast items visible at once.
-        latest_on_top: Whether newer toasts appear above older ones.
-        dismissible: Whether individual toasts can be swiped away.
+        items:
+            Initial list of toast spec mappings.
+        position:
+            Screen corner where the toast stack is anchored. Values:
+            ``"top_left"``, ``"top_right"``, ``"bottom_left"``,
+            ``"bottom_right"``.
+        max_items:
+            Maximum number of toasts shown simultaneously.
+        latest_on_top:
+            When ``True`` the newest toast appears at the top of the stack.
+        dismissible:
+            When ``True`` each toast shows a close button.
     """
 
     control_type = "toast_host"

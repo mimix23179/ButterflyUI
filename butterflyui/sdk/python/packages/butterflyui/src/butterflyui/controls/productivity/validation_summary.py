@@ -7,6 +7,29 @@ from .._shared import Component, merge_props
 __all__ = ["ValidationSummary"]
 
 class ValidationSummary(Component):
+    """
+    Summary block that lists form validation errors as a bulleted group.
+
+    The runtime renders an error-summary banner above or below a form.
+    ``title`` sets the heading. ``errors`` is a flat list of error strings
+    to display.
+
+    ```python
+    import butterflyui as bui
+
+    bui.ValidationSummary(
+        title="Please fix the following:",
+        errors=["Name is required.", "Email is invalid."],
+    )
+    ```
+
+    Args:
+        title:
+            Heading displayed above the error list.
+        errors:
+            List of validation error message strings.
+    """
+
     control_type = "validation_summary"
 
     def __init__(

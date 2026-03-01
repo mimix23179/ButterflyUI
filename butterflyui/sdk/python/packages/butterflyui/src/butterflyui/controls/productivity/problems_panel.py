@@ -7,6 +7,30 @@ from .._shared import Component, merge_props
 __all__ = ["ProblemsPanel"]
 
 class ProblemsPanel(Component):
+    """
+    Read-only panel displaying a list of compiler or linter diagnostics.
+
+    The runtime renders a scrollable list of problem items. Each entry in
+    ``problems`` is a mapping describing a diagnostic (severity, message,
+    file, line, column, etc.).
+
+    ```python
+    import butterflyui as bui
+
+    bui.ProblemsPanel(
+        problems=[
+            {"severity": "error", "message": "Undefined variable x",
+             "file": "main.py", "line": 12},
+        ],
+    )
+    ```
+
+    Args:
+        problems:
+            List of diagnostic spec mappings. Each entry should include
+            at least ``severity`` and ``message``.
+    """
+
     control_type = "problems_panel"
 
     def __init__(

@@ -6,22 +6,38 @@ from .._shared import Component, merge_props
 __all__ = ["Overlay"]
 
 class Overlay(Component):
-    """Generic full-screen overlay container for arbitrary content.
+    """
+    General-purpose overlay that floats child content above the widget tree.
 
-    Renders a layer that covers the Flutter widget tree with optional scrim
-    and alignment control for positioned overlay content.
+    The runtime renders a layer on top of the widget tree, optionally
+    covering the background with a scrim. ``open`` controls visibility.
+    ``dismissible`` closes the overlay when the scrim is tapped.
+    ``alignment`` positions the floating content within the overlay area.
+    ``scrim_color`` tints the background.
 
-    Example:
-        ```python
-        overlay = Overlay(open=True, alignment="center", scrim_color="#80000000")
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Overlay(
+        bui.Text("Floating content"),
+        open=True,
+        alignment="center",
+        scrim_color="#80000000",
+        events=["close"],
+    )
+    ```
 
     Args:
-        open: Whether the overlay is currently visible.
-        dismissible: Whether tapping the scrim closes the overlay.
-        alignment: Alignment of content within the overlay surface.
-        scrim_color: Color of the translucent background scrim.
-        events: Flutter client events to subscribe to.
+        open:
+            When ``True`` the overlay is visible.
+        dismissible:
+            When ``True`` tapping the scrim closes the overlay.
+        alignment:
+            Alignment of the floating content within the overlay area.
+        scrim_color:
+            Color of the background scrim overlay.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "overlay"

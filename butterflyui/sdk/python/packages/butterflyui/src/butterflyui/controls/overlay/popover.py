@@ -6,26 +6,47 @@ from .._shared import Component, merge_props
 __all__ = ["Popover"]
 
 class Popover(Component):
-    """Anchored pop-over panel displayed relative to a target widget.
+    """
+    Anchored floating popover panel positioned relative to a target widget.
 
-    Renders a floating card positioned near an anchor widget within the Flutter
-    widget tree, with configurable placement and transition options.
+    The runtime renders a floating panel tied to an ``anchor`` widget.
+    ``content`` is the popover body. ``position`` sets the preferred side
+    relative to the anchor (``"top"``, ``"bottom"``, ``"left"``,
+    ``"right"``). ``offset`` nudges the popover from the anchor edge.
+    ``dismissible`` closes on outside tap. ``transition_type`` and
+    ``duration_ms`` configure animation.
 
-    Example:
-        ```python
-        pop = Popover(anchor=button, content=detail_card, position="bottom_start")
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Popover(
+        anchor=bui.Button(label="Help"),
+        content=bui.Text("Tooltip-style help text."),
+        open=False,
+        position="bottom",
+    )
+    ```
 
     Args:
-        anchor: Widget that the popover is anchored to.
-        content: Widget displayed inside the popover panel.
-        open: Whether the popover is currently visible.
-        position: Preferred placement relative to the anchor.
-        offset: Pixel offset from the anchor in logical pixels.
-        dismissible: Whether clicking outside the popover closes it.
-        transition: Named transition to use when showing or hiding.
-        transition_type: Category of transition animation to apply.
-        duration_ms: Transition duration in milliseconds.
+        anchor:
+            The widget that the popover is visually attached to.
+        content:
+            The widget rendered inside the popover panel.
+        open:
+            When ``True`` the popover is visible.
+        position:
+            Preferred placement relative to the anchor. Values:
+            ``"top"``, ``"bottom"``, ``"left"``, ``"right"``.
+        offset:
+            Additional displacement from the anchor edge in logical pixels.
+        dismissible:
+            When ``True`` tapping outside the popover closes it.
+        transition:
+            Explicit transition spec mapping.
+        transition_type:
+            Named animation type. Values: ``"fade"``, ``"scale"``.
+        duration_ms:
+            Duration of the show/hide animation in milliseconds.
     """
 
     control_type = "popover"

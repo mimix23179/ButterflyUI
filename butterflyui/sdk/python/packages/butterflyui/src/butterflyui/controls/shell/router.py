@@ -6,6 +6,47 @@ from .._shared import Component, merge_props
 __all__ = ["Router"]
 
 class Router(Component):
+    """
+    Client-side router that mounts one route at a time from its children.
+
+    The runtime activates the matching ``RouteView``, ``RouteHost``, or
+    ``Route`` child and unmounts the rest (unless ``keep_alive`` is
+    ``True``). ``routes`` provides a declarative route-config list instead
+    of child widgets. ``active`` selects a route by ID string; ``index``
+    selects by zero-based position. ``transition`` and ``source_rect``
+    animate route changes. ``lightweight_transitions`` reduces animation
+    weight for low-power devices.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Router(
+        bui.Route(bui.Text("Home"), route_id="home"),
+        bui.Route(bui.Text("Settings"), route_id="settings"),
+        active="home",
+        transition={"type": "fade"},
+    )
+    ```
+
+    Args:
+        routes:
+            Declarative list of route spec mappings (alternative to child
+            ``Route`` widgets).
+        active:
+            ID of the currently active route.
+        index:
+            Zero-based index of the active route when using positional
+            selection.
+        transition:
+            Transition spec mapping applied when switching routes.
+        source_rect:
+            Source rectangle for hero-style origin transitions.
+        keep_alive:
+            When ``True`` inactive routes remain mounted in the widget tree.
+        lightweight_transitions:
+            When ``True`` simplified transitions are used for performance.
+    """
+
     control_type = "router"
 
     def __init__(

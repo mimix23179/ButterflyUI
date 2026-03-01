@@ -7,22 +7,36 @@ from .toast import Toast
 __all__ = ["Snackbar"]
 
 class Snackbar(Toast):
-    """Material-style snackbar notification built on Toast.
+    """
+    Material-style snackbar notification that appears at the bottom of the screen.
 
-    Extends Toast to render a brief bottom-anchored message within the Flutter
-    widget tree following Material Design conventions.
+    A specialization of ``Toast`` with snackbar semantics and positioning.
+    Inherits ``message``, ``open``, ``duration_ms``, ``action_label``, and
+    ``variant`` from ``Toast``.
 
-    Example:
-        ```python
-        bar = Snackbar(message="Saved!", open=True, duration_ms=3000, action_label="Undo")
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Snackbar(
+        message="File saved.",
+        open=True,
+        duration_ms=3000,
+        action_label="Undo",
+    )
+    ```
 
     Args:
-        message: Text content of the snackbar.
-        open: Whether the snackbar is currently visible.
-        duration_ms: Time in milliseconds before auto-dismissal.
-        action_label: Label for the optional action button.
-        variant: Visual style variant (e.g., info, success, error).
+        message:
+            The notification message text.
+        open:
+            When ``True`` the snackbar is visible.
+        duration_ms:
+            Time in milliseconds before the snackbar auto-dismisses.
+        action_label:
+            Label for an optional inline action button.
+        variant:
+            Semantic color variant. Values: ``"info"``, ``"success"``,
+            ``"warning"``, ``"error"``.
     """
 
     control_type = "snackbar"

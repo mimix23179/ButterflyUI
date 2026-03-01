@@ -6,20 +6,33 @@ from .._shared import Component, merge_props
 __all__ = ["ContextMenu"]
 
 class ContextMenu(Component):
-    """Contextual pop-up menu triggered by pointer events.
+    """
+    Context menu that appears near a trigger widget on right-click or long-press.
 
-    Renders a floating menu anchored near a trigger widget, presenting a list
-    of actions within the Flutter widget tree.
+    The runtime wraps its child with an interactive region that opens a
+    floating menu populated by ``items``. ``trigger`` selects the activation
+    gesture; ``open_on_tap`` additionally opens the menu on a regular tap.
 
-    Example:
-        ```python
-        menu = ContextMenu(items=[{"label": "Cut"}, {"label": "Paste"}])
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.ContextMenu(
+        bui.Text("Right-click me"),
+        items=[
+            {"id": "copy", "label": "Copy"},
+            {"id": "paste", "label": "Paste"},
+        ],
+    )
+    ```
 
     Args:
-        items: List of menu item descriptors to display.
-        trigger: Child widget that activates the menu.
-        open_on_tap: Whether to open the menu on a tap instead of long-press.
+        items:
+            List of menu item spec mappings shown in the context menu.
+        trigger:
+            Gesture that opens the menu. Values: ``"secondary_tap"``,
+            ``"long_press"``.
+        open_on_tap:
+            When ``True`` a primary tap also opens the context menu.
     """
 
     control_type = "context_menu"

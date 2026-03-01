@@ -6,35 +6,69 @@ from .._shared import Component, merge_props
 __all__ = ["Splash"]
 
 class Splash(Component):
-    """Full-screen splash screen rendered during app startup or transitions.
+    """
+    Full-screen splash or loading overlay shown during app startup or transitions.
 
-    Covers the Flutter widget tree with a branded loading screen that can
-    display progress, animated effects, and optional skip controls.
+    The runtime renders a full-screen overlay with optional branding,
+    loading indicator, and progress tracking. ``active`` shows or hides the
+    splash. ``color`` sets the background fill. ``title``/``subtitle``/
+    ``message`` add text content. ``loading`` shows a spinner;
+    ``show_progress`` adds a determinate progress bar driven by ``progress``.
+    ``skip_enabled`` adds a skip button. ``auto_start`` starts the splash
+    immediately; ``hide_on_complete`` dismisses it when progress reaches 1.0.
+    ``effect`` selects a visual transition effect.
 
-    Example:
-        ```python
-        splash = Splash(active=True, auto_start=True, title="Welcome", show_progress=True)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Splash(
+        active=True,
+        title="My App",
+        loading=True,
+        auto_start=True,
+        hide_on_complete=True,
+        events=["skip", "complete"],
+    )
+    ```
 
     Args:
-        active: Whether the splash screen is currently displayed.
-        color: Primary accent colour of the splash screen.
-        duration_ms: Total display duration in milliseconds.
-        radius: Corner radius of the splash surface.
-        centered: Whether content is centred on the splash screen.
-        title: Heading text displayed on the splash screen.
-        subtitle: Subheading text displayed below the title.
-        message: Body message shown during loading.
-        loading: Whether an indeterminate loading indicator is shown.
-        progress: Current progress value between 0.0 and 1.0.
-        show_progress: Whether the progress indicator is visible.
-        skip_enabled: Whether a skip button is shown to the user.
-        auto_start: Whether the splash sequence begins automatically.
-        hide_on_complete: Whether the screen hides when progress reaches 1.0.
-        min_duration_ms: Minimum display time regardless of progress.
-        background: Background widget or colour descriptor.
-        effect: Named visual effect applied to the splash surface.
-        events: Flutter client events to subscribe to.
+        active:
+            When ``True`` the splash screen is visible.
+        color:
+            Background fill color of the splash screen.
+        duration_ms:
+            Minimum display duration in milliseconds before auto-hide.
+        radius:
+            Corner radius applied to the splash surface.
+        centered:
+            When ``True`` content is centered within the splash area.
+        title:
+            Primary branding or title text.
+        subtitle:
+            Secondary text shown below the title.
+        message:
+            Body or status message text.
+        loading:
+            When ``True`` a loading spinner is shown.
+        progress:
+            Determinate progress value (0.0--1.0) for the progress bar.
+        show_progress:
+            When ``True`` a determinate progress bar is rendered.
+        skip_enabled:
+            When ``True`` a skip button is shown to dismiss early.
+        auto_start:
+            When ``True`` the splash starts automatically on mount.
+        hide_on_complete:
+            When ``True`` the splash dismisses automatically when
+            ``progress`` reaches 1.0.
+        min_duration_ms:
+            Minimum time in milliseconds the splash stays visible.
+        background:
+            Background widget or image shown behind the splash content.
+        effect:
+            Named visual transition effect applied to the splash.
+        events:
+            List of event names the Flutter runtime should emit to Python.
     """
 
     control_type = "splash"

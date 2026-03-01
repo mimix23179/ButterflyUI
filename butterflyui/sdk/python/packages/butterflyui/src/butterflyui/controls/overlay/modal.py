@@ -6,25 +6,46 @@ from .._shared import Component, merge_props
 __all__ = ["Modal"]
 
 class Modal(Component):
-    """Modal dialog overlay that blocks interaction with background content.
+    """
+    Fullscreen or centered modal dialog with optional animated transition.
 
-    Renders a centred dialog within the Flutter widget tree with optional
-    transition and focus-trap behaviour.
+    The runtime renders a modal overlay above all other content. ``open``
+    controls visibility. ``dismissible`` allows closing by tapping outside
+    or pressing Escape. ``close_on_escape`` specifically enables Escape-key
+    dismissal. ``trap_focus`` locks keyboard focus inside the modal.
+    ``transition_type`` and ``duration_ms`` configure the open/close
+    animation; ``source_rect`` enables a shared-element expand transition.
 
-    Example:
-        ```python
-        dialog = Modal(open=True, dismissible=True, close_on_escape=True)
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Modal(
+        bui.Text("Dialog body"),
+        open=True,
+        dismissible=True,
+        transition_type="fade",
+        duration_ms=200,
+    )
+    ```
 
     Args:
-        open: Whether the modal is currently visible.
-        dismissible: Whether clicking the scrim dismisses the modal.
-        close_on_escape: Whether pressing Escape closes the modal.
-        trap_focus: Whether keyboard focus is confined inside the modal.
-        duration_ms: Transition duration in milliseconds.
-        transition: Named transition to use when opening or closing.
-        transition_type: Category of transition animation to apply.
-        source_rect: Origin rectangle used for shared-element transitions.
+        open:
+            When ``True`` the modal is visible.
+        dismissible:
+            When ``True`` tapping outside the modal closes it.
+        close_on_escape:
+            When ``True`` pressing Escape closes the modal.
+        trap_focus:
+            When ``True`` keyboard focus is confined inside the modal.
+        duration_ms:
+            Duration of the open/close animation in milliseconds.
+        transition:
+            Explicit transition spec mapping.
+        transition_type:
+            Named animation type for open/close. Values: ``"fade"``,
+            ``"slide"``, ``"scale"``, ``"expand"``.
+        source_rect:
+            Source rectangle for a shared-element expand transition.
     """
 
     control_type = "modal"

@@ -8,6 +8,47 @@ from .chat_thread import ChatThread
 __all__ = ["Chat"]
 
 class Chat(ChatThread):
+    """
+    Full-featured chat view combining a message thread with a message composer.
+
+    A specialization of ``ChatThread`` that bundles an integrated message
+    composer. Inherits all ``ChatThread`` properties for message display,
+    scrolling, and grouping.
+
+    ```python
+    import butterflyui as bui
+
+    bui.Chat(
+        messages=[],
+        auto_scroll=True,
+        input_placeholder="Type a message…",
+        events=["send"],
+    )
+    ```
+
+    Args:
+        messages:
+            Initial list of message spec mappings.
+        spacing:
+            Vertical gap in logical pixels between message items.
+        reverse:
+            When ``True`` new messages appear at the bottom of the list.
+        scrollable:
+            When ``False`` the thread does not scroll.
+        group_messages:
+            When ``True`` consecutive messages from the same author are
+            grouped visually.
+        show_timestamps:
+            When ``True`` timestamps are shown beneath each message.
+        auto_scroll:
+            When ``True`` the view automatically scrolls to the latest
+            message.
+        input_placeholder:
+            Placeholder text for the integrated message composer.
+        events:
+            List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "chat"
 
     def __init__(

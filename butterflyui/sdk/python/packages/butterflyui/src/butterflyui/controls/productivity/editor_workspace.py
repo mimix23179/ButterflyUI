@@ -7,6 +7,46 @@ from .._shared import Component, merge_props
 __all__ = ["EditorWorkspace"]
 
 class EditorWorkspace(Component):
+    """
+    IDE-style workspace combining a file explorer, editor area, and status bar.
+
+    The runtime renders an integrated workspace surface. ``documents`` lists
+    open editor documents; ``active_id`` sets the focused document.
+    ``workspace_nodes`` populates the file-explorer tree. ``problems``
+    feeds the problems panel. ``show_explorer``, ``show_problems``, and
+    ``show_status_bar`` toggle each UI region. ``status_text`` sets the
+    status-bar text.
+
+    ```python
+    import butterflyui as bui
+
+    bui.EditorWorkspace(
+        documents=[{"id": "main.py", "content": "print('hello')"}],
+        active_id="main.py",
+        show_explorer=True,
+        show_status_bar=True,
+    )
+    ```
+
+    Args:
+        documents:
+            List of open document specs (id, content, language, etc.).
+        active_id:
+            ID of the currently active/focused document.
+        workspace_nodes:
+            File tree node list for the explorer panel.
+        problems:
+            List of diagnostic problem specs shown in the problems panel.
+        show_explorer:
+            When ``True`` the file explorer panel is visible.
+        show_problems:
+            When ``True`` the problems panel is visible.
+        show_status_bar:
+            When ``True`` the status bar is visible.
+        status_text:
+            Text displayed in the status bar.
+    """
+
     control_type = "editor_workspace"
 
     def __init__(

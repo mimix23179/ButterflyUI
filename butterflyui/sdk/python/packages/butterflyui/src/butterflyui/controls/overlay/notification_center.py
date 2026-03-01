@@ -6,22 +6,37 @@ from .._shared import Component, merge_props
 __all__ = ["NotificationCenter"]
 
 class NotificationCenter(Component):
-    """Notification centre panel for reviewing accumulated notifications.
+    """
+    Scrollable panel listing persistent in-app notifications.
 
-    Renders a scrollable list of notification items within the Flutter widget
-    tree, with optional bulk-clear functionality.
+    The runtime renders a list of notification items that remain until
+    explicitly dismissed or cleared. ``items``/``notifications`` supplies
+    the notification specs. ``title`` labels the panel header.
+    ``show_clear_all`` adds a button to dismiss all items at once.
+    ``max_items`` limits the visible count.
 
-    Example:
-        ```python
-        center = NotificationCenter(title="Notifications", show_clear_all=True)
-        ```
+    ```python
+    import butterflyui as bui
+
+    nc = bui.NotificationCenter(
+        title="Notifications",
+        show_clear_all=True,
+        max_items=50,
+    )
+    ```
 
     Args:
-        items: List of notification item descriptors to display.
-        notifications: Alias for items; merged with items when both provided.
-        title: Heading displayed above the notification list.
-        show_clear_all: Whether to show a button clearing all notifications.
-        max_items: Maximum number of notifications to render.
+        items:
+            List of notification spec mappings. Alias for
+            ``notifications``.
+        notifications:
+            Alias for ``items``.
+        title:
+            Heading text displayed at the top of the panel.
+        show_clear_all:
+            When ``True`` a clear-all button is shown in the header.
+        max_items:
+            Maximum number of notification items to retain.
     """
 
     control_type = "notification_center"

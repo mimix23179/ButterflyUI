@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from ._eventful_effect import _EventfulEffect
 
 __all__ = ["Shimmer"]
 
-class Shimmer(_EventfulEffect):
+class Shimmer(Component):
     """Animated shimmer gradient that sweeps across the child using a
     ``ShaderMask``.
 

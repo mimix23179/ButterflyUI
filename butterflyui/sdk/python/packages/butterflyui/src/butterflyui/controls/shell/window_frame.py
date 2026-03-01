@@ -6,6 +6,70 @@ from .._shared import Component, merge_props
 __all__ = ["WindowFrame"]
 
 class WindowFrame(Component):
+    """
+    Custom window chrome frame with title bar, controls, and optional acrylic.
+
+    The runtime renders a full custom window frame around its child content.
+    ``title`` sets the window title bar text. ``show_close``,
+    ``show_maximize``, and ``show_minimize`` toggle the window control
+    buttons. ``draggable`` makes the title bar a drag region.
+    ``acrylic_effect`` enables a translucent background; ``acrylic_opacity``
+    controls its strength. ``custom_frame`` opts in to a fully custom
+    window border. ``use_native_title_bar`` reverts to the OS title bar.
+    ``native_window_actions`` delegates minimize/maximize/close to the OS.
+    ``show_default_controls`` toggles the built-in control button row.
+    ``emit_move_events`` fires window-position events; ``move_event_throttle_ms``
+    rate-limits them. ``title_leading``, ``title_content``, and
+    ``title_trailing`` slot arbitrary widgets into the title bar.
+
+    ```python
+    import butterflyui as bui
+
+    bui.WindowFrame(
+        bui.Text("App content"),
+        title="My App",
+        draggable=True,
+        show_close=True,
+        show_maximize=True,
+        show_minimize=True,
+    )
+    ```
+
+    Args:
+        title:
+            Text displayed in the window title bar.
+        show_close:
+            When ``True`` the close button is shown in the title bar.
+        show_maximize:
+            When ``True`` the maximize/restore button is shown.
+        show_minimize:
+            When ``True`` the minimize button is shown.
+        draggable:
+            When ``True`` the title bar acts as a window-drag region.
+        acrylic_effect:
+            When ``True`` an acrylic (translucent blur) background is applied.
+        acrylic_opacity:
+            Opacity of the acrylic background (0.0--1.0).
+        custom_frame:
+            When ``True`` a fully custom window border is rendered.
+        use_native_title_bar:
+            When ``True`` the OS native title bar is used instead.
+        native_window_actions:
+            When ``True`` window control actions are delegated to the OS.
+        show_default_controls:
+            When ``True`` the built-in window control button row is shown.
+        emit_move_events:
+            When ``True`` window-position events are emitted to Python.
+        move_event_throttle_ms:
+            Minimum milliseconds between consecutive move events.
+        title_leading:
+            Widget placed at the leading (left) end of the title bar.
+        title_content:
+            Widget replacing the default title text in the title bar.
+        title_trailing:
+            Widget placed at the trailing (right) end of the title bar.
+    """
+
     control_type = "window_frame"
 
     def __init__(

@@ -6,6 +6,43 @@ from .._shared import Component, merge_props
 __all__ = ["WindowControls"]
 
 class WindowControls(Component):
+    """
+    Custom window control buttons (minimize, maximize, close) for desktop apps.
+
+    The runtime renders a row of window-chrome buttons styled to match the
+    app theme. ``show_minimize``, ``show_maximize``, and ``show_close``
+    toggle individual buttons. ``spacing`` sets the gap between buttons.
+    ``button_width``/``button_height`` fix button dimensions. ``radius``
+    sets the corner radius of each button.
+
+    ```python
+    import butterflyui as bui
+
+    bui.WindowControls(
+        show_minimize=True,
+        show_maximize=True,
+        show_close=True,
+        spacing=8,
+    )
+    ```
+
+    Args:
+        show_minimize:
+            When ``True`` the minimize button is rendered.
+        show_maximize:
+            When ``True`` the maximize/restore button is rendered.
+        show_close:
+            When ``True`` the close button is rendered.
+        spacing:
+            Gap in logical pixels between adjacent control buttons.
+        button_width:
+            Fixed width in logical pixels for each control button.
+        button_height:
+            Fixed height in logical pixels for each control button.
+        radius:
+            Corner radius applied to each control button surface.
+    """
+
     control_type = "window_controls"
 
     def __init__(

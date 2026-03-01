@@ -2,11 +2,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
-from ._eventful_effect import _EventfulEffect
 
 __all__ = ["NoiseDisplacement"]
 
-class NoiseDisplacement(_EventfulEffect):
+class NoiseDisplacement(Component):
     """Noise-driven translation jitter that randomly displaces the child
     on one or both axes.
 

@@ -6,24 +6,40 @@ from .._shared import Component, merge_props
 __all__ = ["Portal"]
 
 class Portal(Component):
-    """Portal that teleports content to a different point in the widget tree.
+    """
+    Renders portal content into a separate overlay layer above the widget tree.
 
-    Renders a primary child widget at the call site while projecting portal
-    content to an overlay layer within the Flutter widget tree.
+    The runtime keeps the ``child`` widget in the normal layout tree but
+    projects the ``portal`` content to a top-level overlay layer. ``open``
+    controls whether the portal overlay is visible. ``dismissible`` closes
+    it on outside tap. ``passthrough`` allows pointer events to reach
+    widgets behind the portal. ``alignment`` and ``offset`` position the
+    portal content.
 
-    Example:
-        ```python
-        p = Portal(anchor_widget, tooltip_widget, open=True, alignment="top_center")
-        ```
+    ```python
+    import butterflyui as bui
+
+    bui.Portal(
+        child=bui.Button(label="Open"),
+        portal=bui.Text("Portal content"),
+        open=True,
+        alignment="center",
+    )
+    ```
 
     Args:
-        child: Widget rendered inline at the portal origin.
-        portal: Widget projected into the overlay layer.
-        open: Whether the portal content is currently visible.
-        dismissible: Whether tapping outside dismisses the portal content.
-        passthrough: Whether pointer events pass through portal content.
-        alignment: Alignment of the portal content in the overlay.
-        offset: Pixel offset of portal content from its aligned position.
+        portal:
+            The widget projected into the top-level overlay layer.
+        open:
+            When ``True`` the portal overlay is visible.
+        dismissible:
+            When ``True`` tapping outside closes the portal.
+        passthrough:
+            When ``True`` pointer events pass through to widgets below.
+        alignment:
+            Alignment of the portal content within the overlay area.
+        offset:
+            Offset of the portal content from the alignment position.
     """
 
     control_type = "portal"
