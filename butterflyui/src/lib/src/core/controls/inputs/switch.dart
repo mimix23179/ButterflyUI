@@ -3,13 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUISwitch extends StatefulWidget {
-  final String controlId;
-  final String? label;
-  final bool value;
-  final bool enabled;
-  final bool inline;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
   const ButterflyUISwitch({
     super.key,
     required this.controlId,
@@ -17,8 +10,23 @@ class ButterflyUISwitch extends StatefulWidget {
     required this.value,
     required this.enabled,
     required this.inline,
+    required this.mode,
+    required this.offLabel,
+    required this.onLabel,
+    required this.segments,
     required this.sendEvent,
   });
+
+  final String controlId;
+  final String? label;
+  final bool value;
+  final bool enabled;
+  final bool inline;
+  final String mode;
+  final String? offLabel;
+  final String? onLabel;
+  final List<String> segments;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
   State<ButterflyUISwitch> createState() => _ButterflyUISwitchState();
@@ -51,31 +59,51 @@ class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
     widget.sendEvent(widget.controlId, 'toggle', payload);
   }
 
+  Widget _buildSegmented() {
+    final labels = widget.segments.isNotEmpty
+        ? widget.segments
+        : <String>[widget.offLabel ?? 'Off', widget.onLabel ?? 'On'];
+    final safeLabels = labels.length >= 2
+        ? labels
+        : <String>[labels.isNotEmpty ? labels.first : 'Off', 'On'];
+    final selectedIndex = _value ? 1 : 0;
+    return ToggleButtons(
+      isSelected: [selectedIndex == 0, selectedIndex == 1],
+      onPressed: widget.enabled
+          ? (index) {
+              _handleChanged(index == 1);
+            }
+          : null,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Text(safeLabels[0]),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Text(safeLabels[1]),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final label = widget.label;
-    if (label == null || label.trim().isEmpty) {
-      return Switch(
-        value: _value,
-        onChanged: widget.enabled ? _handleChanged : null,
-      );
-    }
-    if (widget.inline) {
-      final outlineColor = WidgetStateProperty.all(Colors.transparent);
-      final outlineWidth = WidgetStateProperty.all(0.0);
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Switch(
+    final segmented =
+        widget.mode.toLowerCase() == 'segmented' || widget.segments.isNotEmpty;
+    final control = segmented
+        ? _buildSegmented()
+        : Switch(
             value: _value,
             onChanged: widget.enabled ? _handleChanged : null,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            trackOutlineColor: outlineColor,
-            trackOutlineWidth: outlineWidth,
-          ),
-          const SizedBox(width: 8),
-          Text(label),
-        ],
+          );
+
+    if (label == null || label.trim().isEmpty) return control;
+    if (widget.inline) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [control, const SizedBox(width: 8), Text(label)],
       );
     }
     return SwitchListTile(

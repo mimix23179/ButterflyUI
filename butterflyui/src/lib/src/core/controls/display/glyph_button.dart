@@ -12,6 +12,9 @@ Widget buildGlyphButtonControl(
   final glyph = (props['glyph'] ?? props['icon'] ?? '').toString();
   final tooltip = props['tooltip']?.toString();
   final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
+  final interactive = props['interactive'] == null
+      ? true
+      : (props['interactive'] == true);
   final events = props['events'];
 
   String normalizeEventName(String value) {
@@ -69,7 +72,10 @@ Widget buildGlyphButtonControl(
               payload['action_payload'] = actionPayload;
             }
 
-            void emitDeclarativeAction(Object? actionSpec, {bool force = false}) {
+            void emitDeclarativeAction(
+              Object? actionSpec, {
+              bool force = false,
+            }) {
               var eventName = actionEventName;
               String? resolvedActionId = actionId;
               Object? resolvedActionPayload = actionPayload;
@@ -100,7 +106,8 @@ Widget buildGlyphButtonControl(
               final resolvedEvent = normalizeEventName(
                 (eventName == null || eventName.isEmpty) ? 'action' : eventName,
               );
-              if (resolvedEvent.isEmpty || (!force && !isSubscribed(resolvedEvent))) {
+              if (resolvedEvent.isEmpty ||
+                  (!force && !isSubscribed(resolvedEvent))) {
                 return;
               }
 
@@ -110,7 +117,9 @@ Widget buildGlyphButtonControl(
                   'action_id': resolvedActionId,
               };
               if (resolvedActionPayload is Map) {
-                actionEventPayload.addAll(coerceObjectMap(resolvedActionPayload));
+                actionEventPayload.addAll(
+                  coerceObjectMap(resolvedActionPayload),
+                );
               } else if (resolvedActionPayload != null) {
                 actionEventPayload['action_payload'] = resolvedActionPayload;
               }
@@ -153,7 +162,14 @@ Widget buildGlyphButtonControl(
           },
   );
 
+  if (!interactive) {
+    Widget staticIcon = iconWidget;
+    if (tooltip != null && tooltip.isNotEmpty) {
+      staticIcon = Tooltip(message: tooltip, child: staticIcon);
+    }
+    return staticIcon;
+  }
+
   if (tooltip == null || tooltip.isEmpty) return button;
   return Tooltip(message: tooltip, child: button);
 }
-

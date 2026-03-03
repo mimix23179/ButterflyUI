@@ -7,19 +7,19 @@ __all__ = ["DatePicker"]
 
 class DatePicker(Component):
     """
-    Date-input field that opens a Material calendar dialog.
+    Date picker surface supporting single-date and range selection.
 
-    Renders a read-only ``TextField`` with a calendar icon.  Tapping the
-    field (or calling :meth:`open`) shows a Flutter ``showDatePicker``
-    dialog.  The selected date is stored as an ISO-8601 string
-    (``"YYYY-MM-DD"``) and emitted via a ``change`` event.  Optional
-    ``min_date`` / ``max_date`` bounds restrict the selectable range.
+    ``mode`` replaces legacy controls:
+    - ``"single"`` replaces ``date_select``
+    - ``"range"`` replaces ``date_range_picker`` / ``date_range``
+    - ``"span"`` replaces ``date_span``
 
     ```python
     import butterflyui as bui
 
     bui.DatePicker(
-        label="Birthdate",
+        label="Period",
+        mode="range",
         min_date="1900-01-01",
         max_date="2099-12-31",
     )
@@ -27,8 +27,13 @@ class DatePicker(Component):
 
     Args:
         value:
-            Currently selected date as an ISO-8601 string
-            (``"YYYY-MM-DD"``).
+            Selected date as ``"YYYY-MM-DD"`` when ``mode="single"``.
+        start:
+            Range start date when ``mode`` is ``"range"`` or ``"span"``.
+        end:
+            Range end date when ``mode`` is ``"range"`` or ``"span"``.
+        mode:
+            ``"single"`` (default), ``"range"``, or ``"span"``.
         label:
             Floating label text shown above the field.
         placeholder:
@@ -48,6 +53,9 @@ class DatePicker(Component):
         self,
         value: str | None = None,
         *,
+        start: str | None = None,
+        end: str | None = None,
+        mode: str | None = None,
         label: str | None = None,
         placeholder: str | None = None,
         min_date: str | None = None,
@@ -62,6 +70,9 @@ class DatePicker(Component):
         merged = merge_props(
             props,
             value=value,
+            start=start,
+            end=end,
+            mode=mode,
             label=label,
             placeholder=placeholder,
             min_date=min_date,
@@ -81,8 +92,22 @@ class DatePicker(Component):
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})
 
-    def set_value(self, session: Any, value: str) -> dict[str, Any]:
-        return self.invoke(session, "set_value", {"value": value})
+    def set_value(
+        self,
+        session: Any,
+        value: str | None = None,
+        *,
+        start: str | None = None,
+        end: str | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if value is not None:
+            payload["value"] = value
+        if start is not None:
+            payload["start"] = start
+        if end is not None:
+            payload["end"] = end
+        return self.invoke(session, "set_value", payload)
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

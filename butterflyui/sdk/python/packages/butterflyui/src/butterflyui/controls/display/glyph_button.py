@@ -6,7 +6,7 @@ from .._shared import Component, merge_props
 __all__ = ["GlyphButton"]
 
 class GlyphButton(Component):
-    """Icon button that emits click-like events.
+    """Icon glyph surface with optional button interaction.
 
     Renders a Material ``IconButton`` resolved from``glyph`` or
     ``icon`` via ``buildIconValue``.  When pressed the button emits
@@ -15,8 +15,7 @@ class GlyphButton(Component):
     ``actions`` props allow the runtime to chain custom event payloads
     without additional Python code.
 
-    When ``enabled`` is ``False`` the button is greyed out and does
-    not respond to taps.  A ``tooltip`` wraps the button when present.
+    Set ``interactive=False`` to render a plain icon-like glyph (old ``glyph`` behavior).
 
     Example::
 
@@ -41,6 +40,8 @@ class GlyphButton(Component):
             Icon foreground colour.
         enabled: 
             If ``False`` the button is disabled.
+        interactive:
+            If ``False``, the control renders as a static glyph without button chrome.
         events:
             List of event names the Flutter runtime should emit to Python.
     """
@@ -55,6 +56,7 @@ class GlyphButton(Component):
         size: float | None = None,
         color: Any | None = None,
         enabled: bool | None = None,
+        interactive: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -69,6 +71,7 @@ class GlyphButton(Component):
             size=size,
             color=color,
             enabled=enabled,
+            interactive=interactive,
             events=events,
             **kwargs,
         )
