@@ -6,44 +6,51 @@ from .._shared import Component, merge_props
 __all__ = ["GlyphButton"]
 
 class GlyphButton(Component):
-    """Icon glyph surface with optional button interaction.
+    """
+    Icon glyph surface with optional button behavior.
 
-    Renders a Material ``IconButton`` resolved from``glyph`` or
-    ``icon`` via ``buildIconValue``.  When pressed the button emits
-    ``"click"`` (and optionally ``"press"``, ``"tap"``, ``"action"``)
-    depending on which events are subscribed.  Declarative ``action``/
-    ``actions`` props allow the runtime to chain custom event payloads
-    without additional Python code.
+    ``GlyphButton`` is the canonical icon control after merging legacy
+    ``glyph`` and ``glyph_button`` concepts. It can behave as an interactive
+    icon button or as a static icon-like glyph when ``interactive=False``.
+    ``glyph`` and ``icon`` are interchangeable aliases.
 
-    Set ``interactive=False`` to render a plain icon-like glyph (old ``glyph`` behavior).
+    When events are subscribed, the Flutter side can emit ``click``-style
+    interaction messages back to Python.
 
-    Example::
+    ```python
+    import butterflyui as bui
 
-        import butterflyui as bui
-
-        btn = bui.GlyphButton(
-            glyph="delete",
-            tooltip="Remove item",
-            events=["click"],
-        )
+    btn = bui.GlyphButton(
+        glyph="delete",
+        tooltip="Remove item",
+        size=20,
+        events=["click"],
+    )
+    ```
 
     Args:
-        glyph: 
-            Icon name, code-point, or emoji string.
-        icon: 
+        glyph:
+            Icon name, codepoint, or emoji string.
+        icon:
             Alias for ``glyph``.
-        tooltip: 
-            Hover tooltip text for the button.
-        size: 
+        tooltip:
+            Hover/assistive tooltip text.
+        size:
             Icon size in logical pixels.
-        color: 
-            Icon foreground colour.
-        enabled: 
-            If ``False`` the button is disabled.
+        color:
+            Icon foreground color.
+        enabled:
+            If ``False``, the control is disabled.
         interactive:
-            If ``False``, the control renders as a static glyph without button chrome.
+            If ``False``, renders without button chrome/gestures.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
     control_type = "glyph_button"
 

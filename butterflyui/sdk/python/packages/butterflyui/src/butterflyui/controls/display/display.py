@@ -9,11 +9,83 @@ __all__ = ["Display"]
 
 
 class Display(Component):
-    """Unified display surface for identity, status, rating, reactions, and checks.
+    """
+    Unified display surface for identity, status, rating, reactions, and checks.
 
-    Replaces ``persona``, ``rating_display``, ``reaction_bar``, ``result_card``,
-    ``status_mark``, ``typing_indicator``, and ``check_list`` with one configurable
-    control. Use ``variant`` to select primary behavior.
+    ``Display`` consolidates multiple presentation-only widgets into one
+    control: identity cards, ratings, reactions, status badges, checklists, and
+    ownership markers. It is the canonical replacement for legacy
+    ``ownership_marker`` wrappers.
+
+    ```python
+    import butterflyui as bui
+
+    card = bui.Display(
+        variant="result_card",
+        title="Build Complete",
+        subtitle="All checks passed",
+        status="success",
+        badge="v1.4.2",
+    )
+    ```
+
+    Args:
+        variant:
+            Primary rendering mode (for example ``persona``, ``rating``,
+            ``reaction_bar``, ``result_card``, ``status_mark``, ``typing``,
+            or ``check_list`` depending on Flutter implementation).
+        title:
+            Main heading text.
+        subtitle:
+            Secondary heading text.
+        description:
+            Body/description text.
+        name:
+            Display name used by identity variants.
+        status:
+            Status label or semantic state value.
+        badge:
+            Badge text displayed with the content.
+        avatar:
+            Avatar URL/path/string descriptor.
+        initials:
+            Initials fallback for avatar/identity variants.
+        icon:
+            Icon descriptor for status/result variants.
+        value:
+            Numeric or textual value for metric/rating modes.
+        max:
+            Maximum bound for value/rating modes.
+        allow_half:
+            Enables half-step values for rating variants.
+        items:
+            Item descriptors for list/reaction/check variants.
+        selected:
+            Selected item values for selectable variants.
+        checked:
+            Checked item values for checklist variants.
+        dot_count:
+            Dot/count indicator for typing/status variants.
+        document_id:
+            Document identifier for ownership-marker style variants.
+        ranges:
+            Ownership range descriptors.
+        owners:
+            Owner descriptors used by ownership variants.
+        show_avatars:
+            If ``True``, ownership/identity variants show avatar chips.
+        compact:
+            Uses compact spacing treatment.
+        dense:
+            Uses dense spacing treatment.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "display"
@@ -38,6 +110,10 @@ class Display(Component):
         selected: list[Any] | None = None,
         checked: list[Any] | None = None,
         dot_count: int | None = None,
+        document_id: str | None = None,
+        ranges: list[Mapping[str, Any]] | None = None,
+        owners: list[Mapping[str, Any]] | None = None,
+        show_avatars: bool | None = None,
         compact: bool | None = None,
         dense: bool | None = None,
         events: list[str] | None = None,
@@ -66,6 +142,10 @@ class Display(Component):
                 selected=selected,
                 checked=checked,
                 dot_count=dot_count,
+                document_id=document_id,
+                ranges=ranges,
+                owners=owners,
+                show_avatars=show_avatars,
                 compact=compact,
                 dense=dense,
                 events=events,

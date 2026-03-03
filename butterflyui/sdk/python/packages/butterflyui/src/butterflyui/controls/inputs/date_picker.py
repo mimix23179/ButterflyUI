@@ -7,12 +7,15 @@ __all__ = ["DatePicker"]
 
 class DatePicker(Component):
     """
-    Date picker surface supporting single-date and range selection.
+    Date picker supporting single date, range, and span workflows.
 
-    ``mode`` replaces legacy controls:
+    ``DatePicker`` unifies legacy controls into one API via ``mode``:
     - ``"single"`` replaces ``date_select``
     - ``"range"`` replaces ``date_range_picker`` / ``date_range``
     - ``"span"`` replaces ``date_span``
+
+    Use :meth:`open` to programmatically open the picker and :meth:`set_value`
+    to update single or range selections from server-side handlers.
 
     ```python
     import butterflyui as bui
@@ -46,6 +49,12 @@ class DatePicker(Component):
             If ``False``, the field is non-interactive.
         events:
             List of event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
     control_type = "date_picker"
 

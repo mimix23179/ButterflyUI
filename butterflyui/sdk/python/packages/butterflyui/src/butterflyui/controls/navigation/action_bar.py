@@ -1,19 +1,21 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["ActionBar"]
 
+
 class ActionBar(Component):
     """
-    Horizontal toolbar displaying a list of action buttons or child widgets.
+    Horizontal action toolbar for global and context-sensitive commands.
 
-    The runtime renders a row of action items. ``items`` supplies inline item
-    specs; positional children may also be passed. ``dense`` reduces button
-    height; ``spacing`` controls the gap between items; ``wrap`` enables
-    multi-line wrapping when items overflow; ``alignment`` sets the horizontal
-    distribution of items; ``bgcolor`` paints the bar background.
+    ``ActionBar`` is the canonical replacement for legacy
+    ``context_action_bar`` and supports both explicit ``items`` payloads and
+    child controls. It can optionally carry selection/context metadata so the
+    runtime can emit richer command events.
 
     ```python
     import butterflyui as bui
@@ -41,8 +43,18 @@ class ActionBar(Component):
             Horizontal alignment of items within the bar.
         bgcolor:
             Background fill color of the bar.
+        context:
+            Arbitrary context payload associated with this action surface.
+        selection:
+            Selection payload (IDs or descriptors) used by contextual actions.
         events:
             List of event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "action_bar"
@@ -56,6 +68,8 @@ class ActionBar(Component):
         wrap: bool | None = None,
         alignment: str | None = None,
         bgcolor: Any | None = None,
+        context: Mapping[str, Any] | None = None,
+        selection: list[Any] | Mapping[str, Any] | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -70,6 +84,8 @@ class ActionBar(Component):
             wrap=wrap,
             alignment=alignment,
             bgcolor=bgcolor,
+            context=context,
+            selection=selection,
             events=events,
             **kwargs,
         )

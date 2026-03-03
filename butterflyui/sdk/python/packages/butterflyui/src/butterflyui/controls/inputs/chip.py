@@ -9,10 +9,63 @@ __all__ = ["Chip"]
 
 
 class Chip(Component):
-    """Unified chip surface for individual chips and grouped chips.
+    """
+    Unified chip surface for single chips and grouped chip sets.
 
-    This control replaces the old ``chip_group`` API. Use ``options``/``items``
-    to render grouped chips and ``multi_select`` + ``values`` for multi mode.
+    ``Chip`` replaces the old ``chip_group`` API. It can represent one
+    dismissible/interactive chip, or render a collection of selectable chips via
+    ``options``/``items``. In grouped mode, use ``multi_select`` with
+    ``values`` to support multi-selection workflows.
+
+    ```python
+    import butterflyui as bui
+
+    filters = bui.Chip(
+        options=[
+            {"label": "Images", "value": "image"},
+            {"label": "Video", "value": "video"},
+        ],
+        multi_select=True,
+        values=["image"],
+        events=["change"],
+    )
+    ```
+
+    Args:
+        label:
+            Label text for single-chip mode.
+        value:
+            Value for single-chip mode.
+        options:
+            Option descriptors for grouped mode.
+        items:
+            Alias for ``options``.
+        values:
+            Selected values for grouped multi-select mode.
+        multi_select:
+            Enables multi-selection when rendering grouped chips.
+        selected:
+            Selected state for single-chip mode.
+        enabled:
+            If ``False``, chip interactions are disabled.
+        dismissible:
+            If ``True``, the chip can be dismissed.
+        color:
+            Color override for chip background/accent treatment.
+        dense:
+            Uses compact spacing.
+        spacing:
+            Horizontal spacing between chips in grouped mode.
+        run_spacing:
+            Vertical spacing between chip rows in wrapped layouts.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "chip"

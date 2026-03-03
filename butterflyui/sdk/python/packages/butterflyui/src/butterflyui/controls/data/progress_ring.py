@@ -9,7 +9,36 @@ __all__ = ["ProgressRing"]
 
 
 class ProgressRing(Component):
-    """Circular progress ring."""
+    """
+    Circular progress indicator for determinate or indeterminate tasks.
+
+    ``ProgressRing`` sends the canonical ``progress_ring`` control type and pins
+    ``variant="circular"`` / ``circular=True`` so the Flutter side always
+    renders a ring. Use ``value`` for determinate progress, or set
+    ``indeterminate=True`` for an animated spinner-style state.
+
+    ```python
+    import butterflyui as bui
+
+    ring = bui.ProgressRing(value=0.72, label="Syncing", stroke_width=6)
+    ```
+
+    Args:
+        value:
+            Progress value for determinate mode.
+        indeterminate:
+            If ``True``, renders an animated indeterminate ring.
+        label:
+            Optional text label shown with the indicator.
+        stroke_width:
+            Thickness of the ring stroke.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+    """
 
     control_type = "progress_ring"
 

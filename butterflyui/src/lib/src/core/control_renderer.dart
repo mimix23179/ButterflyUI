@@ -30,10 +30,8 @@ import 'controls/candy/candy.dart';
 import 'controls/customization/crop_box.dart';
 import 'controls/customization/histogram_overlay.dart';
 import 'controls/customization/histogram_view.dart';
-import 'controls/customization/ownership_marker.dart';
 import 'controls/customization/color_tools.dart';
 import 'controls/skins/skins.dart';
-import 'controls/display/chat.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
 import 'controls/display/bubble.dart';
@@ -44,17 +42,10 @@ import 'controls/display/glyph_button.dart';
 import 'controls/display/line_plot.dart';
 import 'controls/display/outline.dart';
 import 'controls/display/pie_plot.dart';
-import 'controls/display/diff_view.dart';
 import 'controls/display/error_state.dart';
 import 'controls/display/html_view.dart';
 import 'controls/display/icon.dart';
 import 'controls/display/markdown_view.dart';
-import 'controls/productivity/editor_workspace.dart';
-import 'controls/productivity/editor_tab_strip.dart';
-import 'controls/productivity/file_system.dart';
-import 'controls/productivity/problems_panel.dart';
-import 'controls/productivity/output_panel.dart';
-import 'controls/productivity/workspace_tree.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/animation.dart';
 import 'controls/effects/effects.dart';
@@ -100,22 +91,15 @@ import 'controls/inputs/switch.dart';
 import 'controls/inputs/text_field.dart';
 import 'controls/inputs/time_select.dart';
 import 'controls/interaction/key_listener.dart';
-import 'controls/interaction/cursor.dart';
 import 'controls/interaction/drag_handle.dart';
-import 'controls/interaction/drag_payload.dart';
 import 'controls/interaction/drop_zone.dart';
-import 'controls/interaction/focus_anchor.dart';
 import 'controls/interaction/gesture_area.dart';
 import 'controls/interaction/hover_region.dart';
 import 'controls/interaction/pressable.dart';
-import 'controls/interaction/shortcut_map.dart';
-import 'controls/interaction/submit_scope.dart';
 import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
-import 'controls/layout/adjustment_panel.dart';
 import 'controls/layout/align_control.dart';
 import 'controls/layout/aspect_ratio.dart';
-import 'controls/layout/bounds_probe.dart';
 import 'controls/layout/clip.dart';
 import 'controls/layout/column.dart';
 import 'controls/layout/container.dart';
@@ -123,11 +107,6 @@ import 'controls/layout/decorated_box.dart';
 import 'controls/layout/divider.dart';
 import 'controls/layout/fitted_box.dart';
 import 'controls/layout/page_view.dart';
-import 'controls/layout/page_scene.dart';
-import 'controls/layout/overflow_box.dart';
-import 'controls/layout/pane_spec.dart';
-import 'controls/layout/responsive_row.dart';
-import 'controls/layout/resizable_panel.dart';
 import 'controls/layout/row.dart';
 import 'controls/layout/safe_area.dart';
 import 'controls/layout/scene_view.dart';
@@ -136,15 +115,9 @@ import 'controls/layout/scrollable_column.dart';
 import 'controls/layout/scrollable_row.dart';
 import 'controls/layout/split_view.dart';
 import 'controls/layout/stack.dart';
-import 'controls/layout/view_stack.dart';
-import 'controls/layout/viewport.dart';
-import 'controls/layout/visibility.dart';
-import 'controls/layout/dock_layout.dart';
-import 'controls/layout/details_pane.dart';
 import 'controls/layout/flex_spacer.dart';
 import 'controls/layout/frame.dart';
 import 'controls/layout/grid.dart';
-import 'controls/layout/inspector_panel.dart';
 import 'controls/layout/vertical_divider.dart';
 import 'controls/layout/window_frame.dart';
 import 'controls/layout/window_drag_region.dart';
@@ -162,38 +135,29 @@ import 'controls/lists/table.dart';
 import 'controls/lists/table_view.dart';
 import 'controls/lists/virtual_grid.dart';
 import 'controls/lists/virtual_list.dart';
-import 'controls/media/animation_asset.dart';
 import 'controls/media/audio.dart';
 import 'controls/media/image.dart';
 import 'controls/media/video.dart';
 import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
-import 'controls/navigation/breadcrumbs.dart';
-import 'controls/navigation/context_action_bar.dart';
-import 'controls/navigation/crumb_trail.dart';
-import 'controls/navigation/command_palette.dart';
-import 'controls/navigation/launcher.dart';
+import 'controls/navigation/breadcrumb_bar.dart';
 import 'controls/navigation/menu_bar.dart';
 import 'controls/navigation/nav_ring.dart';
-import 'controls/navigation/navigator.dart';
 import 'controls/navigation/notice_bar.dart';
 import 'controls/navigation/rail_nav.dart';
 import 'controls/navigation/paginator.dart';
-import 'controls/navigation/router.dart';
+import 'controls/navigation/route.dart';
 import 'controls/navigation/sidebar.dart';
 import 'controls/navigation/status_bar.dart';
 import 'controls/navigation/tabs.dart';
 import 'controls/overlay/context_menu.dart';
 import 'controls/overlay/alert_dialog.dart';
 import 'controls/overlay/bottom_sheet.dart';
-import 'controls/overlay/modal.dart';
 import 'controls/overlay/overlay.dart';
-import 'controls/overlay/overlay_host.dart';
 import 'controls/overlay/portal.dart';
 import 'controls/overlay/popover.dart';
 import 'controls/overlay/notification_center.dart';
 import 'controls/overlay/preview_surface.dart';
-import 'controls/overlay/progress_overlay.dart';
 import 'controls/overlay/snack_bar.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
@@ -523,7 +487,7 @@ class ControlRenderer {
 
     switch (type) {
       case 'page':
-      case 'page_control':
+      case 'page_scene':
         {
           Widget pageBody;
           if (children.isEmpty) {
@@ -550,11 +514,9 @@ class ControlRenderer {
           return body;
         }
 
+      case 'route':
       case 'route_view':
       case 'route_host':
-        return buildRouteViewControl(props, rawChildren, context.buildChild);
-
-      case 'route':
         return buildRouteControl(
           controlId,
           props,
@@ -587,17 +549,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'details_pane':
-        return buildDetailsPaneControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'center':
         return buildAlignControl(
           controlId,
@@ -611,9 +562,6 @@ class ControlRenderer {
 
       case 'aspect_ratio':
         return buildAspectRatioControl(props, rawChildren, context.buildChild);
-
-      case 'overflow_box':
-        return buildOverflowBoxControl(props, rawChildren, context.buildChild);
 
       case 'fitted_box':
         return buildFittedBoxControl(props, rawChildren, context.buildChild);
@@ -670,9 +618,6 @@ class ControlRenderer {
               const SizedBox.shrink();
         }
 
-      case 'page_scene':
-        return buildPageSceneControl(props, rawChildren, context.buildChild);
-
       case 'row':
         return buildRowControl(
           props,
@@ -692,16 +637,6 @@ class ControlRenderer {
       case 'stack':
         return buildStackControl(props, rawChildren, context.buildChild);
 
-      case 'view_stack':
-        return buildViewStackControl(
-          controlId,
-          props,
-          children.map(context.buildChild).toList(),
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'page_view':
         return buildPageViewControl(
           controlId,
@@ -720,46 +655,9 @@ class ControlRenderer {
           context.buildChild,
         );
 
-      case 'responsive_row':
-        return buildResponsiveRowControl(
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
-        );
-
       case 'split_view':
       case 'split_pane':
         return buildSplitViewControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'viewport':
-        return buildViewportControl(
-          controlId,
-          props,
-          firstChildOrEmpty(),
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-        );
-
-      case 'visibility':
-        return buildVisibilityControl(
-          controlId,
-          props,
-          firstChildOrEmpty(),
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-        );
-
-      case 'resizable_panel':
-        return buildResizablePanelControl(
           controlId,
           props,
           rawChildren,
@@ -780,34 +678,8 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'adjustment_panel':
-        return buildAdjustmentPanelControl(
-          controlId,
-          props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'dock_layout':
-      case 'dock':
-        return buildDockLayoutControl(props, rawChildren, context.buildChild);
-
       case 'pane':
-      case 'dock_pane':
-        return buildPaneControl(props, rawChildren, context.buildChild);
-
-      case 'pane_spec':
-        return buildPaneSpecControl(props, rawChildren, context.buildChild);
-
-      case 'inspector_panel':
-        return buildInspectorPanelControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.sendEvent,
-        );
+        return buildContainerControl(props, rawChildren, context.buildChild);
 
       case 'expanded':
         {
@@ -978,9 +850,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'diff':
-        return buildDiffViewControl(props);
-
       case 'chart':
       case 'line_chart':
       case 'line_plot':
@@ -1042,28 +911,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'output_panel':
-        return buildOutputPanelControl(
-          controlId,
-          props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'editor_tab_strip':
-        return buildEditorTabStripControl(controlId, props, context.sendEvent);
-
-      case 'editor_workspace':
-      case 'workbench_editor':
-        return buildEditorWorkspaceControl(controlId, props, context.sendEvent);
-
-      case 'problems_panel':
-        return buildProblemsPanelControl(controlId, props, context.sendEvent);
-
-      case 'workspace_tree':
-        return buildWorkspaceTreeControl(controlId, props, context.sendEvent);
-
       case 'problem_screen':
         return buildErrorStateControl(controlId, props, context.sendEvent);
 
@@ -1112,7 +959,6 @@ class ControlRenderer {
         );
 
       case 'outline':
-      case 'symbol_tree':
       case 'outline_view':
         return buildOutlineControl(controlId, props, context.sendEvent);
 
@@ -1134,23 +980,35 @@ class ControlRenderer {
       case 'chat_message':
       case 'message_bubble':
       case 'chat_bubble':
-        return buildChatMessageControl(controlId, props, context.sendEvent);
+        return buildBubbleControl(
+          controlId,
+          <String, Object?>{'variant': 'message', ...props},
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'chat_thread':
       case 'chat':
-        return buildChatThreadControl(
+        return buildBubbleControl(
           controlId,
-          props,
+          <String, Object?>{'variant': 'thread', ...props},
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
       case 'message_composer':
       case 'prompt_composer':
-        return buildMessageComposerControl(
+        return buildBubbleControl(
           controlId,
-          props,
+          <String, Object?>{'variant': 'composer', ...props},
+          rawChildren,
+          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -1370,86 +1228,10 @@ class ControlRenderer {
       case 'form':
         return buildFormControl(props, rawChildren, context.buildChild);
 
-      case 'submit_scope':
-        return buildSubmitScopeControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'auto_form':
-        return buildAutoFormControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'form_field':
         return buildFormFieldControl(props, rawChildren, context.buildChild);
 
-      case 'validation_summary':
-        return buildValidationSummaryControl(props);
-
       case 'modal':
-        {
-          final transition = props['transition'] is Map
-              ? coerceObjectMap(props['transition'] as Map)
-              : const <String, Object?>{};
-          Widget child;
-          if (children.isNotEmpty) {
-            child = context.buildChild(children.first);
-          } else if (props['child'] is Map) {
-            child = context.buildChild(coerceObjectMap(props['child'] as Map));
-          } else {
-            child = const SizedBox.shrink();
-          }
-          return ButterflyUIModal(
-            controlId: controlId,
-            child: child,
-            initialOpen: props['open'] == true,
-            dismissible: props['dismissible'] == null
-                ? true
-                : (props['dismissible'] == true),
-            closeOnEscape: props['close_on_escape'] == null
-                ? true
-                : (props['close_on_escape'] == true),
-            trapFocus: props['trap_focus'] == null
-                ? true
-                : (props['trap_focus'] == true),
-            duration: Duration(
-              milliseconds:
-                  (coerceOptionalInt(
-                            props['duration_ms'] ?? transition['duration_ms'],
-                          ) ??
-                          180)
-                      .clamp(0, 2000),
-            ),
-            transitionType:
-                (props['transition_type']?.toString() ??
-                        transition['type']?.toString() ??
-                        'pop')
-                    .toLowerCase(),
-            transitionCurve: _curveFromName(
-              transition['curve']?.toString() ?? 'ease_out_cubic',
-            ),
-            sourceRect: _coerceRect(
-              props['source_rect'] ?? transition['origin'],
-            ),
-            scrimColor: coerceColor(props['scrim_color']),
-            registerInvokeHandler: context.registerInvokeHandler,
-            unregisterInvokeHandler: context.unregisterInvokeHandler,
-            sendEvent: context.sendEvent,
-          );
-        }
-
       case 'alert_dialog':
         return buildAlertDialogControl(
           controlId,
@@ -1624,14 +1406,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'progress_overlay':
-        return buildProgressOverlayControl(
-          controlId,
-          props,
-          firstChildOrEmpty(),
-          context.sendEvent,
-        );
-
       case 'preview_surface':
         return buildPreviewSurfaceControl(
           controlId,
@@ -1679,18 +1453,8 @@ class ControlRenderer {
         return buildMenuBarControl(controlId, props, context.sendEvent);
 
       case 'action_bar':
-        return buildActionBarControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'context_action_bar':
-        return buildContextActionBarControl(
+        return buildActionBarControl(
           controlId,
           props,
           rawChildren,
@@ -1705,10 +1469,8 @@ class ControlRenderer {
 
       case 'breadcrumbs':
       case 'breadcrumb_bar':
-        return buildBreadcrumbsControl(controlId, props, context.sendEvent);
-
       case 'crumb_trail':
-        return buildCrumbTrailControl(controlId, props, context.sendEvent);
+        return buildBreadcrumbBarControl(controlId, props, context.sendEvent);
 
       case 'status_bar':
         return buildStatusBarControl(
@@ -1720,12 +1482,25 @@ class ControlRenderer {
         );
 
       case 'navigator':
-        return buildNavigatorControl(
-          controlId,
-          props,
-          context.sendEvent,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
+        return ButterflyUISidebar(
+          controlId: controlId,
+          sections: _coerceSidebarSections(props),
+          selectedId:
+              props['selected_id']?.toString() ??
+              props['selected']?.toString() ??
+              props['value']?.toString(),
+          showSearch: props['show_search'] == true,
+          query: props['query']?.toString() ?? '',
+          collapsible: props['collapsible'] == true,
+          dense: props['dense'] == true,
+          emitOnSearchChange: props['emit_on_search_change'] == null
+              ? true
+              : (props['emit_on_search_change'] == true),
+          searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+          events: _coerceStringList(props['events']).toSet(),
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
         );
 
       case 'nav_ring':
@@ -1743,13 +1518,7 @@ class ControlRenderer {
       case 'notice_bar':
         return buildNoticeBarControl(controlId, props, context.sendEvent);
 
-      case 'command_palette':
-      case 'command_search':
-        return buildCommandPaletteControl(controlId, props, context.sendEvent);
-
-      case 'command_item':
-        return buildCommandItemControl(controlId, props, context.sendEvent);
-
+      case 'pagination':
       case 'paginator':
       case 'page_nav':
       case 'page_stepper':
@@ -1759,27 +1528,6 @@ class ControlRenderer {
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
-        );
-
-      case 'router':
-        return buildRouterControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-          context.stylePack.motionPack,
-        );
-
-      case 'launcher':
-        return buildLauncherControl(
-          controlId,
-          props,
-          rawChildren,
-          context.sendEvent,
-          context.tokens,
         );
 
       case 'sidebar':
@@ -1884,19 +1632,14 @@ class ControlRenderer {
           );
         }
 
-      case 'bounds_probe':
-        return buildBoundsProbeControl(
+      case 'overlay_host':
+        return buildOverlayControl(
           controlId,
-          props,
+          <String, Object?>{'open': true, ...props},
           rawChildren,
           context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
           context.sendEvent,
         );
-
-      case 'overlay_host':
-        return buildOverlayHostControl(props, rawChildren, context.buildChild);
 
       case 'window_frame':
         return buildWindowFrameControl(
@@ -1912,7 +1655,6 @@ class ControlRenderer {
         return buildWindowControlsControl(controlId, props, context.sendEvent);
 
       case 'window_drag_region':
-      case 'drag_region':
         return buildWindowDragRegionControl(
           controlId,
           props,
@@ -1924,15 +1666,6 @@ class ControlRenderer {
       case 'list_tile':
       case 'item_tile':
         return buildListTileControl(
-          controlId,
-          props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'file_system':
-        return buildFileSystemControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -2178,15 +1911,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'drag_payload':
-        return buildDragPayloadControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.sendEvent,
-        );
-
       case 'drop_zone':
         return buildDropZoneControl(
           controlId,
@@ -2196,14 +1920,8 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'animation_asset':
-        return buildAnimationAssetControl(props);
-
       case 'sprite':
-        return buildAnimationAssetControl(<String, Object?>{
-          'kind': 'sprite',
-          ...props,
-        });
+        return buildImageControl(props, rawChildren, context.buildChild);
 
       case 'key_listener':
         return ButterflyUIKeyListener(
@@ -2212,17 +1930,6 @@ class ControlRenderer {
           autofocus: props['autofocus'] == true,
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
           sendEvent: context.sendEvent,
-        );
-
-      case 'focus_anchor':
-        return buildFocusAnchorControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
         );
 
       case 'gesture_area':
@@ -2249,27 +1956,6 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
-          context.sendEvent,
-        );
-
-      case 'shortcut_map':
-        return ButterflyUIShortcutMap(
-          controlId: controlId,
-          child: firstChildOrEmpty(),
-          shortcuts: _coerceMapList(props['shortcuts']),
-          enabled: props['enabled'] == null ? true : (props['enabled'] == true),
-          useGlobalHotkeys: props['use_global_hotkeys'] == true,
-          sendEvent: context.sendEvent,
-        );
-
-      case 'cursor':
-        return buildCursorControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -2398,7 +2084,15 @@ class ControlRenderer {
         );
 
       case 'ownership_marker':
-        return buildOwnershipMarkerControl(controlId, props, context.sendEvent);
+        return buildDisplayControl(
+          controlId,
+          <String, Object?>{'variant': 'ownership', ...props},
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'blend_mode_picker':
         return buildBlendModePickerControl(

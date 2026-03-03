@@ -9,10 +9,67 @@ __all__ = ["TableView"]
 
 
 class TableView(Component):
-    """Presentation-first table surface with optional compact toolbar.
+    """
+    Presentation-first table surface for report and document style layouts.
 
-    ``TableView`` targets document/report screens and keeps table semantics while
-    exposing table-specific chrome (caption, footer note, sticky header toggles).
+    ``TableView`` wraps table semantics with report-oriented chrome such as
+    captions, footer notes, and sticky header behavior. Use this control when
+    readability and narrative presentation matter more than dense spreadsheet
+    ergonomics.
+
+    Methods mirror :class:`DataGrid` so you can still drive sorting, filtering,
+    and selection state imperatively from Python after initial render.
+
+    ```python
+    import butterflyui as bui
+
+    table = bui.TableView(
+        caption="Quarterly Revenue",
+        footer_note="Values in USD",
+        columns=[{"key": "region", "label": "Region"}, {"key": "amount", "label": "Amount"}],
+        rows=[{"region": "EU", "amount": "$120,000"}],
+        sticky_header=True,
+        sortable=True,
+    )
+    ```
+
+    Args:
+        columns:
+            Column descriptors consumed by the Flutter renderer.
+        rows:
+            Row objects rendered by the table.
+        caption:
+            Optional title/caption shown above table content.
+        footer_note:
+            Optional annotation shown near the table footer.
+        sortable:
+            Enables sort affordances in headers.
+        filterable:
+            Enables built-in query/filter behavior.
+        selectable:
+            Enables row selection state.
+        dense:
+            Reduces row height and spacing for compact layouts.
+        striped:
+            Alternates row background treatment for readability.
+        show_header:
+            If ``False``, header row is hidden.
+        sticky_header:
+            Pins table header during vertical scrolling when supported.
+        sort_column:
+            Initial column key to sort by.
+        sort_ascending:
+            Initial sort direction.
+        filter_query:
+            Initial query string applied by the renderer.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "table_view"

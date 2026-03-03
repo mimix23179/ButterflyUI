@@ -1,19 +1,21 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["BreadcrumbBar"]
 
+
 class BreadcrumbBar(Component):
     """
-    Interactive breadcrumb navigation bar with click-to-navigate support.
+    Interactive breadcrumb bar with path parsing and overflow behaviors.
 
     The runtime renders a row of clickable path segments. ``path`` provides
     a forward-slash-delimited string path; ``items`` offers explicit segment
-    specs. ``current_index`` highlights the active segment. ``dropdown_levels``
-    shows parent levels as a dropdown when segments overflow. ``compact``
-    collapses middle segments.
+    specs. ``crumbs`` and ``routes`` are accepted aliases for merged
+    ``crumb_trail`` and ``breadcrumbs`` payloads.
 
     ```python
     import butterflyui as bui
@@ -29,6 +31,10 @@ class BreadcrumbBar(Component):
     Args:
         items:
             Explicit list of segment spec mappings. Overrides ``path``.
+        crumbs:
+            Alias for ``items``.
+        routes:
+            Alias for ``items`` used by legacy ``breadcrumbs`` payloads.
         path:
             Forward-slash-delimited path string auto-split into segments.
         current_index:
@@ -55,6 +61,8 @@ class BreadcrumbBar(Component):
         self,
         *,
         items: list[Mapping[str, Any]] | None = None,
+        crumbs: list[Mapping[str, Any]] | None = None,
+        routes: list[Mapping[str, Any]] | None = None,
         path: str | None = None,
         current_index: int | None = None,
         separator: str | None = None,
@@ -71,7 +79,9 @@ class BreadcrumbBar(Component):
     ) -> None:
         merged = merge_props(
             props,
-            items=items,
+            items=items if items is not None else (crumbs if crumbs is not None else routes),
+            crumbs=crumbs if crumbs is not None else items,
+            routes=routes if routes is not None else items,
             path=path,
             current_index=current_index,
             separator=separator,

@@ -1,43 +1,79 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["Drawer"]
 
+
 class Drawer(Component):
     """
-    Slide-in panel drawer that overlays the main content from a screen edge.
+    Slide-in drawer panel for navigation, inspectors, and contextual tools.
 
-    The runtime renders a modal or persistent side panel. ``open`` controls
-    visibility; ``side`` sets which edge the drawer slides from
-    (``"left"``, ``"right"``, ``"top"``, ``"bottom"``). ``size`` fixes the
-    panel width or height. ``dismissible`` allows closing by tapping outside.
+    ``Drawer`` is the canonical replacement for legacy ``side_drawer``. It can
+    host fully custom child content or a data-driven menu via ``items`` /
+    ``sections`` props. Use ``open`` to control visibility and ``side`` to pick
+    the entry edge.
+
+    The control forwards both simple drawer props (size, dismiss behavior) and
+    richer navigation-oriented props (search, collapsible sections, selection)
+    so one wrapper can cover lightweight and full-featured side panels.
 
     ```python
     import butterflyui as bui
 
-    bui.Drawer(
-        bui.Text("Navigation content"),
+    drawer = bui.Drawer(
         side="left",
         size=280,
+        items=[
+            {"id": "home", "label": "Home"},
+            {"id": "settings", "label": "Settings"},
+        ],
+        selected_id="home",
+        show_search=True,
         dismissible=True,
-        events=["open", "close"],
+        events=["open", "close", "select"],
     )
     ```
 
     Args:
         open:
-            When ``True`` the drawer is visible.
+            If ``True``, the drawer is shown.
         side:
-            Edge from which the drawer slides. Values: ``"left"``,
-            ``"right"``, ``"top"``, ``"bottom"``.
+            Entry edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
         size:
-            Width (for left/right) or height (for top/bottom) in logical pixels.
+            Width for left/right drawers, or height for top/bottom drawers.
         dismissible:
-            When ``True`` tapping outside the drawer closes it.
+            If ``True``, tapping the scrim dismisses the drawer.
+        scrim_color:
+            Scrim color shown behind the drawer while open.
+        modal:
+            If ``True``, drawer behaves as modal overlay. If ``False``, runtime
+            may choose a persistent presentation.
+        persistent:
+            Hint for persistent drawer behavior on larger layouts.
+        items:
+            Flat list of menu item descriptors for built-in menu rendering.
+        sections:
+            Sectioned item descriptors for grouped menu rendering.
+        selected_id:
+            Selected item ID when using data-driven menu content.
+        show_search:
+            Enables built-in search input for menu content.
+        query:
+            Initial search query text.
+        collapsible:
+            Enables collapsible sections in sectioned mode.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "drawer"
@@ -50,6 +86,15 @@ class Drawer(Component):
         side: str | None = None,
         size: float | None = None,
         dismissible: bool | None = None,
+        scrim_color: Any | None = None,
+        modal: bool | None = None,
+        persistent: bool | None = None,
+        items: list[Any] | None = None,
+        sections: list[Mapping[str, Any]] | None = None,
+        selected_id: str | None = None,
+        show_search: bool | None = None,
+        query: str | None = None,
+        collapsible: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -62,6 +107,15 @@ class Drawer(Component):
             side=side,
             size=size,
             dismissible=dismissible,
+            scrim_color=scrim_color,
+            modal=modal,
+            persistent=persistent,
+            items=items,
+            sections=sections,
+            selected_id=selected_id,
+            show_search=show_search,
+            query=query,
+            collapsible=collapsible,
             events=events,
             **kwargs,
         )

@@ -538,15 +538,6 @@ class Control:
                         add_child(slot_children, base_child)
                     if overlay_child is not None:
                         add_child(slot_children, overlay_child)
-                elif control_type == "drag_payload":
-                    if props_child is not None:
-                        add_child(slot_children, props_child)
-                    feedback = self.props.get("feedback")
-                    if feedback is not None:
-                        add_child(slot_children, feedback)
-                    ghost = self.props.get("child_when_dragging")
-                    if ghost is not None:
-                        add_child(slot_children, ghost)
                 else:
                     if props_child is not None:
                         add_child(slot_children, props_child)

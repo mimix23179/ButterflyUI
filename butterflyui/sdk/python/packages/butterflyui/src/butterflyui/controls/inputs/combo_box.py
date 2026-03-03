@@ -9,7 +9,58 @@ __all__ = ["ComboBox"]
 
 
 class ComboBox(Component):
-    """Editable combo-box with optional async loading state."""
+    """
+    Editable combo-box input with option lists and async loading hooks.
+
+    ``ComboBox`` is the canonical merged control for both ``combo_box`` and
+    legacy ``combobox`` usage. It supports typed input with selectable options,
+    grouped option sections, loading state for remote queries, and debounce
+    configuration for server-driven suggestion pipelines.
+
+    ```python
+    import butterflyui as bui
+
+    field = bui.ComboBox(
+        label="Assignee",
+        options=[{"label": "Ava", "value": "ava"}],
+        async_source="users.search",
+        debounce_ms=250,
+        events=["change", "query"],
+    )
+    ```
+
+    Args:
+        value:
+            Current selected/typed value.
+        options:
+            Option descriptors shown in the dropdown.
+        items:
+            Alias for ``options``.
+        groups:
+            Group descriptors for grouped option sections.
+        label:
+            Field label text.
+        hint:
+            Hint text shown when input is empty.
+        placeholder:
+            Alias for ``hint``.
+        loading:
+            If ``True``, shows loading affordances.
+        async_source:
+            Identifier used by your runtime for remote option lookups.
+        debounce_ms:
+            Debounce window (milliseconds) for query events.
+        enabled:
+            If ``False``, input is non-interactive.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+    """
 
     control_type = "combo_box"
 

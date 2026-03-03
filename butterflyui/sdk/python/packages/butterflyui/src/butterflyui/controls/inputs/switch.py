@@ -9,7 +9,47 @@ __all__ = ["Switch"]
 
 
 class Switch(Component):
-    """Boolean switch with optional segmented presentation."""
+    """
+    Boolean switch input with optional segmented presentation.
+
+    ``Switch`` now also covers segmented-switch use cases through ``mode`` and
+    ``segments``. In default mode it behaves like a standard on/off toggle;
+    segmented mode allows richer labels and grouped state presentation.
+
+    ```python
+    import butterflyui as bui
+
+    toggle = bui.Switch(
+        value=True,
+        label="Notifications",
+        on_label="On",
+        off_label="Off",
+    )
+    ```
+
+    Args:
+        value:
+            Current boolean state.
+        label:
+            Label shown next to the switch.
+        inline:
+            If ``True``, aligns label and switch inline.
+        mode:
+            Rendering mode (for example ``"toggle"`` or ``"segmented"``
+            depending on renderer support).
+        on_label:
+            Label for the enabled state.
+        off_label:
+            Label for the disabled state.
+        segments:
+            Segment descriptors for segmented presentation mode.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+    """
 
     control_type = "switch"
 

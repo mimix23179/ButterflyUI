@@ -9,11 +9,74 @@ __all__ = ["DataGrid"]
 
 
 class DataGrid(Component):
-    """Structured data grid with sorting, filtering, and row selection.
+    """
+    Structured data grid with sorting, filtering, paging, and selection.
 
-    Unlike ``DataTable`` this wrapper is intentionally grid-focused: it defaults
-    to denser row spacing and enables optional toolbar, footer, and selection
-    telemetry in one payload.
+    ``DataGrid`` is the high-density tabular surface intended for data-heavy
+    experiences such as inventory editors, admin dashboards, and asset browsers.
+    Compared to lightweight table wrappers, it keeps all table behavior in one
+    payload: sorting, filter query state, selectable rows, striped styling, and
+    optional header/footer chrome.
+
+    Runtime methods such as :meth:`set_sort`, :meth:`set_filter`, and
+    :meth:`clear_selection` let Python handlers update the live widget after it
+    has already been rendered.
+
+    ```python
+    import butterflyui as bui
+
+    grid = bui.DataGrid(
+        columns=[
+            {"key": "name", "label": "Name"},
+            {"key": "qty", "label": "Qty"},
+        ],
+        rows=[
+            {"name": "Keyboard", "qty": 12},
+            {"name": "Mouse", "qty": 8},
+        ],
+        sortable=True,
+        filterable=True,
+        selectable=True,
+        page_size=25,
+        events=["change", "sort", "select"],
+    )
+    ```
+
+    Args:
+        columns:
+            Column descriptors consumed by the Flutter renderer.
+        rows:
+            Row objects rendered by the grid.
+        sortable:
+            Enables sort affordances in headers.
+        filterable:
+            Enables built-in query/filter UI behavior.
+        selectable:
+            Enables row selection state.
+        dense:
+            Reduces row height and cell spacing for compact layouts.
+        striped:
+            Alternates row background treatment for readability.
+        show_header:
+            If ``False``, header row is hidden.
+        show_footer:
+            If ``True``, footer/status area is rendered.
+        page_size:
+            Preferred rows-per-page when pagination is enabled by the client.
+        sort_column:
+            Initial column key to sort by.
+        sort_ascending:
+            Initial sort direction.
+        filter_query:
+            Initial query string applied by the renderer.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "data_grid"

@@ -9,7 +9,41 @@ __all__ = ["ReorderableListView"]
 
 
 class ReorderableListView(Component):
-    """Drag-and-drop reorderable list surface."""
+    """
+    Drag-and-drop list surface with runtime reorder state.
+
+    ``ReorderableListView`` renders an ordered item collection that users can
+    rearrange by dragging. Use :meth:`set_items` when the Python side needs to
+    replace the current sequence, and subscribe to reorder-related events to
+    persist the new order.
+
+    ```python
+    import butterflyui as bui
+
+    lst = bui.ReorderableListView(
+        items=[
+            {"id": "a", "label": "Backlog"},
+            {"id": "b", "label": "In Progress"},
+            {"id": "c", "label": "Done"},
+        ],
+        events=["reorder", "change"],
+    )
+    ```
+
+    Args:
+        items:
+            Ordered item descriptors rendered by the list.
+        dense:
+            If ``True``, uses compact row spacing.
+        events:
+            Event names the Flutter side should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+    """
 
     control_type = "reorderable_list_view"
 

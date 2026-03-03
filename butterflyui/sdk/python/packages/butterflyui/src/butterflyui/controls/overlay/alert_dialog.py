@@ -3,71 +3,69 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from .modal import Modal
+from .._shared import Component, merge_props
 
 __all__ = ["AlertDialog"]
 
 
-class AlertDialog(Modal):
+class AlertDialog(Component):
     """
-    Structured modal alert dialog with optional auto-composed body.
+    Dialog overlay for alerts, confirms, and modal prompts.
 
-    ``AlertDialog`` serializes as ``control_type="alert_dialog"`` and maps to
-    the modal overlay runtime with alert-friendly defaults.
-
-    Content modes:
-    - Provide ``child`` for full custom dialog content.
-    - Or provide ``title``/``content``/``actions`` and the wrapper will
-      auto-compose a vertical dialog body using ``Text``, ``Column``, and
-      ``Row`` controls.
-
-    ``modal`` is a convenience flag that inversely maps to ``dismissible``:
-    when ``modal=True``, outside-click dismissal is disabled unless explicitly
-    overridden.
+    ``AlertDialog`` is the canonical replacement for legacy ``modal`` control
+    APIs. You can provide a fully custom ``child`` node or let the wrapper
+    auto-compose a simple title/content/actions body.
 
     ```python
     import butterflyui as bui
 
-    bui.AlertDialog(
-        title="Delete item?",
+    dialog = bui.AlertDialog(
+        title="Delete project?",
         content="This action cannot be undone.",
-        actions=[
-            bui.TextButton("Cancel"),
-            bui.TextButton("Delete"),
-        ],
+        actions=["Cancel", "Delete"],
         open=True,
-        modal=True,
-        transition_type="fade",
+        dismissible=False,
     )
     ```
 
     Args:
         title:
-            Optional dialog title. Strings/numbers are auto-converted to ``Text``.
+            Title node or primitive text value.
         content:
-            Optional dialog body content. Strings/numbers are auto-converted to ``Text``.
+            Body node or primitive text value.
         actions:
-            Optional sequence of footer actions. Primitive values are converted to ``TextButton`` controls.
+            Footer action descriptors or primitive labels.
         child:
-            Fully custom dialog body control. If provided, auto-composition is skipped.
+            Fully custom dialog body control. If provided, auto composition is
+            skipped.
         open:
-            Whether the dialog is currently shown.
-        modal:
-            Convenience alias for modal behavior. When set, it drives default ``dismissible``.
+            If ``True``, the dialog is visible.
         dismissible:
-            Whether outside interactions can dismiss the dialog.
+            If ``True``, outside taps dismiss the dialog.
         close_on_escape:
-            Whether pressing Escape dismisses the dialog.
+            If ``True``, Escape dismisses the dialog.
         trap_focus:
-            Whether keyboard focus should remain inside the dialog while open.
+            If ``True``, keyboard focus remains inside the dialog while open.
         duration_ms:
             Open/close transition duration in milliseconds.
         transition:
-            Explicit transition configuration mapping forwarded to the runtime.
+            Explicit transition descriptor mapping.
         transition_type:
-            Named transition preset (for example ``"fade"``, ``"slide"``, ``"pop"``).
+            Named transition preset (for example ``"fade"``, ``"slide"``,
+            ``"pop"``, ``"pop_from_rect"``).
         source_rect:
-            Optional origin rectangle used by transitions that expand from a source.
+            Optional transition origin rectangle.
+        scrim_color:
+            Overlay scrim color.
+        modal:
+            Alias for modal behavior. When set, it drives default
+            ``dismissible`` (``modal=True`` implies ``dismissible=False``).
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "alert_dialog"
@@ -80,7 +78,6 @@ class AlertDialog(Modal):
         actions: Sequence[Any] | None = None,
         child: Any | None = None,
         open: bool | None = None,
-        modal: bool | None = None,
         dismissible: bool | None = None,
         close_on_escape: bool | None = None,
         trap_focus: bool | None = None,
@@ -88,6 +85,8 @@ class AlertDialog(Modal):
         transition: Mapping[str, Any] | None = None,
         transition_type: str | None = "fade",
         source_rect: Mapping[str, Any] | list[float] | tuple[float, ...] | None = None,
+        scrim_color: Any | None = None,
+        modal: bool | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -100,23 +99,28 @@ class AlertDialog(Modal):
                 content=content,
                 actions=actions,
             )
+
         resolved_dismissible = dismissible
         if resolved_dismissible is None and modal is not None:
             resolved_dismissible = not bool(modal)
+
         super().__init__(
             child=resolved_child,
-            open=open,
-            dismissible=resolved_dismissible,
-            close_on_escape=close_on_escape,
-            trap_focus=trap_focus,
-            duration_ms=duration_ms,
-            transition=transition,
-            transition_type=transition_type,
-            source_rect=source_rect,
-            props=props,
+            props=merge_props(
+                props,
+                open=open,
+                dismissible=resolved_dismissible,
+                close_on_escape=close_on_escape,
+                trap_focus=trap_focus,
+                duration_ms=duration_ms,
+                transition=transition,
+                transition_type=transition_type,
+                source_rect=source_rect,
+                scrim_color=scrim_color,
+                **kwargs,
+            ),
             style=style,
             strict=strict,
-            **kwargs,
         )
 
     @staticmethod
@@ -161,3 +165,22 @@ class AlertDialog(Modal):
         if not dialog_children:
             return None
         return Column(*dialog_children, spacing=12)
+
+    def set_open(self, session: Any, value: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_open", {"value": value})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "emit",
+            {"event": event, "payload": dict(payload or {})},
+        )
+

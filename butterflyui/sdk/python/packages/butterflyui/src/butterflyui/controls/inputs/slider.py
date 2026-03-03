@@ -9,10 +9,44 @@ __all__ = ["Slider"]
 
 
 class Slider(Component):
-    """Single-value or range-value slider.
+    """
+    Single-value or range-value slider input.
 
-    ``Slider`` now replaces ``span_slider``. Provide ``start`` and ``end`` to
-    enable range mode.
+    ``Slider`` is the merged replacement for legacy ``span_slider``. Use
+    ``value`` for standard single-knob behavior, or pass ``start`` and ``end``
+    for range mode with two thumbs.
+
+    ```python
+    import butterflyui as bui
+
+    volume = bui.Slider(value=65, min=0, max=100, divisions=20, label="Volume")
+    ```
+
+    Args:
+        value:
+            Single-value slider position.
+        start:
+            Range start value for dual-thumb mode.
+        end:
+            Range end value for dual-thumb mode.
+        min:
+            Minimum allowed value.
+        max:
+            Maximum allowed value.
+        divisions:
+            Number of discrete steps between ``min`` and ``max``.
+        label:
+            Optional label/caption text.
+        labels:
+            If ``True``, renderer may display value labels.
+        enabled:
+            If ``False``, the slider is non-interactive.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "slider"

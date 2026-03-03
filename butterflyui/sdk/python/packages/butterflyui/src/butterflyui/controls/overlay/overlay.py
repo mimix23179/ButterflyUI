@@ -1,19 +1,20 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["Overlay"]
 
+
 class Overlay(Component):
     """
-    General-purpose overlay that floats child content above the widget tree.
+    General-purpose overlay and overlay-stack host.
 
-    The runtime renders a layer on top of the widget tree, optionally
-    covering the background with a scrim. ``open`` controls visibility.
-    ``dismissible`` closes the overlay when the scrim is tapped.
-    ``alignment`` positions the floating content within the overlay area.
-    ``scrim_color`` tints the background.
+    ``Overlay`` now also absorbs legacy ``overlay_host`` capabilities. You can
+    render a single floating child (traditional overlay behavior) or provide a
+    ``base`` + ``overlays`` stack and select active layers.
 
     ```python
     import butterflyui as bui
@@ -36,8 +37,38 @@ class Overlay(Component):
             Alignment of the floating content within the overlay area.
         scrim_color:
             Color of the background scrim overlay.
+        base:
+            Base/background control for overlay-host style composition.
+        overlays:
+            Overlay layer controls composed above ``base``.
+        active_overlay:
+            Active overlay ID or list of active IDs.
+        active_id:
+            Alias for a single active overlay ID.
+        active_index:
+            Active overlay index.
+        show_all_overlays:
+            If ``True``, all overlays are visible simultaneously.
+        show_default_overlay:
+            If ``True``, first overlay is shown by default.
+        max_visible_overlays:
+            Maximum number of overlays visible at once.
+        transition:
+            Overlay transition descriptor mapping.
+        transition_type:
+            Named transition preset for overlay changes.
+        transition_ms:
+            Transition duration in milliseconds.
+        clip:
+            If ``True``, clip overlay layers to host bounds.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
     """
 
     control_type = "overlay"
@@ -50,6 +81,18 @@ class Overlay(Component):
         dismissible: bool | None = None,
         alignment: Any | None = None,
         scrim_color: Any | None = None,
+        base: Any | None = None,
+        overlays: list[Any] | None = None,
+        active_overlay: str | list[str] | tuple[str, ...] | None = None,
+        active_id: str | None = None,
+        active_index: int | None = None,
+        show_all_overlays: bool | None = None,
+        show_default_overlay: bool | None = None,
+        max_visible_overlays: int | None = None,
+        transition: Mapping[str, Any] | None = None,
+        transition_type: str | None = None,
+        transition_ms: int | None = None,
+        clip: bool | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -62,6 +105,18 @@ class Overlay(Component):
             dismissible=dismissible,
             alignment=alignment,
             scrim_color=scrim_color,
+            base=base,
+            overlays=overlays,
+            active_overlay=active_overlay,
+            active_id=active_id,
+            active_index=active_index,
+            show_all_overlays=show_all_overlays,
+            show_default_overlay=show_default_overlay,
+            max_visible_overlays=max_visible_overlays,
+            transition=transition,
+            transition_type=transition_type,
+            transition_ms=transition_ms,
+            clip=clip,
             events=events,
             **kwargs,
         )
@@ -72,6 +127,9 @@ class Overlay(Component):
 
     def set_open(self, session: Any, value: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"value": value})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

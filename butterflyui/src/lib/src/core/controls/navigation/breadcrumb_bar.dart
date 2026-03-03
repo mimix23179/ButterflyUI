@@ -4,18 +4,20 @@ import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-Widget buildBreadcrumbsControl(
+Widget buildBreadcrumbBarControl(
   String controlId,
   Map<String, Object?> props,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return Builder(
     builder: (context) {
-      final rawItems = props['items'] ?? props['crumbs'] ?? props['routes'];
+      final rawItems = props['items'] ??
+          props['crumbs'] ??
+          props['routes'] ??
+          props['path_items'];
       final items = <Map<String, Object?>>[];
       if (rawItems is List) {
-        for (var i = 0; i < rawItems.length; i += 1) {
-          final raw = rawItems[i];
+        for (final raw in rawItems) {
           if (raw is Map) {
             items.add(coerceObjectMap(raw));
           } else if (raw != null) {
@@ -46,10 +48,7 @@ Widget buildBreadcrumbsControl(
       final separator = props['separator']?.toString() ?? '/';
       final dense = props['dense'] == true || props['compact'] == true;
       final currentIndex = coerceOptionalInt(props['current_index']);
-      final maxItems = (coerceOptionalInt(props['max_items']) ?? 0).clamp(
-        0,
-        99,
-      );
+      final maxItems = (coerceOptionalInt(props['max_items']) ?? 0).clamp(0, 99);
 
       final display = <Map<String, Object?>>[];
       if (maxItems > 0 && items.length > maxItems && maxItems >= 2) {

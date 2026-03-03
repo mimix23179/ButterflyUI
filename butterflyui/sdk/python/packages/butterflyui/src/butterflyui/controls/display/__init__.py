@@ -6,7 +6,6 @@ from .bar_plot import BarPlot
 from .bubble import Bubble
 from .canvas import Canvas
 from .chart import Chart
-from .diff import Diff
 from .display import Display
 from .divider import Divider
 from .emoji_icon import EmojiIcon
@@ -33,7 +32,6 @@ __all__ = [
     "Bubble",
     "Canvas",
     "Chart",
-    "Diff",
     "Display",
     "Divider",
     "EmojiIcon",
