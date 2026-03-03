@@ -205,8 +205,9 @@ FontWeight? candyParseWeight(Object? value) {
   if (value == null) return null;
   final v = value.toString();
   final num? weight = coerceDouble(v);
-  if (weight != null)
+  if (weight != null) {
     return FontWeight.values[(weight / 100).round().clamp(1, 9)];
+  }
   return switch (candyNorm(v)) {
     '100' || 'thin' => FontWeight.w100,
     '200' || 'extralight' => FontWeight.w200,
@@ -302,6 +303,94 @@ Border? candyCoerceBorder(Map<String, Object?> m) {
 String candyNorm(String v) =>
     v.replaceAll('-', '_').replaceAll(' ', '_').toLowerCase();
 
+String _normalizeCandyModule(Object? value) {
+  if (value == null) return '';
+  final normalized = value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+
+  const aliases = <String, String>{
+    'candy': 'container',
+    'layout': 'container',
+    'layout_primitive': 'container',
+    'layout_primitives': 'container',
+    'layout_system': 'container',
+    'surface_primitives': 'surface',
+    'surface_system': 'surface',
+    'surfaces': 'surface',
+    'typography': 'text',
+    'typography_system': 'text',
+    'decoration_system': 'decorated_box',
+    'style': 'decorated_box',
+    'styling': 'decorated_box',
+    'decoration': 'decorated_box',
+    'decorated': 'decorated_box',
+    'decoratedbox': 'decorated_box',
+    'aspectratio': 'aspect_ratio',
+    'overflowbox': 'overflow_box',
+    'fittedbox': 'fitted_box',
+    'buttonstyle': 'button_style',
+    'particle': 'particles',
+    'visual_modifiers': 'effects',
+    'effects_pipeline': 'effects',
+    'motion_system': 'motion',
+    'animation_system': 'motion',
+    'interaction': 'pressable',
+    'interaction_wrapper': 'pressable',
+    'interaction_wrappers': 'pressable',
+    'pressable_wrapper': 'pressable',
+    'gesture': 'gesture_area',
+    'gesture_wrapper': 'gesture_area',
+    'hover': 'hover_region',
+    'hover_wrapper': 'hover_region',
+    'split': 'split_pane',
+    'layers': 'layer',
+    'view': 'viewport',
+  };
+
+  return aliases[normalized] ?? normalized;
+}
+
+Map<String, Object?> _bridgeCandyModuleProps(
+  String module,
+  Map<String, Object?> rawProps,
+) {
+  final bridged = Map<String, Object?>.from(rawProps);
+  bridged['module'] = module;
+
+  switch (module) {
+    case 'page':
+      bridged.putIfAbsent('safe_area', () => true);
+      break;
+    case 'surface':
+      if (bridged['bgcolor'] == null && bridged['background'] != null) {
+        bridged['bgcolor'] = bridged['background'];
+      }
+      break;
+    case 'button':
+      if (bridged['text'] == null && bridged['label'] != null) {
+        bridged['text'] = bridged['label'];
+      }
+      break;
+    case 'text':
+      if (bridged['text'] == null && bridged['label'] != null) {
+        bridged['text'] = bridged['label'];
+      }
+      if (bridged['text'] == null && bridged['value'] != null) {
+        bridged['text'] = bridged['value'];
+      }
+      break;
+    case 'effects':
+      bridged.putIfAbsent('overlay', () => true);
+      break;
+  }
+
+  return bridged;
+}
+
 // ============================================================================
 // Candy Control Builders
 // ============================================================================
@@ -330,7 +419,8 @@ Widget _buildPage(CandyContext ctx) {
   final child = candyFirstChildOrEmpty(ctx.rawChildren, ctx.buildChild);
   // Apply page-specific styling if needed
   return Scaffold(
-    backgroundColor: Colors.transparent, // Let underlying container handle background
+    backgroundColor:
+        Colors.transparent, // Let underlying container handle background
     body: SafeArea(child: child),
   );
 }
@@ -856,12 +946,12 @@ Widget? buildCandyControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   Widget Function(Map<String, Object?> control) buildChild,
 ) {
-  final module =
-      merged['module']?.toString() ?? merged['layout']?.toString() ?? '';
-  final resolvedModule = candyNorm(module);
+  final rawModule = merged['module'] ?? merged['layout'];
+  final resolvedModule = _normalizeCandyModule(rawModule);
   final effectiveModule = resolvedModule.isEmpty ? 'container' : resolvedModule;
 
   final normalized = Map<String, Object?>.from(merged);
+  normalized['module'] = effectiveModule;
   if (normalized['main_axis'] == null && normalized['main'] != null) {
     normalized['main_axis'] = normalized['main'];
   }
@@ -875,36 +965,41 @@ Widget? buildCandyControl(
     normalized['run_spacing'] = normalized['runSpacing'];
   }
 
-  // Build style from tokens - create a fallback ButterflyUIThemeTokens
-  final style = _createThemeTokensFromTokens(tokens);
+  final bridged = _bridgeCandyModuleProps(effectiveModule, normalized);
 
-  final ctx = CandyContext(
-    controlId: controlId,
-    merged: normalized,
-    rawChildren: rawChildren,
-    tokens: tokens,
-    style: style,
-    sendEvent: sendEvent,
-    registerInvokeHandler: registerInvokeHandler,
-    unregisterInvokeHandler: unregisterInvokeHandler,
-    buildChild: buildChild,
+  return Builder(
+    builder: (context) {
+      final scoped = _CandyScopeWidget.of(context);
+      final activeTokens = scoped?.tokens ?? tokens;
+      final style = _createThemeTokensFromTokens(activeTokens);
+
+      final ctx = CandyContext(
+        controlId: controlId,
+        merged: bridged,
+        rawChildren: rawChildren,
+        tokens: activeTokens,
+        style: style,
+        sendEvent: sendEvent,
+        registerInvokeHandler: registerInvokeHandler,
+        unregisterInvokeHandler: unregisterInvokeHandler,
+        buildChild: buildChild,
+      );
+
+      final built =
+          buildCandyLayoutModule(effectiveModule, ctx) ??
+          buildCandyInteractiveModule(effectiveModule, ctx) ??
+          buildCandyDecorationModule(effectiveModule, ctx) ??
+          buildCandyEffectsModule(effectiveModule, ctx) ??
+          buildCandyMotionModule(effectiveModule, ctx);
+      if (built != null) return built;
+      return buildChild({
+        'id': controlId,
+        'type': effectiveModule,
+        'props': bridged,
+        'children': rawChildren,
+      });
+    },
   );
-
-  // Chain through all module builders
-  final built =
-      buildCandyLayoutModule(effectiveModule, ctx) ??
-      buildCandyInteractiveModule(effectiveModule, ctx) ??
-      buildCandyDecorationModule(effectiveModule, ctx) ??
-      buildCandyEffectsModule(effectiveModule, ctx) ??
-      buildCandyMotionModule(effectiveModule, ctx);
-  if (built != null) return built;
-  if (effectiveModule == 'candy') return null;
-  return buildChild({
-    'id': controlId,
-    'type': effectiveModule,
-    'props': normalized,
-    'children': rawChildren,
-  });
 }
 
 // ============================================================================
@@ -935,8 +1030,6 @@ Widget _buildCandyScope(
   final tokens = tokensMap is Map
       ? CandyTokens.fromMap(coerceObjectMap(tokensMap))
       : context.tokens;
-
-  final theme = tokens.buildTheme();
 
   // Get the child
   final childMaps = context.childMapsOf(control);
@@ -1068,11 +1161,7 @@ Widget _buildCandyScope(
   }
 
   // Build theme data
-  return _CandyScopeWidget(
-    tokens: tokens,
-    isDark: isDark,
-    child: childWidget,
-  );
+  return _CandyScopeWidget(tokens: tokens, isDark: isDark, child: childWidget);
 }
 
 class _CandyScopeWidget extends InheritedWidget {
@@ -1084,6 +1173,10 @@ class _CandyScopeWidget extends InheritedWidget {
     required this.isDark,
     required super.child,
   });
+
+  static _CandyScopeWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_CandyScopeWidget>();
+  }
 
   @override
   bool updateShouldNotify(_CandyScopeWidget oldWidget) {

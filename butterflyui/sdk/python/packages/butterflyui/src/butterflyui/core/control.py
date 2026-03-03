@@ -31,6 +31,17 @@ _LAYOUT_PARAM_SPECS: tuple[tuple[str, Any, Any], ...] = (
     ("animation", Any, None),
 )
 _LAYOUT_KEYS = {name for name, _, _ in _LAYOUT_PARAM_SPECS}
+_AUTOPROP_EXCLUDE_NAMES = {
+    "self",
+    "props",
+    "style",
+    "strict",
+    "child",
+    "children",
+    "children_args",
+    "kwargs",
+    "args",
+}
 _BUTTERFLYUI_ROOT = Path(__file__).resolve().parent.parent
 _STDLIB_ROOTS: tuple[Path, ...] = ()
 try:
@@ -143,6 +154,40 @@ def _merge_props(target: dict[str, Any], extra: Mapping[str, Any], *, override: 
             continue
         if override or key not in target:
             target[key] = value
+
+
+def _backfill_bound_init_props(
+    target: dict[str, Any],
+    signature: inspect.Signature,
+    bound_arguments: Mapping[str, Any],
+) -> None:
+    if not isinstance(target, dict):
+        return
+    for name, parameter in signature.parameters.items():
+        if name in _AUTOPROP_EXCLUDE_NAMES:
+            continue
+        if parameter.kind in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        ):
+            continue
+        if name not in bound_arguments:
+            continue
+        value = bound_arguments[name]
+        if value is None:
+            continue
+        if callable(value):
+            continue
+        candidate_keys = [name]
+        if name.endswith("_") and len(name) > 1:
+            candidate_keys.append(name[:-1])
+        if name == "from_":
+            candidate_keys.append("from")
+        for key in candidate_keys:
+            if not key:
+                continue
+            if key not in target:
+                target[key] = value
 
 
 def _coerce_state_value(value: Any) -> tuple[bool, Any]:
@@ -332,6 +377,14 @@ def _build_schema_signature(signature: inspect.Signature, control_type: str) -> 
 
 @dataclass(slots=True, init=False)
 class Control:
+    """Base runtime control node serialized to the Flutter client.
+
+    Subclass constructors can stay ergonomic: when a subclass omits
+    forwarding some init arguments into ``merge_props(...)``, ButterflyUI
+    auto-backfills explicitly passed constructor args into ``props``.
+    This keeps Python signatures/docstrings and runtime-usable arguments
+    aligned across the large control catalog.
+    """
     control_type: str
     control_id: str = field(default_factory=lambda: uuid.uuid4().hex)
     props: dict[str, Any] = field(default_factory=dict)
@@ -528,6 +581,8 @@ class Control:
 
         @wraps(init)
         def wrapped(self: "Control", *args: Any, **kwargs: Any) -> None:
+            init_args = args
+            init_kwargs = dict(kwargs)
             extra_props = None
             if "props" not in param_names:
                 extra_props = kwargs.pop("props", None)
@@ -568,6 +623,16 @@ class Control:
                 _merge_props(self.props, extra_kwargs, override=False)
             if layout_kwargs:
                 _apply_layout_props(self.props, layout_kwargs)
+            try:
+                bound = signature.bind_partial(self, *init_args, **init_kwargs)
+            except Exception:
+                bound = None
+            if bound is not None:
+                _backfill_bound_init_props(
+                    self.props,
+                    signature,
+                    bound.arguments,
+                )
 
             if strict:
                 from .schema import ensure_valid_props

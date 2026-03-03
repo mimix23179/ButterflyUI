@@ -235,6 +235,14 @@ def collect_children(
 
 
 class Component(CoreComponent):
+    """Base class for all Python-side ButterflyUI controls.
+
+    Any non-``None`` keyword arguments are merged into the outgoing
+    ``props`` payload. Combined with control-level constructors and
+    core ``Control`` auto-backfill, this keeps Python docstring/init args
+    and Dart runtime props loosely coupled: newly added runtime
+    properties can be forwarded without waiting for per-control rewrites.
+    """
     control_type: str = ""
 
     def __init__(

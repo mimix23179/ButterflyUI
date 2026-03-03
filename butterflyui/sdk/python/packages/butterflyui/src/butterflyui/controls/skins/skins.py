@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import copy
+import json
 from dataclasses import dataclass, field
 from collections.abc import Mapping, Iterable
+from pathlib import Path
 from typing import Any
 
 from .._shared import Component, merge_props
@@ -11,6 +14,18 @@ __all__ = [
     "SkinsScope",
     "SkinsTokens",
     "SkinsPresets",
+    "SkinsComponentSpec",
+    "create_skin",
+    "register_skin",
+    "remove_skin",
+    "get_skin",
+    "list_skins",
+    "list_custom_skins",
+    "export_skin_registry",
+    "load_skin_registry",
+    "skins_from_candy_tokens",
+    "create_skin_from_candy",
+    "skins_component",
     "skins_row",
     "skins_column",
     "skins_container",
@@ -19,16 +34,158 @@ __all__ = [
 ]
 
 
+_CUSTOM_SKINS: dict[str, dict[str, Any]] = {}
+
+
+def _normalize_skin_name(value: Any | None) -> str:
+    if value is None:
+        return ""
+    return str(value).strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _snapshot_control_value(value: Any) -> Any:
+    from ...core.control import coerce_json_value
+
+    return coerce_json_value(value)
+
+
+def _coerce_tokens_map(tokens: SkinsTokens | Mapping[str, Any] | Any | None) -> dict[str, Any]:
+    if tokens is None:
+        return {}
+    if isinstance(tokens, SkinsTokens):
+        return tokens.to_json()
+    if isinstance(tokens, Mapping):
+        return dict(tokens)
+    if hasattr(tokens, "to_json"):
+        try:
+            payload = tokens.to_json()
+            if isinstance(payload, Mapping):
+                return dict(payload)
+        except Exception:
+            return {}
+    return {}
+
+
+def _merge_dicts(
+    left: Mapping[str, Any] | None,
+    right: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    merged: dict[str, Any] = {}
+    if left:
+        merged.update(dict(left))
+    if right:
+        merged.update(dict(right))
+    return merged
+
+
+def _normalize_skins_module(value: Any | None) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip().lower().replace("-", "_").replace(" ", "_")
+    aliases = {
+        "skins": "container",
+        "layout": "container",
+        "surface": "container",
+        "box": "container",
+        "alignment": "align",
+        "btn": "button",
+        "decorated_box": "decorated",
+        "decoratedbox": "decorated",
+        "selector": "column",
+        "preset": "card",
+        "create_skin": "card",
+        "edit_skin": "card",
+        "delete_skin": "button",
+        "apply": "button",
+        "clear": "button",
+        "token_mapper": "container",
+        "token_schema": "container",
+        "token_validator": "container",
+        "token_exporters": "container",
+        "token_exporter": "container",
+        "token_pipeline": "container",
+        "colors": "gradient",
+        "fonts": "container",
+        "icons": "container",
+        "background": "decorated",
+        "shadow": "border",
+        "outline": "border",
+        "materials": "decorated",
+        "shaders": "effects",
+        "interaction": "button",
+        "responsive": "container",
+        "editor": "column",
+        "effect_editor": "effects",
+        "particle_editor": "particles",
+        "shader_editor": "effects",
+        "material_editor": "decorated",
+        "icon_editor": "container",
+        "font_editor": "container",
+        "color_editor": "gradient",
+        "background_editor": "decorated",
+        "border_editor": "border",
+        "shadow_editor": "border",
+        "outline_editor": "border",
+    }
+    return aliases.get(normalized, normalized)
+
+
+def _raw_skins_module_key(value: Any | None) -> str:
+    if value is None:
+        return ""
+    return str(value).strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _bridge_skins_module_props(
+    source_module: str,
+    module: str | None,
+    raw_props: Mapping[str, Any],
+) -> dict[str, Any]:
+    bridged = dict(raw_props)
+    if module:
+        bridged["module"] = module
+
+    if module == "button" and bridged.get("text") is None and bridged.get("label") is not None:
+        bridged["text"] = bridged.get("label")
+    if module == "decorated" and bridged.get("bgcolor") is None and bridged.get("background") is not None:
+        bridged["bgcolor"] = bridged.get("background")
+
+    if source_module == "selector":
+        bridged.setdefault("spacing", 8)
+    elif source_module in {"preset", "create_skin", "edit_skin"}:
+        bridged.setdefault("padding", {"all": 12})
+        bridged.setdefault("radius", 12)
+    elif source_module == "apply":
+        bridged.setdefault("text", "Apply Skin")
+        bridged.setdefault("variant", "filled")
+    elif source_module == "clear":
+        bridged.setdefault("text", "Clear")
+        bridged.setdefault("variant", "outlined")
+    elif source_module == "delete_skin":
+        bridged.setdefault("text", "Delete Skin")
+        bridged.setdefault("variant", "outlined")
+    elif source_module in {"color_editor", "colors"}:
+        if (
+            bridged.get("gradient") is None
+            and bridged.get("bgcolor") is None
+            and bridged.get("background") is None
+        ):
+            bridged["gradient"] = {"colors": ["#6366F1", "#8B5CF6"]}
+    return bridged
+
+
 @dataclass
 class SkinsTokens:
     """
-    Flat design-token store for a Skins skin, used by ``SkinsScope``.
+    Serializable token map for the Skins system.
 
-    ``data`` holds raw key-value pairs describing colors, radii, spacing,
-    and effects. Use ``from_dict`` to create from an existing mapping
-    and ``to_json`` to serialise back to a plain dict.
+    ``SkinsTokens`` stores the resolved visual identity data used by
+    ``SkinsScope`` and ``Skins`` controls. Typical sections include
+    ``background``, ``surface``, ``text``, ``radius``, ``spacing``, and
+    ``effects``.
 
-    See ``SkinsPresets`` for ready-made named skin presets.
+    Use ``from_dict`` to construct from an existing mapping and ``to_json``
+    when preparing data for runtime serialization.
 
     ```python
     import butterflyui as bui
@@ -40,6 +197,7 @@ class SkinsTokens:
     })
     ```
     """
+
     data: dict[str, Any] = field(default_factory=dict)
 
     @staticmethod
@@ -52,27 +210,19 @@ class SkinsTokens:
 
 class SkinsPresets:
     """
-    Factory providing named built-in skin token presets.
+    Factory for built-in skin token presets.
 
-    Each static method returns a ``SkinsTokens`` instance ready to pass
-    to ``SkinsScope(tokens=...)``. Available presets:
+    Each static method returns a ``SkinsTokens`` instance ready to pass to
+    ``SkinsScope(tokens=...)``.
 
-    * ``default()`` — light neutral palette with indigo primary.
-    * ``shadow()`` — deep navy dark theme with medium-blue accent.
-    * ``fire()`` — dark red/orange high-contrast fire theme.
-    * ``earth()`` — warm earthtone dark theme.
-    * ``gaming()`` — dark neon green/cyan gaming aesthetic.
-
-    ```python
-    import butterflyui as bui
-
-    bui.SkinsScope(
-        bui.Skins(bui.Text("Gaming!"), module="card"),
-        tokens=bui.SkinsPresets.gaming(),
-        brightness="dark",
-    )
-    ```
+    Available presets:
+    - ``default()``: neutral light base
+    - ``shadow()``: dark blue/purple profile
+    - ``fire()``: warm red/orange profile
+    - ``earth()``: muted earthy profile
+    - ``gaming()``: neon cyber profile
     """
+
     @staticmethod
     def default() -> SkinsTokens:
         return SkinsTokens(
@@ -164,14 +314,380 @@ class SkinsPresets:
         )
 
 
+def _resolve_preset_tokens(name: str) -> SkinsTokens | None:
+    normalized = _normalize_skin_name(name)
+    if not normalized:
+        return None
+    if normalized == "default":
+        return SkinsPresets.default()
+    if normalized == "shadow":
+        return SkinsPresets.shadow()
+    if normalized == "fire":
+        return SkinsPresets.fire()
+    if normalized == "earth":
+        return SkinsPresets.earth()
+    if normalized in {"gaming", "cyber"}:
+        return SkinsPresets.gaming()
+    return None
+
+
+def list_custom_skins() -> list[str]:
+    """
+    List user-registered custom skin names.
+    """
+
+    return sorted(_CUSTOM_SKINS.keys())
+
+
+def list_skins() -> list[str]:
+    """
+    List all known skins: built-in presets and registered custom skins.
+    """
+
+    names = ["default", "shadow", "fire", "earth", "gaming"]
+    for name in list_custom_skins():
+        if name not in names:
+            names.append(name)
+    return names
+
+
+def get_skin(name: str) -> SkinsTokens | None:
+    """
+    Return skin tokens by name from custom registry or built-in presets.
+    """
+
+    normalized = _normalize_skin_name(name)
+    custom = _CUSTOM_SKINS.get(normalized)
+    if custom is not None:
+        payload = custom.get("tokens")
+        if isinstance(payload, Mapping):
+            return SkinsTokens(dict(payload))
+    return _resolve_preset_tokens(normalized)
+
+
+def register_skin(
+    name: str,
+    tokens: SkinsTokens | Mapping[str, Any] | Any,
+    *,
+    metadata: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Register or replace a custom skin in the Python-side skin registry.
+
+    Registered skins can be activated by name via ``SkinsScope(skin=...)``.
+    The wrapper injects the token payload so Dart receives renderable values.
+    """
+
+    normalized = _normalize_skin_name(name)
+    if not normalized:
+        raise ValueError("Skin name must not be empty.")
+    token_map = _coerce_tokens_map(tokens)
+    if not token_map:
+        raise ValueError("Skin tokens are required when registering a custom skin.")
+    spec: dict[str, Any] = {"name": normalized, "tokens": token_map}
+    if metadata:
+        spec["metadata"] = dict(metadata)
+    _CUSTOM_SKINS[normalized] = spec
+    return copy.deepcopy(spec)
+
+
+def remove_skin(name: str) -> bool:
+    """
+    Remove a custom skin from the registry. Returns ``True`` if removed.
+    """
+
+    normalized = _normalize_skin_name(name)
+    if normalized in _CUSTOM_SKINS:
+        del _CUSTOM_SKINS[normalized]
+        return True
+    return False
+
+
+def create_skin(
+    name: str,
+    *,
+    base: str | None = None,
+    tokens: SkinsTokens | Mapping[str, Any] | Any | None = None,
+    overrides: Mapping[str, Any] | None = None,
+    metadata: Mapping[str, Any] | None = None,
+    register: bool = True,
+) -> SkinsTokens:
+    """
+    Build a custom skin token set and optionally register it.
+
+    ``base`` can reference a built-in preset or another registered custom skin.
+    ``tokens`` and ``overrides`` are merged on top of the base in that order.
+    """
+
+    merged: dict[str, Any] = {}
+    if base:
+        base_tokens = get_skin(base)
+        if base_tokens is None:
+            raise ValueError(f"Unknown base skin '{base}'.")
+        merged.update(base_tokens.to_json())
+    merged.update(_coerce_tokens_map(tokens))
+    if overrides:
+        merged.update(dict(overrides))
+    if register:
+        register_skin(name, merged, metadata=metadata)
+    return SkinsTokens(merged)
+
+
+def export_skin_registry(
+    path: str | Path | None = None,
+    *,
+    include_presets: bool = False,
+) -> dict[str, Any]:
+    """
+    Export skin registry content as a serializable mapping.
+
+    If ``path`` is provided, JSON is written to disk and the payload is still
+    returned.
+    """
+
+    payload: dict[str, Any] = {}
+    if include_presets:
+        for preset in ("default", "shadow", "fire", "earth", "gaming"):
+            resolved = get_skin(preset)
+            if resolved is not None:
+                payload[preset] = {"name": preset, "tokens": resolved.to_json()}
+    for name, spec in _CUSTOM_SKINS.items():
+        payload[name] = copy.deepcopy(spec)
+    if path is not None:
+        output = Path(path).expanduser()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(payload, indent=2, ensure_ascii=True), encoding="utf-8")
+    return payload
+
+
+def load_skin_registry(
+    source: str | Path | Mapping[str, Any],
+    *,
+    clear_existing: bool = False,
+) -> dict[str, dict[str, Any]]:
+    """
+    Import custom skin specs from a JSON file path or mapping payload.
+    """
+
+    raw: Mapping[str, Any]
+    if isinstance(source, Mapping):
+        raw = source
+    else:
+        path = Path(source).expanduser()
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, Mapping):
+            raise ValueError("Skin registry file must contain a JSON object.")
+        raw = loaded
+
+    if clear_existing:
+        _CUSTOM_SKINS.clear()
+
+    for key, value in raw.items():
+        name = _normalize_skin_name(key)
+        if not name:
+            continue
+        if isinstance(value, Mapping) and "tokens" in value:
+            tokens_payload = value.get("tokens")
+            metadata = value.get("metadata")
+        else:
+            tokens_payload = value
+            metadata = None
+        if not isinstance(tokens_payload, Mapping):
+            continue
+        register_skin(name, tokens_payload, metadata=metadata if isinstance(metadata, Mapping) else None)
+    return {name: copy.deepcopy(spec) for name, spec in _CUSTOM_SKINS.items()}
+
+
+def skins_from_candy_tokens(
+    tokens: Mapping[str, Any] | Any,
+    *,
+    overrides: Mapping[str, Any] | None = None,
+) -> SkinsTokens:
+    """
+    Convert Candy token/theme payloads into Skins-compatible token buckets.
+
+    This enables workflows where users author style packs in Candy and then
+    reuse those design tokens as Skins identities.
+    """
+
+    if hasattr(tokens, "to_json"):
+        raw_candidate = tokens.to_json()
+    else:
+        raw_candidate = tokens
+    raw = dict(raw_candidate) if isinstance(raw_candidate, Mapping) else {}
+
+    colors = raw.get("colors")
+    if isinstance(colors, Mapping):
+        color_map = dict(colors)
+    else:
+        color_map = {}
+
+    radii = raw.get("radii")
+    if not isinstance(radii, Mapping):
+        radii = raw.get("radius") if isinstance(raw.get("radius"), Mapping) else {}
+    spacing = raw.get("spacing") if isinstance(raw.get("spacing"), Mapping) else {}
+    effects = raw.get("effects") if isinstance(raw.get("effects"), Mapping) else {}
+
+    result: dict[str, Any] = {
+        "background": color_map.get("background") or raw.get("background"),
+        "surface": color_map.get("surface") or raw.get("surface"),
+        "surfaceAlt": color_map.get("surfaceAlt") or raw.get("surfaceAlt"),
+        "text": color_map.get("text") or raw.get("text"),
+        "mutedText": color_map.get("mutedText") or raw.get("mutedText"),
+        "border": color_map.get("border") or raw.get("border"),
+        "primary": color_map.get("primary") or raw.get("primary"),
+        "secondary": color_map.get("secondary") or raw.get("secondary"),
+        "success": color_map.get("success") or raw.get("success"),
+        "warning": color_map.get("warning") or raw.get("warning"),
+        "info": color_map.get("info") or raw.get("info"),
+        "error": color_map.get("error") or raw.get("error"),
+        "radius": dict(radii),
+        "spacing": dict(spacing),
+        "effects": dict(effects),
+    }
+    result = {key: value for key, value in result.items() if value is not None}
+    if overrides:
+        result.update(dict(overrides))
+    return SkinsTokens(result)
+
+
+def create_skin_from_candy(
+    name: str,
+    candy_tokens: Mapping[str, Any] | Any,
+    *,
+    overrides: Mapping[str, Any] | None = None,
+    metadata: Mapping[str, Any] | None = None,
+    register: bool = True,
+) -> SkinsTokens:
+    """
+    Convert Candy tokens/theme data into Skins tokens and optionally register.
+    """
+
+    converted = skins_from_candy_tokens(candy_tokens, overrides=overrides)
+    if register:
+        register_skin(name, converted, metadata=metadata)
+    return converted
+
+
+@dataclass
+class SkinsComponentSpec:
+    """
+    Reusable custom component template for Skins-based UI composition.
+    """
+
+    module: str = "container"
+    props: dict[str, Any] = field(default_factory=dict)
+    style: dict[str, Any] = field(default_factory=dict)
+    children: list[Any] = field(default_factory=list)
+    scope_skin: str | None = None
+    scope_tokens: dict[str, Any] | None = None
+    scope_brightness: str | None = None
+    strict: bool = False
+
+    def add_children(self, *children: Any) -> "SkinsComponentSpec":
+        """
+        Append child controls, snapshotted to JSON-safe control payloads.
+        """
+
+        for child in children:
+            self.children.append(_snapshot_control_value(child))
+        return self
+
+    def instantiate(
+        self,
+        *children: Any,
+        module: str | None = None,
+        props: Mapping[str, Any] | None = None,
+        style: Mapping[str, Any] | None = None,
+        strict: bool | None = None,
+        wrap_scope: bool | None = None,
+        child: Any | None = None,
+        **kwargs: Any,
+    ) -> Skins | SkinsScope:
+        """
+        Build a ``Skins`` node from this spec with optional overrides.
+        """
+
+        resolved_module = _normalize_skins_module(module or self.module) or "container"
+        merged_props = _merge_dicts(self.props, props)
+        merged_style = _merge_dicts(self.style, style)
+        runtime_children = copy.deepcopy(self.children)
+        if children:
+            runtime_children.extend(children)
+
+        control = Skins(
+            *runtime_children,
+            module=resolved_module,
+            child=child,
+            props=merged_props or None,
+            style=merged_style or None,
+            strict=self.strict if strict is None else bool(strict),
+            **kwargs,
+        )
+        should_wrap_scope = (
+            wrap_scope
+            if wrap_scope is not None
+            else (
+                self.scope_skin is not None
+                or self.scope_tokens is not None
+                or self.scope_brightness is not None
+            )
+        )
+        if not should_wrap_scope:
+            return control
+        return SkinsScope(
+            control,
+            skin=self.scope_skin,
+            tokens=copy.deepcopy(self.scope_tokens) if self.scope_tokens is not None else None,
+            brightness=self.scope_brightness,
+        )
+
+
+def skins_component(
+    *children: Any,
+    module: str = "container",
+    props: Mapping[str, Any] | None = None,
+    style: Mapping[str, Any] | None = None,
+    scope_skin: str | None = None,
+    scope_tokens: SkinsTokens | Mapping[str, Any] | None = None,
+    scope_brightness: str | None = None,
+    strict: bool = False,
+    **kwargs: Any,
+) -> SkinsComponentSpec:
+    """
+    Build a reusable ``SkinsComponentSpec`` from controls and base props.
+    """
+
+    resolved_tokens: dict[str, Any] | None = None
+    if isinstance(scope_tokens, SkinsTokens):
+        resolved_tokens = scope_tokens.to_json()
+    elif isinstance(scope_tokens, Mapping):
+        resolved_tokens = dict(scope_tokens)
+
+    merged_props = merge_props(props, **kwargs)
+    spec = SkinsComponentSpec(
+        module=_normalize_skins_module(module) or "container",
+        props=dict(merged_props),
+        style=dict(style) if style is not None else {},
+        scope_skin=_normalize_skin_name(scope_skin) or None,
+        scope_tokens=resolved_tokens,
+        scope_brightness=scope_brightness,
+        strict=strict,
+    )
+    spec.add_children(*children)
+    return spec
+
+
 class SkinsScope(Component):
     """
-    Skin-scope wrapper that injects a named or custom skin token set.
+    Scope wrapper that provides active skin tokens to descendants.
 
-    The runtime resolves the active ``SkinsTokens`` from either the named
-    ``skin`` preset or a custom ``tokens`` mapping, then provides them to
-    all descendant ``Skins`` controls via an ``InheritedWidget``.
-    ``brightness`` overrides the light/dark mode of the resolved skin.
+    ``SkinsScope`` selects and injects the current skin context for nested
+    ``Skins`` nodes. You can choose a preset with ``skin=...`` and optionally
+    override with ``tokens=...``.
+
+    ``brightness`` controls whether the runtime should treat the scoped skin
+    as light or dark for theme-derived defaults.
 
     ```python
     import butterflyui as bui
@@ -185,14 +701,16 @@ class SkinsScope(Component):
 
     Args:
         skin:
-            Named built-in skin preset. Values: ``"default"``,
+            Named built-in skin preset. Values include ``"default"``,
             ``"shadow"``, ``"fire"``, ``"earth"``, ``"gaming"``.
+            Custom names registered through ``register_skin``/``create_skin``
+            are also supported.
         tokens:
-            Custom ``SkinsTokens`` instance or raw mapping that overrides
-            the preset.
+            Custom ``SkinsTokens`` instance or raw mapping.
         brightness:
             Color mode override. Values: ``"light"``, ``"dark"``.
     """
+
 
     control_type = "skins_scope"
 
@@ -213,9 +731,16 @@ class SkinsScope(Component):
             resolved_tokens = tokens.to_json()
         elif tokens is not None:
             resolved_tokens = dict(tokens)
+        normalized_skin = _normalize_skin_name(skin) or None
+        if resolved_tokens is None and normalized_skin is not None:
+            custom = _CUSTOM_SKINS.get(normalized_skin)
+            if custom is not None:
+                token_payload = custom.get("tokens")
+                if isinstance(token_payload, Mapping):
+                    resolved_tokens = dict(token_payload)
         merged = merge_props(
             props,
-            skin=skin,
+            skin=normalized_skin,
             tokens=resolved_tokens,
             brightness=brightness,
             **kwargs,
@@ -225,21 +750,23 @@ class SkinsScope(Component):
 
 class Skins(Component):
     """
-    Skin-aware compositor that renders a named layout or decoration module.
+    Umbrella Skins control that renders skin modules.
 
-    The Flutter runtime resolves ambient ``SkinsScope`` tokens and dispatches
-    to the module named by ``module``. Layout modules: ``"row"``,
-    ``"column"``, ``"stack"``, ``"wrap"``, ``"align"`` / ``"alignment"``,
-    ``"container"``, ``"card"``, ``"button"`` / ``"btn"``, ``"badge"``,
-    ``"border"``, ``"page"``. Decoration modules: ``"gradient"``,
-    ``"decorated"``, ``"clip"``. Effects and motion modules are also
-    available.
+    ``Skins`` dispatches to one module at a time and is the runtime-facing
+    entry point for skin-aware UI composition.
 
-    Convenience factories ``skins_row``, ``skins_column``,
-    ``skins_container``, ``skins_card``, and ``skins_transition`` pre-set
-    the ``module`` prop.
+    Common module groups:
+    - layout: ``row``, ``column``, ``stack``, ``wrap``, ``container``, ``card``
+    - decoration: ``gradient``, ``decorated``, ``clip``, ``border``
+    - effects/motion: ``effects``, ``particles``, ``animation``, ``transition``
 
-    ``state`` and ``states`` enable state-machine-driven styling.
+    Module aliases are normalized before serialization. For example,
+    ``decorated_box`` maps to ``decorated``, ``apply`` maps to ``button``, and
+    ``color_editor`` maps to ``gradient``.
+
+    The constructor also bridges some common props, for example:
+    - ``label`` -> ``text`` for button-like modules
+    - ``background`` -> ``bgcolor`` for decorated modules
 
     ```python
     import butterflyui as bui
@@ -249,23 +776,23 @@ class Skins(Component):
         module="card",
         events=["tap"],
     )
-    # or using the convenience factory:
-    bui.skins_card(bui.Text("Card content"), events=["tap"])
     ```
 
     Args:
         module:
-            Name of the Flutter module to render. Values include
-            ``"row"``, ``"column"``, ``"stack"``, ``"wrap"``,
-            ``"container"``, ``"card"``, ``"button"``, ``"gradient"``,
-            ``"clip"``, ``"page"``, and more.
+            Name of the runtime module to render.
+        layout:
+            Alias for ``module``.
         state:
             Active state name used for state-driven styling.
         states:
-            List of all recognised state names for this control.
+            List of all recognized state names for this control.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of event names the runtime should emit to Python.
+        **kwargs:
+            Additional module-specific props forwarded to runtime.
     """
+
 
     control_type = "skins"
 
@@ -273,6 +800,7 @@ class Skins(Component):
         self,
         *children: Any,
         module: str | None = None,
+        layout: str | None = None,
         state: str | None = None,
         states: Iterable[str] | None = None,
         events: list[str] | None = None,
@@ -282,15 +810,24 @@ class Skins(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        resolved_layout = _normalize_skins_module(layout)
+        raw_module: Any | None = module if module is not None else resolved_layout
+        if raw_module is None and isinstance(props, Mapping):
+            raw_module = props.get("module", props.get("layout"))
+        source_module = _raw_skins_module_key(raw_module)
+        resolved_module = _normalize_skins_module(raw_module)
+
         merged = merge_props(
             props,
-            module=module,
+            module=resolved_module,
+            layout=resolved_layout,
             state=state,
             states=list(states) if states is not None else None,
             events=events,
             **kwargs,
         )
-        super().__init__(*children, child=child, props=merged, style=style, strict=strict)
+        bridged = _bridge_skins_module_props(source_module, resolved_module, merged)
+        super().__init__(*children, child=child, props=bridged, style=style, strict=strict)
 
 
 def skins_row(*children: Any, **kwargs: Any) -> Skins:

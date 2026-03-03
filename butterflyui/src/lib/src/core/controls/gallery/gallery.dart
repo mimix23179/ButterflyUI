@@ -65,6 +65,272 @@ GalleryLayoutType parseGalleryLayout(Object? value) {
   };
 }
 
+String _normalizeGalleryModule(Object? value) {
+  if (value == null) return '';
+  return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+}
+
+GalleryLayoutType _resolveGalleryLayoutFromModule(
+  String module,
+  GalleryLayoutType fallback,
+) {
+  return switch (module) {
+    'grid_layout' => GalleryLayoutType.grid,
+    'virtual_grid' => GalleryLayoutType.virtualGrid,
+    'virtual_list' => GalleryLayoutType.virtualList,
+    'list' => GalleryLayoutType.list,
+    'carousel' => GalleryLayoutType.carousel,
+    _ => fallback,
+  };
+}
+
+String? _resolveGalleryTypeFilterFromModule(String module) {
+  return switch (module) {
+    'fonts' || 'font_picker' || 'font_renderer' => 'font',
+    'audio' || 'audio_picker' || 'audio_renderer' => 'audio',
+    'video' || 'video_picker' || 'video_renderer' => 'video',
+    'image' || 'image_picker' || 'image_renderer' => 'image',
+    'document' || 'document_picker' || 'document_renderer' => 'document',
+    'skins' => 'skins',
+    _ => null,
+  };
+}
+
+Map<String, Object?> _bridgeGalleryModuleProps(
+  String module,
+  Map<String, Object?> rawProps,
+) {
+  final bridged = Map<String, Object?>.from(rawProps);
+
+  List<Map<String, Object?>> actionsFrom(Object? value) {
+    if (value is! List) return <Map<String, Object?>>[];
+    return value
+        .whereType<Map>()
+        .map((entry) => coerceObjectMap(entry))
+        .toList();
+  }
+
+  void ensureAction({
+    required String id,
+    required String label,
+    String? icon,
+    String variant = 'text',
+  }) {
+    final current = actionsFrom(
+      bridged['actions'] ?? bridged['toolbar_actions'],
+    );
+    final exists = current.any((action) {
+      final actionId = action['id']?.toString();
+      if (actionId != null && actionId == id) return true;
+      final actionLabel =
+          action['label']?.toString() ?? action['text']?.toString();
+      return actionLabel == label;
+    });
+    if (exists) {
+      bridged['actions'] = current;
+      return;
+    }
+    current.add(<String, Object?>{
+      'id': id,
+      'label': label,
+      'variant': variant,
+      if (icon != null) 'icon': icon,
+    });
+    bridged['actions'] = current;
+  }
+
+  switch (module) {
+    case 'grid_layout':
+      bridged.putIfAbsent('layout', () => 'grid');
+      break;
+    case 'item_tile':
+      bridged.putIfAbsent('layout', () => 'grid');
+      bridged.putIfAbsent('item_style', () => 'card');
+      break;
+    case 'item_preview':
+      bridged.putIfAbsent('show_meta', () => false);
+      bridged.putIfAbsent('show_actions', () => false);
+      break;
+    case 'item_actions':
+      bridged.putIfAbsent('show_actions', () => true);
+      break;
+    case 'item_meta_row':
+      bridged.putIfAbsent('show_meta', () => true);
+      break;
+    case 'item_badge':
+      bridged.putIfAbsent('show_meta', () => true);
+      break;
+    case 'section_header':
+      bridged.putIfAbsent('show_meta', () => true);
+      break;
+    case 'item_selectable':
+      bridged.putIfAbsent('show_selections', () => true);
+      bridged.putIfAbsent('selection_mode', () => 'single');
+      break;
+    case 'item_selection_checkbox':
+      bridged.putIfAbsent('show_selections', () => true);
+      bridged.putIfAbsent('selection_mode', () => 'multi');
+      break;
+    case 'item_selection_radio':
+    case 'item_selection_switch':
+      bridged.putIfAbsent('show_selections', () => true);
+      bridged.putIfAbsent('selection_mode', () => 'single');
+      break;
+    case 'loading_skeleton':
+      bridged.putIfAbsent('is_loading', () => true);
+      break;
+    case 'empty_state':
+      bridged.putIfAbsent('layout', () => 'grid');
+      break;
+    case 'toolbar':
+      bridged.putIfAbsent('show_actions', () => true);
+      break;
+    case 'search_bar':
+      ensureAction(id: 'search', label: 'Search', icon: 'search');
+      break;
+    case 'filter_bar':
+      {
+        final filters = bridged['filters'];
+        if (filters is List) {
+          for (final raw in filters.whereType<Object?>()) {
+            final label = raw is Map
+                ? (raw['label']?.toString() ?? raw['value']?.toString())
+                : raw?.toString();
+            if (label == null || label.isEmpty) continue;
+            ensureAction(
+              id: 'filter_${label.toLowerCase().replaceAll(' ', '_')}',
+              label: label,
+              icon: 'filter_alt',
+              variant: 'outlined',
+            );
+          }
+        } else {
+          ensureAction(
+            id: 'filter',
+            label: 'Filter',
+            icon: 'filter_alt',
+            variant: 'outlined',
+          );
+        }
+      }
+      break;
+    case 'sort_bar':
+      {
+        final options = bridged['options'];
+        if (options is List) {
+          for (final option in options.whereType<Object?>()) {
+            final label = option?.toString();
+            if (label == null || label.isEmpty) continue;
+            ensureAction(
+              id: 'sort_${label.toLowerCase().replaceAll(' ', '_')}',
+              label: label,
+              icon: 'swap_vert',
+            );
+          }
+        } else {
+          ensureAction(id: 'sort', label: 'Sort', icon: 'swap_vert');
+        }
+      }
+      break;
+    case 'pagination':
+      bridged.putIfAbsent('layout', () => 'list');
+      ensureAction(id: 'prev', label: 'Prev', icon: 'chevron_left');
+      ensureAction(id: 'next', label: 'Next', icon: 'chevron_right');
+      break;
+    case 'item_drag_handle':
+    case 'item_drop_target':
+    case 'item_reorder_handle':
+      bridged.putIfAbsent('enable_drag', () => true);
+      bridged.putIfAbsent('enable_reorder', () => true);
+      break;
+    case 'apply':
+      ensureAction(
+        id: 'apply',
+        label: 'Apply',
+        icon: 'check',
+        variant: 'filled',
+      );
+      break;
+    case 'clear':
+      ensureAction(id: 'clear', label: 'Clear', icon: 'clear');
+      break;
+    case 'select_all':
+      ensureAction(id: 'select_all', label: 'Select All', icon: 'done_all');
+      bridged.putIfAbsent('selection_mode', () => 'multi');
+      break;
+    case 'deselect_all':
+      ensureAction(id: 'deselect_all', label: 'Deselect', icon: 'remove_done');
+      break;
+    case 'apply_font':
+      ensureAction(
+        id: 'apply_font',
+        label: 'Apply Font',
+        icon: 'font_download',
+      );
+      break;
+    case 'apply_image':
+      ensureAction(id: 'apply_image', label: 'Apply Image', icon: 'image');
+      break;
+    case 'set_as_wallpaper':
+      ensureAction(
+        id: 'set_as_wallpaper',
+        label: 'Set Wallpaper',
+        icon: 'wallpaper',
+      );
+      break;
+    case 'font_picker':
+      ensureAction(id: 'pick_font', label: 'Pick Font', icon: 'font_download');
+      break;
+    case 'fonts':
+      bridged.putIfAbsent('layout', () => 'list');
+      break;
+    case 'audio':
+    case 'video':
+    case 'image':
+    case 'document':
+      bridged.putIfAbsent('layout', () => 'grid');
+      break;
+    case 'audio_picker':
+      ensureAction(id: 'pick_audio', label: 'Pick Audio', icon: 'audiotrack');
+      break;
+    case 'video_picker':
+      ensureAction(id: 'pick_video', label: 'Pick Video', icon: 'videocam');
+      break;
+    case 'image_picker':
+      ensureAction(id: 'pick_image', label: 'Pick Image', icon: 'image');
+      break;
+    case 'document_picker':
+      ensureAction(
+        id: 'pick_document',
+        label: 'Pick Document',
+        icon: 'description',
+      );
+      break;
+    case 'font_renderer':
+    case 'audio_renderer':
+    case 'video_renderer':
+    case 'image_renderer':
+    case 'document_renderer':
+      bridged.putIfAbsent('use_control_widgets', () => true);
+      break;
+    case 'presets':
+      bridged.putIfAbsent('layout', () => 'grid');
+      break;
+    case 'skins':
+      bridged.putIfAbsent('layout', () => 'grid');
+      break;
+    default:
+      break;
+  }
+
+  return bridged;
+}
+
 // ============================================================================
 // Gallery Item Model
 // ============================================================================
@@ -165,7 +431,7 @@ class GalleryItem {
       thumbnailUrl:
           json['thumbnailUrl']?.toString() ?? json['thumbnail_url']?.toString(),
       type: json['type']?.toString() ?? 'image',
-      metadata: json['metadata'] as Map<String, dynamic>?,
+      metadata: _asMap(json['metadata']),
       isSelected: json['isSelected'] == true || json['is_selected'] == true,
       isLoading: json['isLoading'] == true || json['is_loading'] == true,
       subtitle: json['subtitle']?.toString(),
@@ -174,16 +440,50 @@ class GalleryItem {
           json['authorName']?.toString() ?? json['author_name']?.toString(),
       authorAvatar:
           json['authorAvatar']?.toString() ?? json['author_avatar']?.toString(),
-      likeCount: json['likeCount'] as int? ?? json['like_count'] as int?,
-      viewCount: json['viewCount'] as int? ?? json['view_count'] as int?,
+      likeCount: _asInt(json['likeCount'] ?? json['like_count']),
+      viewCount: _asInt(json['viewCount'] ?? json['view_count']),
       createdAt:
           json['createdAt']?.toString() ?? json['created_at']?.toString(),
-      aspectRatio:
-          (json['aspectRatio'] as num?)?.toDouble() ??
-          (json['aspect_ratio'] as num?)?.toDouble(),
-      tags: (json['tags'] as List?)?.map((e) => e.toString()).toList(),
+      aspectRatio: _asDouble(json['aspectRatio'] ?? json['aspect_ratio']),
+      tags: _asStringList(json['tags']),
       status: json['status']?.toString(),
     );
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value == null) return null;
+    return int.tryParse(value.toString());
+  }
+
+  static double? _asDouble(Object? value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value == null) return null;
+    return double.tryParse(value.toString());
+  }
+
+  static Map<String, dynamic>? _asMap(Object? value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) {
+      return value.map((key, mapValue) => MapEntry(key.toString(), mapValue));
+    }
+    return null;
+  }
+
+  static List<String>? _asStringList(Object? value) {
+    if (value is List) {
+      return value.map((item) => item.toString()).toList();
+    }
+    if (value is String && value.isNotEmpty) {
+      return value
+          .split(',')
+          .map((item) => item.trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -246,7 +546,19 @@ Widget buildGalleryScopeControl(
       ? coerceObjectMap(rawChildren.first as Map)
       : null;
   if (child == null) {
-    return const SizedBox.shrink();
+    final hasGalleryPayload =
+        props.containsKey('items') ||
+        props.containsKey('layout') ||
+        props.containsKey('module');
+    if (!hasGalleryPayload) {
+      return const SizedBox.shrink();
+    }
+    return buildChild({
+      'id': controlId,
+      'type': 'gallery',
+      'props': Map<String, Object?>.from(props),
+      'children': const [],
+    });
   }
   if (child['type']?.toString() == 'gallery') {
     final childProps = child['props'] is Map
@@ -277,9 +589,12 @@ Widget buildGalleryControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
+  final initialModule = _normalizeGalleryModule(props['module']);
+  final effectiveProps = _bridgeGalleryModuleProps(initialModule, props);
   // Parse items from props
-  final itemsData = props['items'];
+  final itemsData = effectiveProps['items'];
   List<GalleryItem> items = [];
+  final module = _normalizeGalleryModule(effectiveProps['module']);
 
   if (itemsData is List) {
     items = itemsData
@@ -288,80 +603,96 @@ Widget buildGalleryControl(
         .toList();
   }
 
-  final layout = parseGalleryLayout(props['layout']);
+  var layout = parseGalleryLayout(effectiveProps['layout']);
+  layout = _resolveGalleryLayoutFromModule(module, layout);
+  final typeFilter = _resolveGalleryTypeFilterFromModule(module);
+  if (typeFilter != null) {
+    items = items
+        .where((item) => item.type.toLowerCase() == typeFilter)
+        .toList();
+  }
   final crossAxisCount =
       coerceOptionalInt(
-        props['cross_axis_count'] ??
-            props['crossAxisCount'] ??
-            props['columns'],
+        effectiveProps['cross_axis_count'] ??
+            effectiveProps['crossAxisCount'] ??
+            effectiveProps['columns'],
       ) ??
       3;
   final mainAxisSpacing =
       coerceDouble(
-        props['main_axis_spacing'] ??
-            props['mainAxisSpacing'] ??
-            props['spacing'],
+        effectiveProps['main_axis_spacing'] ??
+            effectiveProps['mainAxisSpacing'] ??
+            effectiveProps['spacing'],
       ) ??
       8.0;
   final crossAxisSpacing =
-      coerceDouble(props['cross_axis_spacing'] ?? props['crossAxisSpacing']) ??
+      coerceDouble(
+        effectiveProps['cross_axis_spacing'] ??
+            effectiveProps['crossAxisSpacing'],
+      ) ??
       8.0;
   final itemBorderRadius =
       coerceDouble(
-        props['item_border_radius'] ??
-            props['itemBorderRadius'] ??
-            props['radius'],
+        effectiveProps['item_border_radius'] ??
+            effectiveProps['itemBorderRadius'] ??
+            effectiveProps['radius'],
       ) ??
       8.0;
   final showSelections = coerceBoolValue(
-    props['show_selections'] ?? props['showSelections'] ?? props['showSelection'],
+    effectiveProps['show_selections'] ??
+        effectiveProps['showSelections'] ??
+        effectiveProps['showSelection'],
     fallback: true,
   );
   final isLoading = coerceBoolValue(
-    props['is_loading'] ?? props['isLoading'] ?? props['loading'],
+    effectiveProps['is_loading'] ??
+        effectiveProps['isLoading'] ??
+        effectiveProps['loading'],
     fallback: false,
   );
   final showActions = coerceBoolValue(
-    props['show_actions'] ?? props['showActions'],
+    effectiveProps['show_actions'] ?? effectiveProps['showActions'],
     fallback: true,
   );
   final showMeta = coerceBoolValue(
-    props['show_meta'] ?? props['showMeta'],
+    effectiveProps['show_meta'] ?? effectiveProps['showMeta'],
     fallback: true,
   );
   final selectionMode =
-      props['selection_mode']?.toString() ??
-      props['selectionMode']?.toString() ??
-      (props['multiSelect'] == true ? 'multi' : 'none');
+      effectiveProps['selection_mode']?.toString() ??
+      effectiveProps['selectionMode']?.toString() ??
+      (effectiveProps['multiSelect'] == true ? 'multi' : 'none');
   final itemStyle =
-      props['item_style']?.toString() ??
-      props['itemStyle']?.toString() ??
+      effectiveProps['item_style']?.toString() ??
+      effectiveProps['itemStyle']?.toString() ??
       'card';
   final enableReorder = coerceBoolValue(
-    props['enable_reorder'] ?? props['enableReorder'],
+    effectiveProps['enable_reorder'] ?? effectiveProps['enableReorder'],
     fallback: false,
   );
   final enableDrag = coerceBoolValue(
-    props['enable_drag'] ?? props['enableDrag'],
+    effectiveProps['enable_drag'] ?? effectiveProps['enableDrag'],
     fallback: false,
   );
   final shrinkWrap = coerceBoolValue(
-    props['shrink_wrap'] ?? props['shrinkWrap'],
+    effectiveProps['shrink_wrap'] ?? effectiveProps['shrinkWrap'],
     fallback: false,
   );
-  final physics = props['physics']?.toString();
+  final physics = effectiveProps['physics']?.toString();
 
   final useControlWidgets = coerceBoolValue(
-    props['use_control_widgets'] ??
-        props['use_control_layouts'] ??
-        props['use_controls'],
+    effectiveProps['use_control_widgets'] ??
+        effectiveProps['use_control_layouts'] ??
+        effectiveProps['use_controls'],
     fallback: false,
   );
   final useControlLayouts = coerceBoolValue(
-    props['use_control_layouts'] ?? props['use_control_widgets'],
+    effectiveProps['use_control_layouts'] ??
+        effectiveProps['use_control_widgets'],
     fallback: false,
   );
-  final rawActions = props['actions'] ?? props['toolbar_actions'];
+  final rawActions =
+      effectiveProps['actions'] ?? effectiveProps['toolbar_actions'];
   final toolbarActions = rawActions is List
       ? rawActions
             .whereType<Map>()
@@ -430,7 +761,7 @@ Widget buildGalleryControl(
         ]
       : rawChildren;
 
-  return buildContainerControl(props, containerChildren, (childProps) {
+  return buildContainerControl(effectiveProps, containerChildren, (childProps) {
     final childType = childProps['type']?.toString();
     if (childType != '__gallery_content') {
       return buildChild(childProps);
@@ -622,7 +953,8 @@ Widget _buildGalleryLayout({
           'spacing': mainAxisSpacing,
           'child_aspect_ratio': 1.0,
           'shrink_wrap': shrinkWrap,
-          if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
+          if (physics != null)
+            'scrollable': physics is! NeverScrollableScrollPhysics,
         },
         items
             .map(
@@ -658,10 +990,11 @@ Widget _buildGalleryLayout({
       return buildVirtualListControl(
         _galleryControlId(controlId, 'virtual_list'),
         {
-          'spacing': mainAxisSpacing, 
+          'spacing': mainAxisSpacing,
           'item_extent': 80.0,
           'shrink_wrap': shrinkWrap,
-          if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
+          if (physics != null)
+            'scrollable': physics is! NeverScrollableScrollPhysics,
         },
         items
             .map(
@@ -709,7 +1042,8 @@ Widget _buildGalleryLayout({
             'child_aspect_ratio': 1.0,
             'content_padding': EdgeInsets.all(mainAxisSpacing),
             'shrink_wrap': shrinkWrap,
-            if (physics != null) 'scrollable': physics is! NeverScrollableScrollPhysics,
+            if (physics != null)
+              'scrollable': physics is! NeverScrollableScrollPhysics,
           },
           gridChildren,
           (child) => _buildGalleryItemFromControl(
@@ -1391,7 +1725,7 @@ Widget _buildCompactItem({
   return buildListTileControl(
     _galleryControlId(controlId, 'list_tile_${item.id}'),
     {
-      'leading': item.thumbnailUrl ?? item.url,
+      'leading': item.thumbnailUrl ?? item.url ?? item.path,
       'title': item.name ?? 'Untitled',
       'subtitle': item.subtitle ?? item.type,
       'selected': item.isSelected,
@@ -1876,7 +2210,12 @@ Widget _buildGalleryItemFromControl({
   required bool useControlWidgets,
 }) {
   final childType = child['type']?.toString();
-  if (childType != 'gallery_item') {
+  const galleryItemTypes = <String>{
+    'gallery_item',
+    '__gallery_grid_item',
+    '__gallery_virtual_item',
+  };
+  if (!galleryItemTypes.contains(childType)) {
     return buildChild(child);
   }
   final rawProps = child['props'];
@@ -2117,67 +2456,177 @@ Widget _buildPreview({
     );
   }
 
-  final imageUrl = item.thumbnailUrl ?? item.url;
+  final mediaSource = item.url ?? item.path;
+  final imageSource = item.thumbnailUrl ?? item.url ?? item.path;
   final itemType = item.type.toLowerCase();
 
-  if (useControlWidgets) {
-    if (itemType == 'video' && item.url != null) {
-      return buildVideoControl(
-        _galleryControlId(controlId, 'video_${item.id}'),
-        {
-          'source': item.url,
-          'autoplay': false,
-          'controls': true,
-          'fit': 'cover',
-        },
-        registerInvokeHandler,
-        unregisterInvokeHandler,
-        sendEvent,
-      );
-    }
+  if (itemType == 'video' && mediaSource != null && mediaSource.isNotEmpty) {
+    return buildVideoControl(
+      _galleryControlId(controlId, 'video_${item.id}'),
+      {
+        'source': mediaSource,
+        'autoplay': false,
+        'controls': true,
+        'fit': 'cover',
+      },
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
+    );
+  }
 
-    if (itemType == 'audio' && item.url != null) {
-      return buildAudioControl(
-        _galleryControlId(controlId, 'audio_${item.id}'),
-        {
-          'src': item.url,
-          'autoplay': false,
-          'controls': true,
-          'title': item.name,
-          'artist': item.authorName,
-        },
-        registerInvokeHandler,
-        unregisterInvokeHandler,
-        sendEvent,
-      );
-    }
+  if (itemType == 'audio' && mediaSource != null && mediaSource.isNotEmpty) {
+    return buildAudioControl(
+      _galleryControlId(controlId, 'audio_${item.id}'),
+      {
+        'src': mediaSource,
+        'autoplay': false,
+        'controls': true,
+        'title': item.name,
+        'artist': item.authorName,
+      },
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
+    );
+  }
 
-    if (itemType == 'font' || itemType == 'document') {
-      return _buildFallback(item, useControlWidgets);
-    }
+  if (itemType == 'font') {
+    return _buildFontPreview(item);
+  }
 
-    if (imageUrl != null && imageUrl.isNotEmpty) {
+  if (itemType == 'document') {
+    if (imageSource != null && imageSource.isNotEmpty) {
       return buildImageControl(
-        {'src': imageUrl, 'fit': 'cover'},
+        {'src': imageSource, 'fit': 'cover'},
         const [],
         buildChild,
       );
     }
+    return _buildDocumentPreview(item);
   }
 
-  if (imageUrl != null && imageUrl.startsWith('http')) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (_, __) => Container(
-        color: Colors.grey[200],
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      ),
-      errorWidget: (_, __, ___) => _buildFallback(item, useControlWidgets),
+  if (imageSource != null && imageSource.isNotEmpty) {
+    if (useControlWidgets) {
+      return buildImageControl(
+        {'src': imageSource, 'fit': 'cover'},
+        const [],
+        buildChild,
+      );
+    }
+    if (imageSource.startsWith('http://') ||
+        imageSource.startsWith('https://')) {
+      return CachedNetworkImage(
+        imageUrl: imageSource,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(
+          color: Colors.grey[200],
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+        errorWidget: (_, __, ___) => _buildFallback(item, useControlWidgets),
+      );
+    }
+    return buildImageControl(
+      {'src': imageSource, 'fit': 'cover'},
+      const [],
+      buildChild,
     );
   }
 
   return _buildFallback(item, useControlWidgets);
+}
+
+Widget _buildFontPreview(GalleryItem item) {
+  final metadata = item.metadata ?? const <String, dynamic>{};
+  final fontFamily =
+      metadata['font_family']?.toString() ?? metadata['fontFamily']?.toString();
+  final sample =
+      metadata['sample']?.toString() ??
+      'The quick brown fox jumps over 0123456789';
+  return Container(
+    color: Colors.grey[100],
+    padding: const EdgeInsets.all(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.font_download, color: Colors.grey[700], size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                item.name ?? 'Font',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: Text(
+            sample,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: fontFamily,
+              fontSize: 16,
+              color: Colors.grey[900],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildDocumentPreview(GalleryItem item) {
+  final ext = _extractExtension(item.path ?? item.url);
+  return Container(
+    color: Colors.grey[100],
+    padding: const EdgeInsets.all(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.description, color: Colors.blueGrey[700], size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                item.name ?? 'Document',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blueGrey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            ext.isEmpty ? 'DOC' : ext.toUpperCase(),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _extractExtension(String? source) {
+  if (source == null || source.isEmpty) return '';
+  final normalized = source.replaceAll('\\', '/');
+  final name = normalized.split('/').last;
+  final dot = name.lastIndexOf('.');
+  if (dot < 0 || dot >= name.length - 1) return '';
+  return name.substring(dot + 1);
 }
 
 Widget _buildFallback(GalleryItem item, bool useControlWidgets) {

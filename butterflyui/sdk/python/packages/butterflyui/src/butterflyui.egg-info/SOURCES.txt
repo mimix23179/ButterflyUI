@@ -332,6 +332,7 @@ src/butterflyui/controls/shell/window_drag_region.py
 src/butterflyui/controls/shell/window_frame.py
 src/butterflyui/controls/skins/__init__.py
 src/butterflyui/controls/skins/skins.py
+src/butterflyui/controls/webview/__init__.py
 src/butterflyui/controls/webview/webview.py
 src/butterflyui/core/__init__.py
 src/butterflyui/core/animation.py

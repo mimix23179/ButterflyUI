@@ -254,6 +254,83 @@ Color _borderToken(CandyTokens tokens) {
   return tokens.color('border') ?? _textToken(tokens).withOpacity(0.2);
 }
 
+String _snakeCaseKey(String key) {
+  if (key.isEmpty) return key;
+  final buffer = StringBuffer();
+  for (var i = 0; i < key.length; i += 1) {
+    final char = key[i];
+    final code = char.codeUnitAt(0);
+    final isUpper = code >= 65 && code <= 90;
+    if (isUpper) {
+      if (i > 0 && key[i - 1] != '_') {
+        buffer.write('_');
+      }
+      buffer.write(char.toLowerCase());
+    } else if (char == '-' || char == ' ') {
+      buffer.write('_');
+    } else {
+      buffer.write(char);
+    }
+  }
+  return buffer.toString();
+}
+
+Object? _normalizeIncomingPropValue(Object? value) {
+  if (value is Map) {
+    return _normalizeIncomingProps(coerceObjectMap(value));
+  }
+  if (value is List) {
+    return value.map(_normalizeIncomingPropValue).toList();
+  }
+  return value;
+}
+
+Map<String, Object?> _normalizeIncomingProps(Map<String, Object?> source) {
+  final normalized = <String, Object?>{};
+  source.forEach((key, value) {
+    normalized[key] = _normalizeIncomingPropValue(value);
+  });
+  source.forEach((key, value) {
+    final snake = _snakeCaseKey(key);
+    if (snake != key && !normalized.containsKey(snake)) {
+      normalized[snake] = _normalizeIncomingPropValue(value);
+    }
+  });
+
+  const aliasMap = <String, String>{
+    'bg_color': 'bgcolor',
+    'background_color': 'bgcolor',
+    'bordercolor': 'border_color',
+    'borderwidth': 'border_width',
+    'mainaxis': 'main_axis',
+    'crossaxis': 'cross_axis',
+    'mainaxissize': 'main_axis_size',
+    'runspacing': 'run_spacing',
+    'crossaxiscount': 'cross_axis_count',
+    'mainaxisspacing': 'main_axis_spacing',
+    'crossaxisspacing': 'cross_axis_spacing',
+    'itemborderradius': 'item_border_radius',
+    'showactions': 'show_actions',
+    'showmeta': 'show_meta',
+    'showselections': 'show_selections',
+    'selectionmode': 'selection_mode',
+    'enablereorder': 'enable_reorder',
+    'enabledrag': 'enable_drag',
+    'shrinkwrap': 'shrink_wrap',
+    'usecontrolwidgets': 'use_control_widgets',
+    'usecontrollayouts': 'use_control_layouts',
+    'autoload': 'auto_load',
+  };
+  for (final entry in aliasMap.entries) {
+    final from = entry.key;
+    final to = entry.value;
+    if (!normalized.containsKey(to) && normalized.containsKey(from)) {
+      normalized[to] = normalized[from];
+    }
+  }
+  return normalized;
+}
+
 class ControlRenderer {
   final CandyTokens tokens;
   final ButterflyUIControlRegistry registry;
@@ -290,7 +367,7 @@ class ControlRenderer {
     final type = (control['type']?.toString() ?? '').toLowerCase();
     final controlId = control['id']?.toString() ?? '';
     final rawProps = (control['props'] is Map)
-        ? coerceObjectMap(control['props'] as Map)
+        ? _normalizeIncomingProps(coerceObjectMap(control['props'] as Map))
         : <String, Object?>{};
 
     final basePack = inheritedPack ?? stylePack;
@@ -331,28 +408,87 @@ class ControlRenderer {
     }
 
     Widget built;
-    final registryBuilder = registry.builderFor(type);
-    if (registryBuilder != null) {
-      built = registryBuilder(context, controlWithProps);
-    } else {
-      final defaultBuilder =
-          (ButterflyUIControlContext ctx, Map<String, Object?> node) {
-            return _buildDefaultControl(ctx, node);
-          };
-      final override = resolvedPack.overrides[type];
-      built = override == null
-          ? defaultBuilder(context, controlWithProps)
-          : override(context, controlWithProps, defaultBuilder);
-    }
+    try {
+      final registryBuilder = registry.builderFor(type);
+      if (registryBuilder != null) {
+        built = registryBuilder(context, controlWithProps);
+      } else {
+        final defaultBuilder =
+            (ButterflyUIControlContext ctx, Map<String, Object?> node) {
+              return _buildDefaultControl(ctx, node);
+            };
+        final override = resolvedPack.overrides[type];
+        built = override == null
+            ? defaultBuilder(context, controlWithProps)
+            : override(context, controlWithProps, defaultBuilder);
+      }
 
-    built = _applyUniversalDecorators(
-      built: built,
-      controlType: type,
-      controlId: controlId,
-      props: rawProps,
-      context: context,
-    );
+      built = _applyUniversalDecorators(
+        built: built,
+        controlType: type,
+        controlId: controlId,
+        props: rawProps,
+        context: context,
+      );
+    } catch (error, stackTrace) {
+      _reportRenderFailure(
+        controlId: controlId,
+        controlType: type,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      built = _buildRenderFailureFallback(controlId, type, error);
+    }
     return maybeWrap(built);
+  }
+
+  void _reportRenderFailure({
+    required String controlId,
+    required String controlType,
+    required Object error,
+    required StackTrace stackTrace,
+  }) {
+    try {
+      sendSystemEvent('runtime.problem', {
+        'source': 'flutter_renderer',
+        'severity': 'error',
+        'kind': 'control.render',
+        'control_id': controlId,
+        'control_type': controlType,
+        'message': error.toString(),
+        'stack': stackTrace.toString(),
+      });
+    } catch (_) {
+      // Keep rendering resilient even if reporting fails.
+    }
+  }
+
+  Widget _buildRenderFailureFallback(
+    String controlId,
+    String controlType,
+    Object error,
+  ) {
+    final label = controlId.isEmpty
+        ? controlType
+        : '$controlType ($controlId)';
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3F2),
+        border: Border.all(color: const Color(0xFFD92D20), width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Text(
+          'Render failure: $label\n$error',
+          style: const TextStyle(
+            color: Color(0xFFB42318),
+            fontSize: 12,
+            height: 1.3,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildDefaultControl(
@@ -397,7 +533,7 @@ class ControlRenderer {
         ),
         {'id': controlId, 'type': 'candy', 'props': props, 'children': rawChildren},
       );
-      if (candyResult != null) return candyResult;
+      return candyResult;
     }
 
     switch (type) {

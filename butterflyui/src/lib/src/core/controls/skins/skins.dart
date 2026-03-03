@@ -534,6 +534,122 @@ String skinsNorm(String v) {
       .replaceAll(' ', '');
 }
 
+String _rawSkinsModuleKey(Object? value) {
+  if (value == null) return '';
+  return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+}
+
+String _normalizeSkinsModule(Object? value) {
+  final normalized = _rawSkinsModuleKey(value);
+  const aliases = <String, String>{
+    'skins': 'container',
+    'layout': 'container',
+    'alignment': 'align',
+    'surface': 'container',
+    'box': 'container',
+    'btn': 'button',
+    'decorated_box': 'decorated',
+    'decoratedbox': 'decorated',
+    'selector': 'column',
+    'preset': 'card',
+    'create_skin': 'card',
+    'edit_skin': 'card',
+    'delete_skin': 'button',
+    'apply': 'button',
+    'clear': 'button',
+    'token_mapper': 'container',
+    'token_schema': 'container',
+    'token_validator': 'container',
+    'token_exporters': 'container',
+    'token_exporter': 'container',
+    'token_pipeline': 'container',
+    'colors': 'gradient',
+    'fonts': 'container',
+    'icons': 'container',
+    'background': 'decorated',
+    'outline': 'border',
+    'shadow': 'border',
+    'materials': 'decorated',
+    'shaders': 'effects',
+    'interaction': 'button',
+    'responsive': 'container',
+    'editor': 'column',
+    'effect_editor': 'effects',
+    'particle_editor': 'particles',
+    'shader_editor': 'effects',
+    'material_editor': 'decorated',
+    'icon_editor': 'container',
+    'font_editor': 'container',
+    'color_editor': 'gradient',
+    'background_editor': 'decorated',
+    'border_editor': 'border',
+    'shadow_editor': 'border',
+    'outline_editor': 'border',
+  };
+  return aliases[normalized] ?? normalized;
+}
+
+Map<String, Object?> _bridgeSkinsModuleProps(
+  String sourceModule,
+  String module,
+  Map<String, Object?> rawProps,
+) {
+  final bridged = Map<String, Object?>.from(rawProps);
+  bridged['module'] = module;
+
+  if (module == 'button') {
+    if (bridged['text'] == null && bridged['label'] != null) {
+      bridged['text'] = bridged['label'];
+    }
+  }
+  if (module == 'decorated' &&
+      bridged['bgcolor'] == null &&
+      bridged['background'] != null) {
+    bridged['bgcolor'] = bridged['background'];
+  }
+
+  switch (sourceModule) {
+    case 'selector':
+      bridged.putIfAbsent('spacing', () => 8);
+      break;
+    case 'preset':
+    case 'create_skin':
+    case 'edit_skin':
+      bridged.putIfAbsent('padding', () => <String, Object?>{'all': 12});
+      bridged.putIfAbsent('radius', () => 12);
+      break;
+    case 'apply':
+      bridged.putIfAbsent('text', () => 'Apply Skin');
+      bridged.putIfAbsent('variant', () => 'filled');
+      break;
+    case 'clear':
+      bridged.putIfAbsent('text', () => 'Clear');
+      bridged.putIfAbsent('variant', () => 'outlined');
+      break;
+    case 'delete_skin':
+      bridged.putIfAbsent('text', () => 'Delete Skin');
+      bridged.putIfAbsent('variant', () => 'outlined');
+      break;
+    case 'color_editor':
+    case 'colors':
+      if (bridged['gradient'] == null &&
+          bridged['bgcolor'] == null &&
+          bridged['background'] == null) {
+        bridged['gradient'] = <String, Object?>{
+          'colors': <String>['#6366F1', '#8B5CF6'],
+        };
+      }
+      break;
+  }
+
+  return bridged;
+}
+
 // ============================================================================
 // Padding helper
 // ============================================================================
@@ -616,7 +732,7 @@ Widget? buildSkinsLayoutModule(String module, SkinsContext ctx) {
     'stack' => _buildStack(ctx),
     'wrap' => _buildWrap(ctx),
     'align' || 'alignment' => _buildAlign(ctx),
-    'container' => _buildContainer(ctx),
+    'container' || 'surface' || 'box' => _buildContainer(ctx),
     'card' => _buildCard(ctx),
     'button' || 'btn' => _buildButton(ctx),
     'badge' => _buildBadge(ctx),
@@ -638,7 +754,7 @@ Widget _buildRow(SkinsContext ctx) {
   // Use the existing row control with skin tokens
   return buildRowControl(
     ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
+    ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
   );
@@ -648,7 +764,7 @@ Widget _buildColumn(SkinsContext ctx) {
   // Use the existing column control with skin tokens
   return buildColumnControl(
     ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
+    ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
   );
@@ -656,18 +772,14 @@ Widget _buildColumn(SkinsContext ctx) {
 
 Widget _buildStack(SkinsContext ctx) {
   // Use the existing stack control with skin tokens
-  return buildStackControl(
-    ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
-    ctx.buildChild,
-  );
+  return buildStackControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
 }
 
 Widget _buildWrap(SkinsContext ctx) {
   // Use the existing wrap control with skin tokens
   return buildWrapControl(
     ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
+    ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
   );
@@ -688,18 +800,14 @@ Widget _buildAlign(SkinsContext ctx) {
 
 Widget _buildContainer(SkinsContext ctx) {
   // Use the existing container control with skin tokens
-  return buildContainerControl(
-    ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
-    ctx.buildChild,
-  );
+  return buildContainerControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
 }
 
 Widget _buildCard(SkinsContext ctx) {
   // Use the existing card control with skin tokens
   return buildCardControl(
     ctx.merged,
-    skinsBuildAllChildren(ctx.rawChildren, ctx.buildChild),
+    ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
   );
@@ -807,10 +915,15 @@ Widget? buildSkinsControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   Widget Function(Map<String, Object?> control) buildChild,
 ) {
-  final module = merged['module']?.toString();
-  if (module == null) return null;
+  final rawModule = merged['module'] ?? merged['layout'];
+  final sourceModule = _rawSkinsModuleKey(rawModule);
+  final normalizedModule = _normalizeSkinsModule(rawModule);
+  final effectiveModule = normalizedModule.isEmpty
+      ? 'container'
+      : normalizedModule;
 
   final normalized = Map<String, Object?>.from(merged);
+  normalized['module'] = effectiveModule;
   if (normalized['main_axis'] == null && normalized['main'] != null) {
     normalized['main_axis'] = normalized['main'];
   }
@@ -824,33 +937,53 @@ Widget? buildSkinsControl(
     normalized['run_spacing'] = normalized['runSpacing'];
   }
 
-  // Build style from tokens
-  final style = _createThemeTokensFromTokens(tokens);
-
-  final ctx = SkinsContext(
-    controlId: controlId,
-    merged: normalized,
-    rawChildren: rawChildren,
-    tokens: tokens,
-    style: style,
-    sendEvent: sendEvent,
-    registerInvokeHandler: registerInvokeHandler,
-    unregisterInvokeHandler: unregisterInvokeHandler,
-    buildChild: buildChild,
+  final bridged = _bridgeSkinsModuleProps(
+    sourceModule,
+    effectiveModule,
+    normalized,
   );
 
-  // Chain through all module builders
-  return buildSkinsLayoutModule(module, ctx) ??
-      buildSkinsDecorationModule(module, ctx) ??
-      buildSkinsEffectsModule(module, ctx) ??
-      buildSkinsMotionModule(module, ctx);
+  return Builder(
+    builder: (context) {
+      final scoped = _SkinsScopeWidget.of(context);
+      final activeTokens = scoped?.tokens ?? tokens;
+      final style = _createThemeTokensFromTokens(activeTokens);
+
+      final ctx = SkinsContext(
+        controlId: controlId,
+        merged: bridged,
+        rawChildren: rawChildren,
+        tokens: activeTokens,
+        style: style,
+        sendEvent: sendEvent,
+        registerInvokeHandler: registerInvokeHandler,
+        unregisterInvokeHandler: unregisterInvokeHandler,
+        buildChild: buildChild,
+      );
+
+      final built =
+          buildSkinsLayoutModule(effectiveModule, ctx) ??
+          buildSkinsDecorationModule(effectiveModule, ctx) ??
+          buildSkinsEffectsModule(effectiveModule, ctx) ??
+          buildSkinsMotionModule(effectiveModule, ctx);
+      if (built != null) {
+        return built;
+      }
+      return buildChild({
+        'id': controlId,
+        'type': effectiveModule,
+        'props': bridged,
+        'children': rawChildren,
+      });
+    },
+  );
 }
 
 // Decoration module builder
 Widget? buildSkinsDecorationModule(String module, SkinsContext ctx) {
   return switch (module) {
     'gradient' => _buildGradient(ctx),
-    'decorated' || 'decoratedbox' => _buildDecoratedBox(ctx),
+    'decorated' || 'decoratedbox' || 'decorated_box' => _buildDecoratedBox(ctx),
     'clip' => _buildClip(ctx),
     _ => null,
   };
@@ -1140,6 +1273,8 @@ Widget _buildSkinsScope(
   // Extract scope properties
   final tokensMap = props['tokens'];
   final skinType = props['skin']?.toString() ?? 'default';
+  final brightness = props['brightness'] as String? ?? 'light';
+  final isDark = brightness.toLowerCase().startsWith('dark');
 
   // Get tokens based on skin type
   SkinsTokens tokens;
@@ -1156,17 +1291,13 @@ Widget _buildSkinsScope(
     };
   }
 
-  final theme = tokens.buildTheme();
+  final theme = tokens.buildTheme(isDark: isDark);
 
   // Get the child
   final childMaps = context.childMapsOf(control);
   final childWidget = childMaps.isNotEmpty
       ? context.buildChild(childMaps.first)
       : const SizedBox.shrink();
-
-  // Build theme data
-  final brightness = props['brightness'] as String? ?? 'light';
-  final isDark = brightness.toLowerCase().startsWith('dark');
 
   return _SkinsScopeWidget(
     tokens: tokens,
