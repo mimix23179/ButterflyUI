@@ -5,6 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
+Widget buildShimmerShadowControl(
+  String controlId,
+  Map<String, Object?> props,
+  Widget child,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+) {
+  final shimmerProps = _mergePropsSection(props, 'shimmer');
+  final shadowProps = _mergePropsSection(props, 'shadow');
+  final withShadow = buildShadowStackControl(shadowProps, child);
+  return buildShimmerControl(
+    controlId,
+    shimmerProps,
+    withShadow,
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+  );
+}
+
 Widget buildShimmerControl(
   String controlId,
   Map<String, Object?> props,
@@ -87,7 +106,10 @@ class _ShimmerControlState extends State<_ShimmerControl>
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'start':
       case 'play':
@@ -148,10 +170,7 @@ class _ShimmerControlState extends State<_ShimmerControl>
   }
 }
 
-Widget buildShadowStackControl(
-  Map<String, Object?> props,
-  Widget child,
-) {
+Widget buildShadowStackControl(Map<String, Object?> props, Widget child) {
   final radius = coerceDouble(props['radius']) ?? 12;
   final shadows = _coerceShadowList(props['shadows']);
   return Container(
@@ -187,4 +206,17 @@ List<BoxShadow> _coerceShadowList(Object? value) {
     BoxShadow(color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 2)),
     BoxShadow(color: Color(0x14000000), blurRadius: 20, offset: Offset(0, 8)),
   ];
+}
+
+Map<String, Object?> _mergePropsSection(
+  Map<String, Object?> props,
+  String key,
+) {
+  final nested = props[key];
+  if (nested is! Map) {
+    return Map<String, Object?>.from(props);
+  }
+  final merged = Map<String, Object?>.from(props);
+  merged.addAll(coerceObjectMap(nested));
+  return merged;
 }

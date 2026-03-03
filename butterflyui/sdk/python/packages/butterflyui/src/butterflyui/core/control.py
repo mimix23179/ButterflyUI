@@ -156,6 +156,40 @@ def _merge_props(target: dict[str, Any], extra: Mapping[str, Any], *, override: 
             target[key] = value
 
 
+def _coerce_style_payload(style: Any) -> dict[str, Any] | None:
+    if style is None:
+        return None
+    if isinstance(style, Mapping):
+        return dict(style)
+    if hasattr(style, "to_json"):
+        try:
+            payload = style.to_json()
+        except Exception:
+            return None
+        if isinstance(payload, Mapping):
+            return dict(payload)
+    return None
+
+
+def _merge_local_style(
+    props: dict[str, Any],
+    style_payload: Mapping[str, Any] | None,
+    *,
+    override: bool,
+) -> None:
+    if not isinstance(style_payload, Mapping) or not style_payload:
+        return
+    existing = props.get("style")
+    style_map = dict(existing) if isinstance(existing, Mapping) else {}
+    for key, value in style_payload.items():
+        if value is None:
+            continue
+        if override or key not in style_map:
+            style_map[key] = value
+    if style_map:
+        props["style"] = style_map
+
+
 def _backfill_bound_init_props(
     target: dict[str, Any],
     signature: inspect.Signature,
@@ -425,15 +459,10 @@ class Control:
                 if key in _LAYOUT_KEYS:
                     layout_kwargs[key] = extra_props.pop(key)
 
-        if style is not None:
-            try:
-                from .style import Style
-                if isinstance(style, Style):
-                    _merge_props(self.props, style.to_json(), override=True)
-                elif isinstance(style, Mapping):
-                    _merge_props(self.props, style, override=True)
-            except Exception:
-                pass
+        style_payload = _coerce_style_payload(style)
+        if style_payload is not None:
+            _merge_local_style(self.props, style_payload, override=True)
+            _merge_props(self.props, style_payload, override=True)
 
         if extra_props:
             _merge_props(self.props, extra_props, override=True)
@@ -606,15 +635,10 @@ class Control:
 
             init(self, *args, **kwargs)
 
-            if style:
-                try:
-                    from .style import Style
-                    if isinstance(style, Style):
-                         _merge_props(self.props, style.to_json(), override=False)
-                    elif isinstance(style, Mapping):
-                         _merge_props(self.props, style, override=False)
-                except ImportError:
-                    pass
+            style_payload = _coerce_style_payload(style)
+            if style_payload is not None:
+                _merge_local_style(self.props, style_payload, override=False)
+                _merge_props(self.props, style_payload, override=False)
 
             if extra_props:
                 if isinstance(extra_props, Mapping):

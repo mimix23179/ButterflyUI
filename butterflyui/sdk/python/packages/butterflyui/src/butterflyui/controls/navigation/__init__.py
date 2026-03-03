@@ -22,7 +22,9 @@ from .rail_nav import RailNav
 from .notice_bar import NoticeBar
 from .outline import Outline
 from .command_palette import CommandPalette
+from .command_search import CommandSearch
 from .command_item import CommandItem
+from .outline_view import OutlineView
 
 __all__ = [
     "Tabs",
@@ -48,6 +50,8 @@ __all__ = [
     "RailNav",
     "NoticeBar",
     "Outline",
+    "OutlineView",
     "CommandPalette",
+    "CommandSearch",
     "CommandItem"
 ]

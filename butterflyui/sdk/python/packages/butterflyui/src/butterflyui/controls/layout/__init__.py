@@ -13,9 +13,11 @@ from .row import Row
 from .column import Column
 from .stack import Stack
 from .view_stack import ViewStack
+from .page_view import PageView
 from .viewport import Viewport
 from .visibility import Visibility
 from .wrap import Wrap
+from .responsive_row import ResponsiveRow
 from .expanded import Expanded
 from .scroll_view import ScrollView
 from .scrollable_column import ScrollableColumn
@@ -28,7 +30,9 @@ from .accordion import Accordion
 from .adjustment_panel import AdjustmentPanel
 from .bounds_probe import BoundsProbe
 from .dock_layout import DockLayout
+from .dock import Dock
 from .pane import Pane
+from .dock_pane import DockPane
 from .pane_spec import PaneSpec
 from .inspector_panel import InspectorPanel
 from .frame import Frame
@@ -53,9 +57,11 @@ __all__ = [
     "Column",
     "Stack",
     "ViewStack",
+    "PageView",
     "Viewport",
     "Visibility",
     "Wrap",
+    "ResponsiveRow",
     "Expanded",
     "ScrollView",
     "ScrollableColumn",
@@ -68,7 +74,9 @@ __all__ = [
     "AdjustmentPanel",
     "BoundsProbe",
     "DockLayout",
+    "Dock",
     "Pane",
+    "DockPane",
     "PaneSpec",
     "InspectorPanel",
     "Frame",

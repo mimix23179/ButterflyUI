@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 from websockets import ServerConnection, serve
 from websockets.exceptions import ConnectionClosed

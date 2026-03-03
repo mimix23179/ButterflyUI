@@ -152,7 +152,7 @@ _DEFAULT_PROP: dict[str, str] = {
 }
 
 
-def _normalize_bindings(items: Any, *, for_input: bool) -> list[_Binding]:
+def _normalize_bindings(items: Any) -> list[_Binding]:
     if items is None:
         return []
     if isinstance(items, (Component, State)):
@@ -270,8 +270,8 @@ def bind_event(
     """Bind an event callback and return the dispatched wrapper."""
 
     trigger_id = control.control_id if isinstance(control, Component) else str(control)
-    input_bindings = _normalize_bindings(inputs, for_input=True)
-    output_bindings = _normalize_bindings(outputs, for_input=False)
+    input_bindings = _normalize_bindings(inputs)
+    output_bindings = _normalize_bindings(outputs)
     progress_obj: Progress | None = None
 
     if isinstance(progress, Progress):
@@ -319,51 +319,6 @@ def bind_event(
 
     session.on(trigger_id, event, _dispatch)
     return _dispatch
-
-
-def wrap_event_handler(fn: Callable[..., Any]) -> Callable[[dict[str, Any]], Any]:
-    """Adapt ``fn`` so it will be called with ``event=msg`` when possible.
-
-    Behavior:
-    - If ``fn`` accepts an ``event`` or ``evt`` keyword parameter or ``**kwargs``,
-      the wrapper calls ``fn(event=msg)``.
-    - Otherwise, if ``fn`` has no required positional parameters, the wrapper
-      calls ``fn()``.
-    - Otherwise the wrapper calls ``fn(msg)``.
-    - If ``fn`` returns a coroutine, it will be scheduled with
-      ``asyncio.create_task`` (best-effort).
-    """
-    import inspect
-    import asyncio
-
-    try:
-        sig = inspect.signature(fn)
-        accepts_kwargs = any(p.kind == p.VAR_KEYWORD for p in sig.parameters.values())
-        accepts_event_kw = "event" in sig.parameters or "evt" in sig.parameters or accepts_kwargs
-        required_positional = [
-            p
-            for p in sig.parameters.values()
-            if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD) and p.default is p.empty
-        ]
-    except Exception:
-        accepts_event_kw = False
-        required_positional = [None]
-
-    def _wrapped(msg: dict[str, Any]) -> Any:
-        try:
-            if accepts_event_kw:
-                res = fn(event=msg)
-            else:
-                if not required_positional:
-                    res = fn()
-                else:
-                    res = fn(msg)
-            if asyncio.iscoroutine(res):
-                asyncio.create_task(res)
-        except Exception:
-            pass
-
-    return _wrapped
 
 
 # Register built-in action helpers (best-effort).

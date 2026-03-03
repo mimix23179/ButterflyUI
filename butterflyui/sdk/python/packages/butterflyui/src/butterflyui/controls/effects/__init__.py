@@ -13,7 +13,9 @@ from .glass_blur import GlassBlur
 from .glow_effect import GlowEffect
 from .gradient_sweep import GradientSweep
 from .shimmer import Shimmer
+from .shimmer_shadow import ShimmerShadow
 from .shadow_stack import ShadowStack
+from .visual_fx import VisualFx
 from .tilt_hover import TiltHover
 from .timeline import Timeline
 from .time_travel import TimeTravel
@@ -51,7 +53,9 @@ __all__ = [
     "GlowEffect",
     "GradientSweep",
     "Shimmer",
+    "ShimmerShadow",
     "ShadowStack",
+    "VisualFx",
     "TiltHover",
     "Timeline",
     "TimeTravel",

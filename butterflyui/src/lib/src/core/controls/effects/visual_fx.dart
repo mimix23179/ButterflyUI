@@ -6,10 +6,74 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-Widget buildGlowEffectControl(
+Widget buildVisualFxControl(
+  String controlId,
   Map<String, Object?> props,
   Widget child,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
+  final glowProps = _mergeVisualFxProps(props, 'glow');
+  final glassProps = _mergeVisualFxProps(props, 'glass_blur');
+  final chromaticProps = _mergeVisualFxProps(props, 'chromatic_shift');
+  final sweepProps = _mergeVisualFxProps(props, 'gradient_sweep');
+
+  final enableGlow = _coerceBool(
+    glowProps['enabled'] ?? props['enable_glow'],
+    fallback: true,
+  );
+  final enableGlass = _coerceBool(
+    glassProps['enabled'] ?? props['enable_glass_blur'],
+    fallback: true,
+  );
+  final enableChromatic = _coerceBool(
+    chromaticProps['enabled'] ?? props['enable_chromatic_shift'],
+    fallback: true,
+  );
+  final enableSweep = _coerceBool(
+    sweepProps['enabled'] ?? props['enable_gradient_sweep'],
+    fallback: true,
+  );
+
+  Widget current = child;
+  if (enableGlow) {
+    current = buildGlowEffectControl(glowProps, current);
+  }
+  if (enableGlass) {
+    current = buildGlassBlurControl(
+      controlId.isEmpty ? controlId : '$controlId::glass',
+      glassProps,
+      current,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
+    );
+  }
+  if (enableChromatic) {
+    current = buildChromaticShiftControl(
+      controlId.isEmpty ? controlId : '$controlId::chromatic',
+      chromaticProps,
+      current,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
+    );
+  }
+  if (enableSweep) {
+    current = buildGradientSweepControl(
+      controlId.isEmpty ? controlId : '$controlId::sweep',
+      sweepProps,
+      current,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
+    );
+  }
+  return current;
+}
+
+Widget buildGlowEffectControl(Map<String, Object?> props, Widget child) {
   final color = coerceColor(props['color']) ?? const Color(0x8800FFFF);
   final intensity = coerceDouble(props['intensity']) ?? 1;
   final blur = (coerceDouble(props['blur']) ?? 16) * intensity;
@@ -113,7 +177,8 @@ class _GradientSweepControl extends StatefulWidget {
   State<_GradientSweepControl> createState() => _GradientSweepControlState();
 }
 
-class _GradientSweepControlState extends State<_GradientSweepControl> with SingleTickerProviderStateMixin {
+class _GradientSweepControlState extends State<_GradientSweepControl>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   late bool _playing;
   late bool _loop;
@@ -124,7 +189,10 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
   void initState() {
     super.initState();
     _updateTiming();
-    _playing = widget.props['playing'] == true || widget.props['play'] == true || widget.props['autoplay'] != false;
+    _playing =
+        widget.props['playing'] == true ||
+        widget.props['play'] == true ||
+        widget.props['autoplay'] != false;
     _loop = widget.props['loop'] != false;
     _angle = coerceDouble(widget.props['angle']) ?? 0;
     _colors = _coerceColors(widget.props['colors']);
@@ -147,7 +215,10 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
     }
     _updateTiming();
     if (oldWidget.props != widget.props) {
-      _playing = widget.props['playing'] == true || widget.props['play'] == true || widget.props['autoplay'] != false;
+      _playing =
+          widget.props['playing'] == true ||
+          widget.props['play'] == true ||
+          widget.props['autoplay'] != false;
       _loop = widget.props['loop'] != false;
       _angle = coerceDouble(widget.props['angle']) ?? _angle;
       _colors = _coerceColors(widget.props['colors']);
@@ -164,7 +235,8 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
   }
 
   void _updateTiming() {
-    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 1800).clamp(1, 600000);
+    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 1800)
+        .clamp(1, 600000);
     _controller.duration = Duration(milliseconds: durationMs);
   }
 
@@ -175,7 +247,10 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'play':
         _playing = true;
@@ -192,7 +267,11 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
       case 'get_state':
         return {
           'angle': coerceDouble(widget.props['angle']) ?? 0,
-          'duration_ms': coerceOptionalInt(widget.props['duration_ms'] ?? widget.props['duration']) ?? 1800,
+          'duration_ms':
+              coerceOptionalInt(
+                widget.props['duration_ms'] ?? widget.props['duration'],
+              ) ??
+              1800,
           'playing': _playing,
         };
       case 'set_angle':
@@ -210,7 +289,9 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
             _colors = next;
           });
         }
-        widget.sendEvent(widget.controlId, 'change', {'colors': _colors.map((c) => c.value).toList(growable: false)});
+        widget.sendEvent(widget.controlId, 'change', {
+          'colors': _colors.map((c) => c.value).toList(growable: false),
+        });
         return true;
       default:
         throw UnsupportedError('Unknown gradient_sweep method: $method');
@@ -221,10 +302,14 @@ class _GradientSweepControlState extends State<_GradientSweepControl> with Singl
   Widget build(BuildContext context) {
     final colors = _colors;
     final stops = _coerceStops(widget.props['stops'], colors.length);
-    final opacity = (coerceDouble(widget.props['opacity']) ?? 0.6).clamp(0, 1).toDouble();
+    final opacity = (coerceDouble(widget.props['opacity']) ?? 0.6)
+        .clamp(0, 1)
+        .toDouble();
     final baseAngle = _angle * math.pi / 180;
-    final startAngle = (coerceDouble(widget.props['start_angle']) ?? 0) * math.pi / 180;
-    final endAngle = (coerceDouble(widget.props['end_angle']) ?? 360) * math.pi / 180;
+    final startAngle =
+        (coerceDouble(widget.props['start_angle']) ?? 0) * math.pi / 180;
+    final endAngle =
+        (coerceDouble(widget.props['end_angle']) ?? 360) * math.pi / 180;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -296,7 +381,10 @@ class _GlassBlurControlState extends State<_GlassBlurControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_style':
         setState(() {
@@ -319,7 +407,9 @@ class _GlassBlurControlState extends State<_GlassBlurControl> {
     final radius = coerceDouble(_props['radius']) ?? 12;
     final borderColor = coerceColor(_props['border_color']);
     final borderGlow = coerceColor(_props['border_glow']);
-    final noiseOpacity = (coerceDouble(_props['noise_opacity']) ?? 0).clamp(0, 1).toDouble();
+    final noiseOpacity = (coerceDouble(_props['noise_opacity']) ?? 0)
+        .clamp(0, 1)
+        .toDouble();
     final borderWidth = coerceDouble(_props['border_width']) ?? 1;
 
     return ClipRRect(
@@ -330,7 +420,9 @@ class _GlassBlurControlState extends State<_GlassBlurControl> {
           decoration: BoxDecoration(
             color: color.withOpacity(opacity),
             borderRadius: BorderRadius.circular(radius),
-            border: borderColor == null ? null : Border.all(color: borderColor, width: borderWidth),
+            border: borderColor == null
+                ? null
+                : Border.all(color: borderColor, width: borderWidth),
             boxShadow: borderGlow == null
                 ? null
                 : [
@@ -409,7 +501,10 @@ class _ChromaticShiftControlState extends State<_ChromaticShiftControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_shift':
         final value = coerceDouble(args['value']);
@@ -435,7 +530,9 @@ class _ChromaticShiftControlState extends State<_ChromaticShiftControl> {
   @override
   Widget build(BuildContext context) {
     final shift = coerceDouble(_props['shift']) ?? 1.2;
-    final opacity = (coerceDouble(_props['opacity']) ?? 0.35).clamp(0, 1).toDouble();
+    final opacity = (coerceDouble(_props['opacity']) ?? 0.35)
+        .clamp(0, 1)
+        .toDouble();
     final axis = (_props['axis'] ?? 'x').toString().toLowerCase();
     final red = coerceColor(_props['red']) ?? Colors.red;
     final blue = coerceColor(_props['blue']) ?? Colors.blue;
@@ -504,16 +601,25 @@ class _ConfettiBurstControl extends StatefulWidget {
   State<_ConfettiBurstControl> createState() => _ConfettiBurstControlState();
 }
 
-class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with SingleTickerProviderStateMixin {
+class _ConfettiBurstControlState extends State<_ConfettiBurstControl>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   int _seed = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller.duration = Duration(milliseconds: (coerceOptionalInt(widget.props['duration_ms'] ?? widget.props['duration']) ?? 900).clamp(1, 600000));
+    _controller.duration = Duration(
+      milliseconds:
+          (coerceOptionalInt(
+                    widget.props['duration_ms'] ?? widget.props['duration'],
+                  ) ??
+                  900)
+              .clamp(1, 600000),
+    );
     _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed && widget.props['emit_on_complete'] == true) {
+      if (status == AnimationStatus.completed &&
+          widget.props['emit_on_complete'] == true) {
         widget.sendEvent(widget.controlId, 'complete', {'seed': _seed});
       }
     });
@@ -535,7 +641,14 @@ class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with Singl
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
     if (oldWidget.props != widget.props) {
-      _controller.duration = Duration(milliseconds: (coerceOptionalInt(widget.props['duration_ms'] ?? widget.props['duration']) ?? 900).clamp(1, 600000));
+      _controller.duration = Duration(
+        milliseconds:
+            (coerceOptionalInt(
+                      widget.props['duration_ms'] ?? widget.props['duration'],
+                    ) ??
+                    900)
+                .clamp(1, 600000),
+      );
     }
   }
 
@@ -546,7 +659,10 @@ class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with Singl
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'burst':
         _burst();
@@ -565,7 +681,10 @@ class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with Singl
   @override
   Widget build(BuildContext context) {
     final colors = _coerceColors(widget.props['colors']);
-    final count = (coerceOptionalInt(widget.props['count']) ?? 18).clamp(1, 200);
+    final count = (coerceOptionalInt(widget.props['count']) ?? 18).clamp(
+      1,
+      200,
+    );
 
     return SizedBox(
       height: 64,
@@ -576,7 +695,12 @@ class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with Singl
               animation: _controller,
               builder: (context, _) {
                 return CustomPaint(
-                  painter: _ConfettiPainter(progress: _controller.value, colors: colors, count: count, seed: _seed),
+                  painter: _ConfettiPainter(
+                    progress: _controller.value,
+                    colors: colors,
+                    count: count,
+                    seed: _seed,
+                  ),
                 );
               },
             ),
@@ -584,7 +708,10 @@ class _ConfettiBurstControlState extends State<_ConfettiBurstControl> with Singl
           if (widget.props['hide_button'] != true)
             Align(
               alignment: Alignment.center,
-              child: FilledButton.tonal(onPressed: _burst, child: const Text('Burst')),
+              child: FilledButton.tonal(
+                onPressed: _burst,
+                child: const Text('Burst'),
+              ),
             ),
         ],
       ),
@@ -614,7 +741,12 @@ class _NoiseVeilPainter extends CustomPainter {
 }
 
 class _ConfettiPainter extends CustomPainter {
-  _ConfettiPainter({required this.progress, required this.colors, required this.count, required this.seed});
+  _ConfettiPainter({
+    required this.progress,
+    required this.colors,
+    required this.count,
+    required this.seed,
+  });
 
   final double progress;
   final List<Color> colors;
@@ -630,23 +762,39 @@ class _ConfettiPainter extends CustomPainter {
       final vx = (random.nextDouble() - 0.5) * 50;
       final x = x0 + (vx * progress);
       final y = -8 + (vy * progress);
-      final paint = Paint()..color = colors[i % colors.length].withOpacity((1 - progress).clamp(0, 1));
-      canvas.drawRect(Rect.fromCenter(center: Offset(x, y), width: 4, height: 8), paint);
+      final paint = Paint()
+        ..color = colors[i % colors.length].withOpacity(
+          (1 - progress).clamp(0, 1),
+        );
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset(x, y), width: 4, height: 8),
+        paint,
+      );
     }
   }
 
   @override
   bool shouldRepaint(covariant _ConfettiPainter oldDelegate) {
-    return progress != oldDelegate.progress || seed != oldDelegate.seed || count != oldDelegate.count;
+    return progress != oldDelegate.progress ||
+        seed != oldDelegate.seed ||
+        count != oldDelegate.count;
   }
 }
 
 List<Color> _coerceColors(Object? value) {
   if (value is List) {
-    final colors = value.map(coerceColor).whereType<Color>().toList(growable: false);
+    final colors = value
+        .map(coerceColor)
+        .whereType<Color>()
+        .toList(growable: false);
     if (colors.isNotEmpty) return colors;
   }
-  return const [Color(0xFF22D3EE), Color(0xFFA78BFA), Color(0xFFF472B6), Color(0xFF34D399)];
+  return const [
+    Color(0xFF22D3EE),
+    Color(0xFFA78BFA),
+    Color(0xFFF472B6),
+    Color(0xFF34D399),
+  ];
 }
 
 List<double>? _coerceStops(Object? raw, int colorCount) {
@@ -659,4 +807,29 @@ List<double>? _coerceStops(Object? raw, int colorCount) {
       .toList(growable: false);
   if (stops.length != colorCount) return null;
   return stops;
+}
+
+Map<String, Object?> _mergeVisualFxProps(
+  Map<String, Object?> props,
+  String section,
+) {
+  final merged = Map<String, Object?>.from(props);
+  final nested = props[section];
+  if (nested is Map) {
+    merged.addAll(coerceObjectMap(nested));
+  }
+  return merged;
+}
+
+bool _coerceBool(Object? value, {required bool fallback}) {
+  if (value == null) return fallback;
+  if (value is bool) return value;
+  final normalized = value.toString().toLowerCase();
+  if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+    return true;
+  }
+  if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+    return false;
+  }
+  return fallback;
 }

@@ -789,6 +789,10 @@ class Skins(Component):
             List of all recognized state names for this control.
         events:
             List of event names the runtime should emit to Python.
+        style:
+            Optional style map handled by the shared renderer. Use this for
+            gradients, glow/shadow, rounded corners, clipping, and glass-like
+            layers via ``backdrop_blur`` + ``backdrop_color``.
         **kwargs:
             Additional module-specific props forwarded to runtime.
     """

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict, field
-from typing import Any, Literal, Iterable
+from dataclasses import dataclass, asdict
+from typing import Any, Literal
 
 __all__ = [
     "BoxShadow",

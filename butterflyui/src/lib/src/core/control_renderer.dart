@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import 'animation/animation_spec.dart';
@@ -100,6 +102,8 @@ import 'controls/effects/transition.dart';
 import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
 import 'controls/feedback/progress_indicator.dart';
+import 'controls/feedback/progress_bar.dart';
+import 'controls/feedback/progress_ring.dart';
 import 'controls/feedback/progress_timeline.dart';
 import 'controls/feedback/skeleton.dart';
 import 'controls/feedback/timeline.dart';
@@ -159,9 +163,11 @@ import 'controls/layout/container.dart';
 import 'controls/layout/decorated_box.dart';
 import 'controls/layout/divider.dart';
 import 'controls/layout/fitted_box.dart';
+import 'controls/layout/page_view.dart';
 import 'controls/layout/page_scene.dart';
 import 'controls/layout/overflow_box.dart';
 import 'controls/layout/pane_spec.dart';
+import 'controls/layout/responsive_row.dart';
 import 'controls/layout/resizable_panel.dart';
 import 'controls/layout/row.dart';
 import 'controls/layout/safe_area.dart';
@@ -180,6 +186,7 @@ import 'controls/layout/flex_spacer.dart';
 import 'controls/layout/frame.dart';
 import 'controls/layout/grid.dart';
 import 'controls/layout/inspector_panel.dart';
+import 'controls/layout/vertical_divider.dart';
 import 'controls/layout/window_frame.dart';
 import 'controls/layout/window_drag_region.dart';
 import 'controls/layout/window_controls.dart';
@@ -190,6 +197,7 @@ import 'controls/lists/file_browser.dart';
 import 'controls/lists/list_tile.dart';
 import 'controls/lists/queue_list.dart';
 import 'controls/lists/reorderable_list.dart';
+import 'controls/lists/reorderable_list_view.dart';
 import 'controls/lists/reorderable_tree.dart';
 import 'controls/lists/snap_grid.dart';
 import 'controls/lists/sortable_header.dart';
@@ -222,6 +230,7 @@ import 'controls/navigation/info_bar.dart';
 import 'controls/navigation/status_bar.dart';
 import 'controls/navigation/tabs.dart';
 import 'controls/overlay/context_menu.dart';
+import 'controls/overlay/alert_dialog.dart';
 import 'controls/overlay/bottom_sheet.dart';
 import 'controls/overlay/modal.dart';
 import 'controls/overlay/overlay.dart';
@@ -231,6 +240,7 @@ import 'controls/overlay/popover.dart';
 import 'controls/overlay/notification_center.dart';
 import 'controls/overlay/preview_surface.dart';
 import 'controls/overlay/progress_overlay.dart';
+import 'controls/overlay/snack_bar.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
@@ -364,20 +374,33 @@ class ControlRenderer {
     wrapWithControlBox,
     StylePack? inheritedPack,
   }) {
-    final type = (control['type']?.toString() ?? '').toLowerCase();
+    final sourceType = control['type'];
+    final type = (sourceType?.toString() ?? '').trim().toLowerCase();
     final controlId = control['id']?.toString() ?? '';
-    final rawProps = (control['props'] is Map)
+    final incomingProps = (control['props'] is Map)
         ? _normalizeIncomingProps(coerceObjectMap(control['props'] as Map))
         : <String, Object?>{};
+    final baseProps = incomingProps;
 
     final basePack = inheritedPack ?? stylePack;
-    final packName = rawProps['style_pack']?.toString();
+    final packName = baseProps['style_pack']?.toString();
     final resolvedPack = (packName == null || packName.isEmpty)
         ? basePack
         : stylePackRegistry.resolve(packName);
     final effectiveTokens = resolvedPack == stylePack
         ? tokens
         : resolvedPack.buildTokens(styleTokens);
+    final resolvedStyle = ControlStyleResolver.resolve(
+      controlType: type,
+      props: baseProps,
+      tokens: effectiveTokens,
+      stylePack: resolvedPack,
+    );
+    final rawProps = _mergeResolvedStyleProps(
+      controlType: type,
+      props: baseProps,
+      resolvedStyle: resolvedStyle,
+    );
 
     Widget buildChild(Map<String, Object?> child) {
       return buildFromControl(
@@ -397,7 +420,11 @@ class ControlRenderer {
       buildChild: buildChild,
     );
 
-    final controlWithProps = <String, Object?>{...control, 'props': rawProps};
+    final controlWithProps = <String, Object?>{
+      ...control,
+      'type': type,
+      'props': rawProps,
+    };
 
     Widget maybeWrap(Widget built) {
       if (wrapWithControlBox == null) return built;
@@ -429,6 +456,7 @@ class ControlRenderer {
         controlId: controlId,
         props: rawProps,
         context: context,
+        resolvedStyle: resolvedStyle,
       );
     } catch (error, stackTrace) {
       _reportRenderFailure(
@@ -468,9 +496,7 @@ class ControlRenderer {
     String controlType,
     Object error,
   ) {
-    final label = controlId.isEmpty
-        ? controlType
-        : '$controlType ($controlId)';
+    final label = controlId.isEmpty ? controlType : '$controlType ($controlId)';
     return DecoratedBox(
       decoration: BoxDecoration(
         color: const Color(0xFFFFF3F2),
@@ -531,7 +557,12 @@ class ControlRenderer {
           unregisterInvokeHandler: unregisterInvokeHandler,
           buildChild: context.buildChild,
         ),
-        {'id': controlId, 'type': 'candy', 'props': props, 'children': rawChildren},
+        {
+          'id': controlId,
+          'type': 'candy',
+          'props': props,
+          'children': rawChildren,
+        },
       );
       return candyResult;
     }
@@ -669,19 +700,21 @@ class ControlRenderer {
           context.buildChild,
         );
 
-      case 'skins': {
-        final skinsTokens = SkinsTokens.fromCandyTokens(context.tokens);
-        return buildSkinsControl(
-          controlId,
-          props,
-          rawChildren,
-          skinsTokens,
-          context.sendEvent,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.buildChild,
-        ) ?? const SizedBox.shrink();
-      }
+      case 'skins':
+        {
+          final skinsTokens = SkinsTokens.fromCandyTokens(context.tokens);
+          return buildSkinsControl(
+                controlId,
+                props,
+                rawChildren,
+                skinsTokens,
+                context.sendEvent,
+                context.registerInvokeHandler,
+                context.unregisterInvokeHandler,
+                context.buildChild,
+              ) ??
+              const SizedBox.shrink();
+        }
 
       case 'page_scene':
         return buildPageSceneControl(props, rawChildren, context.buildChild);
@@ -715,8 +748,26 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'page_view':
+        return buildPageViewControl(
+          controlId,
+          props,
+          children.map(context.buildChild).toList(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'wrap':
         return buildWrapControl(
+          props,
+          rawChildren,
+          context.tokens,
+          context.buildChild,
+        );
+
+      case 'responsive_row':
+        return buildResponsiveRowControl(
           props,
           rawChildren,
           context.tokens,
@@ -901,6 +952,17 @@ class ControlRenderer {
 
       case 'divider':
         return buildDividerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          fallbackColor: defaultBorder,
+        );
+
+      case 'vertical_divider':
+        return buildVerticalDividerControl(
           controlId,
           props,
           rawChildren,
@@ -1097,7 +1159,9 @@ class ControlRenderer {
           final size = coerceDouble(props['size']);
           final color = coerceColor(props['color']);
           final tooltip = props['tooltip']?.toString();
-          final widget = buildIconValue(iconValue, size: size, color: color) ?? const Icon(Icons.help_outline);
+          final widget =
+              buildIconValue(iconValue, size: size, color: color) ??
+              const Icon(Icons.help_outline);
           if (tooltip == null || tooltip.isEmpty) return widget;
           return Tooltip(message: tooltip, child: widget);
         }
@@ -1579,6 +1643,17 @@ class ControlRenderer {
           );
         }
 
+      case 'alert_dialog':
+        return buildAlertDialogControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'overlay':
         return buildOverlayControl(
           controlId,
@@ -1698,7 +1773,6 @@ class ControlRenderer {
         }
 
       case 'toast':
-      case 'snackbar':
         return ButterflyUIToastWidget(
           controlId: controlId,
           message: (props['message'] ?? props['text'] ?? '').toString(),
@@ -1708,7 +1782,7 @@ class ControlRenderer {
           actionLabel: props['action_label']?.toString(),
           variant: props['variant']?.toString(),
           style: props['style']?.toString(),
-          icon: _parseIconData(props['icon']),
+          icon: parseIconDataLoose(props['icon']),
           animation: props['animation'] is Map
               ? coerceObjectMap(props['animation'] as Map)
               : null,
@@ -1719,6 +1793,10 @@ class ControlRenderer {
           toastPosition: props['toast_position']?.toString(),
           sendEvent: context.sendEvent,
         );
+
+      case 'snackbar':
+      case 'snack_bar':
+        return buildSnackBarControl(controlId, props, context.sendEvent);
 
       case 'toast_host':
       case 'notification_host':
@@ -1759,6 +1837,24 @@ class ControlRenderer {
       case 'progress_indicator':
       case 'progress':
         return buildProgressIndicatorControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'progress_bar':
+        return buildProgressBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'progress_ring':
+        return buildProgressRingControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -2093,6 +2189,15 @@ class ControlRenderer {
 
       case 'reorderable_list':
         return buildReorderableListControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'reorderable_list_view':
+        return buildReorderableListViewControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -2726,6 +2831,15 @@ class ControlRenderer {
           context.sendEvent,
         );
 
+      case 'color_tools':
+        return buildColorToolsControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'container_style':
         return buildContainerStyleControl(
           controlId,
@@ -2872,6 +2986,15 @@ class ControlRenderer {
           context.unregisterInvokeHandler,
         );
 
+      case 'shimmer_shadow':
+        return buildShimmerShadowControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+        );
+
       case 'shadow_stack':
         return buildShadowStackControl(props, firstChildOrEmpty());
 
@@ -2880,6 +3003,16 @@ class ControlRenderer {
 
       case 'effects':
         return buildEffectsControl(props, firstChildOrEmpty());
+
+      case 'visual_fx':
+        return buildVisualFxControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'confetti_burst':
         return buildConfettiBurstControl(
@@ -2939,12 +3072,99 @@ class ControlRenderer {
     }
   }
 
+  Map<String, Object?> _mergeResolvedStyleProps({
+    required String controlType,
+    required Map<String, Object?> props,
+    required ResolvedControlStyle resolvedStyle,
+  }) {
+    final merged = <String, Object?>{...props};
+    _mergeMissingEntries(merged, resolvedStyle.slot('surface'));
+    _mergeMissingEntries(
+      merged,
+      _labelSlotDefaults(resolvedStyle.slot('label')),
+    );
+    _mergeMissingEntries(
+      merged,
+      _iconSlotDefaults(controlType, resolvedStyle.slot('icon')),
+    );
+    return merged;
+  }
+
+  void _mergeMissingEntries(
+    Map<String, Object?> target,
+    Map<String, Object?> source,
+  ) {
+    if (source.isEmpty) return;
+    for (final entry in source.entries) {
+      if (entry.value == null) continue;
+      if (!target.containsKey(entry.key)) {
+        target[entry.key] = entry.value;
+      }
+    }
+  }
+
+  Map<String, Object?> _labelSlotDefaults(Map<String, Object?> slot) {
+    if (slot.isEmpty) return const <String, Object?>{};
+    final out = <String, Object?>{};
+    final textColor = slot['text_color'] ?? slot['foreground'] ?? slot['color'];
+    if (textColor != null) {
+      out['text_color'] = textColor;
+      out['foreground'] = textColor;
+    }
+    final fontSize = slot['font_size'] ?? slot['size'];
+    if (fontSize != null) out['font_size'] = fontSize;
+    final fontWeight = slot['font_weight'] ?? slot['weight'];
+    if (fontWeight != null) out['font_weight'] = fontWeight;
+    if (slot['font_family'] != null) out['font_family'] = slot['font_family'];
+    if (slot['italic'] != null) out['italic'] = slot['italic'];
+    if (slot['letter_spacing'] != null) {
+      out['letter_spacing'] = slot['letter_spacing'];
+    }
+    if (slot['word_spacing'] != null) {
+      out['word_spacing'] = slot['word_spacing'];
+    }
+    if (slot['line_height'] != null) out['line_height'] = slot['line_height'];
+    if (slot['max_lines'] != null) out['max_lines'] = slot['max_lines'];
+    if (slot['overflow'] != null) out['overflow'] = slot['overflow'];
+    final textAlign = slot['text_align'] ?? slot['align'];
+    if (textAlign != null) out['align'] = textAlign;
+    return out;
+  }
+
+  Map<String, Object?> _iconSlotDefaults(
+    String controlType,
+    Map<String, Object?> slot,
+  ) {
+    if (slot.isEmpty) return const <String, Object?>{};
+    final out = <String, Object?>{};
+    final isIconLike =
+        controlType == 'icon' ||
+        controlType == 'emoji_icon' ||
+        controlType == 'glyph' ||
+        controlType == 'glyph_button';
+
+    final iconColor = slot['icon_color'] ?? slot['foreground'] ?? slot['color'];
+    if (iconColor != null) {
+      out['icon_color'] = iconColor;
+      if (isIconLike) out['color'] = iconColor;
+    }
+
+    final iconSize = slot['icon_size'] ?? slot['size'] ?? slot['font_size'];
+    if (iconSize != null) {
+      out['icon_size'] = iconSize;
+      if (isIconLike) out['size'] = iconSize;
+    }
+    if (slot['opacity'] != null) out['icon_opacity'] = slot['opacity'];
+    return out;
+  }
+
   Widget _applyUniversalDecorators({
     required Widget built,
     required String controlType,
     required String controlId,
     required Map<String, Object?> props,
     required ButterflyUIControlContext context,
+    required ResolvedControlStyle resolvedStyle,
   }) {
     if (controlType == 'expanded' ||
         controlType == 'flex_spacer' ||
@@ -2952,12 +3172,6 @@ class ControlRenderer {
       return built;
     }
 
-    final resolvedStyle = ControlStyleResolver.resolve(
-      controlType: controlType,
-      props: props,
-      tokens: context.tokens,
-      stylePack: context.stylePack,
-    );
     final surfaceStyle = resolvedStyle.slot('surface');
 
     final visible = (props['visible'] ?? surfaceStyle['visible']) == null
@@ -2966,6 +3180,15 @@ class ControlRenderer {
     if (!visible) return const SizedBox.shrink();
 
     final enabled = _isEnabled(props);
+
+    final inheritedTextStyle = _coerceInheritedTextStyle(props, surfaceStyle);
+    if (inheritedTextStyle != null) {
+      built = DefaultTextStyle.merge(style: inheritedTextStyle, child: built);
+    }
+    final inheritedIconTheme = _coerceInheritedIconTheme(props, surfaceStyle);
+    if (inheritedIconTheme != null) {
+      built = IconTheme.merge(data: inheritedIconTheme, child: built);
+    }
 
     final width = coerceDouble(props['width'] ?? surfaceStyle['width']);
     final height = coerceDouble(props['height'] ?? surfaceStyle['height']);
@@ -3017,6 +3240,12 @@ class ControlRenderer {
       built = Padding(padding: margin, child: built);
     }
 
+    final borderSpec = (props['border'] is Map)
+        ? coerceObjectMap(props['border'] as Map)
+        : (surfaceStyle['border'] is Map)
+        ? coerceObjectMap(surfaceStyle['border'] as Map)
+        : const <String, Object?>{};
+
     final bg = coerceColor(
       props['bgcolor'] ??
           props['background'] ??
@@ -3025,49 +3254,156 @@ class ControlRenderer {
           surfaceStyle['color'],
     );
     final borderColor = coerceColor(
-      props['border_color'] ?? surfaceStyle['border_color'],
+      props['border_color'] ??
+          borderSpec['color'] ??
+          borderSpec['border_color'] ??
+          surfaceStyle['border_color'],
     );
     final borderWidth = coerceDouble(
-      props['border_width'] ?? surfaceStyle['border_width'],
+      props['border_width'] ??
+          borderSpec['width'] ??
+          borderSpec['border_width'] ??
+          surfaceStyle['border_width'],
     );
-    final radius = coerceDouble(
+    final borderRadius = _coerceBorderRadius(
       props['radius'] ??
           props['border_radius'] ??
           surfaceStyle['radius'] ??
           surfaceStyle['border_radius'],
     );
+    final shape = _parseBoxShape(props['shape'] ?? surfaceStyle['shape']);
+    final gradient = coerceGradient(
+      props['gradient'] ?? surfaceStyle['gradient'],
+    );
+    final image = coerceDecorationImage(
+      props['image'] ?? surfaceStyle['image'],
+    );
+    final boxShadow = coerceBoxShadow(
+      props['shadow'] ?? surfaceStyle['shadow'],
+    );
+    final clipBehavior = _parseClipBehavior(
+      props['clip_behavior'] ?? surfaceStyle['clip_behavior'] ?? props['clip'],
+    );
+    final backdropBlur = coerceDouble(
+      props['backdrop_blur'] ??
+          props['backdropBlur'] ??
+          props['glass_blur'] ??
+          surfaceStyle['backdrop_blur'] ??
+          surfaceStyle['backdropBlur'] ??
+          surfaceStyle['glass_blur'],
+    );
+    final backdropColor = coerceColor(
+      props['backdrop_color'] ??
+          props['backdropColor'] ??
+          props['frost_color'] ??
+          surfaceStyle['backdrop_color'] ??
+          surfaceStyle['backdropColor'] ??
+          surfaceStyle['frost_color'],
+    );
+    final blur = coerceDouble(props['blur'] ?? surfaceStyle['blur']);
     final elevation = coerceDouble(
       props['elevation'] ?? surfaceStyle['elevation'],
+    );
+
+    const nativeDecorationControls = <String>{
+      'surface',
+      'box',
+      'container',
+      'decorated_box',
+    };
+    final shouldApplyDecoration = !nativeDecorationControls.contains(
+      controlType,
     );
     final hasDecoration =
         bg != null ||
         borderColor != null ||
         borderWidth != null ||
-        radius != null;
-    if (hasDecoration) {
+        borderRadius != null ||
+        gradient != null ||
+        image != null ||
+        boxShadow != null ||
+        shape == BoxShape.circle;
+    if (shouldApplyDecoration && hasDecoration) {
       final border = (borderColor != null && (borderWidth ?? 0) > 0)
           ? Border.all(color: borderColor, width: borderWidth ?? 1.0)
           : null;
-      final borderRadius = radius == null
-          ? null
-          : BorderRadius.circular(radius);
       built = DecoratedBox(
         decoration: BoxDecoration(
           color: bg,
           border: border,
+          shape: shape,
           borderRadius: borderRadius,
+          gradient: gradient,
+          image: image,
+          boxShadow: boxShadow,
         ),
         child: built,
       );
-      if ((elevation ?? 0) > 0) {
-        built = Material(
-          type: MaterialType.transparency,
-          elevation: elevation!,
+    }
+
+    if (shouldApplyDecoration && (elevation ?? 0) > 0) {
+      built = Material(
+        type: MaterialType.transparency,
+        elevation: elevation!,
+        borderRadius: shape == BoxShape.circle ? null : borderRadius,
+        clipBehavior: borderRadius == null ? Clip.none : Clip.antiAlias,
+        child: built,
+      );
+    }
+
+    if (shouldApplyDecoration && clipBehavior != Clip.none) {
+      if (shape == BoxShape.circle) {
+        built = ClipOval(clipBehavior: clipBehavior, child: built);
+      } else if (borderRadius != null) {
+        built = ClipRRect(
           borderRadius: borderRadius,
-          clipBehavior: borderRadius == null ? Clip.none : Clip.antiAlias,
+          clipBehavior: clipBehavior,
+          child: built,
+        );
+      } else {
+        built = ClipRect(clipBehavior: clipBehavior, child: built);
+      }
+    }
+
+    if (shouldApplyDecoration &&
+        ((backdropBlur ?? 0) > 0 || backdropColor != null)) {
+      if (shape == BoxShape.circle) {
+        built = ClipOval(child: built);
+      } else if (borderRadius != null) {
+        built = ClipRRect(
+          borderRadius: borderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: built,
+        );
+      } else {
+        built = ClipRect(child: built);
+      }
+      if (backdropBlur != null && backdropBlur > 0) {
+        built = BackdropFilter(
+          filter: ui.ImageFilter.blur(
+            sigmaX: backdropBlur,
+            sigmaY: backdropBlur,
+          ),
           child: built,
         );
       }
+      if (backdropColor != null) {
+        built = DecoratedBox(
+          decoration: BoxDecoration(
+            color: backdropColor,
+            shape: shape,
+            borderRadius: shape == BoxShape.circle ? null : borderRadius,
+          ),
+          child: built,
+        );
+      }
+    }
+
+    if (shouldApplyDecoration && blur != null && blur > 0) {
+      built = ImageFiltered(
+        imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: built,
+      );
     }
 
     final opacity = coerceDouble(props['opacity'] ?? surfaceStyle['opacity']);
@@ -3290,6 +3626,200 @@ class ControlRenderer {
       });
     }
     return sections;
+  }
+
+  TextStyle? _coerceInheritedTextStyle(
+    Map<String, Object?> props,
+    Map<String, Object?> surfaceStyle,
+  ) {
+    final color = coerceColor(
+      props['text_color'] ??
+          props['foreground'] ??
+          surfaceStyle['text_color'] ??
+          surfaceStyle['foreground'],
+    );
+    final size = coerceDouble(
+      props['font_size'] ??
+          props['size'] ??
+          surfaceStyle['font_size'] ??
+          surfaceStyle['size'],
+    );
+    final weight = _parseFontWeight(
+      props['font_weight'] ??
+          props['weight'] ??
+          surfaceStyle['font_weight'] ??
+          surfaceStyle['weight'],
+    );
+    final family = (props['font_family'] ?? surfaceStyle['font_family'])
+        ?.toString();
+    final italic = _coerceBoolOrNull(
+      props.containsKey('italic') ? props['italic'] : surfaceStyle['italic'],
+    );
+    final letterSpacing = coerceDouble(
+      props['letter_spacing'] ?? surfaceStyle['letter_spacing'],
+    );
+    final wordSpacing = coerceDouble(
+      props['word_spacing'] ?? surfaceStyle['word_spacing'],
+    );
+    final lineHeight = coerceDouble(
+      props['line_height'] ?? surfaceStyle['line_height'],
+    );
+    final hasStyle =
+        color != null ||
+        size != null ||
+        weight != null ||
+        family != null ||
+        italic != null ||
+        letterSpacing != null ||
+        wordSpacing != null ||
+        lineHeight != null;
+    if (!hasStyle) return null;
+    return TextStyle(
+      color: color,
+      fontSize: size,
+      fontWeight: weight,
+      fontFamily: family,
+      fontStyle: italic == null
+          ? null
+          : (italic ? FontStyle.italic : FontStyle.normal),
+      letterSpacing: letterSpacing,
+      wordSpacing: wordSpacing,
+      height: lineHeight,
+    );
+  }
+
+  IconThemeData? _coerceInheritedIconTheme(
+    Map<String, Object?> props,
+    Map<String, Object?> surfaceStyle,
+  ) {
+    final color = coerceColor(
+      props['icon_color'] ??
+          props['icon_foreground'] ??
+          surfaceStyle['icon_color'] ??
+          surfaceStyle['icon_foreground'],
+    );
+    final size = coerceDouble(props['icon_size'] ?? surfaceStyle['icon_size']);
+    final opacity = coerceDouble(
+      props['icon_opacity'] ?? surfaceStyle['icon_opacity'],
+    );
+    if (color == null && size == null && opacity == null) return null;
+    return IconThemeData(color: color, size: size, opacity: opacity);
+  }
+
+  BorderRadius? _coerceBorderRadius(Object? value) {
+    if (value == null) return null;
+    if (value is num) {
+      return BorderRadius.circular(value.toDouble());
+    }
+    final scalar = coerceDouble(value);
+    if (scalar != null) {
+      return BorderRadius.circular(scalar);
+    }
+    if (value is List) {
+      final nums = value.map(coerceDouble).whereType<double>().toList();
+      if (nums.isEmpty) return null;
+      if (nums.length == 1) {
+        return BorderRadius.circular(nums[0]);
+      }
+      if (nums.length == 2) {
+        return BorderRadius.only(
+          topLeft: Radius.circular(nums[0]),
+          topRight: Radius.circular(nums[1]),
+          bottomRight: Radius.circular(nums[0]),
+          bottomLeft: Radius.circular(nums[1]),
+        );
+      }
+      if (nums.length == 3) {
+        return BorderRadius.only(
+          topLeft: Radius.circular(nums[0]),
+          topRight: Radius.circular(nums[1]),
+          bottomRight: Radius.circular(nums[2]),
+          bottomLeft: Radius.circular(nums[1]),
+        );
+      }
+      return BorderRadius.only(
+        topLeft: Radius.circular(nums[0]),
+        topRight: Radius.circular(nums[1]),
+        bottomRight: Radius.circular(nums[2]),
+        bottomLeft: Radius.circular(nums[3]),
+      );
+    }
+    if (value is Map) {
+      final map = coerceObjectMap(value);
+      final all = coerceDouble(map['all'] ?? map['radius']);
+      if (all != null) {
+        return BorderRadius.circular(all);
+      }
+      final tl = coerceDouble(map['top_left'] ?? map['tl']) ?? 0;
+      final tr = coerceDouble(map['top_right'] ?? map['tr']) ?? 0;
+      final br = coerceDouble(map['bottom_right'] ?? map['br']) ?? 0;
+      final bl = coerceDouble(map['bottom_left'] ?? map['bl']) ?? 0;
+      final hasAnyCorner =
+          map.containsKey('top_left') ||
+          map.containsKey('top_right') ||
+          map.containsKey('bottom_right') ||
+          map.containsKey('bottom_left') ||
+          map.containsKey('tl') ||
+          map.containsKey('tr') ||
+          map.containsKey('br') ||
+          map.containsKey('bl');
+      if (!hasAnyCorner) return null;
+      return BorderRadius.only(
+        topLeft: Radius.circular(tl),
+        topRight: Radius.circular(tr),
+        bottomRight: Radius.circular(br),
+        bottomLeft: Radius.circular(bl),
+      );
+    }
+    return null;
+  }
+
+  BoxShape _parseBoxShape(Object? value) {
+    if (value is Map) {
+      final map = coerceObjectMap(value);
+      return _parseBoxShape(map['type'] ?? map['shape']);
+    }
+    final normalized = value
+        ?.toString()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    if (normalized == 'circle' || normalized == 'oval') {
+      return BoxShape.circle;
+    }
+    return BoxShape.rectangle;
+  }
+
+  Clip _parseClipBehavior(Object? value) {
+    if (value is bool) {
+      return value ? Clip.antiAlias : Clip.none;
+    }
+    if (value is num) {
+      return value == 0 ? Clip.none : Clip.antiAlias;
+    }
+    final normalized = value
+        ?.toString()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    switch (normalized) {
+      case null:
+      case '':
+      case 'none':
+      case 'off':
+      case 'false':
+        return Clip.none;
+      case 'hard':
+      case 'hard_edge':
+      case 'hardedge':
+        return Clip.hardEdge;
+      case 'anti_alias_with_save_layer':
+      case 'anti_alias_save_layer':
+      case 'antialiaswithsavelayer':
+        return Clip.antiAliasWithSaveLayer;
+      default:
+        return Clip.antiAlias;
+    }
   }
 
   TextAlign? _parseTextAlign(Object? value) {
@@ -3521,64 +4051,6 @@ class ControlRenderer {
       default:
         return SystemMouseCursors.basic;
     }
-  }
-
-  IconData? _parseIconData(Object? value) {
-    if (value == null) return null;
-    final raw = value.toString();
-    if (raw.isEmpty) return null;
-    final s = raw.toLowerCase().replaceAll('-', '_');
-    switch (s) {
-      case 'add':
-      case 'plus':
-        return Icons.add;
-      case 'remove':
-      case 'minus':
-        return Icons.remove;
-      case 'close':
-      case 'x':
-        return Icons.close;
-      case 'check':
-      case 'success':
-        return Icons.check_circle_outline;
-      case 'error':
-      case 'danger':
-        return Icons.error_outline;
-      case 'warning':
-      case 'warn':
-        return Icons.warning_amber_rounded;
-      case 'info':
-        return Icons.info_outline;
-      case 'help':
-        return Icons.help_outline;
-      case 'search':
-        return Icons.search;
-      case 'menu':
-        return Icons.menu;
-      case 'settings':
-        return Icons.settings;
-      case 'home':
-        return Icons.home_outlined;
-      case 'back':
-      case 'arrow_back':
-        return Icons.arrow_back;
-      case 'forward':
-      case 'arrow_forward':
-        return Icons.arrow_forward;
-      case 'refresh':
-        return Icons.refresh;
-      case 'download':
-        return Icons.download_rounded;
-      case 'upload':
-        return Icons.upload_rounded;
-      case 'play':
-        return Icons.play_arrow_rounded;
-      case 'pause':
-        return Icons.pause_rounded;
-      case 'stop':
-        return Icons.stop_rounded;
-    }
-    return null;
   }
 
   bool _coerceBool(Object? value, {required bool fallback}) {

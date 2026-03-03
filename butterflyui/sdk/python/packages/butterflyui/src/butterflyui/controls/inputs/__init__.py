@@ -5,7 +5,9 @@ from .text_area import TextArea
 from .text_field_style import TextFieldStyle
 from .numeric_field import NumericField
 from .search_bar import SearchBar
+from .smart_search_bar import SmartSearchBar
 from .file_picker import FilePicker
+from .filepicker import Filepicker
 from .directory_picker import DirectoryPicker
 from .checkbox import Checkbox
 from .switch import Switch
@@ -19,6 +21,7 @@ from .time_select import TimeSelect
 from .date_range_picker import DateRangePicker
 from .multi_select import MultiSelect
 from .combo_box import ComboBox
+from .combobox import Combobox
 from .dropdown import Dropdown
 from .emoji_picker import EmojiPicker
 from .filter_chips_bar import FilterChipsBar
@@ -31,6 +34,9 @@ from .chip import Chip
 from .tag_chip import TagChip
 from .count_stepper import CountStepper
 from .elevated_button import ElevatedButton
+from .filled_button import FilledButton
+from .outlined_button import OutlinedButton
+from .text_button import TextButton
 from .icon_button import IconButton
 from .icon_picker import IconPicker
 from .keybind_recorder import KeybindRecorder
@@ -43,11 +49,6 @@ from .segment_bar import SegmentBar
 from .segmented_switch import SegmentedSwitch
 from .span_slider import SpanSlider
 
-# Compatibility aliases expected by butterflyui.controls.__init__
-FilledButton = ElevatedButton
-OutlinedButton = Button
-TextButton = Button
-
 __all__ = [
     "Button",
     "AsyncActionButton",
@@ -56,7 +57,9 @@ __all__ = [
     "TextFieldStyle",
     "NumericField",
     "SearchBar",
+    "SmartSearchBar",
     "FilePicker",
+    "Filepicker",
     "DirectoryPicker",
     "Checkbox",
     "Switch",
@@ -70,6 +73,7 @@ __all__ = [
     "DateRangePicker",
     "MultiSelect",
     "ComboBox",
+    "Combobox",
     "Dropdown",
     "EmojiPicker",
     "FilterChipsBar",

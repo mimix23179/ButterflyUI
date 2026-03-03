@@ -21,7 +21,6 @@ __all__ = [
     "normalize_padding",
     "normalize_scale",
     "normalize_skew",
-    "normalize_frame",
 ]
 
 _DIMENSION_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:%|px|vw|vh|vmin|vmax)?$")
@@ -2054,240 +2053,8 @@ GALLERY_EVENT_ENUM = [
     "font_change",
 ]
 
-CODE_EDITOR_MODULE_ENUM = [
-    "editor_intent_router",
-    "editor_minimap",
-    "editor_surface",
-    "editor_view",
-    "diff",
-    "editor_tabs",
-    "empty_state_view",
-    "explorer_tree",
-    "ide",
-    "code_buffer",
-    "code_category_layer",
-    "code_document",
-    "file_tabs",
-    "file_tree",
-    "smart_search_bar",
-    "semantic_search",
-    "search_box",
-    "search_everything_panel",
-    "search_field",
-    "search_history",
-    "search_intent",
-    "search_item",
-    "search_provider",
-    "search_results_view",
-    "search_scope_selector",
-    "search_source",
-    "query_token",
-    "document_tab_strip",
-    "command_search",
-    "tree",
-    "workbench_editor",
-    "workspace_explorer",
-    "command_bar",
-    "diagnostic_stream",
-    "diff_narrator",
-    "dock_graph",
-    "dock",
-    "dock_pane",
-    "empty_view",
-    "export_panel",
-    "gutter",
-    "hint",
-    "mini_map",
-    "scope_picker",
-    "scoped_search_replace",
-    "diagnostics_panel",
-    "ghost_editor",
-    "inline_error_view",
-    "inline_search_overlay",
-    "inline_widget",
-    "inspector",
-    "intent_panel",
-    "intent_router",
-    "intent_search",
-]
-
-CODE_EDITOR_STATE_ENUM = ["idle", "loading", "ready", "searching", "diff", "disabled"]
-
-CODE_EDITOR_EVENT_ENUM = [
-    "ready",
-    "change",
-    "submit",
-    "save",
-    "format_request",
-    "search",
-    "open_document",
-    "close_document",
-    "select",
-    "state_change",
-    "module_change",
-]
-
-TERMINAL_MODULE_ENUM = [
-    "capabilities",
-    "command_builder",
-    "flow_gate",
-    "output_mapper",
-    "presets",
-    "progress",
-    "progress_view",
-    "prompt",
-    "raw_view",
-    "replay",
-    "session",
-    "stdin",
-    "stdin_injector",
-    "stream",
-    "stream_view",
-    "tabs",
-    "timeline",
-    "view",
-    "workbench",
-    "process_bridge",
-    "execution_lane",
-    "log_viewer",
-    "log_panel",
-]
-
-TERMINAL_STATE_ENUM = ["idle", "loading", "ready", "running", "paused", "disabled"]
-
-TERMINAL_EVENT_ENUM = [
-    "ready",
-    "change",
-    "submit",
-    "input",
-    "output",
-    "state_change",
-    "module_change",
-]
-
-STUDIO_MODULE_ENUM = [
-    "actions_editor",
-    "asset_browser",
-    "bindings_editor",
-    "block_palette",
-    "builder",
-    "canvas",
-    "timeline_surface",
-    "node_surface",
-    "preview_surface",
-    "component_palette",
-    "inspector",
-    "outline_tree",
-    "project_panel",
-    "properties_panel",
-    "responsive_toolbar",
-    "tokens_editor",
-    "selection_tools",
-    "transform_box",
-    "transform_toolbar",
-]
-
-STUDIO_STATE_ENUM = ["idle", "loading", "ready", "editing", "preview", "disabled"]
-
-STUDIO_EVENT_ENUM = [
-    "ready",
-    "change",
-    "submit",
-    "select",
-    "state_change",
-    "module_change",
-]
-
 
 def _gallery_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "payload": ANY_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-def _skins_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "payload": ANY_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-def _code_editor_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "payload": ANY_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-def _terminal_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "payload": ANY_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-def _studio_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
     payload_schema = {
         "type": "object",
         "properties": {
@@ -2357,270 +2124,6 @@ GALLERY_MODULE_SCHEMAS = {
     "set_as_wallpaper": _gallery_module_schema({}),
     "presets": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
     "skins": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-}
-
-
-# ============================================================================
-# Skins Module Types (defined below after SKINS_SCHEMA)
-# ============================================================================
-
-CODE_EDITOR_MODULE_SCHEMAS = {
-    "editor_intent_router": _code_editor_module_schema({"shortcuts": {"type": "array", "items": ANY_SCHEMA}}),
-    "editor_minimap": _code_editor_module_schema({"visible": BOOL_SCHEMA}),
-    "editor_surface": _code_editor_module_schema({"read_only": BOOL_SCHEMA, "show_gutter": BOOL_SCHEMA}),
-    "editor_view": _code_editor_module_schema({"document_id": STRING_SCHEMA, "language": STRING_SCHEMA}),
-    "diff": _code_editor_module_schema({"left": STRING_SCHEMA, "right": STRING_SCHEMA}),
-    "editor_tabs": _code_editor_module_schema({"tabs": {"type": "array", "items": ANY_SCHEMA}}),
-    "empty_state_view": _code_editor_module_schema({"message": STRING_SCHEMA, "title": STRING_SCHEMA}),
-    "explorer_tree": _code_editor_module_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}}),
-    "ide": _code_editor_module_schema({"documents": {"type": "array", "items": ANY_SCHEMA}}),
-    "code_buffer": _code_editor_module_schema({"buffer_id": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "code_category_layer": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "code_document": _code_editor_module_schema({"document_id": STRING_SCHEMA, "uri": STRING_SCHEMA}),
-    "file_tabs": _code_editor_module_schema({"tabs": {"type": "array", "items": ANY_SCHEMA}}),
-    "file_tree": _code_editor_module_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}}),
-    "smart_search_bar": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "semantic_search": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "search_box": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "search_everything_panel": _code_editor_module_schema({"results": {"type": "array", "items": ANY_SCHEMA}}),
-    "search_field": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "search_history": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "search_intent": _code_editor_module_schema({"intent": STRING_SCHEMA}),
-    "search_item": _code_editor_module_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA}),
-    "search_provider": _code_editor_module_schema({"sources": {"type": "array", "items": ANY_SCHEMA}}),
-    "search_results_view": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "search_scope_selector": _code_editor_module_schema({"options": {"type": "array", "items": ANY_SCHEMA}}),
-    "search_source": _code_editor_module_schema({"source": STRING_SCHEMA}),
-    "query_token": _code_editor_module_schema({"tokens": {"type": "array", "items": ANY_SCHEMA}}),
-    "document_tab_strip": _code_editor_module_schema({"tabs": {"type": "array", "items": ANY_SCHEMA}}),
-    "command_search": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "tree": _code_editor_module_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}}),
-    "workbench_editor": _code_editor_module_schema({"documents": {"type": "array", "items": ANY_SCHEMA}}),
-    "workspace_explorer": _code_editor_module_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}}),
-    "command_bar": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "diagnostic_stream": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "diff_narrator": _code_editor_module_schema({"text": STRING_SCHEMA}),
-    "dock_graph": _code_editor_module_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}}),
-    "dock": _code_editor_module_schema({"panes": {"type": "array", "items": ANY_SCHEMA}}),
-    "dock_pane": _code_editor_module_schema({"pane_id": STRING_SCHEMA}),
-    "empty_view": _code_editor_module_schema({"message": STRING_SCHEMA, "title": STRING_SCHEMA}),
-    "export_panel": _code_editor_module_schema({"options": {"type": "array", "items": ANY_SCHEMA}}),
-    "gutter": _code_editor_module_schema({"line_count": INTEGER_SCHEMA}),
-    "hint": _code_editor_module_schema({"text": STRING_SCHEMA}),
-    "mini_map": _code_editor_module_schema({"visible": BOOL_SCHEMA}),
-    "scope_picker": _code_editor_module_schema({"options": {"type": "array", "items": ANY_SCHEMA}}),
-    "scoped_search_replace": _code_editor_module_schema({"query": STRING_SCHEMA, "replace_text": STRING_SCHEMA}),
-    "diagnostics_panel": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "ghost_editor": _code_editor_module_schema({"text": STRING_SCHEMA}),
-    "inline_error_view": _code_editor_module_schema({"message": STRING_SCHEMA}),
-    "inline_search_overlay": _code_editor_module_schema({"query": STRING_SCHEMA}),
-    "inline_widget": _code_editor_module_schema({"line": INTEGER_SCHEMA, "column": INTEGER_SCHEMA}),
-    "inspector": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "intent_panel": _code_editor_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "intent_router": _code_editor_module_schema({"routes": {"type": "array", "items": ANY_SCHEMA}}),
-    "intent_search": _code_editor_module_schema({"query": STRING_SCHEMA}),
-}
-
-STUDIO_MODULE_SCHEMAS = {
-    "actions_editor": _studio_module_schema(
-        {
-            "actions": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "target_id": STRING_SCHEMA,
-        }
-    ),
-    "asset_browser": _studio_module_schema(
-        {
-            "assets": {"type": "array", "items": ANY_SCHEMA},
-            "selected_id": STRING_SCHEMA,
-            "show_header": BOOL_SCHEMA,
-        }
-    ),
-    "bindings_editor": _studio_module_schema(
-        {
-            "bindings": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "target_id": STRING_SCHEMA,
-        }
-    ),
-    "block_palette": _studio_module_schema(
-        {
-            "query": STRING_SCHEMA,
-            "blocks": {"type": "array", "items": ANY_SCHEMA},
-            "show_search": BOOL_SCHEMA,
-        }
-    ),
-    "builder": _studio_module_schema(
-        {
-            "project": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "blocks": {"type": "array", "items": ANY_SCHEMA},
-            "assets": {"type": "array", "items": ANY_SCHEMA},
-            "breakpoints": {"type": "array", "items": ANY_SCHEMA},
-            "selected_id": STRING_SCHEMA,
-        }
-    ),
-    "canvas": _studio_module_schema(
-        {
-            "selected_id": STRING_SCHEMA,
-            "hovered_id": STRING_SCHEMA,
-            "show_grid": BOOL_SCHEMA,
-            "snap_to_grid": BOOL_SCHEMA,
-            "grid_size": NUMBER_SCHEMA,
-            "show_drop_hints": BOOL_SCHEMA,
-        }
-    ),
-    "timeline_surface": _studio_module_schema(
-        {
-            "tracks": {"type": "array", "items": ANY_SCHEMA},
-            "playhead_seconds": NUMBER_SCHEMA,
-            "duration_seconds": NUMBER_SCHEMA,
-            "pixels_per_second": NUMBER_SCHEMA,
-            "snap_enabled": BOOL_SCHEMA,
-        }
-    ),
-    "node_surface": _studio_module_schema(
-        {
-            "nodes": {"type": "array", "items": ANY_SCHEMA},
-            "edges": {"type": "array", "items": ANY_SCHEMA},
-            "world_width": NUMBER_SCHEMA,
-            "world_height": NUMBER_SCHEMA,
-        }
-    ),
-    "preview_surface": _studio_module_schema(
-        {
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "status": STRING_SCHEMA,
-            "source": STRING_SCHEMA,
-        }
-    ),
-    "component_palette": _studio_module_schema(
-        {
-            "query": STRING_SCHEMA,
-            "blocks": {"type": "array", "items": ANY_SCHEMA},
-            "show_search": BOOL_SCHEMA,
-        }
-    ),
-    "inspector": _studio_module_schema(
-        {
-            "node": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "show_raw": BOOL_SCHEMA,
-            "show_actions": BOOL_SCHEMA,
-            "show_bindings": BOOL_SCHEMA,
-        }
-    ),
-    "outline_tree": _studio_module_schema(
-        {
-            "nodes": {"type": "array", "items": ANY_SCHEMA},
-            "selected_id": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-        }
-    ),
-    "project_panel": _studio_module_schema(
-        {
-            "project": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        }
-    ),
-    "properties_panel": _studio_module_schema(
-        {
-            "schema": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "value": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "dense": BOOL_SCHEMA,
-        }
-    ),
-    "responsive_toolbar": _studio_module_schema(
-        {
-            "breakpoints": {"type": "array", "items": ANY_SCHEMA},
-            "current_id": STRING_SCHEMA,
-        }
-    ),
-    "tokens_editor": _studio_module_schema(
-        {
-            "height": NUMBER_SCHEMA,
-            "json": STRING_SCHEMA,
-            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        }
-    ),
-    "selection_tools": _studio_module_schema(
-        {
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "active": STRING_SCHEMA,
-        }
-    ),
-    "transform_box": _studio_module_schema(
-        {
-            "x": NUMBER_SCHEMA,
-            "y": NUMBER_SCHEMA,
-            "width": NUMBER_SCHEMA,
-            "height": NUMBER_SCHEMA,
-            "rotation": NUMBER_SCHEMA,
-        }
-    ),
-    "transform_toolbar": _studio_module_schema(
-        {
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "active": STRING_SCHEMA,
-        }
-    ),
-}
-
-TERMINAL_MODULE_SCHEMAS = {
-    "capabilities": _terminal_module_schema(
-        {
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "supports": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "command_builder": _terminal_module_schema(
-        {
-            "command": STRING_SCHEMA,
-            "args": {"type": "array", "items": STRING_SCHEMA},
-            "cwd": STRING_SCHEMA,
-        }
-    ),
-    "flow_gate": _terminal_module_schema(
-        {
-            "enabled": BOOL_SCHEMA,
-            "blocked": BOOL_SCHEMA,
-            "reason": STRING_SCHEMA,
-        }
-    ),
-    "output_mapper": _terminal_module_schema(
-        {
-            "mode": STRING_SCHEMA,
-            "items": {"type": "array", "items": ANY_SCHEMA},
-        }
-    ),
-    "presets": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "progress": _terminal_module_schema({"value": NUMBER_SCHEMA, "total": NUMBER_SCHEMA}),
-    "progress_view": _terminal_module_schema({"value": NUMBER_SCHEMA, "label": STRING_SCHEMA}),
-    "prompt": _terminal_module_schema({"value": STRING_SCHEMA, "placeholder": STRING_SCHEMA}),
-    "raw_view": _terminal_module_schema({"text": STRING_SCHEMA, "raw_text": STRING_SCHEMA}),
-    "replay": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "session": _terminal_module_schema({"session_id": STRING_SCHEMA, "status": STRING_SCHEMA}),
-    "stdin": _terminal_module_schema({"value": STRING_SCHEMA}),
-    "stdin_injector": _terminal_module_schema({"value": STRING_SCHEMA}),
-    "stream": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "stream_view": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "tabs": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "timeline": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "view": _terminal_module_schema({"mode": STRING_SCHEMA}),
-    "workbench": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "process_bridge": _terminal_module_schema(
-        {
-            "command": STRING_SCHEMA,
-            "args": {"type": "array", "items": STRING_SCHEMA},
-            "cwd": STRING_SCHEMA,
-            "env": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "auto_start": BOOL_SCHEMA,
-        }
-    ),
-    "execution_lane": _terminal_module_schema(
-        {
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "active_id": STRING_SCHEMA,
-        }
-    ),
-    "log_viewer": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "log_panel": _terminal_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
 }
 
 GALLERY_SCHEMA = _control_schema(
@@ -2857,81 +2360,6 @@ SKINS_SCOPE_SCHEMA = _control_schema(
         "skin": STRING_SCHEMA,  # Preset skin name
         "tokens": SKINS_TOKENS_SCHEMA,  # Custom tokens
         "brightness": STRING_SCHEMA,  # "light" or "dark"
-    }
-)
-
-CODE_EDITOR_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": CODE_EDITOR_MODULE_ENUM},
-        "state": {"type": "string", "enum": CODE_EDITOR_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "events": {"type": "array", "items": {"type": "string", "enum": CODE_EDITOR_EVENT_ENUM}},
-        "modules": {
-            "type": "object",
-            "properties": {name: CODE_EDITOR_MODULE_SCHEMAS[name] for name in CODE_EDITOR_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        "value": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "code": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "theme": STRING_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "word_wrap": BOOL_SCHEMA,
-        "show_gutter": BOOL_SCHEMA,
-        "line_numbers": BOOL_SCHEMA,
-        "show_minimap": BOOL_SCHEMA,
-        "minimap": BOOL_SCHEMA,
-        "tab_size": INTEGER_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "cursor_color": COLOR_SCHEMA,
-        "selection_color": COLOR_SCHEMA,
-        "editor_bg": COLOR_SCHEMA,
-        "editor_background": COLOR_SCHEMA,
-        "editor_text_color": COLOR_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "engine": STRING_SCHEMA,
-        "webview_engine": STRING_SCHEMA,
-        "document_uri": STRING_SCHEMA,
-        "documents": {"type": "array", "items": ANY_SCHEMA},
-        "glyph_margin": BOOL_SCHEMA,
-        "show_breakpoints": BOOL_SCHEMA,
-        "render_whitespace": STRING_SCHEMA,
-        "format_on_type": BOOL_SCHEMA,
-        "format_on_paste": BOOL_SCHEMA,
-        "emit_on_change": BOOL_SCHEMA,
-        "debounce_ms": INTEGER_SCHEMA,
-        **{name: CODE_EDITOR_MODULE_SCHEMAS[name] for name in CODE_EDITOR_MODULE_ENUM},
-    }
-)
-
-STUDIO_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": STUDIO_MODULE_ENUM},
-        "state": {"type": "string", "enum": STUDIO_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "show_modules": BOOL_SCHEMA,
-        "show_chrome": BOOL_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "events": {"type": "array", "items": {"type": "string", "enum": STUDIO_EVENT_ENUM}},
-        "modules": {
-            "type": "object",
-            "properties": {name: STUDIO_MODULE_SCHEMAS[name] for name in STUDIO_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        **{name: STUDIO_MODULE_SCHEMAS[name] for name in STUDIO_MODULE_ENUM},
     }
 )
 
@@ -4444,76 +3872,6 @@ IDE_SCHEMA = _control_schema(
     }
 )
 
-TERMINAL_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": TERMINAL_MODULE_ENUM},
-        "state": {"type": "string", "enum": TERMINAL_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "events": {"type": "array", "items": {"type": "string", "enum": TERMINAL_EVENT_ENUM}},
-        "modules": {
-            "type": "object",
-            "properties": {name: TERMINAL_MODULE_SCHEMAS[name] for name in TERMINAL_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        "lines": {"type": "array", "items": ANY_SCHEMA},
-        "history": {"type": "array", "items": STRING_SCHEMA},
-        "history_items": {"type": "array", "items": STRING_SCHEMA},
-        "history_limit": INTEGER_SCHEMA,
-        "history_key": STRING_SCHEMA,
-        "persist_history": BOOL_SCHEMA,
-        "prompt": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "submit_label": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_prompt": BOOL_SCHEMA,
-        "show_input": BOOL_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "cursor_blink": BOOL_SCHEMA,
-        "auto_scroll": BOOL_SCHEMA,
-        "wrap_lines": BOOL_SCHEMA,
-        "show_timestamps": BOOL_SCHEMA,
-        "strip_ansi": BOOL_SCHEMA,
-        "clear_on_submit": BOOL_SCHEMA,
-        "auto_focus": BOOL_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "line_height": NUMBER_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "text_color": COLOR_SCHEMA,
-        "cursor_color": COLOR_SCHEMA,
-        "command_color": COLOR_SCHEMA,
-        "error_color": COLOR_SCHEMA,
-        "stderr_color": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "engine": STRING_SCHEMA,
-        "local_command": STRING_SCHEMA,
-        "local_args": {"type": "array", "items": STRING_SCHEMA},
-        "local_env": {"type": "object"},
-        "local_cwd": STRING_SCHEMA,
-        "auto_start": BOOL_SCHEMA,
-        "use_pty": BOOL_SCHEMA,
-        "pipe_input": BOOL_SCHEMA,
-        "emit_local_events": BOOL_SCHEMA,
-        "local_allowlist": {"type": "array", "items": STRING_SCHEMA},
-        "local_blocklist": {"type": "array", "items": STRING_SCHEMA},
-        "local_allow_patterns": {"type": "array", "items": STRING_SCHEMA},
-        "local_block_patterns": {"type": "array", "items": STRING_SCHEMA},
-        "output": STRING_SCHEMA,
-        "raw_text": STRING_SCHEMA,
-        "webview_engine": STRING_SCHEMA,
-        **{name: TERMINAL_MODULE_SCHEMAS[name] for name in TERMINAL_MODULE_ENUM},
-    }
-)
-
 OUTPUT_PANEL_SCHEMA = _control_schema(
     {
         "channels": {"type": "object"},
@@ -5450,7 +4808,17 @@ CONTROL_SCHEMAS = {
     "grain_overlay": GRAIN_OVERLAY_SCHEMA,
     "gradient_sweep": GRADIENT_SWEEP_SCHEMA,
     "shimmer": SHIMMER_SCHEMA,
+    "shimmer_shadow": _control_schema({
+        "shimmer": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "shadow": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    }),
     "shadow_stack": SHADOW_STACK_SCHEMA,
+    "visual_fx": _control_schema({
+        "glow": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "glass_blur": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "chromatic_shift": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "gradient_sweep": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    }),
     "outline_reveal": OUTLINE_REVEAL_SCHEMA,
     "ripple_burst": RIPPLE_BURST_SCHEMA,
     "confetti_burst": CONFETTI_BURST_SCHEMA,
@@ -5678,6 +5046,14 @@ CONTROL_SCHEMAS = {
     "queue_list": QUEUE_LIST_SCHEMA,
     "result_preview_pane": RESULT_PREVIEW_PANE_SCHEMA,
     "color_swatch_grid": COLOR_SWATCH_GRID_SCHEMA,
+    "color_tools": _control_schema({
+        "picker": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "swatches": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "presets": {"type": "array", "items": ANY_SCHEMA},
+        "show_picker": BOOL_SCHEMA,
+        "show_swatches": BOOL_SCHEMA,
+        "spacing": NUMBER_SCHEMA,
+    }),
     "gradient_editor": GRADIENT_EDITOR_SCHEMA,
     "histogram_view": HISTOGRAM_VIEW_SCHEMA,
     "crop_box": CROP_BOX_SCHEMA,
@@ -5698,8 +5074,6 @@ CONTROL_SCHEMAS = {
     "info_bar": INFO_BAR_SCHEMA,
     "mini_map": MINI_MAP_SCHEMA,
     "ide": IDE_SCHEMA,
-    "code_editor": CODE_EDITOR_SCHEMA,
-    "studio": STUDIO_SCHEMA,
     "code_buffer": CODE_BUFFER_SCHEMA,
     "code_document": CODE_DOCUMENT_SCHEMA,
     "multi_cursor_controller": MULTI_CURSOR_CONTROLLER_SCHEMA,
@@ -5805,7 +5179,6 @@ CONTROL_SCHEMAS = {
     ),
     "drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
     "window_controls": _control_schema(),
-    "terminal": TERMINAL_SCHEMA,
     "output_panel": OUTPUT_PANEL_SCHEMA,
     "log_panel": OUTPUT_PANEL_SCHEMA,
     "editor_tab_strip": EDITOR_TAB_STRIP_SCHEMA,
@@ -6069,7 +5442,6 @@ _ALL_CONTROL_TYPES = {
     "code_buffer",
     "code_category_layer",
     "code_document",
-    "code_editor",
     "color_picker",
     "color_swatch_grid",
     "column",
@@ -6288,7 +5660,6 @@ _ALL_CONTROL_TYPES = {
     "state_snapshot",
     "status_bar",
     "status_mark",
-    "studio",
     "studio_actions_editor",
     "studio_asset_browser",
     "studio_bindings_editor",
@@ -6314,7 +5685,6 @@ _ALL_CONTROL_TYPES = {
     "table_view",
     "tabs",
     "tag_chip",
-    "terminal",
     "output_panel",
     "log_panel",
     "text",
@@ -6564,21 +5934,6 @@ RUNTIME_PROP_HINTS = {
     'preference_store': ['namespace'],
     'socket_client': ['url', 'protocols', 'auto_connect'],
     'data_grid': ['rows', 'columns', 'sortable', 'filterable', 'selectable', 'multi_select', 'pagination', 'page_size', 'dense', 'striped', 'show_header', 'auto_sort', 'selected_index', 'sort_column', 'sort_ascending', 'filter_query', 'filter_column', 'filter_case_sensitive'],
-    'code_editor': ['schema_version', 'module', 'state', 'events', 'modules',
-        'manifest', 'registries',
-        'value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste', 'emit_on_change', 'debounce_ms',
-        'editor_intent_router', 'editor_minimap', 'editor_surface', 'editor_view', 'diff', 'editor_tabs', 'empty_state_view', 'explorer_tree', 'ide', 'code_buffer', 'code_category_layer', 'code_document', 'file_tabs', 'file_tree', 'smart_search_bar', 'semantic_search', 'search_box', 'search_everything_panel', 'search_field', 'search_history', 'search_intent', 'search_item', 'search_provider', 'search_results_view', 'search_scope_selector', 'search_source', 'query_token', 'document_tab_strip', 'command_search', 'tree', 'workbench_editor', 'workspace_explorer', 'command_bar', 'diagnostic_stream', 'diff_narrator', 'dock_graph', 'dock', 'dock_pane', 'empty_view', 'export_panel', 'gutter', 'hint', 'mini_map', 'scope_picker', 'scoped_search_replace', 'diagnostics_panel', 'ghost_editor', 'inline_error_view', 'inline_search_overlay', 'inline_widget', 'inspector', 'intent_panel', 'intent_router', 'intent_search',
-    ],
-    'studio': ['schema_version', 'module', 'state', 'events', 'modules',
-        'actions_editor', 'asset_browser', 'bindings_editor', 'block_palette',
-        'builder', 'canvas', 'timeline_surface', 'node_surface', 'preview_surface',
-        'component_palette', 'inspector', 'outline_tree',
-        'project_panel', 'properties_panel', 'responsive_toolbar', 'tokens_editor',
-        'selection_tools', 'transform_box', 'transform_toolbar',
-        'manifest', 'registries', 'render', 'cache', 'media', 'shortcuts', 'panels',
-        'selected_id', 'selected_ids', 'active_tool', 'focused_panel', 'documents', 'assets',
-        'left_pane_ratio', 'right_pane_ratio', 'bottom_panel_height',
-    ],
     'ide': ['value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste'],
     'editor_minimap': ['text', 'language', 'visible', 'position', 'width', 'background', 'border_color', 'text_color'],
     'file_tabs': ['items', 'active_id', 'dense'],
@@ -6599,22 +5954,6 @@ RUNTIME_PROP_HINTS = {
     'drop_zone': ['enabled', 'accepts', 'title', 'subtitle', 'use_desktop_drop'],
     'queue_list': ['items', 'auto_download', 'download_dir', 'max_concurrent', 'use_download_manager', 'emit_local_events'],
     'download_item': ['id', 'title', 'subtitle', 'progress', 'status', 'speed', 'eta', 'paused', 'url', 'path'],
-    'terminal': ['schema_version', 'module', 'state', 'events', 'modules',
-        'manifest', 'registries',
-        'lines', 'history', 'history_items', 'history_limit', 'history_key', 'persist_history',
-        'prompt', 'placeholder', 'submit_label', 'enabled', 'dense', 'show_prompt', 'show_input',
-        'read_only', 'cursor_blink', 'auto_scroll', 'wrap_lines', 'show_timestamps', 'strip_ansi',
-        'clear_on_submit', 'auto_focus', 'max_lines', 'font_family', 'font_size', 'line_height',
-        'bgcolor', 'background', 'text_color', 'cursor_color', 'command_color', 'error_color',
-        'stderr_color', 'border_color', 'radius', 'engine', 'webview_engine',
-        'local_command', 'local_args', 'local_env', 'local_cwd', 'auto_start', 'use_pty', 'pipe_input',
-        'emit_local_events', 'local_allowlist', 'local_blocklist', 'local_allow_patterns', 'local_block_patterns',
-        'output', 'raw_text',
-        'capabilities', 'command_builder', 'flow_gate', 'output_mapper', 'presets', 'progress',
-        'progress_view', 'raw_view', 'replay', 'session', 'stdin', 'stdin_injector', 'stream',
-        'stream_view', 'tabs', 'timeline', 'view', 'workbench', 'process_bridge',
-        'execution_lane', 'log_viewer', 'log_panel',
-    ],
     'output_panel': ['channels', 'active_channel'],
     'log_panel': ['channels', 'active_channel'],
     'editor_tab_strip': ['tabs'],

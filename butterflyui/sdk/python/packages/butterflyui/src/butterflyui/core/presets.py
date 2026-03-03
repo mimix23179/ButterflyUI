@@ -1,4 +1,4 @@
-from .style import Style, BoxShadow, LinearGradient
+from .style import Style, BoxShadow
 
 __all__ = [
     "TERMINAL_STYLE",

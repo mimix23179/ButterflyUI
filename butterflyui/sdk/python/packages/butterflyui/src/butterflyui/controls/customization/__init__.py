@@ -8,6 +8,7 @@ from .border_side import BorderSide
 from .button_style import ButtonStyle
 from .color_picker import ColorPicker
 from .color_swatch_grid import ColorSwatchGrid
+from .color_tools import ColorTools
 from .container_style import ContainerStyle
 from .gradient import Gradient
 from .gradient_editor import GradientEditor
@@ -35,6 +36,7 @@ __all__ = [
     "ButtonStyle",
     "ColorPicker",
     "ColorSwatchGrid",
+    "ColorTools",
     "ContainerStyle",
     "Gradient",
     "GradientEditor",

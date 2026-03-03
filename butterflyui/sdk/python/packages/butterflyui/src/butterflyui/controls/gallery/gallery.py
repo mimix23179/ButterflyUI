@@ -884,8 +884,33 @@ class Gallery(Component):
             Main-axis spacing override.
         cross_axis_spacing:
             Cross-axis spacing override.
+        carousel_height:
+            Fixed pixel height for carousel mode. Use when gallery is placed
+            in shrink-wrapped or unconstrained parents.
+        carousel_aspect_ratio:
+            Fallback ``width / height`` ratio for carousel mode when
+            ``carousel_height`` is not provided.
+        carousel_viewport_fraction:
+            Fraction of viewport each carousel page should occupy.
+            ``1.0`` uses full width; lower values reveal neighboring cards.
+        carousel_pad_ends:
+            Whether carousel adds leading/trailing padding at the ends.
+        carousel_page_snapping:
+            Whether swipe settles exactly on page boundaries.
+        carousel_initial_page:
+            Initial page index used when the carousel is first built.
+        carousel_overlay_opacity:
+            Overlay gradient opacity applied to carousel captions
+            (0.0 to 1.0).
+        carousel_horizontal_inset:
+            Horizontal margin around each carousel tile.
+        carousel_vertical_inset:
+            Vertical margin around each carousel tile.
         events:
             Runtime event names to emit to Python.
+        style:
+            Optional container style for the gallery shell (supports gradient,
+            shadow, radius, clip, and glass keys like ``backdrop_blur``).
         **kwargs:
             Additional runtime props forwarded as-is.
     """
@@ -904,6 +929,15 @@ class Gallery(Component):
         spacing: float | None = None,
         main_axis_spacing: float | None = None,
         cross_axis_spacing: float | None = None,
+        carousel_height: float | None = None,
+        carousel_aspect_ratio: float | None = None,
+        carousel_viewport_fraction: float | None = None,
+        carousel_pad_ends: bool | None = None,
+        carousel_page_snapping: bool | None = None,
+        carousel_initial_page: int | None = None,
+        carousel_overlay_opacity: float | None = None,
+        carousel_horizontal_inset: float | None = None,
+        carousel_vertical_inset: float | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -953,6 +987,15 @@ class Gallery(Component):
             spacing=spacing,
             main_axis_spacing=main_axis_spacing,
             cross_axis_spacing=cross_axis_spacing,
+            carousel_height=carousel_height,
+            carousel_aspect_ratio=carousel_aspect_ratio,
+            carousel_viewport_fraction=carousel_viewport_fraction,
+            carousel_pad_ends=carousel_pad_ends,
+            carousel_page_snapping=carousel_page_snapping,
+            carousel_initial_page=carousel_initial_page,
+            carousel_overlay_opacity=carousel_overlay_opacity,
+            carousel_horizontal_inset=carousel_horizontal_inset,
+            carousel_vertical_inset=carousel_vertical_inset,
             events=events,
             **extra_kwargs,
         )

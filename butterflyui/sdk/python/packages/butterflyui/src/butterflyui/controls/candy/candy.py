@@ -609,6 +609,12 @@ class Candy(Component):
             List of all recognized state names for this control.
         events:
             List of event names the Flutter runtime should emit to Python.
+        style:
+            Optional visual style map applied by the shared control renderer.
+            Common keys include ``gradient``, ``shadow``, ``radius``,
+            ``border_color``, ``border_width``, ``clip_behavior``,
+            ``backdrop_blur``/``backdrop_color`` (glass effect), and
+            per-slot overrides under ``style={"slots": {...}}``.
         **kwargs:
             Additional module-specific props forwarded to runtime.
     """

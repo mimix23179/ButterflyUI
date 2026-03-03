@@ -1,0 +1,23 @@
+import 'package:flutter/material.dart';
+
+import 'package:butterflyui_runtime/src/core/controls/feedback/progress_indicator.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+
+Widget buildProgressBarControl(
+  String controlId,
+  Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  final merged = <String, Object?>{...props};
+  merged.putIfAbsent('variant', () => 'linear');
+  merged.putIfAbsent('circular', () => false);
+  return buildProgressIndicatorControl(
+    controlId,
+    merged,
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
+  );
+}

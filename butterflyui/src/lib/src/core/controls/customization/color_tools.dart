@@ -3,6 +3,107 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
+Widget buildColorToolsControl(
+  String controlId,
+  Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  final pickerProps = _mergeColorToolProps(
+    props,
+    section: 'picker',
+    fallbackKeys: const ['value', 'color', 'show_alpha', 'alpha', 'show_input'],
+  );
+  final swatchProps = _mergeColorToolProps(
+    props,
+    section: 'swatches',
+    fallbackKeys: const [
+      'swatches',
+      'selected_id',
+      'selected_index',
+      'columns',
+      'size',
+      'spacing',
+      'show_labels',
+    ],
+  );
+
+  if (!swatchProps.containsKey('swatches') && props['presets'] is List) {
+    final presets = (props['presets'] as List)
+        .map((entry) => <String, Object?>{'color': entry})
+        .toList(growable: false);
+    swatchProps['swatches'] = presets;
+  }
+
+  final showPicker = _coerceBool(
+    props['show_picker'] ?? pickerProps['show_picker'],
+    fallback: true,
+  );
+  final showSwatches = _coerceBool(
+    props['show_swatches'] ?? swatchProps['show_swatches'],
+    fallback: true,
+  );
+  final spacing = coerceDouble(props['spacing']) ?? 10.0;
+
+  final pickerControlId = controlId.isEmpty ? controlId : '$controlId::picker';
+  final swatchControlId = controlId.isEmpty
+      ? controlId
+      : '$controlId::swatches';
+
+  void emitProxy(
+    String source,
+    String id,
+    String event,
+    Map<String, Object?> payload,
+  ) {
+    final parentPayload = <String, Object?>{
+      'source': source,
+      'event': event,
+      ...payload,
+    };
+    sendEvent(controlId, event, parentPayload);
+    if (id != controlId && id.isNotEmpty) {
+      sendEvent(id, event, payload);
+    }
+  }
+
+  final children = <Widget>[
+    if (showPicker)
+      buildColorPickerControl(
+        pickerControlId,
+        pickerProps,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        (id, event, payload) => emitProxy('picker', id, event, payload),
+      ),
+    if (showSwatches)
+      buildColorSwatchGridControl(
+        swatchControlId,
+        swatchProps,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        (id, event, payload) => emitProxy('swatches', id, event, payload),
+      ),
+  ];
+
+  if (children.isEmpty) {
+    return const SizedBox.shrink();
+  }
+  if (children.length == 1) {
+    return children.first;
+  }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) SizedBox(height: spacing),
+        children[i],
+      ],
+    ],
+  );
+}
+
 Widget buildColorPickerControl(
   String controlId,
   Map<String, Object?> props,
@@ -75,7 +176,10 @@ class _ColorPickerControlState extends State<_ColorPickerControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_value':
         return _valuePayload(_value);
@@ -105,7 +209,8 @@ class _ColorPickerControlState extends State<_ColorPickerControl> {
     final presets = _coerceColors(widget.props['presets']);
     final showInput = widget.props['show_input'] != false;
     final showPresets = widget.props['show_presets'] != false;
-    final showAlpha = widget.props['show_alpha'] == true || widget.props['alpha'] == true;
+    final showAlpha =
+        widget.props['show_alpha'] == true || widget.props['alpha'] == true;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +223,9 @@ class _ColorPickerControlState extends State<_ColorPickerControl> {
               decoration: BoxDecoration(
                 color: _value,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -193,7 +300,9 @@ class _ColorPickerControlState extends State<_ColorPickerControl> {
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                     ),
                   ),
                 ),
@@ -237,7 +346,8 @@ class _ColorSwatchGridControl extends StatefulWidget {
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
-  State<_ColorSwatchGridControl> createState() => _ColorSwatchGridControlState();
+  State<_ColorSwatchGridControl> createState() =>
+      _ColorSwatchGridControlState();
 }
 
 class _ColorSwatchGridControlState extends State<_ColorSwatchGridControl> {
@@ -273,19 +383,26 @@ class _ColorSwatchGridControlState extends State<_ColorSwatchGridControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_state':
         return {'selected_index': _selectedIndex, 'swatches': _swatches};
       case 'set_selected':
         final selectedIndex = coerceOptionalInt(args['selected_index']);
-        if (selectedIndex != null && selectedIndex >= 0 && selectedIndex < _swatches.length) {
+        if (selectedIndex != null &&
+            selectedIndex >= 0 &&
+            selectedIndex < _swatches.length) {
           setState(() => _selectedIndex = selectedIndex);
           final selected = _swatches[selectedIndex];
           widget.sendEvent(widget.controlId, 'select', {
             'index': selectedIndex,
             'id': selected['id']?.toString() ?? '',
-            'value': _toHex(_coerceColor(selected['color'] ?? selected['value'])),
+            'value': _toHex(
+              _coerceColor(selected['color'] ?? selected['value']),
+            ),
           });
         }
         return _selectedIndex;
@@ -296,7 +413,10 @@ class _ColorSwatchGridControlState extends State<_ColorSwatchGridControl> {
 
   @override
   Widget build(BuildContext context) {
-    final columns = (coerceOptionalInt(widget.props['columns']) ?? 6).clamp(1, 20);
+    final columns = (coerceOptionalInt(widget.props['columns']) ?? 6).clamp(
+      1,
+      20,
+    );
     final spacing = coerceDouble(widget.props['spacing']) ?? 6;
     final size = coerceDouble(widget.props['size']) ?? 24;
     final showLabels = widget.props['show_labels'] == true;
@@ -333,7 +453,9 @@ class _ColorSwatchGridControlState extends State<_ColorSwatchGridControl> {
                     color: color,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+                      color: selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outlineVariant,
                       width: selected ? 2 : 1,
                     ),
                   ),
@@ -380,12 +502,12 @@ Widget buildContainerStyleControl(
 Widget buildGradientControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
-  Widget Function(Map<String, Object?> child) buildChild,
-  {String controlId = '',
+  Widget Function(Map<String, Object?> child) buildChild, {
+  String controlId = '',
   ButterflyUIRegisterInvokeHandler? registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler,
-  ButterflyUISendRuntimeEvent? sendEvent,}
-) {
+  ButterflyUISendRuntimeEvent? sendEvent,
+}) {
   return _GradientControl(
     controlId: controlId,
     initialProps: props,
@@ -427,8 +549,7 @@ class _ContainerStyleControlState extends State<_ContainerStyleControl> {
   void initState() {
     super.initState();
     _props = Map<String, Object?>.from(widget.initialProps);
-    if (widget.controlId.isNotEmpty &&
-        widget.registerInvokeHandler != null) {
+    if (widget.controlId.isNotEmpty && widget.registerInvokeHandler != null) {
       widget.registerInvokeHandler!(widget.controlId, _handleInvoke);
     }
   }
@@ -458,7 +579,10 @@ class _ContainerStyleControlState extends State<_ContainerStyleControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_style':
         setState(() {
@@ -580,13 +704,18 @@ class _GradientControlState extends State<_GradientControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_colors':
         setState(() {
           _props['colors'] = args['colors'];
         });
-        widget.sendEvent?.call(widget.controlId, 'change', {'colors': _props['colors']});
+        widget.sendEvent?.call(widget.controlId, 'change', {
+          'colors': _props['colors'],
+        });
         return true;
       case 'set_style':
         setState(() {
@@ -611,7 +740,9 @@ class _GradientControlState extends State<_GradientControl> {
       }
     }
     final gradient = coerceGradient(_props['gradient'] ?? _props);
-    final opacity = (coerceDouble(_props['opacity']) ?? 1).clamp(0, 1).toDouble();
+    final opacity = (coerceDouble(_props['opacity']) ?? 1)
+        .clamp(0, 1)
+        .toDouble();
     return Container(
       decoration: BoxDecoration(gradient: gradient),
       child: Opacity(opacity: opacity, child: child),
@@ -687,7 +818,10 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_state':
         return {'stops': _stops, 'angle': _angle};
@@ -703,13 +837,20 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
         }
         return _angle;
       case 'add_stop':
-        final position = (coerceDouble(args['position']) ?? 0).clamp(0, 1).toDouble();
+        final position = (coerceDouble(args['position']) ?? 0)
+            .clamp(0, 1)
+            .toDouble();
         final color = args['color'];
         setState(() {
-          _stops = [
-            ..._stops,
-            {'position': position, 'color': color},
-          ]..sort((a, b) => ((coerceDouble(a['position']) ?? 0).compareTo(coerceDouble(b['position']) ?? 0)));
+          _stops =
+              [
+                ..._stops,
+                {'position': position, 'color': color},
+              ]..sort(
+                (a, b) => ((coerceDouble(a['position']) ?? 0).compareTo(
+                  coerceDouble(b['position']) ?? 0,
+                )),
+              );
         });
         widget.sendEvent(widget.controlId, 'stops_change', {'stops': _stops});
         return _stops;
@@ -739,7 +880,9 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
             max: 360,
             onChanged: (next) {
               setState(() => _angle = next);
-              widget.sendEvent(widget.controlId, 'angle_change', {'angle': _angle});
+              widget.sendEvent(widget.controlId, 'angle_change', {
+                'angle': _angle,
+              });
             },
           ),
         Wrap(
@@ -753,7 +896,9 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
                         setState(() {
                           _stops = [..._stops]..removeAt(i);
                         });
-                        widget.sendEvent(widget.controlId, 'stops_change', {'stops': _stops});
+                        widget.sendEvent(widget.controlId, 'stops_change', {
+                          'stops': _stops,
+                        });
                       }
                     : null,
                 child: Container(
@@ -762,7 +907,9 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
                   decoration: BoxDecoration(
                     color: _coerceColor(_stops[i]['color']),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                 ),
               ),
@@ -777,7 +924,9 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
                   {'position': 1.0, 'color': '#FFFFFF'},
                 ];
               });
-              widget.sendEvent(widget.controlId, 'stops_change', {'stops': _stops});
+              widget.sendEvent(widget.controlId, 'stops_change', {
+                'stops': _stops,
+              });
             },
             icon: const Icon(Icons.add),
             label: const Text('Add stop'),
@@ -787,7 +936,8 @@ class _GradientEditorControlState extends State<_GradientEditorControl> {
   }
 }
 
-Color _coerceColor(Object? value) => coerceColor(value) ?? const Color(0xFFFFFFFF);
+Color _coerceColor(Object? value) =>
+    coerceColor(value) ?? const Color(0xFFFFFFFF);
 
 String _toHex(Color color) {
   final value = color.toARGB32();
@@ -815,9 +965,14 @@ List<Map<String, Object?>> _coerceSwatches(Object? value) {
   return value.whereType<Map>().map(coerceObjectMap).toList(growable: false);
 }
 
-int _resolveSelected(Map<String, Object?> props, List<Map<String, Object?>> swatches) {
+int _resolveSelected(
+  Map<String, Object?> props,
+  List<Map<String, Object?>> swatches,
+) {
   final selectedIndex = coerceOptionalInt(props['selected_index']);
-  if (selectedIndex != null && selectedIndex >= 0 && selectedIndex < swatches.length) {
+  if (selectedIndex != null &&
+      selectedIndex >= 0 &&
+      selectedIndex < swatches.length) {
     return selectedIndex;
   }
   final selectedId = props['selected_id']?.toString();
@@ -832,4 +987,37 @@ int _resolveSelected(Map<String, Object?> props, List<Map<String, Object?>> swat
 List<Map<String, Object?>> _coerceStops(Object? value) {
   if (value is! List) return const <Map<String, Object?>>[];
   return value.whereType<Map>().map(coerceObjectMap).toList(growable: false);
+}
+
+Map<String, Object?> _mergeColorToolProps(
+  Map<String, Object?> props, {
+  required String section,
+  required List<String> fallbackKeys,
+}) {
+  final merged = <String, Object?>{};
+  final nested = props[section];
+  if (nested is Map) {
+    merged.addAll(coerceObjectMap(nested));
+  }
+  for (final key in fallbackKeys) {
+    if (merged.containsKey(key)) continue;
+    final value = props[key];
+    if (value != null) {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
+
+bool _coerceBool(Object? value, {required bool fallback}) {
+  if (value == null) return fallback;
+  if (value is bool) return value;
+  final normalized = value.toString().toLowerCase();
+  if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+    return true;
+  }
+  if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+    return false;
+  }
+  return fallback;
 }

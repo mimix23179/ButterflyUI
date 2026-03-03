@@ -536,6 +536,86 @@ bool coerceBoolValue(Object? value, {bool fallback = false}) {
   return value.toString().toLowerCase() == 'true';
 }
 
+class _GalleryCarouselPager extends StatefulWidget {
+  const _GalleryCarouselPager({
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.viewportFraction,
+    required this.initialPage,
+    required this.padEnds,
+    required this.pageSnapping,
+    this.physics,
+  });
+
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+  final double viewportFraction;
+  final int initialPage;
+  final bool padEnds;
+  final bool pageSnapping;
+  final ScrollPhysics? physics;
+
+  @override
+  State<_GalleryCarouselPager> createState() => _GalleryCarouselPagerState();
+}
+
+class _GalleryCarouselPagerState extends State<_GalleryCarouselPager> {
+  late PageController _controller;
+
+  int _clampPage(int value) {
+    if (widget.itemCount <= 0) return 0;
+    if (value < 0) return 0;
+    final maxPage = widget.itemCount - 1;
+    if (value > maxPage) return maxPage;
+    return value;
+  }
+
+  PageController _buildController({required int initialPage}) {
+    final viewport = widget.viewportFraction.clamp(0.2, 1.0).toDouble();
+    return PageController(
+      initialPage: _clampPage(initialPage),
+      viewportFraction: viewport,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = _buildController(initialPage: widget.initialPage);
+  }
+
+  @override
+  void didUpdateWidget(covariant _GalleryCarouselPager oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final changed =
+        oldWidget.viewportFraction != widget.viewportFraction ||
+        oldWidget.initialPage != widget.initialPage ||
+        oldWidget.itemCount != widget.itemCount;
+    if (!changed) return;
+    final previous = _controller;
+    _controller = _buildController(initialPage: widget.initialPage);
+    previous.dispose();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      controller: _controller,
+      physics: widget.physics,
+      padEnds: widget.padEnds,
+      pageSnapping: widget.pageSnapping,
+      itemCount: widget.itemCount,
+      itemBuilder: widget.itemBuilder,
+    );
+  }
+}
+
 Widget buildGalleryScopeControl(
   String controlId,
   Map<String, Object?> props,
@@ -679,6 +759,66 @@ Widget buildGalleryControl(
     fallback: false,
   );
   final physics = effectiveProps['physics']?.toString();
+  final carouselHeight = coerceDouble(
+    effectiveProps['carousel_height'] ??
+        effectiveProps['carouselHeight'] ??
+        (layout == GalleryLayoutType.carousel
+            ? effectiveProps['height']
+            : null),
+  );
+  final carouselAspectRatio =
+      coerceDouble(
+        effectiveProps['carousel_aspect_ratio'] ??
+            effectiveProps['carouselAspectRatio'] ??
+            effectiveProps['item_aspect_ratio'] ??
+            effectiveProps['itemAspectRatio'],
+      ) ??
+      (16 / 9);
+  final carouselViewportFraction =
+      (coerceDouble(
+                effectiveProps['carousel_viewport_fraction'] ??
+                    effectiveProps['carouselViewportFraction'] ??
+                    effectiveProps['viewport_fraction'] ??
+                    effectiveProps['viewportFraction'],
+              ) ??
+              1.0)
+          .clamp(0.2, 1.0)
+          .toDouble();
+  final carouselPadEnds = coerceBoolValue(
+    effectiveProps['carousel_pad_ends'] ?? effectiveProps['carouselPadEnds'],
+    fallback: true,
+  );
+  final carouselPageSnapping = coerceBoolValue(
+    effectiveProps['carousel_page_snapping'] ??
+        effectiveProps['carouselPageSnapping'],
+    fallback: true,
+  );
+  final carouselInitialPage =
+      coerceOptionalInt(
+        effectiveProps['carousel_initial_page'] ??
+            effectiveProps['carouselInitialPage'],
+      ) ??
+      0;
+  final carouselOverlayOpacity =
+      (coerceDouble(
+                effectiveProps['carousel_overlay_opacity'] ??
+                    effectiveProps['carouselOverlayOpacity'],
+              ) ??
+              0.7)
+          .clamp(0.0, 1.0)
+          .toDouble();
+  final carouselHorizontalInset =
+      coerceDouble(
+        effectiveProps['carousel_horizontal_inset'] ??
+            effectiveProps['carouselHorizontalInset'],
+      ) ??
+      16.0;
+  final carouselVerticalInset =
+      coerceDouble(
+        effectiveProps['carousel_vertical_inset'] ??
+            effectiveProps['carouselVerticalInset'],
+      ) ??
+      8.0;
 
   final useControlWidgets = coerceBoolValue(
     effectiveProps['use_control_widgets'] ??
@@ -724,6 +864,15 @@ Widget buildGalleryControl(
     useControlLayouts: useControlLayouts,
     shrinkWrap: shrinkWrap,
     physics: _parseScrollPhysics(physics),
+    carouselHeight: carouselHeight,
+    carouselAspectRatio: carouselAspectRatio,
+    carouselViewportFraction: carouselViewportFraction,
+    carouselPadEnds: carouselPadEnds,
+    carouselPageSnapping: carouselPageSnapping,
+    carouselInitialPage: carouselInitialPage,
+    carouselOverlayOpacity: carouselOverlayOpacity,
+    carouselHorizontalInset: carouselHorizontalInset,
+    carouselVerticalInset: carouselVerticalInset,
   );
   final toolbarWidget = toolbarActions.isEmpty
       ? null
@@ -809,6 +958,15 @@ Widget _buildGalleryLayout({
   required bool useControlWidgets,
   required bool useControlLayouts,
   required bool shrinkWrap,
+  required double? carouselHeight,
+  required double carouselAspectRatio,
+  required double carouselViewportFraction,
+  required bool carouselPadEnds,
+  required bool carouselPageSnapping,
+  required int carouselInitialPage,
+  required double carouselOverlayOpacity,
+  required double carouselHorizontalInset,
+  required double carouselVerticalInset,
   ScrollPhysics? physics,
 }) {
   switch (layout) {
@@ -925,13 +1083,13 @@ Widget _buildGalleryLayout({
         },
       );
     case GalleryLayoutType.carousel:
-      // Carousel typically requires fixed height or expands.
-      // We wrap in AspectRatio or SizedBox if needed, but PageView expands.
-      // If shrinkWrap is true, we might need a fixed height container.
-      // For now, we assume user handles height if shrinkWrap is true.
-      return PageView.builder(
+      final carousel = _GalleryCarouselPager(
         physics: physics,
         itemCount: items.length,
+        viewportFraction: carouselViewportFraction,
+        initialPage: carouselInitialPage,
+        padEnds: carouselPadEnds,
+        pageSnapping: carouselPageSnapping,
         itemBuilder: (context, index) {
           final item = items[index];
           return _buildGalleryCarouselItem(
@@ -942,7 +1100,40 @@ Widget _buildGalleryLayout({
             unregisterInvokeHandler: unregisterInvokeHandler,
             sendEvent: sendEvent,
             useControlWidgets: useControlWidgets,
+            showMeta: showMeta,
+            showActions: showActions,
+            itemBorderRadius: itemBorderRadius,
+            overlayOpacity: carouselOverlayOpacity,
+            horizontalInset: carouselHorizontalInset,
+            verticalInset: carouselVerticalInset,
           );
+        },
+      );
+      if (carouselHeight != null && carouselHeight > 0) {
+        return SizedBox(height: carouselHeight, child: carousel);
+      }
+      final resolvedAspectRatio = carouselAspectRatio <= 0
+          ? (16 / 9)
+          : carouselAspectRatio;
+      if (shrinkWrap) {
+        return AspectRatio(aspectRatio: resolvedAspectRatio, child: carousel);
+      }
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.hasBoundedHeight &&
+              constraints.maxHeight.isFinite &&
+              constraints.maxHeight > 0) {
+            return carousel;
+          }
+          final fallbackWidth =
+              constraints.maxWidth.isFinite && constraints.maxWidth > 0
+              ? constraints.maxWidth
+              : 960.0;
+          final fallbackHeight = (fallbackWidth / resolvedAspectRatio).clamp(
+            220.0,
+            560.0,
+          );
+          return SizedBox(height: fallbackHeight, child: carousel);
         },
       );
     case GalleryLayoutType.virtualGrid:
@@ -2109,11 +2300,23 @@ Widget _buildGalleryCarouselTile({
   required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   required ButterflyUISendRuntimeEvent sendEvent,
   required bool useControlWidgets,
+  required bool showMeta,
+  required bool showActions,
+  required double itemBorderRadius,
+  required double overlayOpacity,
+  required double horizontalInset,
+  required double verticalInset,
 }) {
+  final resolvedRadius = itemBorderRadius <= 0 ? 16.0 : itemBorderRadius;
+  final resolvedHorizontalInset = horizontalInset < 0 ? 0.0 : horizontalInset;
+  final resolvedVerticalInset = verticalInset < 0 ? 0.0 : verticalInset;
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    margin: EdgeInsets.symmetric(
+      horizontal: resolvedHorizontalInset,
+      vertical: resolvedVerticalInset,
+    ),
     child: ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(resolvedRadius),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -2126,41 +2329,71 @@ Widget _buildGalleryCarouselTile({
             sendEvent: sendEvent,
             useControlWidgets: useControlWidgets,
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+          if (showMeta)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(overlayOpacity),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (item.name != null)
+                      Text(
+                        item.name!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    if (item.subtitle != null)
+                      Text(
+                        item.subtitle!,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (item.name != null)
+            ),
+          if (showActions && item.likeCount != null)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.45),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.favorite, color: Colors.white, size: 14),
+                    const SizedBox(width: 6),
                     Text(
-                      item.name!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                      _formatCount(item.likeCount!),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
-                  if (item.subtitle != null)
-                    Text(
-                      item.subtitle!,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     ),
@@ -2175,6 +2408,12 @@ Widget _buildGalleryCarouselItem({
   required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   required ButterflyUISendRuntimeEvent sendEvent,
   required bool useControlWidgets,
+  required bool showMeta,
+  required bool showActions,
+  required double itemBorderRadius,
+  required double overlayOpacity,
+  required double horizontalInset,
+  required double verticalInset,
 }) {
   return _buildGalleryCarouselTile(
     controlId: controlId,
@@ -2184,6 +2423,12 @@ Widget _buildGalleryCarouselItem({
     unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
     useControlWidgets: useControlWidgets,
+    showMeta: showMeta,
+    showActions: showActions,
+    itemBorderRadius: itemBorderRadius,
+    overlayOpacity: overlayOpacity,
+    horizontalInset: horizontalInset,
+    verticalInset: verticalInset,
   );
 }
 

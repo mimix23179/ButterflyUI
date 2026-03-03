@@ -37,13 +37,19 @@ class ResolvedControlStyle {
       if (axis.isEmpty) continue;
       final choice = _asMap(axis[entry.value]);
       if (choice.isEmpty) continue;
-      merged = CandyTokens.mergeMaps(merged, _readSlotMap(choice, normalizedSlot));
+      merged = CandyTokens.mergeMaps(
+        merged,
+        _readSlotMap(choice, normalizedSlot),
+      );
     }
 
     final states = _asMap(component['states']);
     final stateLayer = _asMap(states[resolvedState]);
     if (stateLayer.isNotEmpty) {
-      merged = CandyTokens.mergeMaps(merged, _readSlotMap(stateLayer, normalizedSlot));
+      merged = CandyTokens.mergeMaps(
+        merged,
+        _readSlotMap(stateLayer, normalizedSlot),
+      );
     }
 
     merged = CandyTokens.mergeMaps(merged, _readSlotMap(local, normalizedSlot));
@@ -120,7 +126,7 @@ class ControlStyleResolver {
     required CandyTokens tokens,
     required StylePack stylePack,
   }) {
-    final normalizedType = _canonicalControlType(controlType);
+    final normalizedType = _canonicalControlType(controlType, props: props);
     final componentStyles = _asMap(stylePack.componentStyles);
     final component = _asMap(componentStyles[normalizedType]);
     final local = _asMap(props['style']);
@@ -202,12 +208,57 @@ class ControlStyleResolver {
     return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
   }
 
-  static String _canonicalControlType(String value) {
+  static String _canonicalControlType(
+    String value, {
+    Map<String, Object?>? props,
+  }) {
     var normalized = _norm(value);
+    if (normalized == 'candy' || normalized == 'skins') {
+      final module = _norm(
+        (props?['module'] ?? props?['layout'] ?? '').toString(),
+      );
+      if (module.isNotEmpty) {
+        if (module == 'container' ||
+            module == 'surface' ||
+            module == 'box' ||
+            module == 'card' ||
+            module == 'decorated_box' ||
+            module == 'decorated' ||
+            module == 'frame') {
+          return 'surface';
+        }
+        if (module == 'button' ||
+            module == 'filled_button' ||
+            module == 'outlined_button' ||
+            module == 'text_button' ||
+            module == 'elevated_button' ||
+            module == 'icon_button' ||
+            module == 'apply' ||
+            module == 'clear') {
+          return 'button';
+        }
+        if (module == 'text' || module == 'label' || module == 'typography') {
+          return 'text';
+        }
+      }
+    }
     switch (normalized) {
       case 'container':
       case 'box':
+      case 'card':
+      case 'decorated_box':
+      case 'alert_dialog':
+      case 'snack_bar':
+      case 'snackbar':
+      case 'window_frame':
         return 'surface';
+      case 'elevated_button':
+      case 'filled_button':
+      case 'outlined_button':
+      case 'text_button':
+      case 'icon_button':
+      case 'async_action_button':
+        return 'button';
       default:
         return normalized;
     }

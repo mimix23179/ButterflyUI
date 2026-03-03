@@ -7,6 +7,7 @@ from .workspace_tree import WorkspaceTree
 from .file_system import FileSystem
 from .problems_panel import ProblemsPanel
 from .editor_workspace import EditorWorkspace
+from .workbench_editor import WorkbenchEditor
 from .ownership_marker import OwnershipMarker
 from .chat_thread import ChatThread
 from .chat_message import ChatMessage
@@ -28,6 +29,7 @@ __all__ = [
     "FileSystem",
     "ProblemsPanel",
     "EditorWorkspace",
+    "WorkbenchEditor",
     "OwnershipMarker",
     "ChatThread",
     "ChatMessage",

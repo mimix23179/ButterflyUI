@@ -1,6 +1,7 @@
 from .overlay import Overlay
 from .splash import Splash
 from .modal import Modal
+from .alert_dialog import AlertDialog
 from .popover import Popover
 from .portal import Portal
 from .bottom_sheet import BottomSheet
@@ -8,6 +9,7 @@ from .context_menu import ContextMenu
 from .tooltip import Tooltip
 from .toast import Toast
 from .snackbar import Snackbar
+from .snack_bar import SnackBar
 from .toast_host import ToastHost
 from .slide_panel import SlidePanel
 from .side_panel import SidePanel
@@ -20,6 +22,7 @@ __all__ = [
     "Overlay",
     "Splash",
     "Modal",
+    "AlertDialog",
     "Popover",
     "Portal",
     "BottomSheet",
@@ -27,6 +30,7 @@ __all__ = [
     "Tooltip",
     "Toast",
     "Snackbar",
+    "SnackBar",
     "ToastHost",
     "SlidePanel",
     "SidePanel",

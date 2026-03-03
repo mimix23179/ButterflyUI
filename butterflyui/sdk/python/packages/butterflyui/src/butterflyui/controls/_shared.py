@@ -281,19 +281,45 @@ class Component(CoreComponent):
             **kwargs,
         )
         control_props = _normalize_component_props(control_props)
+        inferred_style_slots: Mapping[str, Any] | None = None
+        if style_slots is None:
+            candidate = control_props.pop("style_slots", None)
+            if isinstance(candidate, Mapping):
+                inferred_style_slots = candidate
+        else:
+            control_props.pop("style_slots", None)
+        resolved_style_slots = style_slots or inferred_style_slots
         if modifiers is not None:
             control_props["modifiers"] = _sanitize_modifiers_for_control(
                 self.control_type,
                 list(modifiers),
             )
-        if style_slots is not None:
-            style_map = dict(control_props.get("style", {}))
-            style_map["slots"] = dict(style_slots)
-            control_props["style"] = style_map
-        if isinstance(style, Mapping) and "style" not in control_props:
+        local_style: dict[str, Any] = {}
+        existing_style = control_props.get("style")
+        if isinstance(existing_style, Mapping):
+            local_style.update(dict(existing_style))
+
+        style_map: dict[str, Any] | None = None
+        if isinstance(style, Mapping):
+            style_map = dict(style)
+        elif style is not None and hasattr(style, "to_json"):
+            try:
+                payload = style.to_json()
+                if isinstance(payload, Mapping):
+                    style_map = dict(payload)
+            except Exception:
+                style_map = None
+        if style_map:
+            local_style.update(style_map)
+        if resolved_style_slots is not None:
+            slots = local_style.get("slots")
+            slot_map = dict(slots) if isinstance(slots, Mapping) else {}
+            slot_map.update(dict(resolved_style_slots))
+            local_style["slots"] = slot_map
+        if local_style:
             # Keep backward compatibility for `style=` while also exposing
-            # the explicit local-style contract used by the new style resolver.
-            control_props["style"] = dict(style)
+            # the explicit local-style contract used by the style resolver.
+            control_props["style"] = local_style
 
         if "modifiers" in control_props:
             control_props["modifiers"] = _sanitize_modifiers_for_control(

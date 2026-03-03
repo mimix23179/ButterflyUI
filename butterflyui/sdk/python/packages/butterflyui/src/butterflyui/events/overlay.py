@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from ..app import Page
 from ..core.control import Component
 from ..ui.events import register_action
