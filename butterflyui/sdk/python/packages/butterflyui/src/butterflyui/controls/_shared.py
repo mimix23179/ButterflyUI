@@ -20,6 +20,8 @@ def _canonical_control_type(value: str) -> str:
 _INTERACTIVE_CONTROLS = {
     "candy",
     "skins",
+    "style",
+    "modifier",
     "button",
     "elevated_button",
     "filled_button",
@@ -40,7 +42,6 @@ _INTERACTIVE_CONTROLS = {
     "menu_item",
     "list_tile",
     "item_tile",
-    "paginator",
     "pagination",
     "notification_center",
     "snack_bar",
@@ -53,6 +54,8 @@ _INTERACTIVE_CONTROLS = {
 
 _GLASS_CONTROLS = {
     "candy",
+    "style",
+    "modifier",
     "surface",
     "box",
     "container",
@@ -86,6 +89,8 @@ _GLASS_CONTROLS = {
 
 _TRANSITION_CONTROLS = {
     "candy",
+    "style",
+    "modifier",
     "overlay",
     "alert_dialog",
     "popover",

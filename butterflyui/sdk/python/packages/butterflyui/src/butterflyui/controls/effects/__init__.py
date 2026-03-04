@@ -10,6 +10,7 @@ from .glow_effect import GlowEffect
 from .gradient_sweep import GradientSweep
 from .grain_overlay import GrainOverlay
 from .liquid_morph import LiquidMorph
+from .modifier import Modifier
 from .morphing_border import MorphingBorder
 from .motion import Motion
 from .neon_edge import NeonEdge
@@ -28,6 +29,7 @@ from .shimmer_shadow import ShimmerShadow
 from .stagger import Stagger
 from .timeline import Timeline
 from .transition import Transition
+from .style import Style
 from .vignette import Vignette
 from .visual_fx import VisualFx
 
@@ -44,6 +46,7 @@ __all__ = [
     "GradientSweep",
     "GrainOverlay",
     "LiquidMorph",
+    "Modifier",
     "MorphingBorder",
     "Motion",
     "NeonEdge",
@@ -60,6 +63,7 @@ __all__ = [
     "Shimmer",
     "ShimmerShadow",
     "Stagger",
+    "Style",
     "Timeline",
     "Transition",
     "Vignette",

@@ -160,213 +160,244 @@ class _DisplayControlState extends State<_DisplayControl> {
     return out;
   }
 
+  Widget? _buildSlot(Object? value) {
+    if (value is Map) {
+      return widget.buildChild(coerceObjectMap(value));
+    }
+    if (value == null) return null;
+    final icon = buildIconValue(value, size: _isDense ? 16 : 18);
+    if (icon != null) return icon;
+    final text = value.toString().trim();
+    if (text.isEmpty) return null;
+    return Text(
+      text,
+      style: TextStyle(color: Colors.white70, fontSize: _isDense ? 11 : 12),
+    );
+  }
+
+  bool get _isDense =>
+      _state['dense'] == true ||
+      _state['compact'] == true ||
+      (_state['size']?.toString().toLowerCase() == 'sm');
+
   @override
   Widget build(BuildContext context) {
-    final variant = (_state['variant'] ?? 'summary').toString().toLowerCase();
-    final dense = _state['dense'] == true || _state['compact'] == true;
-    final title = (_state['title'] ?? _state['name'] ?? '').toString();
-    final subtitle = (_state['subtitle'] ?? _state['description'] ?? '')
-        .toString();
-    final status = (_state['status'] ?? '').toString();
-    final icon = buildIconValue(_state['icon'], size: dense ? 16 : 18);
+    final role = _resolveRole(
+      (_state['role'] ?? _state['variant'] ?? 'identity').toString(),
+    );
     final children = _children();
+    final leading = _buildSlot(_state['leading']);
+    final trailing = _buildSlot(_state['trailing']);
+    final interactive =
+        _state['interactive'] == true || _state['clickable'] == true;
+    final tone = (_state['tone'] ?? _state['status'] ?? 'neutral').toString();
+    final accent = _toneColor(tone);
+    final body = switch (role) {
+      _DisplayRole.identity => _buildIdentity(),
+      _DisplayRole.status => _buildStatus(),
+      _DisplayRole.rating => _buildRating(),
+      _DisplayRole.reactions => _buildReactions(),
+      _DisplayRole.check => _buildCheck(),
+      _DisplayRole.ownership => _buildOwnership(),
+    };
 
-    Widget content;
-    switch (variant) {
-      case 'rating':
-        content = _buildRating(dense);
-        break;
-      case 'reactions':
-        content = _buildReactions(dense);
-        break;
-      case 'checklist':
-        content = _buildChecklist(dense);
-        break;
-      case 'typing':
-        content = _buildTyping(dense);
-        break;
-      case 'status':
-        content = _buildStatusChip(dense);
-        break;
-      case 'persona':
-        content = _buildPersona(dense);
-        break;
-      default:
-        content = _buildSummary(
-          dense,
-          icon: icon,
-          title: title,
-          subtitle: subtitle,
-          status: status,
-        );
-        break;
+    final content = <Widget>[];
+    content.add(
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (leading != null) ...[leading, SizedBox(width: _isDense ? 8 : 10)],
+          Expanded(child: body),
+          if (trailing != null) ...[
+            SizedBox(width: _isDense ? 8 : 10),
+            trailing,
+          ],
+        ],
+      ),
+    );
+    if (children.isNotEmpty) {
+      content.add(SizedBox(height: _isDense ? 8 : 10));
+      content.addAll(children);
     }
 
-    final columnChildren = <Widget>[content, ...children];
-    return Container(
+    Widget card = Container(
       width: double.infinity,
-      padding: EdgeInsets.all(dense ? 10 : 12),
+      padding: EdgeInsets.all(_isDense ? 10 : 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white.withValues(alpha: 0.04),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        borderRadius: BorderRadius.circular(_isDense ? 12 : 14),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xff13213a),
+            const Color(0xff1b2a45).withValues(alpha: 0.88),
+          ],
+        ),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: columnChildren
-            .asMap()
-            .entries
-            .map(
-              (entry) => Padding(
-                padding: EdgeInsets.only(
-                  bottom: entry.key == columnChildren.length - 1
-                      ? 0
-                      : (dense ? 8 : 10),
-                ),
-                child: entry.value,
-              ),
-            )
-            .toList(growable: false),
+        children: content,
       ),
     );
+
+    if (interactive) {
+      card = InkWell(
+        borderRadius: BorderRadius.circular(_isDense ? 12 : 14),
+        onTap: () => _emit('tap', {
+          'role': role.name,
+          'title': (_state['title'] ?? _state['name'] ?? '').toString(),
+        }),
+        child: card,
+      );
+    }
+    return card;
   }
 
-  Widget _buildSummary(
-    bool dense, {
-    Widget? icon,
-    required String title,
-    required String subtitle,
-    required String status,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (icon != null) ...[icon, SizedBox(width: dense ? 8 : 10)],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title.isEmpty ? 'Display' : title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: dense ? 13 : 15,
-                ),
-              ),
-              if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: dense ? 11 : 12,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (status.isNotEmpty) _buildStatusChip(dense),
-      ],
-    );
-  }
-
-  Widget _buildPersona(bool dense) {
-    final name = (_state['name'] ?? _state['title'] ?? 'Persona').toString();
-    final subtitle = (_state['subtitle'] ?? '').toString();
+  Widget _buildIdentity() {
+    final name = (_state['title'] ?? _state['name'] ?? 'Identity').toString();
+    final subtitle = (_state['subtitle'] ?? _state['description'] ?? '')
+        .toString();
+    final caption = (_state['caption'] ?? '').toString();
+    final avatar = _state['avatar'];
     final initials = (_state['initials'] ?? _deriveInitials(name)).toString();
+    final tags = _coerceItems(_state['tags']);
     final avatarColor =
         coerceColor(_state['avatar_color']) ?? const Color(0xff334155);
-    return InkWell(
-      onTap: widget.controlId.isEmpty
-          ? null
-          : () => _emit('click', {'name': name, 'subtitle': subtitle}),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: dense ? 14 : 16,
+    final avatarWidget = avatar is Map
+        ? widget.buildChild(coerceObjectMap(avatar))
+        : CircleAvatar(
+            radius: _isDense ? 14 : 16,
             backgroundColor: avatarColor,
             child: Text(
               initials,
               style: TextStyle(
-                fontSize: dense ? 11 : 12,
+                fontSize: _isDense ? 11 : 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-          SizedBox(width: dense ? 8 : 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                if (subtitle.isNotEmpty)
+          );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            avatarWidget,
+            SizedBox(width: _isDense ? 8 : 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    subtitle,
+                    name,
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: dense ? 11 : 12,
+                      fontWeight: FontWeight.w700,
+                      fontSize: _isDense ? 13 : 15,
                     ),
                   ),
-              ],
+                  if (subtitle.isNotEmpty)
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: _isDense ? 11 : 12,
+                      ),
+                    ),
+                  if (caption.isNotEmpty)
+                    Text(
+                      caption,
+                      style: TextStyle(
+                        color: Colors.white60,
+                        fontSize: _isDense ? 10 : 11,
+                      ),
+                    ),
+                ],
+              ),
             ),
+          ],
+        ),
+        if (tags.isNotEmpty) ...[
+          SizedBox(height: _isDense ? 6 : 8),
+          Wrap(
+            spacing: _isDense ? 4 : 6,
+            runSpacing: _isDense ? 4 : 6,
+            children: tags
+                .map(
+                  (tag) => Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: _isDense ? 7 : 8,
+                      vertical: _isDense ? 3 : 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      (tag['label'] ?? tag['title'] ?? tag['id'] ?? '')
+                          .toString(),
+                      style: TextStyle(fontSize: _isDense ? 10 : 11),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
           ),
         ],
-      ),
+      ],
     );
   }
 
-  Widget _buildStatusChip(bool dense) {
-    final status = (_state['status'] ?? 'info').toString().toLowerCase();
-    final label = (_state['badge'] ?? _state['status'] ?? '').toString();
-    final color = coerceColor(_state['color']) ?? _statusColor(status);
-    return InkWell(
-      borderRadius: BorderRadius.circular(999),
-      onTap: widget.controlId.isEmpty
-          ? null
-          : () => _emit('select', {'status': status, 'label': label}),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: dense ? 7 : 9,
-          vertical: dense ? 3 : 4,
-        ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.18),
-          border: Border.all(color: color.withValues(alpha: 0.45)),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          label.isEmpty ? status : label,
-          style: TextStyle(color: color, fontSize: dense ? 11 : 12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTyping(bool dense) {
-    final count = (coerceOptionalInt(_state['dot_count']) ?? 3).clamp(1, 6);
-    final color = coerceColor(_state['color']) ?? Colors.white70;
-    final size = coerceDouble(_state['size']) ?? (dense ? 6 : 7);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List<Widget>.generate(
-        count,
-        (index) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  Widget _buildStatus() {
+    final status = (_state['status'] ?? _state['value'] ?? 'info')
+        .toString()
+        .toLowerCase();
+    final label =
+        (_state['badge'] ?? _state['title'] ?? _state['status'] ?? status)
+            .toString();
+    final color = coerceColor(_state['color']) ?? _toneColor(status);
+    return Wrap(
+      spacing: _isDense ? 6 : 8,
+      runSpacing: _isDense ? 6 : 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: _isDense ? 8 : 10,
+            vertical: _isDense ? 4 : 5,
+          ),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.18),
+            border: Border.all(color: color.withValues(alpha: 0.45)),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: _isDense ? 11 : 12,
+            ),
           ),
         ),
-      ),
+        if ((_state['caption'] ?? '').toString().isNotEmpty)
+          Text(
+            _state['caption']!.toString(),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: _isDense ? 11 : 12,
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _buildRating(bool dense) {
+  Widget _buildRating() {
     final rawValue = coerceDouble(_state['value']) ?? 0;
     final max = (coerceOptionalInt(_state['max']) ?? 5).clamp(1, 10);
     final allowHalf = _state['allow_half'] == true;
     final starColor = coerceColor(_state['color']) ?? Colors.amber;
+    final count = coerceOptionalInt(_state['count']);
 
     IconData iconFor(int index) {
       final full = index + 1 <= rawValue;
@@ -376,25 +407,42 @@ class _DisplayControlState extends State<_DisplayControl> {
       return Icons.star_border;
     }
 
-    return Wrap(
-      spacing: dense ? 2 : 4,
-      children: List<Widget>.generate(max, (index) {
-        return InkWell(
-          onTap: widget.controlId.isEmpty
-              ? null
-              : () => _emit('rate', {'value': index + 1, 'index': index}),
-          child: Icon(iconFor(index), size: dense ? 16 : 20, color: starColor),
-        );
-      }),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: _isDense ? 2 : 4,
+          children: List<Widget>.generate(max, (index) {
+            return InkWell(
+              onTap: widget.controlId.isEmpty
+                  ? null
+                  : () => _emit('rate', {'value': index + 1, 'index': index}),
+              child: Icon(
+                iconFor(index),
+                size: _isDense ? 16 : 20,
+                color: starColor,
+              ),
+            );
+          }),
+        ),
+        if (count != null)
+          Text(
+            '$count ratings',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: _isDense ? 10 : 11,
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _buildReactions(bool dense) {
+  Widget _buildReactions() {
     final items = _coerceItems(_state['items']);
     if (items.isEmpty) return const SizedBox.shrink();
     return Wrap(
-      spacing: dense ? 4 : 6,
-      runSpacing: dense ? 4 : 6,
+      spacing: _isDense ? 4 : 6,
+      runSpacing: _isDense ? 4 : 6,
       children: items
           .map((item) {
             final id = (item['id'] ?? item['key'] ?? item['emoji'] ?? '')
@@ -404,7 +452,7 @@ class _DisplayControlState extends State<_DisplayControl> {
             final isSelected = _selectedReactions.contains(id);
             return FilterChip(
               selected: isSelected,
-              visualDensity: dense
+              visualDensity: _isDense
                   ? VisualDensity.compact
                   : VisualDensity.standard,
               label: Text(count == null ? label : '$label $count'),
@@ -428,7 +476,26 @@ class _DisplayControlState extends State<_DisplayControl> {
     );
   }
 
-  Widget _buildChecklist(bool dense) {
+  Widget _buildCheck() {
+    final single = _state['checked_value'];
+    if (single != null) {
+      final value = single == true;
+      return CheckboxListTile(
+        dense: _isDense,
+        contentPadding: EdgeInsets.zero,
+        controlAffinity: ListTileControlAffinity.leading,
+        value: value,
+        title: Text(
+          (_state['title'] ?? _state['label'] ?? 'Checked').toString(),
+        ),
+        onChanged: (next) {
+          _state['checked_value'] = next == true;
+          _emit('check_change', {'checked': next == true});
+          setState(() {});
+        },
+      );
+    }
+
     final items = _coerceItems(_state['items']);
     if (items.isEmpty) return const SizedBox.shrink();
     return Column(
@@ -438,7 +505,7 @@ class _DisplayControlState extends State<_DisplayControl> {
             final id = (item['id'] ?? item['key'] ?? '').toString();
             final label = (item['label'] ?? item['title'] ?? id).toString();
             return CheckboxListTile(
-              dense: dense,
+              dense: _isDense,
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               value: _checked.contains(id),
@@ -451,7 +518,7 @@ class _DisplayControlState extends State<_DisplayControl> {
                     _checked.remove(id);
                   }
                 });
-                _emit('change', {
+                _emit('check_change', {
                   'id': id,
                   'checked': _checked.toList(growable: false),
                 });
@@ -459,6 +526,77 @@ class _DisplayControlState extends State<_DisplayControl> {
             );
           })
           .toList(growable: false),
+    );
+  }
+
+  Widget _buildOwnership() {
+    final owners = _coerceItems(_state['owners']);
+    final showAvatars = _state['show_avatars'] != false;
+    final title = (_state['title'] ?? _state['document_id'] ?? 'Ownership')
+        .toString();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.workspace_premium_outlined, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: _isDense ? 12 : 14,
+              ),
+            ),
+          ],
+        ),
+        if (owners.isNotEmpty) ...[
+          SizedBox(height: _isDense ? 6 : 8),
+          Wrap(
+            spacing: _isDense ? 6 : 8,
+            runSpacing: _isDense ? 6 : 8,
+            children: owners
+                .map((owner) {
+                  final name =
+                      (owner['name'] ?? owner['title'] ?? owner['id'] ?? '')
+                          .toString();
+                  final initials = _deriveInitials(name);
+                  return Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: _isDense ? 8 : 10,
+                      vertical: _isDense ? 5 : 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showAvatars)
+                          CircleAvatar(
+                            radius: _isDense ? 9 : 10,
+                            backgroundColor:
+                                coerceColor(owner['color']) ??
+                                const Color(0xff334155),
+                            child: Text(
+                              initials,
+                              style: TextStyle(fontSize: _isDense ? 8 : 9),
+                            ),
+                          ),
+                        if (showAvatars) const SizedBox(width: 6),
+                        Text(
+                          name,
+                          style: TextStyle(fontSize: _isDense ? 10 : 11),
+                        ),
+                      ],
+                    ),
+                  );
+                })
+                .toList(growable: false),
+          ),
+        ],
+      ],
     );
   }
 
@@ -478,7 +616,7 @@ class _DisplayControlState extends State<_DisplayControl> {
 
   String _deriveInitials(String name) {
     final parts = name
-        .split(RegExp(r'\\s+'))
+        .split(RegExp(r'\s+'))
         .where((part) => part.isNotEmpty)
         .toList(growable: false);
     if (parts.isEmpty) return '?';
@@ -487,8 +625,8 @@ class _DisplayControlState extends State<_DisplayControl> {
         .toUpperCase();
   }
 
-  Color _statusColor(String status) {
-    switch (status) {
+  Color _toneColor(String tone) {
+    switch (tone.toLowerCase()) {
       case 'ok':
       case 'success':
         return Colors.greenAccent;
@@ -502,4 +640,37 @@ class _DisplayControlState extends State<_DisplayControl> {
         return Colors.lightBlueAccent;
     }
   }
+
+  _DisplayRole _resolveRole(String raw) {
+    final normalized = raw.toLowerCase().replaceAll('-', '_');
+    switch (normalized) {
+      case 'identity':
+      case 'persona':
+      case 'result_card':
+      case 'summary':
+        return _DisplayRole.identity;
+      case 'status':
+      case 'status_mark':
+      case 'typing':
+      case 'typing_indicator':
+        return _DisplayRole.status;
+      case 'rating':
+      case 'rating_display':
+        return _DisplayRole.rating;
+      case 'reactions':
+      case 'reaction_bar':
+        return _DisplayRole.reactions;
+      case 'check':
+      case 'check_list':
+      case 'checklist':
+        return _DisplayRole.check;
+      case 'ownership':
+      case 'ownership_marker':
+        return _DisplayRole.ownership;
+      default:
+        return _DisplayRole.identity;
+    }
+  }
 }
+
+enum _DisplayRole { identity, status, rating, reactions, check, ownership }

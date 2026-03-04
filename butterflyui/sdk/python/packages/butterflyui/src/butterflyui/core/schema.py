@@ -5161,7 +5161,6 @@ CONTROL_SCHEMAS = {
     "validation_summary": _control_schema({"title": STRING_SCHEMA, "errors": {"type": "array", "items": STRING_SCHEMA}, "messages": {"type": "array", "items": STRING_SCHEMA}, "items": {"type": "array", "items": ANY_SCHEMA}}),
     "submit_scope": _control_schema({"enabled": BOOL_SCHEMA, "submit_on_enter": BOOL_SCHEMA, "submit_on_ctrl_enter": BOOL_SCHEMA, "debounce_ms": INTEGER_SCHEMA, "payload": {"type": "object"}}),
     "surface": SURFACE_SCHEMA,
-    "paginator": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "enabled": BOOL_SCHEMA}),
     "page_nav": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "page_size": INTEGER_SCHEMA, "total_items": INTEGER_SCHEMA, "max_visible": INTEGER_SCHEMA, "show_edges": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
     "page_stepper": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "page_size": INTEGER_SCHEMA, "total_items": INTEGER_SCHEMA, "max_visible": INTEGER_SCHEMA, "show_edges": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
     "toast_host": _control_schema(
@@ -6406,6 +6405,591 @@ RUNTIME_PROP_HINTS.setdefault(
     "gallery_scope",
     ["layout", "columns", "spacing", "mainAxisSpacing", "crossAxisSpacing", "radius"],
 )
+
+
+# --- CHANGELOG 1 SCHEMA REFACTOR START ---
+def _pascal_case(name: str) -> str:
+    return "".join(part.capitalize() for part in name.split("_") if part)
+
+
+def _merge_schema_into(target: str, source: str) -> None:
+    src = CONTROL_SCHEMAS.get(source)
+    if not isinstance(src, Mapping):
+        return
+    dst = CONTROL_SCHEMAS.setdefault(target, _control_schema())
+    src_props = src.get("properties", {})
+    dst_props = dst.setdefault("properties", {})
+    if isinstance(src_props, Mapping) and isinstance(dst_props, Mapping):
+        for key, value in src_props.items():
+            if key not in dst_props:
+                dst_props[key] = value
+    if src.get("additionalProperties") is True:
+        dst["additionalProperties"] = True
+    src_required = src.get("required", [])
+    dst_required = list(dst.get("required", []))
+    if isinstance(src_required, list):
+        for item in src_required:
+            if item not in dst_required:
+                dst_required.append(item)
+    if dst_required:
+        dst["required"] = dst_required
+
+
+def _merge_hints_into(target: str, source: str) -> None:
+    src = RUNTIME_PROP_HINTS.get(source, [])
+    dst = RUNTIME_PROP_HINTS.setdefault(target, [])
+    for prop in src:
+        if prop not in dst:
+            dst.append(prop)
+
+
+def _remove_control_name(
+    name: str,
+    *,
+    drop_schema: bool = True,
+    drop_hints: bool = True,
+    drop_types: bool = True,
+) -> None:
+    normalized = name.strip().lower().replace("-", "_").rstrip(".")
+    if not normalized:
+        return
+    if drop_schema:
+        CONTROL_SCHEMAS.pop(normalized, None)
+    if drop_hints:
+        RUNTIME_PROP_HINTS.pop(normalized, None)
+    if drop_types:
+        _ALL_CONTROL_TYPES.discard(normalized)
+        _ALL_CONTROL_TYPES.discard(_pascal_case(normalized))
+
+
+_CHANGELOG_CANONICAL_SCHEMAS = {
+    "bubble": _control_schema(
+        {
+            "variant": STRING_SCHEMA,
+            "role": STRING_SCHEMA,
+            "tone": STRING_SCHEMA,
+            "density": STRING_SCHEMA,
+            "compact": BOOL_SCHEMA,
+            "dense": BOOL_SCHEMA,
+            "align": STRING_SCHEMA,
+            "max_width": DIMENSION_SCHEMA,
+            "grouping": STRING_SCHEMA,
+            "group_messages": BOOL_SCHEMA,
+            "grouped": BOOL_SCHEMA,
+            "selectable": BOOL_SCHEMA,
+            "clickable": BOOL_SCHEMA,
+            "sender_name": STRING_SCHEMA,
+            "author": STRING_SCHEMA,
+            "avatar": ANY_SCHEMA,
+            "role_badge": STRING_SCHEMA,
+            "title": STRING_SCHEMA,
+            "subtitle": STRING_SCHEMA,
+            "text": STRING_SCHEMA,
+            "value": STRING_SCHEMA,
+            "markdown": ANY_SCHEMA,
+            "timestamp": STRING_SCHEMA,
+            "edited": BOOL_SCHEMA,
+            "delivered": BOOL_SCHEMA,
+            "read": BOOL_SCHEMA,
+            "status": STRING_SCHEMA,
+            "error_notice": STRING_SCHEMA,
+            "notice": STRING_SCHEMA,
+            "attachments": {"type": "array", "items": ANY_SCHEMA},
+            "reactions": {"type": "array", "items": ANY_SCHEMA},
+            "actions": {"type": "array", "items": ANY_SCHEMA},
+            "quote_text": STRING_SCHEMA,
+            "quote_author": STRING_SCHEMA,
+            "quote_timestamp": STRING_SCHEMA,
+            "quote_compact": BOOL_SCHEMA,
+            "mention_label": STRING_SCHEMA,
+            "mention_color": COLOR_SCHEMA,
+            "mention_text_color": COLOR_SCHEMA,
+            "mention_clickable": BOOL_SCHEMA,
+            "divider_label": STRING_SCHEMA,
+            "divider_color": COLOR_SCHEMA,
+            "messages": {"type": "array", "items": ANY_SCHEMA},
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "pinned_messages": {"type": "array", "items": ANY_SCHEMA},
+            "spacing": NUMBER_SCHEMA,
+            "reverse": BOOL_SCHEMA,
+            "scrollable": BOOL_SCHEMA,
+            "autoscroll": STRING_SCHEMA,
+            "follow_latest": BOOL_SCHEMA,
+            "unread_divider_label": STRING_SCHEMA,
+            "unread_after_id": STRING_SCHEMA,
+            "unread_index": INTEGER_SCHEMA,
+            "date_separators": {"type": "array", "items": ANY_SCHEMA},
+            "empty_state": ANY_SCHEMA,
+            "typing_indicator": ANY_SCHEMA,
+            "show_timestamps": BOOL_SCHEMA,
+            "show_input": BOOL_SCHEMA,
+            "input_placeholder": STRING_SCHEMA,
+            "send_label": STRING_SCHEMA,
+            "send_on_enter": BOOL_SCHEMA,
+            "placeholder": STRING_SCHEMA,
+            "min_lines": INTEGER_SCHEMA,
+            "max_lines": INTEGER_SCHEMA,
+            "auto_expand": BOOL_SCHEMA,
+            "leading": ANY_SCHEMA,
+            "trailing": ANY_SCHEMA,
+            "show_attach": BOOL_SCHEMA,
+            "draft_key": STRING_SCHEMA,
+            "char_limit": INTEGER_SCHEMA,
+            "show_counter": BOOL_SCHEMA,
+            "cooldown_ms": INTEGER_SCHEMA,
+            "disabled": BOOL_SCHEMA,
+            "read_only": BOOL_SCHEMA,
+            "emit_on_change": BOOL_SCHEMA,
+            "clear_on_send": BOOL_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+    "display": _control_schema(
+        {
+            "role": STRING_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "title": STRING_SCHEMA,
+            "subtitle": STRING_SCHEMA,
+            "caption": STRING_SCHEMA,
+            "description": STRING_SCHEMA,
+            "name": STRING_SCHEMA,
+            "tone": STRING_SCHEMA,
+            "size": STRING_SCHEMA,
+            "interactive": BOOL_SCHEMA,
+            "status": STRING_SCHEMA,
+            "badge": STRING_SCHEMA,
+            "color": COLOR_SCHEMA,
+            "avatar": ANY_SCHEMA,
+            "initials": STRING_SCHEMA,
+            "icon": ICON_VALUE_SCHEMA,
+            "leading": ANY_SCHEMA,
+            "trailing": ANY_SCHEMA,
+            "tags": {"type": "array", "items": ANY_SCHEMA},
+            "value": ANY_SCHEMA,
+            "max": INTEGER_SCHEMA,
+            "allow_half": BOOL_SCHEMA,
+            "count": INTEGER_SCHEMA,
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "selected": {"type": "array", "items": ANY_SCHEMA},
+            "checked": {"type": "array", "items": ANY_SCHEMA},
+            "checked_value": BOOL_SCHEMA,
+            "dot_count": INTEGER_SCHEMA,
+            "document_id": STRING_SCHEMA,
+            "ranges": {"type": "array", "items": ANY_SCHEMA},
+            "owners": {"type": "array", "items": ANY_SCHEMA},
+            "owner": ANY_SCHEMA,
+            "show_avatars": BOOL_SCHEMA,
+            "compact": BOOL_SCHEMA,
+            "dense": BOOL_SCHEMA,
+            "aria_label": STRING_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+    "style": _control_schema(
+        {
+            "style_pack": STRING_SCHEMA,
+            "pack": STRING_SCHEMA,
+            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "token_overrides": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "style_tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "recipes": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "default_style": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "default_modifiers": {"type": "array", "items": ANY_SCHEMA},
+            "default_motion": ANY_SCHEMA,
+            "state": STRING_SCHEMA,
+            "variant": ANY_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+            "child": ANY_SCHEMA,
+            "children": {"type": "array", "items": ANY_SCHEMA},
+        }
+    ),
+    "modifier": _control_schema(
+        {
+            "modifiers": {"type": "array", "items": ANY_SCHEMA},
+            "motion": ANY_SCHEMA,
+            "on_hover": {"type": "array", "items": ANY_SCHEMA},
+            "on_pressed": {"type": "array", "items": ANY_SCHEMA},
+            "on_focus": {"type": "array", "items": ANY_SCHEMA},
+            "cursor": STRING_SCHEMA,
+            "padding": PADDING_SCHEMA,
+            "margin": PADDING_SCHEMA,
+            "align": ALIGNMENT_SCHEMA,
+            "max_width": DIMENSION_SCHEMA,
+            "max_height": DIMENSION_SCHEMA,
+            "min_width": DIMENSION_SCHEMA,
+            "min_height": DIMENSION_SCHEMA,
+            "border": ANY_SCHEMA,
+            "background": ANY_SCHEMA,
+            "shadow": ANY_SCHEMA,
+            "glow": ANY_SCHEMA,
+            "glass": ANY_SCHEMA,
+            "focus_ring": ANY_SCHEMA,
+            "hit_test": STRING_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+            "child": ANY_SCHEMA,
+            "children": {"type": "array", "items": ANY_SCHEMA},
+        }
+    ),
+    "pagination": _control_schema(
+        {
+            "page": INTEGER_SCHEMA,
+            "page_count": INTEGER_SCHEMA,
+            "page_size": INTEGER_SCHEMA,
+            "total_items": INTEGER_SCHEMA,
+            "max_visible": INTEGER_SCHEMA,
+            "show_edges": BOOL_SCHEMA,
+            "dense": BOOL_SCHEMA,
+            "enabled": BOOL_SCHEMA,
+            "prev_label": STRING_SCHEMA,
+            "next_label": STRING_SCHEMA,
+            "mode": STRING_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+    "snack_bar": _control_schema(
+        {
+            "message": STRING_SCHEMA,
+            "label": STRING_SCHEMA,
+            "open": BOOL_SCHEMA,
+            "duration_ms": INTEGER_SCHEMA,
+            "action_label": STRING_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "style": STRING_SCHEMA,
+            "icon": ICON_VALUE_SCHEMA,
+            "instant": BOOL_SCHEMA,
+            "priority": INTEGER_SCHEMA,
+            "use_flushbar": BOOL_SCHEMA,
+            "use_fluttertoast": BOOL_SCHEMA,
+            "toast_position": STRING_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+    "alert_dialog": _control_schema(
+        {
+            "open": BOOL_SCHEMA,
+            "dismissible": BOOL_SCHEMA,
+            "close_on_escape": BOOL_SCHEMA,
+            "trap_focus": BOOL_SCHEMA,
+            "duration_ms": INTEGER_SCHEMA,
+            "transition": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "transition_type": STRING_SCHEMA,
+            "source_rect": ANY_SCHEMA,
+            "scrim_color": COLOR_SCHEMA,
+            "title": ANY_SCHEMA,
+            "content": ANY_SCHEMA,
+            "actions": {"type": "array", "items": ANY_SCHEMA},
+            "child": ANY_SCHEMA,
+        }
+    ),
+    "page_view": _control_schema(
+        {
+            "index": INTEGER_SCHEMA,
+            "initial_page": INTEGER_SCHEMA,
+            "animate": BOOL_SCHEMA,
+            "duration_ms": INTEGER_SCHEMA,
+            "keep_alive": BOOL_SCHEMA,
+            "scroll_direction": STRING_SCHEMA,
+            "reverse": BOOL_SCHEMA,
+            "page_snapping": BOOL_SCHEMA,
+            "pad_ends": BOOL_SCHEMA,
+            "viewport_fraction": NUMBER_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+            "child": ANY_SCHEMA,
+            "children": {"type": "array", "items": ANY_SCHEMA},
+        }
+    ),
+    "vertical_divider": _control_schema(
+        {
+            "vertical": BOOL_SCHEMA,
+            "thickness": NUMBER_SCHEMA,
+            "indent": NUMBER_SCHEMA,
+            "end_indent": NUMBER_SCHEMA,
+            "color": COLOR_SCHEMA,
+        }
+    ),
+    "progress_bar": _control_schema(
+        {
+            "value": NUMBER_SCHEMA,
+            "indeterminate": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "stroke_width": NUMBER_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "circular": BOOL_SCHEMA,
+        }
+    ),
+    "progress_ring": _control_schema(
+        {
+            "value": NUMBER_SCHEMA,
+            "indeterminate": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "stroke_width": NUMBER_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "circular": BOOL_SCHEMA,
+        }
+    ),
+    "reorderable_list_view": _control_schema(
+        {
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "dense": BOOL_SCHEMA,
+            "events": {"type": "array", "items": STRING_SCHEMA},
+        }
+    ),
+}
+
+_CHANGELOG_CANONICAL_HINTS = {
+    "bubble": [
+        "variant", "role", "tone", "density", "compact", "dense", "align", "max_width",
+        "grouping", "group_messages", "grouped", "selectable", "clickable",
+        "sender_name", "author", "avatar", "role_badge", "title", "subtitle", "text",
+        "markdown", "timestamp", "edited", "delivered", "read", "status", "error_notice",
+        "notice", "attachments", "reactions", "actions", "quote_text", "quote_author",
+        "quote_timestamp", "mention_label", "mention_color", "mention_text_color",
+        "mention_clickable", "divider_label", "divider_color", "messages", "items",
+        "pinned_messages", "spacing", "reverse", "scrollable", "autoscroll",
+        "follow_latest", "unread_divider_label", "unread_after_id", "unread_index",
+        "date_separators", "empty_state", "typing_indicator", "show_timestamps",
+        "show_input", "input_placeholder", "send_label", "send_on_enter", "value",
+        "placeholder", "min_lines", "max_lines", "auto_expand", "leading", "trailing",
+        "show_attach", "draft_key", "char_limit", "show_counter", "cooldown_ms",
+        "disabled", "read_only", "emit_on_change", "clear_on_send", "events",
+    ],
+    "display": [
+        "role", "variant", "title", "subtitle", "caption", "description", "name", "tone",
+        "size", "interactive", "icon", "leading", "trailing", "avatar", "initials", "tags",
+        "status", "badge", "color", "value", "max", "allow_half", "count", "items",
+        "selected", "checked", "checked_value", "dot_count", "document_id", "ranges",
+        "owners", "owner", "show_avatars", "compact", "dense", "aria_label", "events",
+    ],
+    "style": [
+        "style_pack", "pack", "tokens", "token_overrides", "style_tokens", "recipes",
+        "default_style", "default_modifiers", "default_motion", "state", "variant",
+        "events", "child", "children",
+    ],
+    "modifier": [
+        "modifiers", "motion", "on_hover", "on_pressed", "on_focus", "cursor", "padding",
+        "margin", "align", "max_width", "max_height", "min_width", "min_height", "border",
+        "background", "shadow", "glow", "glass", "focus_ring", "hit_test", "events",
+        "child", "children",
+    ],
+    "pagination": [
+        "page", "page_count", "page_size", "total_items", "max_visible", "show_edges",
+        "dense", "enabled", "prev_label", "next_label", "mode", "events",
+    ],
+    "snack_bar": [
+        "message", "label", "open", "duration_ms", "action_label", "variant", "style",
+        "icon", "instant", "priority", "use_flushbar", "use_fluttertoast",
+        "toast_position", "events",
+    ],
+    "alert_dialog": [
+        "open", "dismissible", "close_on_escape", "trap_focus", "duration_ms",
+        "transition", "transition_type", "source_rect", "scrim_color", "title", "content",
+        "actions", "child",
+    ],
+    "page_view": [
+        "index", "initial_page", "animate", "duration_ms", "keep_alive",
+        "scroll_direction", "reverse", "page_snapping", "pad_ends",
+        "viewport_fraction", "events", "child", "children",
+    ],
+    "vertical_divider": ["vertical", "thickness", "indent", "end_indent", "color"],
+    "progress_bar": ["value", "indeterminate", "label", "stroke_width", "variant", "circular"],
+    "progress_ring": ["value", "indeterminate", "label", "stroke_width", "variant", "circular"],
+    "reorderable_list_view": ["items", "dense", "events"],
+}
+
+for _name, _schema in _CHANGELOG_CANONICAL_SCHEMAS.items():
+    CONTROL_SCHEMAS.setdefault(_name, _schema)
+
+for _name, _hints in _CHANGELOG_CANONICAL_HINTS.items():
+    _target_hints = RUNTIME_PROP_HINTS.setdefault(_name, [])
+    for _hint in _hints:
+        if _hint not in _target_hints:
+            _target_hints.append(_hint)
+
+_CHANGELOG_ALIAS_TO_CANONICAL = {
+    "glyph": "glyph_button",
+    "html": "html_view",
+    "markdown": "markdown_view",
+    "chip_group": "chip",
+    "segmented_switch": "switch",
+    "span_slider": "slider",
+    "combobox": "combo_box",
+    "filepicker": "file_picker",
+    "mention_pill": "bubble",
+    "message_divider": "bubble",
+    "message_meta": "bubble",
+    "quoted_message": "bubble",
+    "persona": "display",
+    "rating_display": "display",
+    "reaction_bar": "display",
+    "result_card": "display",
+    "status_mark": "display",
+    "typing_indicator": "display",
+    "check_list": "display",
+    "date_range_picker": "date_picker",
+    "date_range": "date_picker",
+    "date_select": "date_picker",
+    "date_span": "date_picker",
+    "side_drawer": "drawer",
+    "page_nav": "pagination",
+    "page_stepper": "pagination",
+    "outline_view": "outline",
+    "navigator": "sidebar",
+    "crumb_trail": "breadcrumb_bar",
+    "context_action_bar": "action_bar",
+    "modal": "alert_dialog",
+    "notification_host": "toast_host",
+    "side_panel": "slide_panel",
+    "snackbar": "snack_bar",
+    "chat_bubble": "bubble",
+    "chat_message": "bubble",
+    "chat_thread": "bubble",
+    "chat": "bubble",
+    "message_bubble": "bubble",
+    "message_composer": "bubble",
+    "prompt_composer": "bubble",
+    "ownership_marker": "display",
+    "overlay_host": "overlay",
+    "page_scene": "page",
+    "route_host": "route",
+    "route_view": "route",
+}
+
+for _alias, _target in _CHANGELOG_ALIAS_TO_CANONICAL.items():
+    CONTROL_SCHEMAS.setdefault(_target, _control_schema())
+    RUNTIME_PROP_HINTS.setdefault(_target, [])
+    _merge_schema_into(_target, _alias)
+    _merge_hints_into(_target, _alias)
+
+for _alias, _target in _CHANGELOG_ALIAS_TO_CANONICAL.items():
+    if _alias != _target:
+        _remove_control_name(_alias, drop_schema=True, drop_hints=True, drop_types=True)
+
+_CHANGELOG_PHASE1_REMOVED = {
+    "brush_panel",
+    "color_swatch_grid",
+    "curve_editor",
+    "guides_manager",
+    "history_stack",
+    "info_bar",
+    "layer_mask_editor",
+    "ruler_guides",
+    "rulers_overlay",
+    "download_item",
+    "file_browser",
+    "progress_indicator",
+    "progress_timeline",
+    "progress",
+    "queue_list",
+    "reorderable_list",
+    "reorderable_tree",
+    "skeleton_loader",
+    "skeleton",
+    "task_list",
+    "tree_node",
+    "tree_view",
+    "tree",
+    "attachment_tile",
+    "code_block",
+    "code_view",
+    "code",
+    "diff_view",
+    "empty_state_view",
+    "empty_state",
+    "error_state",
+    "rich_text_editor",
+    "rich_text",
+    "rte",
+    "vector_view",
+    "layer_list",
+    "layer",
+    "pan_zoom",
+    "pose",
+    "tilt_hover",
+    "time_travel",
+    "count_stepper",
+    "filter_chips_bar",
+    "filter_drawer",
+    "multi_pick",
+    "multi_select",
+    "numeric_field",
+    "path_field",
+    "search_bar",
+    "segment_bar",
+    "select_option",
+    "smart_search_bar",
+    "tag_chip",
+    "tag_filter_bar",
+    "text_field_style",
+}
+
+_CHANGELOG_PHASE2_REMOVED = {
+    "cursor",
+    "drag_payload",
+    "focus_anchor",
+    "shortcut_map",
+    "adjustment_panel",
+    "bounds_probe",
+    "details_pane",
+    "dock_layout",
+    "dock_pane",
+    "dock",
+    "diff",
+    "inspector_panel",
+    "overflow_box",
+    "page_control",
+    "pane_spec",
+    "resizable_panel",
+    "responsive_row",
+    "view_stack",
+    "viewport",
+    "visibility",
+    "breadcrumbs",
+    "command_item",
+    "command_palette",
+    "command_search",
+    "symbol_tree",
+    "progress_overlay",
+    "auto_form",
+    "editor_tab_strip",
+    "editor_workspace",
+    "file_system",
+    "output_panel",
+    "problems_panel",
+    "submit_scope",
+    "validation_summary",
+    "workbench_editor",
+    "workspace_tree",
+    "animation_asset",
+    "drag_region",
+    "launcher",
+    "router",
+}
+
+for _name in sorted(_CHANGELOG_PHASE1_REMOVED | _CHANGELOG_PHASE2_REMOVED):
+    _remove_control_name(_name, drop_schema=True, drop_hints=True, drop_types=True)
+
+_CHANGELOG_RUNTIME_ONLY = {"problem_screen", "native_preview_host", "webview_adapter"}
+for _name in sorted(_CHANGELOG_RUNTIME_ONLY):
+    _remove_control_name(_name, drop_schema=False, drop_hints=False, drop_types=True)
+
+_CHANGELOG_REQUIRED_TYPES = {
+    "alert_dialog",
+    "bubble",
+    "display",
+    "modifier",
+    "page_view",
+    "pagination",
+    "progress_bar",
+    "progress_ring",
+    "reorderable_list_view",
+    "snack_bar",
+    "style",
+    "vertical_divider",
+}
+for _name in _CHANGELOG_REQUIRED_TYPES:
+    _ALL_CONTROL_TYPES.add(_name)
+
+# --- CHANGELOG 1 SCHEMA REFACTOR END ---
 
 for _name, _props in RUNTIME_PROP_HINTS.items():
     _schema = CONTROL_SCHEMAS.setdefault(_name, _control_schema())

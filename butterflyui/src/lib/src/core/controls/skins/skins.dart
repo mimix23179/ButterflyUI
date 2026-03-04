@@ -1113,7 +1113,15 @@ Widget? buildSkinsMotionModule(String module, SkinsContext ctx) {
 }
 
 Widget _buildAnimation(SkinsContext ctx) {
-  return buildMotionControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
+  return buildMotionControl(
+    '${ctx.controlId}::motion',
+    ctx.merged,
+    ctx.rawChildren,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildTransition(SkinsContext ctx) {

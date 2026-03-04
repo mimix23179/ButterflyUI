@@ -52,6 +52,7 @@ import 'controls/effects/effects.dart';
 import 'controls/effects/fold_layer.dart';
 import 'controls/effects/flow_field.dart';
 import 'controls/effects/liquid_morph.dart';
+import 'controls/effects/modifier.dart';
 import 'controls/effects/morphing_border.dart';
 import 'controls/effects/motion.dart';
 import 'controls/effects/parallax.dart';
@@ -64,6 +65,7 @@ import 'controls/effects/scanline_overlay.dart';
 import 'controls/effects/shadow.dart';
 import 'controls/effects/shimmer_shadow.dart';
 import 'controls/effects/stagger.dart';
+import 'controls/effects/style.dart';
 import 'controls/effects/transition.dart';
 import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
@@ -145,7 +147,7 @@ import 'controls/navigation/menu_bar.dart';
 import 'controls/navigation/nav_ring.dart';
 import 'controls/navigation/notice_bar.dart';
 import 'controls/navigation/rail_nav.dart';
-import 'controls/navigation/paginator.dart';
+import 'controls/navigation/pagination.dart';
 import 'controls/navigation/route.dart';
 import 'controls/navigation/sidebar.dart';
 import 'controls/navigation/status_bar.dart';
@@ -259,6 +261,26 @@ Map<String, Object?> _normalizeIncomingProps(Map<String, Object?> source) {
   return normalized;
 }
 
+Map<String, Object?> _extractLocalTokenOverrides(Map<String, Object?> props) {
+  final out = <String, Object?>{};
+  void mergeFrom(Object? raw) {
+    if (raw is! Map) return;
+    out.addAll(coerceObjectMap(raw));
+  }
+
+  mergeFrom(props['tokens']);
+  mergeFrom(props['token_overrides']);
+  mergeFrom(props['style_tokens']);
+  final style = props['style'];
+  if (style is Map) {
+    final styleMap = coerceObjectMap(style);
+    mergeFrom(styleMap['tokens']);
+    mergeFrom(styleMap['token_overrides']);
+    mergeFrom(styleMap['style_tokens']);
+  }
+  return out;
+}
+
 class ControlRenderer {
   final CandyTokens tokens;
   final ButterflyUIControlRegistry registry;
@@ -291,6 +313,7 @@ class ControlRenderer {
     Widget Function(BuildContext context, String nodeId, Widget child)?
     wrapWithControlBox,
     StylePack? inheritedPack,
+    Map<String, Object?>? inheritedTokenOverrides,
   }) {
     final sourceType = control['type'];
     final type = (sourceType?.toString() ?? '').trim().toLowerCase();
@@ -301,13 +324,17 @@ class ControlRenderer {
     final baseProps = incomingProps;
 
     final basePack = inheritedPack ?? stylePack;
+    final parentTokenOverrides = inheritedTokenOverrides ?? styleTokens;
     final packName = baseProps['style_pack']?.toString();
     final resolvedPack = (packName == null || packName.isEmpty)
         ? basePack
         : stylePackRegistry.resolve(packName);
-    final effectiveTokens = resolvedPack == stylePack
-        ? tokens
-        : resolvedPack.buildTokens(styleTokens);
+    final localTokenOverrides = _extractLocalTokenOverrides(baseProps);
+    final resolvedTokenOverrides = CandyTokens.mergeMaps(
+      parentTokenOverrides,
+      localTokenOverrides,
+    );
+    final effectiveTokens = resolvedPack.buildTokens(resolvedTokenOverrides);
     final resolvedStyle = ControlStyleResolver.resolve(
       controlType: type,
       props: baseProps,
@@ -325,6 +352,7 @@ class ControlRenderer {
         child,
         wrapWithControlBox: wrapWithControlBox,
         inheritedPack: resolvedPack,
+        inheritedTokenOverrides: resolvedTokenOverrides,
       );
     }
 
@@ -1496,7 +1524,8 @@ class ControlRenderer {
           emitOnSearchChange: props['emit_on_search_change'] == null
               ? true
               : (props['emit_on_search_change'] == true),
-          searchDebounceMs: coerceOptionalInt(props['search_debounce_ms']) ?? 180,
+          searchDebounceMs:
+              coerceOptionalInt(props['search_debounce_ms']) ?? 180,
           events: _coerceStringList(props['events']).toSet(),
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
@@ -1519,10 +1548,9 @@ class ControlRenderer {
         return buildNoticeBarControl(controlId, props, context.sendEvent);
 
       case 'pagination':
-      case 'paginator':
       case 'page_nav':
       case 'page_stepper':
-        return buildPaginatorControl(
+        return buildPaginationControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1987,8 +2015,38 @@ class ControlRenderer {
           context.buildChild,
         );
 
+      case 'style':
+        return buildStyleControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'modifier':
+        return buildModifierControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'motion':
-        return buildMotionControl(props, rawChildren, context.buildChild);
+        return buildMotionControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'animation':
         return buildAnimationControl(props, rawChildren, context.buildChild);

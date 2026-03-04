@@ -4,7 +4,6 @@ from .app_bar import AppBar
 from .top_bar import TopBar
 from .drawer import Drawer
 from .pagination import Pagination
-from .paginator import Paginator
 from .action_bar import ActionBar
 from .menu_bar import MenuBar
 from .menu_item import MenuItem
@@ -22,7 +21,6 @@ __all__ = [
     "TopBar",
     "Drawer",
     "Pagination",
-    "Paginator",
     "ActionBar",
     "MenuBar",
     "MenuItem",

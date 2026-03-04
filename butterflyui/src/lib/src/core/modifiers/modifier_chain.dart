@@ -48,6 +48,7 @@ class _ModifierBundle {
   final bool focusRing;
   final bool glass;
   final bool elevation;
+  final bool glow;
   final bool clickBurst;
   final bool sound;
   final bool haptics;
@@ -62,12 +63,18 @@ class _ModifierBundle {
   final double glassRadius;
   final double elevationIdle;
   final double elevationHover;
+  final double glowBlur;
+  final double glowSpread;
+  final double glowOpacity;
+  final double hoverGlowOpacity;
+  final double pressGlowOpacity;
   final double burstRadius;
   final int burstDurationMs;
   final String hapticsStyle;
   final Color? focusRingColor;
   final Color? glassTintColor;
   final Color? glassBorderColor;
+  final Color? glowColor;
   final Color? burstColor;
 
   const _ModifierBundle({
@@ -76,6 +83,7 @@ class _ModifierBundle {
     required this.focusRing,
     required this.glass,
     required this.elevation,
+    required this.glow,
     required this.clickBurst,
     required this.sound,
     required this.haptics,
@@ -89,12 +97,18 @@ class _ModifierBundle {
     required this.glassRadius,
     required this.elevationIdle,
     required this.elevationHover,
+    required this.glowBlur,
+    required this.glowSpread,
+    required this.glowOpacity,
+    required this.hoverGlowOpacity,
+    required this.pressGlowOpacity,
     required this.burstRadius,
     required this.burstDurationMs,
     required this.hapticsStyle,
     required this.focusRingColor,
     required this.glassTintColor,
     required this.glassBorderColor,
+    required this.glowColor,
     required this.burstColor,
   });
 
@@ -104,6 +118,7 @@ class _ModifierBundle {
       focusRing ||
       glass ||
       elevation ||
+      glow ||
       clickBurst ||
       sound ||
       haptics ||
@@ -119,6 +134,7 @@ class _ModifierBundle {
       focusRing: allowInteractive ? focusRing : false,
       glass: allowGlass ? glass : false,
       elevation: allowInteractive ? elevation : false,
+      glow: allowInteractive ? glow : false,
       clickBurst: allowInteractive ? clickBurst : false,
       sound: allowInteractive ? sound : false,
       haptics: allowInteractive ? haptics : false,
@@ -132,12 +148,18 @@ class _ModifierBundle {
       glassRadius: glassRadius,
       elevationIdle: elevationIdle,
       elevationHover: elevationHover,
+      glowBlur: glowBlur,
+      glowSpread: glowSpread,
+      glowOpacity: glowOpacity,
+      hoverGlowOpacity: hoverGlowOpacity,
+      pressGlowOpacity: pressGlowOpacity,
       burstRadius: burstRadius,
       burstDurationMs: burstDurationMs,
       hapticsStyle: hapticsStyle,
       focusRingColor: focusRingColor,
       glassTintColor: glassTintColor,
       glassBorderColor: glassBorderColor,
+      glowColor: glowColor,
       burstColor: burstColor,
     );
   }
@@ -152,6 +174,7 @@ class _ModifierBundle {
     var focusRing = false;
     var glass = false;
     var elevation = false;
+    var glow = false;
     var clickBurst = false;
     var sound = false;
     var haptics = false;
@@ -166,12 +189,18 @@ class _ModifierBundle {
     var glassRadius = tokens.number('radii', 'md') ?? 12.0;
     var elevationIdle = 0.0;
     var elevationHover = 8.0;
+    var glowBlur = 18.0;
+    var glowSpread = 2.0;
+    var glowOpacity = 0.55;
+    var hoverGlowOpacity = 0.82;
+    var pressGlowOpacity = 0.38;
     var burstRadius = 56.0;
     var burstDurationMs = 260;
     var hapticsStyle = 'light';
     Color? focusRingColor = tokens.color('primary');
     Color? glassTintColor = const Color(0x14FFFFFF);
     Color? glassBorderColor = const Color(0x33FFFFFF);
+    Color? glowColor = tokens.color('primary');
     Color? burstColor = tokens.color('primary');
 
     Map<String, Object?> resolvePresetMap(Map<String, Object?> item) {
@@ -182,22 +211,12 @@ class _ModifierBundle {
       return CandyTokens.mergeMaps(coerceObjectMap(preset), item);
     }
 
-    for (final value in raw) {
-      if (value == null) continue;
-      String type = '';
-      Map<String, Object?> data = <String, Object?>{};
-      if (value is String) {
-        type = _normalize(value);
-      } else if (value is Map) {
-        data = resolvePresetMap(coerceObjectMap(value));
-        type = _normalize(
-          data['type']?.toString() ??
-              data['id']?.toString() ??
-              data['name']?.toString() ??
-              '',
-        );
-      }
-      if (type.isEmpty) continue;
+    void applyModifier(
+      String type,
+      Map<String, Object?> data, {
+      String? state,
+    }) {
+      final currentState = (state ?? '').toLowerCase();
       switch (type) {
         case 'hovereffectmodifier':
         case 'hovereffect':
@@ -239,6 +258,29 @@ class _ModifierBundle {
           elevationIdle = coerceDouble(data['idle']) ?? elevationIdle;
           elevationHover = coerceDouble(data['hover']) ?? elevationHover;
           break;
+        case 'glow':
+        case 'glowmodifier':
+        case 'glow_effect':
+          glow = true;
+          glowBlur = coerceDouble(data['blur']) ?? glowBlur;
+          glowSpread = coerceDouble(data['spread']) ?? glowSpread;
+          glowOpacity = coerceDouble(data['opacity']) ?? glowOpacity;
+          hoverGlowOpacity =
+              coerceDouble(data['hover_opacity']) ?? hoverGlowOpacity;
+          pressGlowOpacity =
+              coerceDouble(data['press_opacity']) ?? pressGlowOpacity;
+          glowColor = coerceColor(data['color']) ?? glowColor;
+          if (currentState == 'hover') {
+            hoverGlowOpacity =
+                coerceDouble(data['opacity']) ?? hoverGlowOpacity;
+            hoverScale = coerceDouble(data['scale']) ?? hoverScale;
+            hoverDistance = coerceDouble(data['distance']) ?? hoverDistance;
+          } else if (currentState == 'press') {
+            pressGlowOpacity =
+                coerceDouble(data['opacity']) ?? pressGlowOpacity;
+            pressTargetScale = coerceDouble(data['scale']) ?? pressTargetScale;
+          }
+          break;
         case 'clickburstmodifier':
         case 'clickburst':
         case 'click_burst':
@@ -267,12 +309,64 @@ class _ModifierBundle {
       }
     }
 
+    void applyStateList(Object? rawList, String state) {
+      if (rawList is! List) return;
+      for (final item in rawList) {
+        if (item is String) {
+          applyModifier(
+            _normalize(item),
+            const <String, Object?>{},
+            state: state,
+          );
+          continue;
+        }
+        if (item is! Map) continue;
+        final map = resolvePresetMap(coerceObjectMap(item));
+        final type = _normalize(
+          map['type']?.toString() ??
+              map['id']?.toString() ??
+              map['name']?.toString() ??
+              '',
+        );
+        if (type.isEmpty) continue;
+        applyModifier(type, map, state: state);
+      }
+    }
+
+    for (final value in raw) {
+      if (value == null) continue;
+      String type = '';
+      Map<String, Object?> data = <String, Object?>{};
+      if (value is String) {
+        type = _normalize(value);
+      } else if (value is Map) {
+        data = resolvePresetMap(coerceObjectMap(value));
+        type = _normalize(
+          data['type']?.toString() ??
+              data['id']?.toString() ??
+              data['name']?.toString() ??
+              '',
+        );
+      }
+      if (type.isEmpty) continue;
+      if (type == 'state' ||
+          type == 'state_modifiers' ||
+          type == 'state_modifier') {
+        applyStateList(data['hover'], 'hover');
+        applyStateList(data['pressed'] ?? data['press'], 'press');
+        applyStateList(data['focus'], 'focus');
+      } else {
+        applyModifier(type, data);
+      }
+    }
+
     return _ModifierBundle(
       hoverLift: hoverLift,
       pressScale: pressScale,
       focusRing: focusRing,
       glass: glass,
       elevation: elevation,
+      glow: glow,
       clickBurst: clickBurst,
       sound: sound,
       haptics: haptics,
@@ -286,12 +380,18 @@ class _ModifierBundle {
       glassRadius: glassRadius,
       elevationIdle: elevationIdle,
       elevationHover: elevationHover,
+      glowBlur: glowBlur,
+      glowSpread: glowSpread,
+      glowOpacity: glowOpacity,
+      hoverGlowOpacity: hoverGlowOpacity,
+      pressGlowOpacity: pressGlowOpacity,
       burstRadius: burstRadius,
       burstDurationMs: burstDurationMs,
       hapticsStyle: hapticsStyle,
       focusRingColor: focusRingColor,
       glassTintColor: glassTintColor,
       glassBorderColor: glassBorderColor,
+      glowColor: glowColor,
       burstColor: burstColor,
     );
   }
@@ -391,9 +491,37 @@ class _ModifierHostState extends State<_ModifierHost>
         : bundle.elevationIdle;
     final focusColor =
         bundle.focusRingColor ?? Theme.of(context).colorScheme.primary;
+    final glowColor = bundle.glowColor ?? focusColor;
+    final dynamicGlowOpacity = _pressed
+        ? bundle.pressGlowOpacity
+        : (_hovered ? bundle.hoverGlowOpacity : bundle.glowOpacity);
     final borderRadius = BorderRadius.circular(
       bundle.glass ? bundle.glassRadius : bundle.focusRingRadius,
     );
+
+    final shadows = <BoxShadow>[];
+    if (bundle.elevation && dynamicElevation > 0) {
+      shadows.add(
+        BoxShadow(
+          color: baseShadowColor,
+          blurRadius: dynamicElevation,
+          spreadRadius: dynamicElevation * 0.12,
+          offset: Offset(0, dynamicElevation * 0.35),
+        ),
+      );
+    }
+    if (bundle.glow && dynamicGlowOpacity > 0) {
+      shadows.add(
+        BoxShadow(
+          color: glowColor.withValues(
+            alpha: dynamicGlowOpacity.clamp(0.0, 1.0),
+          ),
+          blurRadius: bundle.glowBlur,
+          spreadRadius: bundle.glowSpread,
+          offset: const Offset(0, 0),
+        ),
+      );
+    }
 
     Widget body = widget.child;
     if (bundle.transition) {
@@ -416,16 +544,7 @@ class _ModifierHostState extends State<_ModifierHost>
         border: bundle.focusRing && _focused
             ? Border.all(color: focusColor, width: bundle.focusRingWidth)
             : null,
-        boxShadow: bundle.elevation && dynamicElevation > 0
-            ? <BoxShadow>[
-                BoxShadow(
-                  color: baseShadowColor,
-                  blurRadius: dynamicElevation,
-                  spreadRadius: dynamicElevation * 0.12,
-                  offset: Offset(0, dynamicElevation * 0.35),
-                ),
-              ]
-            : null,
+        boxShadow: shadows.isEmpty ? null : shadows,
       ),
       child: Transform.translate(
         offset: Offset(0, dy),
@@ -484,9 +603,10 @@ class _ModifierHostState extends State<_ModifierHost>
       );
     }
 
-    final wantsHover = bundle.hoverLift || bundle.elevation;
+    final wantsHover = bundle.hoverLift || bundle.elevation || bundle.glow;
     final wantsPress =
         bundle.pressScale ||
+        bundle.glow ||
         bundle.haptics ||
         bundle.sound ||
         bundle.clickBurst;

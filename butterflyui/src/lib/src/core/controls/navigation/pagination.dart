@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-Widget buildPaginatorControl(
+Widget buildPaginationControl(
   String controlId,
   Map<String, Object?> props,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  return ButterflyUIPaginator(
+  return ButterflyUIPagination(
     controlId: controlId,
     props: props,
     registerInvokeHandler: registerInvokeHandler,
@@ -19,14 +19,14 @@ Widget buildPaginatorControl(
   );
 }
 
-class ButterflyUIPaginator extends StatefulWidget {
+class ButterflyUIPagination extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
-  const ButterflyUIPaginator({
+  const ButterflyUIPagination({
     super.key,
     required this.controlId,
     required this.props,
@@ -36,10 +36,10 @@ class ButterflyUIPaginator extends StatefulWidget {
   });
 
   @override
-  State<ButterflyUIPaginator> createState() => _ButterflyUIPaginatorState();
+  State<ButterflyUIPagination> createState() => _ButterflyUIPaginationState();
 }
 
-class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
+class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
   int _page = 1;
   int _pageCount = 1;
 
@@ -53,7 +53,7 @@ class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
   }
 
   @override
-  void didUpdateWidget(covariant ButterflyUIPaginator oldWidget) {
+  void didUpdateWidget(covariant ButterflyUIPagination oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
       if (oldWidget.controlId.isNotEmpty) {
@@ -176,7 +176,7 @@ class _ButterflyUIPaginatorState extends State<ButterflyUIPaginator> {
         _emit(event, payload);
         return null;
       default:
-        throw Exception('Unknown paginator method: $method');
+        throw Exception('Unknown pagination method: $method');
     }
   }
 

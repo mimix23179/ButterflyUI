@@ -92,6 +92,8 @@ class ControlModifierCapabilities {
   static const Set<String> _defaultInteractiveControls = <String>{
     'candy',
     'skins',
+    'style',
+    'modifier',
     'button',
     'elevated_button',
     'filled_button',
@@ -116,7 +118,6 @@ class ControlModifierCapabilities {
     'menu_item',
     'list_tile',
     'item_tile',
-    'paginator',
     'pagination',
     'drawer',
     'sidebar',
@@ -129,6 +130,8 @@ class ControlModifierCapabilities {
 
   static const Set<String> _defaultGlassControls = <String>{
     'candy',
+    'style',
+    'modifier',
     'surface',
     'box',
     'container',
@@ -164,6 +167,8 @@ class ControlModifierCapabilities {
 
   static const Set<String> _defaultTransitionControls = <String>{
     'candy',
+    'style',
+    'modifier',
     'overlay',
     'alert_dialog',
     'popover',

@@ -835,7 +835,15 @@ Widget? buildCandyMotionModule(String module, CandyContext ctx) {
 }
 
 Widget _buildAnimation(CandyContext ctx) {
-  return buildMotionControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
+  return buildMotionControl(
+    '${ctx.controlId}::motion',
+    ctx.merged,
+    ctx.rawChildren,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildTransition(CandyContext ctx) {

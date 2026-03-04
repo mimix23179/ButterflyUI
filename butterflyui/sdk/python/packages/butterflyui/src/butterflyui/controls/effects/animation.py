@@ -1,70 +1,123 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["Animation"]
 
+
 class Animation(Component):
-    """Tween-based entrance animation that interpolates opacity, scale,
-    rotation, and translation offset from zero to the specified target
-    values.
+    """
+    Low-level timeline animation wrapper for opacity/transform/blur/shadow transitions.
 
-    The Flutter runtime wraps the child in a
-    ``TweenAnimationBuilder<double>`` (0 → 1) and applies transforms in
-    the order *translate → rotate → scale → opacity*.  When ``enabled``
-    is ``False`` the child is rendered immediately without animation.
+    ``Animation`` is intended as the reusable interpolation engine under higher-level
+    interaction choreography. It accepts either:
+    - direct scalar props (``opacity``, ``scale``, ``offset``, ``rotation``), or
+    - structured ``from`` / ``to`` maps, or
+    - ``keyframes`` for piecewise interpolation.
 
-    Example::
+    The runtime resolves all inputs into a progress timeline ``t = 0..1`` and
+    applies transforms to the child in a stable order: translate -> rotate ->
+    scale -> blur/shadow -> opacity.
 
+    Example:
+        ```python
         import butterflyui as bui
 
         anim = bui.Animation(
             bui.Text("Hello"),
-            duration_ms=400,
-            opacity=0.0,
-            scale=0.8,
-            curve="ease_out_cubic",
+            duration="medium",
+            curve="emphasized",
+            from_={"opacity": 0.0, "y": 14, "scale": 0.96},
+            to={"opacity": 1.0, "y": 0, "scale": 1.0},
         )
+        ```
 
     Args:
-        duration_ms: 
-            Animation duration in milliseconds.  
-            Defaults to ``220``; clamped to ``1 – 600 000``.
-        curve: 
-            Named easing curve (e.g. ``"linear"``, ``"ease_in_out"``, ``"ease_out_cubic"``).  
-            Defaults to ``ease_out_cubic``.
-        opacity: 
-            Target opacity the child animates *toward* (``0.0`` –``1.0``).  
-            Defaults to ``1.0`` (fully opaque, i.e. no opacity change).
-        scale: 
-            Target uniform scale factor (``0.001`` – ``10.0``).  
-            Defaults to ``1.0``.
-        offset: 
-            Target translation offset as a two-element list 
-            ``[x, y]`` or a mapping ``{"x": …, "y": …}``.
-        rotation: 
-            Target rotation in **degrees**.  
-            The runtime converts to radians internally.
-        enabled: 
-            Set to ``False`` 
-            to bypass the animation entirely and render the child immediately.
+        child:
+            Primary child control to animate.
+        children:
+            Additional children; the runtime uses the first renderable child.
+        duration:
+            Named duration token: ``"short"``, ``"medium"``, ``"long"``.
+        duration_ms:
+            Explicit duration in milliseconds. Overrides ``duration``.
+        delay_ms:
+            Optional animation delay before playback begins.
+        curve:
+            Easing curve name (for example ``linear``, ``ease_out``,
+            ``ease_in_out``, ``emphasized``, ``spring``).
+        enabled:
+            When ``False``, bypasses all animation and renders child directly.
+        play:
+            If ``False``, progress remains at ``0`` (or ``1`` if ``reverse`` is set).
+        reverse:
+            Reverses animation direction.
+        repeat:
+            Repeats the animation loop while mounted.
+        mirror:
+            If ``True`` with ``repeat=True``, alternates forward/reverse cycles.
+        from_:
+            Map of starting values. Common keys:
+            ``opacity``, ``scale``, ``x``, ``y``, ``offset``, ``rotation``,
+            ``blur``, ``shadow_blur``, ``shadow_spread``, ``glow_blur``,
+            ``glow_spread``, ``glow_opacity``, ``color``.
+        to:
+            Map of target values. Same key set as ``from_``.
+        keyframes:
+            List of keyframes ``{"t": 0.0..1.0, "props": {...}}`` for piecewise
+            interpolation of numeric/color values.
+        opacity:
+            Shorthand target opacity (0..1).
+        scale:
+            Shorthand target scale.
+        offset:
+            Shorthand target translation offset ``[x, y]`` or ``{"x":..., "y":...}``.
+        rotation:
+            Shorthand target rotation in degrees.
+        blur:
+            Shorthand target blur sigma.
+        shadow:
+            Optional box-shadow descriptor merged into effect interpolation.
+        color:
+            Optional target tint color.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime event subscriptions for animation lifecycle hooks.
+        props:
+            Raw prop overrides merged after typed args.
+        style:
+            Style map forwarded to renderer style pipeline.
+        strict:
+            Enables strict validation when supported.
     """
+
     control_type = "animation"
 
     def __init__(
         self,
         child: Any | None = None,
-        *children: Any,
+        *children_args: Any,
+        duration: str | None = None,
         duration_ms: int | None = None,
+        delay_ms: int | None = None,
         curve: str | None = None,
+        enabled: bool | None = None,
+        play: bool | None = None,
+        reverse: bool | None = None,
+        repeat: bool | None = None,
+        mirror: bool | None = None,
+        from_: Mapping[str, Any] | None = None,
+        to: Mapping[str, Any] | None = None,
+        keyframes: list[Mapping[str, Any]] | None = None,
         opacity: float | None = None,
         scale: float | None = None,
         offset: Any | None = None,
         rotation: float | None = None,
-        enabled: bool | None = None,
+        blur: float | None = None,
+        shadow: Any | None = None,
+        color: Any | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -73,17 +126,32 @@ class Animation(Component):
     ) -> None:
         merged = merge_props(
             props,
+            duration=duration,
             duration_ms=duration_ms,
+            delay_ms=delay_ms,
             curve=curve,
+            enabled=enabled,
+            play=play,
+            reverse=reverse,
+            repeat=repeat,
+            mirror=mirror,
+            **({"from": dict(from_)} if from_ is not None else {}),
+            to=dict(to) if to is not None else None,
+            keyframes=[dict(frame) for frame in keyframes] if keyframes else None,
             opacity=opacity,
             scale=scale,
             offset=offset,
             rotation=rotation,
-            enabled=enabled,
+            blur=blur,
+            shadow=shadow,
+            color=color,
             events=events,
             **kwargs,
         )
-        resolved_children = list(children)
-        if child is not None:
-            resolved_children.insert(0, child)
-        super().__init__(*resolved_children, props=merged, style=style, strict=strict)
+        super().__init__(
+            *children_args,
+            child=child,
+            props=merged,
+            style=style,
+            strict=strict,
+        )

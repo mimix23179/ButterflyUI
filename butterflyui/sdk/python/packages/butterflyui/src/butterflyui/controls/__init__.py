@@ -30,21 +30,21 @@ from .skins import __all__ as _skins_all
 from .webview import *  # noqa: F401,F403
 from .webview import __all__ as _webview_all
 
-__all__ = (
-    ["Component"]
-    + _candy_all
-    + _skins_all
-    + _customization_all
-    + _data_all
-    + _display_all
-    + _effects_all
-    + _gallery_all
-    + _inputs_all
-    + _interaction_all
-    + _layout_all
-    + _navigation_all
-    + _overlay_all
-    + _productivity_all
-    + _shell_all
-    + _webview_all
-)
+__all__ = [
+    "Component",
+    *_candy_all,
+    *_skins_all,
+    *_customization_all,
+    *_data_all,
+    *_display_all,
+    *_effects_all,
+    *_gallery_all,
+    *_inputs_all,
+    *_interaction_all,
+    *_layout_all,
+    *_navigation_all,
+    *_overlay_all,
+    *_productivity_all,
+    *_shell_all,
+    *_webview_all,
+]
