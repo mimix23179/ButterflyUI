@@ -20,6 +20,13 @@ class Button(Component):
     without writing an explicit event listener.  ``window_action`` lets
     the button control native window behaviour directly from Python.
 
+    ``Button`` also consumes the universal styling contract shared across
+    controls. Pass these via ``**kwargs`` when needed:
+    ``tone``, ``size``, ``density``, ``classes``, ``style_slots``,
+    ``modifiers``, ``on_hover_modifiers``, ``on_pressed_modifiers``,
+    ``on_focus_modifiers``, ``motion`` / ``enter_motion`` / ``hover_motion``,
+    and ``effects`` / ``effect_order``.
+
     ```python
     import butterflyui as bui
 
@@ -55,6 +62,9 @@ class Button(Component):
             Milliseconds to wait before executing ``window_action``.
         events:
             List of event names the Flutter runtime should emit to Python.
+        **kwargs:
+            Additional universal style/modifier/motion/effects props forwarded
+            to the shared renderer.
     """
     control_type = "button"
 

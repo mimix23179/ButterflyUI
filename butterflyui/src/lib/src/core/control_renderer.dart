@@ -8,6 +8,7 @@ import 'butterflyui_event_box.dart';
 import 'control_registry.dart';
 import 'control_utils.dart';
 import 'motion/motion_pack.dart';
+import 'modifiers/control_capabilities.dart';
 import 'modifiers/modifier_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/buttons/elevated_button.dart';
@@ -2438,17 +2439,60 @@ class ControlRenderer {
     required Map<String, Object?> props,
     required ResolvedControlStyle resolvedStyle,
   }) {
+    final capabilities = ControlModifierCapabilities.forControl(controlType);
+    bool supportsSlot(String name) => capabilities.supportedSlots.contains(name);
     final merged = <String, Object?>{...props};
+    if (supportsSlot('root')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('root'));
+    }
+    if (supportsSlot('background')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('background'));
+    }
+    if (supportsSlot('border')) {
+      _mergeMissingEntries(
+        merged,
+        _borderSlotDefaults(resolvedStyle.slot('border')),
+      );
+    }
+    if (supportsSlot('content')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('content'));
+    }
+    if (supportsSlot('leading')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('leading'));
+    }
+    if (supportsSlot('trailing')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('trailing'));
+    }
+    if (supportsSlot('overlay')) {
+      _mergeMissingEntries(merged, resolvedStyle.slot('overlay'));
+    }
     _mergeMissingEntries(merged, resolvedStyle.slot('surface'));
-    _mergeMissingEntries(
-      merged,
-      _labelSlotDefaults(resolvedStyle.slot('label')),
-    );
-    _mergeMissingEntries(
-      merged,
-      _iconSlotDefaults(controlType, resolvedStyle.slot('icon')),
-    );
+    if (supportsSlot('label')) {
+      _mergeMissingEntries(
+        merged,
+        _labelSlotDefaults(resolvedStyle.slot('label')),
+      );
+    }
+    if (supportsSlot('icon')) {
+      _mergeMissingEntries(
+        merged,
+        _iconSlotDefaults(controlType, resolvedStyle.slot('icon')),
+      );
+    }
     return merged;
+  }
+
+  Map<String, Object?> _borderSlotDefaults(Map<String, Object?> slot) {
+    if (slot.isEmpty) return const <String, Object?>{};
+    final out = <String, Object?>{};
+    final color =
+        slot['border_color'] ?? slot['color'] ?? slot['foreground'];
+    final width = slot['border_width'] ?? slot['width'];
+    final radius = slot['radius'] ?? slot['border_radius'];
+    if (color != null) out['border_color'] = color;
+    if (width != null) out['border_width'] = width;
+    if (radius != null) out['radius'] = radius;
+    return out;
   }
 
   void _mergeMissingEntries(
@@ -2532,6 +2576,7 @@ class ControlRenderer {
         controlType == 'spacer') {
       return built;
     }
+    final capabilities = ControlModifierCapabilities.forControl(controlType);
 
     final surfaceStyle = resolvedStyle.slot('surface');
 
@@ -2541,235 +2586,237 @@ class ControlRenderer {
     if (!visible) return const SizedBox.shrink();
 
     final enabled = _isEnabled(props);
-
-    final inheritedTextStyle = _coerceInheritedTextStyle(props, surfaceStyle);
-    if (inheritedTextStyle != null) {
-      built = DefaultTextStyle.merge(style: inheritedTextStyle, child: built);
-    }
-    final inheritedIconTheme = _coerceInheritedIconTheme(props, surfaceStyle);
-    if (inheritedIconTheme != null) {
-      built = IconTheme.merge(data: inheritedIconTheme, child: built);
-    }
-
-    final width = coerceDouble(props['width'] ?? surfaceStyle['width']);
-    final height = coerceDouble(props['height'] ?? surfaceStyle['height']);
-    if (width != null || height != null) {
-      built = SizedBox(width: width, height: height, child: built);
-    }
-
-    final minWidth = coerceDouble(
-      props['min_width'] ?? surfaceStyle['min_width'],
-    );
-    final minHeight = coerceDouble(
-      props['min_height'] ?? surfaceStyle['min_height'],
-    );
-    final maxWidth = coerceDouble(
-      props['max_width'] ?? surfaceStyle['max_width'],
-    );
-    final maxHeight = coerceDouble(
-      props['max_height'] ?? surfaceStyle['max_height'],
-    );
-    if (minWidth != null ||
-        minHeight != null ||
-        maxWidth != null ||
-        maxHeight != null) {
-      built = ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: minWidth ?? 0,
-          minHeight: minHeight ?? 0,
-          maxWidth: maxWidth ?? double.infinity,
-          maxHeight: maxHeight ?? double.infinity,
-        ),
-        child: built,
-      );
-    }
-
-    final padding = coercePadding(props['padding'] ?? surfaceStyle['padding']);
-    if (padding != null) {
-      built = Padding(padding: padding, child: built);
-    }
-
-    final alignment = _parseAlignment(
-      props['alignment'] ?? surfaceStyle['alignment'],
-    );
-    if (alignment != null) {
-      built = Align(alignment: alignment, child: built);
-    }
-
-    final margin = coercePadding(props['margin'] ?? surfaceStyle['margin']);
-    if (margin != null) {
-      built = Padding(padding: margin, child: built);
-    }
-
-    final borderSpec = (props['border'] is Map)
-        ? coerceObjectMap(props['border'] as Map)
-        : (surfaceStyle['border'] is Map)
-        ? coerceObjectMap(surfaceStyle['border'] as Map)
-        : const <String, Object?>{};
-
-    final bg = coerceColor(
-      props['bgcolor'] ??
-          props['background'] ??
-          surfaceStyle['bgcolor'] ??
-          surfaceStyle['background'] ??
-          surfaceStyle['color'],
-    );
-    final borderColor = coerceColor(
-      props['border_color'] ??
-          borderSpec['color'] ??
-          borderSpec['border_color'] ??
-          surfaceStyle['border_color'],
-    );
-    final borderWidth = coerceDouble(
-      props['border_width'] ??
-          borderSpec['width'] ??
-          borderSpec['border_width'] ??
-          surfaceStyle['border_width'],
-    );
-    final borderRadius = _coerceBorderRadius(
-      props['radius'] ??
-          props['border_radius'] ??
-          surfaceStyle['radius'] ??
-          surfaceStyle['border_radius'],
-    );
-    final shape = _parseBoxShape(props['shape'] ?? surfaceStyle['shape']);
-    final gradient = coerceGradient(
-      props['gradient'] ?? surfaceStyle['gradient'],
-    );
-    final image = coerceDecorationImage(
-      props['image'] ?? surfaceStyle['image'],
-    );
-    final boxShadow = coerceBoxShadow(
-      props['shadow'] ?? surfaceStyle['shadow'],
-    );
-    final clipBehavior = _parseClipBehavior(
-      props['clip_behavior'] ?? surfaceStyle['clip_behavior'] ?? props['clip'],
-    );
-    final backdropBlur = coerceDouble(
-      props['backdrop_blur'] ??
-          props['backdropBlur'] ??
-          props['glass_blur'] ??
-          surfaceStyle['backdrop_blur'] ??
-          surfaceStyle['backdropBlur'] ??
-          surfaceStyle['glass_blur'],
-    );
-    final backdropColor = coerceColor(
-      props['backdrop_color'] ??
-          props['backdropColor'] ??
-          props['frost_color'] ??
-          surfaceStyle['backdrop_color'] ??
-          surfaceStyle['backdropColor'] ??
-          surfaceStyle['frost_color'],
-    );
-    final blur = coerceDouble(props['blur'] ?? surfaceStyle['blur']);
-    final elevation = coerceDouble(
-      props['elevation'] ?? surfaceStyle['elevation'],
-    );
-
-    const nativeDecorationControls = <String>{
-      'surface',
-      'box',
-      'container',
-      'decorated_box',
-    };
-    final shouldApplyDecoration = !nativeDecorationControls.contains(
-      controlType,
-    );
-    final hasDecoration =
-        bg != null ||
-        borderColor != null ||
-        borderWidth != null ||
-        borderRadius != null ||
-        gradient != null ||
-        image != null ||
-        boxShadow != null ||
-        shape == BoxShape.circle;
-    if (shouldApplyDecoration && hasDecoration) {
-      final border = (borderColor != null && (borderWidth ?? 0) > 0)
-          ? Border.all(color: borderColor, width: borderWidth ?? 1.0)
-          : null;
-      built = DecoratedBox(
-        decoration: BoxDecoration(
-          color: bg,
-          border: border,
-          shape: shape,
-          borderRadius: borderRadius,
-          gradient: gradient,
-          image: image,
-          boxShadow: boxShadow,
-        ),
-        child: built,
-      );
-    }
-
-    if (shouldApplyDecoration && (elevation ?? 0) > 0) {
-      built = Material(
-        type: MaterialType.transparency,
-        elevation: elevation!,
-        borderRadius: shape == BoxShape.circle ? null : borderRadius,
-        clipBehavior: borderRadius == null ? Clip.none : Clip.antiAlias,
-        child: built,
-      );
-    }
-
-    if (shouldApplyDecoration && clipBehavior != Clip.none) {
-      if (shape == BoxShape.circle) {
-        built = ClipOval(clipBehavior: clipBehavior, child: built);
-      } else if (borderRadius != null) {
-        built = ClipRRect(
-          borderRadius: borderRadius,
-          clipBehavior: clipBehavior,
-          child: built,
-        );
-      } else {
-        built = ClipRect(clipBehavior: clipBehavior, child: built);
+    // Phase 1: base style/layout decorators.
+    if (capabilities.supportsStyleDecorators) {
+      final inheritedTextStyle = _coerceInheritedTextStyle(props, surfaceStyle);
+      if (inheritedTextStyle != null) {
+        built = DefaultTextStyle.merge(style: inheritedTextStyle, child: built);
       }
-    }
-
-    if (shouldApplyDecoration &&
-        ((backdropBlur ?? 0) > 0 || backdropColor != null)) {
-      if (shape == BoxShape.circle) {
-        built = ClipOval(child: built);
-      } else if (borderRadius != null) {
-        built = ClipRRect(
-          borderRadius: borderRadius,
-          clipBehavior: Clip.antiAlias,
-          child: built,
-        );
-      } else {
-        built = ClipRect(child: built);
+      final inheritedIconTheme = _coerceInheritedIconTheme(props, surfaceStyle);
+      if (inheritedIconTheme != null) {
+        built = IconTheme.merge(data: inheritedIconTheme, child: built);
       }
-      if (backdropBlur != null && backdropBlur > 0) {
-        built = BackdropFilter(
-          filter: ui.ImageFilter.blur(
-            sigmaX: backdropBlur,
-            sigmaY: backdropBlur,
+
+      final width = coerceDouble(props['width'] ?? surfaceStyle['width']);
+      final height = coerceDouble(props['height'] ?? surfaceStyle['height']);
+      if (width != null || height != null) {
+        built = SizedBox(width: width, height: height, child: built);
+      }
+
+      final minWidth = coerceDouble(
+        props['min_width'] ?? surfaceStyle['min_width'],
+      );
+      final minHeight = coerceDouble(
+        props['min_height'] ?? surfaceStyle['min_height'],
+      );
+      final maxWidth = coerceDouble(
+        props['max_width'] ?? surfaceStyle['max_width'],
+      );
+      final maxHeight = coerceDouble(
+        props['max_height'] ?? surfaceStyle['max_height'],
+      );
+      if (minWidth != null ||
+          minHeight != null ||
+          maxWidth != null ||
+          maxHeight != null) {
+        built = ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: minWidth ?? 0,
+            minHeight: minHeight ?? 0,
+            maxWidth: maxWidth ?? double.infinity,
+            maxHeight: maxHeight ?? double.infinity,
           ),
           child: built,
         );
       }
-      if (backdropColor != null) {
+
+      final padding = coercePadding(props['padding'] ?? surfaceStyle['padding']);
+      if (padding != null) {
+        built = Padding(padding: padding, child: built);
+      }
+
+      final alignment = _parseAlignment(
+        props['alignment'] ?? surfaceStyle['alignment'],
+      );
+      if (alignment != null) {
+        built = Align(alignment: alignment, child: built);
+      }
+
+      final margin = coercePadding(props['margin'] ?? surfaceStyle['margin']);
+      if (margin != null) {
+        built = Padding(padding: margin, child: built);
+      }
+
+      final borderSpec = (props['border'] is Map)
+          ? coerceObjectMap(props['border'] as Map)
+          : (surfaceStyle['border'] is Map)
+          ? coerceObjectMap(surfaceStyle['border'] as Map)
+          : const <String, Object?>{};
+
+      final bg = coerceColor(
+        props['bgcolor'] ??
+            props['background'] ??
+            surfaceStyle['bgcolor'] ??
+            surfaceStyle['background'] ??
+            surfaceStyle['color'],
+      );
+      final borderColor = coerceColor(
+        props['border_color'] ??
+            borderSpec['color'] ??
+            borderSpec['border_color'] ??
+            surfaceStyle['border_color'],
+      );
+      final borderWidth = coerceDouble(
+        props['border_width'] ??
+            borderSpec['width'] ??
+            borderSpec['border_width'] ??
+            surfaceStyle['border_width'],
+      );
+      final borderRadius = _coerceBorderRadius(
+        props['radius'] ??
+            props['border_radius'] ??
+            surfaceStyle['radius'] ??
+            surfaceStyle['border_radius'],
+      );
+      final shape = _parseBoxShape(props['shape'] ?? surfaceStyle['shape']);
+      final gradient = coerceGradient(
+        props['gradient'] ?? surfaceStyle['gradient'],
+      );
+      final image = coerceDecorationImage(
+        props['image'] ?? surfaceStyle['image'],
+      );
+      final boxShadow = coerceBoxShadow(
+        props['shadow'] ?? surfaceStyle['shadow'],
+      );
+      final clipBehavior = _parseClipBehavior(
+        props['clip_behavior'] ?? surfaceStyle['clip_behavior'] ?? props['clip'],
+      );
+      final backdropBlur = coerceDouble(
+        props['backdrop_blur'] ??
+            props['backdropBlur'] ??
+            props['glass_blur'] ??
+            surfaceStyle['backdrop_blur'] ??
+            surfaceStyle['backdropBlur'] ??
+            surfaceStyle['glass_blur'],
+      );
+      final backdropColor = coerceColor(
+        props['backdrop_color'] ??
+            props['backdropColor'] ??
+            props['frost_color'] ??
+            surfaceStyle['backdrop_color'] ??
+            surfaceStyle['backdropColor'] ??
+            surfaceStyle['frost_color'],
+      );
+      final blur = coerceDouble(props['blur'] ?? surfaceStyle['blur']);
+      final elevation = coerceDouble(
+        props['elevation'] ?? surfaceStyle['elevation'],
+      );
+
+      const nativeDecorationControls = <String>{
+        'surface',
+        'box',
+        'container',
+        'decorated_box',
+      };
+      final shouldApplyDecoration = !nativeDecorationControls.contains(
+        controlType,
+      );
+      final hasDecoration =
+          bg != null ||
+          borderColor != null ||
+          borderWidth != null ||
+          borderRadius != null ||
+          gradient != null ||
+          image != null ||
+          boxShadow != null ||
+          shape == BoxShape.circle;
+      if (shouldApplyDecoration && hasDecoration) {
+        final border = (borderColor != null && (borderWidth ?? 0) > 0)
+            ? Border.all(color: borderColor, width: borderWidth ?? 1.0)
+            : null;
         built = DecoratedBox(
           decoration: BoxDecoration(
-            color: backdropColor,
+            color: bg,
+            border: border,
             shape: shape,
-            borderRadius: shape == BoxShape.circle ? null : borderRadius,
+            borderRadius: borderRadius,
+            gradient: gradient,
+            image: image,
+            boxShadow: boxShadow,
           ),
           child: built,
         );
       }
-    }
 
-    if (shouldApplyDecoration && blur != null && blur > 0) {
-      built = ImageFiltered(
-        imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: built,
-      );
-    }
+      if (shouldApplyDecoration && (elevation ?? 0) > 0) {
+        built = Material(
+          type: MaterialType.transparency,
+          elevation: elevation!,
+          borderRadius: shape == BoxShape.circle ? null : borderRadius,
+          clipBehavior: borderRadius == null ? Clip.none : Clip.antiAlias,
+          child: built,
+        );
+      }
 
-    final opacity = coerceDouble(props['opacity'] ?? surfaceStyle['opacity']);
-    if (opacity != null && opacity >= 0 && opacity < 1) {
-      built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
+      if (shouldApplyDecoration && clipBehavior != Clip.none) {
+        if (shape == BoxShape.circle) {
+          built = ClipOval(clipBehavior: clipBehavior, child: built);
+        } else if (borderRadius != null) {
+          built = ClipRRect(
+            borderRadius: borderRadius,
+            clipBehavior: clipBehavior,
+            child: built,
+          );
+        } else {
+          built = ClipRect(clipBehavior: clipBehavior, child: built);
+        }
+      }
+
+      if (shouldApplyDecoration &&
+          ((backdropBlur ?? 0) > 0 || backdropColor != null)) {
+        if (shape == BoxShape.circle) {
+          built = ClipOval(child: built);
+        } else if (borderRadius != null) {
+          built = ClipRRect(
+            borderRadius: borderRadius,
+            clipBehavior: Clip.antiAlias,
+            child: built,
+          );
+        } else {
+          built = ClipRect(child: built);
+        }
+        if (backdropBlur != null && backdropBlur > 0) {
+          built = BackdropFilter(
+            filter: ui.ImageFilter.blur(
+              sigmaX: backdropBlur,
+              sigmaY: backdropBlur,
+            ),
+            child: built,
+          );
+        }
+        if (backdropColor != null) {
+          built = DecoratedBox(
+            decoration: BoxDecoration(
+              color: backdropColor,
+              shape: shape,
+              borderRadius: shape == BoxShape.circle ? null : borderRadius,
+            ),
+            child: built,
+          );
+        }
+      }
+
+      if (shouldApplyDecoration && blur != null && blur > 0) {
+        built = ImageFiltered(
+          imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: built,
+        );
+      }
+
+      final opacity = coerceDouble(props['opacity'] ?? surfaceStyle['opacity']);
+      if (opacity != null && opacity >= 0 && opacity < 1) {
+        built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
+      }
     }
 
     final tooltip = props['tooltip'] ?? surfaceStyle['tooltip'];
@@ -2787,8 +2834,62 @@ class ControlRenderer {
       built = MouseRegion(cursor: cursor, child: built);
     }
 
+    // Phase 2: explicit effects layer (before/after modifiers).
+    final effectOrder = _resolveEffectOrder(props, surfaceStyle);
+    final effects = capabilities.supportsEffectDecorators
+        ? _resolveUniversalEffects(props, resolvedStyle)
+        : const <Map<String, Object?>>[];
+    if (effects.isNotEmpty && effectOrder == 'before_modifiers') {
+      built = _applyEffectDecorators(
+        built: built,
+        effects: effects,
+        props: props,
+        surfaceStyle: surfaceStyle,
+      );
+    }
+
+    // Phase 3: modifiers + interaction-driven motion.
+    final modifiers = _resolveUniversalModifiers(props, resolvedStyle);
+    final primaryMotionSpec = _resolvePrimaryMotionSpec(props, resolvedStyle);
+    final enterMotionSpec = _resolveEnterMotionSpec(
+      props,
+      resolvedStyle,
+      fallback: primaryMotionSpec,
+    );
+    if (modifiers.isNotEmpty &&
+        (capabilities.supportsMotionDecorators ||
+            capabilities.supportsInteractiveModifiers ||
+            capabilities.supportsGlassModifiers ||
+            capabilities.supportsTransitionModifiers)) {
+      built = applyControlModifierChain(
+        child: built,
+        controlType: controlType,
+        controlId: controlId,
+        modifiers: modifiers,
+        motion: primaryMotionSpec ?? enterMotionSpec,
+        tokens: context.tokens,
+        motionPack: context.stylePack.motionPack,
+        effectPresets: context.stylePack.effectPresets,
+      );
+    }
+
+    // Phase 4: explicit effects layer (post-modifiers).
+    if (effects.isNotEmpty && effectOrder != 'before_modifiers') {
+      built = _applyEffectDecorators(
+        built: built,
+        effects: effects,
+        props: props,
+        surfaceStyle: surfaceStyle,
+      );
+    }
+
+    // Phase 5: semantics and events.
     final semanticLabel =
-        (props['semantic_label'] ?? surfaceStyle['semantic_label'])?.toString();
+        (props['semantic_label'] ??
+                props['aria_label'] ??
+                surfaceStyle['semantic_label'] ??
+                surfaceStyle['aria_label'])
+            ?.toString();
     final role = (props['role'] ?? surfaceStyle['role'])?.toString();
     if (semanticLabel != null || role != null) {
       built = Semantics(
@@ -2800,22 +2901,6 @@ class ControlRenderer {
         child: built,
       );
     }
-
-    final modifierSource = props['modifiers'];
-    final modifiers = modifierSource is List
-        ? modifierSource.cast<Object?>()
-        : resolvedStyle.defaultModifiers();
-    final motionSpec = props['motion'] ?? resolvedStyle.defaultMotion();
-    built = applyControlModifierChain(
-      child: built,
-      controlType: controlType,
-      controlId: controlId,
-      modifiers: modifiers,
-      motion: motionSpec,
-      tokens: context.tokens,
-      motionPack: context.stylePack.motionPack,
-      effectPresets: context.stylePack.effectPresets,
-    );
 
     final events = _coerceStringList(props['events']);
     if (controlId.isNotEmpty && events.isNotEmpty) {
@@ -2832,12 +2917,13 @@ class ControlRenderer {
       );
     }
 
+    // Phase 6: enter/exit animation.
     final animation = props['animation'];
     if (animation is Map) {
       built = AnimationSpec.fromJson(coerceObjectMap(animation)).wrap(built);
-    } else {
+    } else if (capabilities.supportsMotionDecorators) {
       final fallbackAnimation = _animationFromMotion(
-        motionSpec,
+        enterMotionSpec ?? primaryMotionSpec,
         context.stylePack.motionPack,
       );
       if (fallbackAnimation != null) {
@@ -2875,6 +2961,355 @@ class ControlRenderer {
       'curve': 'ease_out',
       'offset': <double>[spec.beginOffset.dx, spec.beginOffset.dy],
     };
+  }
+
+  List<Object?> _resolveUniversalModifiers(
+    Map<String, Object?> props,
+    ResolvedControlStyle resolvedStyle,
+  ) {
+    final out = <Object?>[];
+    final modifierSource = props['modifiers'];
+    if (modifierSource is List) {
+      out.addAll(modifierSource.cast<Object?>());
+    } else {
+      out.addAll(resolvedStyle.defaultModifiers());
+    }
+
+    final hover = _coerceModifierList(
+      props['on_hover_modifiers'] ?? props['on_hover'],
+    );
+    final pressed = _coerceModifierList(
+      props['on_pressed_modifiers'] ?? props['on_pressed'],
+    );
+    final focused = _coerceModifierList(
+      props['on_focus_modifiers'] ?? props['on_focus'],
+    );
+    if (hover.isNotEmpty || pressed.isNotEmpty || focused.isNotEmpty) {
+      out.add(<String, Object?>{
+        'type': 'state',
+        if (hover.isNotEmpty) 'hover': hover,
+        if (pressed.isNotEmpty) 'pressed': pressed,
+        if (focused.isNotEmpty) 'focus': focused,
+      });
+    }
+    return out;
+  }
+
+  List<Object?> _coerceModifierList(Object? value) {
+    if (value == null) return const <Object?>[];
+    if (value is List) return value.cast<Object?>();
+    if (value is Map || value is String) return <Object?>[value];
+    return const <Object?>[];
+  }
+
+  Object? _resolvePrimaryMotionSpec(
+    Map<String, Object?> props,
+    ResolvedControlStyle resolvedStyle,
+  ) {
+    return props['hover_motion'] ??
+        props['press_motion'] ??
+        props['motion'] ??
+        resolvedStyle.defaultMotion();
+  }
+
+  Object? _resolveEnterMotionSpec(
+    Map<String, Object?> props,
+    ResolvedControlStyle resolvedStyle, {
+    Object? fallback,
+  }) {
+    final enterMotion = props['enter_motion'];
+    if (enterMotion != null) return enterMotion;
+    final motion = props['motion'] ?? resolvedStyle.defaultMotion();
+    if (motion is Map) {
+      final map = coerceObjectMap(motion);
+      final nested = map['enter'];
+      if (nested != null) return nested;
+    }
+    return fallback;
+  }
+
+  String _resolveEffectOrder(
+    Map<String, Object?> props,
+    Map<String, Object?> surfaceStyle,
+  ) {
+    final orderRaw = props['effect_order'] ?? surfaceStyle['effect_order'];
+    final normalized = orderRaw
+        ?.toString()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    if (normalized == 'before_modifiers' ||
+        normalized == 'before_modifier' ||
+        normalized == 'before_motion') {
+      return 'before_modifiers';
+    }
+    return 'after_modifiers';
+  }
+
+  List<Map<String, Object?>> _resolveUniversalEffects(
+    Map<String, Object?> props,
+    ResolvedControlStyle resolvedStyle,
+  ) {
+    final out = <Map<String, Object?>>[];
+
+    void addEffect(Object? raw) {
+      if (raw == null) return;
+      if (raw is String) {
+        final type = raw.trim();
+        if (type.isEmpty) return;
+        out.add(<String, Object?>{'type': type});
+        return;
+      }
+      if (raw is List) {
+        for (final entry in raw) {
+          addEffect(entry);
+        }
+        return;
+      }
+      if (raw is! Map) return;
+      final map = coerceObjectMap(raw);
+      if (map.containsKey('type')) {
+        out.add(map);
+        return;
+      }
+      final visualFlags = <String, bool>{
+        'glow': _coerceBool(map['enable_glow'], fallback: false),
+        'glass_blur': _coerceBool(map['enable_glass_blur'], fallback: false),
+        'gradient_sweep': _coerceBool(
+          map['enable_gradient_sweep'],
+          fallback: false,
+        ),
+        'chromatic_shift': _coerceBool(
+          map['enable_chromatic_shift'],
+          fallback: false,
+        ),
+      };
+      for (final entry in visualFlags.entries) {
+        if (!entry.value) continue;
+        final payload = map[entry.key];
+        if (payload is Map) {
+          final fx = coerceObjectMap(payload);
+          fx.putIfAbsent('type', () => entry.key);
+          out.add(fx);
+        } else {
+          out.add(<String, Object?>{'type': entry.key});
+        }
+      }
+
+      for (final effectName in <String>[
+        'blur',
+        'opacity',
+        'glow',
+        'glow_effect',
+        'glass_blur',
+        'glass',
+        'shadow',
+        'vignette',
+        'gradient_sweep',
+        'scanline_overlay',
+        'chromatic_shift',
+      ]) {
+        if (!map.containsKey(effectName)) continue;
+        final payload = map[effectName];
+        if (payload is Map) {
+          final fx = coerceObjectMap(payload);
+          fx.putIfAbsent('type', () => effectName);
+          out.add(fx);
+        } else if (payload is bool) {
+          if (payload) out.add(<String, Object?>{'type': effectName});
+        } else {
+          out.add(<String, Object?>{'type': effectName, 'value': payload});
+        }
+      }
+    }
+
+    addEffect(resolvedStyle.value('effects'));
+    addEffect(props['effects']);
+    addEffect(props['effect']);
+    if (props['visual_fx'] is Map) {
+      addEffect(props['visual_fx']);
+    }
+    return out;
+  }
+
+  Widget _applyEffectDecorators({
+    required Widget built,
+    required List<Map<String, Object?>> effects,
+    required Map<String, Object?> props,
+    required Map<String, Object?> surfaceStyle,
+  }) {
+    final effectClip = _parseClipBehavior(
+      props['effect_clip'] ?? props['effect_clip_behavior'],
+    );
+    final effectRadius = _coerceBorderRadius(
+      props['radius'] ??
+          props['border_radius'] ??
+          surfaceStyle['radius'] ??
+          surfaceStyle['border_radius'],
+    );
+
+    for (final effect in effects) {
+      final type = _normalizeEffectType(effect['type']?.toString());
+      if (type.isEmpty) continue;
+      switch (type) {
+        case 'opacity':
+          final value = coerceDouble(effect['opacity'] ?? effect['value']);
+          if (value != null && value >= 0 && value <= 1) {
+            built = Opacity(opacity: value, child: built);
+          }
+          break;
+        case 'blur':
+        case 'gaussian_blur':
+          final sigma =
+              coerceDouble(effect['sigma'] ?? effect['blur'] ?? effect['value']) ??
+              0.0;
+          if (sigma > 0) {
+            built = ImageFiltered(
+              imageFilter: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+              child: built,
+            );
+          }
+          break;
+        case 'glass':
+        case 'glass_blur':
+          final sigma =
+              coerceDouble(effect['sigma'] ?? effect['blur'] ?? effect['value']) ??
+              0.0;
+          final tint = coerceColor(effect['tint'] ?? effect['color']);
+          if (effectClip != Clip.none) {
+            if (effectRadius != null) {
+              built = ClipRRect(
+                borderRadius: effectRadius,
+                clipBehavior: effectClip,
+                child: built,
+              );
+            } else {
+              built = ClipRect(clipBehavior: effectClip, child: built);
+            }
+          }
+          if (sigma > 0) {
+            built = BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+              child: built,
+            );
+          }
+          if (tint != null) {
+            built = DecoratedBox(
+              decoration: BoxDecoration(
+                color: tint,
+                borderRadius: effectRadius,
+              ),
+              child: built,
+            );
+          }
+          break;
+        case 'glow':
+        case 'glow_effect':
+        case 'neon_edge':
+          final color = coerceColor(effect['color']) ?? const Color(0xFF4F46E5);
+          final blur = coerceDouble(effect['blur']) ?? 18.0;
+          final spread = coerceDouble(effect['spread']) ?? 2.0;
+          final opacity = coerceDouble(effect['opacity']) ?? 0.65;
+          built = DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: effectRadius,
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: color.withValues(alpha: opacity.clamp(0.0, 1.0)),
+                  blurRadius: blur,
+                  spreadRadius: spread,
+                ),
+              ],
+            ),
+            child: built,
+          );
+          break;
+        case 'shadow':
+        case 'shadow_stack':
+        case 'shimmer_shadow':
+          final shadows = coerceBoxShadow(
+            effect['shadows'] ?? effect['shadow'] ?? effect,
+          );
+          if (shadows != null && shadows.isNotEmpty) {
+            built = DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: effectRadius,
+                boxShadow: shadows,
+              ),
+              child: built,
+            );
+          }
+          break;
+        case 'vignette':
+          final color = coerceColor(effect['color']) ?? Colors.black;
+          final intensity = (coerceDouble(effect['intensity']) ?? 0.35).clamp(
+            0.0,
+            1.0,
+          );
+          built = Stack(
+            fit: StackFit.passthrough,
+            children: <Widget>[
+              built,
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: effectRadius,
+                      gradient: RadialGradient(
+                        radius: 1.05,
+                        colors: <Color>[
+                          color.withValues(alpha: 0.0),
+                          color.withValues(alpha: intensity),
+                        ],
+                        stops: const <double>[0.55, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+          break;
+        case 'gradient_sweep':
+          final gradient = coerceGradient(effect['gradient']);
+          final opacity =
+              (coerceDouble(effect['opacity']) ?? 0.35).clamp(0.0, 1.0);
+          if (gradient != null) {
+            built = Stack(
+              fit: StackFit.passthrough,
+              children: <Widget>[
+                built,
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: opacity,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: effectRadius,
+                          gradient: gradient,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    return built;
+  }
+
+  String _normalizeEffectType(String? value) {
+    if (value == null) return '';
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
   }
 
   Widget _unknownControl(

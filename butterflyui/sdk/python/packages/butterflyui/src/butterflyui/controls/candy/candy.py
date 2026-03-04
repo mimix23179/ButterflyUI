@@ -458,6 +458,11 @@ class CandyScope(Component):
     ``particles=True`` or ``scanline=True``), which the runtime applies as
     wrappers around the scope child.
 
+    Descendants inside the scope can use universal slot styling through
+    ``style_slots`` / ``style={"slots": ...}`` with common slots:
+    ``root``, ``background``, ``border``, ``content``, ``label``, ``icon``,
+    ``leading``, ``trailing``, and ``overlay``.
+
     ```python
     import butterflyui as bui
 
@@ -582,6 +587,12 @@ class Candy(Component):
 
     Unknown ``**kwargs`` are still forwarded, so new Dart-side module args
     can be used from Python without waiting for wrapper updates.
+
+    Candy modules also participate in the shared universal pipeline:
+    style -> modifiers -> motion -> effects. You can pass cross-control keys
+    like ``classes``, ``modifiers``, ``on_hover_modifiers``,
+    ``on_pressed_modifiers``, ``enter_motion``/``hover_motion`` and
+    ``effects``/``effect_order`` directly on ``Candy(...)``.
 
     ```python
     import butterflyui as bui

@@ -22,6 +22,11 @@ class Modifier(Component):
     The runtime merges these modifier definitions into each child control's
     ``modifiers`` list and style props.
 
+    State-specific modifier keys are available in both short and explicit form:
+    - ``on_hover`` and ``on_hover_modifiers``
+    - ``on_pressed`` and ``on_pressed_modifiers``
+    - ``on_focus`` and ``on_focus_modifiers``
+
     Example:
         ```python
         import butterflyui as bui
@@ -50,10 +55,16 @@ class Modifier(Component):
             Default motion spec for descendants.
         on_hover:
             Modifier descriptors activated on hover state.
+        on_hover_modifiers:
+            Explicit alias of ``on_hover``.
         on_pressed:
             Modifier descriptors activated on pressed state.
+        on_pressed_modifiers:
+            Explicit alias of ``on_pressed``.
         on_focus:
             Modifier descriptors activated on focus state.
+        on_focus_modifiers:
+            Explicit alias of ``on_focus``.
         cursor:
             Cursor override for descendants.
         padding:
@@ -103,8 +114,11 @@ class Modifier(Component):
         modifiers: list[Any] | None = None,
         motion: Any | None = None,
         on_hover: list[Any] | None = None,
+        on_hover_modifiers: list[Any] | None = None,
         on_pressed: list[Any] | None = None,
+        on_pressed_modifiers: list[Any] | None = None,
         on_focus: list[Any] | None = None,
+        on_focus_modifiers: list[Any] | None = None,
         cursor: str | None = None,
         padding: Any | None = None,
         margin: Any | None = None,
@@ -133,9 +147,18 @@ class Modifier(Component):
                 props,
                 modifiers=modifiers,
                 motion=motion,
-                on_hover=on_hover,
-                on_pressed=on_pressed,
-                on_focus=on_focus,
+                on_hover=on_hover if on_hover is not None else on_hover_modifiers,
+                on_hover_modifiers=on_hover_modifiers
+                if on_hover_modifiers is not None
+                else on_hover,
+                on_pressed=on_pressed if on_pressed is not None else on_pressed_modifiers,
+                on_pressed_modifiers=on_pressed_modifiers
+                if on_pressed_modifiers is not None
+                else on_pressed,
+                on_focus=on_focus if on_focus is not None else on_focus_modifiers,
+                on_focus_modifiers=on_focus_modifiers
+                if on_focus_modifiers is not None
+                else on_focus,
                 cursor=cursor,
                 padding=padding,
                 margin=margin,
@@ -163,4 +186,3 @@ class Modifier(Component):
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
-

@@ -33,6 +33,10 @@ class Motion(Component):
         )
         ```
 
+    ``Motion`` also maps directly to universal cross-control motion props:
+    ``motion`` (primary), ``enter_motion``, ``exit_motion``,
+    ``hover_motion``, and ``press_motion``.
+
     Args:
         child:
             Child control to wrap.
@@ -42,6 +46,14 @@ class Motion(Component):
             ``shared_axis``).
         motion:
             Legacy motion preset/spec alias.
+        enter_motion:
+            Enter transition motion spec for initial mount.
+        exit_motion:
+            Exit transition motion spec for removal/hide transitions.
+        hover_motion:
+            Motion spec used for hover-driven interaction.
+        press_motion:
+            Motion spec used for pressed-state interaction.
         states:
             State map for ``hover``, ``press``, ``focus``, ``selected``,
             ``disabled``. Each value is a map of animated props.
@@ -104,6 +116,10 @@ class Motion(Component):
         *,
         preset: str | None = None,
         motion: Any | None = None,
+        enter_motion: Any | None = None,
+        exit_motion: Any | None = None,
+        hover_motion: Any | None = None,
+        press_motion: Any | None = None,
         states: Mapping[str, Mapping[str, Any]] | None = None,
         hover: Mapping[str, Any] | None = None,
         press: Mapping[str, Any] | None = None,
@@ -147,6 +163,10 @@ class Motion(Component):
             props,
             preset=preset,
             motion=motion if motion is not None else preset,
+            enter_motion=enter_motion,
+            exit_motion=exit_motion,
+            hover_motion=hover_motion,
+            press_motion=press_motion,
             states=state_map or None,
             **({"from": dict(from_)} if from_ is not None else {}),
             to=dict(to) if to is not None else None,
@@ -176,4 +196,3 @@ class Motion(Component):
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
-

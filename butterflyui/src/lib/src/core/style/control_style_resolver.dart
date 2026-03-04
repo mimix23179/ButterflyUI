@@ -8,6 +8,7 @@ class ResolvedControlStyle {
   final Map<String, Object?> component;
   final Map<String, Object?> local;
   final Map<String, String> variantSelection;
+  final List<String> classSelection;
   final String state;
   final StylePack stylePack;
 
@@ -17,6 +18,7 @@ class ResolvedControlStyle {
     required this.component,
     required this.local,
     required this.variantSelection,
+    required this.classSelection,
     required this.state,
     required this.stylePack,
   });
@@ -30,6 +32,16 @@ class ResolvedControlStyle {
       merged,
       _readSlotMap(component, normalizedSlot),
     );
+
+    final classes = _asMap(component['classes']);
+    for (final className in classSelection) {
+      final classStyle = _asMap(classes[className]);
+      if (classStyle.isEmpty) continue;
+      merged = CandyTokens.mergeMaps(
+        merged,
+        _readSlotMap(classStyle, normalizedSlot),
+      );
+    }
 
     final variants = _asMap(component['variants']);
     for (final entry in variantSelection.entries) {
@@ -114,6 +126,7 @@ class ResolvedControlStyle {
     'slots',
     'variants',
     'states',
+    'classes',
     'modifiers',
     'motion',
   };
@@ -130,6 +143,12 @@ class ControlStyleResolver {
     final componentStyles = _asMap(stylePack.componentStyles);
     final component = _asMap(componentStyles[normalizedType]);
     final local = _asMap(props['style']);
+    final styleSlots = _asMap(props['style_slots']);
+    if (styleSlots.isNotEmpty) {
+      final localSlots = _asMap(local['slots']);
+      local['slots'] = CandyTokens.mergeMaps(localSlots, styleSlots);
+    }
+    final classSelection = _resolveClasses(props, local);
     final state = _resolveState(props, local);
     final variants = _resolveVariants(props, local);
     return ResolvedControlStyle(
@@ -138,6 +157,7 @@ class ControlStyleResolver {
       component: component,
       local: local,
       variantSelection: variants,
+      classSelection: classSelection,
       state: state,
       stylePack: stylePack,
     );
@@ -167,6 +187,34 @@ class ControlStyleResolver {
       }
     }
     return out;
+  }
+
+  static List<String> _resolveClasses(
+    Map<String, Object?> props,
+    Map<String, Object?> local,
+  ) {
+    final values = <String>[];
+    void addRaw(Object? raw) {
+      if (raw == null) return;
+      if (raw is String) {
+        for (final part in raw.split(RegExp(r'[\s,]+'))) {
+          final normalized = _norm(part);
+          if (normalized.isNotEmpty && !values.contains(normalized)) {
+            values.add(normalized);
+          }
+        }
+        return;
+      }
+      if (raw is List) {
+        for (final item in raw) {
+          addRaw(item);
+        }
+      }
+    }
+
+    addRaw(local['classes']);
+    addRaw(props['classes']);
+    return values;
   }
 
   static String _resolveState(
@@ -201,7 +249,7 @@ class ControlStyleResolver {
 
   static Map<String, Object?> _asMap(Object? value) {
     if (value is Map) return coerceObjectMap(value);
-    return const <String, Object?>{};
+    return <String, Object?>{};
   }
 
   static String _norm(String value) {

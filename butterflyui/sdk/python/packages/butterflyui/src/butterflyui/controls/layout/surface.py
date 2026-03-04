@@ -14,6 +14,12 @@ class Surface(Component):
     for the background fill, and ``border_color``/``border_width`` for an
     optional border stroke.
 
+    ``Surface`` participates in the universal styling/effects pipeline exposed
+    by the shared renderer. You can pass the same cross-control props used by
+    Candy/Skins/Style/Modifier/Gallery through ``**kwargs`` (for example
+    ``variant``, ``classes``, ``modifiers``, ``motion``, ``effects``,
+    ``on_hover_modifiers``).
+
     ```python
     import butterflyui as bui
 
@@ -36,6 +42,9 @@ class Surface(Component):
             Border stroke color.
         border_width:
             Border stroke width in logical pixels.
+        **kwargs:
+            Additional runtime props forwarded to the universal renderer
+            pipeline (style, modifiers, motion, and effects).
     """
 
     control_type = "surface"

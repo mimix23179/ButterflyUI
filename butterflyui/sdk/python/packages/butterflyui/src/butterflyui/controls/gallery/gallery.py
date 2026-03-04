@@ -827,6 +827,10 @@ class GalleryScope(Component):
     ``GalleryScope`` is a lightweight container for wrapping one or more
     ``Gallery`` nodes with shared props. It currently behaves as a pass-through
     container and keeps room for future scoped gallery state.
+
+    Scope props can include universal styling keys (``classes``,
+    ``style_slots``, ``modifiers``, ``motion``, ``effects``) that descendants
+    consume through the shared renderer pipeline.
     """
 
 
@@ -857,6 +861,10 @@ class Gallery(Component):
     - normalizes module/layout aliases before serialization
     - bridges umbrella module names to practical runtime defaults
     - forwards unknown ``**kwargs`` so new runtime props remain usable
+
+    Gallery also participates in the same universal style/motion/effects
+    contract used by Candy, Skins, and Style controls, including slot-based
+    styling for toolbar/panels/item surfaces.
 
     Examples of bridged module behavior:
     - ``filter`` -> ``filter_bar`` and auto-add filter toolbar action
@@ -912,7 +920,9 @@ class Gallery(Component):
             Optional container style for the gallery shell (supports gradient,
             shadow, radius, clip, and glass keys like ``backdrop_blur``).
         **kwargs:
-            Additional runtime props forwarded as-is.
+            Additional runtime props forwarded as-is, including universal
+            pipeline props such as ``classes``, ``modifiers``, ``motion``,
+            ``effects``, and ``style_slots``.
     """
 
 

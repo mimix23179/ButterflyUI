@@ -17,6 +17,11 @@ class Display(Component):
     ``ownership``. Legacy variants are still accepted and mapped by the
     runtime for backward compatibility.
 
+    Display now uses the shared universal renderer pipeline too, so the same
+    ``classes``/``style_slots``/``modifiers``/``motion``/``effects`` props
+    can style identity/status/rating/reaction/check/ownership roles
+    consistently with Candy/Skins/Gallery.
+
     Example:
         ```python
         import butterflyui as bui

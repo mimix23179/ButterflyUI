@@ -14,6 +14,17 @@ class Container(Component):
     decoration (``bgcolor``, ``border_color``, ``border_width``, ``radius``),
     and child ``alignment`` in one component.
 
+    ``Container`` also supports the universal ButterflyUI styling pipeline via
+    forwarded ``**kwargs``:
+    - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
+      ``style``, ``style_slots``.
+    - modifier layer: ``modifiers``, ``on_hover_modifiers``,
+      ``on_pressed_modifiers``, ``on_focus_modifiers``.
+    - motion layer: ``motion``, ``enter_motion``, ``exit_motion``,
+      ``hover_motion``, ``press_motion``.
+    - effects layer: ``effects``, ``effect_order``, ``effect_clip``,
+      ``effect_target``.
+
     ```python
     import butterflyui as bui
 
@@ -48,6 +59,9 @@ class Container(Component):
             Corner radius in logical pixels.
         events:
             List of event names the Flutter runtime should emit to Python.
+        **kwargs:
+            Additional runtime props, including universal style/modifier/motion/
+            effects props handled by the shared renderer.
     """
 
     control_type = "container"

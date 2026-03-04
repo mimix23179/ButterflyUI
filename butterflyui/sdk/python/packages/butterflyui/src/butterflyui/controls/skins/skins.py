@@ -689,6 +689,10 @@ class SkinsScope(Component):
     ``brightness`` controls whether the runtime should treat the scoped skin
     as light or dark for theme-derived defaults.
 
+    Inside the scope, controls can target standard style slots and class-based
+    recipes using ``style_slots`` and ``classes`` to keep skin behavior
+    consistent across Candy, Display, Bubble, and Gallery nodes.
+
     ```python
     import butterflyui as bui
 
@@ -767,6 +771,10 @@ class Skins(Component):
     The constructor also bridges some common props, for example:
     - ``label`` -> ``text`` for button-like modules
     - ``background`` -> ``bgcolor`` for decorated modules
+
+    Skins modules use the same universal decorator contract as the rest of the
+    runtime: ``modifiers`` + state modifier keys, ``motion`` + enter/hover/
+    press motion keys, and ``effects`` + effect ordering/clipping keys.
 
     ```python
     import butterflyui as bui

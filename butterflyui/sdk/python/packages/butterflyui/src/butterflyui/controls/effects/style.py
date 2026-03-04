@@ -23,6 +23,12 @@ class Style(Component):
     ``register_style_pack``: use page-level APIs for app-wide identity,
     and ``Style`` for localized design systems.
 
+    The style boundary feeds the runtime's universal decorator pipeline:
+    style slots -> modifiers -> motion -> effects -> events/semantics.
+    That means descendants can rely on shared slot names such as
+    ``root``, ``background``, ``border``, ``content``, ``label``, ``icon``,
+    ``leading``, ``trailing``, and ``overlay``.
+
     Example:
         ```python
         import butterflyui as bui
@@ -71,6 +77,10 @@ class Style(Component):
             Optional style state override for descendants (for example ``hover``).
         variant:
             Optional style variant override for descendants.
+        classes:
+            Optional style-class tokens applied to descendants.
+        effects:
+            Default effects spec merged when descendants do not provide one.
         events:
             Runtime events to emit for this style host.
         props:
@@ -98,6 +108,8 @@ class Style(Component):
         default_motion: Any | None = None,
         state: str | None = None,
         variant: Any | None = None,
+        classes: str | list[str] | None = None,
+        effects: Any | None = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -127,6 +139,8 @@ class Style(Component):
                 default_motion=default_motion,
                 state=state,
                 variant=variant,
+                classes=classes,
+                effects=effects,
                 events=events,
                 **kwargs,
             ),
@@ -139,4 +153,3 @@ class Style(Component):
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
-

@@ -102,6 +102,113 @@ _TRANSITION_CONTROLS = {
     "slide_panel",
 }
 
+_STYLE_CONTROLS = set(_INTERACTIVE_CONTROLS) | set(_GLASS_CONTROLS) | set(
+    _TRANSITION_CONTROLS
+) | {
+    "text",
+    "icon",
+    "image",
+    "video",
+    "audio",
+    "markdown_view",
+    "html_view",
+    "gallery",
+    "gallery_scope",
+    "candy_scope",
+    "skins_scope",
+    "bubble",
+    "display",
+    "route",
+    "page_view",
+}
+
+_MOTION_CONTROLS = set(_STYLE_CONTROLS) - {"spacer", "flex_spacer", "expanded"}
+_EFFECT_CONTROLS = set(_STYLE_CONTROLS) - {"spacer", "flex_spacer", "expanded"}
+
+_SLOT_MANIFEST = {
+    "*": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "label",
+        "icon",
+        "leading",
+        "trailing",
+        "overlay",
+    ],
+    "surface": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "overlay",
+        "leading",
+        "trailing",
+        "label",
+        "icon",
+    ],
+    "button": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "label",
+        "icon",
+        "leading",
+        "trailing",
+        "overlay",
+    ],
+    "bubble": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "label",
+        "leading",
+        "trailing",
+        "overlay",
+        "message",
+        "thread",
+        "composer",
+        "attachment",
+        "meta",
+    ],
+    "display": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "label",
+        "leading",
+        "trailing",
+        "overlay",
+        "identity",
+        "status",
+        "rating",
+        "reactions",
+        "check",
+        "ownership",
+    ],
+    "gallery": [
+        "root",
+        "background",
+        "border",
+        "content",
+        "overlay",
+        "toolbar",
+        "panel",
+        "item_root",
+        "item_media",
+        "item_meta",
+        "item_actions",
+        "leading",
+        "trailing",
+        "label",
+        "icon",
+    ],
+}
+
 _INTERACTIVE_MODIFIERS = {
     "hovereffectmodifier",
     "hovereffect",
@@ -139,7 +246,7 @@ _TRANSITION_MODIFIERS = {
     "transition",
 }
 
-_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 1
+_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 2
 
 
 def modifier_capabilities_manifest() -> dict[str, Any]:
@@ -149,6 +256,10 @@ def modifier_capabilities_manifest() -> dict[str, Any]:
             "interactive": sorted(_INTERACTIVE_CONTROLS),
             "glass": sorted(_GLASS_CONTROLS),
             "transition": sorted(_TRANSITION_CONTROLS),
+            "style": sorted(_STYLE_CONTROLS),
+            "motion": sorted(_MOTION_CONTROLS),
+            "effects": sorted(_EFFECT_CONTROLS),
+            "slots": {key: list(values) for key, values in _SLOT_MANIFEST.items()},
         },
         "modifiers": {
             "interactive": sorted(_INTERACTIVE_MODIFIERS),
@@ -228,11 +339,20 @@ def collect_children(
 class Component(CoreComponent):
     """Base class for all Python-side ButterflyUI controls.
 
-    Any non-``None`` keyword arguments are merged into the outgoing
-    ``props`` payload. Combined with control-level constructors and
-    core ``Control`` auto-backfill, this keeps Python docstring/init args
-    and Dart runtime props loosely coupled: newly added runtime
-    properties can be forwarded without waiting for per-control rewrites.
+    Besides regular control props, ``Component`` also carries the universal
+    styling pipeline contract used by Candy/Skins/Style/Modifier/Gallery:
+
+    - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
+      ``style``, ``style_slots``.
+    - modifier layer: ``modifiers``, ``on_hover_modifiers``,
+      ``on_pressed_modifiers``, ``on_focus_modifiers``.
+    - motion layer: ``motion``, ``enter_motion``, ``exit_motion``,
+      ``hover_motion``, ``press_motion``.
+    - effect layer: ``effects``, ``effect_order``, ``effect_clip``,
+      ``effect_target``.
+
+    Any non-``None`` keyword arguments are merged into the outgoing ``props``
+    payload, which keeps Python wrappers and Dart runtime props loosely coupled.
     """
     control_type: str = ""
 
@@ -244,8 +364,23 @@ class Component(CoreComponent):
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         variant: Any | None = None,
+        tone: str | None = None,
+        size: str | None = None,
+        density: str | None = None,
+        classes: str | Iterable[str] | None = None,
         modifiers: Iterable[Any] | None = None,
+        on_hover_modifiers: Iterable[Any] | None = None,
+        on_pressed_modifiers: Iterable[Any] | None = None,
+        on_focus_modifiers: Iterable[Any] | None = None,
         motion: Any | None = None,
+        enter_motion: Any | None = None,
+        exit_motion: Any | None = None,
+        hover_motion: Any | None = None,
+        press_motion: Any | None = None,
+        effects: Any | None = None,
+        effect_order: str | None = None,
+        effect_clip: Any | None = None,
+        effect_target: str | None = None,
         style_slots: Mapping[str, Any] | None = None,
         state: str | None = None,
         strict: bool = False,
@@ -267,7 +402,22 @@ class Component(CoreComponent):
         control_props = merge_props(
             props,
             variant=variant,
+            tone=tone,
+            size=size,
+            density=density,
+            classes=classes,
             motion=motion,
+            enter_motion=enter_motion,
+            exit_motion=exit_motion,
+            hover_motion=hover_motion,
+            press_motion=press_motion,
+            on_hover_modifiers=on_hover_modifiers,
+            on_pressed_modifiers=on_pressed_modifiers,
+            on_focus_modifiers=on_focus_modifiers,
+            effects=effects,
+            effect_order=effect_order,
+            effect_clip=effect_clip,
+            effect_target=effect_target,
             state=state,
             **kwargs,
         )
