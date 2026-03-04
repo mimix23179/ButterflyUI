@@ -9,6 +9,7 @@ __all__ = [
     "ButterflyUIContractError",
     "CONTROL_SCHEMAS",
     "FRAME_CHILD_SCHEMA",
+    "RUNTIME_PROP_HINTS",
     "validate_props",
     "validate_frame_child",
     "ensure_valid_props",
@@ -47,7 +48,7 @@ def normalize_dimension(value: Any | None) -> Any | None:
             raise ValueError("dimension cannot be empty")
         if not _DIMENSION_RE.match(raw):
             raise ValueError(f"invalid dimension: {value!r}")
-        if raw.endswith("%") or raw.endswith("px") or raw.endswith("vw") or raw.endswith("vh") or raw.endswith("vmin") or raw.endswith("vmax"):
+        if raw.endswith(("%", "px", "vw", "vh", "vmin", "vmax")):
             return raw
         try:
             return float(raw)
@@ -194,11 +195,13 @@ def ensure_valid_frame_child(frame: Mapping[str, Any], *, strict: bool = False) 
 def _validate_schema(value: Any, schema: Mapping[str, Any], *, path: str, strict: bool) -> list[str]:
     if value is None:
         return []
+
     if "anyOf" in schema:
         for option in schema["anyOf"]:
             if not _validate_schema(value, option, path=path, strict=strict):
                 return []
         return [f"{path} does not match any allowed schema"]
+
     if "oneOf" in schema:
         matches = 0
         for option in schema["oneOf"]:
@@ -209,16 +212,16 @@ def _validate_schema(value: Any, schema: Mapping[str, Any], *, path: str, strict
         return [f"{path} does not match exactly one schema"]
 
     expected_types = schema.get("type")
-    if expected_types is not None:
-        if not _matches_type(value, expected_types):
-            return [f"{path} expected {expected_types}"]
+    if expected_types is not None and not _matches_type(value, expected_types):
+        return [f"{path} expected {expected_types}"]
 
-    if "enum" in schema:
-        if value not in schema["enum"]:
-            return [f"{path} must be one of {schema['enum']}"]
+    if "enum" in schema and value not in schema["enum"]:
+        return [f"{path} must be one of {schema['enum']}"]
 
     errors: list[str] = []
-    if schema.get("type") == "object" or (isinstance(expected_types, list) and "object" in expected_types):
+    if schema.get("type") == "object" or (
+        isinstance(expected_types, list) and "object" in expected_types
+    ):
         if not isinstance(value, Mapping):
             return [f"{path} must be an object"]
         props_schema = schema.get("properties", {})
@@ -229,12 +232,16 @@ def _validate_schema(value: Any, schema: Mapping[str, Any], *, path: str, strict
         for key, child_value in value.items():
             child_schema = props_schema.get(key)
             if child_schema is not None:
-                errors.extend(_validate_schema(child_value, child_schema, path=f"{path}.{key}", strict=strict))
+                errors.extend(
+                    _validate_schema(child_value, child_schema, path=f"{path}.{key}", strict=strict)
+                )
             elif strict and schema.get("additionalProperties") is False:
                 errors.append(f"{path}.{key} is not allowed")
         return errors
 
-    if schema.get("type") == "array" or (isinstance(expected_types, list) and "array" in expected_types):
+    if schema.get("type") == "array" or (
+        isinstance(expected_types, list) and "array" in expected_types
+    ):
         if not isinstance(value, (list, tuple)):
             return [f"{path} must be an array"]
         min_items = schema.get("minItems")
@@ -246,7 +253,9 @@ def _validate_schema(value: Any, schema: Mapping[str, Any], *, path: str, strict
         items_schema = schema.get("items")
         if items_schema is not None:
             for index, item in enumerate(value):
-                errors.extend(_validate_schema(item, items_schema, path=f"{path}[{index}]", strict=strict))
+                errors.extend(
+                    _validate_schema(item, items_schema, path=f"{path}[{index}]", strict=strict)
+                )
         return errors
 
     if _is_number(value):
@@ -291,6 +300,7 @@ def _is_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
+ANY_SCHEMA = {"type": ["null", "boolean", "integer", "number", "string", "object", "array"]}
 NUMBER_SCHEMA = {"type": "number"}
 INTEGER_SCHEMA = {"type": "integer"}
 BOOL_SCHEMA = {"type": "boolean"}
@@ -328,38 +338,20 @@ DIMENSION_SCHEMA = {
 OFFSET_SCHEMA = {
     "anyOf": [
         {"type": "array", "items": NUMBER_SCHEMA, "minItems": 2},
-        {"type": "object", "properties": {"x": NUMBER_SCHEMA, "y": NUMBER_SCHEMA}},
-    ]
-}
-
-RECT_SCHEMA = {
-    "anyOf": [
-        {"type": "array", "items": NUMBER_SCHEMA, "minItems": 4},
         {
             "type": "object",
-            "properties": {
-                "x": NUMBER_SCHEMA,
-                "y": NUMBER_SCHEMA,
-                "left": NUMBER_SCHEMA,
-                "top": NUMBER_SCHEMA,
-                "width": NUMBER_SCHEMA,
-                "height": NUMBER_SCHEMA,
-            },
+            "properties": {"x": NUMBER_SCHEMA, "y": NUMBER_SCHEMA},
+            "additionalProperties": True,
         },
     ]
 }
 
-ALIGNMENT_SCHEMA = {
-    "anyOf": [
-        STRING_SCHEMA,
-        OFFSET_SCHEMA,
-    ]
-}
+ALIGNMENT_SCHEMA = {"anyOf": [STRING_SCHEMA, OFFSET_SCHEMA]}
 
 PADDING_SCHEMA = {
     "anyOf": [
         NUMBER_SCHEMA,
-        {"type": "array", "items": NUMBER_SCHEMA, "minItems": 1},
+        {"type": "array", "items": NUMBER_SCHEMA, "minItems": 1, "maxItems": 4},
         {
             "type": "object",
             "properties": {
@@ -368,4984 +360,62 @@ PADDING_SCHEMA = {
                 "right": NUMBER_SCHEMA,
                 "bottom": NUMBER_SCHEMA,
             },
+            "additionalProperties": True,
         },
     ]
 }
-
-SCALE_SCHEMA = {
-    "anyOf": [
-        NUMBER_SCHEMA,
-        {"type": "array", "items": NUMBER_SCHEMA, "minItems": 1},
-        {"type": "object"},
-    ]
-}
-
-SKEW_SCHEMA = SCALE_SCHEMA
-
-ANY_SCHEMA: dict[str, Any] = {}
-
-
-def _merge_universal(schema: Mapping[str, Any]) -> dict[str, Any]:
-    """Merge universal ButterflyUI contracts into a control schema.
-
-    This keeps the framework consistent: every control can participate in the
-    same event subscription mechanism and can accept the same style/a11y/focus
-    props, even if some controls choose not to use them.
-    """
-
-    base = dict(schema) if isinstance(schema, Mapping) else {}
-    props = dict(base.get("properties", {})) if isinstance(base.get("properties"), Mapping) else {}
-
-    # Event subscription list: runtime installs listeners only for listed events.
-    props.setdefault(
-        "events",
-        {
-            "type": "array",
-            "items": {"type": "string"},
-        },
-    )
-
-    # Common style / visibility / cursor / tooltip.
-    props.setdefault("bgcolor", ANY_SCHEMA)
-    props.setdefault("background", ANY_SCHEMA)
-    props.setdefault("color", ANY_SCHEMA)
-    props.setdefault("text_color", ANY_SCHEMA)
-    props.setdefault("border_color", ANY_SCHEMA)
-    props.setdefault("border_width", NUMBER_SCHEMA)
-    props.setdefault("radius", NUMBER_SCHEMA)
-    props.setdefault("border_radius", NUMBER_SCHEMA)
-    props.setdefault("elevation", NUMBER_SCHEMA)
-    props.setdefault("opacity", NUMBER_SCHEMA)
-    props.setdefault("visible", BOOL_SCHEMA)
-    props.setdefault("enabled", BOOL_SCHEMA)
-    props.setdefault("disabled", BOOL_SCHEMA)
-    props.setdefault("cursor", STRING_SCHEMA)
-    props.setdefault("tooltip", ANY_SCHEMA)
-    props.setdefault("style_pack", STRING_SCHEMA)
-    props.setdefault("style", {"type": "object", "additionalProperties": True})
-    props.setdefault(
-        "variant",
-        {
-            "anyOf": [
-                STRING_SCHEMA,
-                {"type": "object", "additionalProperties": True},
-            ]
-        },
-    )
-    props.setdefault("modifiers", {"type": "array", "items": ANY_SCHEMA})
-    props.setdefault("motion", ANY_SCHEMA)
-    props.setdefault("slots", {"type": "object", "additionalProperties": True})
-    props.setdefault("state", STRING_SCHEMA)
-
-    # Accessibility semantics.
-    props.setdefault("semantic_label", STRING_SCHEMA)
-    props.setdefault("role", STRING_SCHEMA)
-    props.setdefault("hint", STRING_SCHEMA)
-
-    # Focus + keyboard navigation.
-    props.setdefault("focusable", BOOL_SCHEMA)
-    props.setdefault("autofocus", BOOL_SCHEMA)
-    props.setdefault("tab_index", INTEGER_SCHEMA)
-
-    # Input-like binding fields.
-    props.setdefault("value", ANY_SCHEMA)
-    props.setdefault("default_value", ANY_SCHEMA)
-    props.setdefault("emit_on_change", BOOL_SCHEMA)
-    props.setdefault("debounce_ms", INTEGER_SCHEMA)
-    props.setdefault("dirty", BOOL_SCHEMA)
-    props.setdefault("touched", BOOL_SCHEMA)
-    props.setdefault("error_text", STRING_SCHEMA)
-    props.setdefault("warnings", {"type": "array", "items": ANY_SCHEMA})
-    props.setdefault("status", STRING_SCHEMA)
-
-    base["properties"] = props
-    return base
-
-AXIS_SCHEMA = {"type": "string", "enum": ["horizontal", "vertical", "x", "y"]}
-CURVE_SCHEMA = STRING_SCHEMA
-BLEND_MODE_SCHEMA = STRING_SCHEMA
 
 LAYOUT_PROPS_SCHEMA = {
-    "expand": BOOL_SCHEMA,
-    "flex": INTEGER_SCHEMA,
+    "id": STRING_SCHEMA,
+    "key": STRING_SCHEMA,
     "width": DIMENSION_SCHEMA,
     "height": DIMENSION_SCHEMA,
     "min_width": DIMENSION_SCHEMA,
     "min_height": DIMENSION_SCHEMA,
     "max_width": DIMENSION_SCHEMA,
     "max_height": DIMENSION_SCHEMA,
+    "left": DIMENSION_SCHEMA,
+    "top": DIMENSION_SCHEMA,
+    "right": DIMENSION_SCHEMA,
+    "bottom": DIMENSION_SCHEMA,
+    "x": DIMENSION_SCHEMA,
+    "y": DIMENSION_SCHEMA,
+    "z": NUMBER_SCHEMA,
+    "z_index": NUMBER_SCHEMA,
     "padding": PADDING_SCHEMA,
     "margin": PADDING_SCHEMA,
     "alignment": ALIGNMENT_SCHEMA,
-    "animation": {"type": "object", "additionalProperties": True},
+    "anchor": ALIGNMENT_SCHEMA,
+    "expand": BOOL_SCHEMA,
+    "expand_loose": BOOL_SCHEMA,
+    "visible": BOOL_SCHEMA,
+    "opacity": NUMBER_SCHEMA,
+}
+
+UNIVERSAL_PROPS_SCHEMA = {
+    "child": ANY_SCHEMA,
+    "children": {"type": "array", "items": ANY_SCHEMA},
+    "enabled": BOOL_SCHEMA,
+    "disabled": BOOL_SCHEMA,
+    "style": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    "style_slots": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    "modifiers": {"type": "array", "items": ANY_SCHEMA},
+    "motion": ANY_SCHEMA,
+    "state": STRING_SCHEMA,
+    "variant": ANY_SCHEMA,
+    "events": {"type": "array", "items": STRING_SCHEMA},
+    "tooltip": STRING_SCHEMA,
+    "cursor": STRING_SCHEMA,
+    "semantics": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    "accessibility": {"type": "object", "additionalProperties": ANY_SCHEMA},
+    "aria_label": STRING_SCHEMA,
+    "data": {"type": "object", "additionalProperties": ANY_SCHEMA},
 }
 
 
 def _control_schema(props: Mapping[str, Any] | None = None, *, additional: bool = True) -> dict[str, Any]:
-    merged = dict(LAYOUT_PROPS_SCHEMA)
-    if props:
-        merged.update(props)
+    merged = dict(props or {})
     return {"type": "object", "properties": merged, "additionalProperties": additional}
-
-
-CONTAINER_SCHEMA = _control_schema(
-    {
-        "child": ANY_SCHEMA,
-        "children": {"type": "array", "items": ANY_SCHEMA},
-        "content_alignment": ALIGNMENT_SCHEMA,
-        "content_padding": PADDING_SCHEMA,
-        "content_gap": NUMBER_SCHEMA,
-        "content_layout": STRING_SCHEMA,
-        "content_scroll": AXIS_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "shadow": ANY_SCHEMA,
-        "gradient": ANY_SCHEMA,
-        "image": ANY_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "blur": NUMBER_SCHEMA,
-        "clip_behavior": STRING_SCHEMA,
-    }
-)
-
-COLOR_MATRIX_SCHEMA = {
-    "anyOf": [
-        {"type": "array", "items": NUMBER_SCHEMA, "minItems": 20, "maxItems": 20},
-        STRING_SCHEMA,
-    ]
-}
-
-MOTION_VALUE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "opacity": NUMBER_SCHEMA,
-        "alpha": NUMBER_SCHEMA,
-        "translate": OFFSET_SCHEMA,
-        "offset": OFFSET_SCHEMA,
-        "position": OFFSET_SCHEMA,
-        "x": NUMBER_SCHEMA,
-        "y": NUMBER_SCHEMA,
-        "translate_x": NUMBER_SCHEMA,
-        "translate_y": NUMBER_SCHEMA,
-        "scale": SCALE_SCHEMA,
-        "scale_x": NUMBER_SCHEMA,
-        "scale_y": NUMBER_SCHEMA,
-        "rotation": NUMBER_SCHEMA,
-        "rotate": NUMBER_SCHEMA,
-        "angle": NUMBER_SCHEMA,
-        "rotation_radians": NUMBER_SCHEMA,
-        "rotate_radians": NUMBER_SCHEMA,
-        "angle_radians": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-KEYFRAME_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "t": NUMBER_SCHEMA,
-        "time": NUMBER_SCHEMA,
-        "at": NUMBER_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-        "props": MOTION_VALUE_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-FRAME_CHILD_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "left": DIMENSION_SCHEMA,
-        "top": DIMENSION_SCHEMA,
-        "right": DIMENSION_SCHEMA,
-        "bottom": DIMENSION_SCHEMA,
-        "width": DIMENSION_SCHEMA,
-        "height": DIMENSION_SCHEMA,
-        "x": DIMENSION_SCHEMA,
-        "y": DIMENSION_SCHEMA,
-        "anchor": ALIGNMENT_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-        "z": NUMBER_SCHEMA,
-        "z_index": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-FRAME_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "alignment": ALIGNMENT_SCHEMA,
-        "fit": {"type": "string", "enum": ["expand", "passthrough", "loose"]},
-        "clip": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-SAFE_AREA_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "left": BOOL_SCHEMA,
-        "top": BOOL_SCHEMA,
-        "right": BOOL_SCHEMA,
-        "bottom": BOOL_SCHEMA,
-        "minimum": PADDING_SCHEMA,
-        "maintain_bottom_view_padding": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-POSE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "translate": OFFSET_SCHEMA,
-        "translate_x": NUMBER_SCHEMA,
-        "translate_y": NUMBER_SCHEMA,
-        "scale": SCALE_SCHEMA,
-        "scale_x": NUMBER_SCHEMA,
-        "scale_y": NUMBER_SCHEMA,
-        "rotation": NUMBER_SCHEMA,
-        "rotation_radians": NUMBER_SCHEMA,
-        "skew": SKEW_SCHEMA,
-        "skew_x": NUMBER_SCHEMA,
-        "skew_y": NUMBER_SCHEMA,
-        "skew_radians": SKEW_SCHEMA,
-        "skew_x_radians": NUMBER_SCHEMA,
-        "skew_y_radians": NUMBER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-        "origin": OFFSET_SCHEMA,
-        "pivot": OFFSET_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-LAYER_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "clip": BOOL_SCHEMA,
-        "clip_shape": STRING_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "clip_radius": NUMBER_SCHEMA,
-        "border_radius": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "ignore_pointer": BOOL_SCHEMA,
-        "absorb_pointer": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-LAYER_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "visible": BOOL_SCHEMA,
-        "locked": BOOL_SCHEMA,
-        "thumbnail": STRING_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-LAYER_LIST_SCHEMA = _control_schema(
-    {
-        "layers": {"type": "array", "items": LAYER_ITEM_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "allow_reorder": BOOL_SCHEMA,
-        "show_visibility": BOOL_SCHEMA,
-        "show_lock": BOOL_SCHEMA,
-        "show_thumbnail": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-BOUNDS_PROBE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "emit_on_mount": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-CANDY_MODULE_ENUM = [
-    "button",
-    "card",
-    "column",
-    "container",
-    "row",
-    "stack",
-    "surface",
-    "wrap",
-    "align",
-    "center",
-    "spacer",
-    "aspect_ratio",
-    "overflow_box",
-    "fitted_box",
-    "effects",
-    "particles",
-    "particle_field",
-    "border",
-    "border_side",
-    "shadow",
-    "outline",
-    "gradient",
-    "animated_gradient",
-    "animated_background",
-    "animation",
-    "transition",
-    "canvas",
-    "clip",
-    "decorated_box",
-    "badge",
-    "avatar",
-    "icon",
-    "text",
-    "motion",
-    "flow_field",
-    "liquid_morph",
-    "morphing_border",
-    "parallax",
-    "pixelate",
-    "ripple_burst",
-    "scanline_overlay",
-    "shimmer",
-    "tilt_hover",
-    "vignette",
-    "glow_effect",
-    "neon_edge",
-    "grain_overlay",
-    "noise_displacement",
-    "noise_field",
-    "chromatic_shift",
-    "gradient_sweep",
-    "button_style",
-    "page",
-]
-
-CANDY_STATE_ENUM = ["idle", "hover", "pressed", "focused", "disabled", "selected", "loading"]
-
-CANDY_EVENT_ENUM = [
-    "change",
-    "state_change",
-    "module_change",
-    "click",
-    "tap",
-    "double_tap",
-    "long_press",
-    "hover_enter",
-    "hover_exit",
-    "hover_move",
-    "focus",
-    "blur",
-    "focus_change",
-    "animation_start",
-    "animation_end",
-    "transition_start",
-    "transition_end",
-    "gesture_pan_start",
-    "gesture_pan_update",
-    "gesture_pan_end",
-    "gesture_scale_start",
-    "gesture_scale_update",
-    "gesture_scale_end",
-]
-
-CANDY_SLOTS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "leading": ANY_SCHEMA,
-        "trailing": ANY_SCHEMA,
-        "overlay": ANY_SCHEMA,
-        "background": ANY_SCHEMA,
-        "content": ANY_SCHEMA,
-    },
-    "additionalProperties": False,
-}
-
-CANDY_SEMANTICS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "label": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "button": BOOL_SCHEMA,
-        "focusable": BOOL_SCHEMA,
-        "live_region": BOOL_SCHEMA,
-    },
-    "additionalProperties": False,
-}
-
-CANDY_ACCESSIBILITY_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "label": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "button": BOOL_SCHEMA,
-        "focusable": BOOL_SCHEMA,
-        "live_region": BOOL_SCHEMA,
-    },
-    "additionalProperties": False,
-}
-
-CANDY_PERFORMANCE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "cache": BOOL_SCHEMA,
-        "repaint_boundary": BOOL_SCHEMA,
-        "revision": ANY_SCHEMA,
-    },
-    "additionalProperties": False,
-}
-
-
-def _candy_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "variant": STRING_SCHEMA,
-            "state": {"type": "string", "enum": CANDY_STATE_ENUM},
-            "slots": CANDY_SLOTS_SCHEMA,
-            "leading": ANY_SCHEMA,
-            "trailing": ANY_SCHEMA,
-            "overlay": ANY_SCHEMA,
-            "background": ANY_SCHEMA,
-            "content": ANY_SCHEMA,
-            "animation": ANY_SCHEMA,
-            "transition": ANY_SCHEMA,
-            "motion": ANY_SCHEMA,
-            "events": {"type": "array", "items": {"type": "string", "enum": CANDY_EVENT_ENUM}},
-            "semantics": CANDY_SEMANTICS_SCHEMA,
-            "accessibility": CANDY_ACCESSIBILITY_SCHEMA,
-            "performance": CANDY_PERFORMANCE_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-CANDY_MODULE_SCHEMAS = {
-    "button": _candy_module_schema(
-        {
-            "label": STRING_SCHEMA,
-            "text": STRING_SCHEMA,
-            "icon": ICON_VALUE_SCHEMA,
-            "loading": BOOL_SCHEMA,
-            "disabled": BOOL_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-            "padding": PADDING_SCHEMA,
-            "bgcolor": COLOR_SCHEMA,
-            "text_color": COLOR_SCHEMA,
-        }
-    ),
-    "card": _candy_module_schema(
-        {
-            "elevation": NUMBER_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-            "padding": PADDING_SCHEMA,
-            "margin": PADDING_SCHEMA,
-            "bgcolor": COLOR_SCHEMA,
-        }
-    ),
-    "column": _candy_module_schema(
-        {
-            "spacing": NUMBER_SCHEMA,
-            "alignment": STRING_SCHEMA,
-            "main_axis": STRING_SCHEMA,
-            "cross_axis": STRING_SCHEMA,
-        }
-    ),
-    "container": _candy_module_schema(
-        {
-            "width": DIMENSION_SCHEMA,
-            "height": DIMENSION_SCHEMA,
-            "padding": PADDING_SCHEMA,
-            "margin": PADDING_SCHEMA,
-            "alignment": ALIGNMENT_SCHEMA,
-            "bgcolor": COLOR_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-        }
-    ),
-    "row": _candy_module_schema(
-        {
-            "spacing": NUMBER_SCHEMA,
-            "alignment": STRING_SCHEMA,
-            "main_axis": STRING_SCHEMA,
-            "cross_axis": STRING_SCHEMA,
-        }
-    ),
-    "stack": _candy_module_schema({"alignment": ALIGNMENT_SCHEMA, "fit": STRING_SCHEMA}),
-    "surface": _candy_module_schema(
-        {
-            "bgcolor": COLOR_SCHEMA,
-            "elevation": NUMBER_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-            "border_color": COLOR_SCHEMA,
-            "border_width": NUMBER_SCHEMA,
-        }
-    ),
-    "wrap": _candy_module_schema(
-        {
-            "spacing": NUMBER_SCHEMA,
-            "run_spacing": NUMBER_SCHEMA,
-            "alignment": STRING_SCHEMA,
-            "run_alignment": STRING_SCHEMA,
-        }
-    ),
-    "align": _candy_module_schema(
-        {"alignment": ALIGNMENT_SCHEMA, "width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA}
-    ),
-    "center": _candy_module_schema({"width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA}),
-    "spacer": _candy_module_schema({"width": DIMENSION_SCHEMA, "height": DIMENSION_SCHEMA, "flex": INTEGER_SCHEMA}),
-    "aspect_ratio": _candy_module_schema({"ratio": NUMBER_SCHEMA, "value": NUMBER_SCHEMA}),
-    "overflow_box": _candy_module_schema(
-        {
-            "alignment": ALIGNMENT_SCHEMA,
-            "min_width": DIMENSION_SCHEMA,
-            "max_width": DIMENSION_SCHEMA,
-            "min_height": DIMENSION_SCHEMA,
-            "max_height": DIMENSION_SCHEMA,
-        }
-    ),
-    "fitted_box": _candy_module_schema(
-        {
-            "fit": STRING_SCHEMA,
-            "alignment": ALIGNMENT_SCHEMA,
-            "clip_behavior": STRING_SCHEMA,
-        }
-    ),
-    "effects": _candy_module_schema(
-        {
-            "shimmer": BOOL_SCHEMA,
-            "blur": NUMBER_SCHEMA,
-            "opacity": NUMBER_SCHEMA,
-            "overlay": BOOL_SCHEMA,
-        }
-    ),
-    "particles": _candy_module_schema(
-        {
-            "count": INTEGER_SCHEMA,
-            "speed": NUMBER_SCHEMA,
-            "size": NUMBER_SCHEMA,
-            "gravity": NUMBER_SCHEMA,
-            "drift": NUMBER_SCHEMA,
-            "overlay": BOOL_SCHEMA,
-            "colors": {"type": "array", "items": COLOR_SCHEMA},
-        }
-    ),
-    "border": _candy_module_schema(
-        {
-            "color": COLOR_SCHEMA,
-            "width": NUMBER_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-            "side": STRING_SCHEMA,
-            "padding": PADDING_SCHEMA,
-        }
-    ),
-    "shadow": _candy_module_schema(
-        {
-            "color": COLOR_SCHEMA,
-            "blur": NUMBER_SCHEMA,
-            "spread": NUMBER_SCHEMA,
-            "dx": NUMBER_SCHEMA,
-            "dy": NUMBER_SCHEMA,
-        }
-    ),
-    "outline": _candy_module_schema(
-        {
-            "outline_color": COLOR_SCHEMA,
-            "outline_width": NUMBER_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-        }
-    ),
-    "gradient": _candy_module_schema(
-        {
-            "variant": STRING_SCHEMA,
-            "colors": {"type": "array", "items": COLOR_SCHEMA},
-            "stops": {"type": "array", "items": NUMBER_SCHEMA},
-            "begin": ANY_SCHEMA,
-            "end": ANY_SCHEMA,
-            "angle": NUMBER_SCHEMA,
-        }
-    ),
-    "animation": _candy_module_schema(
-        {
-            "duration_ms": INTEGER_SCHEMA,
-            "curve": STRING_SCHEMA,
-            "opacity": NUMBER_SCHEMA,
-            "scale": NUMBER_SCHEMA,
-            "autoplay": BOOL_SCHEMA,
-            "loop": BOOL_SCHEMA,
-            "reverse": BOOL_SCHEMA,
-        }
-    ),
-    "transition": _candy_module_schema(
-        {
-            "duration_ms": INTEGER_SCHEMA,
-            "curve": STRING_SCHEMA,
-            "preset": STRING_SCHEMA,
-            "key": ANY_SCHEMA,
-        }
-    ),
-    "canvas": _candy_module_schema(
-        {
-            "width": DIMENSION_SCHEMA,
-            "height": DIMENSION_SCHEMA,
-            "commands": {"type": "array", "items": {"type": "object", "additionalProperties": True}},
-        }
-    ),
-    "clip": _candy_module_schema(
-        {
-            "shape": STRING_SCHEMA,
-            "clip_shape": STRING_SCHEMA,
-            "clip_behavior": STRING_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-        }
-    ),
-    "decorated_box": _candy_module_schema(
-        {
-            "bgcolor": COLOR_SCHEMA,
-            "gradient": ANY_SCHEMA,
-            "border_color": COLOR_SCHEMA,
-            "border_width": NUMBER_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-            "shadow": ANY_SCHEMA,
-        }
-    ),
-    "badge": _candy_module_schema(
-        {
-            "label": STRING_SCHEMA,
-            "text": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "color": COLOR_SCHEMA,
-            "bgcolor": COLOR_SCHEMA,
-            "text_color": COLOR_SCHEMA,
-            "radius": NUMBER_SCHEMA,
-        }
-    ),
-    "avatar": _candy_module_schema(
-        {
-            "src": STRING_SCHEMA,
-            "label": STRING_SCHEMA,
-            "text": STRING_SCHEMA,
-            "size": NUMBER_SCHEMA,
-            "color": COLOR_SCHEMA,
-            "bgcolor": COLOR_SCHEMA,
-        }
-    ),
-    "icon": _candy_module_schema({"icon": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA}),
-    "text": _candy_module_schema(
-        {
-            "text": STRING_SCHEMA,
-            "value": STRING_SCHEMA,
-            "color": COLOR_SCHEMA,
-            "font_size": NUMBER_SCHEMA,
-            "size": NUMBER_SCHEMA,
-            "font_weight": ANY_SCHEMA,
-            "weight": ANY_SCHEMA,
-            "align": STRING_SCHEMA,
-            "max_lines": INTEGER_SCHEMA,
-            "overflow": STRING_SCHEMA,
-        }
-    ),
-    "motion": _candy_module_schema(
-        {
-            "duration_ms": INTEGER_SCHEMA,
-            "curve": STRING_SCHEMA,
-            "opacity": NUMBER_SCHEMA,
-            "scale": NUMBER_SCHEMA,
-            "autoplay": BOOL_SCHEMA,
-            "loop": BOOL_SCHEMA,
-            "reverse": BOOL_SCHEMA,
-        }
-    ),
-    "particle_field": _candy_module_schema({}),
-    "border_side": _candy_module_schema({}),
-    "animated_gradient": _candy_module_schema({}),
-    "animated_background": _candy_module_schema({}),
-    "flow_field": _candy_module_schema({}),
-    "liquid_morph": _candy_module_schema({}),
-    "morphing_border": _candy_module_schema({}),
-    "parallax": _candy_module_schema({}),
-    "pixelate": _candy_module_schema({}),
-    "ripple_burst": _candy_module_schema({}),
-    "scanline_overlay": _candy_module_schema({}),
-    "shimmer": _candy_module_schema({}),
-    "tilt_hover": _candy_module_schema({}),
-    "vignette": _candy_module_schema({}),
-    "glow_effect": _candy_module_schema({}),
-    "neon_edge": _candy_module_schema({}),
-    "grain_overlay": _candy_module_schema({}),
-    "noise_displacement": _candy_module_schema({}),
-    "noise_field": _candy_module_schema({}),
-    "chromatic_shift": _candy_module_schema({}),
-    "gradient_sweep": _candy_module_schema({}),
-    "button_style": _candy_module_schema({}),
-    "page": _candy_module_schema({}),
-}
-
-CANDY_MODULE_PAYLOAD_SCHEMA = {
-    "anyOf": [CANDY_MODULE_SCHEMAS[name] for name in CANDY_MODULE_ENUM],
-}
-
-CANDY_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": CANDY_MODULE_ENUM},
-        "state": {"type": "string", "enum": CANDY_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "variant": STRING_SCHEMA,
-        "events": {"type": "array", "items": {"type": "string", "enum": CANDY_EVENT_ENUM}},
-        "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "token_overrides": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "modules": {
-            "type": "object",
-            "properties": {name: CANDY_MODULE_SCHEMAS[name] for name in CANDY_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        "slots": CANDY_SLOTS_SCHEMA,
-        "semantics": CANDY_SEMANTICS_SCHEMA,
-        "accessibility": CANDY_ACCESSIBILITY_SCHEMA,
-        "interaction": {
-            "type": "object",
-            "properties": {
-                "enabled": BOOL_SCHEMA,
-                "hover": BOOL_SCHEMA,
-                "focus": BOOL_SCHEMA,
-                "press": BOOL_SCHEMA,
-                "tap": BOOL_SCHEMA,
-                "double_tap": BOOL_SCHEMA,
-                "long_press": BOOL_SCHEMA,
-            },
-            "additionalProperties": False,
-        },
-        "performance": CANDY_PERFORMANCE_SCHEMA,
-        "quality": STRING_SCHEMA,
-        "cache": BOOL_SCHEMA,
-        "button": CANDY_MODULE_SCHEMAS["button"],
-        "card": CANDY_MODULE_SCHEMAS["card"],
-        "column": CANDY_MODULE_SCHEMAS["column"],
-        "container": CANDY_MODULE_SCHEMAS["container"],
-        "row": CANDY_MODULE_SCHEMAS["row"],
-        "stack": CANDY_MODULE_SCHEMAS["stack"],
-        "surface": CANDY_MODULE_SCHEMAS["surface"],
-        "wrap": CANDY_MODULE_SCHEMAS["wrap"],
-        "align": CANDY_MODULE_SCHEMAS["align"],
-        "center": CANDY_MODULE_SCHEMAS["center"],
-        "spacer": CANDY_MODULE_SCHEMAS["spacer"],
-        "aspect_ratio": CANDY_MODULE_SCHEMAS["aspect_ratio"],
-        "overflow_box": CANDY_MODULE_SCHEMAS["overflow_box"],
-        "fitted_box": CANDY_MODULE_SCHEMAS["fitted_box"],
-        "effects": CANDY_MODULE_SCHEMAS["effects"],
-        "particles": CANDY_MODULE_SCHEMAS["particles"],
-        "border": CANDY_MODULE_SCHEMAS["border"],
-        "shadow": CANDY_MODULE_SCHEMAS["shadow"],
-        "outline": CANDY_MODULE_SCHEMAS["outline"],
-        "gradient": CANDY_MODULE_SCHEMAS["gradient"],
-        "animation": CANDY_MODULE_SCHEMAS["animation"],
-        "transition": CANDY_MODULE_SCHEMAS["transition"],
-        "canvas": CANDY_MODULE_SCHEMAS["canvas"],
-        "clip": CANDY_MODULE_SCHEMAS["clip"],
-        "decorated_box": CANDY_MODULE_SCHEMAS["decorated_box"],
-        "badge": CANDY_MODULE_SCHEMAS["badge"],
-        "avatar": CANDY_MODULE_SCHEMAS["avatar"],
-        "icon": CANDY_MODULE_SCHEMAS["icon"],
-        "text": CANDY_MODULE_SCHEMAS["text"],
-        "motion": CANDY_MODULE_SCHEMAS["motion"],
-        "particle_field": CANDY_MODULE_SCHEMAS["particle_field"],
-        "border_side": CANDY_MODULE_SCHEMAS["border_side"],
-        "animated_gradient": CANDY_MODULE_SCHEMAS["animated_gradient"],
-        "animated_background": CANDY_MODULE_SCHEMAS["animated_background"],
-        "flow_field": CANDY_MODULE_SCHEMAS["flow_field"],
-        "liquid_morph": CANDY_MODULE_SCHEMAS["liquid_morph"],
-        "morphing_border": CANDY_MODULE_SCHEMAS["morphing_border"],
-        "parallax": CANDY_MODULE_SCHEMAS["parallax"],
-        "pixelate": CANDY_MODULE_SCHEMAS["pixelate"],
-        "ripple_burst": CANDY_MODULE_SCHEMAS["ripple_burst"],
-        "scanline_overlay": CANDY_MODULE_SCHEMAS["scanline_overlay"],
-        "shimmer": CANDY_MODULE_SCHEMAS["shimmer"],
-        "tilt_hover": CANDY_MODULE_SCHEMAS["tilt_hover"],
-        "vignette": CANDY_MODULE_SCHEMAS["vignette"],
-        "glow_effect": CANDY_MODULE_SCHEMAS["glow_effect"],
-        "neon_edge": CANDY_MODULE_SCHEMAS["neon_edge"],
-        "grain_overlay": CANDY_MODULE_SCHEMAS["grain_overlay"],
-        "noise_displacement": CANDY_MODULE_SCHEMAS["noise_displacement"],
-        "noise_field": CANDY_MODULE_SCHEMAS["noise_field"],
-        "chromatic_shift": CANDY_MODULE_SCHEMAS["chromatic_shift"],
-        "gradient_sweep": CANDY_MODULE_SCHEMAS["gradient_sweep"],
-        "button_style": CANDY_MODULE_SCHEMAS["button_style"],
-        "page": CANDY_MODULE_SCHEMAS["page"],
-    }
-)
-
-CANDY_SCOPE_SCHEMA = _control_schema(
-    {
-        "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "brightness": STRING_SCHEMA,
-        "radius": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "colors": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "typography": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "spacing": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "elevation": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "motion": {"type": "object", "additionalProperties": ANY_SCHEMA},
-    }
-)
-
-PAN_ZOOM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "enabled": BOOL_SCHEMA,
-        "scale": NUMBER_SCHEMA,
-        "x": NUMBER_SCHEMA,
-        "y": NUMBER_SCHEMA,
-        "min_scale": {"type": "number", "minimum": 0.0},
-        "max_scale": {"type": "number", "minimum": 0.0},
-        "boundary_margin": PADDING_SCHEMA,
-        "pan_enabled": BOOL_SCHEMA,
-        "zoom_enabled": BOOL_SCHEMA,
-        "emit_on_start": BOOL_SCHEMA,
-        "emit_on_update": BOOL_SCHEMA,
-        "emit_on_end": BOOL_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-        "throttle_ms": INTEGER_SCHEMA,
-        "clip": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-SNAP_GRID_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "show_grid": BOOL_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "subdivisions": INTEGER_SCHEMA,
-        "line_color": COLOR_SCHEMA,
-        "major_line_color": COLOR_SCHEMA,
-        "line_width": NUMBER_SCHEMA,
-        "major_line_width": NUMBER_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "origin": OFFSET_SCHEMA,
-        "snap": BOOL_SCHEMA,
-        "snap_spacing": NUMBER_SCHEMA,
-        "snap_mode": {"type": "string", "enum": ["nearest", "round", "floor", "ceil", "ceiling"]},
-        "enabled": BOOL_SCHEMA,
-        "emit_on_hover": BOOL_SCHEMA,
-        "emit_on_press": BOOL_SCHEMA,
-        "emit_on_drag": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-MOTION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        **MOTION_VALUE_SCHEMA["properties"],
-        "from": MOTION_VALUE_SCHEMA,
-        "to": MOTION_VALUE_SCHEMA,
-        "keyframes": {"type": "array", "items": KEYFRAME_SCHEMA},
-        "curve": CURVE_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "duration": INTEGER_SCHEMA,
-        "duration_s": NUMBER_SCHEMA,
-        "delay_ms": INTEGER_SCHEMA,
-        "delay": INTEGER_SCHEMA,
-        "delay_s": NUMBER_SCHEMA,
-        "repeat": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "yoyo": BOOL_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "emit_on_tick": BOOL_SCHEMA,
-        "emit_on_start": BOOL_SCHEMA,
-        "emit_on_complete": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-        "origin": OFFSET_SCHEMA,
-        "pivot": OFFSET_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-TIMELINE_TRACK_SCHEMA = {
-    "type": "object",
-    "properties": {
-        **MOTION_VALUE_SCHEMA["properties"],
-        "from": MOTION_VALUE_SCHEMA,
-        "to": MOTION_VALUE_SCHEMA,
-        "keyframes": {"type": "array", "items": KEYFRAME_SCHEMA},
-        "index": INTEGER_SCHEMA,
-        "child": INTEGER_SCHEMA,
-        "child_index": INTEGER_SCHEMA,
-        "target": STRING_SCHEMA,
-        "id": STRING_SCHEMA,
-        "control": STRING_SCHEMA,
-        "start": NUMBER_SCHEMA,
-        "end": NUMBER_SCHEMA,
-        "begin": NUMBER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-        "origin": OFFSET_SCHEMA,
-        "pivot": OFFSET_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-TIMELINE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "tracks": {"type": "array", "items": TIMELINE_TRACK_SCHEMA},
-        "direction": {"type": "string", "enum": ["horizontal", "vertical"]},
-        "spacing": NUMBER_SCHEMA,
-        "main_axis": STRING_SCHEMA,
-        "cross_axis": STRING_SCHEMA,
-        "curve": CURVE_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "duration": INTEGER_SCHEMA,
-        "duration_s": NUMBER_SCHEMA,
-        "delay_ms": INTEGER_SCHEMA,
-        "delay": INTEGER_SCHEMA,
-        "delay_s": NUMBER_SCHEMA,
-        "repeat": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "yoyo": BOOL_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "emit_on_tick": BOOL_SCHEMA,
-        "emit_on_start": BOOL_SCHEMA,
-        "emit_on_complete": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-STAGGER_SCHEMA = {
-    "type": "object",
-    "properties": {
-        **MOTION_SCHEMA["properties"],
-        "stagger_ms": INTEGER_SCHEMA,
-        "stagger": INTEGER_SCHEMA,
-        "direction": AXIS_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-GESTURE_AREA_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "enabled": BOOL_SCHEMA,
-        "tap_enabled": BOOL_SCHEMA,
-        "double_tap_enabled": BOOL_SCHEMA,
-        "long_press_enabled": BOOL_SCHEMA,
-        "pan_enabled": BOOL_SCHEMA,
-        "scale_enabled": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-DRAG_PAYLOAD_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "data": {
-            "type": ["string", "number", "boolean", "object", "array", "null"],
-        },
-        "drag_type": STRING_SCHEMA,
-        "mime": STRING_SCHEMA,
-        "axis": AXIS_SCHEMA,
-        "max_simultaneous": INTEGER_SCHEMA,
-        "max_simultaneous_drags": INTEGER_SCHEMA,
-        "drag_anchor": {"type": "string", "enum": ["child", "pointer"]},
-    },
-    "additionalProperties": True,
-}
-
-DROP_ZONE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "accept_types": {"type": "array", "items": STRING_SCHEMA},
-        "accept_mimes": {"type": "array", "items": STRING_SCHEMA},
-    },
-    "additionalProperties": True,
-}
-
-LIST_SURFACE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "direction": {"type": "string", "enum": ["horizontal", "vertical"]},
-        "scrollable": BOOL_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "separator": BOOL_SCHEMA,
-        "virtual": BOOL_SCHEMA,
-        "virtualized": BOOL_SCHEMA,
-        "shrink_wrap": BOOL_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "item_extent": NUMBER_SCHEMA,
-        "cache_extent": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-STICKY_SECTION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "header": {"type": "object"},
-        "items": {"type": "array", "items": {"type": "object"}},
-        "header_extent": NUMBER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-STICKY_LIST_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "sections": {"type": "array", "items": STICKY_SECTION_SCHEMA},
-        "spacing": NUMBER_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "scrollable": BOOL_SCHEMA,
-        "shrink_wrap": BOOL_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "cache_extent": NUMBER_SCHEMA,
-        "header_extent": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-UX_ROOT_SCHEMA = _control_schema(
-    {
-        "ux_type": {
-            "type": "string",
-            "enum": [
-                "splash",
-                "stack",
-                "panel",
-                "workspace",
-                "stage",
-                "flow",
-                "overlay",
-                "terminal",
-            ],
-        },
-        "slots": {"type": "array", "items": STRING_SCHEMA},
-        "config": ANY_SCHEMA,
-        "index": INTEGER_SCHEMA,
-        "active_index": INTEGER_SCHEMA,
-    }
-)
-
-GRID_VIEW_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "columns": {"type": "array", "items": STRING_SCHEMA},
-        "rows": {"type": "array", "items": ANY_SCHEMA},
-        "dense": BOOL_SCHEMA,
-        "striped": BOOL_SCHEMA,
-        "show_header": BOOL_SCHEMA,
-        "sortable": BOOL_SCHEMA,
-        "selectable": BOOL_SCHEMA,
-        "selected_index": INTEGER_SCHEMA,
-        "auto_sort": BOOL_SCHEMA,
-        "sort_column": INTEGER_SCHEMA,
-        "sort_ascending": BOOL_SCHEMA,
-        "filter_query": STRING_SCHEMA,
-        "filter_column": INTEGER_SCHEMA,
-        "filter_case_sensitive": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-EFFECT_LAYER_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "blur_sigma": NUMBER_SCHEMA,
-        "blur": NUMBER_SCHEMA,
-        "blur_radius": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "tint": COLOR_SCHEMA,
-        "tint_blend_mode": BLEND_MODE_SCHEMA,
-        "shadow_color": COLOR_SCHEMA,
-        "shadow_blur": NUMBER_SCHEMA,
-        "shadow_spread": NUMBER_SCHEMA,
-        "shadow_offset": OFFSET_SCHEMA,
-        "color_matrix": COLOR_MATRIX_SCHEMA,
-        "filter": STRING_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-CANVAS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "commands": {"type": "array", "items": {"type": "object"}},
-        "background_color": COLOR_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-VECTOR_VIEW_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "src": STRING_SCHEMA,
-        "data": STRING_SCHEMA,
-        "fit": STRING_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "tint": COLOR_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "width": NUMBER_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-MESH_POINT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "x": NUMBER_SCHEMA,
-        "y": NUMBER_SCHEMA,
-        "x_px": NUMBER_SCHEMA,
-        "y_px": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "radius_px": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "blend_mode": STRING_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-GRADIENT_SCHEMA = _control_schema(
-    {
-        "variant": STRING_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "stops": {"type": "array", "items": NUMBER_SCHEMA},
-        "tile_mode": STRING_SCHEMA,
-        "begin": ALIGNMENT_SCHEMA,
-        "end": ALIGNMENT_SCHEMA,
-        "center": ALIGNMENT_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "focal": ALIGNMENT_SCHEMA,
-        "focal_radius": NUMBER_SCHEMA,
-        "start_angle": NUMBER_SCHEMA,
-        "end_angle": NUMBER_SCHEMA,
-        "start_degrees": NUMBER_SCHEMA,
-        "end_degrees": NUMBER_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "background_color": COLOR_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "mesh": {"type": "array", "items": MESH_POINT_SCHEMA},
-        "mesh_points": {"type": "array", "items": MESH_POINT_SCHEMA},
-        "points": {"type": "array", "items": MESH_POINT_SCHEMA},
-    }
-)
-
-ANIMATED_GRADIENT_SCHEMA = _control_schema(
-    {
-        "variant": STRING_SCHEMA,
-        "kind": STRING_SCHEMA,
-        "gradient": STRING_SCHEMA,
-        "type": STRING_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "stops": {"type": "array", "items": NUMBER_SCHEMA},
-        "begin": ALIGNMENT_SCHEMA,
-        "end": ALIGNMENT_SCHEMA,
-        "angle": NUMBER_SCHEMA,
-        "start_angle": NUMBER_SCHEMA,
-        "end_angle": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "background_color": COLOR_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "duration": INTEGER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "ping_pong": BOOL_SCHEMA,
-        "shift": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-    }
-)
-
-PARTICLE_FIELD_SCHEMA = _control_schema(
-    {
-        "count": INTEGER_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "size": NUMBER_SCHEMA,
-        "min_size": NUMBER_SCHEMA,
-        "max_size": NUMBER_SCHEMA,
-        "speed": NUMBER_SCHEMA,
-        "min_speed": NUMBER_SCHEMA,
-        "max_speed": NUMBER_SCHEMA,
-        "direction": NUMBER_SCHEMA,
-        "direction_deg": NUMBER_SCHEMA,
-        "direction_degrees": NUMBER_SCHEMA,
-        "spread": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "seed": INTEGER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "shape": STRING_SCHEMA,
-    }
-)
-
-NOISE_FIELD_SCHEMA = _control_schema(
-    {
-        "cell_size": NUMBER_SCHEMA,
-        "scale": NUMBER_SCHEMA,
-        "speed": NUMBER_SCHEMA,
-        "intensity": NUMBER_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "kind": STRING_SCHEMA,
-        "animated": BOOL_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "seed": INTEGER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "color": COLOR_SCHEMA,
-    }
-)
-
-FLOW_FIELD_SCHEMA = _control_schema(
-    {
-        "count": INTEGER_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "size": NUMBER_SCHEMA,
-        "min_size": NUMBER_SCHEMA,
-        "max_size": NUMBER_SCHEMA,
-        "speed": NUMBER_SCHEMA,
-        "min_speed": NUMBER_SCHEMA,
-        "max_speed": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "seed": INTEGER_SCHEMA,
-        "scale": NUMBER_SCHEMA,
-        "turn": NUMBER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-    }
-)
-
-BLOB_FIELD_SCHEMA = _control_schema(
-    {
-        "count": INTEGER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "min_radius": NUMBER_SCHEMA,
-        "max_radius": NUMBER_SCHEMA,
-        "speed": NUMBER_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "blur_sigma": NUMBER_SCHEMA,
-        "blur": NUMBER_SCHEMA,
-        "seed": INTEGER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-    }
-)
-
-SPRITE_SCHEMA = _control_schema(
-    {
-        "src": STRING_SCHEMA,
-        "frame_width": NUMBER_SCHEMA,
-        "frame_height": NUMBER_SCHEMA,
-        "frames": INTEGER_SCHEMA,
-        "fps": NUMBER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "columns": INTEGER_SCHEMA,
-        "rows": INTEGER_SCHEMA,
-        "fit": STRING_SCHEMA,
-        "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-        "progress": NUMBER_SCHEMA,
-    }
-)
-
-TRANSFORM_BOX_SCHEMA = _control_schema(
-    {
-        "rect": {"type": "object", "additionalProperties": True},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-WEBVIEW_ADAPTER_SCHEMA = _control_schema()
-
-AUDIO_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "src": STRING_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "volume": NUMBER_SCHEMA,
-        "show_controls": BOOL_SCHEMA,
-        "muted": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "seek": NUMBER_SCHEMA,
-        "seek_ms": INTEGER_SCHEMA,
-        "position": NUMBER_SCHEMA,
-        "position_ms": INTEGER_SCHEMA,
-        "emit_on_position": BOOL_SCHEMA,
-        "emit_on_state": BOOL_SCHEMA,
-        "emit_on_duration": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-VIDEO_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "src": STRING_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "volume": NUMBER_SCHEMA,
-        "show_controls": BOOL_SCHEMA,
-        "muted": BOOL_SCHEMA,
-        "fit": STRING_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-        "seek": NUMBER_SCHEMA,
-        "seek_ms": INTEGER_SCHEMA,
-        "position": NUMBER_SCHEMA,
-        "position_ms": INTEGER_SCHEMA,
-        "emit_on_position": BOOL_SCHEMA,
-        "emit_on_state": BOOL_SCHEMA,
-        "emit_on_duration": BOOL_SCHEMA,
-        "throttle_ms": INTEGER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-TEXT_SCHEMA = _control_schema(
-    {
-        "text": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "weight": STRING_SCHEMA,
-        "font_weight": STRING_SCHEMA,
-        "italic": BOOL_SCHEMA,
-        "align": STRING_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "muted": BOOL_SCHEMA,
-    }
-)
-
-ICON_VALUE_SCHEMA = {"type": ["string", "integer"]}
-
-BUTTON_SCHEMA = _control_schema(
-    {
-        "text": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "value": ANY_SCHEMA,
-        "variant": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "action": ANY_SCHEMA,
-        "actions": {"type": "array", "items": ANY_SCHEMA},
-        "action_id": STRING_SCHEMA,
-        "action_event": STRING_SCHEMA,
-        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "window_action": STRING_SCHEMA,
-        "window_action_delay_ms": INTEGER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "text_color": COLOR_SCHEMA,
-        "fgcolor": COLOR_SCHEMA,
-        "foreground": COLOR_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "content_padding": PADDING_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "elevation": NUMBER_SCHEMA,
-        "shadow_color": COLOR_SCHEMA,
-        "overlay_color": COLOR_SCHEMA,
-        "splash_color": COLOR_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "font_weight": STRING_SCHEMA,
-        "weight": STRING_SCHEMA,
-        "letter_spacing": NUMBER_SCHEMA,
-    }
-)
-
-TEXT_FIELD_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "helper_text": STRING_SCHEMA,
-        "error_text": STRING_SCHEMA,
-        "multiline": BOOL_SCHEMA,
-        "min_lines": INTEGER_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "password": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "autofocus": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "expand": BOOL_SCHEMA,
-    }
-)
-
-TEXT_AREA_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "helper_text": STRING_SCHEMA,
-        "error_text": STRING_SCHEMA,
-        "min_lines": INTEGER_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "autofocus": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-CHECKBOX_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "value": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "tristate": BOOL_SCHEMA,
-    }
-)
-
-SWITCH_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "value": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "inline": BOOL_SCHEMA,
-    }
-)
-
-SLIDER_SCHEMA = _control_schema(
-    {
-        "value": NUMBER_SCHEMA,
-        "min": NUMBER_SCHEMA,
-        "max": NUMBER_SCHEMA,
-        "divisions": INTEGER_SCHEMA,
-        "label": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-SELECT_SCHEMA = _control_schema(
-    {
-        "options": {"type": "array", "items": ANY_SCHEMA},
-        "items": {"type": "array", "items": ANY_SCHEMA},
-        "groups": {"type": "array", "items": {"type": "object"}},
-        "index": INTEGER_SCHEMA,
-        "value": ANY_SCHEMA,
-        "values": {"type": "array", "items": ANY_SCHEMA},
-        "selected": ANY_SCHEMA,
-        "label": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "async_source": STRING_SCHEMA,
-        "debounce_ms": INTEGER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "animation": {"type": "object", "additionalProperties": True},
-    }
-)
-
-RADIO_SCHEMA = _control_schema(
-    {
-        "options": {"type": "array", "items": ANY_SCHEMA},
-        "index": INTEGER_SCHEMA,
-        "value": ANY_SCHEMA,
-        "label": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-FILE_PICKER_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "mode": STRING_SCHEMA,
-        "file_type": STRING_SCHEMA,
-        "extensions": {"type": "array", "items": STRING_SCHEMA},
-        "allowed_extensions": {"type": "array", "items": STRING_SCHEMA},
-        "multiple": BOOL_SCHEMA,
-        "allow_multiple": BOOL_SCHEMA,
-        "with_data": BOOL_SCHEMA,
-        "with_path": BOOL_SCHEMA,
-        "pick_directory": BOOL_SCHEMA,
-        "save_file": BOOL_SCHEMA,
-        "file_name": STRING_SCHEMA,
-        "dialog_title": STRING_SCHEMA,
-        "initial_directory": STRING_SCHEMA,
-        "lock_parent_window": BOOL_SCHEMA,
-        "show_selection": BOOL_SCHEMA,
-        "drop_enabled": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-IMAGE_SCHEMA = _control_schema(
-    {
-        "src": STRING_SCHEMA,
-        "fit": STRING_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-    }
-)
-
-GALLERY_SCHEMA_VERSION = 2
-
-# Gallery layout types for the new unified Gallery control
-GALLERY_LAYOUT_TYPES = [
-    "grid",
-    "masonry",
-    "list",
-    "carousel",
-    "virtual_grid",
-    "virtual_list",
-]
-
-# Gallery item schema
-GALLERY_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "name": STRING_SCHEMA,
-        "path": STRING_SCHEMA,
-        "url": STRING_SCHEMA,
-        "thumbnailUrl": STRING_SCHEMA,
-        "thumbnail_url": STRING_SCHEMA,
-        "type": STRING_SCHEMA,
-        "metadata": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "isSelected": BOOL_SCHEMA,
-        "is_selected": BOOL_SCHEMA,
-        "isLoading": BOOL_SCHEMA,
-        "is_loading": BOOL_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "description": STRING_SCHEMA,
-        "authorName": STRING_SCHEMA,
-        "author_name": STRING_SCHEMA,
-        "authorAvatar": STRING_SCHEMA,
-        "author_avatar": STRING_SCHEMA,
-        "likeCount": INTEGER_SCHEMA,
-        "like_count": INTEGER_SCHEMA,
-        "viewCount": INTEGER_SCHEMA,
-        "view_count": INTEGER_SCHEMA,
-        "createdAt": STRING_SCHEMA,
-        "created_at": STRING_SCHEMA,
-        "aspectRatio": NUMBER_SCHEMA,
-        "aspect_ratio": NUMBER_SCHEMA,
-        "tags": {"type": "array", "items": STRING_SCHEMA},
-        "status": STRING_SCHEMA,
-    },
-    "required": ["id"],
-}
-
-GALLERY_MODULE_ENUM = [
-    "toolbar",
-    "filter_bar",
-    "grid_layout",
-    "item_actions",
-    "item_badge",
-    "item_meta_row",
-    "item_preview",
-    "item_selectable",
-    "item_tile",
-    "pagination",
-    "section_header",
-    "sort_bar",
-    "empty_state",
-    "loading_skeleton",
-    "search_bar",
-    "fonts",
-    "font_picker",
-    "font_renderer",
-    "audio",
-    "audio_picker",
-    "audio_renderer",
-    "video",
-    "video_picker",
-    "video_renderer",
-    "image",
-    "image_picker",
-    "image_renderer",
-    "document",
-    "document_picker",
-    "document_renderer",
-    "item_drag_handle",
-    "item_drop_target",
-    "item_reorder_handle",
-    "item_selection_checkbox",
-    "item_selection_radio",
-    "item_selection_switch",
-    "apply",
-    "clear",
-    "select_all",
-    "deselect_all",
-    "apply_font",
-    "apply_image",
-    "set_as_wallpaper",
-    "presets",
-    "skins",
-]
-
-GALLERY_STATE_ENUM = ["idle", "loading", "empty", "ready", "disabled"]
-
-GALLERY_EVENT_ENUM = [
-    "change",
-    "select",
-    "select_change",
-    "page_change",
-    "sort_change",
-    "filter_change",
-    "action",
-    "apply",
-    "clear",
-    "select_all",
-    "deselect_all",
-    "apply_font",
-    "apply_image",
-    "set_as_wallpaper",
-    "pick",
-    "drag_handle",
-    "drop_target",
-    "section_action",
-    "font_change",
-]
-
-
-def _gallery_module_schema(extra_properties: Mapping[str, Any]) -> dict[str, Any]:
-    payload_schema = {
-        "type": "object",
-        "properties": {
-            "enabled": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
-            "value": ANY_SCHEMA,
-            "payload": ANY_SCHEMA,
-            **dict(extra_properties),
-        },
-        "additionalProperties": False,
-    }
-    return {
-        "anyOf": [
-            BOOL_SCHEMA,
-            payload_schema,
-        ]
-    }
-
-
-GALLERY_MODULE_SCHEMAS = {
-    "toolbar": _gallery_module_schema({"actions": {"type": "array", "items": ANY_SCHEMA}}),
-    "filter_bar": _gallery_module_schema(
-        {"filters": {"type": "array", "items": ANY_SCHEMA}, "values": {"type": "array", "items": ANY_SCHEMA}}
-    ),
-    "grid_layout": _gallery_module_schema({"columns": INTEGER_SCHEMA, "spacing": NUMBER_SCHEMA}),
-    "item_actions": _gallery_module_schema({"actions": {"type": "array", "items": ANY_SCHEMA}}),
-    "item_badge": _gallery_module_schema({"text": STRING_SCHEMA}),
-    "item_meta_row": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "item_preview": _gallery_module_schema({"height": NUMBER_SCHEMA}),
-    "item_selectable": _gallery_module_schema({"selected": BOOL_SCHEMA}),
-    "item_tile": _gallery_module_schema({"id": STRING_SCHEMA}),
-    "pagination": _gallery_module_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "pages": INTEGER_SCHEMA}),
-    "section_header": _gallery_module_schema({"count": ANY_SCHEMA, "id": STRING_SCHEMA}),
-    "sort_bar": _gallery_module_schema({"options": {"type": "array", "items": STRING_SCHEMA}, "selected": STRING_SCHEMA}),
-    "empty_state": _gallery_module_schema({}),
-    "loading_skeleton": _gallery_module_schema({}),
-    "search_bar": _gallery_module_schema({"query": STRING_SCHEMA, "placeholder": STRING_SCHEMA}),
-    "fonts": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "font_picker": _gallery_module_schema({"options": {"type": "array", "items": STRING_SCHEMA}}),
-    "font_renderer": _gallery_module_schema({"font": STRING_SCHEMA, "text": STRING_SCHEMA}),
-    "audio": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "audio_picker": _gallery_module_schema({"accept": STRING_SCHEMA}),
-    "audio_renderer": _gallery_module_schema({"src": STRING_SCHEMA}),
-    "video": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "video_picker": _gallery_module_schema({"accept": STRING_SCHEMA}),
-    "video_renderer": _gallery_module_schema({"src": STRING_SCHEMA}),
-    "image": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "image_picker": _gallery_module_schema({"accept": STRING_SCHEMA}),
-    "image_renderer": _gallery_module_schema({"src": STRING_SCHEMA}),
-    "document": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "document_picker": _gallery_module_schema({"accept": STRING_SCHEMA}),
-    "document_renderer": _gallery_module_schema({"src": STRING_SCHEMA}),
-    "item_drag_handle": _gallery_module_schema({}),
-    "item_drop_target": _gallery_module_schema({"height": NUMBER_SCHEMA}),
-    "item_reorder_handle": _gallery_module_schema({}),
-    "item_selection_checkbox": _gallery_module_schema({"selected": BOOL_SCHEMA}),
-    "item_selection_radio": _gallery_module_schema({"selected": BOOL_SCHEMA}),
-    "item_selection_switch": _gallery_module_schema({"selected": BOOL_SCHEMA}),
-    "apply": _gallery_module_schema({}),
-    "clear": _gallery_module_schema({}),
-    "select_all": _gallery_module_schema({}),
-    "deselect_all": _gallery_module_schema({}),
-    "apply_font": _gallery_module_schema({"font": STRING_SCHEMA}),
-    "apply_image": _gallery_module_schema({"image": ANY_SCHEMA}),
-    "set_as_wallpaper": _gallery_module_schema({}),
-    "presets": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-    "skins": _gallery_module_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-}
-
-GALLERY_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        # Layout type (new unified approach)
-        "layout": {"type": "string", "enum": GALLERY_LAYOUT_TYPES},
-        # Item properties
-        "items": {"type": "array", "items": GALLERY_ITEM_SCHEMA},
-        # Layout configuration
-        "columns": INTEGER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "mainAxisSpacing": NUMBER_SCHEMA,
-        "crossAxisSpacing": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        # Display options
-        "showSelection": BOOL_SCHEMA,
-        "multiSelect": BOOL_SCHEMA,
-        "showActions": BOOL_SCHEMA,
-        "showMeta": BOOL_SCHEMA,
-        "scrollDirection": STRING_SCHEMA,
-        "physics": STRING_SCHEMA,
-        "shrinkWrap": BOOL_SCHEMA,
-        # Legacy module support (for backward compatibility)
-        "module": {"type": "string", "enum": GALLERY_MODULE_ENUM},
-        "state": {"type": "string", "enum": GALLERY_STATE_ENUM},
-        "custom_layout": BOOL_SCHEMA,
-        "manifest": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "registries": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "selectable": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "events": {"type": "array", "items": {"type": "string", "enum": GALLERY_EVENT_ENUM}},
-        "modules": {
-            "type": "object",
-            "properties": {name: GALLERY_MODULE_SCHEMAS[name] for name in GALLERY_MODULE_ENUM},
-            "additionalProperties": False,
-        },
-        "toolbar": GALLERY_MODULE_SCHEMAS["toolbar"],
-        "filter_bar": GALLERY_MODULE_SCHEMAS["filter_bar"],
-        "grid_layout": GALLERY_MODULE_SCHEMAS["grid_layout"],
-        "item_actions": GALLERY_MODULE_SCHEMAS["item_actions"],
-        "item_badge": GALLERY_MODULE_SCHEMAS["item_badge"],
-        "item_meta_row": GALLERY_MODULE_SCHEMAS["item_meta_row"],
-        "item_preview": GALLERY_MODULE_SCHEMAS["item_preview"],
-        "item_selectable": GALLERY_MODULE_SCHEMAS["item_selectable"],
-        "item_tile": GALLERY_MODULE_SCHEMAS["item_tile"],
-        "pagination": GALLERY_MODULE_SCHEMAS["pagination"],
-        "section_header": GALLERY_MODULE_SCHEMAS["section_header"],
-        "sort_bar": GALLERY_MODULE_SCHEMAS["sort_bar"],
-        "empty_state": GALLERY_MODULE_SCHEMAS["empty_state"],
-        "loading_skeleton": GALLERY_MODULE_SCHEMAS["loading_skeleton"],
-        "search_bar": GALLERY_MODULE_SCHEMAS["search_bar"],
-        "fonts": GALLERY_MODULE_SCHEMAS["fonts"],
-        "font_picker": GALLERY_MODULE_SCHEMAS["font_picker"],
-        "font_renderer": GALLERY_MODULE_SCHEMAS["font_renderer"],
-        "audio": GALLERY_MODULE_SCHEMAS["audio"],
-        "audio_picker": GALLERY_MODULE_SCHEMAS["audio_picker"],
-        "audio_renderer": GALLERY_MODULE_SCHEMAS["audio_renderer"],
-        "video": GALLERY_MODULE_SCHEMAS["video"],
-        "video_picker": GALLERY_MODULE_SCHEMAS["video_picker"],
-        "video_renderer": GALLERY_MODULE_SCHEMAS["video_renderer"],
-        "image": GALLERY_MODULE_SCHEMAS["image"],
-        "image_picker": GALLERY_MODULE_SCHEMAS["image_picker"],
-        "image_renderer": GALLERY_MODULE_SCHEMAS["image_renderer"],
-        "document": GALLERY_MODULE_SCHEMAS["document"],
-        "document_picker": GALLERY_MODULE_SCHEMAS["document_picker"],
-        "document_renderer": GALLERY_MODULE_SCHEMAS["document_renderer"],
-        "item_drag_handle": GALLERY_MODULE_SCHEMAS["item_drag_handle"],
-        "item_drop_target": GALLERY_MODULE_SCHEMAS["item_drop_target"],
-        "item_reorder_handle": GALLERY_MODULE_SCHEMAS["item_reorder_handle"],
-        "item_selection_checkbox": GALLERY_MODULE_SCHEMAS["item_selection_checkbox"],
-        "item_selection_radio": GALLERY_MODULE_SCHEMAS["item_selection_radio"],
-        "item_selection_switch": GALLERY_MODULE_SCHEMAS["item_selection_switch"],
-        "apply": GALLERY_MODULE_SCHEMAS["apply"],
-        "clear": GALLERY_MODULE_SCHEMAS["clear"],
-        "select_all": GALLERY_MODULE_SCHEMAS["select_all"],
-        "deselect_all": GALLERY_MODULE_SCHEMAS["deselect_all"],
-        "apply_font": GALLERY_MODULE_SCHEMAS["apply_font"],
-        "apply_image": GALLERY_MODULE_SCHEMAS["apply_image"],
-        "set_as_wallpaper": GALLERY_MODULE_SCHEMAS["set_as_wallpaper"],
-        "presets": GALLERY_MODULE_SCHEMAS["presets"],
-        "skins": GALLERY_MODULE_SCHEMAS["skins"],
-    }
-)
-
-GALLERY_SCOPE_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        # Layout type
-        "layout": {"type": "string", "enum": GALLERY_LAYOUT_TYPES},
-        # Layout configuration
-        "columns": INTEGER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "mainAxisSpacing": NUMBER_SCHEMA,
-        "crossAxisSpacing": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-    }
-)
-
-# ============================================================================
-# Skins Module Types - New unified Skins control
-# Uses existing components from ButterflyUI to let users build their own skins
-# ============================================================================
-
-SKINS_MODULE_TYPES = [
-    # Layout modules
-    "row",
-    "column",
-    "stack",
-    "wrap",
-    "align",
-    "container",
-    "card",
-    "button",
-    "badge",
-    "border",
-    "page",
-    # Decoration modules
-    "gradient",
-    "decorated",
-    "clip",
-    # Effects modules
-    "effects",
-    "particles",
-    "canvas",
-    # Motion modules
-    "animation",
-    "motion",
-    "transition",
-]
-
-# Skins tokens schema for theme customization
-SKINS_TOKENS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "background": STRING_SCHEMA,
-        "surface": STRING_SCHEMA,
-        "surfaceAlt": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "mutedText": STRING_SCHEMA,
-        "border": STRING_SCHEMA,
-        "primary": STRING_SCHEMA,
-        "secondary": STRING_SCHEMA,
-        "success": STRING_SCHEMA,
-        "warning": STRING_SCHEMA,
-        "info": STRING_SCHEMA,
-        "error": STRING_SCHEMA,
-        "radius": {
-            "type": "object",
-            "properties": {
-                "sm": NUMBER_SCHEMA,
-                "md": NUMBER_SCHEMA,
-                "lg": NUMBER_SCHEMA,
-            },
-        },
-        "spacing": {
-            "type": "object",
-            "properties": {
-                "xs": NUMBER_SCHEMA,
-                "sm": NUMBER_SCHEMA,
-                "md": NUMBER_SCHEMA,
-                "lg": NUMBER_SCHEMA,
-            },
-        },
-        "effects": {
-            "type": "object",
-            "properties": {
-                "glassBlur": NUMBER_SCHEMA,
-                "shadow": BOOL_SCHEMA,
-                "glow": BOOL_SCHEMA,
-                "fire": BOOL_SCHEMA,
-                "cyber": BOOL_SCHEMA,
-            },
-        },
-        "sound": {
-            "type": "object",
-            "properties": {
-                "click": STRING_SCHEMA,
-                "hover": STRING_SCHEMA,
-                "success": STRING_SCHEMA,
-                "error": STRING_SCHEMA,
-                "warning": STRING_SCHEMA,
-                "info": STRING_SCHEMA,
-            },
-        },
-    },
-}
-
-SKINS_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "module": {"type": "string", "enum": SKINS_MODULE_TYPES},
-        "skin": STRING_SCHEMA,  # Preset skin name: "default", "shadow", "fire", "earth", "gaming"
-        "tokens": SKINS_TOKENS_SCHEMA,  # Custom tokens for skin
-        "brightness": STRING_SCHEMA,  # "light" or "dark"
-        # Layout properties
-        "main": STRING_SCHEMA,  # Main axis alignment
-        "cross": STRING_SCHEMA,  # Cross axis alignment
-        "size": STRING_SCHEMA,  # Main axis size
-        "direction": STRING_SCHEMA,  # Direction for wrap
-        "alignment": STRING_SCHEMA,  # Alignment for align control
-        "width": NUMBER_SCHEMA,  # Width factor for align
-        "height": NUMBER_SCHEMA,  # Height factor for align
-        "fit": STRING_SCHEMA,  # Stack fit
-        "spacing": NUMBER_SCHEMA,  # Wrap spacing
-        "runSpacing": NUMBER_SCHEMA,  # Wrap run spacing
-        # Decoration properties
-        "padding": ANY_SCHEMA,
-        "margin": ANY_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "gradient": ANY_SCHEMA,
-        "bgcolor": STRING_SCHEMA,
-        "background": STRING_SCHEMA,
-        "shadow": ANY_SCHEMA,
-        "border": ANY_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "color": STRING_SCHEMA,
-        "elevation": NUMBER_SCHEMA,
-        "shadowColor": STRING_SCHEMA,
-        # Effects properties
-        "shimmer": BOOL_SCHEMA,
-        "overlay": BOOL_SCHEMA,
-        # Motion properties
-        "duration_ms": INTEGER_SCHEMA,
-        "curve": STRING_SCHEMA,
-        "preset": STRING_SCHEMA,
-    }
-)
-
-# SkinsScope schema for applying skins to children
-SKINS_SCOPE_SCHEMA = _control_schema(
-    {
-        "schema_version": INTEGER_SCHEMA,
-        "skin": STRING_SCHEMA,  # Preset skin name
-        "tokens": SKINS_TOKENS_SCHEMA,  # Custom tokens
-        "brightness": STRING_SCHEMA,  # "light" or "dark"
-    }
-)
-
-ROW_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "main_axis": STRING_SCHEMA,
-        "cross_axis": STRING_SCHEMA,
-    }
-)
-
-COLUMN_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "main_axis": STRING_SCHEMA,
-        "cross_axis": STRING_SCHEMA,
-    }
-)
-
-STACK_SCHEMA = _control_schema(
-    {
-        "alignment": ALIGNMENT_SCHEMA,
-        "fit": STRING_SCHEMA,
-        "clip": BOOL_SCHEMA,
-    }
-)
-
-WRAP_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "run_spacing": NUMBER_SCHEMA,
-        "alignment": STRING_SCHEMA,
-        "run_alignment": STRING_SCHEMA,
-        "cross_axis": STRING_SCHEMA,
-        "direction": STRING_SCHEMA,
-    }
-)
-
-GRID_SCHEMA = _control_schema(
-    {
-        "columns": INTEGER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "run_spacing": NUMBER_SCHEMA,
-        "child_aspect_ratio": NUMBER_SCHEMA,
-        "scrollable": BOOL_SCHEMA,
-        "virtual": BOOL_SCHEMA,
-    }
-)
-
-SCROLL_VIEW_SCHEMA = _control_schema(
-    {
-        "direction": STRING_SCHEMA,
-        "content_padding": PADDING_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "initial_offset": NUMBER_SCHEMA,
-    }
-)
-
-EXPANDED_SCHEMA = _control_schema(
-    {
-        "flex": INTEGER_SCHEMA,
-        "fit": STRING_SCHEMA,
-    }
-)
-
-SPACER_SCHEMA = _control_schema(
-    {
-        "size": NUMBER_SCHEMA,
-    }
-)
-
-MARKDOWN_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "selectable": BOOL_SCHEMA,
-        "scrollable": BOOL_SCHEMA,
-    }
-)
-
-HTML_SCHEMA = _control_schema(
-    {
-        "html": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "html_file": STRING_SCHEMA,
-        "base_url": STRING_SCHEMA,
-    }
-)
-
-CODE_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "selectable": BOOL_SCHEMA,
-    }
-)
-
-JSON_VIEW_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "selectable": BOOL_SCHEMA,
-    }
-)
-
-JSON_TREE_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "selected_path": STRING_SCHEMA,
-        "expand_all": BOOL_SCHEMA,
-        "show_types": BOOL_SCHEMA,
-        "show_counts": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "max_depth": INTEGER_SCHEMA,
-    }
-)
-
-JSON_INSPECTOR_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "path": STRING_SCHEMA,
-        "schema": ANY_SCHEMA,
-        "show_path": BOOL_SCHEMA,
-        "show_type": BOOL_SCHEMA,
-        "show_size": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "max_items": INTEGER_SCHEMA,
-    }
-)
-
-JSON_TABLE_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "max_rows": INTEGER_SCHEMA,
-        "show_index": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-JSON_DIFF_SCHEMA = _control_schema(
-    {
-        "before": ANY_SCHEMA,
-        "after": ANY_SCHEMA,
-        "left": ANY_SCHEMA,
-        "right": ANY_SCHEMA,
-        "max_depth": INTEGER_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-JSON_EDITOR_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "text": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "show_toolbar": BOOL_SCHEMA,
-        "emit_on_change": BOOL_SCHEMA,
-        "renderer": STRING_SCHEMA,
-        "engine": STRING_SCHEMA,
-    }
-)
-
-JSON_PATH_PICKER_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "json": ANY_SCHEMA,
-        "path": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "show_tree": BOOL_SCHEMA,
-        "expand_all": BOOL_SCHEMA,
-        "max_matches": INTEGER_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-PROGRESS_SCHEMA = _control_schema(
-    {
-        "value": NUMBER_SCHEMA,
-        "label": STRING_SCHEMA,
-        "variant": STRING_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "background_color": COLOR_SCHEMA,
-        "stroke_width": NUMBER_SCHEMA,
-    }
-)
-
-EMOJI_ICON_SCHEMA = _control_schema(
-    {
-        "emoji": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "fallback": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "text": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "text_color": COLOR_SCHEMA,
-        "fgcolor": COLOR_SCHEMA,
-        "variant": STRING_SCHEMA,
-        "outline_width": NUMBER_SCHEMA,
-        "outline_color": COLOR_SCHEMA,
-        "stroke_width": NUMBER_SCHEMA,
-        "stroke_color": COLOR_SCHEMA,
-        "shadow_color": COLOR_SCHEMA,
-        "shadow_blur": NUMBER_SCHEMA,
-        "shadow_dx": NUMBER_SCHEMA,
-        "shadow_dy": NUMBER_SCHEMA,
-        "glow_color": COLOR_SCHEMA,
-        "glow_blur": NUMBER_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "bg_color": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "content_padding": PADDING_SCHEMA,
-        "inner_padding": PADDING_SCHEMA,
-        "icon_padding": PADDING_SCHEMA,
-        "animation": {"type": "object"},
-    }
-)
-
-COLOR_PICKER_SCHEMA = _control_schema(
-    {
-        "value": COLOR_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "mode": STRING_SCHEMA,
-        "picker_mode": STRING_SCHEMA,
-        "show_alpha": BOOL_SCHEMA,
-        "alpha": BOOL_SCHEMA,
-        "presets": {"type": "array", "items": COLOR_SCHEMA},
-        "emit_on_change": BOOL_SCHEMA,
-        "show_actions": BOOL_SCHEMA,
-        "show_input": BOOL_SCHEMA,
-        "show_hex": BOOL_SCHEMA,
-        "show_presets": BOOL_SCHEMA,
-        "preset_size": NUMBER_SCHEMA,
-        "preset_spacing": NUMBER_SCHEMA,
-        "preview_height": NUMBER_SCHEMA,
-        "input_label": STRING_SCHEMA,
-        "input_placeholder": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "commit_text": STRING_SCHEMA,
-        "cancel_text": STRING_SCHEMA,
-    }
-)
-
-COLOR_SWATCH_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "value": COLOR_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-COLOR_SWATCH_GRID_SCHEMA = _control_schema(
-    {
-        "swatches": {"type": "array", "items": COLOR_SWATCH_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "selected_index": INTEGER_SCHEMA,
-        "columns": INTEGER_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "show_add": BOOL_SCHEMA,
-        "show_remove": BOOL_SCHEMA,
-        "groups": {"type": "array", "items": ANY_SCHEMA},
-        "group_by": STRING_SCHEMA,
-        "responsive": BOOL_SCHEMA,
-    }
-)
-
-GRADIENT_STOP_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "position": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-GRADIENT_EDITOR_SCHEMA = _control_schema(
-    {
-        "stops": {"type": "array", "items": GRADIENT_STOP_SCHEMA},
-        "angle": NUMBER_SCHEMA,
-        "show_angle": BOOL_SCHEMA,
-        "show_add": BOOL_SCHEMA,
-        "show_remove": BOOL_SCHEMA,
-        "live_preview": BOOL_SCHEMA,
-        "export_format": STRING_SCHEMA,
-    }
-)
-
-HISTOGRAM_SERIES_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "values": {"type": "array", "items": NUMBER_SCHEMA},
-        "color": COLOR_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-HISTOGRAM_VIEW_SCHEMA = _control_schema(
-    {
-        "values": {"type": "array", "items": NUMBER_SCHEMA},
-        "series": {"type": "array", "items": HISTOGRAM_SERIES_SCHEMA},
-        "color": COLOR_SCHEMA,
-        "bar_width": NUMBER_SCHEMA,
-    }
-)
-
-CROP_BOX_SCHEMA = _control_schema(
-    {
-        "rect": RECT_SCHEMA,
-        "shade_color": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-RULER_GUIDES_SCHEMA = _control_schema(
-    {
-        "h_guides": {"type": "array", "items": NUMBER_SCHEMA},
-        "v_guides": {"type": "array", "items": NUMBER_SCHEMA},
-        "ruler_size": NUMBER_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "guide_color": COLOR_SCHEMA,
-    }
-)
-
-ADJUSTMENT_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "value": NUMBER_SCHEMA,
-        "min": NUMBER_SCHEMA,
-        "max": NUMBER_SCHEMA,
-        "step": NUMBER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "show_toggle": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-ADJUSTMENT_PANEL_SCHEMA = _control_schema(
-    {
-        "adjustments": {"type": "array", "items": ADJUSTMENT_ITEM_SCHEMA},
-        "title": STRING_SCHEMA,
-        "show_reset": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-CURVE_POINT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "x": NUMBER_SCHEMA,
-        "y": NUMBER_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-CURVE_EDITOR_SCHEMA = _control_schema(
-    {
-        "points": {"type": "array", "items": CURVE_POINT_SCHEMA},
-        "color": COLOR_SCHEMA,
-        "show_grid": BOOL_SCHEMA,
-        "show_points": BOOL_SCHEMA,
-        "allow_add": BOOL_SCHEMA,
-        "allow_remove": BOOL_SCHEMA,
-        "line_width": NUMBER_SCHEMA,
-        "point_size": NUMBER_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-HISTOGRAM_OVERLAY_SCHEMA = _control_schema(
-    {
-        "values": {"type": "array", "items": NUMBER_SCHEMA},
-        "series": {"type": "array", "items": HISTOGRAM_SERIES_SCHEMA},
-        "color": COLOR_SCHEMA,
-        "bar_width": NUMBER_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-        "padding": PADDING_SCHEMA,
-    }
-)
-
-BRUSH_PANEL_SCHEMA = _control_schema(
-    {
-        "size": NUMBER_SCHEMA,
-        "min_size": NUMBER_SCHEMA,
-        "max_size": NUMBER_SCHEMA,
-        "hardness": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "flow": NUMBER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "smoothing": NUMBER_SCHEMA,
-        "shape": STRING_SCHEMA,
-        "shapes": {"type": "array", "items": STRING_SCHEMA},
-        "show_preview": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-LAYER_MASK_EDITOR_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "src": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "inverted": BOOL_SCHEMA,
-        "show_toggle": BOOL_SCHEMA,
-        "show_invert": BOOL_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-        "show_edit": BOOL_SCHEMA,
-        "preview_size": NUMBER_SCHEMA,
-        "background": COLOR_SCHEMA,
-    }
-)
-
-BLEND_MODE_PICKER_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "options": {"type": "array", "items": STRING_SCHEMA},
-        "items": {"type": "array", "items": ANY_SCHEMA},
-        "label": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "preview": BOOL_SCHEMA,
-        "sample": {"type": "object"},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-HISTORY_ENTRY_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "timestamp": STRING_SCHEMA,
-        "active": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-HISTORY_STACK_SCHEMA = _control_schema(
-    {
-        "entries": {"type": "array", "items": HISTORY_ENTRY_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_index": BOOL_SCHEMA,
-        "show_timestamp": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-TRANSFORM_ACTION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "icon": ICON_VALUE_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-TRANSFORM_TOOLBAR_SCHEMA = _control_schema(
-    {
-        "actions": {"type": "array", "items": TRANSFORM_ACTION_SCHEMA},
-        "active_id": STRING_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-GUIDE_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "axis": STRING_SCHEMA,
-        "position": NUMBER_SCHEMA,
-        "min": NUMBER_SCHEMA,
-        "max": NUMBER_SCHEMA,
-        "locked": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-GUIDES_MANAGER_SCHEMA = _control_schema(
-    {
-        "guides": {"type": "array", "items": GUIDE_ITEM_SCHEMA},
-        "show_add": BOOL_SCHEMA,
-        "show_remove": BOOL_SCHEMA,
-        "show_lock": BOOL_SCHEMA,
-        "show_axis": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-RULERS_OVERLAY_SCHEMA = _control_schema(
-    {
-        "ruler_size": NUMBER_SCHEMA,
-        "tick_spacing": NUMBER_SCHEMA,
-        "major_tick": INTEGER_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "zoom": NUMBER_SCHEMA,
-        "origin": OFFSET_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "tick_color": COLOR_SCHEMA,
-        "label_color": COLOR_SCHEMA,
-    }
-)
-
-SELECTION_TOOL_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "icon": ICON_VALUE_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-SELECTION_TOOLS_SCHEMA = _control_schema(
-    {
-        "tools": {"type": "array", "items": SELECTION_TOOL_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-PRESET_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "thumbnail": STRING_SCHEMA,
-        "src": STRING_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "description": STRING_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-PRESET_GALLERY_SCHEMA = _control_schema(
-    {
-        "presets": {"type": "array", "items": PRESET_ITEM_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "columns": INTEGER_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-        "tile_size": NUMBER_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-EXPORT_PANEL_SCHEMA = _control_schema(
-    {
-        "formats": {"type": "array", "items": STRING_SCHEMA},
-        "format": STRING_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "quality": NUMBER_SCHEMA,
-        "show_size": BOOL_SCHEMA,
-        "show_quality": BOOL_SCHEMA,
-        "show_export": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-INFO_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "icon": ICON_VALUE_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "clickable": BOOL_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-INFO_BAR_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": INFO_ITEM_SCHEMA},
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-MINI_MAP_SCHEMA = _control_schema(
-    {
-        "viewport": RECT_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "viewport_color": COLOR_SCHEMA,
-        "show_viewport": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_CANVAS_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-        "hovered_id": STRING_SCHEMA,
-        "allow_drop": BOOL_SCHEMA,
-        "show_grid": BOOL_SCHEMA,
-        "snap_to_grid": BOOL_SCHEMA,
-        "grid_size": NUMBER_SCHEMA,
-        "show_drop_hints": BOOL_SCHEMA,
-        "use_native_drag": BOOL_SCHEMA,
-        "expand_child": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_TIMELINE_SURFACE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "tracks": {"type": "array", "items": {"type": "object"}},
-        "playhead_seconds": NUMBER_SCHEMA,
-        "duration_seconds": NUMBER_SCHEMA,
-        "pixels_per_second": NUMBER_SCHEMA,
-        "snap_enabled": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_NODE_SURFACE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "edges": {"type": "array", "items": {"type": "object"}},
-        "world_width": NUMBER_SCHEMA,
-        "world_height": NUMBER_SCHEMA,
-    }
-)
-
-STUDIO_PREVIEW_SURFACE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "title": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "status": STRING_SCHEMA,
-        "source": STRING_SCHEMA,
-    }
-)
-
-STUDIO_TOKENS_EDITOR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "json": STRING_SCHEMA,
-        "tokens": {"type": "object"},
-    }
-)
-
-STUDIO_BUILDER_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "project": {"type": "object"},
-        "blocks": {"type": "array", "items": {"type": "object"}},
-        "assets": {"type": "array", "items": {"type": "object"}},
-        "breakpoints": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "show_palette": BOOL_SCHEMA,
-        "show_inspector": BOOL_SCHEMA,
-        "show_assets": BOOL_SCHEMA,
-        "show_actions": BOOL_SCHEMA,
-        "show_bindings": BOOL_SCHEMA,
-        "show_responsive": BOOL_SCHEMA,
-        "show_project_panel": BOOL_SCHEMA,
-        "palette_width": NUMBER_SCHEMA,
-        "inspector_width": NUMBER_SCHEMA,
-        "bottom_panel_height": NUMBER_SCHEMA,
-        "show_grid": BOOL_SCHEMA,
-        "snap_to_grid": BOOL_SCHEMA,
-        "grid_size": NUMBER_SCHEMA,
-        "show_drop_hints": BOOL_SCHEMA,
-        "sync_mode": STRING_SCHEMA,
-        "use_native_drag": BOOL_SCHEMA,
-        "expand_canvas_child": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_BLOCK_PALETTE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "query": STRING_SCHEMA,
-        "blocks": {"type": "array", "items": {"type": "object"}},
-        "show_search": BOOL_SCHEMA,
-        "title": STRING_SCHEMA,
-        "use_native_drag": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_INSPECTOR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "node": {"type": "object"},
-        "show_raw": BOOL_SCHEMA,
-        "show_actions": BOOL_SCHEMA,
-        "show_bindings": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_ASSET_BROWSER_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "assets": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "show_header": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_ACTIONS_EDITOR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "actions": {"type": "object"},
-        "target_id": STRING_SCHEMA,
-    }
-)
-
-STUDIO_BINDINGS_EDITOR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "bindings": {"type": "object"},
-        "target_id": STRING_SCHEMA,
-    }
-)
-
-STUDIO_RESPONSIVE_TOOLBAR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "breakpoints": {"type": "array", "items": {"type": "object"}},
-        "current_id": STRING_SCHEMA,
-    }
-)
-
-STUDIO_PROJECT_PANEL_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "project": {"type": "object"},
-    }
-)
-
-STUDIO_OUTLINE_TREE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-STUDIO_PROPERTIES_PANEL_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "schema": {"type": "object"},
-        "value": {"type": "object"},
-        "title": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-MARKDOWN_VIEW_SCHEMA = MARKDOWN_SCHEMA
-HTML_VIEW_SCHEMA = HTML_SCHEMA
-
-CODE_BLOCK_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "selectable": BOOL_SCHEMA,
-        "show_header": BOOL_SCHEMA,
-        "show_copy": BOOL_SCHEMA,
-        "show_language": BOOL_SCHEMA,
-        "show_wrap_toggle": BOOL_SCHEMA,
-    }
-)
-
-ARTIFACT_CARD_SCHEMA = _control_schema(
-    {
-        "title": STRING_SCHEMA,
-        "message": STRING_SCHEMA,
-        "variant": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "action_label": STRING_SCHEMA,
-        "clickable": BOOL_SCHEMA,
-    }
-)
-
-MESSAGE_BUBBLE_SCHEMA = _control_schema(
-    {
-        "text": STRING_SCHEMA,
-        "value": STRING_SCHEMA,
-        "role": STRING_SCHEMA,
-        "align": STRING_SCHEMA,
-        "status": STRING_SCHEMA,
-        "timestamp": STRING_SCHEMA,
-        "markdown": BOOL_SCHEMA,
-        "show_role": BOOL_SCHEMA,
-        "show_name": BOOL_SCHEMA,
-        "show_avatar": BOOL_SCHEMA,
-        "grouped": BOOL_SCHEMA,
-        "name": STRING_SCHEMA,
-        "avatar": STRING_SCHEMA,
-        "clickable": BOOL_SCHEMA,
-        "padding": {"type": "array"},
-        "radius": NUMBER_SCHEMA,
-        "bgcolor": STRING_SCHEMA,
-        "text_color": STRING_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-    }
-)
-
-CHAT_THREAD_SCHEMA = _control_schema(
-    {
-        "messages": {"type": "array", "items": ANY_SCHEMA},
-        "spacing": NUMBER_SCHEMA,
-        "padding": {"type": "array"},
-        "reverse": BOOL_SCHEMA,
-        "scrollable": BOOL_SCHEMA,
-        "align": STRING_SCHEMA,
-        "group_messages": BOOL_SCHEMA,
-        "show_timestamps": BOOL_SCHEMA,
-        "auto_scroll": BOOL_SCHEMA,
-        "input_placeholder": STRING_SCHEMA,
-    }
-)
-
-AVATAR_STACK_SCHEMA = _control_schema(
-    {
-        "avatars": {"type": "array", "items": {"type": "object"}},
-        "size": NUMBER_SCHEMA,
-        "overlap": NUMBER_SCHEMA,
-        "max": INTEGER_SCHEMA,
-        "max_visible": INTEGER_SCHEMA,
-        "max_count": INTEGER_SCHEMA,
-        "overflow_label": STRING_SCHEMA,
-        "stack_order": STRING_SCHEMA,
-        "expand_on_hover": BOOL_SCHEMA,
-    }
-)
-
-MESSAGE_META_SCHEMA = _control_schema(
-    {
-        "timestamp": STRING_SCHEMA,
-        "status": STRING_SCHEMA,
-        "edited": BOOL_SCHEMA,
-        "pinned": BOOL_SCHEMA,
-        "align": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-ATTACHMENT_TILE_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "type": STRING_SCHEMA,
-        "src": STRING_SCHEMA,
-        "clickable": BOOL_SCHEMA,
-        "show_remove": BOOL_SCHEMA,
-    }
-)
-
-REACTION_BAR_SCHEMA = _control_schema(
-    {
-        "reactions": {"type": "array", "items": {"type": "object"}},
-        "show_add": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "selected_color": STRING_SCHEMA,
-    }
-)
-
-QUOTED_MESSAGE_SCHEMA = _control_schema(
-    {
-        "author": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "accent_color": STRING_SCHEMA,
-    }
-)
-
-TYPING_INDICATOR_SCHEMA = _control_schema(
-    {
-        "size": NUMBER_SCHEMA,
-        "color": STRING_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-MESSAGE_COMPOSER_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "show_attachments": BOOL_SCHEMA,
-        "show_attach": BOOL_SCHEMA,
-        "emit_on_change": BOOL_SCHEMA,
-        "clear_on_send": BOOL_SCHEMA,
-        "min_lines": INTEGER_SCHEMA,
-        "max_lines": INTEGER_SCHEMA,
-        "send_label": STRING_SCHEMA,
-        "attachments": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-MENTION_PILL_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "color": STRING_SCHEMA,
-        "text_color": STRING_SCHEMA,
-        "clickable": BOOL_SCHEMA,
-    }
-)
-
-MESSAGE_DIVIDER_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "padding": {"type": "array"},
-        "color": STRING_SCHEMA,
-        "text_color": STRING_SCHEMA,
-    }
-)
-
-PROMPT_COMPOSER_SCHEMA = MESSAGE_COMPOSER_SCHEMA
-
-GLOW_EFFECT_SCHEMA = _control_schema(
-    {
-        "color": COLOR_SCHEMA,
-        "blur": NUMBER_SCHEMA,
-        "spread": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "offset_x": NUMBER_SCHEMA,
-        "offset_y": NUMBER_SCHEMA,
-        "clip": BOOL_SCHEMA,
-        "intensity": NUMBER_SCHEMA,
-        "direction": OFFSET_SCHEMA,
-        "animated": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-NEON_EDGE_SCHEMA = _control_schema(
-    {
-        "color": COLOR_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "glow": NUMBER_SCHEMA,
-        "spread": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "animated": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-GLASS_BLUR_SCHEMA = _control_schema(
-    {
-        "blur": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "noise_opacity": NUMBER_SCHEMA,
-        "border_glow": COLOR_SCHEMA,
-    }
-)
-
-GRAIN_OVERLAY_SCHEMA = _control_schema(
-    {
-        "opacity": NUMBER_SCHEMA,
-        "density": NUMBER_SCHEMA,
-        "seed": INTEGER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "animated": BOOL_SCHEMA,
-        "fps": INTEGER_SCHEMA,
-    }
-)
-
-GRADIENT_SWEEP_SCHEMA = _control_schema(
-    {
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "stops": {"type": "array", "items": NUMBER_SCHEMA},
-        "duration_ms": INTEGER_SCHEMA,
-        "duration": INTEGER_SCHEMA,
-        "angle": NUMBER_SCHEMA,
-        "start_angle": NUMBER_SCHEMA,
-        "end_angle": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "playing": BOOL_SCHEMA,
-    }
-)
-
-SHIMMER_SCHEMA = _control_schema(
-    {
-        "base_color": STRING_SCHEMA,
-        "highlight_color": STRING_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "angle": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-    }
-)
-
-SHADOW_STACK_SCHEMA = _control_schema(
-    {
-        "shadows": {"type": "array", "items": {"type": "object"}},
-        "radius": NUMBER_SCHEMA,
-    }
-)
-
-OUTLINE_REVEAL_SCHEMA = _control_schema(
-    {
-        "color": STRING_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-        "animate": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-RIPPLE_BURST_SCHEMA = _control_schema(
-    {
-        "color": STRING_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-CONFETTI_BURST_SCHEMA = _control_schema(
-    {
-        "colors": {"type": "array", "items": COLOR_SCHEMA},
-        "count": INTEGER_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "duration": INTEGER_SCHEMA,
-        "gravity": NUMBER_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "emit_on_complete": BOOL_SCHEMA,
-        "hide_button": BOOL_SCHEMA,
-    }
-)
-
-NOISE_DISPLACEMENT_SCHEMA = _control_schema(
-    {
-        "strength": NUMBER_SCHEMA,
-        "speed": NUMBER_SCHEMA,
-        "axis": STRING_SCHEMA,
-        "seed": INTEGER_SCHEMA,
-        "animated": BOOL_SCHEMA,
-        "loop": BOOL_SCHEMA,
-        "play": BOOL_SCHEMA,
-        "autoplay": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-PARALLAX_OFFSET_SCHEMA = _control_schema(
-    {
-        "x": NUMBER_SCHEMA,
-        "y": NUMBER_SCHEMA,
-        "depth": NUMBER_SCHEMA,
-    }
-)
-
-PARALLAX_SCHEMA = _control_schema(
-    {
-        "max_offset": NUMBER_SCHEMA,
-        "reset_on_exit": BOOL_SCHEMA,
-        "depths": {"type": "array", "items": NUMBER_SCHEMA},
-    }
-)
-
-LIQUID_MORPH_SCHEMA = _control_schema(
-    {
-        "min_radius": NUMBER_SCHEMA,
-        "max_radius": NUMBER_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "animate": BOOL_SCHEMA,
-    }
-)
-
-CHROMATIC_SHIFT_SCHEMA = _control_schema(
-    {
-        "shift": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "axis": STRING_SCHEMA,
-        "red": COLOR_SCHEMA,
-        "blue": COLOR_SCHEMA,
-    }
-)
-
-BORDER_SCHEMA = _control_schema(
-    {
-        "color": COLOR_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "side": STRING_SCHEMA,
-        "sides": {"type": "object", "additionalProperties": True},
-        "animated": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-BORDER_SIDE_SCHEMA = _control_schema(
-    {
-        "side": STRING_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "length": NUMBER_SCHEMA,
-        "top": {"type": "object", "additionalProperties": True},
-        "right": {"type": "object", "additionalProperties": True},
-        "bottom": {"type": "object", "additionalProperties": True},
-        "left": {"type": "object", "additionalProperties": True},
-        "animated": BOOL_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-    }
-)
-
-BUTTON_STYLE_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "options": {"type": "array", "items": ANY_SCHEMA},
-        "items": {"type": "array", "items": ANY_SCHEMA},
-        "base": {"type": "object", "additionalProperties": True},
-        "hover": {"type": "object", "additionalProperties": True},
-        "pressed": {"type": "object", "additionalProperties": True},
-        "disabled": {"type": "object", "additionalProperties": True},
-        "focus_ring": {"type": "object", "additionalProperties": True},
-        "motion_behavior": {"type": "object", "additionalProperties": True},
-        "action": ANY_SCHEMA,
-        "actions": {"type": "array", "items": ANY_SCHEMA},
-        "action_id": STRING_SCHEMA,
-        "action_event": STRING_SCHEMA,
-        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
-    }
-)
-
-SCANLINE_OVERLAY_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "thickness": NUMBER_SCHEMA,
-        "opacity": NUMBER_SCHEMA,
-        "color": STRING_SCHEMA,
-    }
-)
-
-PIXELATE_SCHEMA = _control_schema(
-    {
-        "pixel_size": NUMBER_SCHEMA,
-    }
-)
-
-VIGNETTE_SCHEMA = _control_schema(
-    {
-        "intensity": NUMBER_SCHEMA,
-        "color": STRING_SCHEMA,
-    }
-)
-
-TILT_HOVER_SCHEMA = _control_schema(
-    {
-        "max_angle": NUMBER_SCHEMA,
-        "perspective": NUMBER_SCHEMA,
-        "scale": NUMBER_SCHEMA,
-    }
-)
-
-MORPHING_BORDER_SCHEMA = _control_schema(
-    {
-        "min_radius": NUMBER_SCHEMA,
-        "max_radius": NUMBER_SCHEMA,
-        "duration_ms": INTEGER_SCHEMA,
-        "animate": BOOL_SCHEMA,
-        "color": STRING_SCHEMA,
-        "width": NUMBER_SCHEMA,
-    }
-)
-
-SEARCH_BOX_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-    }
-)
-
-SEARCH_BAR_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "query": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "suggestions": {"type": "array", "items": ANY_SCHEMA},
-        "filters": {"type": "array", "items": ANY_SCHEMA},
-        "debounce_ms": INTEGER_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-        "show_suggestions": BOOL_SCHEMA,
-        "max_suggestions": INTEGER_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-SEARCH_ITEM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "title": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "description": STRING_SCHEMA,
-        "group": STRING_SCHEMA,
-        "scope": STRING_SCHEMA,
-        "icon": ICON_VALUE_SCHEMA,
-        "emoji": STRING_SCHEMA,
-        "badge": STRING_SCHEMA,
-        "shortcut": STRING_SCHEMA,
-        "image": STRING_SCHEMA,
-        "kind": STRING_SCHEMA,
-        "tags": {"type": "array", "items": STRING_SCHEMA},
-        "keywords": {"type": "array", "items": STRING_SCHEMA},
-        "meta": {"type": "object"},
-        "score": NUMBER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "payload": ANY_SCHEMA,
-    },
-    "additionalProperties": True,
-}
-
-SEARCH_SOURCE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "icon": ICON_VALUE_SCHEMA,
-        "emoji": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "priority": NUMBER_SCHEMA,
-        "limit": INTEGER_SCHEMA,
-        "items": {"type": "array", "items": SEARCH_ITEM_SCHEMA},
-    },
-    "additionalProperties": True,
-}
-
-SMART_SEARCH_BAR_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "debounce_ms": INTEGER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "autofocus": BOOL_SCHEMA,
-        "emit_on_empty": BOOL_SCHEMA,
-        "show_history": BOOL_SCHEMA,
-        "history_limit": INTEGER_SCHEMA,
-        "history_id": STRING_SCHEMA,
-        "provider_id": STRING_SCHEMA,
-    }
-)
-
-SEARCH_SCOPE_SELECTOR_SCHEMA = _control_schema(
-    {
-        "scopes": {"type": "array", "items": ANY_SCHEMA},
-        "selected": STRING_SCHEMA,
-        "selected_index": INTEGER_SCHEMA,
-        "default_scope": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "provider_id": STRING_SCHEMA,
-    }
-)
-
-FILTER_CHIPS_BAR_SCHEMA = _control_schema(
-    {
-        "filters": {"type": "array", "items": ANY_SCHEMA},
-        "values": {"type": "array", "items": ANY_SCHEMA},
-        "indices": {"type": "array", "items": INTEGER_SCHEMA},
-        "multi_select": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-    }
-)
-
-INTENT_SEARCH_SCHEMA = _control_schema(
-    {
-        "intents": {"type": "array", "items": SEARCH_ITEM_SCHEMA},
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "debounce_ms": INTEGER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "autofocus": BOOL_SCHEMA,
-        "fuzzy": BOOL_SCHEMA,
-        "show_all_on_empty": BOOL_SCHEMA,
-        "max_results": INTEGER_SCHEMA,
-        "emit_on_empty": BOOL_SCHEMA,
-    }
-)
-
-SEARCH_RESULTS_VIEW_SCHEMA = _control_schema(
-    {
-        "results": {"type": "array", "items": SEARCH_ITEM_SCHEMA},
-        "state": STRING_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "grouped": BOOL_SCHEMA,
-        "grid_columns": INTEGER_SCHEMA,
-        "grid_spacing": NUMBER_SCHEMA,
-        "grid_aspect_ratio": NUMBER_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_icons": BOOL_SCHEMA,
-        "show_tags": BOOL_SCHEMA,
-        "show_badges": BOOL_SCHEMA,
-        "show_meta": BOOL_SCHEMA,
-        "show_scores": BOOL_SCHEMA,
-        "show_descriptions": BOOL_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-        "query": STRING_SCHEMA,
-        "empty_title": STRING_SCHEMA,
-        "empty_message": STRING_SCHEMA,
-        "error_title": STRING_SCHEMA,
-        "error_message": STRING_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "loading_count": INTEGER_SCHEMA,
-        "provider_id": STRING_SCHEMA,
-    }
-)
-
-COMMAND_SEARCH_SCHEMA = _control_schema(
-    {
-        "commands": {"type": "array", "items": SEARCH_ITEM_SCHEMA},
-        "open": BOOL_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "title": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "hotkeys": {"type": "array", "items": STRING_SCHEMA},
-        "dense": BOOL_SCHEMA,
-        "fuzzy": BOOL_SCHEMA,
-        "show_all_on_empty": BOOL_SCHEMA,
-        "max_results": INTEGER_SCHEMA,
-        "dismiss_on_select": BOOL_SCHEMA,
-        "close_on_escape": BOOL_SCHEMA,
-        "max_width": NUMBER_SCHEMA,
-        "max_height": NUMBER_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-    }
-)
-
-INLINE_SEARCH_OVERLAY_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "position": STRING_SCHEMA,
-        "offset": {"type": "array"},
-        "dismissible": BOOL_SCHEMA,
-        "close_on_escape": BOOL_SCHEMA,
-        "match_width": BOOL_SCHEMA,
-        "max_width": NUMBER_SCHEMA,
-        "max_height": NUMBER_SCHEMA,
-        "elevation": NUMBER_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-    }
-)
-
-RESULT_PREVIEW_PANE_SCHEMA = _control_schema(
-    {
-        "item": {"type": "object"},
-        "selected_item": {"type": "object"},
-        "dense": BOOL_SCHEMA,
-        "empty_title": STRING_SCHEMA,
-        "empty_message": STRING_SCHEMA,
-    }
-)
-
-SEARCH_PROVIDER_SCHEMA = _control_schema(
-    {
-        "sources": {"type": "array", "items": SEARCH_SOURCE_SCHEMA},
-        "query": STRING_SCHEMA,
-        "scope": STRING_SCHEMA,
-        "fuzzy": BOOL_SCHEMA,
-        "include_empty": BOOL_SCHEMA,
-        "limit": INTEGER_SCHEMA,
-        "min_score": NUMBER_SCHEMA,
-        "emit_on_change": BOOL_SCHEMA,
-    }
-)
-
-SEARCH_HISTORY_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": STRING_SCHEMA},
-        "max_items": INTEGER_SCHEMA,
-        "persist": BOOL_SCHEMA,
-        "storage_key": STRING_SCHEMA,
-        "dedupe": BOOL_SCHEMA,
-    }
-)
-
-DIRECTORY_PICKER_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-PATH_FIELD_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "label": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "mode": STRING_SCHEMA,
-        "file_type": STRING_SCHEMA,
-        "extensions": {"type": "array", "items": STRING_SCHEMA},
-        "suggested_name": STRING_SCHEMA,
-        "show_browse": BOOL_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-KEYBIND_RECORDER_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "show_clear": BOOL_SCHEMA,
-    }
-)
-
-IDE_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "code": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "theme": STRING_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-        "emit_on_search_change": BOOL_SCHEMA,
-        "search_debounce_ms": INTEGER_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "word_wrap": BOOL_SCHEMA,
-        "show_gutter": BOOL_SCHEMA,
-        "line_numbers": BOOL_SCHEMA,
-        "glyph_margin": BOOL_SCHEMA,
-        "show_breakpoints": BOOL_SCHEMA,
-        "show_minimap": BOOL_SCHEMA,
-        "minimap": BOOL_SCHEMA,
-        "render_whitespace": STRING_SCHEMA,
-        "format_on_type": BOOL_SCHEMA,
-        "format_on_paste": BOOL_SCHEMA,
-        "document_uri": STRING_SCHEMA,
-        "documents": {"type": "array", "items": {"type": "object"}},
-        "tab_size": INTEGER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "cursor_blink": BOOL_SCHEMA,
-        "cursor_color": COLOR_SCHEMA,
-        "selection_color": COLOR_SCHEMA,
-        "line_highlight_color": COLOR_SCHEMA,
-        "editor_bg": COLOR_SCHEMA,
-        "editor_background": COLOR_SCHEMA,
-        "editor_text_color": COLOR_SCHEMA,
-        "padding_top": NUMBER_SCHEMA,
-        "padding_bottom": NUMBER_SCHEMA,
-        "chrome_padding": PADDING_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "engine": STRING_SCHEMA,
-        "webview_engine": STRING_SCHEMA,
-    }
-)
-
-OUTPUT_PANEL_SCHEMA = _control_schema(
-    {
-        "channels": {"type": "object"},
-        "active_channel": STRING_SCHEMA,
-    }
-)
-
-EDITOR_TAB_STRIP_SCHEMA = _control_schema(
-    {
-        "tabs": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-WORKSPACE_TREE_SCHEMA = _control_schema(
-    {
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "items": {"type": "array", "items": {"type": "object"}},
-        "roots": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-PROBLEMS_PANEL_SCHEMA = _control_schema(
-    {
-        "problems": {"type": "array", "items": {"type": "object"}},
-        "items": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-EDITOR_WORKSPACE_SCHEMA = _control_schema(
-    {
-        "documents": {"type": "array", "items": {"type": "object"}},
-        "tabs": {"type": "array", "items": {"type": "object"}},
-        "active_id": STRING_SCHEMA,
-        "workspace_nodes": {"type": "array", "items": {"type": "object"}},
-        "problems": {"type": "array", "items": {"type": "object"}},
-        "show_explorer": BOOL_SCHEMA,
-        "show_problems": BOOL_SCHEMA,
-        "show_status_bar": BOOL_SCHEMA,
-        "status_text": STRING_SCHEMA,
-    }
-)
-
-SIDEBAR_SCHEMA = _control_schema(
-    {
-        "sections": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "show_search": BOOL_SCHEMA,
-        "query": STRING_SCHEMA,
-        "collapsible": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-        "emit_on_search_change": BOOL_SCHEMA,
-        "search_debounce_ms": INTEGER_SCHEMA,
-        "open": BOOL_SCHEMA,
-        "side": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-    }
-)
-
-APP_BAR_SCHEMA = _control_schema(
-    {
-        "title": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "center_title": BOOL_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "bgcolor": STRING_SCHEMA,
-        "elevation": NUMBER_SCHEMA,
-        "padding": {"type": "array"},
-        "show_search": BOOL_SCHEMA,
-        "search_value": STRING_SCHEMA,
-        "search_placeholder": STRING_SCHEMA,
-        "search_enabled": BOOL_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-        "emit_on_search_change": BOOL_SCHEMA,
-        "search_debounce_ms": INTEGER_SCHEMA,
-    }
-)
-
-OVERLAY_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-        "alignment": ANY_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-    }
-)
-
-MODAL_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-    }
-)
-
-PROBLEM_SCREEN_SCHEMA = _control_schema(
-    {
-        "title": STRING_SCHEMA,
-        "message": STRING_SCHEMA,
-        "severity": {"type": "string", "enum": ["error", "fatal", "warning", "info"]},
-        "traceback": STRING_SCHEMA,
-        "files": {"type": "array", "items": {"type": "object"}},
-        "related_files": {"type": "array", "items": STRING_SCHEMA},
-        "related_modules": {"type": "array", "items": {"type": "object"}},
-        "session_id": STRING_SCHEMA,
-        "ui_snapshot": {"type": "object"},
-        "error_classes": {"type": "array", "items": STRING_SCHEMA},
-        "error_class": STRING_SCHEMA,
-        "error_kind": STRING_SCHEMA,
-        "hint": STRING_SCHEMA,
-        "actions": {"type": "array", "items": {"type": "object"}},
-        "variant": STRING_SCHEMA,
-    }
-)
-
-BOOT_HOST_SCHEMA = _control_schema(
-    {
-        "message": STRING_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-        "actions": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-POPOVER_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "position": STRING_SCHEMA,
-        "offset": {"type": "array"},
-        "dismissible": BOOL_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-    }
-)
-
-SLIDE_PANEL_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "emit_on_search_change": BOOL_SCHEMA,
-        "search_debounce_ms": INTEGER_SCHEMA,
-        "side": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-    }
-)
-
-SIDE_DRAWER_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "side": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "scrim_color": COLOR_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-    }
-)
-
-BOTTOM_SHEET_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "dismissible": BOOL_SCHEMA,
-        "scrim_color": STRING_SCHEMA,
-        "height": NUMBER_SCHEMA,
-        "max_height": NUMBER_SCHEMA,
-    }
-)
-
-CRUMB_TRAIL_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": ANY_SCHEMA},
-        "current_index": INTEGER_SCHEMA,
-        "separator": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-RESIZABLE_PANEL_SCHEMA = _control_schema(
-    {
-        "axis": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "min_size": NUMBER_SCHEMA,
-        "max_size": NUMBER_SCHEMA,
-        "resizable": BOOL_SCHEMA,
-        "reverse": BOOL_SCHEMA,
-        "handle_size": NUMBER_SCHEMA,
-        "handle_color": STRING_SCHEMA,
-        "emit_on_change": BOOL_SCHEMA,
-    }
-)
-
-SCROLLABLE_COLUMN_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "padding": {"type": "array"},
-        "reverse": BOOL_SCHEMA,
-        "sticky_header": BOOL_SCHEMA,
-    }
-)
-
-SCROLLABLE_ROW_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "padding": {"type": "array"},
-        "reverse": BOOL_SCHEMA,
-        "sticky_header": BOOL_SCHEMA,
-    }
-)
-
-FILE_TREE_SCHEMA = _control_schema(
-    {
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "expanded": {"type": "array", "items": STRING_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-LOG_VIEWER_SCHEMA = _control_schema(
-    {
-        "entries": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-        "show_filters": BOOL_SCHEMA,
-        "level": STRING_SCHEMA,
-    }
-)
-
-NOTIFICATION_CENTER_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-PROGRESS_OVERLAY_SCHEMA = _control_schema(
-    {
-        "open": BOOL_SCHEMA,
-        "message": STRING_SCHEMA,
-        "value": NUMBER_SCHEMA,
-        "scrim_color": STRING_SCHEMA,
-    }
-)
-
-DOWNLOAD_ITEM_SCHEMA = _control_schema(
-    {
-        "id": STRING_SCHEMA,
-        "title": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "progress": NUMBER_SCHEMA,
-        "status": STRING_SCHEMA,
-        "speed": STRING_SCHEMA,
-        "eta": STRING_SCHEMA,
-        "paused": BOOL_SCHEMA,
-    }
-)
-
-QUEUE_LIST_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-EMOJI_PICKER_SCHEMA = _control_schema(
-    {
-        "value": STRING_SCHEMA,
-        "emojis": {"type": "array", "items": STRING_SCHEMA},
-        "items": {"type": "array", "items": STRING_SCHEMA},
-        "categories": {"type": "array", "items": STRING_SCHEMA},
-        "recent": {"type": "array", "items": STRING_SCHEMA},
-        "skin_tone": STRING_SCHEMA,
-        "show_search": BOOL_SCHEMA,
-        "show_recent": BOOL_SCHEMA,
-        "category": STRING_SCHEMA,
-        "query": STRING_SCHEMA,
-        "include_metadata": BOOL_SCHEMA,
-        "recent_limit": INTEGER_SCHEMA,
-        "columns": INTEGER_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "selected": STRING_SCHEMA,
-    }
-)
-
-ICON_PICKER_SCHEMA = EMOJI_PICKER_SCHEMA
-
-REORDERABLE_LIST_SCHEMA = _control_schema(
-    {
-        "axis": STRING_SCHEMA,
-        "padding": {"type": "array"},
-        "build_default_handles": BOOL_SCHEMA,
-    }
-)
-
-REORDERABLE_TREE_SCHEMA = _control_schema(
-    {
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "build_default_handles": BOOL_SCHEMA,
-    }
-)
-
-DRAG_HANDLE_SCHEMA = _control_schema(
-    {
-        "index": INTEGER_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-AUTO_FORM_SCHEMA = _control_schema(
-    {
-        "schema": {"type": "object"},
-        "fields": {"type": "array", "items": {"type": "object"}},
-        "value": {"type": "object"},
-        "values": {"type": "object"},
-        "title": STRING_SCHEMA,
-        "description": STRING_SCHEMA,
-        "submit_label": STRING_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "columns": INTEGER_SCHEMA,
-        "show_labels": BOOL_SCHEMA,
-        "label_width": NUMBER_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "validation_rules": {"type": "object"},
-        "visibility_rules": {"type": "object"},
-    }
-)
-
-SURFACE_SCHEMA = _control_schema(
-    {
-        "bgcolor": STRING_SCHEMA,
-        "border_color": STRING_SCHEMA,
-        "border_width": NUMBER_SCHEMA,
-        "radius": NUMBER_SCHEMA,
-        "elevation": NUMBER_SCHEMA,
-        "content_alignment": STRING_SCHEMA,
-        "content_padding": {"type": "array"},
-    }
-)
-
-# IDE controls
-CODE_BUFFER_SCHEMA = _control_schema(
-    {
-        "text": STRING_SCHEMA,
-        "buffer_id": STRING_SCHEMA,
-        "version": INTEGER_SCHEMA,
-        "dirty": BOOL_SCHEMA,
-        "metadata": {"type": "object"},
-    }
-)
-
-CODE_DOCUMENT_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "buffer_id": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "cursors": {"type": "array", "items": {"type": "object"}},
-        "selections": {"type": "array", "items": {"type": "object"}},
-        "diagnostics": {"type": "array", "items": {"type": "object"}},
-        "tokens": {"type": "array", "items": {"type": "object"}},
-        "semantic_items": {"type": "array", "items": {"type": "object"}},
-        "category_items": {"type": "array", "items": {"type": "object"}},
-        "ownership_items": {"type": "array", "items": {"type": "object"}},
-        "metadata": {"type": "object"},
-    }
-)
-
-MULTI_CURSOR_CONTROLLER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "cursors": {"type": "array", "items": {"type": "object"}},
-        "selections": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-SYNTAX_LAYER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "tokens": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-FOLD_LAYER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "ranges": {"type": "array", "items": {"type": "object"}},
-        "folded_ids": {"type": "array", "items": STRING_SCHEMA},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-SEMANTIC_LAYER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "items": {"type": "array", "items": {"type": "object"}},
-        "semantic_items": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-CODE_CATEGORY_LAYER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "items": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-OWNERSHIP_MARKER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "items": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-INLINE_WIDGET_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "line": INTEGER_SCHEMA,
-        "column": INTEGER_SCHEMA,
-        "offset_y": NUMBER_SCHEMA,
-        "offset": NUMBER_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-    }
-)
-
-VIRTUAL_FILE_SYSTEM_SCHEMA = _control_schema(
-    {
-        "vfs_id": STRING_SCHEMA,
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "root_id": STRING_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-        "expanded": {"type": "array", "items": STRING_SCHEMA},
-        "version": INTEGER_SCHEMA,
-    }
-)
-
-FILE_SYSTEM_SCHEMA = _control_schema(
-    {
-        "root": STRING_SCHEMA,
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "selected_path": STRING_SCHEMA,
-        "show_hidden": BOOL_SCHEMA,
-        "readonly": BOOL_SCHEMA,
-        "events": {"type": "array", "items": STRING_SCHEMA},
-        "vfs_id": STRING_SCHEMA,
-        "root_id": STRING_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-        "expanded": {"type": "array", "items": STRING_SCHEMA},
-        "version": INTEGER_SCHEMA,
-    }
-)
-
-EDITOR_INTENT_ROUTER_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "shortcuts": {"type": "array", "items": {"type": "object"}},
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-FOCUS_MODE_CONTROLLER_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "hidden_panels": {"type": "array", "items": STRING_SCHEMA},
-        "hidden": {"type": "array", "items": STRING_SCHEMA},
-    }
-)
-
-CONTROL_PRESET_SCHEMA = _control_schema(
-    {
-        "preset_id": STRING_SCHEMA,
-        "props": {"type": "object"},
-        "target_types": {"type": "array", "items": STRING_SCHEMA},
-    }
-)
-
-BEHAVIOR_MIXINS_SCHEMA = _control_schema(
-    {
-        "mixins_id": STRING_SCHEMA,
-        "mixins": {"type": "array", "items": STRING_SCHEMA},
-    }
-)
-
-EDITOR_VIEW_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "buffer_id": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "line_height": NUMBER_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "tab_size": INTEGER_SCHEMA,
-        "cursor_color": COLOR_SCHEMA,
-        "selection_color": COLOR_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "preset_id": STRING_SCHEMA,
-        "behavior_ids": {"type": "array", "items": STRING_SCHEMA},
-        "behaviors": {"type": "array", "items": STRING_SCHEMA},
-        "current_line": INTEGER_SCHEMA,
-    }
-)
-
-EDITOR_SURFACE_SCHEMA = _control_schema(
-    {
-        "document_id": STRING_SCHEMA,
-        "buffer_id": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "language": STRING_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-        "wrap": BOOL_SCHEMA,
-        "line_height": NUMBER_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-        "tab_size": INTEGER_SCHEMA,
-        "cursor_color": COLOR_SCHEMA,
-        "selection_color": COLOR_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "show_gutter": BOOL_SCHEMA,
-        "show_minimap": BOOL_SCHEMA,
-        "gutter_width": NUMBER_SCHEMA,
-        "minimap_width": NUMBER_SCHEMA,
-        "breakpoints": {"type": "array", "items": INTEGER_SCHEMA},
-        "diagnostics": {"type": "array", "items": {"type": "object"}},
-        "preset_id": STRING_SCHEMA,
-        "behavior_ids": {"type": "array", "items": STRING_SCHEMA},
-        "behaviors": {"type": "array", "items": STRING_SCHEMA},
-        "current_line": INTEGER_SCHEMA,
-    }
-)
-
-GUTTER_SCHEMA = _control_schema(
-    {
-        "line_count": INTEGER_SCHEMA,
-        "current_line": INTEGER_SCHEMA,
-        "breakpoints": {"type": "array", "items": INTEGER_SCHEMA},
-        "diagnostics": {"type": "array", "items": {"type": "object"}},
-        "show_line_numbers": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "width": NUMBER_SCHEMA,
-        "font_size": NUMBER_SCHEMA,
-        "font_family": STRING_SCHEMA,
-    }
-)
-
-SYMBOL_TREE_SCHEMA = _control_schema(
-    {
-        "nodes": {"type": "array", "items": {"type": "object"}},
-        "expanded": {"type": "array", "items": STRING_SCHEMA},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_icons": BOOL_SCHEMA,
-    }
-)
-
-OUTLINE_VIEW_SCHEMA = SYMBOL_TREE_SCHEMA
-BREADCRUMB_BAR_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": {"type": "object"}},
-        "path": STRING_SCHEMA,
-        "current_index": INTEGER_SCHEMA,
-        "separator": STRING_SCHEMA,
-        "max_items": INTEGER_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "dropdown_levels": BOOL_SCHEMA,
-        "show_root": BOOL_SCHEMA,
-        "compact": BOOL_SCHEMA,
-    }
-)
-STATUS_BAR_SCHEMA = _control_schema(
-    {
-        "items": {"type": "array", "items": INFO_ITEM_SCHEMA},
-        "text": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-    }
-)
-COMMAND_PALETTE_SCHEMA = COMMAND_SEARCH_SCHEMA
-
-CONTEXT_ACTION_BAR_SCHEMA = _control_schema(
-    {
-        "spacing": NUMBER_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "bgcolor": COLOR_SCHEMA,
-        "alignment": ALIGNMENT_SCHEMA,
-    }
-)
-
-DIAGNOSTIC_STREAM_SCHEMA = _control_schema(
-    {
-        "entries": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-        "show_filters": BOOL_SCHEMA,
-        "show_search": BOOL_SCHEMA,
-        "level": STRING_SCHEMA,
-        "query": STRING_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-    }
-)
-
-EXECUTION_LANE_SCHEMA = _control_schema(
-    {
-        "entries": {"type": "array", "items": {"type": "object"}},
-        "state": STRING_SCHEMA,
-        "position": INTEGER_SCHEMA,
-        "show_controls": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-STATE_INSPECTOR_SCHEMA = _control_schema(
-    {
-        "value": ANY_SCHEMA,
-        "scopes": {"type": "array", "items": {"type": "object"}},
-        "selected_scope": STRING_SCHEMA,
-        "show_path": BOOL_SCHEMA,
-        "show_type": BOOL_SCHEMA,
-        "show_size": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-DOCK_GRAPH_SCHEMA = _control_schema(
-    {
-        "layout": {"type": "object"},
-        "panels": {"type": "array", "items": {"type": "object"}},
-        "focus_mode_id": STRING_SCHEMA,
-        "divider_size": NUMBER_SCHEMA,
-        "tab_height": NUMBER_SCHEMA,
-    }
-)
-
-INTENT_PANEL_SCHEMA = _control_schema(
-    {
-        "intents": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-        "show_search": BOOL_SCHEMA,
-        "query": STRING_SCHEMA,
-    }
-)
-
-DIFF_NARRATOR_SCHEMA = _control_schema(
-    {
-        "summary": STRING_SCHEMA,
-        "risk": STRING_SCHEMA,
-        "changes": {"type": "array", "items": {"type": "object"}},
-        "before": STRING_SCHEMA,
-        "after": STRING_SCHEMA,
-        "show_diff": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-GHOST_EDITOR_SCHEMA = _control_schema(
-    {
-        "base_document_id": STRING_SCHEMA,
-        "ghost_document_id": STRING_SCHEMA,
-        "show_diff": BOOL_SCHEMA,
-        "diff_mode": STRING_SCHEMA,
-        "split_ratio": NUMBER_SCHEMA,
-        "read_only": BOOL_SCHEMA,
-    }
-)
-
-PREVIEW_SURFACE_SCHEMA = _control_schema(
-    {
-        "title": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "status": STRING_SCHEMA,
-        "active": BOOL_SCHEMA,
-        "show_border": BOOL_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "padding": PADDING_SCHEMA,
-        "empty_title": STRING_SCHEMA,
-        "empty_message": STRING_SCHEMA,
-        "actions": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-NATIVE_PREVIEW_HOST_SCHEMA = _control_schema(
-    {
-        "window_handle": INTEGER_SCHEMA,
-        "process_id": INTEGER_SCHEMA,
-        "visible": BOOL_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "background": COLOR_SCHEMA,
-    }
-)
-
-STATE_SNAPSHOT_SCHEMA = _control_schema(
-    {
-        "snapshots": {"type": "array", "items": {"type": "object"}},
-        "entries": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_controls": BOOL_SCHEMA,
-    }
-)
-
-HOT_RELOAD_BOUNDARY_SCHEMA = _control_schema(
-    {
-        "label": STRING_SCHEMA,
-        "description": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "mode": STRING_SCHEMA,
-        "show_switch": BOOL_SCHEMA,
-        "action_label": STRING_SCHEMA,
-        "border_color": COLOR_SCHEMA,
-        "background": COLOR_SCHEMA,
-        "padding": PADDING_SCHEMA,
-    }
-)
-
-SEMANTIC_SEARCH_SCHEMA = _control_schema(
-    {
-        "query": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "scopes": {"type": "array", "items": {"type": "object"}},
-        "selected_scope": STRING_SCHEMA,
-        "results": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-        "show_scopes": BOOL_SCHEMA,
-        "show_results": BOOL_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "empty_title": STRING_SCHEMA,
-        "empty_message": STRING_SCHEMA,
-    }
-)
-
-SCOPED_SEARCH_REPLACE_SCHEMA = _control_schema(
-    {
-        "query": STRING_SCHEMA,
-        "replace": STRING_SCHEMA,
-        "scopes": {"type": "array", "items": {"type": "object"}},
-        "selected_scope": STRING_SCHEMA,
-        "regex": BOOL_SCHEMA,
-        "case_sensitive": BOOL_SCHEMA,
-        "whole_word": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-INTENT_ROUTER_SCHEMA = _control_schema(
-    {
-        "intents": {"type": "array", "items": {"type": "object"}},
-        "query": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-        "show_search": BOOL_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-    }
-)
-
-PREVIEW_INTENT_INTERCEPTOR_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "mode": STRING_SCHEMA,
-        "intents": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-PREVIEW_PRESETS_SCHEMA = _control_schema(
-    {
-        "presets": {"type": "array", "items": {"type": "object"}},
-        "selected_id": STRING_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }
-)
-
-LAYOUT_FREEZE_SCHEMA = _control_schema(
-    {
-        "enabled": BOOL_SCHEMA,
-        "label": STRING_SCHEMA,
-        "description": STRING_SCHEMA,
-        "show_toggle": BOOL_SCHEMA,
-    }
-)
-
-TIME_TRAVEL_LITE_SCHEMA = _control_schema(
-    {
-        "steps": {"type": "array", "items": {"type": "object"}},
-        "entries": {"type": "array", "items": {"type": "object"}},
-        "position": INTEGER_SCHEMA,
-        "state": STRING_SCHEMA,
-        "show_controls": BOOL_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-LIVE_CONTROL_PICKER_SCHEMA = _control_schema(
-    {
-        "active": BOOL_SCHEMA,
-        "selected_id": STRING_SCHEMA,
-        "selected_path": STRING_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-    }
-)
-
-PREVIEW_ERROR_OVERLAY_SCHEMA = _control_schema(
-    {
-        "visible": BOOL_SCHEMA,
-        "title": STRING_SCHEMA,
-        "message": STRING_SCHEMA,
-        "details": STRING_SCHEMA,
-        "severity": STRING_SCHEMA,
-        "actions": {"type": "array", "items": {"type": "object"}},
-    }
-)
-
-SEARCH_EVERYTHING_PANEL_SCHEMA = _control_schema(
-    {
-        "query": STRING_SCHEMA,
-        "placeholder": STRING_SCHEMA,
-        "filters": {"type": "array", "items": {"type": "object"}},
-        "categories": {"type": "array", "items": {"type": "object"}},
-        "selected_filters": {"type": "array", "items": STRING_SCHEMA},
-        "results": {"type": "array", "items": {"type": "object"}},
-        "dense": BOOL_SCHEMA,
-        "show_filters": BOOL_SCHEMA,
-        "show_results": BOOL_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "empty_title": STRING_SCHEMA,
-        "empty_message": STRING_SCHEMA,
-    }
-)
-
-CONTROL_SCHEMAS = {
-    "align": _control_schema({"alignment": ALIGNMENT_SCHEMA, "width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA}),
-    "center": _control_schema({"width_factor": NUMBER_SCHEMA, "height_factor": NUMBER_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "text": TEXT_SCHEMA,
-    "markdown": MARKDOWN_SCHEMA,
-    "markdown_view": MARKDOWN_VIEW_SCHEMA,
-    "html": HTML_SCHEMA,
-    "html_view": HTML_VIEW_SCHEMA,
-    "code": CODE_SCHEMA,
-    "code_view": CODE_SCHEMA,
-    "code_block": CODE_BLOCK_SCHEMA,
-    "diff": JSON_DIFF_SCHEMA,
-    "diff_view": JSON_DIFF_SCHEMA,
-    "rich_text_editor": _control_schema({"value": STRING_SCHEMA, "text": STRING_SCHEMA, "read_only": BOOL_SCHEMA}),
-    "rich_text": _control_schema({"value": STRING_SCHEMA, "text": STRING_SCHEMA, "read_only": BOOL_SCHEMA}),
-    "rte": _control_schema({"value": STRING_SCHEMA, "text": STRING_SCHEMA, "read_only": BOOL_SCHEMA}),
-    "chart": _control_schema({"series": {"type": "array", "items": {"type": "object"}}, "data": ANY_SCHEMA, "kind": STRING_SCHEMA}),
-    "bar_chart": _control_schema(
-        {
-            "values": {"type": "array", "items": NUMBER_SCHEMA},
-            "points": {"type": "array", "items": ANY_SCHEMA},
-            "labels": {"type": "array", "items": STRING_SCHEMA},
-            "datasets": {"type": "array", "items": {"type": "object"}},
-            "grouped": BOOL_SCHEMA,
-            "stacked": BOOL_SCHEMA,
-            "animate": BOOL_SCHEMA,
-            "show_tooltip": BOOL_SCHEMA,
-            "fill": BOOL_SCHEMA,
-            "color": COLOR_SCHEMA,
-            "height": NUMBER_SCHEMA,
-        }
-    ),
-    "line_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "points": {"type": "array", "items": ANY_SCHEMA}, "fill": BOOL_SCHEMA, "color": COLOR_SCHEMA}),
-    "line_chart": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "points": {"type": "array", "items": ANY_SCHEMA}, "fill": BOOL_SCHEMA, "color": COLOR_SCHEMA}),
-    "pie_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "labels": {"type": "array", "items": STRING_SCHEMA}, "colors": {"type": "array", "items": COLOR_SCHEMA}, "donut": BOOL_SCHEMA, "hole": NUMBER_SCHEMA, "start_angle": NUMBER_SCHEMA, "clockwise": BOOL_SCHEMA}),
-    "bar_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "labels": {"type": "array", "items": STRING_SCHEMA}, "color": COLOR_SCHEMA, "spacing": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA}),
-    "sparkline": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "data": ANY_SCHEMA}),
-    "spark_plot": _control_schema({"values": {"type": "array", "items": NUMBER_SCHEMA}, "data": ANY_SCHEMA}),
-    "empty_state": _control_schema({"title": STRING_SCHEMA, "message": STRING_SCHEMA, "action_label": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA}),
-    "error_state": _control_schema({"title": STRING_SCHEMA, "message": STRING_SCHEMA, "error": STRING_SCHEMA, "action_label": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA}),
-    "artifact_card": ARTIFACT_CARD_SCHEMA,
-    "result_card": ARTIFACT_CARD_SCHEMA,
-    "message_bubble": MESSAGE_BUBBLE_SCHEMA,
-    "chat_message": MESSAGE_BUBBLE_SCHEMA,
-    "chat_bubble": MESSAGE_BUBBLE_SCHEMA,
-    "chat_thread": CHAT_THREAD_SCHEMA,
-    "avatar_stack": AVATAR_STACK_SCHEMA,
-    "badge": _control_schema({"label": STRING_SCHEMA, "text": STRING_SCHEMA, "value": STRING_SCHEMA}),
-    "border": BORDER_SCHEMA,
-    "border_side": BORDER_SIDE_SCHEMA,
-    "button_style": BUTTON_STYLE_SCHEMA,
-    "message_meta": MESSAGE_META_SCHEMA,
-    "attachment_tile": ATTACHMENT_TILE_SCHEMA,
-    "reaction_bar": REACTION_BAR_SCHEMA,
-    "quoted_message": QUOTED_MESSAGE_SCHEMA,
-    "rating_display": _control_schema({"value": NUMBER_SCHEMA, "max": INTEGER_SCHEMA, "allow_half": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "typing_indicator": TYPING_INDICATOR_SCHEMA,
-    "message_composer": MESSAGE_COMPOSER_SCHEMA,
-    "async_action_button": _control_schema({
-        "label": STRING_SCHEMA,
-        "text": STRING_SCHEMA,
-        "value": ANY_SCHEMA,
-        "variant": STRING_SCHEMA,
-        "busy": BOOL_SCHEMA,
-        "loading": BOOL_SCHEMA,
-        "disabled_while_busy": BOOL_SCHEMA,
-        "busy_label": STRING_SCHEMA,
-        "action": ANY_SCHEMA,
-        "actions": {"type": "array", "items": ANY_SCHEMA},
-        "action_id": STRING_SCHEMA,
-        "action_event": STRING_SCHEMA,
-        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "window_action": STRING_SCHEMA,
-        "window_action_delay_ms": INTEGER_SCHEMA,
-    }),
-    "prompt_composer": PROMPT_COMPOSER_SCHEMA,
-    "mention_pill": MENTION_PILL_SCHEMA,
-    "persona": _control_schema({
-        "name": STRING_SCHEMA,
-        "subtitle": STRING_SCHEMA,
-        "avatar": STRING_SCHEMA,
-        "status": STRING_SCHEMA,
-        "initials": STRING_SCHEMA,
-        "layout": STRING_SCHEMA,
-        "show_avatar": BOOL_SCHEMA,
-        "avatar_color": COLOR_SCHEMA,
-        "leading": ANY_SCHEMA,
-        "title_widget": ANY_SCHEMA,
-        "subtitle_widget": ANY_SCHEMA,
-        "trailing": ANY_SCHEMA,
-        "content": ANY_SCHEMA,
-        "dense": BOOL_SCHEMA,
-    }),
-    "message_divider": MESSAGE_DIVIDER_SCHEMA,
-    "glow_effect": GLOW_EFFECT_SCHEMA,
-    "neon_edge": NEON_EDGE_SCHEMA,
-    "glass_blur": GLASS_BLUR_SCHEMA,
-    "grain_overlay": GRAIN_OVERLAY_SCHEMA,
-    "gradient_sweep": GRADIENT_SWEEP_SCHEMA,
-    "shimmer": SHIMMER_SCHEMA,
-    "shimmer_shadow": _control_schema({
-        "shimmer": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "shadow": {"type": "object", "additionalProperties": ANY_SCHEMA},
-    }),
-    "shadow_stack": SHADOW_STACK_SCHEMA,
-    "visual_fx": _control_schema({
-        "glow": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "glass_blur": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "chromatic_shift": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "gradient_sweep": {"type": "object", "additionalProperties": ANY_SCHEMA},
-    }),
-    "outline_reveal": OUTLINE_REVEAL_SCHEMA,
-    "ripple_burst": RIPPLE_BURST_SCHEMA,
-    "confetti_burst": CONFETTI_BURST_SCHEMA,
-    "noise_displacement": NOISE_DISPLACEMENT_SCHEMA,
-    "animated_gradient": ANIMATED_GRADIENT_SCHEMA,
-    "noise_field": NOISE_FIELD_SCHEMA,
-    "flow_field": FLOW_FIELD_SCHEMA,
-    "blob_field": BLOB_FIELD_SCHEMA,
-    "parallax_offset": PARALLAX_OFFSET_SCHEMA,
-    "parallax": PARALLAX_SCHEMA,
-    "pan_zoom": _control_schema(PAN_ZOOM_SCHEMA["properties"]),
-    "pose": POSE_SCHEMA,
-    "liquid_morph": LIQUID_MORPH_SCHEMA,
-    "motion": MOTION_SCHEMA,
-    "timeline": _control_schema(TIMELINE_SCHEMA["properties"]),
-    "chromatic_shift": CHROMATIC_SHIFT_SCHEMA,
-    "scanline_overlay": SCANLINE_OVERLAY_SCHEMA,
-    "pixelate": PIXELATE_SCHEMA,
-    "vignette": VIGNETTE_SCHEMA,
-    "tilt_hover": TILT_HOVER_SCHEMA,
-    "morphing_border": MORPHING_BORDER_SCHEMA,
-    "json_view": JSON_VIEW_SCHEMA,
-    "json_tree": JSON_TREE_SCHEMA,
-    "json_inspector": JSON_INSPECTOR_SCHEMA,
-    "json_table": JSON_TABLE_SCHEMA,
-    "json_diff": JSON_DIFF_SCHEMA,
-    "json_editor": JSON_EDITOR_SCHEMA,
-    "json_path_picker": JSON_PATH_PICKER_SCHEMA,
-    "progress": PROGRESS_SCHEMA,
-    "progress_indicator": PROGRESS_SCHEMA,
-    "button": BUTTON_SCHEMA,
-    "icon": _control_schema({"icon": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "tooltip": STRING_SCHEMA}),
-    "icon_button": _control_schema({
-        "icon": ICON_VALUE_SCHEMA,
-        "glyph": STRING_SCHEMA,
-        "tooltip": STRING_SCHEMA,
-        "size": NUMBER_SCHEMA,
-        "color": COLOR_SCHEMA,
-        "enabled": BOOL_SCHEMA,
-        "value": ANY_SCHEMA,
-        "action": ANY_SCHEMA,
-        "actions": {"type": "array", "items": ANY_SCHEMA},
-        "action_id": STRING_SCHEMA,
-        "action_event": STRING_SCHEMA,
-        "action_payload": {"type": "object", "additionalProperties": ANY_SCHEMA},
-    }),
-    "elevated_button": BUTTON_SCHEMA,
-    "filled_button": BUTTON_SCHEMA,
-    "outlined_button": BUTTON_SCHEMA,
-    "text_button": BUTTON_SCHEMA,
-    "glyph_button": _control_schema({"glyph": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "tooltip": STRING_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "text_field": TEXT_FIELD_SCHEMA,
-    "text_area": TEXT_AREA_SCHEMA,
-    "text_field_style": _control_schema({"variant": STRING_SCHEMA, "dense": BOOL_SCHEMA, "filled": BOOL_SCHEMA, "outlined": BOOL_SCHEMA, "radius": NUMBER_SCHEMA, "border_width": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "border_color": COLOR_SCHEMA, "hint_color": COLOR_SCHEMA, "label_color": COLOR_SCHEMA, "text_color": COLOR_SCHEMA}),
-    "search_box": SEARCH_BOX_SCHEMA,
-    "search_bar": SEARCH_BAR_SCHEMA,
-    "smart_search_bar": SMART_SEARCH_BAR_SCHEMA,
-    "search_scope_selector": SEARCH_SCOPE_SELECTOR_SCHEMA,
-    "filter_chips_bar": FILTER_CHIPS_BAR_SCHEMA,
-    "chip_group": FILTER_CHIPS_BAR_SCHEMA,
-    "check_list": _control_schema({"options": {"type": "array", "items": ANY_SCHEMA}, "values": {"type": "array", "items": ANY_SCHEMA}, "dense": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "chip": _control_schema({"label": STRING_SCHEMA, "value": ANY_SCHEMA, "selected": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "dismissible": BOOL_SCHEMA, "color": COLOR_SCHEMA}),
-    "tag_chip": _control_schema({"label": STRING_SCHEMA, "value": ANY_SCHEMA, "selected": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "dismissible": BOOL_SCHEMA, "color": COLOR_SCHEMA, "icon": ICON_VALUE_SCHEMA}),
-    "option": _control_schema({"label": STRING_SCHEMA, "value": ANY_SCHEMA, "description": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "selected": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "select_option": _control_schema({"label": STRING_SCHEMA, "value": ANY_SCHEMA, "description": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "selected": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "tag_filter_bar": FILTER_CHIPS_BAR_SCHEMA,
-    "intent_search": INTENT_SEARCH_SCHEMA,
-    "checkbox": CHECKBOX_SCHEMA,
-    "switch": SWITCH_SCHEMA,
-    "segmented_switch": SWITCH_SCHEMA,
-    "slider": SLIDER_SCHEMA,
-    "span_slider": _control_schema({"start": NUMBER_SCHEMA, "end": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA, "divisions": INTEGER_SCHEMA, "enabled": BOOL_SCHEMA, "labels": BOOL_SCHEMA}),
-    "count_stepper": _control_schema({"value": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA, "step": NUMBER_SCHEMA, "wrap": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "select": SELECT_SCHEMA,
-    "segment_bar": SELECT_SCHEMA,
-    "combobox": SELECT_SCHEMA,
-    "combo_box": SELECT_SCHEMA,
-    "dropdown": SELECT_SCHEMA,
-    "multi_select": SELECT_SCHEMA,
-    "multi_pick": SELECT_SCHEMA,
-    "radio": RADIO_SCHEMA,
-    "file_picker": FILE_PICKER_SCHEMA,
-    "filepicker": FILE_PICKER_SCHEMA,
-    "date_picker": _control_schema(
-        {
-            "value": ANY_SCHEMA,
-            "date": ANY_SCHEMA,
-            "label": STRING_SCHEMA,
-            "placeholder": STRING_SCHEMA,
-            "min_date": STRING_SCHEMA,
-            "max_date": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "enabled": BOOL_SCHEMA,
-        }
-    ),
-    "date_select": _control_schema(
-        {
-            "value": ANY_SCHEMA,
-            "date": ANY_SCHEMA,
-            "label": STRING_SCHEMA,
-            "placeholder": STRING_SCHEMA,
-            "min_date": STRING_SCHEMA,
-            "max_date": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "enabled": BOOL_SCHEMA,
-        }
-    ),
-    "time_select": _control_schema({"value": STRING_SCHEMA, "label": STRING_SCHEMA, "placeholder": STRING_SCHEMA, "minute_step": INTEGER_SCHEMA, "use_24h": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "date_range_picker": _control_schema(
-        {
-            "value": ANY_SCHEMA,
-            "start": ANY_SCHEMA,
-            "end": ANY_SCHEMA,
-            "start_date": ANY_SCHEMA,
-            "end_date": ANY_SCHEMA,
-            "label": STRING_SCHEMA,
-            "placeholder": STRING_SCHEMA,
-            "min_date": STRING_SCHEMA,
-            "max_date": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "enabled": BOOL_SCHEMA,
-        }
-    ),
-    "date_range": _control_schema(
-        {
-            "value": ANY_SCHEMA,
-            "start": ANY_SCHEMA,
-            "end": ANY_SCHEMA,
-            "start_date": ANY_SCHEMA,
-            "end_date": ANY_SCHEMA,
-            "label": STRING_SCHEMA,
-            "placeholder": STRING_SCHEMA,
-            "min_date": STRING_SCHEMA,
-            "max_date": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "enabled": BOOL_SCHEMA,
-        }
-    ),
-    "date_span": _control_schema(
-        {
-            "value": ANY_SCHEMA,
-            "start": ANY_SCHEMA,
-            "end": ANY_SCHEMA,
-            "start_date": ANY_SCHEMA,
-            "end_date": ANY_SCHEMA,
-            "label": STRING_SCHEMA,
-            "placeholder": STRING_SCHEMA,
-            "min_date": STRING_SCHEMA,
-            "max_date": STRING_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "enabled": BOOL_SCHEMA,
-        }
-    ),
-    "directory_picker": DIRECTORY_PICKER_SCHEMA,
-    "path_field": PATH_FIELD_SCHEMA,
-    "keybind_recorder": KEYBIND_RECORDER_SCHEMA,
-    "glyph": _control_schema({"glyph": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA, "tooltip": STRING_SCHEMA}),
-    "search_results_view": SEARCH_RESULTS_VIEW_SCHEMA,
-    "image": IMAGE_SCHEMA,
-    "audio": AUDIO_SCHEMA,
-    "canvas": CANVAS_SCHEMA,
-    "vector_view": VECTOR_VIEW_SCHEMA,
-    "gallery": GALLERY_SCHEMA,
-    "gallery_scope": GALLERY_SCOPE_SCHEMA,
-    "skins": SKINS_SCHEMA,
-    "skins_scope": SKINS_SCOPE_SCHEMA,
-    "video": VIDEO_SCHEMA,
-    "sprite": SPRITE_SCHEMA,
-    "snap_grid": _control_schema(SNAP_GRID_SCHEMA["properties"]),
-    "stagger": _control_schema(STAGGER_SCHEMA["properties"]),
-    "transform_box": TRANSFORM_BOX_SCHEMA,
-    "dock_layout": _control_schema(),
-    "dock": _control_schema(),
-    "pane": _control_schema(),
-    "pane_spec": _control_schema({"slot": STRING_SCHEMA, "title": STRING_SCHEMA, "size": NUMBER_SCHEMA, "width": NUMBER_SCHEMA, "height": NUMBER_SCHEMA, "min_size": NUMBER_SCHEMA, "max_size": NUMBER_SCHEMA, "collapsible": BOOL_SCHEMA, "collapsed": BOOL_SCHEMA}),
-    "dock_pane": _control_schema(),
-    "split_view": _control_schema({"axis": STRING_SCHEMA, "ratio": NUMBER_SCHEMA, "min_ratio": NUMBER_SCHEMA, "max_ratio": NUMBER_SCHEMA, "draggable": BOOL_SCHEMA, "divider_size": NUMBER_SCHEMA}),
-    "split_pane": _control_schema({"axis": STRING_SCHEMA, "ratio": NUMBER_SCHEMA, "min_ratio": NUMBER_SCHEMA, "max_ratio": NUMBER_SCHEMA, "draggable": BOOL_SCHEMA, "divider_size": NUMBER_SCHEMA}),
-    "resizable_panel": RESIZABLE_PANEL_SCHEMA,
-    "scrollable_column": SCROLLABLE_COLUMN_SCHEMA,
-    "scrollable_row": SCROLLABLE_ROW_SCHEMA,
-    "safe_area": SAFE_AREA_SCHEMA,
-    "frame": CONTAINER_SCHEMA,
-    "grid": _control_schema({"columns": INTEGER_SCHEMA, "spacing": NUMBER_SCHEMA, "run_spacing": NUMBER_SCHEMA, "child_aspect_ratio": NUMBER_SCHEMA, "direction": STRING_SCHEMA, "reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA}),
-    "accordion": _control_schema({"sections": {"type": "array", "items": {"type": "object"}}, "labels": {"type": "array", "items": STRING_SCHEMA}, "index": ANY_SCHEMA, "expanded": ANY_SCHEMA, "multiple": BOOL_SCHEMA, "allow_empty": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "show_dividers": BOOL_SCHEMA, "spacing": NUMBER_SCHEMA}),
-    "action_bar": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "dense": BOOL_SCHEMA, "spacing": NUMBER_SCHEMA, "wrap": BOOL_SCHEMA, "alignment": STRING_SCHEMA, "bgcolor": COLOR_SCHEMA}),
-    "inspector_panel": _control_schema(),
-    "route": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA}),
-    "route_view": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA, "child": ANY_SCHEMA, "children": {"type": "array", "items": ANY_SCHEMA}, "layout": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
-    "route_host": _control_schema({"route_id": STRING_SCHEMA, "title": STRING_SCHEMA, "label": STRING_SCHEMA, "child": ANY_SCHEMA}),
-    "sidebar": SIDEBAR_SCHEMA,
-    "app_bar": APP_BAR_SCHEMA,
-    "top_bar": APP_BAR_SCHEMA,
-    "overlay": OVERLAY_SCHEMA,
-    "portal": _control_schema(),
-    "modal": MODAL_SCHEMA,
-    "problem_screen": PROBLEM_SCREEN_SCHEMA,
-    "boot_host": BOOT_HOST_SCHEMA,
-    "popover": POPOVER_SCHEMA,
-    "inline_search_overlay": INLINE_SEARCH_OVERLAY_SCHEMA,
-    "command_search": COMMAND_SEARCH_SCHEMA,
-    "slide_panel": SLIDE_PANEL_SCHEMA,
-    "side_panel": SLIDE_PANEL_SCHEMA,
-    "drawer": SIDE_DRAWER_SCHEMA,
-    "side_drawer": SIDE_DRAWER_SCHEMA,
-    "snackbar": _control_schema({"message": STRING_SCHEMA, "label": STRING_SCHEMA, "open": BOOL_SCHEMA, "duration_ms": INTEGER_SCHEMA, "action_label": STRING_SCHEMA, "variant": STRING_SCHEMA, "style": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "instant": BOOL_SCHEMA, "priority": INTEGER_SCHEMA, "use_flushbar": BOOL_SCHEMA, "use_fluttertoast": BOOL_SCHEMA, "toast_position": STRING_SCHEMA}),
-    "bottom_sheet": BOTTOM_SHEET_SCHEMA,
-    "bounds_probe": BOUNDS_PROBE_SCHEMA,
-    "notification_center": NOTIFICATION_CENTER_SCHEMA,
-    "notification_host": _control_schema(
-        {
-            "items": {"type": "array", "items": {"type": "object"}},
-            "toasts": {"type": "array", "items": {"type": "object"}},
-            "position": STRING_SCHEMA,
-            "max_items": INTEGER_SCHEMA,
-            "latest_on_top": BOOL_SCHEMA,
-            "dismissible": BOOL_SCHEMA,
-            "spacing": NUMBER_SCHEMA,
-            "padding": PADDING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "progress_overlay": PROGRESS_OVERLAY_SCHEMA,
-    "download_item": DOWNLOAD_ITEM_SCHEMA,
-    "queue_list": QUEUE_LIST_SCHEMA,
-    "result_preview_pane": RESULT_PREVIEW_PANE_SCHEMA,
-    "color_swatch_grid": COLOR_SWATCH_GRID_SCHEMA,
-    "color_tools": _control_schema({
-        "picker": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "swatches": {"type": "object", "additionalProperties": ANY_SCHEMA},
-        "presets": {"type": "array", "items": ANY_SCHEMA},
-        "show_picker": BOOL_SCHEMA,
-        "show_swatches": BOOL_SCHEMA,
-        "spacing": NUMBER_SCHEMA,
-    }),
-    "gradient_editor": GRADIENT_EDITOR_SCHEMA,
-    "histogram_view": HISTOGRAM_VIEW_SCHEMA,
-    "crop_box": CROP_BOX_SCHEMA,
-    "ruler_guides": RULER_GUIDES_SCHEMA,
-    "adjustment_panel": ADJUSTMENT_PANEL_SCHEMA,
-    "curve_editor": CURVE_EDITOR_SCHEMA,
-    "histogram_overlay": HISTOGRAM_OVERLAY_SCHEMA,
-    "brush_panel": BRUSH_PANEL_SCHEMA,
-    "layer_mask_editor": LAYER_MASK_EDITOR_SCHEMA,
-    "blend_mode_picker": BLEND_MODE_PICKER_SCHEMA,
-    "history_stack": HISTORY_STACK_SCHEMA,
-    "transform_toolbar": TRANSFORM_TOOLBAR_SCHEMA,
-    "guides_manager": GUIDES_MANAGER_SCHEMA,
-    "rulers_overlay": RULERS_OVERLAY_SCHEMA,
-    "selection_tools": SELECTION_TOOLS_SCHEMA,
-    "preset_gallery": PRESET_GALLERY_SCHEMA,
-    "export_panel": EXPORT_PANEL_SCHEMA,
-    "info_bar": INFO_BAR_SCHEMA,
-    "mini_map": MINI_MAP_SCHEMA,
-    "ide": IDE_SCHEMA,
-    "code_buffer": CODE_BUFFER_SCHEMA,
-    "code_document": CODE_DOCUMENT_SCHEMA,
-    "multi_cursor_controller": MULTI_CURSOR_CONTROLLER_SCHEMA,
-    "syntax_layer": SYNTAX_LAYER_SCHEMA,
-    "fold_layer": FOLD_LAYER_SCHEMA,
-    "layer": LAYER_SCHEMA,
-    "layer_list": _control_schema({"layers": {"type": "array", "items": {"type": "object"}}, "active_layer": STRING_SCHEMA, "active_id": STRING_SCHEMA, "max_visible_overlays": INTEGER_SCHEMA, "mode": STRING_SCHEMA}),
-    "semantic_layer": SEMANTIC_LAYER_SCHEMA,
-    "code_category_layer": CODE_CATEGORY_LAYER_SCHEMA,
-    "ownership_marker": OWNERSHIP_MARKER_SCHEMA,
-    "inline_widget": INLINE_WIDGET_SCHEMA,
-    "virtual_file_system": VIRTUAL_FILE_SYSTEM_SCHEMA,
-    "file_system": FILE_SYSTEM_SCHEMA,
-    "editor_intent_router": EDITOR_INTENT_ROUTER_SCHEMA,
-    "focus_mode_controller": FOCUS_MODE_CONTROLLER_SCHEMA,
-    "control_preset": CONTROL_PRESET_SCHEMA,
-    "behavior_mixins": BEHAVIOR_MIXINS_SCHEMA,
-    "editor_view": EDITOR_VIEW_SCHEMA,
-    "editor_surface": EDITOR_SURFACE_SCHEMA,
-    "gutter": GUTTER_SCHEMA,
-    "symbol_tree": SYMBOL_TREE_SCHEMA,
-    "outline_view": OUTLINE_VIEW_SCHEMA,
-    "outline": OUTLINE_VIEW_SCHEMA,
-    "breadcrumb_bar": BREADCRUMB_BAR_SCHEMA,
-    "crumb_trail": CRUMB_TRAIL_SCHEMA,
-    "status_bar": STATUS_BAR_SCHEMA,
-    "status_mark": _control_schema({"label": STRING_SCHEMA, "status": STRING_SCHEMA, "value": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "dense": BOOL_SCHEMA, "align": STRING_SCHEMA, "color": COLOR_SCHEMA}),
-    "context_action_bar": CONTEXT_ACTION_BAR_SCHEMA,
-    "command_palette": COMMAND_PALETTE_SCHEMA,
-    "diagnostic_stream": DIAGNOSTIC_STREAM_SCHEMA,
-    "execution_lane": EXECUTION_LANE_SCHEMA,
-    "preview_surface": PREVIEW_SURFACE_SCHEMA,
-    "native_preview_host": NATIVE_PREVIEW_HOST_SCHEMA,
-    "state_snapshot": STATE_SNAPSHOT_SCHEMA,
-    "hot_reload_boundary": HOT_RELOAD_BOUNDARY_SCHEMA,
-    "semantic_search": SEMANTIC_SEARCH_SCHEMA,
-    "scoped_search_replace": SCOPED_SEARCH_REPLACE_SCHEMA,
-    "intent_router": INTENT_ROUTER_SCHEMA,
-    "preview_intent_interceptor": PREVIEW_INTENT_INTERCEPTOR_SCHEMA,
-    "preview_presets": PREVIEW_PRESETS_SCHEMA,
-    "layout_freeze": LAYOUT_FREEZE_SCHEMA,
-    "time_travel_lite": TIME_TRAVEL_LITE_SCHEMA,
-    "time_travel": TIME_TRAVEL_LITE_SCHEMA,
-    "live_control_picker": LIVE_CONTROL_PICKER_SCHEMA,
-    "preview_error_overlay": PREVIEW_ERROR_OVERLAY_SCHEMA,
-    "search_everything_panel": SEARCH_EVERYTHING_PANEL_SCHEMA,
-    "state_inspector": STATE_INSPECTOR_SCHEMA,
-    "dock_graph": DOCK_GRAPH_SCHEMA,
-    "intent_panel": INTENT_PANEL_SCHEMA,
-    "diff_narrator": DIFF_NARRATOR_SCHEMA,
-    "ghost_editor": GHOST_EDITOR_SCHEMA,
-    "emoji_picker": EMOJI_PICKER_SCHEMA,
-    "field_group": _control_schema({"label": STRING_SCHEMA, "helper_text": STRING_SCHEMA, "error_text": STRING_SCHEMA, "spacing": NUMBER_SCHEMA, "required": BOOL_SCHEMA}),
-    "filter_drawer": _control_schema({"title": STRING_SCHEMA, "open": BOOL_SCHEMA, "schema": {"type": "object"}, "state": {"type": "object"}, "show_actions": BOOL_SCHEMA, "apply_label": STRING_SCHEMA, "clear_label": STRING_SCHEMA, "dense": BOOL_SCHEMA, "events": {"type": "array", "items": STRING_SCHEMA}}),
-    "icon_picker": ICON_PICKER_SCHEMA,
-    "file_tree": FILE_TREE_SCHEMA,
-    "log_viewer": LOG_VIEWER_SCHEMA,
-    "reorderable_list": REORDERABLE_LIST_SCHEMA,
-    "reorderable_tree": REORDERABLE_TREE_SCHEMA,
-    "drag_handle": DRAG_HANDLE_SCHEMA,
-    "drag_payload": DRAG_PAYLOAD_SCHEMA,
-    "drop_zone": DROP_ZONE_SCHEMA,
-    "focus_anchor": _control_schema({"autofocus": BOOL_SCHEMA, "enabled": BOOL_SCHEMA, "can_request_focus": BOOL_SCHEMA, "skip_traversal": BOOL_SCHEMA, "descendants_are_focusable": BOOL_SCHEMA, "descendants_are_traversable": BOOL_SCHEMA}),
-    "gesture_area": _control_schema({"enabled": BOOL_SCHEMA, "tap_enabled": BOOL_SCHEMA, "double_tap_enabled": BOOL_SCHEMA, "long_press_enabled": BOOL_SCHEMA, "pan_enabled": BOOL_SCHEMA, "scale_enabled": BOOL_SCHEMA}),
-    "pressable": _control_schema({"enabled": BOOL_SCHEMA, "autofocus": BOOL_SCHEMA, "hover_enabled": BOOL_SCHEMA, "focus_enabled": BOOL_SCHEMA}),
-    "hover_region": _control_schema({"enabled": BOOL_SCHEMA, "opaque": BOOL_SCHEMA, "cursor": STRING_SCHEMA, "events": {"type": "array", "items": STRING_SCHEMA}, "throttle_ms": INTEGER_SCHEMA}),
-    "details_pane": _control_schema({"mode": STRING_SCHEMA, "split_ratio": NUMBER_SCHEMA, "stack_breakpoint": NUMBER_SCHEMA, "show_details": BOOL_SCHEMA, "show_back": BOOL_SCHEMA, "back_label": STRING_SCHEMA, "divider": BOOL_SCHEMA}),
-    "flex_spacer": _control_schema({"flex": INTEGER_SCHEMA}),
-    "spacer": _control_schema({"flex": INTEGER_SCHEMA}),
-    "view_stack": _control_schema({"index": INTEGER_SCHEMA, "animate": BOOL_SCHEMA, "duration_ms": INTEGER_SCHEMA, "keep_alive": BOOL_SCHEMA}),
-    "viewport": _control_schema({"width": NUMBER_SCHEMA, "height": NUMBER_SCHEMA, "x": NUMBER_SCHEMA, "y": NUMBER_SCHEMA, "clip": BOOL_SCHEMA}),
-    "visibility": _control_schema({"visible": BOOL_SCHEMA, "maintain_state": BOOL_SCHEMA, "maintain_size": BOOL_SCHEMA, "maintain_animation": BOOL_SCHEMA, "replacement": ANY_SCHEMA}),
-    "cursor": _control_schema({"cursor": STRING_SCHEMA, "enabled": BOOL_SCHEMA, "opaque": BOOL_SCHEMA}),
-    "nav_ring": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "policy": STRING_SCHEMA, "dense": BOOL_SCHEMA}),
-    "rail_nav": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "selected_index": INTEGER_SCHEMA, "dense": BOOL_SCHEMA, "extended": BOOL_SCHEMA}),
-    "navigator": SIDEBAR_SCHEMA,
-    "notice_bar": _control_schema({"text": STRING_SCHEMA, "variant": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "dismissible": BOOL_SCHEMA, "action_label": STRING_SCHEMA, "action_id": STRING_SCHEMA}),
-    "numeric_field": _control_schema({"value": NUMBER_SCHEMA, "min": NUMBER_SCHEMA, "max": NUMBER_SCHEMA, "step": NUMBER_SCHEMA, "decimals": INTEGER_SCHEMA, "label": STRING_SCHEMA, "placeholder": STRING_SCHEMA, "enabled": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "data_source_view": _control_schema({"sources": {"type": "array", "items": {"type": "object"}}, "selected_id": STRING_SCHEMA, "query": STRING_SCHEMA, "show_search": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "sortable_header": _control_schema({"columns": {"type": "array", "items": {"type": "object"}}, "sort_column": STRING_SCHEMA, "sort_ascending": BOOL_SCHEMA, "dense": BOOL_SCHEMA}),
-    "sticky_list": _control_schema(STICKY_LIST_SCHEMA["properties"]),
-    "auto_form": AUTO_FORM_SCHEMA,
-    "form": _control_schema({"title": STRING_SCHEMA, "description": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
-    "form_field": _control_schema({"label": STRING_SCHEMA, "description": STRING_SCHEMA, "required": BOOL_SCHEMA, "helper_text": STRING_SCHEMA, "error_text": STRING_SCHEMA, "spacing": NUMBER_SCHEMA}),
-    "validation_summary": _control_schema({"title": STRING_SCHEMA, "errors": {"type": "array", "items": STRING_SCHEMA}, "messages": {"type": "array", "items": STRING_SCHEMA}, "items": {"type": "array", "items": ANY_SCHEMA}}),
-    "submit_scope": _control_schema({"enabled": BOOL_SCHEMA, "submit_on_enter": BOOL_SCHEMA, "submit_on_ctrl_enter": BOOL_SCHEMA, "debounce_ms": INTEGER_SCHEMA, "payload": {"type": "object"}}),
-    "surface": SURFACE_SCHEMA,
-    "page_nav": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "page_size": INTEGER_SCHEMA, "total_items": INTEGER_SCHEMA, "max_visible": INTEGER_SCHEMA, "show_edges": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "page_stepper": _control_schema({"page": INTEGER_SCHEMA, "page_count": INTEGER_SCHEMA, "page_size": INTEGER_SCHEMA, "total_items": INTEGER_SCHEMA, "max_visible": INTEGER_SCHEMA, "show_edges": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "toast_host": _control_schema(
-        {
-            "items": {"type": "array", "items": {"type": "object"}},
-            "toasts": {"type": "array", "items": {"type": "object"}},
-            "position": STRING_SCHEMA,
-            "max_items": INTEGER_SCHEMA,
-            "latest_on_top": BOOL_SCHEMA,
-            "dismissible": BOOL_SCHEMA,
-            "spacing": NUMBER_SCHEMA,
-            "padding": PADDING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
-    "window_controls": _control_schema(),
-    "output_panel": OUTPUT_PANEL_SCHEMA,
-    "log_panel": OUTPUT_PANEL_SCHEMA,
-    "editor_tab_strip": EDITOR_TAB_STRIP_SCHEMA,
-    "editor_tabs": EDITOR_TAB_STRIP_SCHEMA,
-    "document_tab_strip": EDITOR_TAB_STRIP_SCHEMA,
-    "workspace_tree": WORKSPACE_TREE_SCHEMA,
-    "workspace_explorer": WORKSPACE_TREE_SCHEMA,
-    "explorer_tree": WORKSPACE_TREE_SCHEMA,
-    "problems_panel": PROBLEMS_PANEL_SCHEMA,
-    "diagnostics_panel": PROBLEMS_PANEL_SCHEMA,
-    "editor_workspace": EDITOR_WORKSPACE_SCHEMA,
-    "workbench_editor": EDITOR_WORKSPACE_SCHEMA,
-    "breadcrumbs": CRUMB_TRAIL_SCHEMA,
-    "menu_bar": _control_schema({"items": {"type": "array", "items": {"type": "object"}}, "dense": BOOL_SCHEMA, "show_dividers": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "command_item": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "value": ANY_SCHEMA, "description": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "shortcut": STRING_SCHEMA, "enabled": BOOL_SCHEMA}),
-    "table_view": _control_schema({"columns": {"type": "array", "items": ANY_SCHEMA}, "rows": {"type": "array", "items": ANY_SCHEMA}, "sortable": BOOL_SCHEMA, "filterable": BOOL_SCHEMA, "selectable": BOOL_SCHEMA, "dense": BOOL_SCHEMA, "striped": BOOL_SCHEMA, "show_header": BOOL_SCHEMA, "sort_column": STRING_SCHEMA, "sort_ascending": BOOL_SCHEMA, "filter_query": STRING_SCHEMA}),
-    "tree_view": _control_schema({"nodes": {"type": "array", "items": ANY_SCHEMA}, "expanded": {"type": "array", "items": STRING_SCHEMA}, "dense": BOOL_SCHEMA, "multi_select": BOOL_SCHEMA, "show_root": BOOL_SCHEMA, "expand_all": BOOL_SCHEMA, "show_search": BOOL_SCHEMA, "show_expand_collapse_all": BOOL_SCHEMA, "search_placeholder": STRING_SCHEMA, "search_hint": STRING_SCHEMA, "auto_expand_search_hits": BOOL_SCHEMA}),
-    "virtual_list": _control_schema({"item_count": INTEGER_SCHEMA, "item_extent": NUMBER_SCHEMA, "cache_extent": NUMBER_SCHEMA, "padding": PADDING_SCHEMA, "reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "physics": STRING_SCHEMA}),
-    "virtual_grid": _control_schema({"item_count": INTEGER_SCHEMA, "cross_axis_count": INTEGER_SCHEMA, "main_axis_extent": NUMBER_SCHEMA, "child_aspect_ratio": NUMBER_SCHEMA, "cross_axis_spacing": NUMBER_SCHEMA, "main_axis_spacing": NUMBER_SCHEMA, "padding": PADDING_SCHEMA, "reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "physics": STRING_SCHEMA}),
-    "scene_view": _control_schema({"background": ANY_SCHEMA, "show_grid": BOOL_SCHEMA, "show_axes": BOOL_SCHEMA, "camera": {"type": "object"}}),
-    "search_provider": SEARCH_PROVIDER_SCHEMA,
-    "search_history": SEARCH_HISTORY_SCHEMA,
-
-    "webview": _control_schema({"url": STRING_SCHEMA, "html": STRING_SCHEMA, "initial_url": STRING_SCHEMA, "javascript_enabled": BOOL_SCHEMA, "transparent": BOOL_SCHEMA, "allow_navigation": BOOL_SCHEMA, "headers": {"type": "object"}}),
-
-    "webview_adapter": WEBVIEW_ADAPTER_SCHEMA,
-
-    # Candy
-    "candy": CANDY_SCHEMA,
-    "candy_scope": CANDY_SCOPE_SCHEMA,
-    "emoji_icon": EMOJI_ICON_SCHEMA,
-    "color_picker": COLOR_PICKER_SCHEMA,
-
-    # Studio
-    "studio_canvas": STUDIO_CANVAS_SCHEMA,
-    "studio_timeline_surface": STUDIO_TIMELINE_SURFACE_SCHEMA,
-    "studio_node_surface": STUDIO_NODE_SURFACE_SCHEMA,
-    "studio_preview_surface": STUDIO_PREVIEW_SURFACE_SCHEMA,
-    "studio_tokens_editor": STUDIO_TOKENS_EDITOR_SCHEMA,
-    "studio_builder": STUDIO_BUILDER_SCHEMA,
-    "studio_block_palette": STUDIO_BLOCK_PALETTE_SCHEMA,
-    "studio_component_palette": STUDIO_BLOCK_PALETTE_SCHEMA,
-    "studio_inspector": STUDIO_INSPECTOR_SCHEMA,
-    "studio_asset_browser": STUDIO_ASSET_BROWSER_SCHEMA,
-    "studio_actions_editor": STUDIO_ACTIONS_EDITOR_SCHEMA,
-    "studio_bindings_editor": STUDIO_BINDINGS_EDITOR_SCHEMA,
-    "studio_responsive_toolbar": STUDIO_RESPONSIVE_TOOLBAR_SCHEMA,
-    "studio_project_panel": STUDIO_PROJECT_PANEL_SCHEMA,
-    "studio_outline_tree": STUDIO_OUTLINE_TREE_SCHEMA,
-    "studio_properties_panel": STUDIO_PROPERTIES_PANEL_SCHEMA,
-}
-
-# Compatibility mappings for renderer-wired controls that share existing
-# contracts or only require permissive property acceptance in 0.1.0.
-CONTROL_SCHEMAS.update(
-    {
-        "animated_background": _control_schema({"layers": {"type": "array", "items": ANY_SCHEMA}, "speed": NUMBER_SCHEMA}),
-        "animation_asset": _control_schema({"src": STRING_SCHEMA, "asset": STRING_SCHEMA, "autoplay": BOOL_SCHEMA, "loop": BOOL_SCHEMA}),
-        "box": CONTAINER_SCHEMA,
-        "card": CONTAINER_SCHEMA,
-        "chat": CHAT_THREAD_SCHEMA,
-        "column": COLUMN_SCHEMA,
-        "container": CONTAINER_SCHEMA,
-        "container_style": _control_schema(
-            {
-                "variant": STRING_SCHEMA,
-                "outline_width": NUMBER_SCHEMA,
-                "outline_color": COLOR_SCHEMA,
-                "stroke_width": NUMBER_SCHEMA,
-                "stroke_color": COLOR_SCHEMA,
-                "shadow_color": COLOR_SCHEMA,
-                "shadow_blur": NUMBER_SCHEMA,
-                "shadow_dx": NUMBER_SCHEMA,
-                "shadow_dy": NUMBER_SCHEMA,
-                "glow_color": COLOR_SCHEMA,
-                "glow_blur": NUMBER_SCHEMA,
-                "bgcolor": COLOR_SCHEMA,
-                "background": COLOR_SCHEMA,
-                "bg_color": COLOR_SCHEMA,
-                "border_color": COLOR_SCHEMA,
-                "border_width": NUMBER_SCHEMA,
-                "radius": NUMBER_SCHEMA,
-                "shape": STRING_SCHEMA,
-                "content_padding": PADDING_SCHEMA,
-                "inner_padding": PADDING_SCHEMA,
-                "icon_padding": PADDING_SCHEMA,
-                "animation": {"type": "object"},
-            }
-        ),
-        "context_menu": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "open": BOOL_SCHEMA}),
-        "data_grid": JSON_TABLE_SCHEMA,
-        "data_table": JSON_TABLE_SCHEMA,
-        "divider": _control_schema({"orientation": STRING_SCHEMA, "thickness": NUMBER_SCHEMA, "indent": NUMBER_SCHEMA}),
-        "expanded": _control_schema({"flex": INTEGER_SCHEMA}),
-        "file_browser": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "path": STRING_SCHEMA}),
-        "gradient": GRADIENT_SCHEMA,
-        "grid_view": GRID_VIEW_SCHEMA,
-        "icon": _control_schema({"name": ICON_VALUE_SCHEMA, "value": ICON_VALUE_SCHEMA, "size": NUMBER_SCHEMA, "color": COLOR_SCHEMA}),
-        "item_tile": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "leading": ANY_SCHEMA, "trailing": ANY_SCHEMA}),
-        "key_listener": _control_schema({"autofocus": BOOL_SCHEMA, "enabled": BOOL_SCHEMA}),
-        "launcher": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "query": STRING_SCHEMA, "open": BOOL_SCHEMA}),
-        "list_tile": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "leading": ANY_SCHEMA, "trailing": ANY_SCHEMA}),
-        "list_view": _control_schema({"reverse": BOOL_SCHEMA, "shrink_wrap": BOOL_SCHEMA, "padding": PADDING_SCHEMA, "spacing": NUMBER_SCHEMA}),
-        "menu_item": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "icon": ICON_VALUE_SCHEMA, "enabled": BOOL_SCHEMA}),
-        "overlay_host": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}}),
-        "page": _control_schema({"title": STRING_SCHEMA, "bgcolor": COLOR_SCHEMA, "safe_area": BOOL_SCHEMA}),
-        "page_scene": _control_schema({"title": STRING_SCHEMA, "subtitle": STRING_SCHEMA, "show_header": BOOL_SCHEMA}),
-        "particle_field": PARTICLE_FIELD_SCHEMA,
-        "progress_timeline": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "current": INTEGER_SCHEMA}),
-        "router": _control_schema({"route": STRING_SCHEMA, "routes": {"type": "array", "items": ANY_SCHEMA}}),
-        "row": ROW_SCHEMA,
-        "scroll_view": SCROLL_VIEW_SCHEMA,
-        "shortcut_map": _control_schema({"bindings": {"type": "array", "items": ANY_SCHEMA}, "enabled": BOOL_SCHEMA}),
-        "skeleton": _control_schema({"enabled": BOOL_SCHEMA, "lines": INTEGER_SCHEMA, "height": NUMBER_SCHEMA}),
-        "skeleton_loader": _control_schema({"enabled": BOOL_SCHEMA, "lines": INTEGER_SCHEMA, "height": NUMBER_SCHEMA}),
-        "splash": _control_schema(
-            {
-                "active": BOOL_SCHEMA,
-                "color": COLOR_SCHEMA,
-                "duration_ms": INTEGER_SCHEMA,
-                "radius": NUMBER_SCHEMA,
-                "centered": BOOL_SCHEMA,
-                "title": STRING_SCHEMA,
-                "subtitle": STRING_SCHEMA,
-                "message": STRING_SCHEMA,
-                "loading": BOOL_SCHEMA,
-                "progress": NUMBER_SCHEMA,
-                "show_progress": BOOL_SCHEMA,
-                "skip_enabled": BOOL_SCHEMA,
-                "auto_start": BOOL_SCHEMA,
-                "hide_on_complete": BOOL_SCHEMA,
-                "min_duration_ms": INTEGER_SCHEMA,
-                "background": COLOR_SCHEMA,
-                "effect": STRING_SCHEMA,
-            }
-        ),
-        "stack": STACK_SCHEMA,
-        "table": JSON_TABLE_SCHEMA,
-        "tabs": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "selected": INTEGER_SCHEMA}),
-        "task_list": _control_schema({"items": {"type": "array", "items": ANY_SCHEMA}, "dense": BOOL_SCHEMA}),
-        "toast": _control_schema({"message": STRING_SCHEMA, "title": STRING_SCHEMA, "variant": STRING_SCHEMA, "open": BOOL_SCHEMA}),
-        "tooltip": _control_schema({"message": STRING_SCHEMA, "text": STRING_SCHEMA, "placement": STRING_SCHEMA}),
-        "tree_node": _control_schema({"id": STRING_SCHEMA, "label": STRING_SCHEMA, "children": {"type": "array", "items": ANY_SCHEMA}}),
-        "window_drag_region": _control_schema({"draggable": BOOL_SCHEMA, "maximize_on_double_tap": BOOL_SCHEMA, "emit_move": BOOL_SCHEMA}),
-        "window_frame": _control_schema({
-            "title": STRING_SCHEMA,
-            "show_controls": BOOL_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "show_close": BOOL_SCHEMA,
-            "show_maximize": BOOL_SCHEMA,
-            "show_minimize": BOOL_SCHEMA,
-            "draggable": BOOL_SCHEMA,
-            "custom_frame": BOOL_SCHEMA,
-            "use_native_title_bar": BOOL_SCHEMA,
-            "native_window_actions": BOOL_SCHEMA,
-            "show_default_controls": BOOL_SCHEMA,
-            "emit_move": BOOL_SCHEMA,
-            "emit_move_events": BOOL_SCHEMA,
-            "move_event_throttle_ms": INTEGER_SCHEMA,
-            "title_leading": ANY_SCHEMA,
-            "title_content": ANY_SCHEMA,
-            "title_trailing": ANY_SCHEMA,
-        }),
-        "wrap": WRAP_SCHEMA,
-        "empty_state_view": CONTROL_SCHEMAS["empty_state"],
-        "tree": CONTROL_SCHEMAS["tree_view"],
-    }
-)
 
 
 def _merge_layout(schema: dict[str, Any]) -> dict[str, Any]:
@@ -5356,1268 +426,309 @@ def _merge_layout(schema: dict[str, Any]) -> dict[str, Any]:
     return schema
 
 
-_ALL_CONTROL_TYPES = {
-    "AdjustmentPanel",
-    "AnimatedGradient",
-    "BlendModePicker",
-    "BlobField",
-    "Clipboard",
-    "Cursor",
-    "DownloadItem",
-    "EffectLayer",
-    "EmojiPicker",
-    "FileTree",
-    "FlowField",
-    "Gradient",
-    "GuidesManager",
-    "HistoryStack",
-    "Layer",
-    "Lifecycle",
-    "LogViewer",
-    "Motion",
-    "NativePreviewHost",
-    "NoiseField",
-    "Parallax",
-    "ParticleField",
-    "Pose",
-    "PresetGallery",
-    "QueueList",
-    "SceneView",
-    "Sprite",
-    "Stagger",
-    "StickyList",
-    "Timeline",
-    "timeline_track",
-    "TrayItem",
-    "VectorView",
-    "Visibility",
-    "When",
-    "WindowFrame",
-    "accordion",
-    "action_bar",
-    "align",
-    "border",
-    "border_side",
-    "animated_background",
-    "app_bar",
-    "artifact_card",
-    "async_action_button",
-    "attachment_tile",
-    "audio",
-    "auto_form",
-    "avatar_stack",
-    "badge",
-    "bar_plot",
-    "behavior_mixins",
-    "bottom_sheet",
-    "bounds_probe",
-    "breadcrumb_bar",
-    "breadcrumbs",
-    "brush_panel",
-    "button",
-    "elevated_button",
-    "filled_button",
-    "outlined_button",
-    "text_button",
-    "button_style",
-    "callout",
-    "candy",
-    "candy_scope",
-    "gallery",
-    "gallery_scope",
-    "skins",
-    "canvas",
-    "card",
-    "center",
-    "chat_bubble",
-    "chat_message",
-    "chat_thread",
-    "check_list",
-    "checkbox",
-    "chip",
-    "chromatic_shift",
-    "code",
-    "code_block",
-    "code_buffer",
-    "code_category_layer",
-    "code_document",
-    "color_picker",
-    "color_swatch_grid",
-    "column",
-    "command_bar",
-    "command_item",
-    "command_palette",
-    "command_search",
-    "confetti_burst",
-    "confirm_dialog",
-    "container",
-    "container_style",
-    "context_action_bar",
-    "context_menu",
-    "control_preset",
-    "count_stepper",
-    "crop_box",
-    "crumb_trail",
-    "curve_editor",
-    "data_grid",
-    "data_source_view",
-    "date_select",
-    "date_span",
-    "details_pane",
-    "diagnostic_stream",
-    "diff_narrator",
-    "directory_picker",
-    "divider",
-    "dock_graph",
-    "drag_handle",
-    "drag_payload",
-    "drop_zone",
-    "dropdown",
-    "editor_intent_router",
-    "editor_minimap",
-    "editor_surface",
-    "editor_view",
-    "emoji_icon",
-    "empty_state_view",
-    "empty_view",
-    "execution_lane",
-    "expanded",
-    "export_panel",
-    "field_group",
-    "file_picker",
-    "file_tabs",
-    "filter_chips_bar",
-    "filter_drawer",
-    "flex_spacer",
-    "flow_page",
-    "focus_anchor",
-    "focus_mode_controller",
-    "fold_layer",
-    "form",
-    "frame",
-    "gallery",
-    "gesture_area",
-    "ghost_editor",
-    "glass_blur",
-    "glow_effect",
-    "glyph",
-    "glyph_button",
-    "icon",
-    "gradient_editor",
-    "gradient_sweep",
-    "grain_overlay",
-    "grid",
-    "grid_view",
-    "gutter",
-    "hint",
-    "histogram_overlay",
-    "histogram_view",
-    "hot_reload_boundary",
-    "hover_region",
-    "html",
-    "icon_button",
-    "icon_picker",
-    "image",
-    "info_bar",
-    "inline_error_view",
-    "inline_search_overlay",
-    "inspector",
-    "intent_panel",
-    "intent_router",
-    "intent_search",
-    "item_tile",
-    "json_diff",
-    "json_editor",
-    "json_inspector",
-    "json_path_picker",
-    "json_table",
-    "json_tree",
-    "json_view",
-    "key_listener",
-    "keybind_recorder",
-    "layer",
-    "layer_list",
-    "layer_mask_editor",
-    "layout_freeze",
-    "line_chart",
-    "line_plot",
-    "liquid_morph",
-    "list_surface",
-    "list_tile",
-    "live_control_picker",
-    "markdown",
-    "mentioned_pill",
-    "menu_bar",
-    "menu_item",
-    "message_bubble",
-    "message_composer",
-    "message_divider",
-    "message_meta",
-    "mini_map",
-    "modal",
-    "morphing_border",
-    "multi_cursor_controller",
-    "multi_pick",
-    "multi_source_merge_view",
-    "nav_ring",
-    "navigator",
-    "neon_edge",
-    "noise_displacement",
-    "notice_bar",
-    "notification_center",
-    "numeric_field",
-    "option",
-    "outline_reveal",
-    "outline_view",
-    "overlay",
-    "overlay_page",
-    "ownership_marker",
-    "page_nav",
-    "page_route",
-    "page_stepper",
-    "pan_zoom",
-    "panel_page",
-    "parallax_offset",
-    "path_field",
-    "persona",
-    "pie_plot",
-    "pixelate",
-    "popover",
-    "pressable",
-    "preview_error_overlay",
-    "preview_intent_interceptor",
-    "preview_presets",
-    "preview_surface",
-    "progress",
-    "progress_indicator",
-    "progress_overlay",
-    "query_token",
-    "quoted_message",
-    "radio",
-    "rail_nav",
-    "rating_display",
-    "reaction_bar",
-    "reorderable_list",
-    "reorderable_tree",
-    "resizable_panel",
-    "result_card",
-    "result_preview_pane",
-    "ripple_burst",
-    "row",
-    "ruler_guides",
-    "rulers_overlay",
-    "safe_area",
-    "scanline_overlay",
-    "scope_picker",
-    "scoped_search_replace",
-    "scroll_view",
-    "scrollable_column",
-    "scrollable_row",
-    "search_bar",
-    "search_box",
-    "search_everything_panel",
-    "search_field",
-    "search_history",
-    "search_intent",
-    "search_item",
-    "search_provider",
-    "search_results_view",
-    "search_scope_selector",
-    "search_source",
-    "segment_bar",
-    "segmented_switch",
-    "select",
-    "select_option",
-    "selection_tools",
-    "semantic_layer",
-    "semantic_search",
-    "shadow_stack",
-    "shimmer",
-    "shortcut_map",
-    "side_drawer",
-    "side_panel",
-    "sidebar",
-    "skeleton",
-    "skeleton_loader",
-    "slide_panel",
-    "slider",
-    "smart_search_bar",
-    "snackbar",
-    "snap_grid",
-    "sortable_header",
-    "spacer",
-    "span_slider",
-    "spark_plot",
-    "splash",
-    "splash_page",
-    "split_pane",
-    "split_view",
-    "stack",
-    "stack_page",
-    "stage_page",
-    "state_inspector",
-    "state_snapshot",
-    "status_bar",
-    "status_mark",
-    "studio_actions_editor",
-    "studio_asset_browser",
-    "studio_bindings_editor",
-    "studio_block_palette",
-    "studio_builder",
-    "studio_canvas",
-    "studio_timeline_surface",
-    "studio_node_surface",
-    "studio_preview_surface",
-    "studio_component_palette",
-    "studio_inspector",
-    "studio_outline_tree",
-    "studio_project_panel",
-    "studio_properties_panel",
-    "studio_responsive_toolbar",
-    "studio_tokens_editor",
-    "submit_scope",
-    "surface",
-    "switch",
-    "symbol_tree",
-    "syntax_layer",
-    "table",
-    "table_view",
-    "tabs",
-    "tag_chip",
-    "output_panel",
-    "log_panel",
-    "text",
-    "text_area",
-    "text_field",
-    "text_field_style",
-    "tilt_hover",
-    "time_select",
-    "time_travel_lite",
-    "toast",
-    "toggle_set",
-    "tooltip",
-    "top_bar",
-    "transform_box",
-    "transform_toolbar",
-    "tree",
-    "tree_node",
-    "tree_view",
-    "typing_indicator",
-    "ux_root",
-    "validator",
-    "video",
-    "view_stack",
-    "viewport",
-    "vignette",
-    "virtual_file_system",
-    "virtual_list",
-    "webview",
-    "workspace_page",
-    "wrap",
-}
+def _merge_universal(schema: dict[str, Any]) -> dict[str, Any]:
+    props = dict(UNIVERSAL_PROPS_SCHEMA)
+    props.update(schema.get("properties", {}))
+    schema["properties"] = props
+    schema.setdefault("additionalProperties", True)
+    return schema
 
 
-# --- RUNTIME_PROP_HINTS START ---
-RUNTIME_PROP_HINTS = {
-    'accordion': ['accent_color', 'allowEmpty', 'allow_empty', 'body_color', 'body_padding', 'border_color', 'content_padding', 'dense', 'divider_color', 'elevation', 'expanded', 'glass_blur', 'glass_opacity', 'header_bg', 'header_color', 'header_padding', 'index', 'labels', 'multiple', 'radius', 'show_dividers', 'spacing', 'style', 'variant'],
-    'action_bar': ['bgcolor', 'spacing'],
-    'adjustment_panel': ['items'],
-    'attachment_tile': ['kind', 'name', 'url'],
-    'avatar_stack': ['avatars', 'items', 'size', 'overlap', 'max'],
-    'badge': ['label', 'text', 'value', 'color', 'bgcolor', 'offset', 'radius', 'text_color', 'padding', 'clickable'],
-    'bar_plot': ['color', 'colors', 'max', 'min', 'spacing', 'values'],
-    'blend_mode_picker': ['value', 'options', 'items', 'label', 'enabled', 'dense'],
-    'blob_field': ['count', 'seed', 'color', 'background', 'bgcolor'],
-    'border': ['color', 'width', 'radius', 'side', 'padding'],
-    'border_side': ['side', 'color', 'width', 'length'],
-    'button_style': ['value', 'options'],
-    'candy_scope': [
-        'tokens', 'theme', 'brightness', 'radius', 'colors', 'typography', 'spacing', 'elevation', 'motion'
-    ],
-    'gallery': [
-        'schema_version', 'module', 'state', 'items', 'spacing', 'run_spacing', 'tile_width', 'tile_height', 'selectable', 'enabled', 'events', 'modules',
-        'manifest', 'registries',
-        'toolbar', 'filter_bar', 'grid_layout', 'item_actions', 'item_badge',
-        'item_meta_row', 'item_preview', 'item_selectable', 'item_tile',
-        'pagination', 'section_header', 'sort_bar', 'empty_state',
-        'loading_skeleton', 'search_bar', 'font_picker', 'audio_picker',
-        'video_picker', 'image_picker', 'document_picker',
-        'fonts', 'font_renderer', 'audio', 'audio_renderer', 'video', 'video_renderer', 'image', 'image_renderer',
-        'document', 'document_renderer',
-        'item_drag_handle', 'item_drop_target',
-        'item_reorder_handle', 'item_selection_checkbox', 'item_selection_radio',
-        'item_selection_switch', 'apply', 'clear', 'select_all',
-        'deselect_all', 'apply_font', 'apply_image', 'set_as_wallpaper',
-        'presets', 'skins', 'payload'
-    ],
-    'gallery_scope': [
-        'layout', 'spacing', 'radius', 'columns', 'cross_axis_count', 'cross_axis_spacing', 'main_axis_spacing'
-    ],
-    'skins': [
-        'schema_version', 'module', 'state', 'skins', 'selected_skin', 'presets', 'value', 'enabled', 'events', 'modules',
-        'manifest', 'registries',
-        'selector', 'preset', 'editor', 'preview', 'apply', 'clear', 'token_mapper',
-        'create_skin', 'edit_skin', 'delete_skin',
-        'effects', 'particles', 'shaders', 'materials', 'icons', 'fonts', 'colors', 'background',
-        'border', 'shadow', 'outline', 'animation', 'transition', 'interaction', 'layout', 'responsive',
-        'effect_editor', 'particle_editor', 'shader_editor', 'material_editor', 'icon_editor', 'font_editor',
-        'color_editor', 'background_editor', 'border_editor', 'shadow_editor', 'outline_editor', 'payload'
-    ],
-    'callout': ['action_id', 'action_label', 'dismissible', 'icon', 'text', 'title', 'variant'],
-    'chat_bubble': ['content', 'value'],
-    'check_list': ['enabled', 'indices', 'options', 'spacing', 'values'],
-    'code_block': ['text'],
-    'color_picker': ['value', 'color', 'mode', 'picker_mode', 'show_alpha', 'alpha', 'presets', 'emit_on_change', 'show_actions', 'show_input', 'show_hex', 'show_presets', 'preset_size', 'preset_spacing', 'preview_height', 'input_label', 'input_placeholder', 'enabled', 'commit_text', 'cancel_text'],
-    'color_swatch_grid': ['swatches', 'selected_id', 'selected_index', 'columns', 'size', 'spacing', 'show_labels', 'show_add', 'show_remove'],
-    'container_style': ['variant', 'outline_width', 'outline_color', 'stroke_width', 'stroke_color', 'shadow_color', 'shadow_blur', 'shadow_dx', 'shadow_dy', 'glow_color', 'glow_blur', 'bgcolor', 'background', 'bg_color', 'border_color', 'border_width', 'radius', 'shape', 'content_padding', 'inner_padding', 'icon_padding', 'animation'],
-    'glow_effect': ['color', 'blur', 'spread', 'radius', 'offset_x', 'offset_y', 'clip'],
-    'glass_blur': ['blur', 'opacity', 'color', 'radius', 'border_color', 'border_width'],
-    'gradient': ['variant', 'colors', 'stops', 'tile_mode', 'begin', 'end', 'center', 'radius', 'focal', 'focal_radius', 'start_angle', 'end_angle', 'start_degrees', 'end_degrees', 'bgcolor', 'background', 'background_color', 'opacity', 'mesh', 'mesh_points', 'points'],
-    'gradient_editor': ['stops', 'angle', 'show_angle', 'show_add', 'show_remove'],
-    'gradient_sweep': ['colors', 'duration_ms', 'angle', 'opacity'],
-    'confetti_burst': ['colors', 'count', 'duration_ms', 'gravity'],
-    'chromatic_shift': ['shift', 'opacity'],
-    'command_bar': ['dense', 'items', 'bgcolor', 'text_color', 'icon_color', 'item_bgcolor', 'selected_color', 'backdrop', 'backdrop_blur'],
-    'menu_bar': ['menus', 'items', 'bgcolor', 'text_color', 'icon_color', 'item_bgcolor', 'divider_color', 'height', 'dense', 'padding', 'backdrop', 'backdrop_blur', 'use_menu_bar', 'use_mac_menu_bar'],
-    'menu_item': ['id', 'label', 'title', 'icon', 'shortcut', 'enabled', 'selected'],
-    'butterflyui_candy': ['allow_gif', 'images'],
-    'context_menu': ['items', 'bgcolor', 'text_color', 'icon_color', 'item_bgcolor', 'divider_color', 'backdrop', 'backdrop_blur', 'use_contextmenu'],
-    'context_action_bar': ['items', 'open', 'anchor', 'position', 'offset', 'dismissible', 'scrim_color', 'bgcolor', 'text_color', 'icon_color', 'item_bgcolor', 'spacing', 'padding', 'alignment', 'backdrop', 'backdrop_blur'],
-    'count_stepper': ['enabled', 'label', 'max', 'min', 'step', 'value'],
-    'cursor': ['cursor'],
-    'date_select': ['enabled', 'label', 'max_date', 'min_date', 'placeholder', 'value'],
-    'date_span': ['enabled', 'end', 'label', 'max_date', 'min_date', 'placeholder', 'start'],
-    'empty_view': ['icon', 'message', 'title'],
-    'empty_state_view': ['icon', 'message', 'title', 'action_label'],
-    'inline_error_view': ['icon', 'message', 'title', 'action_label'],
-    'export_panel': ['options'],
-    'field_group': ['error_text', 'helper_text', 'label', 'spacing'],
-    'file_picker': [
-        'label',
-        'file_type',
-        'extensions',
-        'allowed_extensions',
-        'multiple',
-        'allow_multiple',
-        'with_data',
-        'with_path',
-        'enabled',
-        'mode',
-        'pick_directory',
-        'save_file',
-        'file_name',
-        'dialog_title',
-        'initial_directory',
-        'lock_parent_window',
-        'show_selection',
-    ],
-    'directory_picker': [
-        'label',
-        'mode',
-        'pick_directory',
-        'enabled',
-        'initial_directory',
-        'dialog_title',
-        'lock_parent_window',
-    ],
-    'focus_anchor': ['autofocus', 'can_request_focus', 'request_focus'],
-    'form': ['description', 'spacing', 'title'],
-    'glyph': ['color', 'icon', 'size'],
-    'glyph_button': ['bgcolor', 'color', 'enabled', 'icon', 'size', 'tooltip'],
-    'guides_manager': ['items'],
-    'hint': ['dense', 'message', 'text', 'variant'],
-    'history_stack': ['items'],
-    'hover_region': ['cursor', 'enabled'],
-    'inspector': ['dense', 'items', 'show_dividers'],
-    'item_tile': ['dense', 'enabled', 'leading_icon', 'leading_text', 'leading_image', 'selected', 'subtitle', 'title', 'meta', 'badges', 'actions', 'trailing_icon', 'trailing_text'],
-    'list_tile': ['dense', 'enabled', 'leading_icon', 'leading_text', 'leading_image', 'selected', 'subtitle', 'title', 'meta', 'badges', 'actions', 'trailing_icon', 'trailing_text'],
-    'json_editor': ['mode', 'use_inapp', 'webview_engine'],
-    'key_listener': ['autofocus', 'enabled'],
-    'layer_list': ['items'],
-    'layer_mask_editor': ['bgcolor', 'thumbnail'],
-    'line_plot': ['color', 'fill', 'fill_color', 'max', 'min', 'stroke_width', 'values'],
-    'message_divider': ['line_color'],
-    'multi_pick': ['enabled', 'indices', 'options', 'spacing', 'values'],
-    'nav_ring': ['policy'],
-    'notice_bar': ['action_id', 'action_label', 'dismissible', 'icon', 'text', 'variant'],
-    'numeric_field': ['decimals', 'dense', 'enabled', 'label', 'max', 'min', 'placeholder', 'step', 'value'],
-    'page_nav': ['enabled', 'next_label', 'page', 'page_count', 'prev_label'],
-    'page_stepper': ['enabled', 'max_visible', 'page', 'page_count', 'show_edges'],
-    'path_field': ['allowed_extensions', 'file_name'],
-    'persona': ['bgcolor', 'border_color', 'border_width', 'label', 'size', 'src', 'text_color'],
-    'pie_plot': ['colors', 'inner_radius', 'start_angle', 'values'],
-    'preset_gallery': ['items'],
-    'pressable': ['enabled'],
-    'quoted_message': ['value'],
-    'rail_nav': ['items'],
-    'reaction_bar': ['items'],
-    'ruler_guides': ['horizontal_guides', 'vertical_guides'],
-    'rulers_overlay': ['bgcolor'],
-    'scene_view': ['background', 'show_grid'],
-    'segment_bar': ['dense', 'enabled', 'index', 'options', 'value'],
-    'selection_tools': ['items'],
-    'shortcut_map': ['enabled', 'shortcuts', 'use_global_hotkeys'],
-    'side_panel': ['bgcolor', 'cross_axis', 'spacing'],
-    'skeleton': ['radius', 'variant'],
-    'skeleton_loader': ['radius', 'variant', 'width', 'height'],
-    'snap_grid': ['background_color', 'color', 'offset'],
-    'span_slider': ['divisions', 'enabled', 'end', 'max', 'min', 'start'],
-    'spark_plot': ['color', 'max', 'min', 'stroke_width', 'values'],
-    'split_pane': ['axis', 'ratio', 'use_split_view'],
-    'split_view': ['axis', 'ratio', 'min_ratio', 'max_ratio', 'draggable', 'divider_size'],
-    'status_mark': ['dot_size', 'label', 'status', 'text'],
-    'submit_scope': ['autofocus', 'enabled'],
-    'table': ['columns', 'rows'],
-    'tabs': ['closable', 'index', 'labels', 'scrollable', 'show_add'],
-    'time_select': ['enabled', 'label', 'placeholder', 'use_24h', 'value'],
-    'toast': ['action_label', 'duration_ms', 'icon', 'instant', 'label', 'message', 'open', 'priority', 'style', 'variant', 'use_flushbar', 'use_fluttertoast', 'toast_position'],
-    'snackbar': ['action_label', 'duration_ms', 'icon', 'instant', 'label', 'message', 'open', 'priority', 'style', 'variant', 'use_flushbar', 'use_fluttertoast', 'toast_position'],
-    'share_action': ['text', 'subject', 'files', 'position'],
-    'toggle_set': ['dense', 'enabled', 'indices', 'options', 'spacing', 'values'],
-    'token': ['color', 'enabled', 'label', 'selectable', 'selected', 'text_color', 'removable'],
-    'tooltip': ['message', 'prefer_below', 'text', 'wait_ms'],
-    'top_bar': ['bgcolor', 'center_title', 'elevation', 'subtitle', 'title'],
-    'transform_toolbar': ['items'],
-    'tree': ['dense', 'expanded', 'nodes'],
-    'validator': ['message', 'status'],
-    'viewport': ['emit_on_mount', 'throttle_ms'],
-    'visibility': ['maintain_space', 'visible'],
-    'when': ['condition'],
-    'window_frame': ['show_close', 'show_maximize', 'show_minimize', 'title', 'use_window_manager', 'use_bitsdojo', 'acrylic_effect', 'acrylic_opacity'],
-    'window_drag_region': ['draggable', 'maximize_on_double_tap', 'emit_move', 'native_drag', 'native_maximize_action', 'child'],
-    'smart_search_bar': ['debounce_ms', 'enabled', 'history_id', 'hint', 'loading', 'placeholder', 'provider_id', 'show_clear', 'value'],
-    'search_bar': ['query', 'value', 'placeholder', 'hint', 'debounce_ms', 'enabled', 'disabled', 'show_clear', 'loading', 'dense', 'autofocus', 'auto_focus', 'tokens', 'filters', 'show_filters', 'suggestions', 'show_suggestions', 'max_suggestions'],
-    'search_scope_selector': ['scopes', 'options', 'items', 'selected', 'selected_scope', 'value', 'scope', 'selected_index', 'index', 'default_scope', 'default', 'enabled', 'disabled', 'dense', 'provider_id'],
-    'query_token': ['id', 'label', 'selected', 'removable', 'color', 'text_color', 'textColor', 'meta', 'enabled', 'selectable'],
-    'search_item': ['id', 'title', 'label', 'subtitle', 'description', 'group', 'scope', 'icon', 'emoji', 'badge', 'shortcut', 'image', 'kind', 'tags', 'keywords', 'meta', 'score', 'enabled', 'payload'],
-    'search_source': ['id', 'label', 'title', 'subtitle', 'items', 'icon', 'emoji', 'enabled', 'priority', 'limit'],
-    'search_intent': ['id', 'title', 'label', 'subtitle', 'text', 'value', 'query', 'is_empty', 'is_submitted', 'trigger'],
-    'search_field': ['value', 'query', 'placeholder', 'hint', 'icon', 'search_icon', 'clear_icon', 'clearIcon', 'show_clear', 'showClear', 'loading', 'disabled', 'enabled', 'read_only', 'readOnly', 'auto_focus', 'autoFocus', 'debounce_ms', 'debounceMs', 'dense', 'filled', 'bordered', 'rounded', 'width', 'bgcolor', 'border_color', 'borderColor', 'focus_color', 'focusColor', 'text_color', 'textColor', 'hint_color', 'hintColor'],
-    'filter_chips_bar': ['filters', 'indices', 'multi_select', 'values'],
-    'filter_drawer': ['schema', 'state', 'title', 'show_actions', 'apply_label', 'clear_label', 'dense'],
-    'intent_search': ['query', 'value', 'intents', 'items', 'providers', 'results', 'selected_intent', 'placeholder', 'hint', 'empty_text', 'debounce_ms', 'max_results', 'enabled', 'disabled', 'loading', 'autofocus', 'auto_focus', 'fuzzy', 'fuzzy_match', 'show_all_on_empty', 'emit_on_empty', 'show_intents', 'show_providers', 'auto_search'],
-    'search_results_view': ['results', 'items', 'data', 'state', 'status', 'layout', 'view', 'grouped', 'grid_columns', 'columns', 'grid_spacing', 'spacing', 'grid_aspect_ratio', 'aspect_ratio', 'dense', 'show_icons', 'show_tags', 'show_badges', 'show_meta', 'show_scores', 'show_descriptions', 'selected_id', 'selected', 'query', 'value', 'empty_title', 'empty_message', 'error_title', 'error_message', 'loading', 'loading_count', 'provider_id', 'source_id', 'initial_offset'],
-    'semantic_search': ['query', 'value', 'placeholder', 'hint', 'scopes', 'providers', 'selected_scope', 'scope', 'results', 'items', 'dense', 'show_scopes', 'show_results', 'loading', 'empty_title', 'empty_message'],
-    'intent_router': ['intents', 'items', 'query', 'value', 'dense', 'show_search', 'selected_id', 'selected', 'selected_intent'],
-    'search_everything_panel': ['query', 'value', 'placeholder', 'hint', 'filters', 'categories', 'scopes', 'selected_filters', 'selected', 'filter', 'results', 'items', 'dense', 'show_filters', 'show_results', 'loading', 'empty_title', 'empty_message'],
-    'data_source_view': ['state', 'loading', 'page', 'page_size', 'has_more', 'refreshable', 'prefetch_threshold', 'cache_key', 'show_content_on_loading', 'overlay_loading', 'empty_view', 'error_view', 'offline_view', 'loading_view'],
-    'virtual_list': ['items', 'header', 'footer', 'scrollable', 'separator', 'spacing', 'padding', 'reverse', 'item_extent', 'cache_extent', 'loading', 'skeleton_count', 'has_more', 'prefetch_threshold', 'use_positioned_list', 'initial_index'],
-    'multi_source_merge_view': ['sources', 'dedupe_key', 'merge_strategy', 'prefer_source', 'updated_key', 'spacing', 'separator', 'header', 'footer', 'padding', 'loading'],
-    'details_pane': ['mode', 'split_ratio', 'stack_breakpoint', 'show_details', 'show_back', 'back_label', 'divider'],
-    'card': ['color', 'elevation', 'radius', 'margin', 'padding', 'shape', 'clip_behavior', 'surface_tint_color', 'shadow_color'],
-    'async_action_button': ['label', 'state', 'enabled', 'variant', 'color', 'text_color', 'radius', 'content_padding', 'success_label', 'error_label', 'progress', 'show_progress'],
-    'divider': ['vertical', 'thickness', 'indent', 'end_indent', 'color'],
-    'particle_field': ['count', 'speed', 'size', 'colors', 'seed', 'gravity', 'drift', 'link_distance', 'line_color', 'line_opacity', 'play', 'enabled'],
-    'scanline_overlay': ['enabled', 'opacity', 'line_thickness', 'spacing', 'angle', 'speed', 'blend_mode', 'color'],
-    'vignette': ['enabled', 'intensity', 'radius', 'softness', 'color', 'blend_mode'],
-    'surface': ['color', 'bgcolor', 'elevation', 'radius', 'padding', 'margin', 'border', 'border_color', 'border_width', 'shadow_color', 'clip_behavior'],
-    'box': ['color', 'bgcolor', 'padding', 'margin', 'alignment', 'radius', 'border', 'border_color', 'border_width', 'clip_behavior', 'gradient', 'image'],
-    'row': ['spacing', 'alignment', 'horizontal_alignment', 'vertical_alignment', 'run_alignment', 'wrap', 'reverse', 'clip_behavior'],
-    'column': ['spacing', 'alignment', 'horizontal_alignment', 'vertical_alignment', 'run_alignment', 'reverse', 'clip_behavior'],
-    'stack': ['alignment', 'fit', 'clip_behavior'],
-    'wrap': ['spacing', 'run_spacing', 'alignment', 'run_alignment', 'cross_alignment', 'direction', 'vertical_direction', 'clip_behavior'],
-    'scroll_view': ['axis', 'reverse', 'primary', 'physics', 'padding', 'controller_id', 'scrollbar', 'thumb_visibility', 'track_visibility', 'initial_offset'],
-    'prompt_composer': ['value', 'placeholder', 'enabled', 'multiline', 'min_lines', 'max_lines', 'submit_label', 'dense', 'show_attach', 'show_send', 'send_on_enter'],
-    'confirm_dialog': ['open', 'title', 'message', 'confirm_label', 'cancel_label', 'dangerous', 'dismissible'],
-    'rating_display': ['rating', 'max_rating', 'count', 'show_count', 'size', 'color', 'inactive_color'],
-    'sortable_header': ['options', 'selected', 'selected_index', 'variant', 'label', 'dense'],
-    'segmented_switch': ['options', 'index', 'value', 'enabled', 'dense'],
-    'scope_picker': ['options', 'index', 'value', 'enabled', 'dense'],
-    'tag_chip': ['label', 'selected', 'selectable', 'enabled', 'color', 'text_color', 'removable'],
-    'command_search': ['commands', 'items', 'hotkeys', 'trigger_keys', 'shortcuts', 'shortcut', 'open', 'placeholder', 'empty_text', 'title', 'subtitle', 'dense', 'fuzzy', 'fuzzy_match', 'show_all_on_empty', 'max_results', 'dismiss_on_select', 'close_on_escape', 'max_width', 'width', 'max_height', 'scrim_color'],
-    'inline_search_overlay': ['open', 'visible', 'position', 'offset', 'dismissible', 'close_on_escape', 'match_width', 'max_width', 'max_height', 'elevation', 'scrim_color', 'query', 'replace_text', 'case_sensitive', 'whole_word', 'use_regex', 'show_replace', 'show_options', 'match_count', 'current_match', 'placeholder', 'replace_placeholder', 'auto_focus'],
-    'emoji_icon': ['emoji', 'text', 'size', 'variant', 'color', 'text_color', 'fgcolor', 'outline_width', 'stroke_width', 'outline_color', 'stroke_color', 'shadow_color', 'glow_color', 'shadow_blur', 'glow_blur', 'shadow_dx', 'shadow_dy', 'bgcolor', 'background', 'bg_color', 'border_color', 'border_width', 'content_padding', 'inner_padding', 'icon_padding', 'radius', 'shape'],
-    'result_preview_pane': ['item', 'selected_item'],
-    'search_provider': ['sources', 'query', 'value', 'scope', 'selected_scope', 'fuzzy', 'fuzzy_match', 'include_empty', 'limit', 'max_results', 'min_score', 'emit_on_change'],
-    'search_history': ['items', 'entries', 'max_items', 'persist', 'storage_key', 'dedupe'],
-    'preference_store': ['namespace'],
-    'socket_client': ['url', 'protocols', 'auto_connect'],
-    'data_grid': ['rows', 'columns', 'sortable', 'filterable', 'selectable', 'multi_select', 'pagination', 'page_size', 'dense', 'striped', 'show_header', 'auto_sort', 'selected_index', 'sort_column', 'sort_ascending', 'filter_query', 'filter_column', 'filter_case_sensitive'],
-    'ide': ['value', 'text', 'code', 'language', 'theme', 'read_only', 'wrap', 'word_wrap', 'show_gutter', 'line_numbers', 'show_minimap', 'minimap', 'tab_size', 'font_size', 'font_family', 'cursor_blink', 'cursor_color', 'selection_color', 'line_highlight_color', 'editor_bg', 'editor_background', 'editor_text_color', 'padding_top', 'padding_bottom', 'radius', 'bgcolor', 'background', 'border_color', 'border_width', 'chrome_padding', 'engine', 'webview_engine', 'document_uri', 'documents', 'glyph_margin', 'show_breakpoints', 'render_whitespace', 'format_on_type', 'format_on_paste'],
-    'editor_minimap': ['text', 'language', 'visible', 'position', 'width', 'background', 'border_color', 'text_color'],
-    'file_tabs': ['items', 'active_id', 'dense'],
-    'pane_spec': ['size', 'min_size', 'max_size', 'resizable', 'collapsible', 'collapsed'],
-    'progress_indicator': ['value', 'indeterminate', 'label', 'color', 'background_color', 'stroke_width', 'variant', 'circular'],
-    'table_view': ['rows', 'headers', 'columns', 'sortable', 'filterable', 'selectable', 'multi_select', 'dense', 'striped', 'show_header'],
-    'tree_node': ['id', 'label', 'expanded', 'selected', 'disabled', 'icon', 'children'],
-    'tree_view': ['nodes', 'expanded', 'dense', 'multi_select', 'show_root', 'expand_all'],
-    'markdown': ['value', 'text', 'selectable', 'scrollable', 'use_flutter_markdown'],
-    'markdown_view': ['value', 'text', 'selectable', 'scrollable', 'use_flutter_markdown'],
-    'code': ['value', 'text', 'selectable', 'wrap', 'language', 'use_syntax_highlight', 'use_flutter_highlight'],
-    'code_block': ['value', 'text', 'selectable', 'wrap', 'language', 'use_syntax_highlight', 'use_flutter_highlight'],
-    'chat': ['messages', 'items', 'show_input', 'placeholder', 'send_label', 'enabled', 'dense', 'use_flutter_chat_ui', 'user_id'],
-    'image': ['src', 'fit', 'radius', 'cache', 'placeholder'],
-    'webview': ['url', 'html', 'base_url', 'bgcolor', 'engine', 'webview_engine', 'fallback_engine', 'use_inapp', 'prevent_links', 'request_headers', 'headers', 'user_agent', 'javascript_enabled', 'js_enabled', 'dom_storage_enabled', 'third_party_cookies_enabled', 'cache_enabled', 'clear_cache_on_start', 'incognito', 'media_playback_requires_user_gesture', 'allows_inline_media_playback', 'allow_file_access', 'allow_universal_access_from_file_urls', 'allow_popups', 'open_external_links', 'init_timeout_ms'],
-    'butterflyui_webview': ['url', 'html', 'base_url', 'bgcolor', 'engine', 'webview_engine', 'fallback_engine', 'use_inapp', 'prevent_links', 'request_headers', 'headers', 'user_agent', 'javascript_enabled', 'js_enabled', 'dom_storage_enabled', 'third_party_cookies_enabled', 'cache_enabled', 'clear_cache_on_start', 'incognito', 'media_playback_requires_user_gesture', 'allows_inline_media_playback', 'allow_file_access', 'allow_universal_access_from_file_urls', 'allow_popups', 'open_external_links', 'init_timeout_ms'],
-    'webview_adapter': ['url', 'html', 'base_url', 'bgcolor', 'engine', 'webview_engine', 'fallback_engine', 'use_inapp', 'prevent_links', 'request_headers', 'headers', 'user_agent', 'javascript_enabled', 'js_enabled', 'dom_storage_enabled', 'third_party_cookies_enabled', 'cache_enabled', 'clear_cache_on_start', 'incognito', 'media_playback_requires_user_gesture', 'allows_inline_media_playback', 'allow_file_access', 'allow_universal_access_from_file_urls', 'allow_popups', 'open_external_links', 'init_timeout_ms'],
-    'drop_zone': ['enabled', 'accepts', 'title', 'subtitle', 'use_desktop_drop'],
-    'queue_list': ['items', 'auto_download', 'download_dir', 'max_concurrent', 'use_download_manager', 'emit_local_events'],
-    'download_item': ['id', 'title', 'subtitle', 'progress', 'status', 'speed', 'eta', 'paused', 'url', 'path'],
-    'output_panel': ['channels', 'active_channel'],
-    'log_panel': ['channels', 'active_channel'],
-    'editor_tab_strip': ['tabs'],
-    'editor_tabs': ['tabs'],
-    'document_tab_strip': ['tabs'],
-    'workspace_tree': ['nodes', 'items', 'roots'],
-    'workspace_explorer': ['nodes', 'items', 'roots'],
-    'explorer_tree': ['nodes', 'items', 'roots'],
-    'problems_panel': ['problems', 'items'],
-    'diagnostics_panel': ['problems', 'items'],
-    'editor_workspace': ['documents', 'tabs', 'active_id', 'workspace_nodes', 'problems', 'show_explorer', 'show_problems', 'show_status_bar', 'status_text'],
-    'workbench_editor': ['documents', 'tabs', 'active_id', 'workspace_nodes', 'problems', 'show_explorer', 'show_problems', 'show_status_bar', 'status_text'],
-    'history_stack': ['entries', 'items', 'selected_id', 'dense', 'show_index', 'show_timestamp', 'enabled', 'use_undo', 'show_controls'],
-    'grid': ['columns', 'spacing', 'run_spacing', 'child_aspect_ratio', 'layout', 'masonry', 'scrollable', 'virtual', 'virtualized'],
-    'gutter': ['line_count', 'current_line', 'breakpoints', 'diagnostics', 'show_line_numbers', 'dense', 'width', 'highlight_lines', 'highlight_color', 'scroll_group'],
-    'editor_view': ['document_id', 'buffer_id', 'text', 'language', 'read_only', 'wrap', 'line_height', 'font_size', 'font_family', 'tab_size', 'cursor_color', 'selection_color', 'padding', 'background', 'bgcolor', 'preset_id', 'behavior_ids', 'behaviors', 'highlight_lines', 'highlight_color', 'scroll_group'],
-}
-
-RUNTIME_PROP_HINTS.update(
+FRAME_CHILD_SCHEMA = _control_schema(
     {
-        "router": [
-            "routes",
-            "active",
-            "active_route",
-            "route",
-            "index",
-            "transition",
-            "transition_type",
-            "source_rect",
-            "show_tabs",
-            "keep_alive",
-            "lightweight_transitions",
-        ],
-        "route_view": ["route_id", "title", "label", "child", "children", "layout", "spacing"],
-        "route_host": ["route_id", "title", "label", "child"],
-        "page_scene": [
-            "background_layer",
-            "ambient_layer",
-            "hero_layer",
-            "content_layer",
-            "overlay_layer",
-            "pages",
-            "active_page",
-            "active_id",
-            "page",
-            "value",
-            "transition",
-            "transition_type",
-            "transition_ms",
-            "ambient_opacity",
-            "hero_alignment",
-            "content_alignment",
-            "content_padding",
-        ],
-        "overlay_host": [
-            "base",
-            "overlays",
-            "layers",
-            "clip",
-            "transition",
-            "transition_type",
-            "transition_ms",
-            "active_overlay",
-            "active_id",
-            "overlay_id",
-            "active_index",
-            "index",
-            "show_all_overlays",
-            "show_default_overlay",
-            "max_visible_overlays",
-            "value",
-        ],
-        "modal": [
-            "open",
-            "dismissible",
-            "close_on_escape",
-            "trap_focus",
-            "duration_ms",
-            "transition",
-            "transition_type",
-            "source_rect",
-            "scrim_color",
-            "child",
-        ],
-        "popover": [
-            "anchor",
-            "content",
-            "open",
-            "position",
-            "offset",
-            "dismissible",
-            "scrim_color",
-            "transition",
-            "transition_type",
-            "duration_ms",
-        ],
-        "animation_asset": [
-            "src",
-            "kind",
-            "engine",
-            "frames",
-            "autoplay",
-            "loop",
-            "duration_ms",
-            "fps",
-            "fit",
-            "alignment",
-            "pulse_scale",
-        ],
-        "launcher": [
-            "items",
-            "selected_id",
-            "layout",
-            "columns",
-            "spacing",
-            "run_spacing",
-            "icon_size",
-            "tile_width",
-            "tile_height",
-            "radius",
-            "bgcolor",
-            "border_color",
-        ],
-        "window_frame": [
-            "title",
-            "show_close",
-            "show_maximize",
-            "show_minimize",
-            "draggable",
-            "acrylic_effect",
-            "acrylic_opacity",
-            "content_padding",
-            "title_height",
-            "custom_frame",
-            "use_native_title_bar",
-            "native_title_bar",
-            "system_title_bar",
-            "native_window_actions",
-            "window_actions",
-            "show_default_controls",
-            "title_leading",
-            "title_content",
-            "title_widget",
-            "title_trailing",
-            "window_controls",
-        ],
-        "window_drag_region": [
-            "draggable",
-            "maximize_on_double_tap",
-            "emit_move",
-            "native_drag",
-            "native_maximize_action",
-            "child",
-        ],
+        "control": ANY_SCHEMA,
+        "props": {"type": "object", "additionalProperties": ANY_SCHEMA},
+        "frame": _control_schema(
+            {
+                "left": DIMENSION_SCHEMA,
+                "top": DIMENSION_SCHEMA,
+                "right": DIMENSION_SCHEMA,
+                "bottom": DIMENSION_SCHEMA,
+                "width": DIMENSION_SCHEMA,
+                "height": DIMENSION_SCHEMA,
+                "x": DIMENSION_SCHEMA,
+                "y": DIMENSION_SCHEMA,
+                "anchor": ALIGNMENT_SCHEMA,
+                "alignment": ALIGNMENT_SCHEMA,
+                "z": NUMBER_SCHEMA,
+                "z_index": NUMBER_SCHEMA,
+            }
+        ),
     }
 )
 
-for _prop in [
-    "custom_frame",
-    "use_native_title_bar",
-    "native_title_bar",
-    "system_title_bar",
-    "native_window_actions",
-    "window_actions",
-    "show_default_controls",
-    "title_leading",
-    "title_content",
-    "title_widget",
-    "title_trailing",
-    "window_controls",
-    "child",
-]:
-    _window_hints = RUNTIME_PROP_HINTS.setdefault("window_frame", [])
-    if _prop not in _window_hints:
-        _window_hints.append(_prop)
 
-_button_hints = RUNTIME_PROP_HINTS.setdefault("button", [])
-for _prop in [
-    "window_action",
-    "window_action_delay_ms",
-    "action",
-    "actions",
-    "action_id",
-    "action_event",
-    "action_payload",
-    "value",
-]:
-    if _prop not in _button_hints:
-        _button_hints.append(_prop)
-
-_icon_button_hints = RUNTIME_PROP_HINTS.setdefault("icon_button", [])
-for _prop in [
-    "icon",
-    "glyph",
-    "tooltip",
-    "size",
-    "color",
-    "enabled",
-    "value",
-    "action",
-    "actions",
-    "action_id",
-    "action_event",
-    "action_payload",
-]:
-    if _prop not in _icon_button_hints:
-        _icon_button_hints.append(_prop)
-
-_async_action_button_hints = RUNTIME_PROP_HINTS.setdefault("async_action_button", [])
-for _prop in [
-    "label",
-    "text",
-    "value",
-    "variant",
-    "busy",
-    "loading",
-    "disabled_while_busy",
-    "busy_label",
-    "window_action",
-    "window_action_delay_ms",
-    "action",
-    "actions",
-    "action_id",
-    "action_event",
-    "action_payload",
-]:
-    if _prop not in _async_action_button_hints:
-        _async_action_button_hints.append(_prop)
-
-_button_style_hints = RUNTIME_PROP_HINTS.setdefault("button_style", [])
-for _prop in [
-    "value",
-    "options",
-    "items",
-    "base",
-    "hover",
-    "pressed",
-    "disabled",
-    "focus_ring",
-    "motion_behavior",
-    "action",
-    "actions",
-    "action_id",
-    "action_event",
-    "action_payload",
-]:
-    if _prop not in _button_style_hints:
-        _button_style_hints.append(_prop)
-
-RUNTIME_PROP_HINTS.update(
-    {
-        "combo_box": [
-            "value",
-            "options",
-            "items",
-            "groups",
-            "label",
-            "hint",
-            "placeholder",
-            "loading",
-            "async_source",
-            "debounce_ms",
-            "enabled",
-        ],
-        "aspect_ratio": ["ratio", "aspect_ratio", "child"],
-        "overflow_box": [
-            "min_width",
-            "min_height",
-            "max_width",
-            "max_height",
-            "alignment",
-            "fit",
-            "child",
-        ],
-        "fitted_box": ["fit", "alignment", "clip_behavior", "child"],
-        "avatar": [
-            "src",
-            "image",
-            "name",
-            "initials",
-            "icon",
-            "size",
-            "radius",
-            "color",
-            "bgcolor",
-            "status",
-            "badge",
-            "enabled",
-        ],
-        "shadow": [
-            "color",
-            "blur",
-            "spread",
-            "offset_x",
-            "offset_y",
-            "radius",
-            "shadows",
-            "child",
-        ],
-        "decorated_box": [
-            "color",
-            "bgcolor",
-            "gradient",
-            "image",
-            "border_color",
-            "border_width",
-            "radius",
-            "shape",
-            "shadow",
-            "padding",
-            "margin",
-            "clip_behavior",
-            "child",
-            "children",
-        ],
-        "clip": ["shape", "radius", "clip_behavior", "child"],
-        "effects": [
-            "blur",
-            "opacity",
-            "color",
-            "blend_mode",
-            "brightness",
-            "contrast",
-            "saturation",
-            "hue_rotate",
-            "grayscale",
-            "enabled",
-            "child",
-            "children",
-        ],
-        "particles": [
-            "count",
-            "colors",
-            "min_size",
-            "max_size",
-            "speed",
-            "min_speed",
-            "max_speed",
-            "direction",
-            "spread",
-            "opacity",
-            "seed",
-            "loop",
-            "play",
-            "shape",
-        ],
-        "animation": [
-            "duration_ms",
-            "curve",
-            "opacity",
-            "scale",
-            "offset",
-            "rotation",
-            "enabled",
-            "child",
-            "children",
-        ],
-        "transition": [
-            "duration_ms",
-            "curve",
-            "transition_type",
-            "preset",
-            "state",
-            "mode",
-            "enabled",
-            "child",
-            "children",
-        ],
-    }
-)
-
-RUNTIME_PROP_HINTS.setdefault(
-    "candy",
-    [
-        "schema_version",
-        "module",
-        "variant",
-        "events",
-        "state",
-        "payload",
-        "theme",
-        "tokens",
-        "token_overrides",
-        "modules",
-        "slots",
-        "semantics",
-        "accessibility",
-        "interaction",
-        "performance",
-        "quality",
-        "cache",
-        "button",
-        "card",
-        "column",
-        "container",
-        "row",
-        "stack",
-        "surface",
-        "wrap",
-        "align",
-        "center",
-        "spacer",
-        "aspect_ratio",
-        "overflow_box",
-        "fitted_box",
-        "effects",
-        "particles",
-        "border",
-        "shadow",
-        "outline",
-        "gradient",
-        "animation",
-        "transition",
-        "canvas",
-        "clip",
-        "decorated_box",
-        "badge",
-        "avatar",
-        "icon",
-        "text",
-        "motion",
-    ],
-)
-
-RUNTIME_PROP_HINTS.setdefault(
-    "skins",
-    [
-        "module", "main", "cross", "size", "direction", "alignment", "width", "height",
-        "fit", "spacing", "run_spacing", "padding", "margin", "radius", "gradient",
-        "bgcolor", "background", "shadow", "border", "shape", "color", "elevation",
-        "shadow_color", "shimmer", "overlay", "duration_ms", "curve", "preset",
-        "skin", "tokens", "brightness"
-    ],
-)
-
-RUNTIME_PROP_HINTS.setdefault(
-    "skins_scope",
-    ["skin", "tokens", "brightness"],
-)
-
-RUNTIME_PROP_HINTS.setdefault(
-    "gallery",
-    [
-        "items", "layout", "columns", "spacing", "mainAxisSpacing", "crossAxisSpacing",
-        "radius", "showSelection", "multiSelect", "showActions", "showMeta", "scrollDirection"
-    ],
-)
-
-RUNTIME_PROP_HINTS.setdefault(
-    "gallery_scope",
-    ["layout", "columns", "spacing", "mainAxisSpacing", "crossAxisSpacing", "radius"],
-)
+_BOTH_ENDS_CONTROL_TYPES = ['accordion',
+ 'action_bar',
+ 'alert_dialog',
+ 'align',
+ 'animated_background',
+ 'animated_gradient',
+ 'animation',
+ 'app_bar',
+ 'artifact_card',
+ 'aspect_ratio',
+ 'async_action_button',
+ 'audio',
+ 'avatar',
+ 'avatar_stack',
+ 'badge',
+ 'bar_chart',
+ 'bar_plot',
+ 'blend_mode_picker',
+ 'blob_field',
+ 'border',
+ 'border_side',
+ 'bottom_sheet',
+ 'box',
+ 'breadcrumb_bar',
+ 'bubble',
+ 'button',
+ 'button_style',
+ 'candy',
+ 'candy_scope',
+ 'canvas',
+ 'card',
+ 'center',
+ 'chart',
+ 'checkbox',
+ 'chip',
+ 'chromatic_shift',
+ 'clip',
+ 'color_picker',
+ 'color_tools',
+ 'column',
+ 'combo_box',
+ 'confetti_burst',
+ 'container',
+ 'container_style',
+ 'context_menu',
+ 'crop_box',
+ 'data_grid',
+ 'data_source_view',
+ 'data_table',
+ 'date_picker',
+ 'decorated_box',
+ 'directory_picker',
+ 'display',
+ 'divider',
+ 'drag_handle',
+ 'drawer',
+ 'drop_zone',
+ 'dropdown',
+ 'effects',
+ 'elevated_button',
+ 'emoji_icon',
+ 'emoji_picker',
+ 'expanded',
+ 'field_group',
+ 'file_picker',
+ 'filled_button',
+ 'fitted_box',
+ 'flex_spacer',
+ 'flow_field',
+ 'fold_layer',
+ 'form',
+ 'form_field',
+ 'frame',
+ 'gallery',
+ 'gallery_scope',
+ 'gesture_area',
+ 'glass_blur',
+ 'glow_effect',
+ 'glyph_button',
+ 'gradient',
+ 'gradient_editor',
+ 'gradient_sweep',
+ 'grain_overlay',
+ 'grid',
+ 'grid_view',
+ 'histogram_overlay',
+ 'histogram_view',
+ 'hover_region',
+ 'html_view',
+ 'icon',
+ 'icon_button',
+ 'icon_picker',
+ 'image',
+ 'item_tile',
+ 'key_listener',
+ 'keybind_recorder',
+ 'line_chart',
+ 'line_plot',
+ 'liquid_morph',
+ 'list_tile',
+ 'list_view',
+ 'markdown_view',
+ 'menu_bar',
+ 'menu_item',
+ 'modifier',
+ 'morphing_border',
+ 'motion',
+ 'nav_ring',
+ 'neon_edge',
+ 'noise_displacement',
+ 'noise_field',
+ 'notice_bar',
+ 'notification_center',
+ 'option',
+ 'outline',
+ 'outlined_button',
+ 'overlay',
+ 'page_view',
+ 'pagination',
+ 'pane',
+ 'parallax',
+ 'particle_field',
+ 'particles',
+ 'pie_plot',
+ 'pixelate',
+ 'popover',
+ 'portal',
+ 'pressable',
+ 'preview_surface',
+ 'progress_bar',
+ 'progress_ring',
+ 'radio',
+ 'rail_nav',
+ 'reorderable_list_view',
+ 'ripple_burst',
+ 'route',
+ 'row',
+ 'safe_area',
+ 'scanline_overlay',
+ 'scene_view',
+ 'scroll_view',
+ 'scrollable_column',
+ 'scrollable_row',
+ 'select',
+ 'shadow',
+ 'shadow_stack',
+ 'shimmer',
+ 'shimmer_shadow',
+ 'sidebar',
+ 'skins',
+ 'skins_scope',
+ 'slide_panel',
+ 'slider',
+ 'snack_bar',
+ 'snap_grid',
+ 'sortable_header',
+ 'spacer',
+ 'spark_plot',
+ 'sparkline',
+ 'splash',
+ 'split_pane',
+ 'split_view',
+ 'sprite',
+ 'stack',
+ 'stagger',
+ 'status_bar',
+ 'sticky_list',
+ 'style',
+ 'surface',
+ 'switch',
+ 'table',
+ 'table_view',
+ 'tabs',
+ 'text',
+ 'text_area',
+ 'text_button',
+ 'text_field',
+ 'time_select',
+ 'timeline',
+ 'toast',
+ 'toast_host',
+ 'tooltip',
+ 'top_bar',
+ 'transition',
+ 'vertical_divider',
+ 'video',
+ 'vignette',
+ 'virtual_grid',
+ 'virtual_list',
+ 'visual_fx',
+ 'webview',
+ 'window_controls',
+ 'window_drag_region',
+ 'window_frame',
+ 'wrap']
 
 
-# --- CHANGELOG 1 SCHEMA REFACTOR START ---
-def _pascal_case(name: str) -> str:
-    return "".join(part.capitalize() for part in name.split("_") if part)
-
-
-def _merge_schema_into(target: str, source: str) -> None:
-    src = CONTROL_SCHEMAS.get(source)
-    if not isinstance(src, Mapping):
-        return
-    dst = CONTROL_SCHEMAS.setdefault(target, _control_schema())
-    src_props = src.get("properties", {})
-    dst_props = dst.setdefault("properties", {})
-    if isinstance(src_props, Mapping) and isinstance(dst_props, Mapping):
-        for key, value in src_props.items():
-            if key not in dst_props:
-                dst_props[key] = value
-    if src.get("additionalProperties") is True:
-        dst["additionalProperties"] = True
-    src_required = src.get("required", [])
-    dst_required = list(dst.get("required", []))
-    if isinstance(src_required, list):
-        for item in src_required:
-            if item not in dst_required:
-                dst_required.append(item)
-    if dst_required:
-        dst["required"] = dst_required
-
-
-def _merge_hints_into(target: str, source: str) -> None:
-    src = RUNTIME_PROP_HINTS.get(source, [])
-    dst = RUNTIME_PROP_HINTS.setdefault(target, [])
-    for prop in src:
-        if prop not in dst:
-            dst.append(prop)
-
-
-def _remove_control_name(
-    name: str,
-    *,
-    drop_schema: bool = True,
-    drop_hints: bool = True,
-    drop_types: bool = True,
-) -> None:
-    normalized = name.strip().lower().replace("-", "_").rstrip(".")
-    if not normalized:
-        return
-    if drop_schema:
-        CONTROL_SCHEMAS.pop(normalized, None)
-    if drop_hints:
-        RUNTIME_PROP_HINTS.pop(normalized, None)
-    if drop_types:
-        _ALL_CONTROL_TYPES.discard(normalized)
-        _ALL_CONTROL_TYPES.discard(_pascal_case(normalized))
-
-
-_CHANGELOG_CANONICAL_SCHEMAS = {
-    "bubble": _control_schema(
-        {
+def _typed_schema_overrides() -> dict[str, dict[str, Any]]:
+    return {
+        "alert_dialog": _control_schema({
+            "open": BOOL_SCHEMA,
+            "dismissible": BOOL_SCHEMA,
+            "close_on_escape": BOOL_SCHEMA,
+            "trap_focus": BOOL_SCHEMA,
+            "duration_ms": INTEGER_SCHEMA,
+            "transition": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "transition_type": STRING_SCHEMA,
+            "source_rect": ANY_SCHEMA,
+            "scrim_color": COLOR_SCHEMA,
+            "title": ANY_SCHEMA,
+            "content": ANY_SCHEMA,
+            "actions": {"type": "array", "items": ANY_SCHEMA},
+        }),
+        "bubble": _control_schema({
             "variant": STRING_SCHEMA,
             "role": STRING_SCHEMA,
             "tone": STRING_SCHEMA,
             "density": STRING_SCHEMA,
-            "compact": BOOL_SCHEMA,
-            "dense": BOOL_SCHEMA,
             "align": STRING_SCHEMA,
-            "max_width": DIMENSION_SCHEMA,
-            "grouping": STRING_SCHEMA,
-            "group_messages": BOOL_SCHEMA,
-            "grouped": BOOL_SCHEMA,
-            "selectable": BOOL_SCHEMA,
-            "clickable": BOOL_SCHEMA,
-            "sender_name": STRING_SCHEMA,
-            "author": STRING_SCHEMA,
-            "avatar": ANY_SCHEMA,
-            "role_badge": STRING_SCHEMA,
-            "title": STRING_SCHEMA,
-            "subtitle": STRING_SCHEMA,
             "text": STRING_SCHEMA,
             "value": STRING_SCHEMA,
             "markdown": ANY_SCHEMA,
-            "timestamp": STRING_SCHEMA,
-            "edited": BOOL_SCHEMA,
-            "delivered": BOOL_SCHEMA,
-            "read": BOOL_SCHEMA,
-            "status": STRING_SCHEMA,
-            "error_notice": STRING_SCHEMA,
-            "notice": STRING_SCHEMA,
+            "messages": {"type": "array", "items": ANY_SCHEMA},
+            "items": {"type": "array", "items": ANY_SCHEMA},
             "attachments": {"type": "array", "items": ANY_SCHEMA},
             "reactions": {"type": "array", "items": ANY_SCHEMA},
             "actions": {"type": "array", "items": ANY_SCHEMA},
-            "quote_text": STRING_SCHEMA,
-            "quote_author": STRING_SCHEMA,
-            "quote_timestamp": STRING_SCHEMA,
-            "quote_compact": BOOL_SCHEMA,
-            "mention_label": STRING_SCHEMA,
-            "mention_color": COLOR_SCHEMA,
-            "mention_text_color": COLOR_SCHEMA,
-            "mention_clickable": BOOL_SCHEMA,
-            "divider_label": STRING_SCHEMA,
-            "divider_color": COLOR_SCHEMA,
-            "messages": {"type": "array", "items": ANY_SCHEMA},
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "pinned_messages": {"type": "array", "items": ANY_SCHEMA},
-            "spacing": NUMBER_SCHEMA,
-            "reverse": BOOL_SCHEMA,
-            "scrollable": BOOL_SCHEMA,
-            "autoscroll": STRING_SCHEMA,
-            "follow_latest": BOOL_SCHEMA,
-            "unread_divider_label": STRING_SCHEMA,
-            "unread_after_id": STRING_SCHEMA,
-            "unread_index": INTEGER_SCHEMA,
-            "date_separators": {"type": "array", "items": ANY_SCHEMA},
-            "empty_state": ANY_SCHEMA,
-            "typing_indicator": ANY_SCHEMA,
-            "show_timestamps": BOOL_SCHEMA,
-            "show_input": BOOL_SCHEMA,
-            "input_placeholder": STRING_SCHEMA,
-            "send_label": STRING_SCHEMA,
-            "send_on_enter": BOOL_SCHEMA,
-            "placeholder": STRING_SCHEMA,
             "min_lines": INTEGER_SCHEMA,
             "max_lines": INTEGER_SCHEMA,
-            "auto_expand": BOOL_SCHEMA,
-            "leading": ANY_SCHEMA,
-            "trailing": ANY_SCHEMA,
+            "send_on_enter": BOOL_SCHEMA,
+            "show_input": BOOL_SCHEMA,
             "show_attach": BOOL_SCHEMA,
-            "draft_key": STRING_SCHEMA,
-            "char_limit": INTEGER_SCHEMA,
-            "show_counter": BOOL_SCHEMA,
-            "cooldown_ms": INTEGER_SCHEMA,
             "disabled": BOOL_SCHEMA,
             "read_only": BOOL_SCHEMA,
-            "emit_on_change": BOOL_SCHEMA,
-            "clear_on_send": BOOL_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "display": _control_schema(
-        {
+        }),
+        "candy_scope": _control_schema({
+            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "theme": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "brightness": STRING_SCHEMA,
+            "child": ANY_SCHEMA,
+            "children": {"type": "array", "items": ANY_SCHEMA},
+            "particles": BOOL_SCHEMA,
+            "scanline": BOOL_SCHEMA,
+            "shimmer": BOOL_SCHEMA,
+            "vignette": BOOL_SCHEMA,
+        }),
+        "display": _control_schema({
             "role": STRING_SCHEMA,
             "variant": STRING_SCHEMA,
             "title": STRING_SCHEMA,
             "subtitle": STRING_SCHEMA,
             "caption": STRING_SCHEMA,
             "description": STRING_SCHEMA,
-            "name": STRING_SCHEMA,
             "tone": STRING_SCHEMA,
             "size": STRING_SCHEMA,
             "interactive": BOOL_SCHEMA,
-            "status": STRING_SCHEMA,
-            "badge": STRING_SCHEMA,
-            "color": COLOR_SCHEMA,
-            "avatar": ANY_SCHEMA,
-            "initials": STRING_SCHEMA,
-            "icon": ICON_VALUE_SCHEMA,
-            "leading": ANY_SCHEMA,
-            "trailing": ANY_SCHEMA,
-            "tags": {"type": "array", "items": ANY_SCHEMA},
             "value": ANY_SCHEMA,
-            "max": INTEGER_SCHEMA,
-            "allow_half": BOOL_SCHEMA,
-            "count": INTEGER_SCHEMA,
             "items": {"type": "array", "items": ANY_SCHEMA},
             "selected": {"type": "array", "items": ANY_SCHEMA},
             "checked": {"type": "array", "items": ANY_SCHEMA},
-            "checked_value": BOOL_SCHEMA,
-            "dot_count": INTEGER_SCHEMA,
-            "document_id": STRING_SCHEMA,
-            "ranges": {"type": "array", "items": ANY_SCHEMA},
-            "owners": {"type": "array", "items": ANY_SCHEMA},
-            "owner": ANY_SCHEMA,
-            "show_avatars": BOOL_SCHEMA,
-            "compact": BOOL_SCHEMA,
-            "dense": BOOL_SCHEMA,
-            "aria_label": STRING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "style": _control_schema(
-        {
-            "style_pack": STRING_SCHEMA,
-            "pack": STRING_SCHEMA,
-            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "token_overrides": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "style_tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "recipes": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "default_style": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "default_modifiers": {"type": "array", "items": ANY_SCHEMA},
-            "default_motion": ANY_SCHEMA,
-            "state": STRING_SCHEMA,
-            "variant": ANY_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-            "child": ANY_SCHEMA,
-            "children": {"type": "array", "items": ANY_SCHEMA},
-        }
-    ),
-    "modifier": _control_schema(
-        {
+        }),
+        "modifier": _control_schema({
             "modifiers": {"type": "array", "items": ANY_SCHEMA},
-            "motion": ANY_SCHEMA,
             "on_hover": {"type": "array", "items": ANY_SCHEMA},
             "on_pressed": {"type": "array", "items": ANY_SCHEMA},
             "on_focus": {"type": "array", "items": ANY_SCHEMA},
+            "motion": ANY_SCHEMA,
             "cursor": STRING_SCHEMA,
             "padding": PADDING_SCHEMA,
             "margin": PADDING_SCHEMA,
             "align": ALIGNMENT_SCHEMA,
-            "max_width": DIMENSION_SCHEMA,
-            "max_height": DIMENSION_SCHEMA,
-            "min_width": DIMENSION_SCHEMA,
-            "min_height": DIMENSION_SCHEMA,
             "border": ANY_SCHEMA,
             "background": ANY_SCHEMA,
             "shadow": ANY_SCHEMA,
@@ -6625,13 +736,20 @@ _CHANGELOG_CANONICAL_SCHEMAS = {
             "glass": ANY_SCHEMA,
             "focus_ring": ANY_SCHEMA,
             "hit_test": STRING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-            "child": ANY_SCHEMA,
-            "children": {"type": "array", "items": ANY_SCHEMA},
-        }
-    ),
-    "pagination": _control_schema(
-        {
+        }),
+        "page_view": _control_schema({
+            "index": INTEGER_SCHEMA,
+            "initial_page": INTEGER_SCHEMA,
+            "animate": BOOL_SCHEMA,
+            "duration_ms": INTEGER_SCHEMA,
+            "keep_alive": BOOL_SCHEMA,
+            "scroll_direction": STRING_SCHEMA,
+            "reverse": BOOL_SCHEMA,
+            "page_snapping": BOOL_SCHEMA,
+            "pad_ends": BOOL_SCHEMA,
+            "viewport_fraction": NUMBER_SCHEMA,
+        }),
+        "pagination": _control_schema({
             "page": INTEGER_SCHEMA,
             "page_count": INTEGER_SCHEMA,
             "page_size": INTEGER_SCHEMA,
@@ -6643,11 +761,28 @@ _CHANGELOG_CANONICAL_SCHEMAS = {
             "prev_label": STRING_SCHEMA,
             "next_label": STRING_SCHEMA,
             "mode": STRING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "snack_bar": _control_schema(
-        {
+        }),
+        "progress_bar": _control_schema({
+            "value": NUMBER_SCHEMA,
+            "indeterminate": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "stroke_width": NUMBER_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "circular": BOOL_SCHEMA,
+        }),
+        "progress_ring": _control_schema({
+            "value": NUMBER_SCHEMA,
+            "indeterminate": BOOL_SCHEMA,
+            "label": STRING_SCHEMA,
+            "stroke_width": NUMBER_SCHEMA,
+            "variant": STRING_SCHEMA,
+            "circular": BOOL_SCHEMA,
+        }),
+        "reorderable_list_view": _control_schema({
+            "items": {"type": "array", "items": ANY_SCHEMA},
+            "dense": BOOL_SCHEMA,
+        }),
+        "snack_bar": _control_schema({
             "message": STRING_SCHEMA,
             "label": STRING_SCHEMA,
             "open": BOOL_SCHEMA,
@@ -6661,345 +796,1168 @@ _CHANGELOG_CANONICAL_SCHEMAS = {
             "use_flushbar": BOOL_SCHEMA,
             "use_fluttertoast": BOOL_SCHEMA,
             "toast_position": STRING_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
-    "alert_dialog": _control_schema(
-        {
-            "open": BOOL_SCHEMA,
-            "dismissible": BOOL_SCHEMA,
-            "close_on_escape": BOOL_SCHEMA,
-            "trap_focus": BOOL_SCHEMA,
-            "duration_ms": INTEGER_SCHEMA,
-            "transition": {"type": "object", "additionalProperties": ANY_SCHEMA},
-            "transition_type": STRING_SCHEMA,
-            "source_rect": ANY_SCHEMA,
-            "scrim_color": COLOR_SCHEMA,
-            "title": ANY_SCHEMA,
-            "content": ANY_SCHEMA,
-            "actions": {"type": "array", "items": ANY_SCHEMA},
-            "child": ANY_SCHEMA,
-        }
-    ),
-    "page_view": _control_schema(
-        {
-            "index": INTEGER_SCHEMA,
-            "initial_page": INTEGER_SCHEMA,
-            "animate": BOOL_SCHEMA,
-            "duration_ms": INTEGER_SCHEMA,
-            "keep_alive": BOOL_SCHEMA,
-            "scroll_direction": STRING_SCHEMA,
-            "reverse": BOOL_SCHEMA,
-            "page_snapping": BOOL_SCHEMA,
-            "pad_ends": BOOL_SCHEMA,
-            "viewport_fraction": NUMBER_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
+        }),
+        "skins_scope": _control_schema({
+            "skin": STRING_SCHEMA,
+            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "brightness": STRING_SCHEMA,
             "child": ANY_SCHEMA,
             "children": {"type": "array", "items": ANY_SCHEMA},
-        }
-    ),
-    "vertical_divider": _control_schema(
-        {
+        }),
+        "style": _control_schema({
+            "style_pack": STRING_SCHEMA,
+            "pack": STRING_SCHEMA,
+            "tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "token_overrides": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "style_tokens": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "recipes": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "default_style": {"type": "object", "additionalProperties": ANY_SCHEMA},
+            "default_modifiers": {"type": "array", "items": ANY_SCHEMA},
+            "default_motion": ANY_SCHEMA,
+            "state": STRING_SCHEMA,
+        }),
+        "vertical_divider": _control_schema({
             "vertical": BOOL_SCHEMA,
             "thickness": NUMBER_SCHEMA,
             "indent": NUMBER_SCHEMA,
             "end_indent": NUMBER_SCHEMA,
             "color": COLOR_SCHEMA,
-        }
-    ),
-    "progress_bar": _control_schema(
-        {
-            "value": NUMBER_SCHEMA,
-            "indeterminate": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "stroke_width": NUMBER_SCHEMA,
-            "variant": STRING_SCHEMA,
-            "circular": BOOL_SCHEMA,
-        }
-    ),
-    "progress_ring": _control_schema(
-        {
-            "value": NUMBER_SCHEMA,
-            "indeterminate": BOOL_SCHEMA,
-            "label": STRING_SCHEMA,
-            "stroke_width": NUMBER_SCHEMA,
-            "variant": STRING_SCHEMA,
-            "circular": BOOL_SCHEMA,
-        }
-    ),
-    "reorderable_list_view": _control_schema(
-        {
-            "items": {"type": "array", "items": ANY_SCHEMA},
-            "dense": BOOL_SCHEMA,
-            "events": {"type": "array", "items": STRING_SCHEMA},
-        }
-    ),
+        }),
+    }
+
+
+_TYPED_SCHEMA_OVERRIDES = _typed_schema_overrides()
+
+CONTROL_SCHEMAS: dict[str, dict[str, Any]] = {
+    name: _TYPED_SCHEMA_OVERRIDES.get(name, _control_schema())
+    for name in _BOTH_ENDS_CONTROL_TYPES
 }
 
-_CHANGELOG_CANONICAL_HINTS = {
-    "bubble": [
-        "variant", "role", "tone", "density", "compact", "dense", "align", "max_width",
-        "grouping", "group_messages", "grouped", "selectable", "clickable",
-        "sender_name", "author", "avatar", "role_badge", "title", "subtitle", "text",
-        "markdown", "timestamp", "edited", "delivered", "read", "status", "error_notice",
-        "notice", "attachments", "reactions", "actions", "quote_text", "quote_author",
-        "quote_timestamp", "mention_label", "mention_color", "mention_text_color",
-        "mention_clickable", "divider_label", "divider_color", "messages", "items",
-        "pinned_messages", "spacing", "reverse", "scrollable", "autoscroll",
-        "follow_latest", "unread_divider_label", "unread_after_id", "unread_index",
-        "date_separators", "empty_state", "typing_indicator", "show_timestamps",
-        "show_input", "input_placeholder", "send_label", "send_on_enter", "value",
-        "placeholder", "min_lines", "max_lines", "auto_expand", "leading", "trailing",
-        "show_attach", "draft_key", "char_limit", "show_counter", "cooldown_ms",
-        "disabled", "read_only", "emit_on_change", "clear_on_send", "events",
+RUNTIME_PROP_HINTS: dict[str, list[str]] = {'accordion': ['accent_color',
+               'allowEmpty',
+               'allow_empty',
+               'body_color',
+               'body_padding',
+               'border_color',
+               'content_padding',
+               'dense',
+               'divider_color',
+               'elevation',
+               'expanded',
+               'glass_blur',
+               'glass_opacity',
+               'header_bg',
+               'header_color',
+               'header_padding',
+               'index',
+               'labels',
+               'multiple',
+               'radius',
+               'show_dividers',
+               'spacing',
+               'style',
+               'variant'],
+ 'action_bar': ['bgcolor',
+                'spacing',
+                'items',
+                'open',
+                'anchor',
+                'position',
+                'offset',
+                'dismissible',
+                'scrim_color',
+                'text_color',
+                'icon_color',
+                'item_bgcolor',
+                'padding',
+                'alignment',
+                'backdrop',
+                'backdrop_blur'],
+ 'alert_dialog': ['open',
+                  'dismissible',
+                  'close_on_escape',
+                  'trap_focus',
+                  'duration_ms',
+                  'transition',
+                  'transition_type',
+                  'source_rect',
+                  'scrim_color',
+                  'title',
+                  'content',
+                  'actions',
+                  'child'],
+ 'align': [],
+ 'animated_background': [],
+ 'animated_gradient': [],
+ 'animation': ['duration_ms', 'curve', 'opacity', 'scale', 'offset', 'rotation', 'enabled', 'child', 'children'],
+ 'app_bar': [],
+ 'artifact_card': [],
+ 'aspect_ratio': ['ratio', 'aspect_ratio', 'child'],
+ 'async_action_button': ['label',
+                         'state',
+                         'enabled',
+                         'variant',
+                         'color',
+                         'text_color',
+                         'radius',
+                         'content_padding',
+                         'success_label',
+                         'error_label',
+                         'progress',
+                         'show_progress',
+                         'text',
+                         'value',
+                         'busy',
+                         'loading',
+                         'disabled_while_busy',
+                         'busy_label',
+                         'window_action',
+                         'window_action_delay_ms',
+                         'action',
+                         'actions',
+                         'action_id',
+                         'action_event',
+                         'action_payload'],
+ 'audio': [],
+ 'avatar': ['src',
+            'image',
+            'name',
+            'initials',
+            'icon',
+            'size',
+            'radius',
+            'color',
+            'bgcolor',
+            'status',
+            'badge',
+            'enabled'],
+ 'avatar_stack': ['avatars', 'items', 'size', 'overlap', 'max'],
+ 'badge': ['label', 'text', 'value', 'color', 'bgcolor', 'offset', 'radius', 'text_color', 'padding', 'clickable'],
+ 'bar_chart': [],
+ 'bar_plot': ['color', 'colors', 'max', 'min', 'spacing', 'values'],
+ 'blend_mode_picker': ['value', 'options', 'items', 'label', 'enabled', 'dense'],
+ 'blob_field': ['count', 'seed', 'color', 'background', 'bgcolor'],
+ 'border': ['color', 'width', 'radius', 'side', 'padding'],
+ 'border_side': ['side', 'color', 'width', 'length'],
+ 'bottom_sheet': [],
+ 'box': ['color',
+         'bgcolor',
+         'padding',
+         'margin',
+         'alignment',
+         'radius',
+         'border',
+         'border_color',
+         'border_width',
+         'clip_behavior',
+         'gradient',
+         'image'],
+ 'breadcrumb_bar': [],
+ 'bubble': ['variant',
+            'role',
+            'tone',
+            'density',
+            'compact',
+            'dense',
+            'align',
+            'max_width',
+            'grouping',
+            'group_messages',
+            'grouped',
+            'selectable',
+            'clickable',
+            'sender_name',
+            'author',
+            'avatar',
+            'role_badge',
+            'title',
+            'subtitle',
+            'text',
+            'markdown',
+            'timestamp',
+            'edited',
+            'delivered',
+            'read',
+            'status',
+            'error_notice',
+            'notice',
+            'attachments',
+            'reactions',
+            'actions',
+            'quote_text',
+            'quote_author',
+            'quote_timestamp',
+            'mention_label',
+            'mention_color',
+            'mention_text_color',
+            'mention_clickable',
+            'divider_label',
+            'divider_color',
+            'messages',
+            'items',
+            'pinned_messages',
+            'spacing',
+            'reverse',
+            'scrollable',
+            'autoscroll',
+            'follow_latest',
+            'unread_divider_label',
+            'unread_after_id',
+            'unread_index',
+            'date_separators',
+            'empty_state',
+            'typing_indicator',
+            'show_timestamps',
+            'show_input',
+            'input_placeholder',
+            'send_label',
+            'send_on_enter',
+            'value',
+            'placeholder',
+            'min_lines',
+            'max_lines',
+            'auto_expand',
+            'leading',
+            'trailing',
+            'show_attach',
+            'draft_key',
+            'char_limit',
+            'show_counter',
+            'cooldown_ms',
+            'disabled',
+            'read_only',
+            'emit_on_change',
+            'clear_on_send',
+            'events',
+            'line_color',
+            'content',
+            'enabled',
+            'use_flutter_chat_ui',
+            'user_id',
+            'multiline',
+            'submit_label',
+            'show_send'],
+ 'button': ['window_action',
+            'window_action_delay_ms',
+            'action',
+            'actions',
+            'action_id',
+            'action_event',
+            'action_payload',
+            'value'],
+ 'button_style': ['value',
+                  'options',
+                  'items',
+                  'base',
+                  'hover',
+                  'pressed',
+                  'disabled',
+                  'focus_ring',
+                  'motion_behavior',
+                  'action',
+                  'actions',
+                  'action_id',
+                  'action_event',
+                  'action_payload'],
+ 'candy': ['schema_version',
+           'module',
+           'variant',
+           'events',
+           'state',
+           'payload',
+           'theme',
+           'tokens',
+           'token_overrides',
+           'modules',
+           'slots',
+           'semantics',
+           'accessibility',
+           'interaction',
+           'performance',
+           'quality',
+           'cache',
+           'button',
+           'card',
+           'column',
+           'container',
+           'row',
+           'stack',
+           'surface',
+           'wrap',
+           'align',
+           'center',
+           'spacer',
+           'aspect_ratio',
+           'overflow_box',
+           'fitted_box',
+           'effects',
+           'particles',
+           'border',
+           'shadow',
+           'outline',
+           'gradient',
+           'animation',
+           'transition',
+           'canvas',
+           'clip',
+           'decorated_box',
+           'badge',
+           'avatar',
+           'icon',
+           'text',
+           'motion'],
+ 'canvas': [],
+ 'card': ['color',
+          'elevation',
+          'radius',
+          'margin',
+          'padding',
+          'shape',
+          'clip_behavior',
+          'surface_tint_color',
+          'shadow_color'],
+ 'center': [],
+ 'chart': [],
+ 'checkbox': [],
+ 'chip': [],
+ 'chromatic_shift': ['shift', 'opacity'],
+ 'clip': ['shape', 'radius', 'clip_behavior', 'child'],
+ 'color_picker': ['value',
+                  'color',
+                  'mode',
+                  'picker_mode',
+                  'show_alpha',
+                  'alpha',
+                  'presets',
+                  'emit_on_change',
+                  'show_actions',
+                  'show_input',
+                  'show_hex',
+                  'show_presets',
+                  'preset_size',
+                  'preset_spacing',
+                  'preview_height',
+                  'input_label',
+                  'input_placeholder',
+                  'enabled',
+                  'commit_text',
+                  'cancel_text'],
+ 'color_tools': [],
+ 'column': ['spacing',
+            'alignment',
+            'horizontal_alignment',
+            'vertical_alignment',
+            'run_alignment',
+            'reverse',
+            'clip_behavior'],
+ 'combo_box': ['value',
+               'options',
+               'items',
+               'groups',
+               'label',
+               'hint',
+               'placeholder',
+               'loading',
+               'async_source',
+               'debounce_ms',
+               'enabled'],
+ 'confetti_burst': ['colors', 'count', 'duration_ms', 'gravity'],
+ 'container': [],
+ 'container_style': ['variant',
+                     'outline_width',
+                     'outline_color',
+                     'stroke_width',
+                     'stroke_color',
+                     'shadow_color',
+                     'shadow_blur',
+                     'shadow_dx',
+                     'shadow_dy',
+                     'glow_color',
+                     'glow_blur',
+                     'bgcolor',
+                     'background',
+                     'bg_color',
+                     'border_color',
+                     'border_width',
+                     'radius',
+                     'shape',
+                     'content_padding',
+                     'inner_padding',
+                     'icon_padding',
+                     'animation'],
+ 'context_menu': ['items',
+                  'bgcolor',
+                  'text_color',
+                  'icon_color',
+                  'item_bgcolor',
+                  'divider_color',
+                  'backdrop',
+                  'backdrop_blur',
+                  'use_contextmenu'],
+ 'crop_box': [],
+ 'data_grid': ['rows',
+               'columns',
+               'sortable',
+               'filterable',
+               'selectable',
+               'multi_select',
+               'pagination',
+               'page_size',
+               'dense',
+               'striped',
+               'show_header',
+               'auto_sort',
+               'selected_index',
+               'sort_column',
+               'sort_ascending',
+               'filter_query',
+               'filter_column',
+               'filter_case_sensitive'],
+ 'data_source_view': ['state',
+                      'loading',
+                      'page',
+                      'page_size',
+                      'has_more',
+                      'refreshable',
+                      'prefetch_threshold',
+                      'cache_key',
+                      'show_content_on_loading',
+                      'overlay_loading',
+                      'empty_view',
+                      'error_view',
+                      'offline_view',
+                      'loading_view'],
+ 'data_table': [],
+ 'date_picker': ['enabled', 'label', 'max_date', 'min_date', 'placeholder', 'value', 'end', 'start'],
+ 'decorated_box': ['color',
+                   'bgcolor',
+                   'gradient',
+                   'image',
+                   'border_color',
+                   'border_width',
+                   'radius',
+                   'shape',
+                   'shadow',
+                   'padding',
+                   'margin',
+                   'clip_behavior',
+                   'child',
+                   'children'],
+ 'directory_picker': ['label',
+                      'mode',
+                      'pick_directory',
+                      'enabled',
+                      'initial_directory',
+                      'dialog_title',
+                      'lock_parent_window'],
+ 'display': ['role',
+             'variant',
+             'title',
+             'subtitle',
+             'caption',
+             'description',
+             'name',
+             'tone',
+             'size',
+             'interactive',
+             'icon',
+             'leading',
+             'trailing',
+             'avatar',
+             'initials',
+             'tags',
+             'status',
+             'badge',
+             'color',
+             'value',
+             'max',
+             'allow_half',
+             'count',
+             'items',
+             'selected',
+             'checked',
+             'checked_value',
+             'dot_count',
+             'document_id',
+             'ranges',
+             'owners',
+             'owner',
+             'show_avatars',
+             'compact',
+             'dense',
+             'aria_label',
+             'events',
+             'bgcolor',
+             'border_color',
+             'border_width',
+             'label',
+             'src',
+             'text_color',
+             'rating',
+             'max_rating',
+             'show_count',
+             'inactive_color',
+             'dot_size',
+             'text',
+             'enabled',
+             'indices',
+             'options',
+             'spacing',
+             'values'],
+ 'divider': ['vertical', 'thickness', 'indent', 'end_indent', 'color'],
+ 'drag_handle': [],
+ 'drawer': [],
+ 'drop_zone': ['enabled', 'accepts', 'title', 'subtitle', 'use_desktop_drop'],
+ 'dropdown': [],
+ 'effects': ['blur',
+             'opacity',
+             'color',
+             'blend_mode',
+             'brightness',
+             'contrast',
+             'saturation',
+             'hue_rotate',
+             'grayscale',
+             'enabled',
+             'child',
+             'children'],
+ 'elevated_button': [],
+ 'emoji_icon': ['emoji',
+                'text',
+                'size',
+                'variant',
+                'color',
+                'text_color',
+                'fgcolor',
+                'outline_width',
+                'stroke_width',
+                'outline_color',
+                'stroke_color',
+                'shadow_color',
+                'glow_color',
+                'shadow_blur',
+                'glow_blur',
+                'shadow_dx',
+                'shadow_dy',
+                'bgcolor',
+                'background',
+                'bg_color',
+                'border_color',
+                'border_width',
+                'content_padding',
+                'inner_padding',
+                'icon_padding',
+                'radius',
+                'shape'],
+ 'emoji_picker': [],
+ 'expanded': [],
+ 'field_group': ['error_text', 'helper_text', 'label', 'spacing'],
+ 'file_picker': ['label',
+                 'file_type',
+                 'extensions',
+                 'allowed_extensions',
+                 'multiple',
+                 'allow_multiple',
+                 'with_data',
+                 'with_path',
+                 'enabled',
+                 'mode',
+                 'pick_directory',
+                 'save_file',
+                 'file_name',
+                 'dialog_title',
+                 'initial_directory',
+                 'lock_parent_window',
+                 'show_selection'],
+ 'filled_button': [],
+ 'fitted_box': ['fit', 'alignment', 'clip_behavior', 'child'],
+ 'flex_spacer': [],
+ 'flow_field': [],
+ 'fold_layer': [],
+ 'form': ['description', 'spacing', 'title'],
+ 'form_field': [],
+ 'frame': [],
+ 'gallery': ['schema_version',
+             'module',
+             'state',
+             'items',
+             'spacing',
+             'run_spacing',
+             'tile_width',
+             'tile_height',
+             'selectable',
+             'enabled',
+             'events',
+             'modules',
+             'manifest',
+             'registries',
+             'toolbar',
+             'filter_bar',
+             'grid_layout',
+             'item_actions',
+             'item_badge',
+             'item_meta_row',
+             'item_preview',
+             'item_selectable',
+             'item_tile',
+             'pagination',
+             'section_header',
+             'sort_bar',
+             'empty_state',
+             'loading_skeleton',
+             'search_bar',
+             'font_picker',
+             'audio_picker',
+             'video_picker',
+             'image_picker',
+             'document_picker',
+             'fonts',
+             'font_renderer',
+             'audio',
+             'audio_renderer',
+             'video',
+             'video_renderer',
+             'image',
+             'image_renderer',
+             'document',
+             'document_renderer',
+             'item_drag_handle',
+             'item_drop_target',
+             'item_reorder_handle',
+             'item_selection_checkbox',
+             'item_selection_radio',
+             'item_selection_switch',
+             'apply',
+             'clear',
+             'select_all',
+             'deselect_all',
+             'apply_font',
+             'apply_image',
+             'set_as_wallpaper',
+             'presets',
+             'skins',
+             'payload'],
+ 'gallery_scope': ['layout',
+                   'spacing',
+                   'radius',
+                   'columns',
+                   'cross_axis_count',
+                   'cross_axis_spacing',
+                   'main_axis_spacing'],
+ 'gesture_area': [],
+ 'glass_blur': ['blur', 'opacity', 'color', 'radius', 'border_color', 'border_width'],
+ 'glow_effect': ['color', 'blur', 'spread', 'radius', 'offset_x', 'offset_y', 'clip'],
+ 'glyph_button': ['bgcolor', 'color', 'enabled', 'icon', 'size', 'tooltip'],
+ 'gradient': ['variant',
+              'colors',
+              'stops',
+              'tile_mode',
+              'begin',
+              'end',
+              'center',
+              'radius',
+              'focal',
+              'focal_radius',
+              'start_angle',
+              'end_angle',
+              'start_degrees',
+              'end_degrees',
+              'bgcolor',
+              'background',
+              'background_color',
+              'opacity',
+              'mesh',
+              'mesh_points',
+              'points'],
+ 'gradient_editor': ['stops', 'angle', 'show_angle', 'show_add', 'show_remove'],
+ 'gradient_sweep': ['colors', 'duration_ms', 'angle', 'opacity'],
+ 'grain_overlay': [],
+ 'grid': ['columns',
+          'spacing',
+          'run_spacing',
+          'child_aspect_ratio',
+          'layout',
+          'masonry',
+          'scrollable',
+          'virtual',
+          'virtualized'],
+ 'grid_view': [],
+ 'histogram_overlay': [],
+ 'histogram_view': [],
+ 'hover_region': ['cursor', 'enabled'],
+ 'html_view': [],
+ 'icon': [],
+ 'icon_button': ['icon',
+                 'glyph',
+                 'tooltip',
+                 'size',
+                 'color',
+                 'enabled',
+                 'value',
+                 'action',
+                 'actions',
+                 'action_id',
+                 'action_event',
+                 'action_payload'],
+ 'icon_picker': [],
+ 'image': ['src', 'fit', 'radius', 'cache', 'placeholder'],
+ 'item_tile': ['dense',
+               'enabled',
+               'leading_icon',
+               'leading_text',
+               'leading_image',
+               'selected',
+               'subtitle',
+               'title',
+               'meta',
+               'badges',
+               'actions',
+               'trailing_icon',
+               'trailing_text'],
+ 'key_listener': ['autofocus', 'enabled'],
+ 'keybind_recorder': [],
+ 'line_chart': [],
+ 'line_plot': ['color', 'fill', 'fill_color', 'max', 'min', 'stroke_width', 'values'],
+ 'liquid_morph': [],
+ 'list_tile': ['dense',
+               'enabled',
+               'leading_icon',
+               'leading_text',
+               'leading_image',
+               'selected',
+               'subtitle',
+               'title',
+               'meta',
+               'badges',
+               'actions',
+               'trailing_icon',
+               'trailing_text'],
+ 'list_view': [],
+ 'markdown_view': ['value', 'text', 'selectable', 'scrollable', 'use_flutter_markdown'],
+ 'menu_bar': ['menus',
+              'items',
+              'bgcolor',
+              'text_color',
+              'icon_color',
+              'item_bgcolor',
+              'divider_color',
+              'height',
+              'dense',
+              'padding',
+              'backdrop',
+              'backdrop_blur',
+              'use_menu_bar',
+              'use_mac_menu_bar'],
+ 'menu_item': ['id', 'label', 'title', 'icon', 'shortcut', 'enabled', 'selected'],
+ 'modifier': ['modifiers',
+              'motion',
+              'on_hover',
+              'on_pressed',
+              'on_focus',
+              'cursor',
+              'padding',
+              'margin',
+              'align',
+              'max_width',
+              'max_height',
+              'min_width',
+              'min_height',
+              'border',
+              'background',
+              'shadow',
+              'glow',
+              'glass',
+              'focus_ring',
+              'hit_test',
+              'events',
+              'child',
+              'children'],
+ 'morphing_border': [],
+ 'motion': [],
+ 'nav_ring': ['policy'],
+ 'neon_edge': [],
+ 'noise_displacement': [],
+ 'noise_field': [],
+ 'notice_bar': ['action_id', 'action_label', 'dismissible', 'icon', 'text', 'variant'],
+ 'notification_center': [],
+ 'option': [],
+ 'outline': [],
+ 'outlined_button': [],
+ 'overlay': ['base',
+             'overlays',
+             'layers',
+             'clip',
+             'transition',
+             'transition_type',
+             'transition_ms',
+             'active_overlay',
+             'active_id',
+             'overlay_id',
+             'active_index',
+             'index',
+             'show_all_overlays',
+             'show_default_overlay',
+             'max_visible_overlays',
+             'value'],
+ 'page_view': ['index',
+               'initial_page',
+               'animate',
+               'duration_ms',
+               'keep_alive',
+               'scroll_direction',
+               'reverse',
+               'page_snapping',
+               'pad_ends',
+               'viewport_fraction',
+               'events',
+               'child',
+               'children'],
+ 'pagination': ['page',
+                'page_count',
+                'page_size',
+                'total_items',
+                'max_visible',
+                'show_edges',
+                'dense',
+                'enabled',
+                'prev_label',
+                'next_label',
+                'mode',
+                'events'],
+ 'pane': [],
+ 'parallax': [],
+ 'particle_field': ['count',
+                    'speed',
+                    'size',
+                    'colors',
+                    'seed',
+                    'gravity',
+                    'drift',
+                    'link_distance',
+                    'line_color',
+                    'line_opacity',
+                    'play',
+                    'enabled'],
+ 'particles': ['count',
+               'colors',
+               'min_size',
+               'max_size',
+               'speed',
+               'min_speed',
+               'max_speed',
+               'direction',
+               'spread',
+               'opacity',
+               'seed',
+               'loop',
+               'play',
+               'shape'],
+ 'pie_plot': ['colors', 'inner_radius', 'start_angle', 'values'],
+ 'pixelate': [],
+ 'popover': ['anchor',
+             'content',
+             'open',
+             'position',
+             'offset',
+             'dismissible',
+             'scrim_color',
+             'transition',
+             'transition_type',
+             'duration_ms'],
+ 'portal': [],
+ 'pressable': ['enabled'],
+ 'preview_surface': [],
+ 'progress_bar': ['value', 'indeterminate', 'label', 'stroke_width', 'variant', 'circular'],
+ 'progress_ring': ['value', 'indeterminate', 'label', 'stroke_width', 'variant', 'circular'],
+ 'radio': [],
+ 'rail_nav': ['items'],
+ 'reorderable_list_view': ['items', 'dense', 'events'],
+ 'ripple_burst': [],
+ 'route': ['route_id', 'title', 'label', 'child', 'children', 'layout', 'spacing'],
+ 'row': ['spacing',
+         'alignment',
+         'horizontal_alignment',
+         'vertical_alignment',
+         'run_alignment',
+         'wrap',
+         'reverse',
+         'clip_behavior'],
+ 'safe_area': [],
+ 'scanline_overlay': ['enabled', 'opacity', 'line_thickness', 'spacing', 'angle', 'speed', 'blend_mode', 'color'],
+ 'scene_view': ['background', 'show_grid'],
+ 'scroll_view': ['axis',
+                 'reverse',
+                 'primary',
+                 'physics',
+                 'padding',
+                 'controller_id',
+                 'scrollbar',
+                 'thumb_visibility',
+                 'track_visibility',
+                 'initial_offset'],
+ 'scrollable_column': [],
+ 'scrollable_row': [],
+ 'select': [],
+ 'shadow': ['color', 'blur', 'spread', 'offset_x', 'offset_y', 'radius', 'shadows', 'child'],
+ 'shadow_stack': [],
+ 'shimmer': [],
+ 'shimmer_shadow': [],
+ 'sidebar': [],
+ 'skins': ['schema_version',
+           'module',
+           'state',
+           'skins',
+           'selected_skin',
+           'presets',
+           'value',
+           'enabled',
+           'events',
+           'modules',
+           'manifest',
+           'registries',
+           'selector',
+           'preset',
+           'editor',
+           'preview',
+           'apply',
+           'clear',
+           'token_mapper',
+           'create_skin',
+           'edit_skin',
+           'delete_skin',
+           'effects',
+           'particles',
+           'shaders',
+           'materials',
+           'icons',
+           'fonts',
+           'colors',
+           'background',
+           'border',
+           'shadow',
+           'outline',
+           'animation',
+           'transition',
+           'interaction',
+           'layout',
+           'responsive',
+           'effect_editor',
+           'particle_editor',
+           'shader_editor',
+           'material_editor',
+           'icon_editor',
+           'font_editor',
+           'color_editor',
+           'background_editor',
+           'border_editor',
+           'shadow_editor',
+           'outline_editor',
+           'payload'],
+ 'slide_panel': ['bgcolor', 'cross_axis', 'spacing'],
+ 'slider': ['divisions', 'enabled', 'end', 'max', 'min', 'start'],
+ 'snack_bar': ['message',
+               'label',
+               'open',
+               'duration_ms',
+               'action_label',
+               'variant',
+               'style',
+               'icon',
+               'instant',
+               'priority',
+               'use_flushbar',
+               'use_fluttertoast',
+               'toast_position',
+               'events'],
+ 'snap_grid': ['background_color', 'color', 'offset'],
+ 'sortable_header': ['options', 'selected', 'selected_index', 'variant', 'label', 'dense'],
+ 'spacer': [],
+ 'spark_plot': ['color', 'max', 'min', 'stroke_width', 'values'],
+ 'sparkline': [],
+ 'splash': [],
+ 'split_pane': ['axis', 'ratio', 'use_split_view'],
+ 'split_view': ['axis', 'ratio', 'min_ratio', 'max_ratio', 'draggable', 'divider_size'],
+ 'sprite': [],
+ 'stack': ['alignment', 'fit', 'clip_behavior'],
+ 'stagger': [],
+ 'status_bar': [],
+ 'sticky_list': [],
+ 'style': ['style_pack',
+           'pack',
+           'tokens',
+           'token_overrides',
+           'style_tokens',
+           'recipes',
+           'default_style',
+           'default_modifiers',
+           'default_motion',
+           'state',
+           'variant',
+           'events',
+           'child',
+           'children'],
+ 'surface': ['color',
+             'bgcolor',
+             'elevation',
+             'radius',
+             'padding',
+             'margin',
+             'border',
+             'border_color',
+             'border_width',
+             'shadow_color',
+             'clip_behavior'],
+ 'switch': ['options', 'index', 'value', 'enabled', 'dense'],
+ 'table': ['columns', 'rows'],
+ 'table_view': ['rows',
+                'headers',
+                'columns',
+                'sortable',
+                'filterable',
+                'selectable',
+                'multi_select',
+                'dense',
+                'striped',
+                'show_header'],
+ 'tabs': ['closable', 'index', 'labels', 'scrollable', 'show_add'],
+ 'text': [],
+ 'text_area': [],
+ 'text_button': [],
+ 'text_field': [],
+ 'time_select': ['enabled', 'label', 'placeholder', 'use_24h', 'value'],
+ 'timeline': [],
+ 'toast': ['action_label',
+           'duration_ms',
+           'icon',
+           'instant',
+           'label',
+           'message',
+           'open',
+           'priority',
+           'style',
+           'variant',
+           'use_flushbar',
+           'use_fluttertoast',
+           'toast_position'],
+ 'toast_host': [],
+ 'tooltip': ['message', 'prefer_below', 'text', 'wait_ms'],
+ 'top_bar': ['bgcolor', 'center_title', 'elevation', 'subtitle', 'title'],
+ 'transition': ['duration_ms', 'curve', 'transition_type', 'preset', 'state', 'mode', 'enabled', 'child', 'children'],
+ 'vertical_divider': ['vertical', 'thickness', 'indent', 'end_indent', 'color'],
+ 'video': [],
+ 'vignette': ['enabled', 'intensity', 'radius', 'softness', 'color', 'blend_mode'],
+ 'virtual_grid': [],
+ 'virtual_list': ['items',
+                  'header',
+                  'footer',
+                  'scrollable',
+                  'separator',
+                  'spacing',
+                  'padding',
+                  'reverse',
+                  'item_extent',
+                  'cache_extent',
+                  'loading',
+                  'skeleton_count',
+                  'has_more',
+                  'prefetch_threshold',
+                  'use_positioned_list',
+                  'initial_index'],
+ 'visual_fx': [],
+ 'webview': ['url',
+             'html',
+             'base_url',
+             'bgcolor',
+             'engine',
+             'webview_engine',
+             'fallback_engine',
+             'use_inapp',
+             'prevent_links',
+             'request_headers',
+             'headers',
+             'user_agent',
+             'javascript_enabled',
+             'js_enabled',
+             'dom_storage_enabled',
+             'third_party_cookies_enabled',
+             'cache_enabled',
+             'clear_cache_on_start',
+             'incognito',
+             'media_playback_requires_user_gesture',
+             'allows_inline_media_playback',
+             'allow_file_access',
+             'allow_universal_access_from_file_urls',
+             'allow_popups',
+             'open_external_links',
+             'init_timeout_ms'],
+ 'window_controls': [],
+ 'window_drag_region': ['draggable',
+                        'maximize_on_double_tap',
+                        'emit_move',
+                        'native_drag',
+                        'native_maximize_action',
+                        'child'],
+ 'window_frame': ['title',
+                  'show_close',
+                  'show_maximize',
+                  'show_minimize',
+                  'draggable',
+                  'acrylic_effect',
+                  'acrylic_opacity',
+                  'content_padding',
+                  'title_height',
+                  'custom_frame',
+                  'use_native_title_bar',
+                  'native_title_bar',
+                  'system_title_bar',
+                  'native_window_actions',
+                  'window_actions',
+                  'show_default_controls',
+                  'title_leading',
+                  'title_content',
+                  'title_widget',
+                  'title_trailing',
+                  'window_controls',
+                  'child'],
+ 'wrap': ['spacing',
+          'run_spacing',
+          'alignment',
+          'run_alignment',
+          'cross_alignment',
+          'direction',
+          'vertical_direction',
+          'clip_behavior']}
+
+RUNTIME_PROP_HINTS.setdefault(
+    "candy_scope",
+    [
+        "tokens",
+        "theme",
+        "brightness",
+        "child",
+        "children",
+        "particles",
+        "scanline",
+        "shimmer",
+        "vignette",
     ],
-    "display": [
-        "role", "variant", "title", "subtitle", "caption", "description", "name", "tone",
-        "size", "interactive", "icon", "leading", "trailing", "avatar", "initials", "tags",
-        "status", "badge", "color", "value", "max", "allow_half", "count", "items",
-        "selected", "checked", "checked_value", "dot_count", "document_id", "ranges",
-        "owners", "owner", "show_avatars", "compact", "dense", "aria_label", "events",
-    ],
-    "style": [
-        "style_pack", "pack", "tokens", "token_overrides", "style_tokens", "recipes",
-        "default_style", "default_modifiers", "default_motion", "state", "variant",
-        "events", "child", "children",
-    ],
-    "modifier": [
-        "modifiers", "motion", "on_hover", "on_pressed", "on_focus", "cursor", "padding",
-        "margin", "align", "max_width", "max_height", "min_width", "min_height", "border",
-        "background", "shadow", "glow", "glass", "focus_ring", "hit_test", "events",
-        "child", "children",
-    ],
-    "pagination": [
-        "page", "page_count", "page_size", "total_items", "max_visible", "show_edges",
-        "dense", "enabled", "prev_label", "next_label", "mode", "events",
-    ],
-    "snack_bar": [
-        "message", "label", "open", "duration_ms", "action_label", "variant", "style",
-        "icon", "instant", "priority", "use_flushbar", "use_fluttertoast",
-        "toast_position", "events",
-    ],
-    "alert_dialog": [
-        "open", "dismissible", "close_on_escape", "trap_focus", "duration_ms",
-        "transition", "transition_type", "source_rect", "scrim_color", "title", "content",
-        "actions", "child",
-    ],
-    "page_view": [
-        "index", "initial_page", "animate", "duration_ms", "keep_alive",
-        "scroll_direction", "reverse", "page_snapping", "pad_ends",
-        "viewport_fraction", "events", "child", "children",
-    ],
-    "vertical_divider": ["vertical", "thickness", "indent", "end_indent", "color"],
-    "progress_bar": ["value", "indeterminate", "label", "stroke_width", "variant", "circular"],
-    "progress_ring": ["value", "indeterminate", "label", "stroke_width", "variant", "circular"],
-    "reorderable_list_view": ["items", "dense", "events"],
-}
+)
+RUNTIME_PROP_HINTS.setdefault(
+    "skins_scope",
+    ["skin", "tokens", "brightness", "child", "children"],
+)
 
-for _name, _schema in _CHANGELOG_CANONICAL_SCHEMAS.items():
-    CONTROL_SCHEMAS.setdefault(_name, _schema)
+# Ensure every shared control has schema + hint map, and hint props are visible
+# to strict-mode signatures/introspection.
+for _name in _BOTH_ENDS_CONTROL_TYPES:
+    schema = CONTROL_SCHEMAS.setdefault(_name, _control_schema())
+    hints = RUNTIME_PROP_HINTS.setdefault(_name, [])
+    schema_props = schema.setdefault("properties", {})
+    for prop in hints:
+        schema_props.setdefault(prop, ANY_SCHEMA)
 
-for _name, _hints in _CHANGELOG_CANONICAL_HINTS.items():
-    _target_hints = RUNTIME_PROP_HINTS.setdefault(_name, [])
-    for _hint in _hints:
-        if _hint not in _target_hints:
-            _target_hints.append(_hint)
-
-_CHANGELOG_ALIAS_TO_CANONICAL = {
-    "glyph": "glyph_button",
-    "html": "html_view",
-    "markdown": "markdown_view",
-    "chip_group": "chip",
-    "segmented_switch": "switch",
-    "span_slider": "slider",
-    "combobox": "combo_box",
-    "filepicker": "file_picker",
-    "mention_pill": "bubble",
-    "message_divider": "bubble",
-    "message_meta": "bubble",
-    "quoted_message": "bubble",
-    "persona": "display",
-    "rating_display": "display",
-    "reaction_bar": "display",
-    "result_card": "display",
-    "status_mark": "display",
-    "typing_indicator": "display",
-    "check_list": "display",
-    "date_range_picker": "date_picker",
-    "date_range": "date_picker",
-    "date_select": "date_picker",
-    "date_span": "date_picker",
-    "side_drawer": "drawer",
-    "page_nav": "pagination",
-    "page_stepper": "pagination",
-    "outline_view": "outline",
-    "navigator": "sidebar",
-    "crumb_trail": "breadcrumb_bar",
-    "context_action_bar": "action_bar",
-    "modal": "alert_dialog",
-    "notification_host": "toast_host",
-    "side_panel": "slide_panel",
-    "snackbar": "snack_bar",
-    "chat_bubble": "bubble",
-    "chat_message": "bubble",
-    "chat_thread": "bubble",
-    "chat": "bubble",
-    "message_bubble": "bubble",
-    "message_composer": "bubble",
-    "prompt_composer": "bubble",
-    "ownership_marker": "display",
-    "overlay_host": "overlay",
-    "page_scene": "page",
-    "route_host": "route",
-    "route_view": "route",
-}
-
-for _alias, _target in _CHANGELOG_ALIAS_TO_CANONICAL.items():
-    CONTROL_SCHEMAS.setdefault(_target, _control_schema())
-    RUNTIME_PROP_HINTS.setdefault(_target, [])
-    _merge_schema_into(_target, _alias)
-    _merge_hints_into(_target, _alias)
-
-for _alias, _target in _CHANGELOG_ALIAS_TO_CANONICAL.items():
-    if _alias != _target:
-        _remove_control_name(_alias, drop_schema=True, drop_hints=True, drop_types=True)
-
-_CHANGELOG_PHASE1_REMOVED = {
-    "brush_panel",
-    "color_swatch_grid",
-    "curve_editor",
-    "guides_manager",
-    "history_stack",
-    "info_bar",
-    "layer_mask_editor",
-    "ruler_guides",
-    "rulers_overlay",
-    "download_item",
-    "file_browser",
-    "progress_indicator",
-    "progress_timeline",
-    "progress",
-    "queue_list",
-    "reorderable_list",
-    "reorderable_tree",
-    "skeleton_loader",
-    "skeleton",
-    "task_list",
-    "tree_node",
-    "tree_view",
-    "tree",
-    "attachment_tile",
-    "code_block",
-    "code_view",
-    "code",
-    "diff_view",
-    "empty_state_view",
-    "empty_state",
-    "error_state",
-    "rich_text_editor",
-    "rich_text",
-    "rte",
-    "vector_view",
-    "layer_list",
-    "layer",
-    "pan_zoom",
-    "pose",
-    "tilt_hover",
-    "time_travel",
-    "count_stepper",
-    "filter_chips_bar",
-    "filter_drawer",
-    "multi_pick",
-    "multi_select",
-    "numeric_field",
-    "path_field",
-    "search_bar",
-    "segment_bar",
-    "select_option",
-    "smart_search_bar",
-    "tag_chip",
-    "tag_filter_bar",
-    "text_field_style",
-}
-
-_CHANGELOG_PHASE2_REMOVED = {
-    "cursor",
-    "drag_payload",
-    "focus_anchor",
-    "shortcut_map",
-    "adjustment_panel",
-    "bounds_probe",
-    "details_pane",
-    "dock_layout",
-    "dock_pane",
-    "dock",
-    "diff",
-    "inspector_panel",
-    "overflow_box",
-    "page_control",
-    "pane_spec",
-    "resizable_panel",
-    "responsive_row",
-    "view_stack",
-    "viewport",
-    "visibility",
-    "breadcrumbs",
-    "command_item",
-    "command_palette",
-    "command_search",
-    "symbol_tree",
-    "progress_overlay",
-    "auto_form",
-    "editor_tab_strip",
-    "editor_workspace",
-    "file_system",
-    "output_panel",
-    "problems_panel",
-    "submit_scope",
-    "validation_summary",
-    "workbench_editor",
-    "workspace_tree",
-    "animation_asset",
-    "drag_region",
-    "launcher",
-    "router",
-}
-
-for _name in sorted(_CHANGELOG_PHASE1_REMOVED | _CHANGELOG_PHASE2_REMOVED):
-    _remove_control_name(_name, drop_schema=True, drop_hints=True, drop_types=True)
-
-_CHANGELOG_RUNTIME_ONLY = {"problem_screen", "native_preview_host", "webview_adapter"}
-for _name in sorted(_CHANGELOG_RUNTIME_ONLY):
-    _remove_control_name(_name, drop_schema=False, drop_hints=False, drop_types=True)
-
-_CHANGELOG_REQUIRED_TYPES = {
-    "alert_dialog",
-    "bubble",
-    "display",
-    "modifier",
-    "page_view",
-    "pagination",
-    "progress_bar",
-    "progress_ring",
-    "reorderable_list_view",
-    "snack_bar",
-    "style",
-    "vertical_divider",
-}
-for _name in _CHANGELOG_REQUIRED_TYPES:
-    _ALL_CONTROL_TYPES.add(_name)
-
-# --- CHANGELOG 1 SCHEMA REFACTOR END ---
-
-for _name, _props in RUNTIME_PROP_HINTS.items():
-    _schema = CONTROL_SCHEMAS.setdefault(_name, _control_schema())
-    _schema_props = _schema.setdefault('properties', {})
-    for _prop in _props:
-        _schema_props.setdefault(_prop, ANY_SCHEMA)
-# --- RUNTIME_PROP_HINTS END ---
-
-for name in _ALL_CONTROL_TYPES:
-    CONTROL_SCHEMAS.setdefault(name, _control_schema())
+# Exported/consumed by core control signature plumbing.
+_ALL_CONTROL_TYPES = set(_BOTH_ENDS_CONTROL_TYPES)
 
 for name, schema in list(CONTROL_SCHEMAS.items()):
     CONTROL_SCHEMAS[name] = _merge_universal(_merge_layout(schema))
