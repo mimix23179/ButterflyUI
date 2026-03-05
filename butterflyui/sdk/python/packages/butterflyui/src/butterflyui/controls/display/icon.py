@@ -6,22 +6,51 @@ from .._shared import Component, merge_props
 __all__ = ["Icon"]
 
 class Icon(Component):
-    """Single Material icon glyph.
+    """
+    Render a resolved icon glyph with optional surface styling and contrast hints.
 
-    Renders a Flutter ``Icon`` widget resolved from the ``icon`` name
-    or code-point.  The icon can be sized and coloured, and an
-    optional ``tooltip`` (passed via extra kwargs) wraps it in a
-    ``Tooltip``.
+    ``Icon`` is a thin Python wrapper over the runtime icon renderer. The runtime
+    accepts flexible icon payloads (name aliases, integer code points, and map
+    payloads) and can apply background/border/padding tokens so the icon remains
+    legible inside layout and overlay surfaces.
+
+    Supported icon payload forms:
+    - icon name: ``"settings"`` or ``"chevron_right"``
+    - integer code point: ``0xe8b8``
+    - structured map:
+      ``{"codepoint": 0xe8b8, "font_family": "MaterialIcons", "color": "#60A5FA"}``
 
     Example::
 
         import butterflyui as bui
 
-        ic = bui.Icon(icon="favorite", size=24, color="#ef4444")
+        ic = bui.Icon(
+            icon="settings",
+            size=20,
+            color={"token": "primary", "auto_contrast": True},
+            background="#0B1220",
+            border_color="#334155",
+            border_width=1,
+            radius=8,
+            padding=6,
+            tooltip="Settings",
+        )
 
     Args:
-        icon: 
-            Material icon name string or integer code-point.
+        icon:
+            Icon payload resolved by the runtime. Usually a name string or integer
+            code point.
+        props:
+            Optional prebuilt property map merged before ``kwargs``.
+        style:
+            Optional style-slot map consumed by universal decorators.
+        strict:
+            Enables strict schema validation in supported runtimes.
+        **kwargs:
+            Additional runtime props such as ``value``, ``name``, ``size``,
+            ``color``, ``foreground``, ``background``, ``bgcolor``, ``tooltip``,
+            ``semantic_label``, ``padding``, ``radius``, ``border_color``,
+            ``border_width``, ``auto_contrast``, and ``min_contrast``.
     """
     control_type = "icon"
 

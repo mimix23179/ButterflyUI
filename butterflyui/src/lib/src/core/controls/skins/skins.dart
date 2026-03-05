@@ -20,7 +20,6 @@ import 'package:butterflyui_runtime/src/core/controls/customization/border.dart'
 import 'package:butterflyui_runtime/src/core/controls/customization/badge.dart';
 import 'package:butterflyui_runtime/src/core/controls/customization/color_tools.dart';
 import 'package:butterflyui_runtime/src/core/controls/effects/shimmer_shadow.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/layer.dart';
 import 'package:butterflyui_runtime/src/core/controls/effects/particle_field.dart';
 import 'package:butterflyui_runtime/src/core/controls/effects/motion.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/canvas_control.dart';
@@ -1056,7 +1055,7 @@ Widget? buildSkinsEffectsModule(String module, SkinsContext ctx) {
 }
 
 Widget _buildEffects(SkinsContext ctx) {
-  Widget child = buildLayerControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
+  Widget child = _buildSkinsLayer(ctx);
 
   if (ctx.merged['shimmer'] == true) {
     child = buildShimmerControl(
@@ -1066,6 +1065,45 @@ Widget _buildEffects(SkinsContext ctx) {
       ctx.registerInvokeHandler,
       ctx.unregisterInvokeHandler,
     );
+  }
+
+  return child;
+}
+
+Widget _buildSkinsLayer(SkinsContext ctx) {
+  final props = ctx.merged;
+  if (props['visible'] == false) return const SizedBox.shrink();
+
+  Widget child = skinsFirstChildOrEmpty(ctx.rawChildren, ctx.buildChild);
+
+  final opacity = coerceDouble(props['opacity']);
+  if (opacity != null) {
+    child = Opacity(opacity: opacity.clamp(0.0, 1.0), child: child);
+  }
+
+  final clip = props['clip'] == true;
+  final radius = coerceDouble(
+    props['clip_radius'] ?? props['border_radius'] ?? props['radius'],
+  );
+  if (clip) {
+    final shape = (props['clip_shape'] ?? props['shape'] ?? '')
+        .toString()
+        .toLowerCase();
+    if (shape == 'circle') {
+      child = ClipOval(child: child);
+    } else {
+      child = ClipRRect(
+        borderRadius: BorderRadius.circular(radius ?? 0),
+        child: child,
+      );
+    }
+  }
+
+  if (props['absorb_pointer'] == true) {
+    child = AbsorbPointer(child: child);
+  }
+  if (props['ignore_pointer'] == true) {
+    child = IgnorePointer(child: child);
   }
 
   return child;

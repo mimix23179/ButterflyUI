@@ -39,7 +39,9 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
-  late List<ButterflyUIOption> _options = List<ButterflyUIOption>.from(widget.options);
+  late List<ButterflyUIOption> _options = List<ButterflyUIOption>.from(
+    widget.options,
+  );
   late bool _loading = widget.loading;
 
   @override
@@ -81,7 +83,10 @@ class _ButterflyUIComboboxState extends State<ButterflyUICombobox> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_value':
         return _controller.text;

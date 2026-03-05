@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'image_provider_resolver.dart';
+
 Color? Function(String token)? _tokenColorResolver;
 
 void setTokenColorResolver(Color? Function(String token)? resolver) {
@@ -333,53 +334,77 @@ Color? coerceColor(Object? value) {
 
   if (value is Map) {
     final map = coerceObjectMap(value);
+    Color? resolved;
 
     final direct = map['value'];
-    if (direct is int) return Color(direct);
-
-    final token = map['token'];
-    if (token != null) {
-      final resolved = _resolveTokenColor(token.toString());
-      if (resolved != null) return resolved;
+    if (direct != null) {
+      resolved = coerceColor(direct);
     }
 
-    final name = map['name'];
-    if (name is String) {
-      final resolved = _resolveNamedColor(name.trim().toLowerCase());
-      if (resolved != null) return resolved;
-    }
-
-    final hexValue = map['hex'] ?? map['color'] ?? map['argb'] ?? map['rgba'];
-    if (hexValue is String) {
-      final parsed = coerceColor(hexValue);
-      if (parsed != null) return parsed;
-    }
-
-    final rRaw = map['r'] ?? map['red'];
-    final gRaw = map['g'] ?? map['green'];
-    final bRaw = map['b'] ?? map['blue'];
-    if (rRaw != null && gRaw != null && bRaw != null) {
-      int clamp255(num v) => v < 0 ? 0 : (v > 255 ? 255 : v.round());
-      final r = clamp255(
-        (rRaw is num) ? rRaw : (num.tryParse(rRaw.toString()) ?? 0),
-      );
-      final g = clamp255(
-        (gRaw is num) ? gRaw : (num.tryParse(gRaw.toString()) ?? 0),
-      );
-      final b = clamp255(
-        (bRaw is num) ? bRaw : (num.tryParse(bRaw.toString()) ?? 0),
-      );
-
-      final aRaw = map['a'] ?? map['alpha'];
-      int a = 255;
-      if (aRaw != null) {
-        final n = (aRaw is num) ? aRaw : num.tryParse(aRaw.toString());
-        if (n != null) {
-          // Accept either 0..1 or 0..255.
-          a = n <= 1 ? clamp255(n * 255.0) : clamp255(n);
-        }
+    if (resolved == null) {
+      final token = map['token'];
+      if (token != null) {
+        resolved = _resolveTokenColor(token.toString());
       }
-      return Color.fromARGB(a, r, g, b);
+    }
+    if (resolved == null) {
+      final role = map['role'];
+      if (role != null) {
+        resolved = _resolveTokenColor(role.toString());
+      }
+    }
+
+    if (resolved == null) {
+      final name = map['name'];
+      if (name is String) {
+        resolved = _resolveNamedColor(name.trim().toLowerCase());
+      }
+    }
+
+    if (resolved == null) {
+      final hexValue = map['hex'] ?? map['color'] ?? map['argb'] ?? map['rgba'];
+      if (hexValue is String) {
+        resolved = coerceColor(hexValue);
+      }
+    }
+    if (resolved == null) {
+      final fallback = map['fallback'];
+      if (fallback != null) {
+        resolved = coerceColor(fallback);
+      }
+    }
+
+    if (resolved == null) {
+      final rRaw = map['r'] ?? map['red'];
+      final gRaw = map['g'] ?? map['green'];
+      final bRaw = map['b'] ?? map['blue'];
+      if (rRaw != null && gRaw != null && bRaw != null) {
+        int clamp255(num v) => v < 0 ? 0 : (v > 255 ? 255 : v.round());
+        final r = clamp255(
+          (rRaw is num) ? rRaw : (num.tryParse(rRaw.toString()) ?? 0),
+        );
+        final g = clamp255(
+          (gRaw is num) ? gRaw : (num.tryParse(gRaw.toString()) ?? 0),
+        );
+        final b = clamp255(
+          (bRaw is num) ? bRaw : (num.tryParse(bRaw.toString()) ?? 0),
+        );
+
+        final aRaw = map['a'] ?? map['alpha'];
+        int a = 255;
+        if (aRaw != null) {
+          final n = (aRaw is num) ? aRaw : num.tryParse(aRaw.toString());
+          if (n != null) {
+            // Accept either 0..1 or 0..255.
+            a = n <= 1 ? clamp255(n * 255.0) : clamp255(n);
+          }
+        }
+        resolved = Color.fromARGB(a, r, g, b);
+      }
+    }
+
+    if (resolved != null) {
+      return _applyColorMapAdjustments(resolved, map);
     }
   }
 
@@ -469,6 +494,27 @@ Color? coerceColor(Object? value) {
   final parsed = int.tryParse(hex, radix: 16);
   if (parsed == null) return null;
   return Color(parsed);
+}
+
+Color _applyColorMapAdjustments(Color color, Map<String, Object?> map) {
+  var out = color;
+  final alpha = _coerceUnitAlpha(map['alpha'] ?? map['a']);
+  if (alpha != null) {
+    out = out.withValues(alpha: alpha);
+  }
+
+  final opacity = _coerceUnitAlpha(map['opacity']);
+  if (opacity != null) {
+    out = out.withValues(alpha: (out.a * opacity).clamp(0.0, 1.0));
+  }
+  return out;
+}
+
+double? _coerceUnitAlpha(Object? raw) {
+  final value = coerceDouble(raw);
+  if (value == null) return null;
+  if (value <= 1.0) return value.clamp(0.0, 1.0);
+  return (value / 255.0).clamp(0.0, 1.0);
 }
 
 Color? parseColor(Object? value) {

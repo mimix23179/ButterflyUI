@@ -16,6 +16,7 @@ import 'controls/buttons/icon_button.dart';
 import 'controls/buttons/filled_button.dart';
 import 'controls/buttons/outlined_button.dart';
 import 'controls/buttons/text_button.dart';
+import 'controls/common/color_value.dart';
 import 'controls/common/option_types.dart';
 import 'controls/common/icon_value.dart';
 import 'controls/customization/animated_gradient.dart';
@@ -43,9 +44,9 @@ import 'controls/display/glyph_button.dart';
 import 'controls/display/line_plot.dart';
 import 'controls/display/outline.dart';
 import 'controls/display/pie_plot.dart';
-import 'controls/display/error_state.dart';
 import 'controls/display/html_view.dart';
 import 'controls/display/icon.dart';
+import 'controls/display/color.dart';
 import 'controls/display/markdown_view.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/animation.dart';
@@ -78,7 +79,7 @@ import 'controls/feedback/tooltip.dart';
 import 'controls/inputs/checkbox.dart';
 import 'controls/inputs/chip.dart';
 import 'controls/inputs/async_action_button.dart';
-import 'controls/inputs/combobox.dart';
+import 'controls/inputs/combo_box.dart';
 import 'controls/inputs/date_picker.dart';
 import 'controls/inputs/file_picker.dart';
 import 'controls/inputs/emoji_picker.dart';
@@ -172,7 +173,13 @@ import 'controls/webview/webview.dart';
 import 'webview/webview_api.dart';
 
 Color _textToken(CandyTokens tokens) {
-  return tokens.color('text') ?? const Color(0xff0f172a);
+  final explicit = tokens.color('text');
+  if (explicit != null) return explicit;
+  final surface =
+      tokens.color('surface') ??
+      tokens.color('background') ??
+      const Color(0xffffffff);
+  return bestForegroundFor(surface, minContrast: 4.5);
 }
 
 Color _surfaceToken(CandyTokens tokens) {
@@ -182,7 +189,7 @@ Color _surfaceToken(CandyTokens tokens) {
 }
 
 Color _borderToken(CandyTokens tokens) {
-  return tokens.color('border') ?? _textToken(tokens).withOpacity(0.2);
+  return tokens.color('border') ?? _textToken(tokens).withValues(alpha: 0.2);
 }
 
 String _snakeCaseKey(String key) {
@@ -464,6 +471,86 @@ class ControlRenderer {
     );
   }
 
+  Widget _buildProblemScreenControl(
+    String controlId,
+    Map<String, Object?> props,
+    ButterflyUISendRuntimeEvent sendEvent,
+  ) {
+    final title = (props['title'] ?? 'Something went wrong').toString();
+    final message = (props['message'] ?? props['text'] ?? 'Please try again.')
+        .toString();
+    final detail = props['detail']?.toString();
+    final actionLabel = (props['action_label'] ?? 'Retry').toString();
+    final icon =
+        buildIconValue(props['icon'], size: 34) ??
+        const Icon(Icons.error_outline, size: 34);
+
+    return Builder(
+      builder: (context) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconTheme(
+                  data: IconThemeData(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  child: icon,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                if (detail != null && detail.trim().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      detail,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                FilledButton.tonal(
+                  onPressed: controlId.isEmpty
+                      ? null
+                      : () {
+                          sendEvent(controlId, 'retry', {'label': actionLabel});
+                          sendEvent(controlId, 'action', {
+                            'label': actionLabel,
+                          });
+                        },
+                  child: Text(actionLabel),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDefaultControl(
     ButterflyUIControlContext context,
     Map<String, Object?> control,
@@ -516,7 +603,6 @@ class ControlRenderer {
 
     switch (type) {
       case 'page':
-      case 'page_scene':
         {
           Widget pageBody;
           if (children.isEmpty) {
@@ -544,8 +630,6 @@ class ControlRenderer {
         }
 
       case 'route':
-      case 'route_view':
-      case 'route_host':
         return buildRouteControl(
           controlId,
           props,
@@ -834,9 +918,24 @@ class ControlRenderer {
           final weight = _parseFontWeight(
             props['weight'] ?? props['font_weight'],
           );
+          final textBackground = resolveColorValue(
+            props['background'] ??
+                props['bgcolor'] ??
+                props['surface'] ??
+                props['surface_color'],
+          );
+          final autoContrast = _coerceBool(
+            props['auto_contrast'],
+            fallback: true,
+          );
+          final minContrast = coerceDouble(props['min_contrast']) ?? 4.5;
           final color =
-              coerceColor(
+              resolveColorValue(
                 props['color'] ?? props['text_color'] ?? props['foreground'],
+                fallback: defaultText,
+                background: textBackground,
+                autoContrast: autoContrast,
+                minContrast: minContrast,
               ) ??
               defaultText;
           final align = _parseTextAlign(props['align']);
@@ -941,20 +1040,16 @@ class ControlRenderer {
         );
 
       case 'problem_screen':
-        return buildErrorStateControl(controlId, props, context.sendEvent);
+        return _buildProblemScreenControl(controlId, props, context.sendEvent);
 
       case 'icon':
         {
           final iconValue = props['icon'] ?? props['value'] ?? props['name'];
-          final size = coerceDouble(props['size']);
-          final color = coerceColor(props['color']);
-          final tooltip = props['tooltip']?.toString();
-          final widget =
-              buildIconValue(iconValue, size: size, color: color) ??
-              const Icon(Icons.help_outline);
-          if (tooltip == null || tooltip.isEmpty) return widget;
-          return Tooltip(message: tooltip, child: widget);
+          return buildIconControl(iconValue, props);
         }
+
+      case 'color':
+        return buildColorControl(controlId, props, context.sendEvent);
 
       case 'emoji_icon':
         return buildEmojiIconControl(controlId, props, context.sendEvent);
@@ -988,7 +1083,6 @@ class ControlRenderer {
         );
 
       case 'outline':
-      case 'outline_view':
         return buildOutlineControl(controlId, props, context.sendEvent);
 
       case 'pie_plot':
@@ -1001,43 +1095,6 @@ class ControlRenderer {
         return buildAudioControl(
           controlId,
           props,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'chat_message':
-      case 'message_bubble':
-      case 'chat_bubble':
-        return buildBubbleControl(
-          controlId,
-          <String, Object?>{'variant': 'message', ...props},
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'chat_thread':
-      case 'chat':
-        return buildBubbleControl(
-          controlId,
-          <String, Object?>{'variant': 'thread', ...props},
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'message_composer':
-      case 'prompt_composer':
-        return buildBubbleControl(
-          controlId,
-          <String, Object?>{'variant': 'composer', ...props},
-          rawChildren,
-          context.buildChild,
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
@@ -1260,7 +1317,6 @@ class ControlRenderer {
       case 'form_field':
         return buildFormFieldControl(props, rawChildren, context.buildChild);
 
-      case 'modal':
       case 'alert_dialog':
         return buildAlertDialogControl(
           controlId,
@@ -1412,12 +1468,10 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
-      case 'snackbar':
       case 'snack_bar':
         return buildSnackBarControl(controlId, props, context.sendEvent);
 
       case 'toast_host':
-      case 'notification_host':
         return buildToastHostControl(
           controlId,
           props,
@@ -1482,7 +1536,6 @@ class ControlRenderer {
         return buildMenuBarControl(controlId, props, context.sendEvent);
 
       case 'action_bar':
-      case 'context_action_bar':
         return buildActionBarControl(
           controlId,
           props,
@@ -1496,9 +1549,7 @@ class ControlRenderer {
       case 'menu_item':
         return buildMenuItemControl(controlId, props, context.sendEvent);
 
-      case 'breadcrumbs':
       case 'breadcrumb_bar':
-      case 'crumb_trail':
         return buildBreadcrumbBarControl(controlId, props, context.sendEvent);
 
       case 'status_bar':
@@ -1508,29 +1559,6 @@ class ControlRenderer {
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
-        );
-
-      case 'navigator':
-        return ButterflyUISidebar(
-          controlId: controlId,
-          sections: _coerceSidebarSections(props),
-          selectedId:
-              props['selected_id']?.toString() ??
-              props['selected']?.toString() ??
-              props['value']?.toString(),
-          showSearch: props['show_search'] == true,
-          query: props['query']?.toString() ?? '',
-          collapsible: props['collapsible'] == true,
-          dense: props['dense'] == true,
-          emitOnSearchChange: props['emit_on_search_change'] == null
-              ? true
-              : (props['emit_on_search_change'] == true),
-          searchDebounceMs:
-              coerceOptionalInt(props['search_debounce_ms']) ?? 180,
-          events: _coerceStringList(props['events']).toSet(),
-          registerInvokeHandler: context.registerInvokeHandler,
-          unregisterInvokeHandler: context.unregisterInvokeHandler,
-          sendEvent: context.sendEvent,
         );
 
       case 'nav_ring':
@@ -1549,8 +1577,6 @@ class ControlRenderer {
         return buildNoticeBarControl(controlId, props, context.sendEvent);
 
       case 'pagination':
-      case 'page_nav':
-      case 'page_stepper':
         return buildPaginationControl(
           controlId,
           props,
@@ -1641,8 +1667,6 @@ class ControlRenderer {
 
       case 'drawer':
       case 'slide_panel':
-      case 'side_panel':
-      case 'side_drawer':
         {
           final child = children.isNotEmpty
               ? context.buildChild(children.first)
@@ -1660,15 +1684,6 @@ class ControlRenderer {
             sendEvent: context.sendEvent,
           );
         }
-
-      case 'overlay_host':
-        return buildOverlayControl(
-          controlId,
-          <String, Object?>{'open': true, ...props},
-          rawChildren,
-          context.buildChild,
-          context.sendEvent,
-        );
 
       case 'window_frame':
         return buildWindowFrameControl(
@@ -2142,17 +2157,6 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'ownership_marker':
-        return buildDisplayControl(
-          controlId,
-          <String, Object?>{'variant': 'ownership', ...props},
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'blend_mode_picker':
         return buildBlendModePickerControl(
           controlId,
@@ -2440,7 +2444,8 @@ class ControlRenderer {
     required ResolvedControlStyle resolvedStyle,
   }) {
     final capabilities = ControlModifierCapabilities.forControl(controlType);
-    bool supportsSlot(String name) => capabilities.supportedSlots.contains(name);
+    bool supportsSlot(String name) =>
+        capabilities.supportedSlots.contains(name);
     final merged = <String, Object?>{...props};
     if (supportsSlot('root')) {
       _mergeMissingEntries(merged, resolvedStyle.slot('root'));
@@ -2485,8 +2490,7 @@ class ControlRenderer {
   Map<String, Object?> _borderSlotDefaults(Map<String, Object?> slot) {
     if (slot.isEmpty) return const <String, Object?>{};
     final out = <String, Object?>{};
-    final color =
-        slot['border_color'] ?? slot['color'] ?? slot['foreground'];
+    final color = slot['border_color'] ?? slot['color'] ?? slot['foreground'];
     final width = slot['border_width'] ?? slot['width'];
     final radius = slot['radius'] ?? slot['border_radius'];
     if (color != null) out['border_color'] = color;
@@ -2630,7 +2634,9 @@ class ControlRenderer {
         );
       }
 
-      final padding = coercePadding(props['padding'] ?? surfaceStyle['padding']);
+      final padding = coercePadding(
+        props['padding'] ?? surfaceStyle['padding'],
+      );
       if (padding != null) {
         built = Padding(padding: padding, child: built);
       }
@@ -2689,7 +2695,9 @@ class ControlRenderer {
         props['shadow'] ?? surfaceStyle['shadow'],
       );
       final clipBehavior = _parseClipBehavior(
-        props['clip_behavior'] ?? surfaceStyle['clip_behavior'] ?? props['clip'],
+        props['clip_behavior'] ??
+            surfaceStyle['clip_behavior'] ??
+            props['clip'],
       );
       final backdropBlur = coerceDouble(
         props['backdrop_blur'] ??
@@ -3161,7 +3169,9 @@ class ControlRenderer {
         case 'blur':
         case 'gaussian_blur':
           final sigma =
-              coerceDouble(effect['sigma'] ?? effect['blur'] ?? effect['value']) ??
+              coerceDouble(
+                effect['sigma'] ?? effect['blur'] ?? effect['value'],
+              ) ??
               0.0;
           if (sigma > 0) {
             built = ImageFiltered(
@@ -3173,7 +3183,9 @@ class ControlRenderer {
         case 'glass':
         case 'glass_blur':
           final sigma =
-              coerceDouble(effect['sigma'] ?? effect['blur'] ?? effect['value']) ??
+              coerceDouble(
+                effect['sigma'] ?? effect['blur'] ?? effect['value'],
+              ) ??
               0.0;
           final tint = coerceColor(effect['tint'] ?? effect['color']);
           if (effectClip != Clip.none) {
@@ -3272,8 +3284,10 @@ class ControlRenderer {
           break;
         case 'gradient_sweep':
           final gradient = coerceGradient(effect['gradient']);
-          final opacity =
-              (coerceDouble(effect['opacity']) ?? 0.35).clamp(0.0, 1.0);
+          final opacity = (coerceDouble(effect['opacity']) ?? 0.35).clamp(
+            0.0,
+            1.0,
+          );
           if (gradient != null) {
             built = Stack(
               fit: StackFit.passthrough,
@@ -3305,11 +3319,7 @@ class ControlRenderer {
 
   String _normalizeEffectType(String? value) {
     if (value == null) return '';
-    return value
-        .trim()
-        .toLowerCase()
-        .replaceAll('-', '_')
-        .replaceAll(' ', '_');
+    return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
   }
 
   Widget _unknownControl(
@@ -3428,11 +3438,27 @@ class ControlRenderer {
     Map<String, Object?> props,
     Map<String, Object?> surfaceStyle,
   ) {
-    final color = coerceColor(
+    final textBackground = resolveColorValue(
+      props['background'] ??
+          props['bgcolor'] ??
+          surfaceStyle['background'] ??
+          surfaceStyle['bgcolor'],
+    );
+    final autoContrast = _coerceBool(
+      props['auto_contrast'] ?? surfaceStyle['auto_contrast'],
+      fallback: true,
+    );
+    final minContrast =
+        coerceDouble(props['min_contrast'] ?? surfaceStyle['min_contrast']) ??
+        4.5;
+    final color = resolveColorValue(
       props['text_color'] ??
           props['foreground'] ??
           surfaceStyle['text_color'] ??
           surfaceStyle['foreground'],
+      background: textBackground,
+      autoContrast: autoContrast,
+      minContrast: minContrast,
     );
     final size = coerceDouble(
       props['font_size'] ??
@@ -3488,11 +3514,27 @@ class ControlRenderer {
     Map<String, Object?> props,
     Map<String, Object?> surfaceStyle,
   ) {
-    final color = coerceColor(
+    final iconBackground = resolveColorValue(
+      props['background'] ??
+          props['bgcolor'] ??
+          surfaceStyle['background'] ??
+          surfaceStyle['bgcolor'],
+    );
+    final autoContrast = _coerceBool(
+      props['auto_contrast'] ?? surfaceStyle['auto_contrast'],
+      fallback: true,
+    );
+    final minContrast =
+        coerceDouble(props['min_contrast'] ?? surfaceStyle['min_contrast']) ??
+        4.5;
+    final color = resolveColorValue(
       props['icon_color'] ??
           props['icon_foreground'] ??
           surfaceStyle['icon_color'] ??
           surfaceStyle['icon_foreground'],
+      background: iconBackground,
+      autoContrast: autoContrast,
+      minContrast: minContrast,
     );
     final size = coerceDouble(props['icon_size'] ?? surfaceStyle['icon_size']);
     final opacity = coerceDouble(

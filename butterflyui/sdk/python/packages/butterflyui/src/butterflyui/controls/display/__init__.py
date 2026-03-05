@@ -6,6 +6,7 @@ from .bar_plot import BarPlot
 from .bubble import Bubble
 from .canvas import Canvas
 from .chart import Chart
+from .color import Color
 from .display import Display
 from .divider import Divider
 from .emoji_icon import EmojiIcon
@@ -32,6 +33,7 @@ __all__ = [
     "Bubble",
     "Canvas",
     "Chart",
+    "Color",
     "Display",
     "Divider",
     "EmojiIcon",

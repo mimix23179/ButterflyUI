@@ -28,10 +28,7 @@ import 'package:butterflyui_runtime/src/core/controls/buttons/outlined_button.da
 import 'package:butterflyui_runtime/src/core/controls/buttons/text_button.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/icon.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/avatar.dart';
-import 'package:butterflyui_runtime/src/core/controls/display/empty_state.dart';
 import 'package:butterflyui_runtime/src/core/controls/customization/badge.dart';
-import 'package:butterflyui_runtime/src/core/controls/feedback/progress_indicator.dart'
-    as bfi;
 import 'package:butterflyui_runtime/src/core/controls/media/image.dart';
 import 'package:butterflyui_runtime/src/core/controls/media/video.dart';
 import 'package:butterflyui_runtime/src/core/controls/media/audio.dart';
@@ -916,20 +913,14 @@ Widget buildGalleryControl(
       return buildChild(childProps);
     }
     if (isLoading) {
-      return bfi.buildProgressIndicatorControl(
-        _galleryControlId(controlId, 'loading'),
-        {'variant': 'circular'},
-        registerInvokeHandler,
-        unregisterInvokeHandler,
-        sendEvent,
-      );
+      return _buildGalleryProgressIndicator();
     }
     if (items.isEmpty) {
-      return buildEmptyStateControl(controlId, {
-        'icon': 'photo_library',
-        'title': 'No items in gallery',
-        'message': 'Add some items to get started',
-      }, sendEvent);
+      return _buildGalleryEmptyState(
+        icon: 'photo_library',
+        title: 'No items in gallery',
+        message: 'Add some items to get started',
+      );
     }
     return content;
   });
@@ -2679,6 +2670,63 @@ Widget _buildGalleryActionButton({
 }
 
 // ============================================================================
+// Local utility surfaces
+// ============================================================================
+
+Widget _buildGalleryProgressIndicator({double size = 40}) {
+  return Center(
+    child: SizedBox(
+      width: size,
+      height: size,
+      child: const CircularProgressIndicator(strokeWidth: 3),
+    ),
+  );
+}
+
+Widget _buildGalleryEmptyState({
+  required String icon,
+  required String title,
+  required String message,
+}) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(_galleryEmptyStateIcon(icon), size: 40, color: Colors.white70),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            style: const TextStyle(color: Colors.white70),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+IconData _galleryEmptyStateIcon(String icon) {
+  final normalized = icon.trim().toLowerCase();
+  return switch (normalized) {
+    'search' => Icons.search_off_rounded,
+    'folder' => Icons.folder_off_outlined,
+    'photo_library' || 'gallery' || 'image' => Icons.photo_library_outlined,
+    'video' => Icons.video_library_outlined,
+    'audio' => Icons.library_music_outlined,
+    'document' || 'doc' => Icons.description_outlined,
+    _ => Icons.photo_library_outlined,
+  };
+}
+
+// ============================================================================
 // Preview Builder - Uses Image control
 // ============================================================================
 
@@ -2692,13 +2740,7 @@ Widget _buildPreview({
   required bool useControlWidgets,
 }) {
   if (item.isLoading) {
-    return bfi.buildProgressIndicatorControl(
-      _galleryControlId(controlId, 'item_loading_${item.id}'),
-      {'variant': 'circular'},
-      registerInvokeHandler,
-      unregisterInvokeHandler,
-      sendEvent,
-    );
+    return _buildGalleryProgressIndicator(size: 28);
   }
 
   final mediaSource = item.url ?? item.path;

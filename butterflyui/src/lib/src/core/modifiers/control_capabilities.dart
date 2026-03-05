@@ -172,6 +172,7 @@ class ControlModifierCapabilities {
     'date_picker',
     'date_range_picker',
     'chip',
+    'color',
     'file_picker',
     'filepicker',
     'directory_picker',
