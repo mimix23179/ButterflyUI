@@ -19,8 +19,9 @@ def build_page(page: bui.Page) -> None:
                 color="#9CA3AF",
             ),
             bui.Row(
-                bui.Button("Primary", variant="filled"),
-                bui.Button("Outlined", variant="outlined"),
+                bui.FilledButton("Primary", icon="rocket_launch", action_id="primary_action"),
+                bui.OutlinedButton("Outlined", icon="tune", action_id="outlined_action"),
+                bui.IconButton(icon="settings", tooltip="Settings", color="#93C5FD"),
                 spacing=10,
             ),
             bui.TextField(label="Name", placeholder="Type your name"),
@@ -28,6 +29,11 @@ def build_page(page: bui.Page) -> None:
                 bui.Checkbox(value=True, label="Enable notifications"),
                 bui.Switch(value=False, label="Dark mode", inline=True),
                 spacing=14,
+            ),
+            bui.Row(
+                bui.Icon(icon="palette", size=18, color="#67E8F9"),
+                bui.Color(value="#67E8F9", label="Accent", show_label=True, show_hex=True, size=18),
+                spacing=10,
             ),
             bui.Slider(value=35, min=0, max=100, divisions=20, label="Volume"),
             bui.ProgressBar(value=0.65, label="Build progress", stroke_width=8),
@@ -38,6 +44,7 @@ def build_page(page: bui.Page) -> None:
         border_color="#374151",
         border_width=1,
         radius=12,
+        transparency=0.05,
     )
 
     root = bui.Column(

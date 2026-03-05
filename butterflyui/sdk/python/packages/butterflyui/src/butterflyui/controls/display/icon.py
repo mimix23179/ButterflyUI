@@ -7,50 +7,42 @@ __all__ = ["Icon"]
 
 class Icon(Component):
     """
-    Render a resolved icon glyph with optional surface styling and contrast hints.
+    Renderable icon-value control for consistent icon payload handling.
 
-    ``Icon`` is a thin Python wrapper over the runtime icon renderer. The runtime
-    accepts flexible icon payloads (name aliases, integer code points, and map
-    payloads) and can apply background/border/padding tokens so the icon remains
-    legible inside layout and overlay surfaces.
+    ``Icon`` wraps runtime icon resolution and exposes a stable Python API for
+    icon name/codepoint payloads plus optional visual surface fields. It is
+    designed to pair with ``Color`` and button/layout/overlay controls where
+    icon rendering needs consistent serialization.
 
-    Supported icon payload forms:
-    - icon name: ``"settings"`` or ``"chevron_right"``
-    - integer code point: ``0xe8b8``
-    - structured map:
-      ``{"codepoint": 0xe8b8, "font_family": "MaterialIcons", "color": "#60A5FA"}``
+    ```python
+    import butterflyui as bui
 
-    Example::
-
-        import butterflyui as bui
-
-        ic = bui.Icon(
-            icon="settings",
-            size=20,
-            color={"token": "primary", "auto_contrast": True},
-            background="#0B1220",
-            border_color="#334155",
-            border_width=1,
-            radius=8,
-            padding=6,
-            tooltip="Settings",
-        )
+    bui.Icon(
+        icon="settings",
+        size=20,
+        color="#60A5FA",
+        background="#0B1220",
+        radius=8,
+        padding=6,
+        tooltip="Settings",
+    )
+    ```
 
     Args:
         icon:
-            Icon payload resolved by the runtime. Usually a name string or integer
-            code point.
+            Icon payload, typically a name string or codepoint integer.
         props:
-            Optional prebuilt property map merged before ``kwargs``.
+            Optional prebuilt property map merged before ``**kwargs``.
         style:
-            Optional style-slot map consumed by universal decorators.
+            Optional style map for the control host.
         strict:
-            Enables strict schema validation in supported runtimes.
+            Enables strict schema validation when supported.
         **kwargs:
-            Additional runtime props such as ``value``, ``name``, ``size``,
-            ``color``, ``foreground``, ``background``, ``bgcolor``, ``tooltip``,
-            ``semantic_label``, ``padding``, ``radius``, ``border_color``,
-            ``border_width``, ``auto_contrast``, and ``min_contrast``.
+            Extra runtime props forwarded to the renderer, including values such
+            as ``value``, ``name``, ``size``, ``color``, ``foreground``,
+            ``background``, ``bgcolor``, ``tooltip``, ``semantic_label``,
+            ``padding``, ``radius``, ``border_color``, ``border_width``,
+            ``auto_contrast``, and ``min_contrast``.
     """
     control_type = "icon"
 
@@ -65,3 +57,4 @@ class Icon(Component):
     ) -> None:
         merged = merge_props(props, icon=icon, **kwargs)
         super().__init__(props=merged, style=style, strict=strict)
+

@@ -10,7 +10,57 @@ __all__ = ["FilledButton"]
 
 
 class FilledButton(Button):
-    """Convenience ``Button`` preset with ``variant='filled'``."""
+    """
+    Filled emphasis button preset.
+
+    ``FilledButton`` forwards all interaction, action dispatch, style, and
+    customization behavior from :class:`Button` while forcing
+    ``variant="filled"``. Use it for primary call-to-action surfaces where
+    stronger visual emphasis is needed.
+
+    In addition to typed parameters, runtime keys passed through ``**kwargs``
+    are preserved. This includes optional icon/color/transparency props and
+    style pipeline fields such as classes, modifiers, motion, and effects.
+
+    ```python
+    import butterflyui as bui
+
+    bui.FilledButton(
+        "Deploy",
+        action_id="deploy_release",
+        icon="rocket_launch",
+        transparency=0.04,
+    )
+    ```
+
+    Args:
+        label:
+            Button caption text. ``text`` takes precedence when both are set.
+        text:
+            Caption text alias for ``label``.
+        value:
+            Arbitrary payload emitted with click events.
+        events:
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
+    """
 
     control_type = "filled_button"
 

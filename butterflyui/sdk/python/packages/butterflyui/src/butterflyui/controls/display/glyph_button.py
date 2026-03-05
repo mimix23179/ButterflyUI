@@ -7,50 +7,53 @@ __all__ = ["GlyphButton"]
 
 class GlyphButton(Component):
     """
-    Icon glyph surface with optional button behavior.
+    Unified glyph/icon surface with optional button interaction.
 
-    ``GlyphButton`` is the canonical icon control after merging legacy
-    ``glyph`` and ``glyph_button`` concepts. It can behave as an interactive
-    icon button or as a static icon-like glyph when ``interactive=False``.
-    ``glyph`` and ``icon`` are interchangeable aliases.
+    ``GlyphButton`` is the merged control for legacy ``glyph`` and
+    ``glyph_button`` behavior. It can render as an interactive icon trigger or
+    as a passive visual glyph by setting ``interactive=False``.
 
-    When events are subscribed, the Flutter side can emit ``click``-style
-    interaction messages back to Python.
+    ``glyph`` and ``icon`` are interchangeable aliases. Event subscriptions are
+    forwarded to runtime so this control can participate in action pipelines,
+    overlays, and other interaction flows.
 
     ```python
     import butterflyui as bui
 
-    btn = bui.GlyphButton(
-        glyph="delete",
-        tooltip="Remove item",
-        size=20,
+    bui.GlyphButton(
+        glyph="settings",
+        tooltip="Preferences",
+        size=18,
+        color="#8BD3FF",
         events=["click"],
     )
     ```
 
     Args:
         glyph:
-            Icon name, codepoint, or emoji string.
+            Icon name, codepoint, or glyph string payload.
         icon:
             Alias for ``glyph``.
         tooltip:
-            Hover/assistive tooltip text.
+            Assistive tooltip text.
         size:
-            Icon size in logical pixels.
+            Glyph size in logical pixels.
         color:
-            Icon foreground color.
+            Foreground color for the glyph.
         enabled:
             If ``False``, the control is disabled.
         interactive:
-            If ``False``, renders without button chrome/gestures.
+            If ``False``, renders as a passive glyph without button semantics.
         events:
-            Event names the Flutter side should emit to Python.
+            Runtime event names to subscribe to.
         props:
-            Raw prop overrides merged after typed arguments.
+            Additional props merged before typed arguments.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Optional style map for the control host.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
     """
     control_type = "glyph_button"
 
@@ -86,3 +89,4 @@ class GlyphButton(Component):
 
     def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+

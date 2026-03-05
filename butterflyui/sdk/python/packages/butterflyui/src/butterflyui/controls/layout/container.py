@@ -24,6 +24,7 @@ class Container(Component):
       ``hover_motion``, ``press_motion``.
     - effects layer: ``effects``, ``effect_order``, ``effect_clip``,
       ``effect_target``.
+    - visual tokens: ``icon``, ``color``, and ``transparency``.
 
     ```python
     import butterflyui as bui
@@ -61,7 +62,8 @@ class Container(Component):
             List of event names the Flutter runtime should emit to Python.
         **kwargs:
             Additional runtime props, including universal style/modifier/motion/
-            effects props handled by the shared renderer.
+            effects props handled by the shared renderer, plus optional
+            ``icon``, ``color``, and ``transparency`` hints.
     """
 
     control_type = "container"

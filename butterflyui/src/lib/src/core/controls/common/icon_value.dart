@@ -77,19 +77,19 @@ Widget? buildIconValue(
       map['codepoint'] ?? map['unicode'] ?? map['code'] ?? map['glyph'],
     );
     if (codepoint != null) {
-      final fontFamily = map['font_family']?.toString() ?? 'MaterialIcons';
+      final fontFamily = map['font_family']?.toString();
       final fontPackage = map['font_package']?.toString();
       final matchTextDirection =
           coerceBool(map['match_text_direction']) ?? false;
-      return Icon(
-        IconData(
-          codepoint,
-          fontFamily: fontFamily,
-          fontPackage: fontPackage,
-          matchTextDirection: matchTextDirection,
-        ),
+      return _buildIconFromCodepoint(
+        codepoint,
+        fontFamily: fontFamily,
+        fontPackage: fontPackage,
+        matchTextDirection: matchTextDirection,
         size: size,
         color: resolvedColor,
+        textStyle: textStyle,
+        fallbackIcon: fallbackIcon,
       );
     }
 
@@ -117,10 +117,13 @@ Widget? buildIconValue(
   } else {
     final codepoint = _parseIconCodepoint(value);
     if (codepoint != null) {
-      return Icon(
-        IconData(codepoint, fontFamily: 'MaterialIcons'),
+      return _buildIconFromCodepoint(
+        codepoint,
+        fontFamily: 'MaterialIcons',
         size: size,
         color: resolvedColor,
+        textStyle: textStyle,
+        fallbackIcon: fallbackIcon,
       );
     }
   }
@@ -166,6 +169,46 @@ int? _parseIconCodepoint(Object? value) {
   return int.tryParse(normalized);
 }
 
+Widget _buildIconFromCodepoint(
+  int codepoint, {
+  String? fontFamily,
+  String? fontPackage,
+  bool matchTextDirection = false,
+  double? size,
+  Color? color,
+  TextStyle? textStyle,
+  IconData? fallbackIcon,
+}) {
+  if (_isMaterialIconFamily(fontFamily)) {
+    final iconData = _materialIconsByCodepoint[codepoint];
+    if (iconData != null) {
+      return Icon(iconData, size: size, color: color);
+    }
+    return Icon(fallbackIcon ?? Icons.help_outline, size: size, color: color);
+  }
+
+  final baseStyle = textStyle ?? TextStyle(fontSize: size, color: color);
+  final glyph = String.fromCharCode(codepoint);
+  return Text(
+    glyph,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: baseStyle.copyWith(fontFamily: fontFamily, package: fontPackage),
+  );
+}
+
+bool _isMaterialIconFamily(String? fontFamily) {
+  if (fontFamily == null || fontFamily.trim().isEmpty) {
+    return true;
+  }
+  final normalized = fontFamily
+      .toLowerCase()
+      .replaceAll('_', '')
+      .replaceAll('-', '')
+      .replaceAll(' ', '');
+  return normalized == 'materialicons';
+}
+
 const Map<String, IconData> _iconAliases = <String, IconData>{
   'add': Icons.add,
   'arrow_down': Icons.expand_more,
@@ -205,4 +248,8 @@ const Map<String, IconData> _iconAliases = <String, IconData>{
   'success': Icons.check_circle_outline,
   'upload': Icons.upload_outlined,
   'warning': Icons.warning_amber_rounded,
+};
+
+final Map<int, IconData> _materialIconsByCodepoint = <int, IconData>{
+  for (final iconData in _iconAliases.values) iconData.codePoint: iconData,
 };

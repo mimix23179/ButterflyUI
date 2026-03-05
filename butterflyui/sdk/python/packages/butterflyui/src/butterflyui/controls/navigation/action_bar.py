@@ -17,6 +17,10 @@ class ActionBar(Component):
     child controls. It can optionally carry selection/context metadata so the
     runtime can emit richer command events.
 
+    Item payloads may include icon descriptors (for example ``{"icon":
+    "save"}``) and color/transparency styling fields when supported by runtime
+    themes.
+
     ```python
     import butterflyui as bui
 
@@ -55,6 +59,8 @@ class ActionBar(Component):
             Style map forwarded to the renderer style pipeline.
         strict:
             When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props forwarded to the shared style pipeline.
     """
 
     control_type = "action_bar"

@@ -14,6 +14,10 @@ class Frame(Component):
     color, border, corner radius, and clip behaviour. ``alignment`` positions
     the child within the frame.
 
+    ``Frame`` forwards additional style pipeline props through ``**kwargs``,
+    including classes/modifiers/motion/effects plus optional ``icon``,
+    ``color``, and ``transparency`` hints.
+
     ```python
     import butterflyui as bui
 
@@ -60,6 +64,8 @@ class Frame(Component):
             ``"antiAliasWithSaveLayer"``.
         events:
             List of event names the Flutter runtime should emit to Python.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "frame"

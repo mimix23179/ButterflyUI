@@ -16,6 +16,10 @@ class Overlay(Component):
     render a single floating child (traditional overlay behavior) or provide a
     ``base`` + ``overlays`` stack and select active layers.
 
+    Like other core controls, ``Overlay`` forwards universal styling props
+    through ``**kwargs`` so icon/color/transparency and motion/effects
+    pipelines can be applied consistently.
+
     ```python
     import butterflyui as bui
 
@@ -69,6 +73,8 @@ class Overlay(Component):
             Style map forwarded to the renderer style pipeline.
         strict:
             When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "overlay"

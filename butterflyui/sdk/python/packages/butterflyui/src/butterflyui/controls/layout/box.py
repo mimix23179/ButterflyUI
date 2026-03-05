@@ -13,6 +13,10 @@ class Box(Component):
     ``height``, ``padding``, ``margin``, ``alignment``, and ``bgcolor``
     styling values.
 
+    ``Box`` also forwards universal runtime props through ``**kwargs``. This
+    includes style/modifier/motion/effects keys plus optional ``icon``,
+    ``color``, and ``transparency`` hints used by higher-level styling flows.
+
     ```python
     import butterflyui as bui
 
@@ -38,6 +42,8 @@ class Box(Component):
             How children are aligned within the box.
         bgcolor:
             Background fill color.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "box"

@@ -17,6 +17,10 @@ class Chip(Component):
     ``options``/``items``. In grouped mode, use ``multi_select`` with
     ``values`` to support multi-selection workflows.
 
+    ``Chip`` also forwards universal style pipeline fields through ``**kwargs``
+    so color accents, transparency, and effect/motion styling remain
+    consistent with Candy/Skins contracts.
+
     ```python
     import butterflyui as bui
 
@@ -66,6 +70,8 @@ class Chip(Component):
             Style map forwarded to the renderer style pipeline.
         strict:
             When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "chip"

@@ -18,7 +18,7 @@ class Surface(Component):
     by the shared renderer. You can pass the same cross-control props used by
     Candy/Skins/Style/Modifier/Gallery through ``**kwargs`` (for example
     ``variant``, ``classes``, ``modifiers``, ``motion``, ``effects``,
-    ``on_hover_modifiers``).
+    ``on_hover_modifiers``, ``icon``, ``color``, ``transparency``).
 
     ```python
     import butterflyui as bui
@@ -44,7 +44,8 @@ class Surface(Component):
             Border stroke width in logical pixels.
         **kwargs:
             Additional runtime props forwarded to the universal renderer
-            pipeline (style, modifiers, motion, and effects).
+            pipeline (style, modifiers, motion, effects, and optional
+            icon/color/transparency hints).
     """
 
     control_type = "surface"

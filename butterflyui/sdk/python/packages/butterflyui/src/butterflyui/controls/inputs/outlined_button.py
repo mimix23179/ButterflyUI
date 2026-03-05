@@ -10,7 +10,52 @@ __all__ = ["OutlinedButton"]
 
 
 class OutlinedButton(Button):
-    """Convenience ``Button`` preset with ``variant='outlined'``."""
+    """
+    Outlined emphasis button preset.
+
+    ``OutlinedButton`` uses :class:`Button` behavior and forces
+    ``variant="outlined"`` for medium-emphasis actions. It supports the same
+    click events, declarative action dispatch, and runtime style/customization
+    forwarding as the base button family.
+
+    ```python
+    import butterflyui as bui
+
+    bui.OutlinedButton(
+        "Inspect",
+        action_event="open_inspector",
+        icon="search",
+    )
+    ```
+
+    Args:
+        label:
+            Button caption text. ``text`` takes precedence when both are set.
+        text:
+            Caption text alias for ``label``.
+        value:
+            Arbitrary payload emitted with click events.
+        events:
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
+    """
 
     control_type = "outlined_button"
 

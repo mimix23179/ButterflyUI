@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from .._shared import Component, merge_props
@@ -7,64 +7,65 @@ __all__ = ["Button"]
 
 class Button(Component):
     """
-    General-purpose clickable button.
+    Base interactive button control.
 
-    Renders a Flutter button widget whose visual style is controlled by
-    ``variant``.  When no variant is given the runtime applies its default
-    filled style.  The ``label`` / ``text`` values are shown as the button
-    caption.  Tapping the button emits a ``click`` event together with any
-    ``value`` payload.
+    ``Button`` is the shared click surface used by specialized button
+    controls. It serializes caption, variant, events, and declarative actions
+    into one runtime payload.
 
-    Declarative actions (``action``, ``action_id``, ``actions``) allow the
-    button to trigger server-side handlers or sequences of operations
-    without writing an explicit event listener.  ``window_action`` lets
-    the button control native window behaviour directly from Python.
-
-    ``Button`` also consumes the universal styling contract shared across
-    controls. Pass these via ``**kwargs`` when needed:
-    ``tone``, ``size``, ``density``, ``classes``, ``style_slots``,
-    ``modifiers``, ``on_hover_modifiers``, ``on_pressed_modifiers``,
-    ``on_focus_modifiers``, ``motion`` / ``enter_motion`` / ``hover_motion``,
-    and ``effects`` / ``effect_order``.
+    In addition to typed parameters, extra keys passed via ``**kwargs`` are
+    forwarded to runtime. This allows advanced visual and pipeline fields like
+    ``icon``, ``color``, ``transparency``, ``classes``, ``modifiers``,
+    ``motion``, and ``effects``.
 
     ```python
     import butterflyui as bui
 
-    bui.Button("Submit", variant="filled", value="submit")
+    bui.Button(
+        "Submit",
+        variant="filled",
+        action_id="submit_form",
+        icon="send",
+        transparency=0.08,
+    )
     ```
 
     Args:
         label:
-            Button caption text.  Alias ``text`` takes precedence when
-            both are supplied.
+            Caption text. Alias ``text`` takes precedence when both are set.
         text:
-            Button caption text (alias for ``label``).
+            Caption text alias for ``label``.
         value:
-            Arbitrary payload emitted alongside the ``click`` event.
+            Arbitrary payload emitted with click events.
         variant:
-            Visual style variant — e.g. ``"filled"``, ``"outlined"``,
-            ``"text"``, ``"elevated"``, ``"tonal"``.
-        action:
-            Declarative action descriptor dispatched when the button is
-            tapped.
-        action_id:
-            ID of a registered server-side action to invoke on tap.
-        action_event:
-            Event name forwarded to the action handler.
-        action_payload:
-            Extra mapping forwarded with the action invocation.
-        actions:
-            List of action descriptors executed sequentially on tap.
-        window_action:
-            Native window command triggered on tap — e.g.
-            ``"minimize"``, ``"maximize"``, ``"close"``.
-        window_action_delay_ms:
-            Milliseconds to wait before executing ``window_action``.
+            Visual variant, such as ``"filled"``, ``"outlined"``,
+            ``"text"``, ``"elevated"``, or ``"tonal"``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        window_action:
+            Native window command, for example ``"minimize"``,
+            ``"maximize"``, or ``"close"``.
+        window_action_delay_ms:
+            Delay before running ``window_action``.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
         **kwargs:
-            Additional universal style/modifier/motion/effects props forwarded
-            to the shared renderer.
+            Extra runtime props, including style/modifier/motion/effects
+            fields and optional icon/color/transparency fields.
     """
     control_type = "button"
 
@@ -105,3 +106,4 @@ class Button(Component):
             window_action_delay_ms=window_action_delay_ms,
         )
         super().__init__(props=merged, style=style, strict=strict, **kwargs)
+

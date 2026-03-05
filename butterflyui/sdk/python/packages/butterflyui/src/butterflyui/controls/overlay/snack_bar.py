@@ -16,6 +16,9 @@ class SnackBar(Component):
     It is designed for short-lived status feedback such as save confirmations,
     warnings, and undo prompts.
 
+    Supports icon payloads directly and forwards style pipeline fields via
+    ``**kwargs`` for color/transparency and motion/effect customization.
+
     ```python
     import butterflyui as bui
 
@@ -64,6 +67,8 @@ class SnackBar(Component):
             Style map forwarded to the renderer style pipeline.
         strict:
             When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "snack_bar"

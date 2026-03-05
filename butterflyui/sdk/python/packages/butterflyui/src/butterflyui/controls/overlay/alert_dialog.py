@@ -16,6 +16,9 @@ class AlertDialog(Component):
     APIs. You can provide a fully custom ``child`` node or let the wrapper
     auto-compose a simple title/content/actions body.
 
+    The action row accepts normal button controls, so it works directly with
+    icon-enabled button variants and declarative action dispatch.
+
     ```python
     import butterflyui as bui
 
@@ -66,6 +69,9 @@ class AlertDialog(Component):
             Style map forwarded to the renderer style pipeline.
         strict:
             When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline,
+            including style/modifier/motion/effects and transparency hints.
     """
 
     control_type = "alert_dialog"

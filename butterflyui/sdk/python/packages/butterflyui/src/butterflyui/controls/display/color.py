@@ -10,28 +10,26 @@ __all__ = ["Color"]
 
 class Color(Component):
     """
-    Renderable color value control for swatches, chips, and color diagnostics.
+    Renderable color-value control for swatches and live UI diagnostics.
 
-    ``Color`` is a lightweight display control that resolves color payloads and
-    renders a visual swatch with optional label/hex metadata. It is designed to
-    pair with runtime token systems so color intent can be serialized and
-    reused across display/layout/overlay controls.
+    ``Color`` serializes color payloads into a visible swatch surface with
+    optional labels and metadata. It can be used as a standalone display
+    control or embedded in larger layout/overlay UIs to preview runtime tokens,
+    theme slots, and dynamic color choices.
 
-    Supported value forms:
-    - string colors (hex/rgb/hsl/token refs accepted by runtime)
-    - integer ARGB values
-    - structured maps, such as ``{"value": "#4F8BFF", "opacity": 0.8}``
+    The control accepts string colors, numeric color payloads, and mapping
+    payloads, making it compatible with both simple and structured color flows.
 
-    Example::
+    ```python
+    import butterflyui as bui
 
-        import butterflyui as bui
-
-        swatch = bui.Color(
-            value={"value": "#4F8BFF", "opacity": 0.9},
-            label="Primary",
-            show_hex=True,
-            auto_contrast=True,
-        )
+    bui.Color(
+        value={"value": "#4F8BFF", "opacity": 0.9},
+        label="Primary",
+        show_hex=True,
+        auto_contrast=True,
+    )
+    ```
 
     Args:
         value:
@@ -39,35 +37,43 @@ class Color(Component):
         color:
             Alias for ``value``.
         label:
-            Optional human-readable name shown next to the swatch.
+            Optional label shown with the swatch.
         show_label:
-            Whether to render ``label``.
+            Whether to render the ``label`` text.
         show_hex:
-            Whether to render hex metadata text.
+            Whether to render resolved hex metadata.
         size:
-            Base swatch size (used when width/height are not provided).
+            Base swatch size used when width/height are omitted.
         width:
             Swatch width override.
         height:
             Swatch height override.
         radius:
-            Border radius for rectangular swatches.
+            Border radius for rectangular shapes.
         shape:
             Swatch shape (for example ``"rectangle"`` or ``"circle"``).
         border_color:
-            Optional border color for the swatch.
+            Optional swatch border color.
         border_width:
-            Border stroke width.
+            Swatch border width.
         background:
-            Optional background color for the full control surface.
+            Optional background for the full control surface.
         auto_contrast:
-            When ``True``, runtime tries to keep readable foreground text.
+            Enables automatic foreground contrast when supported.
         min_contrast:
-            Minimum contrast ratio target when auto-contrast is enabled.
+            Minimum target contrast when ``auto_contrast`` is enabled.
         enabled:
             Enables interaction events when supported.
         events:
-            Runtime event names to emit to Python.
+            Runtime event names to subscribe to.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
     """
 
     control_type = "color"
@@ -129,3 +135,4 @@ class Color(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+

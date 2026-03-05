@@ -8,45 +8,61 @@ __all__ = ["IconButton"]
 
 class IconButton(Button):
     """
-    Tappable icon button without a text label.
+    Tappable icon-only button control.
 
-    Extends :class:`Button` and renders a Flutter ``IconButton``
-    widget.  The ``icon`` parameter accepts a Material icon name
-    string or a codepoint integer.  An optional ``tooltip`` is shown
-    on long-press.  Tapping emits a ``click`` event together with any
-    ``value`` payload.  Inherits full action dispatch support from
-    :class:`Button`.
+    ``IconButton`` is the icon-focused member of the button family. It keeps
+    the full action/event behavior of :class:`Button` while prioritizing icon
+    payloads over text captions. The runtime can resolve icon name strings,
+    integer code points, and compatible icon payload objects.
+
+    Use this for toolbar buttons, compact overlay actions, or quick actions
+    where a label would add unnecessary visual weight.
 
     ```python
     import butterflyui as bui
 
-    bui.IconButton("delete", tooltip="Delete item", color="red")
+    bui.IconButton(
+        icon="delete",
+        tooltip="Delete item",
+        color="#FF4D6D",
+        action_id="delete_current_item",
+    )
     ```
 
     Args:
         icon:
-            Material icon name (e.g. ``"add"``, ``"close"``) or
-            Unicode codepoint integer.
+            Material icon name, codepoint integer, or runtime icon payload.
         tooltip:
-            Text shown in the long-press tooltip.
+            Assistive tooltip text.
         size:
             Icon size in logical pixels.
         color:
-            Icon colour — any Flutter-compatible colour value.
+            Icon color value accepted by runtime.
         enabled:
-            If ``False``, the button is non-interactive.
+            If ``False``, the control is non-interactive.
         value:
-            Arbitrary payload emitted with the ``click`` event.
+            Arbitrary payload emitted with click events.
+        events:
+            Runtime event names to subscribe to.
         action:
-            Declarative action descriptor dispatched on tap.
+            Declarative action descriptor fired on press.
         action_id:
-            ID of a registered server-side action.
+            Registered action ID to dispatch on press.
         action_event:
-            Event name forwarded to the action handler.
+            Event name forwarded to the action dispatcher.
         action_payload:
-            Extra payload mapping for the action.
+            Extra payload mapping for action dispatch.
         actions:
-            List of action descriptors executed on tap.
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer. This can include
+            style/modifier/motion/effects fields and optional transparency.
     """
     control_type = "icon_button"
 
@@ -91,3 +107,4 @@ class IconButton(Button):
             strict=strict,
             **kwargs,
         )
+

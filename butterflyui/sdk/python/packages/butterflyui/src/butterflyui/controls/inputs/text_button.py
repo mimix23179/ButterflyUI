@@ -10,7 +10,55 @@ __all__ = ["TextButton"]
 
 
 class TextButton(Button):
-    """Convenience ``Button`` preset with ``variant='text'``."""
+    """
+    Low-emphasis text button preset.
+
+    ``TextButton`` reuses :class:`Button` behavior while forcing
+    ``variant="text"``. It is suited for tertiary actions, inline links, and
+    toolbar actions where minimal chrome is preferred.
+
+    The control still supports action IDs, action payloads, and runtime event
+    emission. Additional visual/runtime props can be supplied through
+    ``**kwargs``.
+
+    ```python
+    import butterflyui as bui
+
+    bui.TextButton(
+        "Undo",
+        action_id="undo_last",
+        icon="undo",
+    )
+    ```
+
+    Args:
+        label:
+            Button caption text. ``text`` takes precedence when both are set.
+        text:
+            Caption text alias for ``label``.
+        value:
+            Arbitrary payload emitted with click events.
+        events:
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
+    """
 
     control_type = "text_button"
 

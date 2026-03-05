@@ -15,6 +15,10 @@ class DecoratedBox(Component):
     ``DecorationImage``. ``shadow`` accepts a list of box-shadow specs.
     ``shape`` can be ``"rectangle"`` (default) or ``"circle"``.
 
+    Through ``**kwargs`` this control also supports universal style pipeline
+    fields (classes/modifiers/motion/effects) and optional icon/color/
+    transparency hints used by Candy/Skins styling flows.
+
     ```python
     import butterflyui as bui
 
@@ -52,6 +56,8 @@ class DecoratedBox(Component):
             Outer spacing around the decorated box.
         clip_behavior:
             Anti-aliasing clip mode applied to the decoration boundary.
+        **kwargs:
+            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
     control_type = "decorated_box"

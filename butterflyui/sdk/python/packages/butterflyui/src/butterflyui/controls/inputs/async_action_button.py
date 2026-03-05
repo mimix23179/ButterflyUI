@@ -8,66 +8,65 @@ __all__ = ["AsyncActionButton"]
 
 class AsyncActionButton(Button):
     """
-    Button that tracks and displays an asynchronous busy state.
+    Button with built-in asynchronous busy/loading behavior.
 
-    Extends :class:`Button` with a ``busy`` / ``loading`` flag that the
-    Flutter runtime uses to show a progress indicator in place of the
-    label while an operation is running.  The optional ``busy_label``
-    is displayed alongside the spinner when set.  When
-    ``disabled_while_busy`` is ``True`` the button ignores taps while
-    in the busy state.
+    ``AsyncActionButton`` extends :class:`Button` by synchronizing ``busy`` and
+    ``loading`` state flags and exposing helpers to toggle busy state through
+    runtime invocations. This is useful for long-running actions such as remote
+    API calls, background jobs, and multi-step workflows.
 
-    Call :meth:`set_busy` from your Python handler to toggle the state
-    imperatively; the Flutter side also mirrors the ``busy``/``loading``
-    prop on re-render.
+    While busy, the renderer can show a spinner and optional ``busy_label``;
+    when ``disabled_while_busy`` is enabled, presses are ignored until the
+    operation completes.
 
     ```python
     import butterflyui as bui
 
-    btn = bui.AsyncActionButton(
+    save_btn = bui.AsyncActionButton(
         "Save",
-        busy_label="Saving…",
+        action_id="save_document",
+        busy_label="Saving...",
         disabled_while_busy=True,
     )
     ```
 
     Args:
         label:
-            Button text.  Alias ``text`` takes precedence when both are
-            supplied.
+            Button text. ``text`` takes precedence when both are set.
         text:
-            Button text (alias for ``label``).
+            Button text alias for ``label``.
         value:
-            Arbitrary payload emitted with the ``click`` event.
+            Arbitrary payload emitted with click events.
         variant:
-            Visual style variant forwarded to the Flutter button builder
-            (e.g. ``"filled"``, ``"outlined"``, ``"text"``).
+            Optional visual variant (for example ``"filled"`` or ``"outlined"``).
         busy:
-            If ``True``, the button renders in its busy/loading state.
-            Alias ``loading`` is kept in sync.
+            Busy/loading state flag.
         loading:
             Alias for ``busy``.
         disabled_while_busy:
-            If ``True``, the button is non-interactive while busy.
+            If ``True``, disables interaction while busy.
         busy_label:
-            Text shown next to the loading indicator while busy.
-        action:
-            Declarative action descriptor dispatched on click.
-        action_id:
-            ID of a registered server-side action to invoke on click.
-        action_event:
-            Event name forwarded to the action handler.
-        action_payload:
-            Extra payload mapping forwarded with the action.
-        actions:
-            List of action descriptors executed sequentially on click.
-        window_action:
-            Window-level command triggered on click (e.g.
-            ``"minimize"``, ``"maximize"``, ``"close"``).
-        window_action_delay_ms:
-            Milliseconds to wait before executing ``window_action``.
+            Optional text shown while busy.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
     """
     control_type = "async_action_button"
 
@@ -124,3 +123,4 @@ class AsyncActionButton(Button):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+

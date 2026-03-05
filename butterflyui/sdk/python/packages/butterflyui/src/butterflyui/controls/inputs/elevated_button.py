@@ -8,38 +8,54 @@ __all__ = ["ElevatedButton"]
 
 class ElevatedButton(Button):
     """
-    :class:`Button` preset with ``variant="elevated"``.
+    Raised button preset with ``variant="elevated"``.
 
-    Convenience subclass that forces the ``elevated`` visual variant so
-    you don't have to specify it manually.  The Flutter side renders an
-    ``ElevatedButton`` widget with a raised shadow.  All other
-    :class:`Button` parameters apply unchanged.
+    ``ElevatedButton`` forwards the standard :class:`Button` interaction and
+    action pipeline while enforcing the elevated visual variant. Use this for
+    actions that need stronger depth or separation from surrounding surfaces.
+
+    As with other button wrappers, extra runtime keys passed via ``**kwargs``
+    are forwarded unchanged, including icon/color/transparency and style
+    pipeline fields.
 
     ```python
     import butterflyui as bui
 
-    bui.ElevatedButton("Confirm", value="confirm")
+    bui.ElevatedButton(
+        "Confirm",
+        value="confirm",
+        action_id="confirm_dialog",
+        icon="check",
+    )
     ```
 
     Args:
         label:
-            Button caption text.  Alias ``text`` takes precedence.
+            Button caption text. ``text`` takes precedence when both are set.
         text:
-            Button caption text (alias for ``label``).
+            Caption text alias for ``label``.
         value:
-            Arbitrary payload emitted with the ``click`` event.
-        action:
-            Declarative action descriptor dispatched on tap.
-        action_id:
-            ID of a registered server-side action.
-        action_event:
-            Event name forwarded to the action handler.
-        action_payload:
-            Extra payload mapping for the action.
-        actions:
-            List of action descriptors executed on tap.
+            Arbitrary payload emitted with click events.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime event names to subscribe to.
+        action:
+            Declarative action descriptor fired on press.
+        action_id:
+            Registered action ID to dispatch on press.
+        action_event:
+            Event name forwarded to the action dispatcher.
+        action_payload:
+            Extra payload mapping for action dispatch.
+        actions:
+            Action descriptor list executed on press.
+        props:
+            Additional props merged before typed arguments.
+        style:
+            Optional style map for the control host.
+        strict:
+            Enables strict schema validation when supported.
+        **kwargs:
+            Extra runtime props forwarded to the renderer.
     """
     control_type = "elevated_button"
 
