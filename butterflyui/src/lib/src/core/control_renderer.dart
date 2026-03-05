@@ -238,7 +238,10 @@ Map<String, Object?> _normalizeIncomingProps(Map<String, Object?> source) {
   const aliasMap = <String, String>{
     'bg_color': 'bgcolor',
     'background_color': 'bgcolor',
+    'fg_color': 'foreground',
     'bordercolor': 'border_color',
+    'textcolor': 'text_color',
+    'iconcolor': 'icon_color',
     'borderwidth': 'border_width',
     'mainaxis': 'main_axis',
     'crossaxis': 'cross_axis',
@@ -258,6 +261,10 @@ Map<String, Object?> _normalizeIncomingProps(Map<String, Object?> source) {
     'usecontrolwidgets': 'use_control_widgets',
     'usecontrollayouts': 'use_control_layouts',
     'autoload': 'auto_load',
+    'opacity_level': 'opacity',
+    'transparent': 'transparency',
+    'translucent': 'transparency',
+    'translucency': 'transparency',
   };
   for (final entry in aliasMap.entries) {
     final from = entry.key;
@@ -2600,6 +2607,12 @@ class ControlRenderer {
       if (inheritedIconTheme != null) {
         built = IconTheme.merge(data: inheritedIconTheme, child: built);
       }
+      built = _applyUniversalIconAdornments(
+        built: built,
+        controlType: controlType,
+        props: props,
+        surfaceStyle: surfaceStyle,
+      );
 
       final width = coerceDouble(props['width'] ?? surfaceStyle['width']);
       final height = coerceDouble(props['height'] ?? surfaceStyle['height']);
@@ -2821,7 +2834,27 @@ class ControlRenderer {
         );
       }
 
-      final opacity = coerceDouble(props['opacity'] ?? surfaceStyle['opacity']);
+      final explicitOpacity = coerceDouble(
+        props['opacity'] ?? surfaceStyle['opacity'],
+      );
+      final transparency = coerceDouble(
+        props['transparency'] ??
+            props['alpha'] ??
+            props['translucency'] ??
+            surfaceStyle['transparency'] ??
+            surfaceStyle['alpha'] ??
+            surfaceStyle['translucency'],
+      );
+      double? opacity = explicitOpacity;
+      if (transparency != null) {
+        final normalizedTransparency = transparency > 1
+            ? (transparency / 100.0).clamp(0.0, 1.0)
+            : transparency.clamp(0.0, 1.0);
+        final transparencyOpacity = 1.0 - normalizedTransparency;
+        opacity = opacity == null
+            ? transparencyOpacity
+            : (opacity * transparencyOpacity).clamp(0.0, 1.0);
+      }
       if (opacity != null && opacity >= 0 && opacity < 1) {
         built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
       }
@@ -3454,8 +3487,10 @@ class ControlRenderer {
     final color = resolveColorValue(
       props['text_color'] ??
           props['foreground'] ??
+          props['color'] ??
           surfaceStyle['text_color'] ??
-          surfaceStyle['foreground'],
+          surfaceStyle['foreground'] ??
+          surfaceStyle['color'],
       background: textBackground,
       autoContrast: autoContrast,
       minContrast: minContrast,
@@ -3530,8 +3565,10 @@ class ControlRenderer {
     final color = resolveColorValue(
       props['icon_color'] ??
           props['icon_foreground'] ??
+          props['color'] ??
           surfaceStyle['icon_color'] ??
-          surfaceStyle['icon_foreground'],
+          surfaceStyle['icon_foreground'] ??
+          surfaceStyle['color'],
       background: iconBackground,
       autoContrast: autoContrast,
       minContrast: minContrast,
@@ -3542,6 +3579,126 @@ class ControlRenderer {
     );
     if (color == null && size == null && opacity == null) return null;
     return IconThemeData(color: color, size: size, opacity: opacity);
+  }
+
+  Widget _applyUniversalIconAdornments({
+    required Widget built,
+    required String controlType,
+    required Map<String, Object?> props,
+    required Map<String, Object?> surfaceStyle,
+  }) {
+    const nativeIconControls = <String>{
+      'button',
+      'elevated_button',
+      'filled_button',
+      'outlined_button',
+      'text_button',
+      'icon_button',
+      'glyph_button',
+      'icon',
+      'emoji_icon',
+      'app_bar',
+      'menu_item',
+      'list_tile',
+      'item_tile',
+      'bubble',
+      'display',
+      'notice_bar',
+      'pagination',
+      'toast',
+      'snack_bar',
+      'action_bar',
+      'tabs',
+    };
+    if (nativeIconControls.contains(controlType)) {
+      return built;
+    }
+    if (_coerceBool(
+          props['decorate_icon'] ?? surfaceStyle['decorate_icon'],
+          fallback: true,
+        ) ==
+        false) {
+      return built;
+    }
+
+    final iconPosition = (props['icon_position'] ?? 'leading')
+        .toString()
+        .trim()
+        .toLowerCase();
+    final leadingValue = iconPosition == 'trailing'
+        ? null
+        : (props['leading_icon'] ?? props['icon']);
+    final trailingValue = iconPosition == 'trailing'
+        ? (props['trailing_icon'] ?? props['icon'])
+        : props['trailing_icon'];
+    if (leadingValue == null && trailingValue == null) {
+      return built;
+    }
+
+    final background = resolveColorValue(
+      props['background'] ??
+          props['bgcolor'] ??
+          surfaceStyle['background'] ??
+          surfaceStyle['bgcolor'],
+    );
+    final autoContrast = _coerceBool(
+      props['auto_contrast'] ?? surfaceStyle['auto_contrast'],
+      fallback: true,
+    );
+    final minContrast =
+        coerceDouble(props['min_contrast'] ?? surfaceStyle['min_contrast']) ??
+        4.5;
+    final iconColor = resolveColorValue(
+      props['icon_color'] ??
+          props['icon_foreground'] ??
+          props['foreground'] ??
+          props['color'] ??
+          surfaceStyle['icon_color'] ??
+          surfaceStyle['icon_foreground'] ??
+          surfaceStyle['foreground'] ??
+          surfaceStyle['color'],
+      background: background,
+      autoContrast: autoContrast,
+      minContrast: minContrast,
+    );
+    final iconSize = coerceDouble(
+      props['icon_size'] ??
+          props['size'] ??
+          surfaceStyle['icon_size'] ??
+          surfaceStyle['size'],
+    );
+    final spacing =
+        coerceDouble(props['icon_spacing'] ?? surfaceStyle['icon_spacing']) ??
+        8.0;
+
+    Widget? buildAdornmentIcon(Object? raw) {
+      if (raw == null) return null;
+      return buildIconValue(
+        raw,
+        colorValue: props['icon_color'] ?? props['color'] ?? iconColor,
+        color: iconColor,
+        background: background,
+        size: iconSize,
+        autoContrast: autoContrast,
+        minContrast: minContrast,
+        fallbackIcon: Icons.circle,
+      );
+    }
+
+    final leading = buildAdornmentIcon(leadingValue);
+    final trailing = buildAdornmentIcon(trailingValue);
+    if (leading == null && trailing == null) {
+      return built;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (leading != null) ...[leading, SizedBox(width: spacing)],
+        Flexible(fit: FlexFit.loose, child: built),
+        if (trailing != null) ...[SizedBox(width: spacing), trailing],
+      ],
+    );
   }
 
   BorderRadius? _coerceBorderRadius(Object? value) {

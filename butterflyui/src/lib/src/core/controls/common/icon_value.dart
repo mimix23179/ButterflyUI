@@ -40,6 +40,39 @@ Widget? buildIconValue(
 
   if (value is Map) {
     final map = coerceObjectMap(value);
+
+    final typeToken = map['type']?.toString().trim().toLowerCase();
+    if (typeToken != null && typeToken.isNotEmpty && map['props'] is Map) {
+      final nestedProps = coerceObjectMap(map['props'] as Map);
+      if (typeToken == 'icon' ||
+          typeToken == 'glyph_button' ||
+          typeToken == 'icon_button' ||
+          typeToken == 'emoji_icon') {
+        final nestedValue =
+            nestedProps['icon'] ??
+            nestedProps['glyph'] ??
+            nestedProps['emoji'] ??
+            nestedProps['value'] ??
+            nestedProps['name'];
+        return buildIconValue(
+          nestedValue,
+          colorValue: nestedProps['color'] ?? colorValue,
+          color: resolvedColor,
+          background:
+              background ??
+              resolveColorValue(
+                nestedProps['background'] ?? nestedProps['bgcolor'],
+              ),
+          size: coerceDouble(nestedProps['size']) ?? size,
+          textStyle: textStyle,
+          autoContrast:
+              coerceBool(nestedProps['auto_contrast']) ?? autoContrast,
+          minContrast: coerceDouble(nestedProps['min_contrast']) ?? minContrast,
+          fallbackIcon: fallbackIcon,
+        );
+      }
+    }
+
     final codepoint = _parseIconCodepoint(
       map['codepoint'] ?? map['unicode'] ?? map['code'] ?? map['glyph'],
     );

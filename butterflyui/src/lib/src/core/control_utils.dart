@@ -336,8 +336,24 @@ Color? coerceColor(Object? value) {
     final map = coerceObjectMap(value);
     Color? resolved;
 
+    final typeToken = map['type']?.toString().trim().toLowerCase();
+    if (typeToken != null && typeToken.isNotEmpty && map['props'] is Map) {
+      final nestedProps = coerceObjectMap(map['props'] as Map);
+      if (typeToken == 'color') {
+        resolved = coerceColor(
+          nestedProps['value'] ?? nestedProps['color'] ?? nestedProps,
+        );
+      } else if (typeToken == 'icon') {
+        resolved = coerceColor(
+          nestedProps['color'] ??
+              nestedProps['foreground'] ??
+              nestedProps['icon_color'],
+        );
+      }
+    }
+
     final direct = map['value'];
-    if (direct != null) {
+    if (resolved == null && direct != null) {
       resolved = coerceColor(direct);
     }
 
@@ -616,8 +632,9 @@ Gradient? coerceGradient(Object? value) {
       ?.map(coerceDouble)
       .whereType<double>()
       .toList();
-  if (stops != null && stops.length != colors.length)
+  if (stops != null && stops.length != colors.length) {
     return null; // Invalid stops
+  }
 
   final tileModeStr = map['tile_mode']?.toString().toLowerCase();
   final tileMode = tileModeStr == 'mirror'

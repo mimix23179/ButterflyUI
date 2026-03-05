@@ -122,6 +122,22 @@ Color? _parseColorPayload(Object? value) {
   if (value == null) return null;
   if (value is Map) {
     final map = coerceObjectMap(value);
+    final typeToken = map['type']?.toString().trim().toLowerCase();
+    if (typeToken != null && typeToken.isNotEmpty && map['props'] is Map) {
+      final nestedProps = coerceObjectMap(map['props'] as Map);
+      if (typeToken == 'color') {
+        return _parseColorPayload(
+          nestedProps['value'] ?? nestedProps['color'] ?? nestedProps,
+        );
+      }
+      if (typeToken == 'icon') {
+        return _parseColorPayload(
+          nestedProps['color'] ??
+              nestedProps['foreground'] ??
+              nestedProps['icon_color'],
+        );
+      }
+    }
     final direct =
         map['value'] ??
         map['color'] ??
