@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/modifiers/control_capabilities.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildModifierControl(
@@ -147,56 +148,70 @@ class _ModifierControlState extends State<_ModifierControl> {
     final props = node['props'] is Map
         ? coerceObjectMap(node['props'] as Map)
         : <String, Object?>{};
+    final type = _normalizeType(node['type']);
+    final capabilities = ControlModifierCapabilities.forControl(type);
+    final canInjectModifiers =
+        capabilities.supportsInteractiveModifiers ||
+        capabilities.supportsGlassModifiers ||
+        capabilities.supportsTransitionModifiers;
+    final canInjectMotion = canInjectModifiers;
+    final canInjectStylePatch = canInjectModifiers;
 
-    final list = <Object?>[];
-    final defaults = _state['modifiers'];
-    if (defaults is List) {
-      list.addAll(defaults);
-    }
-    _appendShorthandModifiers(list);
-    final current = props['modifiers'];
-    if (current is List) {
-      list.addAll(current);
-    }
-    if (list.isNotEmpty) {
-      props['modifiers'] = list;
-    }
-
-    if (!props.containsKey('motion') && _state.containsKey('motion')) {
-      props['motion'] = _state['motion'];
-    }
-    for (final key in const <String>[
-      'cursor',
-      'padding',
-      'margin',
-      'align',
-      'alignment',
-      'max_width',
-      'max_height',
-      'min_width',
-      'min_height',
-      'hit_test',
-    ]) {
-      if (!props.containsKey(key) && _state.containsKey(key)) {
-        props[key] = _state[key];
+    if (canInjectModifiers) {
+      final list = <Object?>[];
+      final defaults = _state['modifiers'];
+      if (defaults is List) {
+        list.addAll(defaults);
+      }
+      _appendShorthandModifiers(list);
+      final current = props['modifiers'];
+      if (current is List) {
+        list.addAll(current);
+      }
+      if (list.isNotEmpty) {
+        props['modifiers'] = list;
       }
     }
 
-    final style = props['style'] is Map
-        ? coerceObjectMap(props['style'] as Map)
-        : <String, Object?>{};
-    final stylePatch = <String, Object?>{};
-    if (_state.containsKey('background')) {
-      stylePatch['bgcolor'] = _state['background'];
+    if (canInjectMotion && !props.containsKey('motion') && _state.containsKey('motion')) {
+      props['motion'] = _state['motion'];
     }
-    if (_state.containsKey('border')) {
-      stylePatch['border'] = _state['border'];
+    if (canInjectMotion) {
+      for (final key in const <String>[
+        'cursor',
+        'padding',
+        'margin',
+        'align',
+        'alignment',
+        'max_width',
+        'max_height',
+        'min_width',
+        'min_height',
+        'hit_test',
+      ]) {
+        if (!props.containsKey(key) && _state.containsKey(key)) {
+          props[key] = _state[key];
+        }
+      }
     }
-    if (_state.containsKey('shadow')) {
-      stylePatch['shadow'] = _state['shadow'];
-    }
-    if (stylePatch.isNotEmpty) {
-      props['style'] = CandyTokens.mergeMaps(stylePatch, style);
+
+    if (canInjectStylePatch) {
+      final style = props['style'] is Map
+          ? coerceObjectMap(props['style'] as Map)
+          : <String, Object?>{};
+      final stylePatch = <String, Object?>{};
+      if (_state.containsKey('background')) {
+        stylePatch['bgcolor'] = _state['background'];
+      }
+      if (_state.containsKey('border')) {
+        stylePatch['border'] = _state['border'];
+      }
+      if (_state.containsKey('shadow')) {
+        stylePatch['shadow'] = _state['shadow'];
+      }
+      if (stylePatch.isNotEmpty) {
+        props['style'] = CandyTokens.mergeMaps(stylePatch, style);
+      }
     }
 
     node['props'] = props;
@@ -204,13 +219,22 @@ class _ModifierControlState extends State<_ModifierControl> {
       final rawChildren = node['children'] as List;
       node['children'] = rawChildren
           .map((child) {
-            if (child is Map)
+            if (child is Map) {
               return _applyModifiersToNode(coerceObjectMap(child));
+            }
             return child;
           })
           .toList(growable: false);
     }
     return node;
+  }
+
+  String _normalizeType(Object? value) {
+    return (value?.toString() ?? '')
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
   }
 
   void _appendShorthandModifiers(List<Object?> list) {

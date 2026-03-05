@@ -1,88 +1,333 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 import 'package:butterflyui_runtime/src/core/control_theme.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-class ButterflyUISlidePanel extends StatelessWidget {
-  final String controlId;
-  final Widget child;
-  final bool open;
-  final String side;
-  final double size;
-  final Color? scrimColor;
-  final bool dismissible;
-  final ButterflyUISendRuntimeEvent sendEvent;
+Widget buildSlidePanelControl(
+  String controlId,
+  Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildChild,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  return _ButterflyUISlidePanelControl(
+    controlId: controlId,
+    props: props,
+    rawChildren: rawChildren,
+    buildChild: buildChild,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
 
-  const ButterflyUISlidePanel({
-    super.key,
+class _ButterflyUISlidePanelControl extends StatefulWidget {
+  const _ButterflyUISlidePanelControl({
     required this.controlId,
-    required this.child,
-    required this.open,
-    required this.side,
-    required this.size,
-    required this.scrimColor,
-    required this.dismissible,
+    required this.props,
+    required this.rawChildren,
+    required this.buildChild,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
+  final String controlId;
+  final Map<String, Object?> props;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildChild;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_ButterflyUISlidePanelControl> createState() =>
+      _ButterflyUISlidePanelControlState();
+}
+
+class _ButterflyUISlidePanelControlState
+    extends State<_ButterflyUISlidePanelControl> {
+  bool _open = false;
+  String _side = 'left';
+  double _size = 280;
+  bool _dismissible = true;
+  Color? _scrimColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromProps(widget.props);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ButterflyUISlidePanelControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _open = props['open'] == true;
+    _side = _normalizeSide(
+      props['side']?.toString() ?? props['position']?.toString(),
+    );
+    _size =
+        coerceDouble(props['size'] ?? props['width'] ?? props['height']) ??
+        280.0;
+    _dismissible = props['dismissible'] == null
+        ? true
+        : (props['dismissible'] == true);
+    _scrimColor = coerceColor(props['scrim_color']);
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_open':
+        {
+          final next = args['value'] == true || args['open'] == true;
+          _setOpen(next, emitLifecycle: true);
+          return _statePayload();
+        }
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            final map = coerceObjectMap(incoming);
+            setState(() {
+              if (map.containsKey('open')) {
+                _open = map['open'] == true;
+              }
+              if (map.containsKey('side') || map.containsKey('position')) {
+                _side = _normalizeSide(
+                  map['side']?.toString() ?? map['position']?.toString(),
+                );
+              }
+              if (map.containsKey('size') ||
+                  map.containsKey('width') ||
+                  map.containsKey('height')) {
+                _size =
+                    coerceDouble(
+                      map['size'] ?? map['width'] ?? map['height'],
+                    ) ??
+                    _size;
+              }
+              if (map.containsKey('dismissible')) {
+                _dismissible = map['dismissible'] == true;
+              }
+              if (map.containsKey('scrim_color')) {
+                _scrimColor = coerceColor(map['scrim_color']);
+              }
+            });
+            _emit('state', _statePayload());
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          _emit(event, payload);
+          return true;
+        }
+      default:
+        throw UnsupportedError('Unknown slide_panel method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'open': _open,
+      'side': _side,
+      'size': _size,
+      'dismissible': _dismissible,
+    };
+  }
+
+  String _normalizeSide(String? raw) {
+    switch ((raw ?? '').toLowerCase()) {
+      case 'right':
+      case 'top':
+      case 'bottom':
+      case 'left':
+        return raw!.toLowerCase();
+      default:
+        return 'left';
+    }
+  }
+
+  void _emit(String event, Map<String, Object?> payload) {
+    if (widget.controlId.isEmpty) return;
+    widget.sendEvent(widget.controlId, event, payload);
+  }
+
+  void _setOpen(bool next, {required bool emitLifecycle}) {
+    if (_open == next) {
+      _emit('state', _statePayload());
+      return;
+    }
+    setState(() {
+      _open = next;
+    });
+    if (emitLifecycle) {
+      _emit(next ? 'open' : 'close', _statePayload());
+      _emit('change', _statePayload());
+    }
+    _emit('state', _statePayload());
+  }
+
+  void _dismiss() {
+    if (!_dismissible) return;
+    _setOpen(false, emitLifecycle: true);
+    _emit('dismiss', _statePayload());
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.of(context).size;
-    final isHorizontal = side == 'left' || side == 'right';
-    final panelSize = size <= 0 ? (isHorizontal ? screen.width * 0.3 : screen.height * 0.3) : size;
+    Widget child = const SizedBox.shrink();
+    for (final raw in widget.rawChildren) {
+      if (raw is Map) {
+        child = widget.buildChild(coerceObjectMap(raw));
+        break;
+      }
+    }
+    if (child is SizedBox && widget.props['child'] is Map) {
+      child = widget.buildChild(coerceObjectMap(widget.props['child'] as Map));
+    }
+
+    final durationMs =
+        coerceOptionalInt(
+          widget.props['duration_ms'] ?? widget.props['duration'],
+        ) ??
+        220;
+    final curve = _curveFrom(widget.props['curve']?.toString());
+
+    final size = MediaQuery.of(context).size;
+    final horizontal = _side == 'left' || _side == 'right';
+    final panelSize = (_size <= 0)
+        ? (horizontal ? size.width * 0.3 : size.height * 0.3)
+        : _size;
+
+    final panelColor =
+        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        Theme.of(context).colorScheme.surface;
+    final elevation = coerceDouble(widget.props['elevation']) ?? 4.0;
+    final radius = coerceDouble(widget.props['radius']) ?? 0.0;
+    final panelMargin =
+        coercePadding(widget.props['margin'] ?? widget.props['panel_margin']) ??
+        EdgeInsets.zero;
+    final panelClip =
+        coerceClipBehavior(widget.props['clip_behavior']) ?? Clip.antiAlias;
 
     double left = 0;
     double top = 0;
     double? right;
     double? bottom;
 
-    if (side == 'left') {
-      left = open ? 0 : -panelSize;
-      top = 0;
-      bottom = 0;
-    } else if (side == 'right') {
-      right = open ? 0 : -panelSize;
-      top = 0;
-      bottom = 0;
-    } else if (side == 'top') {
-      top = open ? 0 : -panelSize;
-      left = 0;
-      right = 0;
+    if (_side == 'left') {
+      left = _open
+          ? panelMargin.left
+          : -(panelSize + panelMargin.left + panelMargin.right);
+      top = panelMargin.top;
+      bottom = panelMargin.bottom;
+    } else if (_side == 'right') {
+      right = _open
+          ? panelMargin.right
+          : -(panelSize + panelMargin.left + panelMargin.right);
+      top = panelMargin.top;
+      bottom = panelMargin.bottom;
+    } else if (_side == 'top') {
+      top = _open
+          ? panelMargin.top
+          : -(panelSize + panelMargin.top + panelMargin.bottom);
+      left = panelMargin.left;
+      right = panelMargin.right;
     } else {
-      bottom = open ? 0 : -panelSize;
-      left = 0;
-      right = 0;
+      bottom = _open
+          ? panelMargin.bottom
+          : -(panelSize + panelMargin.top + panelMargin.bottom);
+      left = panelMargin.left;
+      right = panelMargin.right;
     }
 
     return Stack(
       children: [
-        if (open)
+        if (_open)
           Positioned.fill(
             child: GestureDetector(
-              onTap: dismissible ? () => sendEvent(controlId, 'dismiss', {}) : null,
+              onTap: _dismissible ? _dismiss : null,
               child: Container(
-                color: scrimColor ?? butterflyuiScrim(context, opacity: 0.54),
+                color: _scrimColor ?? butterflyuiScrim(context, opacity: 0.54),
               ),
             ),
           ),
         AnimatedPositioned(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          left: side == 'right' ? null : left,
-          right: side == 'right' ? right : null,
-          top: side == 'bottom' ? null : top,
-          bottom: side == 'bottom' ? bottom : null,
-          width: isHorizontal ? panelSize : null,
-          height: isHorizontal ? null : panelSize,
+          duration: Duration(milliseconds: durationMs.clamp(0, 2000)),
+          curve: curve,
+          left: _side == 'right' ? null : left,
+          right: _side == 'right' ? right : null,
+          top: _side == 'bottom' ? null : top,
+          bottom: _side == 'bottom' ? bottom : null,
+          width: horizontal ? panelSize : null,
+          height: horizontal ? null : panelSize,
           child: Material(
-            elevation: 4,
-            color: Theme.of(context).colorScheme.surface,
-            clipBehavior: Clip.hardEdge,
-            child: child,
+            type: MaterialType.transparency,
+            child: Material(
+              elevation: elevation,
+              color: panelColor,
+              clipBehavior: panelClip,
+              borderRadius: radius <= 0 ? null : BorderRadius.circular(radius),
+              child: child,
+            ),
           ),
         ),
       ],
     );
   }
-}
 
+  Curve _curveFrom(String? raw) {
+    switch ((raw ?? '').toLowerCase().replaceAll('-', '_')) {
+      case 'linear':
+        return Curves.linear;
+      case 'ease_in':
+      case 'easein':
+        return Curves.easeIn;
+      case 'ease_in_out':
+      case 'easeinout':
+        return Curves.easeInOut;
+      default:
+        return Curves.easeOutCubic;
+    }
+  }
+}

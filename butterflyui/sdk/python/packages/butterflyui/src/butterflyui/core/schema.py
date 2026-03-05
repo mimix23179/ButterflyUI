@@ -422,6 +422,19 @@ UNIVERSAL_PROPS_SCHEMA = {
     "effect_order": STRING_SCHEMA,
     "effect_clip": ANY_SCHEMA,
     "effect_target": STRING_SCHEMA,
+    "surface": ANY_SCHEMA,
+    "surface_layers": ANY_SCHEMA,
+    "background_layers": ANY_SCHEMA,
+    "background_layer": ANY_SCHEMA,
+    "foreground_layers": ANY_SCHEMA,
+    "overlay_layers": ANY_SCHEMA,
+    "overlay_layer": ANY_SCHEMA,
+    "hover_surface_layers": ANY_SCHEMA,
+    "hover_background_layers": ANY_SCHEMA,
+    "hover_surface_opacity": NUMBER_SCHEMA,
+    "hover_layer_opacity": NUMBER_SCHEMA,
+    "layer_transition_ms": INTEGER_SCHEMA,
+    "layer_transition_curve": STRING_SCHEMA,
     "state": STRING_SCHEMA,
     "variant": ANY_SCHEMA,
     "events": {"type": "array", "items": STRING_SCHEMA},
@@ -611,7 +624,7 @@ _BOTH_ENDS_CONTROL_TYPES = ['accordion',
  'modifier',
  'morphing_border',
  'motion',
- 'nav_ring',
+ 'navigation_ring',
  'neon_edge',
  'noise_displacement',
  'noise_field',
@@ -636,7 +649,7 @@ _BOTH_ENDS_CONTROL_TYPES = ['accordion',
  'progress_bar',
  'progress_ring',
  'radio',
- 'rail_nav',
+ 'rail_navigation',
  'reorderable_list_view',
  'ripple_burst',
  'route',
@@ -2261,7 +2274,7 @@ RUNTIME_PROP_HINTS: dict[str, list[str]] = {'accordion': ['accent_color',
             'glow',
             'shadow',
             'events'],
- 'nav_ring': ['policy', 'items', 'selected_id', 'dense', 'events'],
+ 'navigation_ring': ['policy', 'items', 'selected_id', 'dense', 'events'],
  'neon_edge': ['child',
                'color',
                'width',
@@ -2415,7 +2428,7 @@ RUNTIME_PROP_HINTS: dict[str, list[str]] = {'accordion': ['accent_color',
  'progress_bar': ['value', 'indeterminate', 'label', 'stroke_width', 'variant', 'circular'],
  'progress_ring': ['value', 'indeterminate', 'label', 'stroke_width', 'variant', 'circular'],
  'radio': ['options', 'index', 'value', 'label'],
- 'rail_nav': ['items', 'selected_id', 'dense', 'extended', 'events'],
+ 'rail_navigation': ['items', 'selected_id', 'dense', 'extended', 'events'],
  'reorderable_list_view': ['items', 'dense', 'events'],
  'ripple_burst': ['child', 'color', 'count', 'duration_ms', 'max_radius', 'center', 'events'],
  'route': ['route_id', 'title', 'label', 'child', 'children', 'layout', 'spacing', 'events'],
@@ -2975,6 +2988,22 @@ _UNIVERSAL_COLOR_HINTS = [
     "min_contrast",
 ]
 
+_UNIVERSAL_LAYER_HINTS = [
+    "surface",
+    "surface_layers",
+    "background_layers",
+    "background_layer",
+    "foreground_layers",
+    "overlay_layers",
+    "overlay_layer",
+    "hover_surface_layers",
+    "hover_background_layers",
+    "hover_surface_opacity",
+    "hover_layer_opacity",
+    "layer_transition_ms",
+    "layer_transition_curve",
+]
+
 # Ensure every shared control has schema + hint map, and hint props are visible
 # to strict-mode signatures/introspection.
 for _name in _BOTH_ENDS_CONTROL_TYPES:
@@ -2983,9 +3012,61 @@ for _name in _BOTH_ENDS_CONTROL_TYPES:
     for _color_prop in _UNIVERSAL_COLOR_HINTS:
         if _color_prop not in hints:
             hints.append(_color_prop)
+    for _layer_prop in _UNIVERSAL_LAYER_HINTS:
+        if _layer_prop not in hints:
+            hints.append(_layer_prop)
     schema_props = schema.setdefault("properties", {})
     for prop in hints:
         schema_props.setdefault(prop, ANY_SCHEMA)
+
+_NAV_OVERLAY_LAYOUT_CONTROLS = [
+    "action_bar",
+    "app_bar",
+    "breadcrumb_bar",
+    "drawer",
+    "menu_bar",
+    "navigation_ring",
+    "notice_bar",
+    "rail_navigation",
+    "sidebar",
+    "status_bar",
+    "top_bar",
+    "bottom_sheet",
+    "context_menu",
+    "slide_panel",
+]
+
+_NAV_OVERLAY_LAYOUT_HINTS = [
+    "align",
+    "alignment",
+    "position",
+    "margin",
+    "panel_margin",
+    "panel_alignment",
+    "width",
+    "height",
+    "panel_width",
+    "panel_min_width",
+    "panel_max_width",
+    "min_width",
+    "min_height",
+    "max_width",
+    "max_height",
+    "offset",
+    "translate",
+    "radius",
+    "clip_behavior",
+]
+
+for _name in _NAV_OVERLAY_LAYOUT_CONTROLS:
+    _hints = RUNTIME_PROP_HINTS.setdefault(_name, [])
+    for _prop in _NAV_OVERLAY_LAYOUT_HINTS:
+        if _prop not in _hints:
+            _hints.append(_prop)
+    _schema = CONTROL_SCHEMAS.setdefault(_name, _control_schema())
+    _schema_props = _schema.setdefault("properties", {})
+    for _prop in _NAV_OVERLAY_LAYOUT_HINTS:
+        _schema_props.setdefault(_prop, ANY_SCHEMA)
 
 # Exported/consumed by core control signature plumbing.
 _ALL_CONTROL_TYPES = set(_BOTH_ENDS_CONTROL_TYPES)

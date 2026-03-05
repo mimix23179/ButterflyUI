@@ -11,7 +11,8 @@ Widget buildBreadcrumbBarControl(
 ) {
   return Builder(
     builder: (context) {
-      final rawItems = props['items'] ??
+      final rawItems =
+          props['items'] ??
           props['crumbs'] ??
           props['routes'] ??
           props['path_items'];
@@ -48,7 +49,10 @@ Widget buildBreadcrumbBarControl(
       final separator = props['separator']?.toString() ?? '/';
       final dense = props['dense'] == true || props['compact'] == true;
       final currentIndex = coerceOptionalInt(props['current_index']);
-      final maxItems = (coerceOptionalInt(props['max_items']) ?? 0).clamp(0, 99);
+      final maxItems = (coerceOptionalInt(props['max_items']) ?? 0).clamp(
+        0,
+        99,
+      );
 
       final display = <Map<String, Object?>>[];
       if (maxItems > 0 && items.length > maxItems && maxItems >= 2) {
@@ -126,9 +130,15 @@ Widget buildBreadcrumbBarControl(
         }
       }
 
-      return SingleChildScrollView(
+      final bar = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(children: children),
+      );
+      return applyControlFrameLayout(
+        props: props,
+        child: bar,
+        clipToRadius: true,
+        defaultRadius: coerceDouble(props['radius']),
       );
     },
   );

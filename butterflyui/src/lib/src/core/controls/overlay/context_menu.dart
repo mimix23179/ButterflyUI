@@ -8,12 +8,16 @@ Widget buildContextMenuControl(
   String controlId,
   Map<String, Object?> props,
   Widget child,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return ButterflyUIContextMenu(
     controlId: controlId,
     props: props,
     child: child,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }
@@ -37,34 +41,166 @@ class _ContextAction {
 }
 
 class ButterflyUIContextMenu extends StatefulWidget {
-  final String controlId;
-  final Map<String, Object?> props;
-  final Widget child;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
   const ButterflyUIContextMenu({
     super.key,
     required this.controlId,
     required this.props,
     required this.child,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final Widget child;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
   State<ButterflyUIContextMenu> createState() => _ButterflyUIContextMenuState();
 }
 
 class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
-  Future<void> _showAt(Offset globalPosition) async {
-    final actions = _parseActions(widget.props['items']);
-    if (actions.isEmpty) return;
+  List<_ContextAction> _actions = const <_ContextAction>[];
+  String _trigger = 'secondary';
+  bool _openOnTap = false;
+  bool _enabled = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _syncFromProps(widget.props);
     if (widget.controlId.isNotEmpty) {
-      widget.sendEvent(widget.controlId, 'open', {
-        'x': globalPosition.dx,
-        'y': globalPosition.dy,
-      });
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant ButterflyUIContextMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _actions = _parseActions(props['items']);
+    _trigger = (props['trigger']?.toString().toLowerCase() ?? 'secondary');
+    _openOnTap = props['open_on_tap'] == true;
+    _enabled = props['enabled'] == null ? true : (props['enabled'] == true);
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_items':
+        setState(() {
+          _actions = _parseActions(args['items']);
+        });
+        return _statePayload();
+      case 'set_props':
+        {
+          final rawProps = args['props'];
+          if (rawProps is Map) {
+            final props = coerceObjectMap(rawProps);
+            setState(() {
+              if (props.containsKey('items')) {
+                _actions = _parseActions(props['items']);
+              }
+              if (props.containsKey('trigger')) {
+                _trigger =
+                    props['trigger']?.toString().toLowerCase() ?? _trigger;
+              }
+              if (props.containsKey('open_on_tap')) {
+                _openOnTap = props['open_on_tap'] == true;
+              }
+              if (props.containsKey('enabled')) {
+                _enabled = props['enabled'] == true;
+              }
+            });
+          }
+          return _statePayload();
+        }
+      case 'open_at':
+        {
+          final x = coerceDouble(args['x']);
+          final y = coerceDouble(args['y']);
+          final position = args['position'];
+          Offset? target;
+          if (x != null && y != null) {
+            target = Offset(x, y);
+          } else if (position is List && position.length >= 2) {
+            final px = coerceDouble(position[0]);
+            final py = coerceDouble(position[1]);
+            if (px != null && py != null) {
+              target = Offset(px, py);
+            }
+          }
+          if (target != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _showAt(target!);
+            });
+            return true;
+          }
+          return false;
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          _emit(event, payload);
+          return true;
+        }
+      default:
+        throw UnsupportedError('Unknown context_menu method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'enabled': _enabled,
+      'trigger': _trigger,
+      'open_on_tap': _openOnTap,
+      'item_count': _actions.where((action) => !action.separator).length,
+    };
+  }
+
+  void _emit(String event, Map<String, Object?> payload) {
+    if (widget.controlId.isEmpty) return;
+    widget.sendEvent(widget.controlId, event, payload);
+  }
+
+  Future<void> _showAt(Offset globalPosition) async {
+    if (_actions.isEmpty || !_enabled) return;
+
+    _emit('open', {'x': globalPosition.dx, 'y': globalPosition.dy});
 
     final overlay = Overlay.of(context).context.findRenderObject();
     if (overlay is! RenderBox) return;
@@ -72,11 +208,17 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
     final selected = await showMenu<_ContextAction>(
       context: context,
       color: coerceColor(widget.props['bgcolor']),
+      elevation: coerceDouble(widget.props['elevation']),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          coerceDouble(widget.props['radius']) ?? 12,
+        ),
+      ),
       position: RelativeRect.fromRect(
         Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 0, 0),
         Offset.zero & overlay.size,
       ),
-      items: actions
+      items: _actions
           .map<PopupMenuEntry<_ContextAction>>((action) {
             if (action.separator) {
               return const PopupMenuDivider(height: 8);
@@ -106,14 +248,19 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
           .toList(growable: false),
     );
 
-    if (!mounted || widget.controlId.isEmpty) return;
+    if (!mounted) return;
 
     if (selected == null) {
-      widget.sendEvent(widget.controlId, 'dismiss', {});
+      _emit('dismiss', {});
       return;
     }
 
-    widget.sendEvent(widget.controlId, 'select', {
+    _emit('select', {
+      'id': selected.id,
+      'label': selected.label,
+      'payload': selected.payload,
+    });
+    _emit('change', {
       'id': selected.id,
       'label': selected.label,
       'payload': selected.payload,
@@ -122,12 +269,7 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = widget.props['enabled'] == null
-        ? true
-        : (widget.props['enabled'] == true);
-    final trigger =
-        (widget.props['trigger']?.toString().toLowerCase() ?? 'secondary');
-    final showOnTap = trigger == 'tap' || widget.props['open_on_tap'] == true;
+    final showOnTap = _trigger == 'tap' || _openOnTap;
 
     Widget child = widget.child;
     if (child is SizedBox && widget.props['label'] != null) {
@@ -136,20 +278,26 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
         child: Text(widget.props['label']!.toString()),
       );
     }
+    child = applyControlFrameLayout(
+      props: widget.props,
+      child: child,
+      clipToRadius: true,
+      defaultRadius: coerceDouble(widget.props['radius']),
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onSecondaryTapDown: enabled
+      onSecondaryTapDown: _enabled
           ? (details) => _showAt(details.globalPosition)
           : null,
-      onLongPressStart: enabled
+      onLongPressStart: _enabled
           ? (details) {
-              if (trigger == 'long_press') {
+              if (_trigger == 'long_press') {
                 _showAt(details.globalPosition);
               }
             }
           : null,
-      onTapDown: enabled
+      onTapDown: _enabled
           ? (details) {
               if (showOnTap) {
                 _showAt(details.globalPosition);

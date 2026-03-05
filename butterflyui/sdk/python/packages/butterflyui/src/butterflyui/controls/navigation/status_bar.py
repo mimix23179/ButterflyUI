@@ -12,7 +12,8 @@ class StatusBar(Component):
     The runtime renders a fixed-height bar at the bottom edge. ``items``
     supply labelled status segments (left or right aligned). ``text`` sets
     a single plain-text message when a full item list is not needed.
-    ``dense`` reduces bar height.
+    ``dense`` reduces bar height. Runtime invokes support item/text updates
+    and arbitrary event emission.
 
     ```python
     import butterflyui as bui
@@ -61,6 +62,9 @@ class StatusBar(Component):
 
     def set_text(self, session: Any, text: str) -> dict[str, Any]:
         return self.invoke(session, "set_text", {"text": text})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUIAppBar extends StatefulWidget {
   final String controlId;
+  final Map<String, Object?> props;
   final String? title;
   final String? subtitle;
   final bool centerTitle;
@@ -30,6 +32,7 @@ class ButterflyUIAppBar extends StatefulWidget {
   const ButterflyUIAppBar({
     super.key,
     required this.controlId,
+    required this.props,
     required this.title,
     required this.subtitle,
     required this.centerTitle,
@@ -107,7 +110,10 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_title':
         setState(() {
@@ -198,12 +204,18 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
     final titleWidget = (widget.title == null && widget.subtitle == null)
         ? const SizedBox.shrink()
         : Column(
-            crossAxisAlignment: widget.centerTitle ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            crossAxisAlignment: widget.centerTitle
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_title != null)
-                Text(_title!, style: const TextStyle(fontWeight: FontWeight.w600)),
-              if (_subtitle != null) Text(_subtitle!, style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  _title!,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              if (_subtitle != null)
+                Text(_subtitle!, style: Theme.of(context).textTheme.bodySmall),
             ],
           );
 
@@ -248,7 +260,9 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
         if (widget.leading != null) widget.leading!,
         Expanded(
           child: Align(
-            alignment: widget.centerTitle ? Alignment.center : Alignment.centerLeft,
+            alignment: widget.centerTitle
+                ? Alignment.center
+                : Alignment.centerLeft,
             child: titleWidget,
           ),
         ),
@@ -258,14 +272,30 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
       ],
     );
 
-    return Material(
-      color: widget.bgcolor ?? Theme.of(context).colorScheme.surface,
-      elevation: widget.elevation,
-      child: SizedBox(
-        height: widget.height,
-        child: Padding(padding: widget.padding, child: row),
+    final radius = coerceDouble(widget.props['radius']) ?? 0.0;
+    final clip = radius > 0 ? Clip.antiAlias : Clip.none;
+    final bar = Material(
+      type: MaterialType.transparency,
+      child: Material(
+        color: widget.bgcolor ?? Theme.of(context).colorScheme.surface,
+        elevation: widget.elevation,
+        clipBehavior: clip,
+        shape: radius > 0
+            ? RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(radius),
+              )
+            : null,
+        child: SizedBox(
+          height: widget.height,
+          child: Padding(padding: widget.padding, child: row),
+        ),
       ),
+    );
+    return applyControlFrameLayout(
+      props: widget.props,
+      child: bar,
+      clipToRadius: radius > 0,
+      defaultRadius: radius > 0 ? radius : null,
     );
   }
 }
-

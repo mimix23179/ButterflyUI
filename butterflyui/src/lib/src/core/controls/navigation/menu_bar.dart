@@ -7,11 +7,15 @@ import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 Widget buildMenuBarControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   return ButterflyUIMenuBar(
     controlId: controlId,
     props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
   );
 }
@@ -91,89 +95,221 @@ class _MenuGroupData {
   });
 }
 
-class ButterflyUIMenuBar extends StatelessWidget {
-  final String controlId;
-  final Map<String, Object?> props;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
+class ButterflyUIMenuBar extends StatefulWidget {
   const ButterflyUIMenuBar({
     super.key,
     required this.controlId,
     required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<ButterflyUIMenuBar> createState() => _ButterflyUIMenuBarState();
+}
+
+class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
+  List<_MenuGroupData> _groups = const <_MenuGroupData>[];
+  bool _dense = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromProps(widget.props);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ButterflyUIMenuBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _groups = _parseMenuGroups(props);
+    _dense = props['dense'] == true;
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_menus':
+      case 'set_items':
+        {
+          setState(() {
+            final payload = <String, Object?>{
+              ...widget.props,
+              if (args.containsKey('menus')) 'menus': args['menus'],
+              if (args.containsKey('items')) 'items': args['items'],
+            };
+            _groups = _parseMenuGroups(payload);
+          });
+          return _statePayload();
+        }
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            final props = coerceObjectMap(incoming);
+            setState(() {
+              final merged = <String, Object?>{...widget.props, ...props};
+              _groups = _parseMenuGroups(merged);
+              if (props.containsKey('dense')) {
+                _dense = props['dense'] == true;
+              }
+            });
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          _emit(event, payload);
+          return true;
+        }
+      default:
+        throw UnsupportedError('Unknown menu_bar method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    var actionCount = 0;
+    for (final group in _groups) {
+      actionCount += group.actions.where((action) => !action.separator).length;
+    }
+    return <String, Object?>{
+      'dense': _dense,
+      'menu_count': _groups.length,
+      'action_count': actionCount,
+    };
+  }
+
+  void _emit(String event, Map<String, Object?> payload) {
+    if (widget.controlId.isEmpty) return;
+    widget.sendEvent(widget.controlId, event, payload);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final groups = _parseMenuGroups(props);
-    final dense = props['dense'] == true;
-    final height = coerceDouble(props['height']) ?? (dense ? 34 : 40);
+    final height = coerceDouble(widget.props['height']) ?? (_dense ? 34 : 40);
     final padding =
-        coercePadding(props['padding']) ??
-        EdgeInsets.symmetric(horizontal: dense ? 8 : 12, vertical: 4);
+        coercePadding(widget.props['padding']) ??
+        EdgeInsets.symmetric(horizontal: _dense ? 8 : 12, vertical: 4);
 
     final bgColor =
-        coerceColor(props['bgcolor'] ?? props['background']) ??
+        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
         Theme.of(context).colorScheme.surface;
     final borderColor =
-        coerceColor(props['divider_color'] ?? props['border_color']) ??
+        coerceColor(
+          widget.props['divider_color'] ?? widget.props['border_color'],
+        ) ??
         Theme.of(context).colorScheme.outlineVariant;
 
-    if (groups.isEmpty) {
-      return Container(
+    if (_groups.isEmpty) {
+      final bar = Container(
         height: height,
         padding: padding,
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
           color: bgColor,
           border: Border(
-            bottom: BorderSide(color: borderColor.withOpacity(0.6)),
+            bottom: BorderSide(color: borderColor.withValues(alpha: 0.6)),
           ),
         ),
         child: Text(
-          props['title']?.toString() ?? 'Menu',
+          widget.props['title']?.toString() ?? 'Menu',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
+      return applyControlFrameLayout(
+        props: widget.props,
+        child: bar,
+        clipToRadius: true,
+        defaultRadius: coerceDouble(widget.props['radius']),
+      );
     }
 
-    return Container(
+    final bar = Container(
       height: height,
       padding: padding,
       decoration: BoxDecoration(
         color: bgColor,
-        border: Border(bottom: BorderSide(color: borderColor.withOpacity(0.6))),
+        border: Border(
+          bottom: BorderSide(color: borderColor.withValues(alpha: 0.6)),
+        ),
       ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: groups.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 4),
+        itemCount: _groups.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 4),
         itemBuilder: (context, index) {
-          final group = groups[index];
+          final group = _groups[index];
           return _MenuGroupButton(
-            controlId: controlId,
+            controlId: widget.controlId,
             group: group,
-            dense: dense,
-            sendEvent: sendEvent,
+            dense: _dense,
+            sendEvent: widget.sendEvent,
           );
         },
       ),
+    );
+    return applyControlFrameLayout(
+      props: widget.props,
+      child: bar,
+      clipToRadius: true,
+      defaultRadius: coerceDouble(widget.props['radius']),
     );
   }
 }
 
 class _MenuGroupButton extends StatelessWidget {
-  final String controlId;
-  final _MenuGroupData group;
-  final bool dense;
-  final ButterflyUISendRuntimeEvent sendEvent;
-
   const _MenuGroupButton({
     required this.controlId,
     required this.group,
     required this.dense,
     required this.sendEvent,
   });
+
+  final String controlId;
+  final _MenuGroupData group;
+  final bool dense;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
   Widget build(BuildContext context) {
@@ -196,6 +332,12 @@ class _MenuGroupButton extends StatelessWidget {
       onSelected: (_MenuActionData action) {
         if (controlId.isEmpty) return;
         sendEvent(controlId, 'select', {
+          'menu_id': group.id,
+          'id': action.id,
+          'label': action.label,
+          'payload': action.payload,
+        });
+        sendEvent(controlId, 'change', {
           'menu_id': group.id,
           'id': action.id,
           'label': action.label,

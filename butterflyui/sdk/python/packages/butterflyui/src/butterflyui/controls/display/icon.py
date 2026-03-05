@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
+from ...core.icon_data import normalize_icon_value
 from .._shared import Component, merge_props
 
 __all__ = ["Icon"]
@@ -56,5 +57,8 @@ class Icon(Component):
         **kwargs: Any,
     ) -> None:
         merged = merge_props(props, icon=icon, **kwargs)
+        for key in ("icon", "value", "name", "leading_icon", "trailing_icon"):
+            if key in merged:
+                merged[key] = normalize_icon_value(merged[key], strict=strict)
         super().__init__(props=merged, style=style, strict=strict)
 

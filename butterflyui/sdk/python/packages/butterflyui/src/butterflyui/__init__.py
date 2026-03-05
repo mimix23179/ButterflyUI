@@ -30,7 +30,21 @@ from .app import (
     run_desktop,
     run_web,
 )
-from .core import Breakpoints, Component, Control
+from .core import (
+    Breakpoints,
+    Component,
+    Control,
+    ICON_NAMES,
+    ICON_SET,
+    IconData,
+    Icons,
+    icon,
+    icon_names,
+    is_icon_name,
+    normalize_icon_name,
+    normalize_icon_value,
+    suggest_icon_names,
+)
 from .core.animation import AnimationSpec
 from .core.performance import PerformanceConfig, performance_config, enable_60fps
 from .controls import *  # noqa: F401,F403
@@ -67,6 +81,16 @@ __all__ = [
     "Component",
     "Control",
     "Breakpoints",
+    "IconData",
+    "ICON_NAMES",
+    "ICON_SET",
+    "Icons",
+    "icon",
+    "icon_names",
+    "is_icon_name",
+    "normalize_icon_name",
+    "normalize_icon_value",
+    "suggest_icon_names",
     "AnimationSpec",
     "PerformanceConfig",
     "performance_config",

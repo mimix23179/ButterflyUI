@@ -10,17 +10,18 @@ __all__ = ["Modifier"]
 
 class Modifier(Component):
     """
-    Composable modifier host that injects layout/surface/interaction effects into descendants.
+    Composable modifier host that injects layout/visual/interaction effects into descendants.
 
     ``Modifier`` is the glue control for reusable visual behavior. Instead of creating
     many one-off controls, you can wrap a subtree and apply:
     - layout constraints (padding/margin/alignment/constrain),
-    - surface effects (background/border/shadow/glow/glass),
+    - visual effects (background/border/shadow/glow/glass),
     - interaction affordances (cursor/focus ring/hover/press state lists),
     - motion defaults for descendants.
 
     The runtime merges these modifier definitions into each child control's
-    ``modifiers`` list and style props.
+    ``modifiers`` list and style props, but only for controls that advertise
+    modifier/style/motion capabilities through the shared manifest.
 
     State-specific modifier keys are available in both short and explicit form:
     - ``on_hover`` and ``on_hover_modifiers``

@@ -7,11 +7,12 @@ __all__ = ["ContextMenu"]
 
 class ContextMenu(Component):
     """
-    Context menu that appears near a trigger widget on right-click or long-press.
+    Popup context menu bound to a child trigger surface.
 
-    The runtime wraps its child with an interactive region that opens a
-    floating menu populated by ``items``. ``trigger`` selects the activation
-    gesture; ``open_on_tap`` additionally opens the menu on a regular tap.
+    ``ContextMenu`` opens a floating action list on secondary click, long
+    press, or tap (depending on ``trigger``/``open_on_tap``). Items may define
+    icons, separators, enabled state, and custom payload fields. The runtime
+    emits ``open``, ``dismiss``, ``select``, and ``change`` events.
 
     ```python
     import butterflyui as bui
@@ -33,6 +34,14 @@ class ContextMenu(Component):
             ``"long_press"``.
         open_on_tap:
             When ``True`` a primary tap also opens the context menu.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props passed through to Flutter.
     """
 
     control_type = "context_menu"
@@ -57,3 +66,22 @@ class ContextMenu(Component):
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_items",
+            {"items": [dict(item) for item in items]},
+        )
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def open_at(self, session: Any, x: float, y: float) -> dict[str, Any]:
+        return self.invoke(session, "open_at", {"x": x, "y": y})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

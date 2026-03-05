@@ -14,7 +14,9 @@ class SlidePanel(Component):
 
     ``SlidePanel`` is the canonical replacement for legacy ``side_panel``.
     It can slide from any edge and accepts sizing aliases (``width`` /
-    ``height``) in addition to ``size``.
+    ``height``) in addition to ``size``. The runtime keeps open/closed state,
+    supports invoke mutations, and emits lifecycle events such as ``open``,
+    ``close``, ``dismiss``, ``change``, and ``state``.
 
     ```python
     import butterflyui as bui
@@ -104,3 +106,9 @@ class SlidePanel(Component):
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

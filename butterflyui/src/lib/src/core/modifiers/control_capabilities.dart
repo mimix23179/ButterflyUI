@@ -101,10 +101,7 @@ class ControlModifierCapabilities {
   }
 
   static String _canonicalControlType(String value) {
-    var normalized = _normalize(value);
-    if (normalized == 'container') return 'surface';
-    if (normalized == 'box') return 'surface';
-    return normalized;
+    return _normalize(value);
   }
 
   static Set<String> _runtimeInteractiveControls = Set<String>.from(
@@ -194,9 +191,6 @@ class ControlModifierCapabilities {
     'candy',
     'style',
     'modifier',
-    'surface',
-    'box',
-    'container',
     'card',
     'row',
     'column',
@@ -275,17 +269,6 @@ class ControlModifierCapabilities {
 
   static const Map<String, Set<String>> _defaultSlotMap = <String, Set<String>>{
     '*': _defaultSlots,
-    'surface': <String>{
-      'root',
-      'background',
-      'border',
-      'content',
-      'overlay',
-      'leading',
-      'trailing',
-      'label',
-      'icon',
-    },
     'button': <String>{
       'root',
       'background',

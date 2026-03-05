@@ -9,8 +9,8 @@ from .menu_bar import MenuBar
 from .menu_item import MenuItem
 from .breadcrumb_bar import BreadcrumbBar
 from .status_bar import StatusBar
-from .nav_ring import NavRing
-from .rail_nav import RailNav
+from .navigation_ring import NavigationRing
+from .rail_navigation import RailNavigation
 from .notice_bar import NoticeBar
 from .outline import Outline
 
@@ -26,8 +26,8 @@ __all__ = [
     "MenuItem",
     "BreadcrumbBar",
     "StatusBar",
-    "NavRing",
-    "RailNav",
+    "NavigationRing",
+    "RailNavigation",
     "NoticeBar",
     "Outline",
 ]

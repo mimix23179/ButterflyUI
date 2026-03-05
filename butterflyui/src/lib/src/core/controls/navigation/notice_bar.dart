@@ -21,7 +21,7 @@ Widget buildNoticeBarControl(
     _ => const Color(0xff1e3a8a),
   };
 
-  return Container(
+  final bar = Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
     decoration: BoxDecoration(
       color: bg,
@@ -29,7 +29,9 @@ Widget buildNoticeBarControl(
     ),
     child: Row(
       children: [
-        Expanded(child: Text(text, style: const TextStyle(color: Colors.white))),
+        Expanded(
+          child: Text(text, style: const TextStyle(color: Colors.white)),
+        ),
         if (actionLabel != null && actionLabel.isNotEmpty)
           TextButton(
             onPressed: controlId.isEmpty
@@ -49,5 +51,11 @@ Widget buildNoticeBarControl(
           ),
       ],
     ),
+  );
+  return applyControlFrameLayout(
+    props: props,
+    child: bar,
+    clipToRadius: true,
+    defaultRadius: coerceDouble(props['radius']) ?? 8,
   );
 }

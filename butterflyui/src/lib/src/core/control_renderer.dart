@@ -146,10 +146,10 @@ import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
 import 'controls/navigation/breadcrumb_bar.dart';
 import 'controls/navigation/menu_bar.dart';
-import 'controls/navigation/nav_ring.dart';
 import 'controls/navigation/notice_bar.dart';
-import 'controls/navigation/rail_nav.dart';
+import 'controls/navigation/navigation_ring.dart';
 import 'controls/navigation/pagination.dart';
+import 'controls/navigation/rail_navigation.dart';
 import 'controls/navigation/route.dart';
 import 'controls/navigation/sidebar.dart';
 import 'controls/navigation/status_bar.dart';
@@ -1435,6 +1435,8 @@ class ControlRenderer {
             controlId,
             props,
             child,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
             context.sendEvent,
           );
         }
@@ -1540,7 +1542,13 @@ class ControlRenderer {
         }
 
       case 'menu_bar':
-        return buildMenuBarControl(controlId, props, context.sendEvent);
+        return buildMenuBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'action_bar':
         return buildActionBarControl(
@@ -1568,11 +1576,17 @@ class ControlRenderer {
           context.sendEvent,
         );
 
-      case 'nav_ring':
-        return buildNavRingControl(controlId, props, context.sendEvent);
+      case 'navigation_ring':
+        return buildNavigationRingControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
-      case 'rail_nav':
-        return buildRailNavControl(
+      case 'rail_navigation':
+        return buildRailNavigationControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1613,6 +1627,7 @@ class ControlRenderer {
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
+          props: props,
         );
 
       case 'app_bar':
@@ -1643,6 +1658,7 @@ class ControlRenderer {
           }
           return ButterflyUIAppBar(
             controlId: controlId,
+            props: props,
             title: props['title']?.toString(),
             subtitle: props['subtitle']?.toString(),
             centerTitle: props['center_title'] == true,
@@ -1675,20 +1691,14 @@ class ControlRenderer {
       case 'drawer':
       case 'slide_panel':
         {
-          final child = children.isNotEmpty
-              ? context.buildChild(children.first)
-              : mapChildPropOrEmpty('child');
-          return ButterflyUISlidePanel(
-            controlId: controlId,
-            child: child,
-            open: props['open'] == true,
-            side: _normalizePanelSide(props['side']?.toString()),
-            size: coerceDouble(props['size']) ?? 280,
-            scrimColor: coerceColor(props['scrim_color']),
-            dismissible: props['dismissible'] == null
-                ? true
-                : (props['dismissible'] == true),
-            sendEvent: context.sendEvent,
+          return buildSlidePanelControl(
+            controlId,
+            props,
+            rawChildren,
+            context.buildChild,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
+            context.sendEvent,
           );
         }
 
@@ -2860,6 +2870,71 @@ class ControlRenderer {
       }
     }
 
+    final surfaceLayers = _resolveControlLayers(
+      props['surface_layers'] ??
+          props['background_layers'] ??
+          props['background_layer'] ??
+          props['surface'] ??
+          surfaceStyle['surface_layers'] ??
+          surfaceStyle['background_layers'] ??
+          surfaceStyle['background_layer'] ??
+          surfaceStyle['surface'],
+      context,
+    );
+    final foregroundLayers = _resolveControlLayers(
+      props['foreground_layers'] ??
+          props['overlay_layers'] ??
+          props['overlay_layer'] ??
+          surfaceStyle['foreground_layers'] ??
+          surfaceStyle['overlay_layers'] ??
+          surfaceStyle['overlay_layer'],
+      context,
+    );
+    final hoverSurfaceLayers = _resolveControlLayers(
+      props['hover_surface_layers'] ??
+          props['hover_background_layers'] ??
+          surfaceStyle['hover_surface_layers'] ??
+          surfaceStyle['hover_background_layers'],
+      context,
+    );
+    if (surfaceLayers.isNotEmpty ||
+        foregroundLayers.isNotEmpty ||
+        hoverSurfaceLayers.isNotEmpty) {
+      final hoverOpacity =
+          (coerceDouble(
+                    props['hover_surface_opacity'] ??
+                        props['hover_layer_opacity'] ??
+                        surfaceStyle['hover_surface_opacity'] ??
+                        surfaceStyle['hover_layer_opacity'],
+                  ) ??
+                  1.0)
+              .clamp(0.0, 1.0);
+      final layerDurationMs =
+          coerceOptionalInt(
+            props['layer_transition_ms'] ??
+                props['hover_surface_duration_ms'] ??
+                surfaceStyle['layer_transition_ms'] ??
+                surfaceStyle['hover_surface_duration_ms'],
+          ) ??
+          180;
+      final layerCurve = _curveFromName(
+        (props['layer_transition_curve'] ??
+                props['hover_surface_curve'] ??
+                surfaceStyle['layer_transition_curve'] ??
+                surfaceStyle['hover_surface_curve'])
+            ?.toString(),
+      );
+      built = _LayeredSurfaceHost(
+        backgroundLayers: surfaceLayers,
+        foregroundLayers: foregroundLayers,
+        hoverBackgroundLayers: hoverSurfaceLayers,
+        hoverOpacity: hoverOpacity,
+        hoverDuration: Duration(milliseconds: layerDurationMs.clamp(0, 2000)),
+        hoverCurve: layerCurve,
+        child: built,
+      );
+    }
+
     final tooltip = props['tooltip'] ?? surfaceStyle['tooltip'];
     if (tooltip != null && controlType != 'tooltip') {
       final message = tooltip is Map
@@ -2977,6 +3052,40 @@ class ControlRenderer {
     }
 
     return built;
+  }
+
+  List<Widget> _resolveControlLayers(
+    Object? raw,
+    ButterflyUIControlContext context,
+  ) {
+    final out = <Widget>[];
+
+    void addLayer(Object? value) {
+      if (value == null) return;
+      if (value is List) {
+        for (final item in value) {
+          addLayer(item);
+        }
+        return;
+      }
+      if (value is! Map) return;
+      final map = coerceObjectMap(value);
+      if (map['type'] != null) {
+        out.add(context.buildChild(map));
+        return;
+      }
+      final nestedControl = map['control'] ?? map['node'];
+      if (nestedControl != null) {
+        addLayer(nestedControl);
+      }
+      final nestedLayers = map['layers'] ?? map['controls'] ?? map['children'];
+      if (nestedLayers != null) {
+        addLayer(nestedLayers);
+      }
+    }
+
+    addLayer(raw);
+    return out;
   }
 
   Map<String, Object?>? _animationFromMotion(
@@ -4079,5 +4188,71 @@ class ControlRenderer {
       default:
         return 'left';
     }
+  }
+}
+
+class _LayeredSurfaceHost extends StatefulWidget {
+  const _LayeredSurfaceHost({
+    required this.backgroundLayers,
+    required this.foregroundLayers,
+    required this.hoverBackgroundLayers,
+    required this.hoverOpacity,
+    required this.hoverDuration,
+    required this.hoverCurve,
+    required this.child,
+  });
+
+  final List<Widget> backgroundLayers;
+  final List<Widget> foregroundLayers;
+  final List<Widget> hoverBackgroundLayers;
+  final double hoverOpacity;
+  final Duration hoverDuration;
+  final Curve hoverCurve;
+  final Widget child;
+
+  @override
+  State<_LayeredSurfaceHost> createState() => _LayeredSurfaceHostState();
+}
+
+class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasHoverLayer = widget.hoverBackgroundLayers.isNotEmpty;
+
+    Widget layered = Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        for (final layer in widget.backgroundLayers)
+          Positioned.fill(child: IgnorePointer(child: layer)),
+        if (hasHoverLayer)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _hovered ? widget.hoverOpacity : 0.0,
+                duration: widget.hoverDuration,
+                curve: widget.hoverCurve,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    for (final layer in widget.hoverBackgroundLayers) layer,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        widget.child,
+        for (final layer in widget.foregroundLayers)
+          Positioned.fill(child: IgnorePointer(child: layer)),
+      ],
+    );
+
+    if (!hasHoverLayer) return layered;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: layered,
+    );
   }
 }

@@ -188,11 +188,11 @@ src/butterflyui/controls/navigation/breadcrumb_bar.py
 src/butterflyui/controls/navigation/drawer.py
 src/butterflyui/controls/navigation/menu_bar.py
 src/butterflyui/controls/navigation/menu_item.py
-src/butterflyui/controls/navigation/nav_ring.py
+src/butterflyui/controls/navigation/navigation_ring.py
 src/butterflyui/controls/navigation/notice_bar.py
 src/butterflyui/controls/navigation/outline.py
 src/butterflyui/controls/navigation/pagination.py
-src/butterflyui/controls/navigation/rail_nav.py
+src/butterflyui/controls/navigation/rail_navigation.py
 src/butterflyui/controls/navigation/sidebar.py
 src/butterflyui/controls/navigation/status_bar.py
 src/butterflyui/controls/navigation/tabs.py
@@ -228,6 +228,10 @@ src/butterflyui/controls/webview/webview.py
 src/butterflyui/core/__init__.py
 src/butterflyui/core/animation.py
 src/butterflyui/core/control.py
+src/butterflyui/core/icon_data.py
+src/butterflyui/core/icons.json
+src/butterflyui/core/icons.py
+src/butterflyui/core/icons.pyi
 src/butterflyui/core/performance.py
 src/butterflyui/core/presets.py
 src/butterflyui/core/responsive.py

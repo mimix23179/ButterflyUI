@@ -328,6 +328,119 @@ EdgeInsets? coercePadding(Object? value) {
   return null;
 }
 
+AlignmentGeometry? coerceAlignmentGeometry(Object? value) {
+  return _coerceAlignment(value);
+}
+
+Clip? coerceClipBehavior(Object? value) {
+  final token = value?.toString().trim().toLowerCase().replaceAll('-', '_');
+  switch (token) {
+    case 'none':
+      return Clip.none;
+    case 'hardedge':
+    case 'hard_edge':
+      return Clip.hardEdge;
+    case 'antialias':
+    case 'anti_alias':
+      return Clip.antiAlias;
+    case 'antialiaswithsavelayer':
+    case 'anti_alias_with_save_layer':
+      return Clip.antiAliasWithSaveLayer;
+    default:
+      return null;
+  }
+}
+
+Offset? coerceOffset(Object? value) {
+  if (value == null) return null;
+  if (value is List && value.length >= 2) {
+    return Offset(coerceDouble(value[0]) ?? 0.0, coerceDouble(value[1]) ?? 0.0);
+  }
+  if (value is Map) {
+    final map = coerceObjectMap(value);
+    return Offset(coerceDouble(map['x']) ?? 0.0, coerceDouble(map['y']) ?? 0.0);
+  }
+  return null;
+}
+
+Widget applyControlFrameLayout({
+  required Map<String, Object?> props,
+  required Widget child,
+  bool clipToRadius = false,
+  double? defaultRadius,
+}) {
+  Widget current = child;
+
+  final explicitOffset = coerceOffset(props['offset'] ?? props['translate']);
+  if (explicitOffset != null &&
+      (explicitOffset.dx != 0.0 || explicitOffset.dy != 0.0)) {
+    current = Transform.translate(offset: explicitOffset, child: current);
+  }
+
+  final width = coerceDouble(props['width']);
+  final height = coerceDouble(props['height']);
+  if (width != null || height != null) {
+    current = SizedBox(width: width, height: height, child: current);
+  }
+
+  final minWidth = coerceDouble(props['min_width']);
+  final minHeight = coerceDouble(props['min_height']);
+  final maxWidth = coerceDouble(props['max_width']);
+  final maxHeight = coerceDouble(props['max_height']);
+  if (minWidth != null ||
+      minHeight != null ||
+      maxWidth != null ||
+      maxHeight != null) {
+    current = ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: minWidth ?? 0.0,
+        minHeight: minHeight ?? 0.0,
+        maxWidth: maxWidth ?? double.infinity,
+        maxHeight: maxHeight ?? double.infinity,
+      ),
+      child: current,
+    );
+  }
+
+  final radius =
+      coerceDouble(props['outer_radius'] ?? props['radius']) ?? defaultRadius;
+  final clip = coerceClipBehavior(props['clip_behavior']);
+  final shouldClip = clip != null && clip != Clip.none
+      ? true
+      : (clipToRadius && radius != null && radius > 0);
+  if (shouldClip) {
+    final behavior = (clip == null || clip == Clip.none)
+        ? Clip.antiAlias
+        : clip;
+    if (radius != null && radius > 0) {
+      current = ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        clipBehavior: behavior,
+        child: current,
+      );
+    } else {
+      current = ClipRect(clipBehavior: behavior, child: current);
+    }
+  }
+
+  final alignValue =
+      props['align'] ??
+      props['alignment'] ??
+      props['position'] ??
+      props['dock'];
+  final alignment = coerceAlignmentGeometry(alignValue);
+  if (alignment != null) {
+    current = Align(alignment: alignment, child: current);
+  }
+
+  final margin = coercePadding(props['margin']);
+  if (margin != null) {
+    current = Padding(padding: margin, child: current);
+  }
+
+  return current;
+}
+
 Color? coerceColor(Object? value) {
   if (value == null) return null;
   if (value is int) return Color(value);
@@ -595,6 +708,16 @@ AlignmentGeometry? _coerceAlignment(Object? value) {
   switch (s) {
     case 'center':
       return Alignment.center;
+    case 'top':
+      return Alignment.topCenter;
+    case 'bottom':
+      return Alignment.bottomCenter;
+    case 'left':
+    case 'start':
+      return Alignment.centerLeft;
+    case 'right':
+    case 'end':
+      return Alignment.centerRight;
     case 'top_center':
       return Alignment.topCenter;
     case 'bottom_center':

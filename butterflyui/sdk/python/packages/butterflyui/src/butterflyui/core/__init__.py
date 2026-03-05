@@ -2,6 +2,17 @@ from __future__ import annotations
 
 from .animation import AnimationSpec
 from .control import Component, Control
+from .icon_data import (
+    ICON_NAMES,
+    ICON_SET,
+    IconData,
+    icon_names,
+    is_icon_name,
+    normalize_icon_name,
+    normalize_icon_value,
+    suggest_icon_names,
+)
+from .icons import Icons, icon
 from .performance import PerformanceConfig, enable_60fps, performance_config
 from .presets import COMFY_STYLE, GLASS_STYLE, RETRO_STYLE, SCIFI_STYLE, TERMINAL_STYLE
 from .responsive import Breakpoints
@@ -35,6 +46,16 @@ __all__ = [
     "AnimationSpec",
     "Component",
     "Control",
+    "IconData",
+    "ICON_NAMES",
+    "ICON_SET",
+    "Icons",
+    "icon",
+    "icon_names",
+    "is_icon_name",
+    "normalize_icon_name",
+    "normalize_icon_value",
+    "suggest_icon_names",
     "PerformanceConfig",
     "performance_config",
     "enable_60fps",

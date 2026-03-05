@@ -13,7 +13,8 @@ class BottomSheet(Component):
     shows or hides the sheet. ``dismissible`` allows the user to close it
     by tapping the scrim. ``scrim_color`` tints the background overlay.
     ``height`` fixes the sheet height; ``max_height`` caps it when content
-    is dynamic.
+    is dynamic. The runtime supports ``set_open``/``set_props`` invokes and
+    emits ``open``, ``close``, ``dismiss``, ``change``, and ``state`` events.
 
     ```python
     import butterflyui as bui
@@ -76,6 +77,9 @@ class BottomSheet(Component):
 
     def set_open(self, session: Any, value: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"value": value})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

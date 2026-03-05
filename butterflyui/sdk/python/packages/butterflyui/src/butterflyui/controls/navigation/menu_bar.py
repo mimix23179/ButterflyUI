@@ -7,34 +7,58 @@ __all__ = ["MenuBar"]
 
 class MenuBar(Component):
     """
-    Application-level horizontal menu bar with drop-down menus.
+    Application-level horizontal menu bar with dropdown menu groups.
 
-    The runtime renders a classic top menu bar. ``menus`` / ``items`` supply
-    top-level menu specs; each entry may contain a ``label`` and nested
-    ``children`` for sub-menus. Positional children can also inject custom
-    widgets into the bar. ``dense`` reduces the bar height; ``height``
-    overrides it explicitly.
+    ``MenuBar`` accepts either ``menus`` or ``items`` payloads. Each top-level
+    menu entry can contain nested ``items`` / ``children`` actions, icons,
+    separators, shortcuts, and per-action payload metadata. The Dart runtime
+    emits ``open``, ``dismiss``, ``select``, and ``change`` events as users
+    interact with menu groups.
 
     ```python
     import butterflyui as bui
 
     bui.MenuBar(
         menus=[
-            {"label": "File", "children": [{"label": "New", "id": "new"}, {"label": "Open", "id": "open"}]},
-            {"label": "Edit", "children": [{"label": "Undo", "id": "undo"}]},
+            {
+                "id": "file",
+                "label": "File",
+                "items": [
+                    {"id": "new", "label": "New", "shortcut": "Ctrl+N"},
+                    {"id": "open", "label": "Open"},
+                    {"separator": True},
+                    {"id": "quit", "label": "Quit", "variant": "danger"},
+                ],
+            },
+            {
+                "id": "edit",
+                "label": "Edit",
+                "items": [{"id": "undo", "label": "Undo", "shortcut": "Ctrl+Z"}],
+            },
         ],
+        events=["open", "select", "change"],
     )
     ```
 
     Args:
         menus:
-            List of top-level menu spec mappings. Alias for ``items``.
+            List of top-level menu spec mappings.
         items:
-            Alias for ``menus``.
+            Alias of ``menus`` when constructing from generic payloads.
         dense:
             Reduces bar height and menu item padding.
         height:
             Explicit bar height in logical pixels.
+        events:
+            Optional runtime event whitelist.
+        props:
+            Raw prop overrides merged after typed arguments.
+        style:
+            Style map forwarded to the renderer style pipeline.
+        strict:
+            When ``True``, unknown props raise validation errors.
+        **kwargs:
+            Additional runtime props passed through to Flutter.
     """
 
     control_type = "menu_bar"
@@ -46,6 +70,7 @@ class MenuBar(Component):
         items: list[Any] | None = None,
         dense: bool | None = None,
         height: float | None = None,
+        events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
@@ -57,6 +82,33 @@ class MenuBar(Component):
             items=items,
             dense=dense,
             height=height,
+            events=events,
             **kwargs,
         )
         super().__init__(*children, props=merged, style=style, strict=strict)
+
+    def set_menus(self, session: Any, menus: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_menus",
+            {"menus": [dict(menu) for menu in menus]},
+        )
+
+    def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "set_items",
+            {"items": [dict(item) for item in items]},
+        )
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

@@ -39,4 +39,5 @@ include = [
 butterflyui = [
     "py.typed",
     "**/*.pyi",
+    "**/*.json",
 ]

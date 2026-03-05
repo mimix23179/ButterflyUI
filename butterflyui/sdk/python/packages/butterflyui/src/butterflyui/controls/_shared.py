@@ -11,10 +11,7 @@ def _normalize_token(value: str) -> str:
 
 
 def _canonical_control_type(value: str) -> str:
-    normalized = _normalize_token(value)
-    if normalized in {"container", "box"}:
-        return "surface"
-    return normalized
+    return _normalize_token(value)
 
 
 _INTERACTIVE_CONTROLS = {
@@ -56,9 +53,6 @@ _GLASS_CONTROLS = {
     "candy",
     "style",
     "modifier",
-    "surface",
-    "box",
-    "container",
     "card",
     "row",
     "column",
@@ -122,8 +116,16 @@ _STYLE_CONTROLS = set(_INTERACTIVE_CONTROLS) | set(_GLASS_CONTROLS) | set(
     "page_view",
 }
 
-_MOTION_CONTROLS = set(_STYLE_CONTROLS) - {"spacer", "flex_spacer", "expanded"}
-_EFFECT_CONTROLS = set(_STYLE_CONTROLS) - {"spacer", "flex_spacer", "expanded"}
+_MOTION_CONTROLS = set(_STYLE_CONTROLS) - {
+    "spacer",
+    "flex_spacer",
+    "expanded",
+}
+_EFFECT_CONTROLS = set(_STYLE_CONTROLS) - {
+    "spacer",
+    "flex_spacer",
+    "expanded",
+}
 
 _SLOT_MANIFEST = {
     "*": [
@@ -136,17 +138,6 @@ _SLOT_MANIFEST = {
         "leading",
         "trailing",
         "overlay",
-    ],
-    "surface": [
-        "root",
-        "background",
-        "border",
-        "content",
-        "overlay",
-        "leading",
-        "trailing",
-        "label",
-        "icon",
     ],
     "button": [
         "root",
@@ -246,7 +237,7 @@ _TRANSITION_MODIFIERS = {
     "transition",
 }
 
-_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 2
+_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 4
 
 
 def modifier_capabilities_manifest() -> dict[str, Any]:
