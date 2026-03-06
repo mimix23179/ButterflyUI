@@ -34,6 +34,9 @@ from .core import (
     Breakpoints,
     Component,
     Control,
+)
+from .controls import Animation, AnimationEffect, Border, BorderEffect, Gradient, GradientEffect, Style, StyleScope, Transition, TransitionEffect
+from .icons import (
     ICON_NAMES,
     ICON_SET,
     IconData,
@@ -45,7 +48,23 @@ from .core import (
     normalize_icon_value,
     suggest_icon_names,
 )
-from .core.animation import AnimationSpec
+from .metadata import CONTROL_SPECS, get_control_spec, iter_control_specs
+from .types import (
+    Alignment,
+    AnimationSpec,
+    BorderSideSpec,
+    BorderSpec,
+    BoxShadow,
+    ColorRGBA,
+    DecorationImage,
+    EdgeInsets,
+    LinearGradient,
+    RadialGradient,
+    SemanticsProps,
+    Style as StyleValue,
+    SweepGradient,
+    TextStyle,
+)
 from .core.performance import PerformanceConfig, performance_config, enable_60fps
 from .controls import *  # noqa: F401,F403
 from .controls import __all__ as _controls_all
@@ -91,10 +110,36 @@ __all__ = [
     "normalize_icon_name",
     "normalize_icon_value",
     "suggest_icon_names",
+    "Animation",
+    "AnimationEffect",
+    "Alignment",
     "AnimationSpec",
+    "Border",
+    "BorderEffect",
+    "BorderSpec",
+    "BorderSideSpec",
+    "BoxShadow",
+    "ColorRGBA",
+    "DecorationImage",
+    "EdgeInsets",
+    "Gradient",
+    "GradientEffect",
+    "LinearGradient",
+    "RadialGradient",
+    "SemanticsProps",
     "PerformanceConfig",
     "performance_config",
     "enable_60fps",
+    "Style",
+    "StyleScope",
+    "StyleValue",
+    "SweepGradient",
+    "TextStyle",
+    "Transition",
+    "TransitionEffect",
+    "CONTROL_SPECS",
+    "get_control_spec",
+    "iter_control_specs",
     "State",
     "DerivedState",
     "Signal",

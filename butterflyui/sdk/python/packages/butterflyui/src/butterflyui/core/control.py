@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import inspect
 import keyword
 import traceback
-import uuid
 import sysconfig
 from collections.abc import Mapping
 from enum import Enum
@@ -12,6 +11,11 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 import weakref
+
+from .children import control_children_from_slots
+from .dirty import DirtyChildrenList, DirtyPropsDict, DirtyState
+from .ids import new_control_id
+from .invocation import invoke_control_method, invoke_control_method_async
 
 if TYPE_CHECKING:
     from ..app import ButterflyUISession
@@ -33,6 +37,9 @@ _LAYOUT_PARAM_SPECS: tuple[tuple[str, Any, Any], ...] = (
 _LAYOUT_KEYS = {name for name, _, _ in _LAYOUT_PARAM_SPECS}
 _AUTOPROP_EXCLUDE_NAMES = {
     "self",
+    "control_type",
+    "control_id",
+    "meta",
     "props",
     "style",
     "strict",
@@ -420,7 +427,7 @@ class Control:
     aligned across the large control catalog.
     """
     control_type: str
-    control_id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    control_id: str = field(default_factory=new_control_id)
     props: dict[str, Any] = field(default_factory=dict)
     children: list["Control"] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
@@ -443,9 +450,11 @@ class Control:
         if not resolved_type:
             resolved_type = self.__class__.__name__.lower()
         self.control_type = str(resolved_type)
-        self.control_id = str(control_id) if control_id else uuid.uuid4().hex
-        self.props = {}
-        self.children = list(children) if children else []
+        self.control_id = str(control_id) if control_id else new_control_id()
+        self._dirty_state = DirtyState()
+        self._suspend_dirty_tracking = True
+        self.props = DirtyPropsDict(self)
+        self.children = DirtyChildrenList(self, children or [])
         self.meta = dict(meta) if isinstance(meta, Mapping) else {}
         self._inline_event_handlers: dict[str, Any] = {}
         self._inline_event_bound_sessions: set[str] = set()
@@ -474,6 +483,8 @@ class Control:
             from .schema import ensure_valid_props
 
             ensure_valid_props(self.control_type, self.props, strict=True)
+        self._suspend_dirty_tracking = False
+        self.clear_dirty()
 
     def add_inline_event_handler(self, event: str, handler: Any) -> None:
         if not callable(handler):
@@ -494,64 +505,7 @@ class Control:
         self._inline_event_bound_sessions.add(session_key)
 
     def to_json(self) -> dict[str, Any]:
-        merged_children = list(self.children)
-
-        def is_control_like(value: Any) -> bool:
-            if isinstance(value, Control):
-                return True
-            if isinstance(value, Mapping) and "type" in value:
-                return True
-            return False
-
-        def add_child(target: list[Any], value: Any) -> None:
-            if not is_control_like(value):
-                return
-            if isinstance(value, Control):
-                if any(value is existing for existing in target):
-                    return
-            elif any(isinstance(existing, Mapping) and existing == value for existing in target):
-                return
-            target.append(value)
-
-        if not merged_children:
-            try:
-                slot_children: list[Any] = []
-                control_type = str(self.control_type)
-                props_child = self.props.get("child")
-                props_children = self.props.get("children")
-
-                if control_type in ("app_bar", "top_bar"):
-                    leading = self.props.get("leading")
-                    actions = self.props.get("actions")
-                    if leading is not None:
-                        add_child(slot_children, leading)
-                    if actions is not None:
-                        if isinstance(actions, (list, tuple)):
-                            for item in actions:
-                                add_child(slot_children, item)
-                        else:
-                            add_child(slot_children, actions)
-                elif control_type == "overlay":
-                    base_child = self.props.get("base_child")
-                    overlay_child = self.props.get("overlay_child")
-                    if base_child is not None:
-                        add_child(slot_children, base_child)
-                    if overlay_child is not None:
-                        add_child(slot_children, overlay_child)
-                else:
-                    if props_child is not None:
-                        add_child(slot_children, props_child)
-                    if props_children is not None:
-                        if isinstance(props_children, (list, tuple)):
-                            for item in props_children:
-                                add_child(slot_children, item)
-                        else:
-                            add_child(slot_children, props_children)
-
-                if slot_children:
-                    merged_children = slot_children
-            except Exception:
-                pass
+        merged_children = control_children_from_slots(str(self.control_type), self.props, list(self.children))
         payload = {
             "id": self.control_id,
             "type": self.control_type,
@@ -570,6 +524,43 @@ class Control:
         """Alias for to_json() for compatibility with older control code."""
         return self.to_json()
 
+    def mark_dirty(self, name: str) -> None:
+        if getattr(self, "_suspend_dirty_tracking", False):
+            return
+        self._dirty_state.props.add(str(name))
+
+    def mark_children_dirty(self) -> None:
+        if getattr(self, "_suspend_dirty_tracking", False):
+            return
+        self._dirty_state.children = True
+
+    def mark_events_dirty(self) -> None:
+        if getattr(self, "_suspend_dirty_tracking", False):
+            return
+        self._dirty_state.events = True
+
+    def clear_dirty(self) -> None:
+        self._dirty_state.clear()
+
+    def collect_patch(self) -> dict[str, Any]:
+        patch: dict[str, Any] = {}
+        for name in sorted(self._dirty_state.props):
+            patch[name] = coerce_json_value(self.props.get(name))
+        if self._dirty_state.events and "events" not in patch:
+            patch["events"] = coerce_json_value(self.props.get("events"))
+        if self._dirty_state.children:
+            merged_children = control_children_from_slots(
+                str(self.control_type),
+                self.props,
+                list(self.children),
+            )
+            patch["children"] = [
+                child
+                for child in (coerce_child_json(c) for c in merged_children)
+                if child is not None
+            ]
+        return patch
+
     def _get(self, key: str, default: Any = None) -> Any:
         return self.props.get(key, default)
 
@@ -578,6 +569,8 @@ class Control:
             self.props.pop(key, None)
         else:
             self.props[key] = value
+        if key == "events":
+            self.mark_events_dirty()
 
     def _on(self, event: str, handler: Any, session: "ButterflyUISession | None" = None, **kwargs: Any) -> Any:
         if session is None:
@@ -592,6 +585,8 @@ class Control:
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super(Control, cls).__init_subclass__(**kwargs)
+        if "__init__" not in cls.__dict__:
+            return
         init = cls.__init__
         if getattr(init, "_butterflyui_wrapped", False):
             return
@@ -675,6 +670,10 @@ class Control:
                 _register_control(self)
             except Exception:
                 pass
+            try:
+                self.clear_dirty()
+            except Exception:
+                pass
 
         wrapped._butterflyui_wrapped = True  # type: ignore[attr-defined]
         cls.__init__ = wrapped  # type: ignore[assignment]
@@ -688,6 +687,8 @@ class Control:
                 self.props.pop(key, None)
             else:
                 self.props[key] = value
+            if key == "events":
+                self.mark_events_dirty()
         if session is not None:
             session.update_props(self.control_id, coerce_json_value(props))
 
@@ -702,7 +703,7 @@ class Control:
         timeout: float | None = 10.0,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        return session.invoke(self.control_id, method, dict(args or {}), timeout=timeout, **kwargs)
+        return invoke_control_method(session, self.control_id, method, args, timeout=timeout, **kwargs)
 
     async def invoke_async(
         self,
@@ -713,7 +714,7 @@ class Control:
         timeout: float | None = 10.0,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        return await session.invoke_async(self.control_id, method, dict(args or {}), timeout=timeout, **kwargs)
+        return await invoke_control_method_async(session, self.control_id, method, args, timeout=timeout, **kwargs)
 
     def request_focus(self, session: "ButterflyUISession", *, timeout: float | None = 10.0) -> dict[str, Any]:
         # Ensure the runtime installs the focus machinery.
@@ -1143,6 +1144,7 @@ class Control:
         if changed:
             # Update local state immediately.
             self.props["events"] = events
+            self.mark_events_dirty()
             # If the runtime is already connected, also notify it.
             try:
                 session.update_props(self.control_id, {"events": events})

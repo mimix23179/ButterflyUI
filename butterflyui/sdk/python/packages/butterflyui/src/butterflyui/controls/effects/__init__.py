@@ -1,5 +1,7 @@
 from .animated_background import AnimatedBackground
 from .animation import Animation
+from .animation_effect import AnimationEffect
+from .border_effect import Border, BorderEffect
 from .chromatic_shift import ChromaticShift
 from .confetti_burst import ConfettiBurst
 from .effects import Effects
@@ -26,16 +28,22 @@ from .shadow import Shadow
 from .shadow_stack import ShadowStack
 from .shimmer import Shimmer
 from .shimmer_shadow import ShimmerShadow
+from ..scopes.style_scope import StyleScope
 from .stagger import Stagger
 from .timeline import Timeline
 from .transition import Transition
+from .transition_effect import TransitionEffect
 from .style import Style
+from .gradient_effect import Gradient, GradientEffect
 from .vignette import Vignette
 from .visual_fx import VisualFx
 
 __all__ = [
     "AnimatedBackground",
     "Animation",
+    "AnimationEffect",
+    "Border",
+    "BorderEffect",
     "ChromaticShift",
     "ConfettiBurst",
     "Effects",
@@ -62,10 +70,14 @@ __all__ = [
     "ShadowStack",
     "Shimmer",
     "ShimmerShadow",
+    "StyleScope",
     "Stagger",
     "Style",
     "Timeline",
     "Transition",
+    "TransitionEffect",
+    "Gradient",
+    "GradientEffect",
     "Vignette",
     "VisualFx",
 ]

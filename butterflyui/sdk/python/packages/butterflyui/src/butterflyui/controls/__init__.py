@@ -1,4 +1,20 @@
 from ._shared import Component
+from .base_control import BaseControl
+from .control import Component as ControlComponent
+from .effect_control import EffectControl
+from .forms import *  # noqa: F401,F403
+from .forms import __all__ as _forms_all
+from .input_control import InputControl
+from .layout_control import LayoutControl
+from .overlay_control import OverlayControl
+from .scope_control import ScopeControl
+from .scrollable_control import ScrollableControl
+from .scopes import *  # noqa: F401,F403
+from .scopes import __all__ as _scopes_all
+from .tools import *  # noqa: F401,F403
+from .tools import __all__ as _tools_all
+from .web import *  # noqa: F401,F403
+from .web import __all__ as _web_all
 from .candy import *  # noqa: F401,F403
 from .candy import __all__ as _candy_all
 from .customization import *  # noqa: F401,F403
@@ -32,6 +48,18 @@ from .webview import __all__ as _webview_all
 
 __all__ = [
     "Component",
+    "BaseControl",
+    "ControlComponent",
+    "LayoutControl",
+    "ScrollableControl",
+    "InputControl",
+    "OverlayControl",
+    "ScopeControl",
+    "EffectControl",
+    *_forms_all,
+    *_scopes_all,
+    *_tools_all,
+    *_web_all,
     *_candy_all,
     *_skins_all,
     *_customization_all,

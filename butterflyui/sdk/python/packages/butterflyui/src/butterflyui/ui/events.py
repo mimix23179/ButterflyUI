@@ -34,10 +34,22 @@ NO_UPDATE = _NoUpdateType()
 _ACTIONS: dict[str, Callable[..., Any]] = {}
 
 
-def register_action(name: str, fn: Callable[..., Any]) -> Callable[..., Any]:
-    """Register a named action helper."""
-    _ACTIONS[str(name)] = fn
-    return fn
+def register_action(
+    name: str,
+    fn: Callable[..., Any] | None = None,
+) -> Callable[..., Any]:
+    """Register a named action helper.
+
+    Supports both direct registration and decorator usage.
+    """
+
+    def decorator(callback: Callable[..., Any]) -> Callable[..., Any]:
+        _ACTIONS[str(name)] = callback
+        return callback
+
+    if fn is not None:
+        return decorator(fn)
+    return decorator
 
 
 def get_action(name: str) -> Callable[..., Any] | None:

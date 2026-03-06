@@ -1,18 +1,27 @@
 from __future__ import annotations
 
-from .animation import AnimationSpec
-from .control import Component, Control
-from .icon_data import (
+from ..icons import (
     ICON_NAMES,
     ICON_SET,
     IconData,
+    Icons,
+    icon,
     icon_names,
     is_icon_name,
     normalize_icon_name,
     normalize_icon_value,
     suggest_icon_names,
 )
-from .icons import Icons, icon
+from ..types import (
+    AnimationSpec,
+    BoxShadow,
+    DecorationImage,
+    LinearGradient,
+    RadialGradient,
+    Style,
+    SweepGradient,
+)
+from .control import Component, Control
 from .performance import PerformanceConfig, enable_60fps, performance_config
 from .presets import COMFY_STYLE, GLASS_STYLE, RETRO_STYLE, SCIFI_STYLE, TERMINAL_STYLE
 from .responsive import Breakpoints
@@ -32,14 +41,6 @@ from .schema import (
     normalize_skew,
     validate_frame_child,
     validate_props,
-)
-from .style import (
-    BoxShadow,
-    DecorationImage,
-    LinearGradient,
-    RadialGradient,
-    Style,
-    SweepGradient,
 )
 
 __all__ = [

@@ -1,8 +1,10 @@
 from .artifact_card import ArtifactCard
 from .audio import Audio
 from .avatar import Avatar
+from .avatar_stack import AvatarStack
 from .bar_chart import BarChart
 from .bar_plot import BarPlot
+from .badge import Badge
 from .bubble import Bubble
 from .canvas import Canvas
 from .chart import Chart
@@ -28,8 +30,10 @@ __all__ = [
     "ArtifactCard",
     "Audio",
     "Avatar",
+    "AvatarStack",
     "BarChart",
     "BarPlot",
+    "Badge",
     "Bubble",
     "Canvas",
     "Chart",
