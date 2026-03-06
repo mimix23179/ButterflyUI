@@ -145,6 +145,7 @@ import 'controls/media/video.dart';
 import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
 import 'controls/navigation/breadcrumb_bar.dart';
+import 'controls/navigation/drawer.dart';
 import 'controls/navigation/menu_bar.dart';
 import 'controls/navigation/notice_bar.dart';
 import 'controls/navigation/navigation_ring.dart';
@@ -1689,6 +1690,18 @@ class ControlRenderer {
         }
 
       case 'drawer':
+        {
+          return buildDrawerControl(
+            controlId,
+            props,
+            rawChildren,
+            context.buildChild,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
+            context.sendEvent,
+          );
+        }
+
       case 'slide_panel':
         {
           return buildSlidePanelControl(

@@ -16,6 +16,9 @@ class Sidebar(Component):
     render either a flat list (``items``) or grouped sections (``sections``),
     optionally with a searchable header and collapsible groups.
 
+    Through ``props`` the control also supports shared placement/layout hints
+    (alignment/position, margin, constraints, radius/clip behavior).
+
     ```python
     import butterflyui as bui
 
@@ -55,7 +58,8 @@ class Sidebar(Component):
         events:
             Event names the Flutter side should emit to Python.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged after typed arguments, including style
+            and shared layout hints.
         style:
             Style map forwarded to the renderer style pipeline.
         strict:

@@ -7,14 +7,16 @@ __all__ = ["BottomSheet"]
 
 class BottomSheet(Component):
     """
-    Modal bottom sheet that slides up from the bottom edge of the screen.
+    Modal bottom sheet surface with configurable panel alignment and sizing.
 
-    The runtime renders a Flutter ``BottomSheet``-style overlay. ``open``
-    shows or hides the sheet. ``dismissible`` allows the user to close it
-    by tapping the scrim. ``scrim_color`` tints the background overlay.
-    ``height`` fixes the sheet height; ``max_height`` caps it when content
-    is dynamic. The runtime supports ``set_open``/``set_props`` invokes and
-    emits ``open``, ``close``, ``dismiss``, ``change``, and ``state`` events.
+    The runtime renders an overlay sheet that can be opened/closed via
+    ``set_open`` and updated via ``set_props``. It emits ``open``, ``close``,
+    ``dismiss``, ``change``, and ``state`` events.
+
+    In addition to ``height``/``max_height`` and scrim behavior, this control
+    accepts extended panel-placement props through ``props``:
+    ``alignment``/``align``/``panel_alignment``, ``margin``/``panel_margin``,
+    ``width``/``panel_width``, and panel width constraints.
 
     ```python
     import butterflyui as bui
@@ -41,6 +43,9 @@ class BottomSheet(Component):
             Maximum sheet height when content determines its size.
         events:
             List of event names the Flutter runtime should emit to Python.
+        props:
+            Additional runtime props including panel alignment, panel margins,
+            clip behavior, radius, and sizing constraints.
     """
 
     control_type = "bottom_sheet"

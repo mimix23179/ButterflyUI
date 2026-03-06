@@ -12,10 +12,13 @@ class BreadcrumbBar(Component):
     """
     Interactive breadcrumb bar with path parsing and overflow behaviors.
 
-    The runtime renders a row of clickable path segments. ``path`` provides
-    a forward-slash-delimited string path; ``items`` offers explicit segment
-    specs. ``crumbs`` and ``routes`` are accepted aliases for merged
-    ``crumb_trail`` and ``breadcrumbs`` payloads.
+    Renders clickable path segments from either a slash-delimited ``path`` or
+    explicit ``items`` payloads. ``crumbs`` and ``routes`` remain accepted
+    aliases for compatibility with previous payload shapes.
+
+    Supports shared placement props via ``props`` (alignment, margin, size
+    constraints, radius/clip) so breadcrumb surfaces can be docked in custom
+    headers/toolbars.
 
     ```python
     import butterflyui as bui
@@ -53,6 +56,8 @@ class BreadcrumbBar(Component):
             When ``True`` middle segments are collapsed to an ellipsis.
         events:
             List of event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop overrides and extended layout hints.
     """
 
     control_type = "breadcrumb_bar"

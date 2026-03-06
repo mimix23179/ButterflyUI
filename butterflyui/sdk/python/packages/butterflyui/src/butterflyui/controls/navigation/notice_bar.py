@@ -5,43 +5,51 @@ from .._shared import Component, merge_props
 
 __all__ = ["NoticeBar"]
 
+
 class NoticeBar(Component):
     """
-    Inline banner that displays a notice message with optional dismiss and action.
+    Inline banner for status messages, warnings, and lightweight actions.
 
-    The runtime renders a horizontal notification strip. ``variant`` sets
-    the semantic color (``"info"``, ``"success"``, ``"warning"``, ``"error"``
-    etc.). ``icon`` prepends an icon glyph. ``dismissible`` adds an ✕ button
-    to close the bar. ``action_label`` and ``action_id`` add a text button
-    that emits an action event.
+    ``NoticeBar`` renders a compact horizontal notification strip. ``variant``
+    selects semantic tone, ``icon`` prepends a glyph, ``dismissible`` enables
+    close interaction, and ``action_label``/``action_id`` define an inline
+    command surface.
+
+    The control accepts shared layout hints through ``props`` so notice bars
+    can be aligned and clipped consistently in headers/content regions.
 
     ```python
     import butterflyui as bui
 
     bui.NoticeBar(
-        text="Your changes have been saved.",
+        text="Deployment completed successfully.",
         variant="success",
+        icon="check_circle",
         dismissible=True,
+        action_label="View logs",
+        action_id="open_logs",
         events=["dismiss", "action"],
     )
     ```
 
     Args:
         text:
-            The notice message text.
+            Notice message text.
         variant:
-            Semantic color variant. Values: ``"info"``, ``"success"``,
-            ``"warning"``, ``"error"``.
+            Semantic tone token (for example ``"info"``, ``"success"``,
+            ``"warning"``, ``"error"``).
         icon:
-            Icon glyph name prepended to the message.
+            Optional leading icon descriptor.
         dismissible:
-            When ``True`` an ✕ button is shown to dismiss the bar.
+            Shows a close action when ``True``.
         action_label:
-            Label for an optional inline action button.
+            Optional inline action label.
         action_id:
-            Identifier emitted when the action button is tapped.
+            Identifier emitted for the inline action.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime events the control may emit.
+        props:
+            Additional props, including layout/placement hints.
     """
 
     control_type = "notice_bar"
@@ -80,5 +88,14 @@ class NoticeBar(Component):
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
-    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "emit",
+            {"event": event, "payload": dict(payload or {})},
+        )

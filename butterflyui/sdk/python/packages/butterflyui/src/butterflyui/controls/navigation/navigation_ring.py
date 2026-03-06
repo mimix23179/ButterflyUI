@@ -12,14 +12,16 @@ class NavigationRing(Component):
     """
     Compact ring-style navigation selector with icon-first destinations.
 
-    ``NavigationRing`` renders a rounded destination cluster that is useful
-    for dashboard tabs, mode pickers, and floating navigation shells.
-    The control keeps local selected state, emits ``select``/``change``
-    events, and supports runtime updates through invoke methods.
+    Renders a rounded destination cluster for compact mode switching and
+    dashboard navigation shells. Keeps selected state, emits ``select`` and
+    ``change`` events, and supports runtime state mutation methods.
 
     Item entries accept rich metadata:
     ``id``/``value`` identity, ``label`` text, ``icon`` descriptors, optional
     ``badge`` text, and ``enabled`` boolean state.
+
+    Shared frame/layout hints are accepted through ``props`` to control ring
+    placement and clipping (alignment, margin, constraints, radius, clip).
 
     Example:
         ```python
@@ -50,7 +52,8 @@ class NavigationRing(Component):
         events:
             Runtime event whitelist emitted by the Flutter renderer.
         props:
-            Additional raw props merged after typed arguments.
+            Additional raw props merged after typed arguments, including layout
+            hints and visual configuration.
         style:
             Optional style token map forwarded to the style pipeline.
         strict:

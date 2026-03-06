@@ -15,6 +15,9 @@ class StatusBar(Component):
     ``dense`` reduces bar height. Runtime invokes support item/text updates
     and arbitrary event emission.
 
+    Shared layout hints are accepted through ``props`` for dock/placement
+    control (alignment/position, margin, width/height constraints, radius/clip).
+
     ```python
     import butterflyui as bui
 
@@ -33,6 +36,8 @@ class StatusBar(Component):
             Simple plain-text status message (used instead of ``items``).
         dense:
             Reduces bar height and item padding.
+        props:
+            Additional runtime props, including layout and visual hints.
     """
 
     control_type = "status_bar"

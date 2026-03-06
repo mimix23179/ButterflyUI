@@ -10,16 +10,15 @@ __all__ = ["ActionBar"]
 
 class ActionBar(Component):
     """
-    Horizontal action toolbar for global and context-sensitive commands.
+    Horizontal command surface for global and context-sensitive actions.
 
-    ``ActionBar`` is the canonical replacement for legacy
-    ``context_action_bar`` and supports both explicit ``items`` payloads and
-    child controls. It can optionally carry selection/context metadata so the
-    runtime can emit richer command events.
+    Supports explicit ``items`` payloads and/or child controls. Item payloads
+    may include icon descriptors and optional metadata so runtime events can
+    carry command context.
 
-    Item payloads may include icon descriptors (for example ``{"icon":
-    "save"}``) and color/transparency styling fields when supported by runtime
-    themes.
+    The control also participates in shared layout props used across navigation
+    and overlay surfaces, including alignment/positioning, margin, size
+    constraints, radius, and clip behavior.
 
     ```python
     import butterflyui as bui
@@ -53,6 +52,16 @@ class ActionBar(Component):
             Selection payload (IDs or descriptors) used by contextual actions.
         events:
             List of event names the Flutter runtime should emit to Python.
+        align / alignment / position:
+            Placement hints for wrapper alignment in parent layouts.
+        margin:
+            Outer spacing around the action bar.
+        width / height / min_width / max_width / min_height / max_height:
+            Optional sizing and constraint hints.
+        radius:
+            Outer clipping/shape radius for the action bar shell.
+        clip_behavior:
+            Clip strategy for rounded shells and overflow.
         props:
             Raw prop overrides merged after typed arguments.
         style:

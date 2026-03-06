@@ -10,16 +10,21 @@ __all__ = ["Drawer"]
 
 class Drawer(Component):
     """
-    Slide-in drawer panel for navigation, inspectors, and contextual tools.
+    Standalone drawer overlay control with optional built-in navigation content.
 
-    ``Drawer`` is the canonical replacement for legacy ``side_drawer``. It can
-    host fully custom child content or a data-driven menu via ``items`` /
-    ``sections`` props. Use ``open`` to control visibility and ``side`` to pick
-    the entry edge.
+    ``Drawer`` is backed by its own Dart control implementation (not an alias
+    of ``slide_panel``). It supports both:
+    - custom content mode via ``child`` / ``children``, and
+    - data-driven menu mode via ``items`` or grouped ``sections``.
 
-    The control forwards both simple drawer props (size, dismiss behavior) and
-    richer navigation-oriented props (search, collapsible sections, selection)
-    so one wrapper can cover lightweight and full-featured side panels.
+    The built-in menu mode includes selection, optional search, optional
+    collapsible sections, and runtime events for open/close/dismiss/select.
+    Drawer presentation is edge-anchored through ``side`` and can be sized
+    with ``size`` (or width/height aliases passed through ``props``).
+
+    Layout and placement props are supported through the shared runtime contract
+    (for example ``margin``, ``radius``, ``clip_behavior``, ``align`` /
+    ``alignment`` / ``position``, and sizing constraints).
 
     ```python
     import butterflyui as bui
@@ -42,7 +47,7 @@ class Drawer(Component):
         open:
             If ``True``, the drawer is shown.
         side:
-            Entry edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
+            Drawer edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
         size:
             Width for left/right drawers, or height for top/bottom drawers.
         dismissible:
@@ -50,10 +55,9 @@ class Drawer(Component):
         scrim_color:
             Scrim color shown behind the drawer while open.
         modal:
-            If ``True``, drawer behaves as modal overlay. If ``False``, runtime
-            may choose a persistent presentation.
+            Modal behavior hint for host runtimes.
         persistent:
-            Hint for persistent drawer behavior on larger layouts.
+            Persistent layout hint for host runtimes.
         items:
             Flat list of menu item descriptors for built-in menu rendering.
         sections:

@@ -12,11 +12,14 @@ class SlidePanel(Component):
     """
     Edge-anchored panel overlay for drawers, side panels, and utility trays.
 
-    ``SlidePanel`` is the canonical replacement for legacy ``side_panel``.
-    It can slide from any edge and accepts sizing aliases (``width`` /
-    ``height``) in addition to ``size``. The runtime keeps open/closed state,
-    supports invoke mutations, and emits lifecycle events such as ``open``,
-    ``close``, ``dismiss``, ``change``, and ``state``.
+    ``SlidePanel`` is the dedicated side-panel primitive. It can slide from
+    any edge and accepts sizing aliases (``width`` / ``height``) in addition
+    to ``size``. The runtime keeps open/closed state, supports invoke mutation,
+    and emits ``open``, ``close``, ``dismiss``, ``change``, and ``state``.
+
+    Extended panel-placement props are accepted through ``props`` such as
+    ``margin`` / ``panel_margin``, ``radius``, ``clip_behavior``, and
+    transition tuning fields.
 
     ```python
     import butterflyui as bui
@@ -53,7 +56,8 @@ class SlidePanel(Component):
         events:
             Event names the Flutter side should emit to Python.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged after typed arguments, including panel
+            placement/layout and shell styling hints.
         style:
             Style map forwarded to the renderer style pipeline.
         strict:

@@ -14,6 +14,10 @@ class ContextMenu(Component):
     icons, separators, enabled state, and custom payload fields. The runtime
     emits ``open``, ``dismiss``, ``select``, and ``change`` events.
 
+    The menu shell supports styling/shape hints through ``props`` (for example
+    ``bgcolor``, ``radius``, ``elevation``), and the trigger surface also
+    accepts shared layout hints through ``props``.
+
     ```python
     import butterflyui as bui
 
@@ -35,7 +39,8 @@ class ContextMenu(Component):
         open_on_tap:
             When ``True`` a primary tap also opens the context menu.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged after typed arguments, including trigger
+            placement/layout hints and menu shell style hints.
         style:
             Style map forwarded to the renderer style pipeline.
         strict:

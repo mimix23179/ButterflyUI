@@ -7,12 +7,15 @@ __all__ = ["AppBar"]
 
 class AppBar(Component):
     """
-    Application top bar with title, optional subtitle, leading widget, and actions.
+    Application top bar with title block, optional search, and trailing actions.
 
-    The runtime renders a Flutter ``AppBar``. ``leading`` places a widget
-    (e.g. a menu icon or back button) at the start of the bar. ``actions``
-    is a list of trailing action widgets. ``title`` and ``subtitle`` populate
-    the bar's label area.
+    ``AppBar`` and ``TopBar`` share the same runtime renderer. ``leading``
+    places a widget at the start edge, ``actions`` supplies trailing widgets,
+    and ``title``/``subtitle`` populate the label block.
+
+    The control accepts shared frame/layout props through ``props`` (alignment,
+    margin, sizing constraints, radius, clip behavior) for consistent placement
+    in custom shells.
 
     ```python
     import butterflyui as bui
@@ -36,6 +39,12 @@ class AppBar(Component):
             List of trailing action widget specs shown at the end of the bar.
         events:
             List of event names the Flutter runtime should emit to Python.
+        props:
+            Raw prop map for extended options, including ``show_search``,
+            ``search_value``, ``search_placeholder``, ``search_enabled``,
+            ``emit_on_search_change``, ``search_debounce_ms``, plus layout
+            fields such as ``align``/``alignment``/``position``, ``margin``,
+            ``width``/``height`` constraints, ``radius``, and ``clip_behavior``.
     """
 
     control_type = "app_bar"

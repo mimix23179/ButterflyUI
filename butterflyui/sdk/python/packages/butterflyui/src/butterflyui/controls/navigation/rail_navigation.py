@@ -19,6 +19,9 @@ class RailNavigation(Component):
     Item mappings may define ``icon`` and ``selected_icon`` descriptors along
     with ``id``, ``label``, and ``enabled`` state.
 
+    Shared frame/layout hints are accepted through ``props`` to place rails
+    in custom shells (alignment, margin, sizing constraints, radius/clip).
+
     Example:
         ```python
         import butterflyui as bui
@@ -47,7 +50,8 @@ class RailNavigation(Component):
         events:
             Runtime event whitelist emitted by the Flutter renderer.
         props:
-            Additional raw props merged after typed arguments.
+            Additional raw props merged after typed arguments, including
+            indicator/text/icon color options and layout hints.
         style:
             Optional style token map forwarded to the style pipeline.
         strict:

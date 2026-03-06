@@ -5,14 +5,18 @@ from .._shared import Component, merge_props
 
 __all__ = ["TopBar"]
 
+
 class TopBar(Component):
     """
     Application top bar with optional inline search and trailing actions.
 
-    The runtime renders a top navigation bar combining a ``title`` and
-    optional ``subtitle`` with an inline search field (``show_search``,
-    ``search_value``, ``search_placeholder``) and a list of trailing
-    ``actions``. ``center_title`` centers the title text.
+    The runtime renders a top navigation surface composed of ``title`` and
+    optional ``subtitle`` plus a search field and trailing ``actions``.
+    ``center_title`` controls title alignment.
+
+    ``TopBar`` uses the same runtime renderer as ``AppBar`` and supports
+    shared layout hints through ``props`` (alignment/position, margin,
+    constraints, radius, and clip behavior).
 
     ```python
     import butterflyui as bui
@@ -20,7 +24,7 @@ class TopBar(Component):
     bui.TopBar(
         title="Explorer",
         show_search=True,
-        search_placeholder="Search files…",
+        search_placeholder="Search files...",
         actions=[{"id": "filter", "icon": "filter_list"}],
         events=["search", "action"],
     )
@@ -32,17 +36,19 @@ class TopBar(Component):
         subtitle:
             Optional secondary text shown below the title.
         center_title:
-            When ``True`` the title is centered in the bar.
+            Centers the title when ``True``.
         show_search:
-            When ``True`` an inline search field is shown in the bar.
+            Shows an inline search field when ``True``.
         search_value:
-            Current value of the search field.
+            Current search query value.
         search_placeholder:
             Placeholder text for the search field.
         actions:
-            List of trailing action widget specs.
+            Trailing action widget specs.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            Runtime event names to emit.
+        props:
+            Additional runtime props, including shared placement/layout hints.
     """
 
     control_type = "top_bar"
@@ -86,8 +92,22 @@ class TopBar(Component):
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
-    def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
-        return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "emit",
+            {"event": event, "payload": dict(payload or {})},
+        )
 
-    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+    def trigger(
+        self,
+        session: Any,
+        event: str = "change",
+        **payload: Any,
+    ) -> dict[str, Any]:
         return self.emit(session, event, payload)

@@ -9,11 +9,13 @@ class MenuBar(Component):
     """
     Application-level horizontal menu bar with dropdown menu groups.
 
-    ``MenuBar`` accepts either ``menus`` or ``items`` payloads. Each top-level
-    menu entry can contain nested ``items`` / ``children`` actions, icons,
-    separators, shortcuts, and per-action payload metadata. The Dart runtime
-    emits ``open``, ``dismiss``, ``select``, and ``change`` events as users
-    interact with menu groups.
+    ``MenuBar`` accepts ``menus`` or ``items`` payloads. Each top-level menu
+    can include nested actions, separators, shortcuts, icons, and custom
+    payload metadata. Runtime emits ``open``, ``dismiss``, ``select``, and
+    ``change`` events as users interact with menu groups.
+
+    The control also supports shared layout/placement hints through ``props``
+    (alignment, margin, size constraints, radius, clip behavior).
 
     ```python
     import butterflyui as bui
@@ -52,7 +54,8 @@ class MenuBar(Component):
         events:
             Optional runtime event whitelist.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides including menu styling and layout hints
+            (alignment/position, margin, sizing constraints, radius/clip).
         style:
             Style map forwarded to the renderer style pipeline.
         strict:
