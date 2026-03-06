@@ -9,51 +9,8 @@ __all__ = ["AnimationEffect", "Animation"]
 
 
 class AnimationEffect(Component):
-    """Low-level timeline animation wrapper for opacity and transform transitions.
-    
-    Args:
-        child:
-            Primary child control wrapped by the animation.
-        duration:
-            Named duration token or runtime duration string.
-        duration_ms:
-            Duration of the animation in milliseconds.
-        delay_ms:
-            Delay before the animation starts, in milliseconds.
-        curve:
-            Animation curve name used by the runtime.
-        enabled:
-            Whether the animation wrapper is active.
-        play:
-            Whether the animation should play immediately.
-        reverse:
-            Whether the animation should run in reverse.
-        repeat:
-            Whether the animation should loop continuously.
-        mirror:
-            Whether repeated animation cycles should alternate direction.
-        from_:
-            Starting state payload for the animation.
-        to:
-            Ending state payload for the animation.
-        keyframes:
-            Intermediate keyframe list for more complex animations.
-        opacity:
-            Target opacity applied by the wrapper.
-        scale:
-            Target scale factor applied by the wrapper.
-        offset:
-            Positional offset applied by the wrapper.
-        rotation:
-            Rotation in turns or radians, depending on runtime expectations.
-        blur:
-            Blur amount animated by the wrapper.
-        shadow:
-            Shadow payload animated by the wrapper.
-        color:
-            Tint or overlay color animated by the wrapper.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    """
+    Low-level timeline animation wrapper for opacity and transform transitions.
     """
 
 

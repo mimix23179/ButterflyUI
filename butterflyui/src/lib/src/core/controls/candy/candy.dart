@@ -443,7 +443,16 @@ Widget _buildRow(CandyContext ctx) {
     );
   }
 
-  return buildRowControl(m, ctx.rawChildren, ctx.tokens, ctx.buildChild);
+  return buildRowControl(
+    ctx.controlId,
+    m,
+    ctx.rawChildren,
+    ctx.tokens,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildColumn(CandyContext ctx) {
@@ -465,7 +474,16 @@ Widget _buildColumn(CandyContext ctx) {
     );
   }
 
-  return buildColumnControl(m, ctx.rawChildren, ctx.tokens, ctx.buildChild);
+  return buildColumnControl(
+    ctx.controlId,
+    m,
+    ctx.rawChildren,
+    ctx.tokens,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildStack(CandyContext ctx) {
@@ -474,15 +492,27 @@ Widget _buildStack(CandyContext ctx) {
 
 Widget _buildWrap(CandyContext ctx) {
   return buildWrapControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     ctx.tokens,
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
 Widget _buildContainer(CandyContext ctx) {
-  return buildContainerControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
+  return buildContainerControl(
+    ctx.controlId,
+    ctx.merged,
+    ctx.rawChildren,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildAlign(CandyContext ctx) {
@@ -548,10 +578,14 @@ Widget _buildFittedBox(CandyContext ctx) {
 
 Widget _buildCard(CandyContext ctx) {
   return buildCardControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     ctx.tokens,
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
@@ -572,6 +606,8 @@ Widget _buildButton(CandyContext ctx) {
     ctx.controlId,
     ctx.merged,
     ctx.tokens,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
     ctx.sendEvent,
   );
 }

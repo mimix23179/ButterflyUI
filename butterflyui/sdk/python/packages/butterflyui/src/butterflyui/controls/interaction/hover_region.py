@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["HoverRegion"]
 
 class HoverRegion(Component):
-    """Tracks pointer hover state over its child and emits hover events.
+    """
+    Tracks pointer hover state over its child and emits hover events.
     
     Wraps the child in a ``MouseRegion`` that fires ``enter`` and
     ``exit`` events when the pointer moves in or out of the bounds,
@@ -14,6 +15,8 @@ class HoverRegion(Component):
     An optional ``cursor`` override changes the displayed mouse cursor
     while hovering.  When ``opaque`` is ``True`` the region absorbs
     pointer events so they do not reach widgets underneath.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -23,18 +26,6 @@ class HoverRegion(Component):
         cursor="click",
     )
     ```
-    
-    Args:
-        enabled:
-            If ``False``, hover detection is inactive.
-        opaque:
-            If ``True``, the region absorbs pointer events rather than
-            passing them through.
-        cursor:
-            Mouse cursor to display while hovering — e.g. ``"click"``,
-            ``"text"``, ``"grab"``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

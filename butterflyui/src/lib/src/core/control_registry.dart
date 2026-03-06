@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'candy/theme.dart';
 import 'style/style_pack.dart';
 import 'webview/webview_api.dart';
-import 'control_utils.dart';
+import 'runtime_control_node.dart';
 
-typedef ButterflyUIControlBuilder = Widget Function(
-  ButterflyUIControlContext context,
-  Map<String, Object?> control,
-);
+typedef ButterflyUIControlBuilder =
+    Widget Function(
+      ButterflyUIControlContext context,
+      Map<String, Object?> control,
+    );
 
 class ButterflyUIControlContext {
   final CandyTokens tokens;
@@ -30,18 +31,15 @@ class ButterflyUIControlContext {
   });
 
   Map<String, Object?> propsOf(Map<String, Object?> control) {
-    final raw = control['props'];
-    if (raw is Map) return coerceObjectMap(raw);
-    return <String, Object?>{};
+    return nodeOf(control).props;
   }
 
   List<Map<String, Object?>> childMapsOf(Map<String, Object?> control) {
-    final raw = control['children'];
-    if (raw is! List) return const [];
-    return raw
-        .whereType<Map>()
-        .map((c) => coerceObjectMap(c))
-        .toList();
+    return nodeOf(control).children;
+  }
+
+  RuntimeControlNode nodeOf(Map<String, Object?> control) {
+    return RuntimeControlNode(control);
   }
 }
 
@@ -58,5 +56,3 @@ class ButterflyUIControlRegistry {
 
   bool has(String type) => _builders.containsKey(type);
 }
-
-

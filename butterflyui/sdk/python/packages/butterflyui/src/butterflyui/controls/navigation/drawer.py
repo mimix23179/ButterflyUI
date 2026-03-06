@@ -9,7 +9,8 @@ __all__ = ["Drawer"]
 
 
 class Drawer(Component):
-    """Standalone drawer overlay control with optional built-in navigation content.
+    """
+    Standalone drawer overlay control with optional built-in navigation content.
     
     ``Drawer`` is backed by its own Dart control implementation (not an alias
     of ``slide_panel``). It supports both:
@@ -24,6 +25,8 @@ class Drawer(Component):
     Layout and placement props are supported through the shared runtime contract
     (for example ``margin``, ``radius``, ``clip_behavior``, ``align`` /
     ``alignment`` / ``position``, and sizing constraints).
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -41,42 +44,6 @@ class Drawer(Component):
         events=["open", "close", "select"],
     )
     ```
-    
-    Args:
-        open:
-            If ``True``, the drawer is shown.
-        side:
-            Drawer edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
-        size:
-            Width for left/right drawers, or height for top/bottom drawers.
-        dismissible:
-            If ``True``, tapping the scrim dismisses the drawer.
-        scrim_color:
-            Scrim color shown behind the drawer while open.
-        modal:
-            Modal behavior hint for host runtimes.
-        persistent:
-            Persistent layout hint for host runtimes.
-        items:
-            Flat list of menu item descriptors for built-in menu rendering.
-        sections:
-            Sectioned item descriptors for grouped menu rendering.
-        selected_id:
-            Selected item ID when using data-driven menu content.
-        show_search:
-            Enables built-in search input for menu content.
-        query:
-            Current query string used to filter, search, or narrow the control's content.
-        collapsible:
-            Enables collapsible sections in sectioned mode.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

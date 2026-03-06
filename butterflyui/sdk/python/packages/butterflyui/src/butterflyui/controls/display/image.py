@@ -6,21 +6,20 @@ from .._shared import Component, merge_props
 __all__ = ["Image"]
 
 class Image(Component):
-    """Network or asset image display.
+    """
+    Network or asset image display.
     
     Renders a Flutter ``Image`` widget from the URL or asset path
     given in ``src``.  Additional sizing, fit, and alignment options
     can be passed through ``props`` or ``**kwargs``.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        img = bui.Image(src="https://example.com/photo.jpg")
-    
-    Args:
-        src:
-            Source URI, file path, or asset reference rendered by the control.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    img = bui.Image(src="https://example.com/photo.jpg")
+    ```
     """
 
 

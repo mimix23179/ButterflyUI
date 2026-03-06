@@ -1,206 +1,182 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildRowControl(
+  String controlId,
   Map<String, Object?> props,
-  List children,
+  List<dynamic> rawChildren,
   CandyTokens tokens,
   Widget Function(Map<String, Object?> child) buildFromControl,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final sourceChildren = children.isEmpty && props['children'] is List
-      ? props['children'] as List
-      : children;
-  final spacing =
-      coerceDouble(props['spacing'] ?? props['gap']) ??
-      tokens.number('layout', 'row_spacing') ??
-      tokens.number('spacing', 'sm') ??
-      0.0;
-  final mainAxis = _parseMainAxisAlignment(
-    props['main_axis'],
-    MainAxisAlignment.start,
+  return _FlexRowControl(
+    controlId: controlId,
+    props: props,
+    rawChildren: rawChildren,
+    tokens: tokens,
+    buildFromControl: buildFromControl,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
   );
-  final crossAxis = _parseCrossAxisAlignment(
-    props['cross_axis'],
-    CrossAxisAlignment.center,
-  );
-  final mainAxisSize = _parseMainAxisSize(props['main_axis_size']);
-  final clipBehavior = _parseClip(props['clip_behavior']);
-  final rowChildren = _buildFlexChildren(
-    sourceChildren,
-    Axis.horizontal,
-    spacing,
-    mainAxisSize,
-    buildFromControl,
-  );
-  Widget row = Row(
-    crossAxisAlignment: crossAxis,
-    mainAxisAlignment: mainAxis,
-    mainAxisSize: mainAxisSize,
-    textBaseline: crossAxis == CrossAxisAlignment.baseline
-        ? TextBaseline.alphabetic
-        : null,
-    children: rowChildren,
-  );
-  if (clipBehavior != null) {
-    row = ClipRect(clipBehavior: clipBehavior, child: row);
-  }
-  return row;
 }
 
-List<Widget> _buildFlexChildren(
-  List children,
-  Axis axis,
-  double spacing,
-  MainAxisSize parentMainAxisSize,
-  Widget Function(Map<String, Object?> child) buildFromControl,
-) {
-  final built = <Widget>[];
-  for (final child in children) {
-    if (child is! Map) continue;
-    final childMap = coerceObjectMap(child);
-    final childType = childMap['type']?.toString() ?? '';
-    if (childType == 'expanded') {
-      final expandedProps = (childMap['props'] is Map)
-          ? coerceObjectMap(childMap['props'] as Map)
-          : <String, Object?>{};
-      final flex = coerceOptionalInt(expandedProps['flex']) ?? 1;
-      final fit = _parseFlexFit(expandedProps['fit']) ?? FlexFit.tight;
-      final innerChild = _firstChildMap(
-        childMap['children'] as List? ?? const [],
-      );
-      Widget widget = innerChild == null
-          ? const SizedBox.shrink()
-          : buildFromControl(innerChild);
-      if (fit == FlexFit.loose) {
-        widget = Flexible(flex: flex, fit: fit, child: widget);
-      } else {
-        widget = Expanded(flex: flex, child: widget);
-      }
-      built.add(widget);
-      continue;
-    }
-    Widget widget = buildFromControl(childMap);
-    final childProps = (childMap['props'] is Map)
-        ? coerceObjectMap(childMap['props'] as Map)
-        : <String, Object?>{};
-    final flex =
-        coerceOptionalInt(childProps['flex']) ??
-        (childProps['expand'] == true ? 1 : null);
-    if (flex != null && flex > 0) {
-      if (parentMainAxisSize == MainAxisSize.min) {
-        widget = Flexible(flex: flex, fit: FlexFit.loose, child: widget);
-      } else {
-        widget = Expanded(flex: flex, child: widget);
-      }
-    }
-    built.add(widget);
-  }
+class _FlexRowControl extends StatefulWidget {
+  const _FlexRowControl({
+    required this.controlId,
+    required this.props,
+    required this.rawChildren,
+    required this.tokens,
+    required this.buildFromControl,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
 
-  if (spacing <= 0 || built.length < 2) return built;
+  final String controlId;
+  final Map<String, Object?> props;
+  final List<dynamic> rawChildren;
+  final CandyTokens tokens;
+  final Widget Function(Map<String, Object?> child) buildFromControl;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
 
-  final spaced = <Widget>[];
-  for (var i = 0; i < built.length; i += 1) {
-    if (i > 0) {
-      spaced.add(
-        axis == Axis.horizontal
-            ? SizedBox(width: spacing)
-            : SizedBox(height: spacing),
-      );
-    }
-    spaced.add(built[i]);
-  }
-  return spaced;
+  @override
+  State<_FlexRowControl> createState() => _FlexRowControlState();
 }
 
-Map<String, Object?>? _firstChildMap(List children) {
-  for (final child in children) {
-    if (child is Map) {
-      return coerceObjectMap(child);
+class _FlexRowControlState extends State<_FlexRowControl> {
+  late double _spacing;
+  late MainAxisAlignment _mainAxis;
+  late CrossAxisAlignment _crossAxis;
+  late MainAxisSize _mainAxisSize;
+  late Clip? _clipBehavior;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromProps();
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _FlexRowControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
+    if (oldWidget.props != widget.props) {
+      _syncFromProps();
     }
   }
-  return null;
-}
 
-MainAxisAlignment _parseMainAxisAlignment(
-  Object? value,
-  MainAxisAlignment fallback,
-) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'start':
-    case 'left':
-      return MainAxisAlignment.start;
-    case 'center':
-      return MainAxisAlignment.center;
-    case 'end':
-    case 'right':
-      return MainAxisAlignment.end;
-    case 'spacebetween':
-    case 'space_between':
-      return MainAxisAlignment.spaceBetween;
-    case 'spacearound':
-    case 'space_around':
-      return MainAxisAlignment.spaceAround;
-    case 'spaceevenly':
-    case 'space_evenly':
-      return MainAxisAlignment.spaceEvenly;
+  @override
+  void dispose() {
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    super.dispose();
   }
-  return fallback;
-}
 
-CrossAxisAlignment _parseCrossAxisAlignment(
-  Object? value,
-  CrossAxisAlignment fallback,
-) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'start':
-      return CrossAxisAlignment.start;
-    case 'center':
-      return CrossAxisAlignment.center;
-    case 'end':
-      return CrossAxisAlignment.end;
-    case 'stretch':
-      return CrossAxisAlignment.stretch;
-    case 'baseline':
-      return CrossAxisAlignment.baseline;
+  void _syncFromProps() {
+    _spacing =
+        coerceDouble(widget.props['spacing'] ?? widget.props['gap']) ??
+        widget.tokens.number('layout', 'row_spacing') ??
+        widget.tokens.number('spacing', 'sm') ??
+        0.0;
+    _mainAxis = parseLayoutMainAxisAlignment(
+      widget.props['main_axis'],
+      MainAxisAlignment.start,
+    );
+    _crossAxis = parseLayoutCrossAxisAlignment(
+      widget.props['cross_axis'],
+      CrossAxisAlignment.center,
+      axis: Axis.horizontal,
+    );
+    _mainAxisSize = parseLayoutMainAxisSize(widget.props['main_axis_size']);
+    _clipBehavior = parseLayoutClip(widget.props['clip_behavior']);
   }
-  return fallback;
-}
 
-FlexFit? _parseFlexFit(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'loose':
-      return FlexFit.loose;
-    case 'tight':
-      return FlexFit.tight;
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_layout':
+        setState(() {
+          _spacing = coerceDouble(args['spacing'] ?? args['gap']) ?? _spacing;
+          _mainAxis = parseLayoutMainAxisAlignment(
+            args['main_axis'],
+            _mainAxis,
+          );
+          _crossAxis = parseLayoutCrossAxisAlignment(
+            args['cross_axis'],
+            _crossAxis,
+            axis: Axis.horizontal,
+          );
+          if (args.containsKey('main_axis_size')) {
+            _mainAxisSize = parseLayoutMainAxisSize(args['main_axis_size']);
+          }
+          if (args.containsKey('clip_behavior')) {
+            _clipBehavior = parseLayoutClip(args['clip_behavior']);
+          }
+        });
+        return _statePayload();
+      case 'get_state':
+      case 'get_layout':
+        return _statePayload();
+      default:
+        throw UnsupportedError('Unknown row method: $method');
+    }
   }
-  return null;
-}
 
-MainAxisSize _parseMainAxisSize(Object? value) {
-  final s = value?.toString().toLowerCase();
-  if (s == 'min') return MainAxisSize.min;
-  return MainAxisSize.max;
-}
-
-Clip? _parseClip(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'hardedge':
-    case 'hard_edge':
-      return Clip.hardEdge;
-    case 'antialias':
-    case 'anti_alias':
-      return Clip.antiAlias;
-    case 'antialiaswithsavelayer':
-    case 'anti_alias_with_save_layer':
-      return Clip.antiAliasWithSaveLayer;
-    case 'none':
-      return Clip.none;
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'spacing': _spacing,
+      'main_axis': _mainAxis.name,
+      'cross_axis': _crossAxis.name,
+      'main_axis_size': _mainAxisSize.name,
+      if (_clipBehavior != null) 'clip_behavior': _clipBehavior!.name,
+    };
   }
-  return null;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget row = Row(
+      crossAxisAlignment: _crossAxis,
+      mainAxisAlignment: _mainAxis,
+      mainAxisSize: _mainAxisSize,
+      textBaseline: _crossAxis == CrossAxisAlignment.baseline
+          ? TextBaseline.alphabetic
+          : null,
+      children: buildFlexChildren(
+        rawChildren: widget.rawChildren,
+        axis: Axis.horizontal,
+        spacing: _spacing,
+        parentMainAxisSize: _mainAxisSize,
+        buildChild: widget.buildFromControl,
+      ),
+    );
+    if (_clipBehavior != null) {
+      row = ClipRect(clipBehavior: _clipBehavior!, child: row);
+    }
+    return row;
+  }
 }

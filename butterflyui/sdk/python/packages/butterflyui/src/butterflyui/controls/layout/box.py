@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Box"]
 
 class Box(Component):
-    """Simple sized box that constrains and optionally decorates its children.
+    """
+    Simple sized box that constrains and optionally decorates its children.
     
     The runtime renders a lightweight container. Accepts optional ``width``,
     ``height``, ``padding``, ``margin``, ``alignment``, and ``bgcolor``
@@ -15,6 +16,8 @@ class Box(Component):
     ``Box`` also forwards universal runtime props through ``**kwargs``. This
     includes style/modifier/motion/effects keys plus optional ``icon``,
     ``color``, and ``transparency`` hints used by higher-level styling flows.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,22 +30,6 @@ class Box(Component):
         padding=8,
     )
     ```
-    
-    Args:
-        width:
-            Fixed width in logical pixels. Accepts a number or a sizing token.
-        height:
-            Fixed height in logical pixels. Accepts a number or a sizing token.
-        padding:
-            Inner spacing between the box edge and its children.
-        margin:
-            Outer spacing applied around the control before neighboring layout items are positioned.
-        alignment:
-            How children are aligned within the box.
-        bgcolor:
-            Background color painted behind the control's content area.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
 

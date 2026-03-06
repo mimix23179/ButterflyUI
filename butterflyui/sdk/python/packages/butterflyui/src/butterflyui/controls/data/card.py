@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Card"]
 
 class Card(Component):
-    """Material-style surface container that wraps a single child control
+    """
+    Material-style surface container that wraps a single child control
     inside a rounded, optionally elevated panel.
     
     The runtime renders a Flutter ``Card`` whose background colour falls
@@ -26,18 +27,6 @@ class Card(Component):
         content_padding=16,
     )
     ```
-    
-    Args:
-        title:
-            Optional primary title text forwarded as metadata in the control props.
-        subtitle:
-            Optional secondary title text forwarded as metadata in the control props.
-        elevated:
-            If ``True``, applies elevated card styling with a non-zero ``elevation`` value.
-        radius:
-            Corner radius in logical pixels.  Overrides the Candy ``card.radius`` / ``radii.md`` tokens.
-        content_padding:
-            Inner padding applied around the card's child content (single number or per-edge spec).
     """
 
 

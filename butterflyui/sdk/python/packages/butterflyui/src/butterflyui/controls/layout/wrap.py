@@ -16,6 +16,8 @@ class Wrap(Component):
     ``cross_axis`` sets alignment of children within a single run.
     ``direction`` switches the main axis to horizontal (default) or vertical.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -26,21 +28,6 @@ class Wrap(Component):
         alignment="start",
     )
     ```
-
-    Args:
-        spacing:
-            Gap between consecutive children along the main axis.
-        run_spacing:
-            Gap between consecutive runs along the cross axis.
-        alignment:
-            Alignment of children within each run along the main axis.
-        run_alignment:
-            Alignment of runs along the cross axis.
-        cross_axis:
-            Alignment of children within a run along the cross axis.
-        direction:
-            Main-axis direction. Values: ``"horizontal"`` (default),
-            ``"vertical"``.
     """
 
 

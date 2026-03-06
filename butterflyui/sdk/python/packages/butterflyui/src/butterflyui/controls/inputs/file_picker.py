@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["FilePicker"]
 
 class FilePicker(Component):
-    """Native file and directory picker button.
+    """
+    Native file and directory picker button.
     
     Renders a button (or inline trigger widget) that opens the
     platform’s native file-picker dialog when tapped or when
@@ -14,6 +15,8 @@ class FilePicker(Component):
     result is returned via an ``"result"`` runtime event and can also
     be fetched imperatively with :meth:`get_files`.  Setting
     ``save_file`` switches the dialog to save mode.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -25,45 +28,6 @@ class FilePicker(Component):
         multiple=False,
     )
     ```
-    
-    Args:
-        label:
-            Button / field label displayed in the UI.
-        file_type:
-            MIME category hint — e.g. ``"image"``, ``"video"``,
-            ``"audio"``, ``"any"``.
-        extensions:
-            List of allowed extensions without the dot
-            (e.g. ``["txt", "md"]``).
-        allowed_extensions:
-            Backward-compatible alias for ``extensions``. When both fields are provided, ``extensions`` takes precedence and this alias is kept only for compatibility.
-        multiple:
-            If ``True``, the user can select multiple files.
-        allow_multiple:
-            Backward-compatible alias for ``multiple``. When both fields are provided, ``multiple`` takes precedence and this alias is kept only for compatibility.
-        with_data:
-            If ``True``, file bytes are included in the result payload.
-        with_path:
-            If ``True``, absolute file paths are included in the result
-            payload.
-        enabled:
-            If ``False``, the picker is non-interactive.
-        mode:
-            Picker mode override — ``"open"``, ``"save"``, or
-            ``"directory"``.
-        pick_directory:
-            If ``True``, forces directory-selection mode.
-        save_file:
-            If ``True``, the dialog opens in save mode.
-        file_name:
-            Default file name pre-filled in save dialogs.
-        dialog_title:
-            Title string shown in the native file-picker dialog.
-        initial_directory:
-            Absolute path of the directory the dialog starts in.
-        lock_parent_window:
-            If ``True``, the parent window is blocked while the picker
-            dialog is open (Windows only).
     """
 
 

@@ -7,7 +7,8 @@ from .._shared import Component, merge_props
 __all__ = ["Icon"]
 
 class Icon(Component):
-    """Renderable icon-value control for consistent icon payload handling.
+    """
+    Renderable icon-value control for consistent icon payload handling.
     
     ``Icon`` wraps runtime icon resolution and exposes a stable Python API for
     icon name/codepoint payloads plus optional visual surface fields. It is
@@ -27,22 +28,6 @@ class Icon(Component):
         tooltip="Settings",
     )
     ```
-    
-    Args:
-        icon:
-            Icon payload, typically a name string or codepoint integer.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer, including values such
-            as ``value``, ``name``, ``size``, ``color``, ``foreground``,
-            ``background``, ``bgcolor``, ``tooltip``, ``semantic_label``,
-            ``padding``, ``radius``, ``border_color``, ``border_width``,
-            ``auto_contrast``, and ``min_contrast``.
     """
 
 

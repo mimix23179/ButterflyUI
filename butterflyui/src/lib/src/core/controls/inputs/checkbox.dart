@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUICheckbox extends StatefulWidget {
@@ -8,6 +10,8 @@ class ButterflyUICheckbox extends StatefulWidget {
   final bool? value;
   final bool enabled;
   final bool tristate;
+  final bool autofocus;
+  final Object? events;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
@@ -19,6 +23,8 @@ class ButterflyUICheckbox extends StatefulWidget {
     required this.value,
     required this.enabled,
     required this.tristate,
+    this.autofocus = false,
+    this.events,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
     required this.sendEvent,
@@ -29,20 +35,32 @@ class ButterflyUICheckbox extends StatefulWidget {
 }
 
 class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
+  late final FocusNode _focusNode = FocusNode(
+    debugLabel: 'butterflyui:checkbox:${widget.controlId}',
+  );
   bool? _value;
 
   @override
   void initState() {
     super.initState();
     _value = _normalizeValue(widget.value);
-    if (widget.controlId.isNotEmpty) {
-      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
-    }
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUICheckbox oldWidget) {
     super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
     if (widget.value != oldWidget.value ||
         widget.tristate != oldWidget.tristate) {
       _value = _normalizeValue(widget.value);
@@ -51,9 +69,11 @@ class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
 
   @override
   void dispose() {
-    if (widget.controlId.isNotEmpty) {
-      widget.unregisterInvokeHandler(widget.controlId);
-    }
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -73,36 +93,38 @@ class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
     String method,
     Map<String, Object?> args,
   ) async {
-    switch (method) {
-      case 'set_value':
-        final requested = args.containsKey('value')
-            ? args['value']
-            : args['checked'];
-        setState(() {
-          _value = _normalizeValue(_coerceBoolOrNull(requested));
-        });
-        return _value;
-      case 'toggle':
-        setState(() {
-          _value = _nextToggleValue();
-        });
-        return _value;
-      case 'get_value':
-        return _value;
-      default:
-        throw Exception('Unknown invoke method: $method');
-    }
-  }
-
-  bool? _coerceBoolOrNull(Object? raw) {
-    if (raw == null) return null;
-    if (raw is bool) return raw;
-    if (raw is num) return raw != 0;
-    final s = raw.toString().toLowerCase();
-    if (s == 'true' || s == '1' || s == 'yes' || s == 'on') return true;
-    if (s == 'false' || s == '0' || s == 'no' || s == 'off') return false;
-    if (s == 'null' || s == 'none') return null;
-    return null;
+    return handleFormFieldInvoke(
+      context: context,
+      focusNode: _focusNode,
+      method: method,
+      args: args,
+      onUnhandled: (name, payload) async {
+        switch (name) {
+          case 'set_value':
+            final requested = payload.containsKey('value')
+                ? payload['value']
+                : payload['checked'];
+            setState(() {
+              _value = _normalizeValue(coerceShellBoolOrNull(requested));
+            });
+            return _value;
+          case 'toggle':
+            setState(() {
+              _value = _nextToggleValue();
+            });
+            return _value;
+          case 'get_value':
+          case 'get_state':
+            return <String, Object?>{
+              'value': _value,
+              'checked': _value == true,
+              'tristate': widget.tristate,
+            };
+          default:
+            throw Exception('Unknown checkbox method: $name');
+        }
+      },
+    );
   }
 
   void _handleChanged(bool? next) {
@@ -110,15 +132,18 @@ class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
     setState(() {
       _value = normalized;
     });
-    if (widget.controlId.isEmpty) return;
     final payload = <String, Object?>{
       'value': normalized,
       'checked': normalized == true,
       'tristate': widget.tristate,
     };
-    widget.sendEvent(widget.controlId, 'change', payload);
-    widget.sendEvent(widget.controlId, 'input', payload);
-    widget.sendEvent(widget.controlId, 'toggle', payload);
+    emitFormFieldValueEvents(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.events,
+      payload: payload,
+      sendEvent: widget.sendEvent,
+      emitToggle: true,
+    );
   }
 
   @override
@@ -126,19 +151,32 @@ class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
     final label = widget.label;
     final tristate = widget.tristate;
     final value = tristate ? _value : (_value ?? false);
-    if (label == null || label.trim().isEmpty) {
-      return Checkbox(
-        value: value,
-        tristate: tristate,
-        onChanged: widget.enabled ? _handleChanged : null,
-      );
-    }
-    return CheckboxListTile(
-      value: value,
-      tristate: tristate,
-      title: Text(label),
-      controlAffinity: ListTileControlAffinity.leading,
-      onChanged: widget.enabled ? _handleChanged : null,
+    final control = (label == null || label.trim().isEmpty)
+        ? Checkbox(
+            value: value,
+            tristate: tristate,
+            onChanged: widget.enabled ? _handleChanged : null,
+          )
+        : CheckboxListTile(
+            value: value,
+            tristate: tristate,
+            title: Text(label),
+            controlAffinity: ListTileControlAffinity.leading,
+            onChanged: widget.enabled ? _handleChanged : null,
+          );
+    return wrapFocusableFormField(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      onFocusChange: (value) {
+        emitSubscribedEvent(
+          controlId: widget.controlId,
+          subscribedEventsSource: widget.events,
+          name: value ? 'focus' : 'blur',
+          payload: <String, Object?>{'focused': value},
+          sendEvent: widget.sendEvent,
+        );
+      },
+      child: control,
     );
   }
 }

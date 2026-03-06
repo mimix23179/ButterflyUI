@@ -9,7 +9,8 @@ __all__ = ["VisualFx"]
 
 
 class VisualFx(Component):
-    """Composite visual-effects pipeline for staged post-processing around one child.
+    """
+    Composite visual-effects pipeline for staged post-processing around one child.
     
     ``VisualFx`` wraps a single child control and applies optional visual
     processing stages such as glow, glass blur, chromatic shift, and gradient
@@ -41,34 +42,6 @@ class VisualFx(Component):
         enable_gradient_sweep=True,
     )
     ```
-    
-    Args:
-        child:
-            The control to render and decorate with visual effect stages.
-        glow:
-            Mapping for glow stage parameters, such as color, blur radius,
-            spread, intensity, and blend mode (renderer dependent).
-        glass_blur:
-            Mapping for glass/frosted stage parameters, typically blur sigma,
-            tint color, and optional border/highlight knobs.
-        chromatic_shift:
-            Mapping for RGB shift/aberration stage parameters.
-        gradient_sweep:
-            Mapping for animated or static gradient sweep overlay parameters.
-        enable_glow:
-            Enables or disables the glow stage.
-        enable_glass_blur:
-            Enables or disables the glass blur stage.
-        enable_chromatic_shift:
-            Enables or disables the chromatic shift stage.
-        enable_gradient_sweep:
-            Enables or disables the gradient sweep stage.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

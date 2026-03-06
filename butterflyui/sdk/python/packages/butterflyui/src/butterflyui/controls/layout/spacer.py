@@ -6,11 +6,14 @@ from .._shared import Component, merge_props
 __all__ = ["Spacer"]
 
 class Spacer(Component):
-    """Flexible spacer that consumes available space inside a flex layout.
+    """
+    Flexible spacer that consumes available space inside a flex layout.
     
     Similar to ``FlexSpacer`` but exposes runtime control methods
     (``set_flex``, ``get_state``, ``emit``). ``flex`` controls the proportion
     of available space consumed relative to other flexible siblings.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -22,13 +25,6 @@ class Spacer(Component):
         events=["resize"],
     )
     ```
-    
-    Args:
-        flex:
-            Flex factor. Higher values claim more space relative to sibling
-            flex children. Defaults to ``1``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

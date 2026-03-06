@@ -16,6 +16,8 @@ class Splash(Component):
     ``skip_enabled`` adds a skip button. ``auto_start`` starts the splash
     immediately; ``hide_on_complete`` dismisses it when progress reaches 1.0.
     ``effect`` selects a visual transition effect.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,45 +31,6 @@ class Splash(Component):
         events=["skip", "complete"],
     )
     ```
-    
-    Args:
-        active:
-            When ``True`` the splash screen is visible.
-        color:
-            Background fill color of the splash screen.
-        duration_ms:
-            Minimum display duration in milliseconds before auto-hide.
-        radius:
-            Corner radius applied to the splash surface.
-        centered:
-            When ``True`` content is centered within the splash area.
-        title:
-            Primary heading text rendered by the control.
-        subtitle:
-            Secondary text shown below the title.
-        message:
-            Main message text rendered inside the control.
-        loading:
-            When ``True`` a loading spinner is shown.
-        progress:
-            Determinate progress value (0.0--1.0) for the progress bar.
-        show_progress:
-            When ``True`` a determinate progress bar is rendered.
-        skip_enabled:
-            When ``True`` a skip button is shown to dismiss early.
-        auto_start:
-            When ``True`` the splash starts automatically on mount.
-        hide_on_complete:
-            When ``True`` the splash dismisses automatically when
-            ``progress`` reaches 1.0.
-        min_duration_ms:
-            Minimum time in milliseconds the splash stays visible.
-        background:
-            Background widget or image shown behind the splash content.
-        effect:
-            Named visual transition effect applied to the splash.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

@@ -6,30 +6,21 @@ from .._shared import Component, merge_props
 __all__ = ["Divider"]
 
 class Divider(Component):
-    """Thin horizontal or vertical line separator.
+    """
+    Thin horizontal or vertical line separator.
     
     Renders a Material ``Divider`` (horizontal by default) or
     ``VerticalDivider`` when ``vertical`` is ``True``.  Useful for
     visually separating content sections within rows, columns, or
     cards.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        sep = bui.Divider(thickness=2, indent=16, color="#334155")
-    
-    Args:
-        vertical:
-            Controls whether renders a vertical divider instead of horizontal. Set it to ``False`` to disable this behavior.
-        thickness:
-            Line thickness in logical pixels.
-        indent:
-            Leading blank space before the divider line.
-        end_indent:
-            Trailing blank space after the divider line.
-        color:
-            Primary color value used by the control for text, icons, strokes, or accent surfaces.
+    ```python
+    import butterflyui as bui
+
+    sep = bui.Divider(thickness=2, indent=16, color="#334155")
+    ```
     """
 
 

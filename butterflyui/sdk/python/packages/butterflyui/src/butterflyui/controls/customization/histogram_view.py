@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["HistogramView"]
 
 class HistogramView(Component):
-    """Standalone histogram bar chart rendered via ``CustomPaint``.
+    """
+    Standalone histogram bar chart rendered via ``CustomPaint``.
     
     Each bin value is drawn as a vertical bar whose height is proportional
     to the value. The default bar colour is ``#60a5fa``. A background
@@ -21,24 +22,6 @@ class HistogramView(Component):
         show_grid=True,
     )
     ```
-    
-    Args:
-        bins:
-            List of bin values (relative bar heights, ``0.0``–``1.0``).
-        channels:
-            Per-channel histograms. Each item is a dict with ``"bins"`` and ``"color"`` keys.
-        domain:
-            Domain range ``[min, max]`` used for axis labelling.
-        normalized:
-            If ``True``, bin values are normalised to the tallest bin.
-        show_grid:
-            If ``True``, a background reference grid is drawn.
-        compact:
-            If ``True``, the chart renders at a shorter height (``84`` px instead of ``140`` px).
-        height:
-            Explicit canvas height in logical pixels. Overrides ``compact`` when set.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

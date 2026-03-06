@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ListView"]
 
 class ListView(Component):
-    """Vertical scrollable list container for child controls or data-item
+    """
+    Vertical scrollable list container for child controls or data-item
     payloads with optional separator dividers.
     
     When explicit ``children`` are passed they are rendered directly as
@@ -26,10 +27,6 @@ class ListView(Component):
     ```
     
     Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        separator:
-            If ``True``, a ``Divider`` is inserted between each row.
     """
 
 

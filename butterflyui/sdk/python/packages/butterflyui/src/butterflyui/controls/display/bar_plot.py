@@ -7,35 +7,24 @@ from .bar_chart import BarChart
 __all__ = ["BarPlot"]
 
 class BarPlot(BarChart):
-    """Simplified bar-chart alias for quick single-series plots.
+    """
+    Simplified bar-chart alias for quick single-series plots.
     
     Extends ``BarChart`` with a reduced parameter set tailored for
     single-series data.  Multi-series features (``datasets``,
     ``grouped``, ``stacked``) are omitted — pass ``values`` and an
     optional ``color`` for a one-liner bar plot.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        plot = bui.BarPlot(
-            values=[4, 8, 15, 16, 23, 42],
-            color="#7c3aed",
-        )
-    
-    Args:
-        values:
-            Numeric bar values for a single series.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        labels:
-            Ordered list of label strings rendered by the control.
-        fill:
-            Fill color or paint descriptor used when rendering the chart or visual surface.
-        color:
-            Bar colour applied to every bar.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    plot = bui.BarPlot(
+        values=[4, 8, 15, 16, 23, 42],
+        color="#7c3aed",
+    )
+    ```
     """
 
 

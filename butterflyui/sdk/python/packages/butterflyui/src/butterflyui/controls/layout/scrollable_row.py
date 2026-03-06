@@ -6,12 +6,15 @@ from .._shared import Component, merge_props
 __all__ = ["ScrollableRow"]
 
 class ScrollableRow(Component):
-    """Horizontally scrollable row of children.
+    """
+    Horizontally scrollable row of children.
     
     The runtime renders a horizontal ``ListView``-backed row. ``spacing`` adds
     a gap between children; ``reverse`` flips the scroll direction.
     ``content_padding`` adds padding around the scrollable area.
     ``initial_offset`` sets the starting scroll position.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -22,18 +25,6 @@ class ScrollableRow(Component):
         events=["scroll"],
     )
     ```
-    
-    Args:
-        spacing:
-            Horizontal gap between children in logical pixels.
-        reverse:
-            When ``True`` children are laid out in reverse scroll order.
-        content_padding:
-            Padding applied around the scrollable content area.
-        initial_offset:
-            Starting scroll offset in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

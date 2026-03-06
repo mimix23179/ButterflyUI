@@ -15,6 +15,8 @@ class SplitView(Component):
     ``divider_size`` controls the visible width or height of the divider.
     For bounded drag behavior prefer ``SplitPane``.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -26,20 +28,6 @@ class SplitView(Component):
         draggable=True,
     )
     ```
-
-    Args:
-        axis:
-            Split direction. Values: ``"horizontal"``, ``"vertical"``.
-        ratio:
-            Initial fractional position of the divider (0.0-1.0).
-        min_ratio:
-            Minimum allowed divider ratio during drag.
-        max_ratio:
-            Maximum allowed divider ratio during drag.
-        draggable:
-            When ``True`` the user can drag the divider to resize panels.
-        divider_size:
-            Width or height of the divider affordance in logical pixels.
     """
 
 

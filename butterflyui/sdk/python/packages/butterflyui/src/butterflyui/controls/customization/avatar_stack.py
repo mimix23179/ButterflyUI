@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["AvatarStack"]
 
 class AvatarStack(Component):
-    """Renders a horizontal row of overlapping circular avatar bubbles.
+    """
+    Renders a horizontal row of overlapping circular avatar bubbles.
     
     Each avatar shows the first character of its ``label`` (or ``name``) in
     a coloured circle. When there are more avatars than `max`, an overflow
@@ -29,26 +30,6 @@ class AvatarStack(Component):
         max=5,
     )
     ```
-    
-    Args:
-        avatars:
-            Ordered list of avatar entries rendered by the stack. Each item can be a plain label string or a mapping with avatar metadata such as label, color, text color, and id.
-        size:
-            Diameter of each avatar circle in logical pixels. Defaults to ``28``.
-        overlap:
-            Horizontal overlap between adjacent avatars in logical pixels. Defaults to ``8``.
-        max:
-            Maximum number of avatars to display before showing an overflow indicator. Avatars beyond this count are hidden.
-        max_visible:
-            Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
-        max_count:
-            Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
-        overflow_label:
-            Custom text for the overflow chip. When omitted, the runtime displays ``"+N"`` where ``N`` is the hidden count.
-        stack_order:
-            Set to ``"reverse"`` to render avatars in reversed stacking order.
-        expand_on_hover:
-            If ``True``, the stack expands to reveal hidden avatars on hover.
     """
 
 

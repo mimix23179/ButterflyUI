@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["SceneView"]
 
 class SceneView(Component):
-    """Scene surface that can display a background, grid, axes, and camera
+    """
+    Scene surface that can display a background, grid, axes, and camera
     viewport.
     
     Acts as a container for editor content with configurable visual
@@ -23,18 +24,6 @@ class SceneView(Component):
         camera={"zoom": 1.0, "x": 0, "y": 0},
     )
     ```
-    
-    Args:
-        background:
-            Background colour of the scene surface.
-        show_grid:
-            If ``True``, a reference grid is drawn on the scene.
-        show_axes:
-            If ``True``, X/Y coordinate axes are drawn.
-        camera:
-            Camera/viewport configuration dict with keys such as ``"zoom"``, ``"x"``, and ``"y"``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

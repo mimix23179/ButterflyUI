@@ -15,6 +15,8 @@ class Radio(Component):
     Selecting a different option emits a ``change`` event with the
     new ``value`` and ``index``.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -24,18 +26,6 @@ class Radio(Component):
         label="Choose one",
     )
     ```
-
-    Args:
-        options:
-            List of option items.  Each entry may be a plain string
-            or a mapping with ``"label"`` and ``"value"`` keys.
-        index:
-            Zero-based index of the initially selected option.
-        value:
-            Value of the initially selected option.  Takes precedence
-            over ``index`` when both are provided.
-        label:
-            Optional label rendered above the radio group.
     """
 
 

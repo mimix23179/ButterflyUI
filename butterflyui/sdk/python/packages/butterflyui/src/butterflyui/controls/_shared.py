@@ -344,52 +344,6 @@ class Component(LayoutControl):
     
     Any non-``None`` keyword arguments are merged into the outgoing ``props``
     payload, which keeps Python wrappers and Dart runtime props loosely coupled.
-    
-    Args:
-        child:
-            Single convenience child appended to the control tree.
-        variant:
-            Variant token forwarded into the shared style pipeline.
-        tone:
-            Tone token forwarded into the shared style pipeline.
-        size:
-            Size token forwarded into the shared style pipeline.
-        density:
-            Density token forwarded into the shared style pipeline.
-        classes:
-            Class tokens used by recipes, packs, or runtime selectors.
-        modifiers:
-            Base modifier list applied to the control.
-        on_hover_modifiers:
-            Modifiers activated while the pointer hovers the control.
-        on_pressed_modifiers:
-            Modifiers activated while the control is pressed.
-        on_focus_modifiers:
-            Modifiers activated while the control is focused.
-        motion:
-            Base motion configuration for the control.
-        enter_motion:
-            Motion played when the control enters.
-        exit_motion:
-            Motion played when the control exits.
-        hover_motion:
-            Motion played while the pointer hovers the control, such as lift, opacity, or highlight feedback.
-        press_motion:
-            Motion played while the control is being pressed, such as scale, opacity, or elevation feedback.
-        effects:
-            Visual effects applied by the shared renderer pipeline.
-        effect_order:
-            Ordering hint controlling when effects are applied.
-        effect_clip:
-            Clip behavior or shape used when rendering effects.
-        effect_target:
-            Target surface for shared effects.
-        style_slots:
-            Slot-specific local style overrides.
-        state:
-            Active state token forwarded into styling and motion resolution.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
     """
     control_type: str = ""
 

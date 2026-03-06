@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["GradientSweep"]
 
 class GradientSweep(Component):
-    """Animated sweep-gradient overlay that rotates through configurable
+    """
+    Animated sweep-gradient overlay that rotates through configurable
     colours using a ``ShaderMask``.
     
     The Flutter runtime paints a ``SweepGradient`` via ``ShaderMask``
@@ -16,51 +17,18 @@ class GradientSweep(Component):
     resumed, and the colour list or angle can be updated at runtime
     through invoke methods.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        sweep = bui.GradientSweep(
-            bui.Text("Neon"),
-            colors=["#22d3ee", "#a78bfa", "#f472b6"],
-            duration_ms=2000,
-            opacity=0.6,
-        )
-    
-    Args:
-        colors:
-            List of gradient-stop colours.  Defaults to a built-in
-            cyan / purple / pink / green palette if empty.
-        stops:
-            Optional list of gradient stop positions (``0.0`` –
-            ``1.0``), one per colour.  Length must match *colors*.
-        duration_ms:
-            Full rotation period in milliseconds.  Defaults
-            to ``1800``; clamped to ``1 – 600 000``.
-        duration:
-            Backward-compatible alias for ``*duration_ms*``. When both fields are provided, ``*duration_ms*`` takes precedence and this alias is kept only for compatibility.
-        angle:
-            Static base angle in **degrees** added to the animated
-            rotation.
-        start_angle:
-            Sweep gradient start angle in degrees.  Defaults
-            to ``0``.
-        end_angle:
-            Sweep gradient end angle in degrees.  Defaults to
-            ``360``.
-        opacity:
-            Shader mask opacity (``0.0`` – ``1.0``).  Defaults to
-            ``0.6``.
-        loop:
-            When ``True`` (default) the rotation repeats
-            indefinitely.
-        autoplay:
-            When ``True`` (default) the animation starts on
-            mount.
-        play:
-            Explicit play flag; ``True`` starts, ``False`` pauses.
-        playing:
-            Backward-compatible alias for ``*play*``. When both fields are provided, ``*play*`` takes precedence and this alias is kept only for compatibility.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    sweep = bui.GradientSweep(
+        bui.Text("Neon"),
+        colors=["#22d3ee", "#a78bfa", "#f472b6"],
+        duration_ms=2000,
+        opacity=0.6,
+    )
+    ```
     """
 
 

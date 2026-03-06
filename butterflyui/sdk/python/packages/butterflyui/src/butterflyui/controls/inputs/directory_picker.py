@@ -15,15 +15,13 @@ class DirectoryPicker(FilePicker):
     from :class:`FilePicker` (``pick``, ``pick_directory``,
     ``get_files``, ``clear``) are available.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
     bui.DirectoryPicker(label="Choose output folder")
     ```
-
-    Args:
-        label:
-            Button/field label displayed in the UI.
     """
 
 

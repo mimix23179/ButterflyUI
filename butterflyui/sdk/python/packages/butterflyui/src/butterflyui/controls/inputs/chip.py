@@ -20,6 +20,8 @@ class Chip(Component):
     so color accents, transparency, and effect/motion styling remain
     consistent with Candy/Skins contracts.
     
+    Example:
+    
     ```python
     import butterflyui as bui
     
@@ -33,44 +35,6 @@ class Chip(Component):
         events=["change"],
     )
     ```
-    
-    Args:
-        label:
-            Label text for single-chip mode.
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        options:
-            Option descriptors for grouped mode.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        values:
-            Selected values for grouped multi-select mode.
-        multi_select:
-            Enables multi-selection when rendering grouped chips.
-        selected:
-            Selected state for single-chip mode.
-        enabled:
-            If ``False``, chip interactions are disabled.
-        dismissible:
-            If ``True``, the chip can be dismissed.
-        color:
-            Color override for chip background/accent treatment.
-        dense:
-            Enables a denser layout with reduced gaps, padding, or row height.
-        spacing:
-            Horizontal spacing between chips in grouped mode.
-        run_spacing:
-            Vertical spacing between chip rows in wrapped layouts.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
 

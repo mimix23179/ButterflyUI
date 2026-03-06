@@ -9,7 +9,8 @@ __all__ = ["AlertDialog"]
 
 
 class AlertDialog(Component):
-    """Dialog overlay for alerts, confirms, and modal prompts.
+    """
+    Dialog overlay for alerts, confirms, and modal prompts.
     
     ``AlertDialog`` is the canonical replacement for legacy ``modal`` control
     APIs. You can provide a fully custom ``child`` node or let the wrapper
@@ -17,6 +18,8 @@ class AlertDialog(Component):
     
     The action row accepts normal button controls, so it works directly with
     icon-enabled button variants and declarative action dispatch.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,48 +32,6 @@ class AlertDialog(Component):
         dismissible=False,
     )
     ```
-    
-    Args:
-        title:
-            Title node or primitive text value.
-        content:
-            Body node or primitive text value.
-        actions:
-            Footer action descriptors or primitive labels.
-        child:
-            Fully custom dialog body control. If provided, auto composition is
-            skipped.
-        open:
-            If ``True``, the dialog is visible.
-        dismissible:
-            If ``True``, outside taps dismiss the dialog.
-        close_on_escape:
-            If ``True``, Escape dismisses the dialog.
-        trap_focus:
-            If ``True``, keyboard focus remains inside the dialog while open.
-        duration_ms:
-            Open/close transition duration in milliseconds.
-        transition:
-            Explicit transition descriptor mapping.
-        transition_type:
-            Named transition preset (for example ``"fade"``, ``"slide"``,
-            ``"pop"``, ``"pop_from_rect"``).
-        source_rect:
-            Optional transition origin rectangle.
-        scrim_color:
-            Color used for the modal scrim or backdrop behind the overlay.
-        modal:
-            Alias for modal behavior. When set, it drives default
-            ``dismissible`` (``modal=True`` implies ``dismissible=False``).
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline,
-            including style/modifier/motion/effects and transparency hints.
     """
 
 

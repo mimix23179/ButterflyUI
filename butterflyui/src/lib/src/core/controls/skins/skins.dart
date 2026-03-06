@@ -752,20 +752,28 @@ Widget _buildPage(SkinsContext ctx) {
 Widget _buildRow(SkinsContext ctx) {
   // Use the existing row control with skin tokens
   return buildRowControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
 Widget _buildColumn(SkinsContext ctx) {
   // Use the existing column control with skin tokens
   return buildColumnControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
@@ -777,10 +785,14 @@ Widget _buildStack(SkinsContext ctx) {
 Widget _buildWrap(SkinsContext ctx) {
   // Use the existing wrap control with skin tokens
   return buildWrapControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
@@ -799,16 +811,28 @@ Widget _buildAlign(SkinsContext ctx) {
 
 Widget _buildContainer(SkinsContext ctx) {
   // Use the existing container control with skin tokens
-  return buildContainerControl(ctx.merged, ctx.rawChildren, ctx.buildChild);
+  return buildContainerControl(
+    ctx.controlId,
+    ctx.merged,
+    ctx.rawChildren,
+    ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
+  );
 }
 
 Widget _buildCard(SkinsContext ctx) {
   // Use the existing card control with skin tokens
   return buildCardControl(
+    ctx.controlId,
     ctx.merged,
     ctx.rawChildren,
     _createCandyTokensFromSkins(ctx.tokens),
     ctx.buildChild,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
+    ctx.sendEvent,
   );
 }
 
@@ -826,6 +850,8 @@ Widget _buildButton(SkinsContext ctx) {
     ctx.controlId,
     buttonProps,
     candyTokens,
+    ctx.registerInvokeHandler,
+    ctx.unregisterInvokeHandler,
     ctx.sendEvent,
   );
 }

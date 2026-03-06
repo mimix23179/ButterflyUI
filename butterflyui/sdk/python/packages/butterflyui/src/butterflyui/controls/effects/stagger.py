@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Stagger"]
 
 class Stagger(Component):
-    """Staggered fade-in animation that reveals children one after
+    """
+    Staggered fade-in animation that reveals children one after
     another with cascading delays.
     
     The Flutter runtime wraps each child in a ``FadeTransition`` +
@@ -15,41 +16,20 @@ class Stagger(Component):
     configurable per-item delay (``stagger_ms``), producing a
     sequential entrance effect.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        stagger = bui.Stagger(
-            bui.Text("Line 1"),
-            bui.Text("Line 2"),
-            bui.Text("Line 3"),
-            stagger_ms=60,
-            duration_ms=500,
-            direction="vertical",
-        )
-    
-    Args:
-        stagger_ms:
-            Per-item delay in milliseconds between successive
-            child animations (``0`` – ``4000``).  Defaults to ``40``.
-        stagger:
-            Backward-compatible alias for ``*stagger_ms*``. When both fields are provided, ``*stagger_ms*`` takes precedence and this alias is kept only for compatibility.
-        direction:
-            Layout and slide direction — ``"vertical"``
-            (default, slides from below) or ``"horizontal"`` (slides
-            from the right).
-        play:
-            When ``True`` (default) the stagger starts on mount;
-            set to ``False`` to defer.
-        duration_ms:
-            Total animation controller duration in
-            milliseconds.  Defaults to ``420``; clamped to
-            ``50 – 60 000``.
-        curve:
-            Named easing curve (e.g. ``"ease_out_cubic"``).
-            Defaults to ``ease_out_cubic``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    stagger = bui.Stagger(
+        bui.Text("Line 1"),
+        bui.Text("Line 2"),
+        bui.Text("Line 3"),
+        stagger_ms=60,
+        duration_ms=500,
+        direction="vertical",
+    )
+    ```
     """
 
 

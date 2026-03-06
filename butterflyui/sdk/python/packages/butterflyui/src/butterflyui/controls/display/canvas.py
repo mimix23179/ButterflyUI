@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Canvas"]
 
 class Canvas(Component):
-    """Drawable canvas surface for simple vector shapes.
+    """
+    Drawable canvas surface for simple vector shapes.
     
     Renders a ``Container`` with a ``CustomPaint`` layer that draws
     lines, rectangles, and circles from the ``shapes`` list.  Each
@@ -19,29 +20,19 @@ class Canvas(Component):
     ``clear`` to remove all shapes, and ``get_state`` to retrieve
     the current shape count.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        canvas = bui.Canvas(
-            shapes=[
-                {"type": "rect", "x": 10, "y": 10, "width": 80, "height": 40, "color": "#2563eb"},
-                {"type": "circle", "x": 60, "y": 60, "radius": 20, "color": "#7c3aed"},
-            ],
-            background="#0f172a",
-        )
-    
-    Args:
-        strokes:
-            Ordered list of stroke descriptors rendered by the canvas surface.
-        shapes:
-            List of shape dicts drawn by the ``CustomPainter``. Each dict should contain ``"type"`` plus geometry keys.
-        background:
-            Background colour for the canvas container.
-        grid:
-            Controls whether a reference grid is drawn behind the shapes. Set it to ``False`` to disable this behavior.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    canvas = bui.Canvas(
+        shapes=[
+            {"type": "rect", "x": 10, "y": 10, "width": 80, "height": 40, "color": "#2563eb"},
+            {"type": "circle", "x": 60, "y": 60, "radius": 20, "color": "#7c3aed"},
+        ],
+        background="#0f172a",
+    )
+    ```
     """
 
 

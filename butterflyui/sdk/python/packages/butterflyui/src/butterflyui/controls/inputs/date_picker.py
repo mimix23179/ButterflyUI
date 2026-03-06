@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DatePicker"]
 
 class DatePicker(Component):
-    """Date picker supporting single date, range, and span workflows.
+    """
+    Date picker supporting single date, range, and span workflows.
     
     ``DatePicker`` unifies legacy controls into one API via ``mode``:
     - ``"single"`` replaces ``date_select``
@@ -15,6 +16,8 @@ class DatePicker(Component):
     
     Use :meth:`open` to programmatically open the picker and :meth:`set_value`
     to update single or range selections from server-side handlers.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -26,34 +29,6 @@ class DatePicker(Component):
         max_date="2099-12-31",
     )
     ```
-    
-    Args:
-        value:
-            Selected date as ``"YYYY-MM-DD"`` when ``mode="single"``.
-        start:
-            Range start date when ``mode`` is ``"range"`` or ``"span"``.
-        end:
-            Range end date when ``mode`` is ``"range"`` or ``"span"``.
-        mode:
-            ``"single"`` (default), ``"range"``, or ``"span"``.
-        label:
-            Floating label text shown above the field.
-        placeholder:
-            Hint text shown when no date is selected.
-        min_date:
-            Earliest selectable date as ``"YYYY-MM-DD"``.
-        max_date:
-            Latest selectable date as ``"YYYY-MM-DD"``.
-        enabled:
-            If ``False``, the field is non-interactive.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

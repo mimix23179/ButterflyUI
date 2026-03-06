@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
@@ -10,6 +8,8 @@ Widget buildButtonControl(
   String? controlId,
   Map<String, Object?> props,
   CandyTokens tokens,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final resolvedId = controlId ?? '';
@@ -19,61 +19,14 @@ Widget buildButtonControl(
               'elevated')
           .toLowerCase()
           .trim();
-  final variant = rawVariant == 'filled' ? 'elevated' : rawVariant;
-  final spec = buildButtonVisualSpec(
+  final variant = rawVariant.isEmpty ? 'elevated' : rawVariant;
+  return buildButtonVariantControl(
+    controlId: resolvedId,
     props: props,
     tokens: tokens,
     variant: variant,
-    fallbackLabel: 'Button',
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
   );
-  final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
-  final content = buildButtonContent(spec: spec, fallbackLabel: 'Button');
-
-  void onPressed() {
-    unawaited(maybeDispatchWindowAction(props));
-    emitControlPressEvents(
-      controlId: resolvedId,
-      props: props,
-      payload: buildBasePressPayload(
-        label: spec.label,
-        variant: variant,
-        props: props,
-      ),
-      sendEvent: sendEvent,
-    );
-  }
-
-  Widget button;
-  switch (variant) {
-    case 'text':
-      button = TextButton(
-        onPressed: enabled ? onPressed : null,
-        style: spec.style,
-        child: content,
-      );
-      break;
-    case 'outlined':
-      button = OutlinedButton(
-        onPressed: enabled ? onPressed : null,
-        style: spec.style,
-        child: content,
-      );
-      break;
-    case 'filled':
-      button = FilledButton(
-        onPressed: enabled ? onPressed : null,
-        style: spec.style,
-        child: content,
-      );
-      break;
-    case 'elevated':
-    default:
-      button = ElevatedButton(
-        onPressed: enabled ? onPressed : null,
-        style: spec.style,
-        child: content,
-      );
-      break;
-  }
-  return applyControlTransparency(child: button, props: props);
 }

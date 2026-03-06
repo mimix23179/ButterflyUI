@@ -7,31 +7,22 @@ from .sparkline import Sparkline
 __all__ = ["SparkPlot"]
 
 class SparkPlot(Sparkline):
-    """Alias for ``Sparkline`` with event subscription support.
+    """
+    Alias for ``Sparkline`` with event subscription support.
     
     Extends ``Sparkline`` with an explicit ``events`` parameter for
     subscribing to runtime events.  Behaviour is otherwise identical.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        plot = bui.SparkPlot(
-            values=[1, 4, 2, 5, 3],
-            color="#059669",
-        )
-    
-    Args:
-        values:
-            Numeric data points for the sparkline.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        fill:
-            Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
-        color:
-            Primary color value used by the control for text, icons, strokes, or accent surfaces.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    plot = bui.SparkPlot(
+        values=[1, 4, 2, 5, 3],
+        color="#059669",
+    )
+    ```
     """
 
 

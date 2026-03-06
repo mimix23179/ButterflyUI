@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Dropdown"]
 
 class Dropdown(Component):
-    """Non-editable drop-down select rendered as a ``Combobox``.
+    """
+    Non-editable drop-down select rendered as a ``Combobox``.
     
     Extends :class:`Combobox` but maps to the ``dropdown`` control type
     on the Flutter side, which may render as a pure select-only
     dropdown rather than an editable text field.  Supports the same
     option, grouping, async-source, and imperative methods as
     :class:`Combobox`.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -23,34 +26,6 @@ class Dropdown(Component):
         value="Medium",
     )
     ```
-    
-    Args:
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        options:
-            List of option items (strings or ``{"label", "value"}``
-            mappings).
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        groups:
-            List of grouped option sections, each with
-            ``"label"`` and ``"options"`` keys.
-        label:
-            Floating label text above the field.
-        hint:
-            Hint/placeholder text shown when nothing is selected.
-        placeholder:
-            Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
-        loading:
-            If ``True``, a progress indicator is shown.
-        async_source:
-            Async data source identifier or configuration used to fetch items for this control on demand.
-        debounce_ms:
-            Debounce delay in milliseconds for async input events.
-        enabled:
-            If ``False``, the control is non-interactive.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Video"]
 
 class Video(Component):
-    """Video player control with playback management.
+    """
+    Video player control with playback management.
     
     Embeds a video player backed by the platform media stack.  Supports
     ``autoplay``, ``loop``, ``muted``, and optional native ``controls``.
@@ -16,42 +17,18 @@ class Video(Component):
     Use ``play``, ``pause``, ``set_position``, and ``get_state`` to
     manage playback programmatically.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        vid = bui.Video(
-            src="/media/intro.mp4",
-            poster="/media/thumb.jpg",
-            autoplay=False,
-            controls=True,
-        )
-    
-    Args:
-        src:
-            URI or file path of the video source.
-        poster:
-            Image URL shown as a thumbnail before playback.
-        autoplay:
-            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
-        loop:
-            Controls whether playback restarts automatically after the media reaches the end of the stream.
-        muted:
-            Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
-        controls:
-            Controls whether the platform's native playback controls are shown, such as play/pause, seek, volume, or fullscreen actions when available.
-        fit:
-            Box-fit mode (e.g. ``"contain"``, ``"cover"``).
-        volume:
-            Initial volume level from ``0.0`` to ``1.0``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    ```python
+    import butterflyui as bui
+
+    vid = bui.Video(
+        src="/media/intro.mp4",
+        poster="/media/thumb.jpg",
+        autoplay=False,
+        controls=True,
+    )
+    ```
     """
 
 

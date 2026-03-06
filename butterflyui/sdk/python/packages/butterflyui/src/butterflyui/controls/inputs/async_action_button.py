@@ -7,7 +7,8 @@ from .button import Button
 __all__ = ["AsyncActionButton"]
 
 class AsyncActionButton(Button):
-    """Button with built-in asynchronous busy/loading behavior.
+    """
+    Button with built-in asynchronous busy/loading behavior.
     
     ``AsyncActionButton`` extends :class:`Button` by synchronizing ``busy`` and
     ``loading`` state flags and exposing helpers to toggle busy state through
@@ -17,6 +18,8 @@ class AsyncActionButton(Button):
     While busy, the renderer can show a spinner and optional ``busy_label``;
     when ``disabled_while_busy`` is enabled, presses are ignored until the
     operation completes.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -28,44 +31,6 @@ class AsyncActionButton(Button):
         disabled_while_busy=True,
     )
     ```
-    
-    Args:
-        label:
-            Button text. ``text`` takes precedence when both are set.
-        text:
-            Button text alias for ``label``.
-        value:
-            Arbitrary payload emitted with click events.
-        variant:
-            Optional visual variant (for example ``"filled"`` or ``"outlined"``).
-        busy:
-            Controls whether the control should render its busy or in-progress state instead of its idle presentation.
-        loading:
-            Backward-compatible alias for ``busy``. When both fields are provided, ``busy`` takes precedence and this alias is kept only for compatibility.
-        disabled_while_busy:
-            If ``True``, disables interaction while busy.
-        busy_label:
-            Replacement label text shown while the control is in its busy state.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        action:
-            Declarative action descriptor fired on press.
-        action_id:
-            Registered action ID to dispatch on press.
-        action_event:
-            Event name forwarded to the action dispatcher.
-        action_payload:
-            Extra payload mapping for action dispatch.
-        actions:
-            Action descriptor list executed on press.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer.
     """
 
 

@@ -7,7 +7,8 @@ from .list_tile import ListTile
 __all__ = ["ItemTile"]
 
 class ItemTile(ListTile):
-    """Selectable list tile tailored for data-oriented item rows, extending
+    """
+    Selectable list tile tailored for data-oriented item rows, extending
     ``ListTile`` with an ``events`` convenience parameter and invoke
     helpers for runtime state management.
     
@@ -30,24 +31,6 @@ class ItemTile(ListTile):
         selected=False,
     )
     ```
-    
-    Args:
-        title:
-            Primary title text displayed on the tile.
-        subtitle:
-            Secondary supporting text rendered beneath the title.
-        leading_icon:
-            Icon name or data rendered at the leading edge of the tile.
-        trailing_icon:
-            Icon name or data rendered at the trailing edge.
-        meta:
-            Additional metadata string displayed as trailing text or forwarded in event payloads.
-        selected:
-            If ``True``, the tile renders in its selected visual state.
-        enabled:
-            If ``False``, the tile is visually dimmed and non-interactive.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

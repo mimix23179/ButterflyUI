@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["BarChart"]
 
 class BarChart(Component):
-    """Vertical bar chart rendered with ``CustomPaint``.
+    """
+    Vertical bar chart rendered with ``CustomPaint``.
     
     Draws one or more series of vertical bars using a lightweight
     ``CustomPainter``.  Single-series data is passed via ``values``;
@@ -18,39 +19,17 @@ class BarChart(Component):
     
     Use ``set_data`` to replace the chart data at runtime.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        chart = bui.BarChart(
-            values=[12, 25, 18, 30, 22],
-            labels=["Mon", "Tue", "Wed", "Thu", "Fri"],
-            color="#2563eb",
-        )
-    
-    Args:
-        values:
-            Primary list of numeric bar values.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        labels:
-            Category labels displayed along the x-axis.
-        datasets:
-            List of dataset mappings, each containing a ``"values"`` key, for multi-series bar charts.
-        grouped:
-            Controls whether multiple datasets are drawn side-by-side. Set it to ``False`` to disable this behavior.
-        stacked:
-            Controls whether datasets are stacked vertically. Set it to ``False`` to disable this behavior.
-        fill:
-            Whether bars are solid-filled (default ``True``).
-        color:
-            Primary bar colour forwarded to the painter.
-        animate:
-            Controls whether the runtime animates data transitions. Set it to ``False`` to disable this behavior.
-        show_tooltip:
-            Controls whether a tooltip appears on bar hover. Set it to ``False`` to disable this behavior.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    chart = bui.BarChart(
+        values=[12, 25, 18, 30, 22],
+        labels=["Mon", "Tue", "Wed", "Thu", "Fri"],
+        color="#2563eb",
+    )
+    ```
     """
 
 

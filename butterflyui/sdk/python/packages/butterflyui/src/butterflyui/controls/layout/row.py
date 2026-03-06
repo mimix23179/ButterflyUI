@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Row"]
 
 class Row(Component):
-    """Horizontal flex container that arranges children in a row.
+    """
+    Horizontal flex container that arranges children in a row.
 
     The runtime renders a Flutter ``Row`` widget.  Children are laid
     out horizontally with configurable ``spacing`` (alias ``gap``) between
@@ -15,27 +16,19 @@ class Row(Component):
     (start, center, end, stretch).  Child controls may use ``expanded``
     or set ``flex`` in their props to fill available space.
 
-    Example::
+    Example:
 
-        import butterflyui as bui
+    ```python
+    import butterflyui as bui
 
-        bui.Row(
-            bui.Text("Left"),
-            bui.Text("Center"),
-            bui.Text("Right"),
-            spacing=16,
-            main_axis="space_between",
-        )
-
-    Args:
-        spacing:
-            Horizontal gap between children in logical pixels.  Aliased as ``gap``.
-        main_axis:
-            Main-axis alignment for the row.  Values: ``start``, ``center``,
-            ``end``, ``space_between``, ``space_around``, ``space_evenly``.
-        cross_axis:
-            Cross-axis alignment for children.  Values: ``start``, ``center``,
-            ``end``, ``stretch``, ``baseline``.
+    bui.Row(
+        bui.Text("Left"),
+        bui.Text("Center"),
+        bui.Text("Right"),
+        spacing=16,
+        main_axis="space_between",
+    )
+    ```
     """
 
 

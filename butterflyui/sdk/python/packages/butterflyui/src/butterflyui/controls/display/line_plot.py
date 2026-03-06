@@ -7,33 +7,24 @@ from .line_chart import LineChart
 __all__ = ["LinePlot"]
 
 class LinePlot(LineChart):
-    """Simplified line-chart alias for quick single-series plots.
+    """
+    Simplified line-chart alias for quick single-series plots.
     
     Extends ``LineChart`` with an identical parameter surface.  Use
     this when you want a semantic distinction (e.g. a scientific
     "plot" vs. a dashboard "chart") without any behavioural
     difference.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        plot = bui.LinePlot(
-            values=[1.2, 3.4, 2.1, 5.6],
-            color="#059669",
-        )
-    
-    Args:
-        values:
-            Numeric data points for the polyline.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        fill:
-            Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
-        color:
-            Primary color value used by the control for text, icons, strokes, or accent surfaces.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    plot = bui.LinePlot(
+        values=[1.2, 3.4, 2.1, 5.6],
+        color="#059669",
+    )
+    ```
     """
 
 

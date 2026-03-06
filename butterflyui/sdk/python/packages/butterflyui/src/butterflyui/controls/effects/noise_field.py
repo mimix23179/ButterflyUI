@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["NoiseField"]
 
 class NoiseField(Component):
-    """Procedural noise-texture field rendered with a ``CustomPainter``.
+    """
+    Procedural noise-texture field rendered with a ``CustomPainter``.
     
     The Flutter runtime paints a grid of 2×2-pixel rectangles whose
     alpha is derived from a seeded ``Random`` multiplied by
@@ -14,39 +15,19 @@ class NoiseField(Component):
     ``TweenAnimationBuilder`` allows an optional animated transition.
     Tapping the widget increments the seed and emits a ``"tap"`` event.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        noise = bui.NoiseField(
-            seed=42,
-            intensity=0.35,
-            color="#ffffff",
-            height=120,
-            animated=True,
-        )
-    
-    Args:
-        seed:
-            Integer seed for the ``Random`` generator.  Defaults to
-            ``0``.
-        intensity:
-            Per-pixel alpha multiplier (``0.0`` – ``1.0``).
-            Defaults to ``0.35``.
-        speed:
-            Reserved — animation speed multiplier.
-        color:
-            Pixel colour.  Defaults to white.
-        kind:
-            Reserved — noise algorithm variant name.
-        height:
-            Explicit height of the ``SizedBox`` containing the
-            canvas.  Defaults to ``100`` logical pixels.
-        animated:
-            When ``True`` the painter transitions via a
-            ``TweenAnimationBuilder``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    noise = bui.NoiseField(
+        seed=42,
+        intensity=0.35,
+        color="#ffffff",
+        height=120,
+        animated=True,
+    )
+    ```
     """
 
 

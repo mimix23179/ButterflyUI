@@ -9,11 +9,14 @@ __all__ = ["Switch"]
 
 
 class Switch(Component):
-    """Boolean switch input with optional segmented presentation.
+    """
+    Boolean switch input with optional segmented presentation.
     
     ``Switch`` now also covers segmented-switch use cases through ``mode`` and
     ``segments``. In default mode it behaves like a standard on/off toggle;
     segmented mode allows richer labels and grouped state presentation.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -25,29 +28,6 @@ class Switch(Component):
         off_label="Off",
     )
     ```
-    
-    Args:
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        label:
-            Primary label text rendered by the control or its active action.
-        inline:
-            If ``True``, aligns label and switch inline.
-        mode:
-            Rendering mode (for example ``"toggle"`` or ``"segmented"``
-            depending on renderer support).
-        on_label:
-            Label text shown when the control is in its on or enabled state.
-        off_label:
-            Label text shown when the control is in its off or disabled state.
-        segments:
-            Segment descriptors for segmented presentation mode.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

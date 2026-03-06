@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DataSourceView"]
 
 class DataSourceView(Component):
-    """Searchable, selectable list of data-source entries with live
+    """
+    Searchable, selectable list of data-source entries with live
     filtering and selection state.
     
     The runtime builds a ``Column`` containing an optional search
@@ -31,20 +32,6 @@ class DataSourceView(Component):
         dense=True,
     )
     ```
-    
-    Args:
-        sources:
-            List of source mapping objects.  Each should contain at least ``"id"``; ``"title"``, ``"label"``, and ``"subtitle"`` keys are used for display.
-        selected_id:
-            The ``id`` of the currently highlighted / selected source row.
-        query:
-            Initial search-filter text pre-filled in the search field.
-        show_search:
-            If ``True``, a ``TextField`` with a search icon is rendered above the list for live filtering.
-        dense:
-            If ``True``, list tiles use compact vertical density.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

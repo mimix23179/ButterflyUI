@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/scrollable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildScrollableColumnControl(
@@ -43,7 +44,8 @@ class _ScrollableColumnControl extends StatefulWidget {
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
-  State<_ScrollableColumnControl> createState() => _ScrollableColumnControlState();
+  State<_ScrollableColumnControl> createState() =>
+      _ScrollableColumnControlState();
 }
 
 class _ScrollableColumnControlState extends State<_ScrollableColumnControl> {
@@ -81,54 +83,24 @@ class _ScrollableColumnControlState extends State<_ScrollableColumnControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
-    if (!_controller.hasClients) {
-      throw StateError('ScrollableColumn has no attached ScrollPosition');
-    }
-    final position = _controller.position;
-
-    Future<void> moveTo(double target) async {
-      final animate = args['animate'] == null ? true : (args['animate'] == true);
-      final durationMs = coerceOptionalInt(args['duration_ms']) ?? 250;
-      final clamped = target
-          .clamp(position.minScrollExtent, position.maxScrollExtent)
-          .toDouble();
-      if (animate) {
-        await _controller.animateTo(
-          clamped,
-          duration: Duration(milliseconds: durationMs),
-          curve: Curves.easeOutCubic,
-        );
-      } else {
-        _controller.jumpTo(clamped);
-      }
-    }
-
-    switch (method) {
-      case 'get_scroll_metrics':
-        return <String, Object?>{
-          'pixels': position.pixels,
-          'min_scroll_extent': position.minScrollExtent,
-          'max_scroll_extent': position.maxScrollExtent,
-          'viewport_dimension': position.viewportDimension,
-        };
-      case 'scroll_to':
-        await moveTo(coerceDouble(args['offset']) ?? 0.0);
-        return null;
-      case 'scroll_to_start':
-        await moveTo(position.minScrollExtent);
-        return null;
-      case 'scroll_to_end':
-        await moveTo(position.maxScrollExtent);
-        return null;
-      default:
-        throw UnsupportedError('Unknown scrollable_column method: $method');
-    }
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    return handleScrollableInvoke(
+      controlType: 'scrollable_column',
+      controller: _controller,
+      axis: Axis.vertical,
+      reverse: widget.props['reverse'] == true,
+      method: method,
+      args: args,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final spacing = coerceDouble(widget.props['spacing'] ?? widget.props['gap']) ?? 0.0;
+    final spacing =
+        coerceDouble(widget.props['spacing'] ?? widget.props['gap']) ?? 0.0;
     final reverse = widget.props['reverse'] == true;
     final children = <Widget>[];
 
@@ -148,7 +120,7 @@ class _ScrollableColumnControlState extends State<_ScrollableColumnControl> {
         ..addAll(spaced);
     }
 
-    return SingleChildScrollView(
+    final scrollable = SingleChildScrollView(
       controller: _controller,
       reverse: reverse,
       padding: coercePadding(widget.props['content_padding']),
@@ -156,6 +128,14 @@ class _ScrollableColumnControlState extends State<_ScrollableColumnControl> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
       ),
+    );
+
+    return wrapScrollableNotifications(
+      child: scrollable,
+      controller: _controller,
+      controlId: widget.controlId,
+      events: coerceScrollableEvents(widget.props['events']),
+      sendEvent: widget.sendEvent,
     );
   }
 }

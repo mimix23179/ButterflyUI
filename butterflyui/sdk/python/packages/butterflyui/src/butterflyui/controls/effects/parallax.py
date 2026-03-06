@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Parallax"]
 
 class Parallax(Component):
-    """Mouse-tracked parallax offset effect that shifts the child in
+    """
+    Mouse-tracked parallax offset effect that shifts the child in
     response to pointer position.
     
     The Flutter runtime wraps the child in a ``MouseRegion`` and
@@ -16,28 +17,17 @@ class Parallax(Component):
     each direction.  On pointer exit the offset resets to zero (unless
     ``reset_on_exit`` is ``False``).
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        parallax = bui.Parallax(
-            bui.Image(src="hero.png"),
-            max_offset=20,
-            reset_on_exit=True,
-        )
-    
-    Args:
-        max_offset:
-            Maximum translation in logical pixels along each
-            axis.  Defaults to ``14``; clamped to ``0 – 200``.
-        reset_on_exit:
-            When ``True`` (default) the offset smoothly
-            resets to zero when the pointer leaves the widget.
-        depths:
-            Reserved — per-layer depth factors for multi-layer
-            parallax.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    parallax = bui.Parallax(
+        bui.Image(src="hero.png"),
+        max_offset=20,
+        reset_on_exit=True,
+    )
+    ```
     """
 
 

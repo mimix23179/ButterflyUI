@@ -930,54 +930,6 @@ class Gallery(Component):
     Use convenience helpers ``gallery_grid``, ``gallery_masonry``,
     ``gallery_list``, ``gallery_carousel``, ``gallery_virtual_grid``, and
     ``gallery_virtual_list`` for common layout presets.
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        module:
-            Optional umbrella module selector.
-        layout:
-            Layout mode or layout identifier that controls how the control arranges its content.
-        type_filter:
-            Optional media type filter such as ``"image"`` or ``"font"``.
-        columns:
-            Number of columns used when the control lays out content in a grid.
-        spacing:
-            Base spacing value used between items or structural regions inside the control.
-        main_axis_spacing:
-            Spacing inserted between items on the primary layout axis.
-        cross_axis_spacing:
-            Spacing inserted between items on the grid or layout cross axis.
-        carousel_height:
-            Fixed pixel height for carousel mode. Use when gallery is placed
-            in shrink-wrapped or unconstrained parents.
-        carousel_aspect_ratio:
-            Fallback ``width / height`` ratio for carousel mode when
-            ``carousel_height`` is not provided.
-        carousel_viewport_fraction:
-            Fraction of viewport each carousel page should occupy.
-            ``1.0`` uses full width; lower values reveal neighboring cards.
-        carousel_pad_ends:
-            Whether carousel adds leading/trailing padding at the ends.
-        carousel_page_snapping:
-            Whether swipe settles exactly on page boundaries.
-        carousel_initial_page:
-            Initial page index used when the carousel is first built.
-        carousel_overlay_opacity:
-            Overlay gradient opacity applied to carousel captions
-            (0.0 to 1.0).
-        carousel_horizontal_inset:
-            Horizontal margin around each carousel tile.
-        carousel_vertical_inset:
-            Vertical margin around each carousel tile.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        **kwargs:
-            Additional runtime props forwarded as-is, including universal
-            pipeline props such as ``classes``, ``modifiers``, ``motion``,
-            ``effects``, and ``style_slots``.
     """
 
 

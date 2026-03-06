@@ -6,66 +6,26 @@ from .._shared import Component, merge_props
 __all__ = ["Particles"]
 
 class Particles(Component):
-    """Convenience alias that delegates to ``ParticleField`` at runtime.
+    """
+    Convenience alias that delegates to ``ParticleField`` at runtime.
     
     The Flutter runtime maps ``density`` to ``count`` when present and
     passes all properties through to ``buildParticleFieldControl``.
     See ``ParticleField`` for the full description of the particle
     system.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        fx = bui.Particles(
-            count=60,
-            colors=["#22d3ee", "#a78bfa"],
-            speed=20,
-            opacity=0.5,
-        )
-    
-    Args:
-        count:
-            Number of particles to spawn (``0`` – ``2000``).
-            Defaults to ``40``.
-        colors:
-            List of particle colours.  Falls back to the theme
-            accent palette when empty.
-        min_size:
-            Minimum particle diameter in logical pixels.
-            Defaults to ``2``.
-        max_size:
-            Maximum particle diameter.  Defaults to ``6``.
-        speed:
-            Uniform particle speed; overrides both *min_speed*
-            and *max_speed*.
-        min_speed:
-            Minimum particle velocity in pixels per second.
-            Defaults to ``8``.
-        max_speed:
-            Maximum particle velocity.  Defaults to ``32``.
-        direction:
-            Emission direction in **degrees** (0 = right,
-            90 = down).  ``None`` emits omnidirectionally.
-        spread:
-            Angular spread in degrees around *direction*.
-            Defaults to ``30``.
-        opacity:
-            Global particle opacity (``0.0`` – ``1.0``).
-            Defaults to ``0.6``.
-        seed:
-            Integer seed for deterministic particle layout.
-        loop:
-            When ``True`` (default) particles wrap around the
-            canvas edges.
-        play:
-            When ``True`` (default) the animation runs; ``False``
-            pauses.
-        shape:
-            Particle shape — ``"circle"`` (default) or
-            ``"square"``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    fx = bui.Particles(
+        count=60,
+        colors=["#22d3ee", "#a78bfa"],
+        speed=20,
+        opacity=0.5,
+    )
+    ```
     """
 
 

@@ -21,6 +21,8 @@ class KeyListener(Component):
     immediately when mounted so events are captured without a
     preceding tap.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -29,13 +31,6 @@ class KeyListener(Component):
         autofocus=True,
     )
     ```
-
-    Args:
-        autofocus:
-            If ``True``, the focus node requests focus when first
-            mounted.
-        enabled:
-            If ``False``, key events are not captured or emitted.
     """
 
 

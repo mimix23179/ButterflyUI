@@ -14,6 +14,8 @@ class Pane(Component):
     ``"fill"``). ``title`` labels the pane in containers that show titles.
     ``size``, ``width``, and ``height`` hint at the preferred dimensions.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -23,18 +25,6 @@ class Pane(Component):
         size=240,
     )
     ```
-
-    Args:
-        slot:
-            Slot identifier that controls placement within the parent layout.
-        title:
-            Optional display title for the pane.
-        size:
-            Preferred size in logical pixels along the pane's constrained axis.
-        width:
-            Explicit width hint in logical pixels.
-        height:
-            Explicit height hint in logical pixels.
     """
 
 

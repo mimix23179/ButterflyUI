@@ -6,24 +6,21 @@ from .._shared import Component, merge_props
 __all__ = ["Text"]
 
 class Text(Component):
-    """Simple text label.
+    """
+    Simple text label.
     
     Renders a Flutter ``Text`` widget from the ``value`` or ``text``
     parameter.  The value is coerced to a string.  Additional
     typographic options (font size, weight, colour, etc.) can be
     passed through ``props`` or ``**kwargs``.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        label = bui.Text("Hello, world!")
-    
-    Args:
-        value:
-            Text content to display (coerced to ``str``).
-        text:
-            Alias for ``value`` — takes precedence when both are supplied.
+    ```python
+    import butterflyui as bui
+
+    label = bui.Text("Hello, world!")
+    ```
     """
 
 

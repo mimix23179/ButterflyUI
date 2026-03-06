@@ -15,6 +15,8 @@ class FittedBox(Component):
     ``alignment`` positions the child when empty space remains after fitting.
     ``clip_behavior`` clips overflow.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -24,15 +26,6 @@ class FittedBox(Component):
         alignment="center",
     )
     ```
-
-    Args:
-        fit:
-            Scaling mode. Values: ``"contain"``, ``"cover"``, ``"fill"``,
-            ``"fitWidth"``, ``"fitHeight"``, ``"none"``, ``"scaleDown"``.
-        alignment:
-            Positions the child within unfilled space after fitting.
-        clip_behavior:
-            Anti-aliasing clip mode applied when the child overflows.
     """
 
 

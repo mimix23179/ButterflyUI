@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Button"]
 
 class Button(Component):
-    """Base interactive button control.
+    """
+    Base interactive button control.
     
     ``Button`` is the shared click surface used by specialized button
     controls. It serializes caption, variant, events, and declarative actions
@@ -16,7 +17,10 @@ class Button(Component):
     forwarded to runtime. This allows advanced visual and pipeline fields like
     ``icon``, ``color``, ``transparency``, ``classes``, ``modifiers``,
     ``motion``, and ``effects``.
-    
+    "
+
+    Example:
+
     ```python
     import butterflyui as bui
     
@@ -28,43 +32,6 @@ class Button(Component):
         transparency=0.08,
     )
     ```
-    
-    Args:
-        label:
-            Caption text. Alias ``text`` takes precedence when both are set.
-        text:
-            Caption text alias for ``label``.
-        value:
-            Arbitrary payload emitted with click events.
-        variant:
-            Visual variant, such as ``"filled"``, ``"outlined"``,
-            ``"text"``, ``"elevated"``, or ``"tonal"``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        action:
-            Declarative action descriptor fired on press.
-        action_id:
-            Registered action ID to dispatch on press.
-        action_event:
-            Event name forwarded to the action dispatcher.
-        action_payload:
-            Extra payload mapping for action dispatch.
-        actions:
-            Action descriptor list executed on press.
-        window_action:
-            Native window command, for example ``"minimize"``,
-            ``"maximize"``, or ``"close"``.
-        window_action_delay_ms:
-            Delay before running ``window_action``.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props, including style/modifier/motion/effects
-            fields and optional icon/color/transparency fields.
     """
 
 

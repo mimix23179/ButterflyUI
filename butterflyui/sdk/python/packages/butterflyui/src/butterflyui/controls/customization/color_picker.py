@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ColorPicker"]
 
 class ColorPicker(Component):
-    """Interactive colour selector with hex text input, optional alpha slider,
+    """
+    Interactive colour selector with hex text input, optional alpha slider,
     and a preset-swatches grid.
     
     The runtime renders a colour swatch preview, a hex ``TextField``, an
@@ -24,48 +25,6 @@ class ColorPicker(Component):
         presets=["#ef4444", "#22c55e", "#3b82f6", "#f59e0b"],
     )
     ```
-    
-    Args:
-        value:
-            Initial colour value (hex string). Also used for ``get_value`` / ``set_value``.
-        color:
-            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
-        mode:
-            Picker layout mode hint forwarded to the runtime.
-        picker_mode:
-            Backward-compatible alias for ``mode``. When both fields are provided, ``mode`` takes precedence and this alias is kept only for compatibility.
-        show_alpha:
-            If ``True``, displays an alpha-channel slider below the colour swatch.
-        alpha:
-            Backward-compatible alias for ``show_alpha``. When both fields are provided, ``show_alpha`` takes precedence and this alias is kept only for compatibility.
-        presets:
-            List of preset colour strings displayed as selectable circles below the picker.
-        emit_on_change:
-            If ``True``, a ``"change"`` event is emitted on every interaction (not just on commit).
-        show_actions:
-            If ``True``, shows commit/cancel action buttons.
-        show_input:
-            Controls whether (default), the hex ``TextField`` is visible. Set it to ``False`` to disable this behavior.
-        show_hex:
-            Backward-compatible alias for ``show_input``. When both fields are provided, ``show_input`` takes precedence and this alias is kept only for compatibility.
-        show_presets:
-            Controls whether (default when presets are supplied), the preset- swatches grid is visible. Set it to ``False`` to disable this behavior.
-        preset_size:
-            Diameter of each preset swatch circle. Defaults to ``20``.
-        preset_spacing:
-            Spacing between preset swatch circles. Defaults to ``6``.
-        preview_height:
-            Height of the colour-preview swatch area.
-        input_label:
-            Label text displayed above the hex input ``TextField``.
-        input_placeholder:
-            Placeholder text shown inside the hex input when empty.
-        commit_text:
-            Label for the commit/OK action button.
-        cancel_text:
-            Label for the cancel action button.
-        enabled:
-            If ``False``, the entire picker is disabled and non-interactive.
     """
 
 

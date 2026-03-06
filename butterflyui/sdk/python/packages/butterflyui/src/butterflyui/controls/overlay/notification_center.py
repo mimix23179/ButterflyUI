@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["NotificationCenter"]
 
 class NotificationCenter(Component):
-    """Scrollable panel listing persistent in-app notifications.
+    """
+    Scrollable panel listing persistent in-app notifications.
     
     The runtime renders a list of notification items that remain until
     explicitly dismissed or cleared. ``items``/``notifications`` supplies
     the notification specs. ``title`` labels the panel header.
     ``show_clear_all`` adds a button to dismiss all items at once.
     ``max_items`` limits the visible count.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -23,18 +26,6 @@ class NotificationCenter(Component):
         max_items=50,
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        notifications:
-            Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
-        title:
-            Heading text displayed at the top of the panel.
-        show_clear_all:
-            When ``True`` a clear-all button is shown in the header.
-        max_items:
-            Maximum number of notification items to retain.
     """
 
 

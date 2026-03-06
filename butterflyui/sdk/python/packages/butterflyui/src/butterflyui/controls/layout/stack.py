@@ -15,6 +15,8 @@ class Stack(Component):
     ``"expand"`` (fills the parent). ``clip`` enables clipping of children
     that overflow the stack bounds.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -24,15 +26,6 @@ class Stack(Component):
         alignment="center",
     )
     ```
-
-    Args:
-        alignment:
-            Aligns un-positioned children within the stack. Accepts a string
-            alignment name or an ``{x, y}`` mapping.
-        fit:
-            How the stack sizes itself. Values: ``"loose"``, ``"expand"``.
-        clip:
-            When ``True`` children that overflow the stack bounds are clipped.
     """
 
 

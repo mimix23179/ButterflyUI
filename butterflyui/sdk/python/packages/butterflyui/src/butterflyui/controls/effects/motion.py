@@ -9,7 +9,8 @@ __all__ = ["Motion"]
 
 
 class Motion(Component):
-    """Interaction-aware motion choreography wrapper.
+    """
+    Interaction-aware motion choreography wrapper.
     
     ``Motion`` sits above ``Animation`` and focuses on state-driven micro-interactions:
     hover lift, press sink, focus pulse, enter transitions, and shared-axis style
@@ -17,93 +18,24 @@ class Motion(Component):
     happen (hover/press/focus/selected/disabled) and *how* values should animate.
     
     Example:
-        ```python
-        import butterflyui as bui
-    
-        cta = bui.Motion(
-            bui.Button("Start"),
-            preset="hover_lift_glow",
-            states={
-                "hover": {"scale": 1.02, "y": -2, "glow_opacity": 0.9},
-                "press": {"scale": 0.98, "y": 0},
-            },
-            duration_ms=180,
-            curve="emphasized",
-        )
-        ```
+    ```python
+    import butterflyui as bui
+
+    cta = bui.Motion(
+        bui.Button("Start"),
+        preset="hover_lift_glow",
+        states={
+            "hover": {"scale": 1.02, "y": -2, "glow_opacity": 0.9},
+            "press": {"scale": 0.98, "y": 0},
+        },
+        duration_ms=180,
+        curve="emphasized",
+    )
+    ```
     
     ``Motion`` also maps directly to universal cross-control motion props:
     ``motion`` (primary), ``enter_motion``, ``exit_motion``,
     ``hover_motion``, and ``press_motion``.
-    
-    Args:
-        child:
-            Single child control or payload wrapped by this control.
-        preset:
-            Preset choreography name (for example ``hover_lift``, ``press_sink``,
-            ``hover_lift_glow``, ``focus_pulse``, ``enter_fade_up``,
-            ``shared_axis``).
-        motion:
-            Legacy motion preset/spec alias.
-        enter_motion:
-            Enter transition motion spec for initial mount.
-        exit_motion:
-            Exit transition motion spec for removal/hide transitions.
-        hover_motion:
-            Motion spec used for hover-driven interaction.
-        press_motion:
-            Motion spec used for pressed-state interaction.
-        states:
-            State map for ``hover``, ``press``, ``focus``, ``selected``,
-            ``disabled``. Each value is a map of animated props.
-        hover:
-            State-specific style map applied while the pointer hovers the control. Use it to override hover-time visual properties such as background, border, elevation, or text color.
-        press:
-            State-specific motion configuration applied while the control is actively pressed.
-        focus:
-            State-specific motion configuration applied while the control has keyboard or accessibility focus.
-        selected:
-            Shortcut state map for selected.
-        disabled:
-            State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
-        from_:
-            Base state map used as animation origin.
-        to:
-            Base state map used as animation target while ``play=True``.
-        duration:
-            Named duration token (``short``, ``medium``, ``long``).
-        duration_ms:
-            Explicit duration in milliseconds.
-        curve:
-            Easing curve name or specification used for the motion transition.
-        play:
-            Enables/disables playback of base from/to transition.
-        interactive:
-            Enables hover/press/focus input tracking.
-        axis:
-            Axis hint used by some presets (x/y/z).
-        opacity:
-            Opacity value applied while this motion or visual state is active.
-        scale:
-            Scale factor applied while the motion or effect state is active.
-        x:
-            Horizontal offset applied by the active motion or effect state.
-        y:
-            Vertical offset applied by the active motion or effect state.
-        blur:
-            Blur amount applied by the motion or effect step when this state is active.
-        glow:
-            Glow descriptor merged into active state.
-        shadow:
-            Shadow descriptor merged into active state.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DropZone"]
 
 class DropZone(Component):
-    """Rectangular drop target that accepts drags from :class:`DragPayload`.
+    """
+    Rectangular drop target that accepts drags from :class:`DragPayload`.
     
     Renders a ``DragTarget`` container with a visual highlight that
     changes colour depending on hover / accept / reject state (green
@@ -23,6 +24,8 @@ class DropZone(Component):
     - ``leave`` — the drag left without dropping.
     - ``drop``  — a drag was released inside the zone.
     - ``reject`` — an incompatible drag type hovered the zone.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -32,27 +35,6 @@ class DropZone(Component):
         accepts=["task"],
     )
     ```
-    
-    Args:
-        enabled:
-            If ``False``, the zone does not accept any drops.
-        accepts:
-            List of ``drag_type`` strings this zone will accept.
-            Alias ``accept_types`` is kept in sync.
-        accept_types:
-            Backward-compatible alias for ``accepts``. When both fields are provided, ``accepts`` takes precedence and this alias is kept only for compatibility.
-        accept_mimes:
-            List of MIME type strings accepted for desktop file drops.
-        title:
-            Heading text shown in the default empty-state card.
-        subtitle:
-            Subheading text shown below ``title`` in the empty-state
-            card.
-        use_desktop_drop:
-            If ``True``, the zone also listens for system-level
-            file-drop events (desktop only).
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

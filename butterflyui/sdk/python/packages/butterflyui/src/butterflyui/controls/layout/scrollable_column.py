@@ -6,12 +6,15 @@ from .._shared import Component, merge_props
 __all__ = ["ScrollableColumn"]
 
 class ScrollableColumn(Component):
-    """Vertically scrollable column of children.
+    """
+    Vertically scrollable column of children.
     
     The runtime renders a vertical ``ListView``-backed column. ``spacing``
     adds a gap between children; ``reverse`` flips the scroll direction so
     content starts from the bottom. ``content_padding`` adds padding around
     the scrollable area. ``initial_offset`` sets the starting scroll position.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -22,18 +25,6 @@ class ScrollableColumn(Component):
         events=["scroll"],
     )
     ```
-    
-    Args:
-        spacing:
-            Vertical gap between children in logical pixels.
-        reverse:
-            When ``True`` children are laid out in reverse scroll order.
-        content_padding:
-            Padding applied around the scrollable content area.
-        initial_offset:
-            Starting scroll offset in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

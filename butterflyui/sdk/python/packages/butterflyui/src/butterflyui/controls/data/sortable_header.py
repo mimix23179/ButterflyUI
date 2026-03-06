@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["SortableHeader"]
 
 class SortableHeader(Component):
-    """Clickable column-header row that tracks the currently sorted column
+    """
+    Clickable column-header row that tracks the currently sorted column
     and direction.
     
     The runtime renders a ``Wrap`` of tappable header chips.  Each
@@ -32,18 +33,6 @@ class SortableHeader(Component):
         dense=True,
     )
     ```
-    
-    Args:
-        columns:
-            Header column definitions — list of mappings with ``"key"`` (or ``"id"``/``"field"``) and ``"label"`` (or ``"title"``) keys.
-        sort_column:
-            The ``key`` of the currently sorted column.  ``None`` means no column is sorted.
-        sort_ascending:
-            Controls whether (default), the current sort direction is ascending. Set it to ``False`` to disable this behavior.
-        dense:
-            If ``True``, header chips use compact padding and smaller icon size.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

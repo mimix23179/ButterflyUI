@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["SnapGrid"]
 
 class SnapGrid(Component):
-    """Interactive grid overlay with major/minor lines, optional snapping,
+    """
+    Interactive grid overlay with major/minor lines, optional snapping,
     and pointer-event emission for hover, press, and drag.
     
     The runtime paints a ``CustomPaint`` grid using ``_GridPainter``
@@ -31,42 +32,6 @@ class SnapGrid(Component):
         emit_on_press=True,
     )
     ```
-    
-    Args:
-        show_grid:
-            Controls whether (default), the visual grid lines are painted. Set to ``False`` to hide the grid while keeping snapping. Set it to ``False`` to disable this behavior.
-        spacing:
-            Major grid-cell spacing in logical pixels (clamped ``2`` – ``200``).  Defaults to ``16``.
-        subdivisions:
-            Number of minor divisions within each major cell (clamped ``1`` – ``16``).  Defaults to ``1``.
-        line_color:
-            Colour of minor grid lines.  Defaults to ``#22FFFFFF``.
-        major_line_color:
-            Colour of major grid lines.  Defaults to ``#44FFFFFF``.
-        line_width:
-            Stroke width of minor lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.0``.
-        major_line_width:
-            Stroke width of major lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.2``.
-        background:
-            Background colour/paint applied behind the grid lines.
-        origin:
-            Grid origin point or offset configuration.
-        snap:
-            If ``True``, pointer coordinates are rounded to the nearest grid intersection.
-        snap_spacing:
-            Snap interval in logical pixels (overrides ``spacing`` for snapping calculations).
-        snap_mode:
-            Snap strategy hint forwarded to the runtime.
-        enabled:
-            If ``False``, pointer interaction is disabled.
-        emit_on_hover:
-            If ``True``, emits ``"hover"`` events with ``x``/``y`` as the pointer moves over the grid.
-        emit_on_press:
-            If ``True``, emits ``"press"`` events with ``x``/``y`` on pointer down.
-        emit_on_drag:
-            If ``True``, emits ``"drag"`` events with ``x``/``y``/``dx``/``dy`` during drag gestures.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

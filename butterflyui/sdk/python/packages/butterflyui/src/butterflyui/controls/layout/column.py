@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Column"]
 
 class Column(Component):
-    """Vertical flex container that arranges children in a column.
+    """
+    Vertical flex container that arranges children in a column.
 
     The runtime renders a Flutter ``Column`` widget.  Children are laid
     out vertically with configurable ``spacing`` (alias ``gap``) between
@@ -15,27 +16,19 @@ class Column(Component):
     (start, center, end, stretch).  Child controls may use ``expanded``
     or set ``flex`` in their props to fill available space.
 
-    Example::
+    Example:
 
-        import butterflyui as bui
+    ```python
+    import butterflyui as bui
 
-        bui.Column(
-            bui.Text("First item"),
-            bui.Text("Second item"),
-            bui.Text("Third item"),
-            spacing=12,
-            main_axis="center",
-        )
-
-    Args:
-        spacing:
-            Vertical gap between children in logical pixels.  Aliased as ``gap``.
-        main_axis:
-            Main-axis alignment for the column.  Values: ``start``, ``center``,
-            ``end``, ``space_between``, ``space_around``, ``space_evenly``.
-        cross_axis:
-            Cross-axis alignment for children.  Values: ``start``, ``center``,
-            ``end``, ``stretch``, ``baseline``.
+    bui.Column(
+        bui.Text("First item"),
+        bui.Text("Second item"),
+        bui.Text("Third item"),
+        spacing=12,
+        main_axis="center",
+    )
+    ```
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["AnimatedBackground"]
 
 class AnimatedBackground(Component):
-    """Animated color-cycling background that continuously blends through a
+    """
+    Animated color-cycling background that continuously blends through a
     list of colours.
     
     The Flutter runtime layers each colour as a full-size ``Container``
@@ -15,23 +16,16 @@ class AnimatedBackground(Component):
     ``AnimationController``.  When only one colour is supplied the
     widget short-circuits to a static ``Container``.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        bg = bui.AnimatedBackground(
-            colors=["#22d3ee", "#a78bfa", "#f472b6"],
-            duration_ms=3000,
-        )
-    
-    Args:
-        colors:
-            Sequence of colour values (hex strings, integers, or
-            any format accepted by the runtime ``coerceColor``
-            helper that the background cycles through.
-        duration_ms:
-            Total cycle duration in milliseconds.  Defaults to ``2400``;
-            clamped to the range ``1 – 600 000``.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    bg = bui.AnimatedBackground(
+        colors=["#22d3ee", "#a78bfa", "#f472b6"],
+        duration_ms=3000,
+    )
+    ```
     """
 
 

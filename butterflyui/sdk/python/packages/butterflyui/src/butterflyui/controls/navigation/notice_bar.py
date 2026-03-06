@@ -7,7 +7,8 @@ __all__ = ["NoticeBar"]
 
 
 class NoticeBar(Component):
-    """Inline banner for status messages, warnings, and lightweight actions.
+    """
+    Inline banner for status messages, warnings, and lightweight actions.
     
     ``NoticeBar`` renders a compact horizontal notification strip. ``variant``
     selects semantic tone, ``icon`` prepends a glyph, ``dismissible`` enables
@@ -16,6 +17,8 @@ class NoticeBar(Component):
     
     The control accepts shared layout hints through ``props`` so notice bars
     can be aligned and clipped consistently in headers/content regions.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -30,25 +33,6 @@ class NoticeBar(Component):
         events=["dismiss", "action"],
     )
     ```
-    
-    Args:
-        text:
-            Primary text value rendered by the control.
-        variant:
-            Semantic tone token (for example ``"info"``, ``"success"``,
-            ``"warning"``, ``"error"``).
-        icon:
-            Optional leading icon descriptor.
-        dismissible:
-            Shows a close action when ``True``.
-        action_label:
-            Label text rendered for the control's inline action when that action is available.
-        action_id:
-            Identifier emitted for the inline action.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Vignette"]
 
 class Vignette(Component):
-    """Radial vignette overlay that darkens the edges of the child
+    """
+    Radial vignette overlay that darkens the edges of the child
     content.
     
     The Flutter runtime renders a darkened radial gradient
@@ -14,28 +15,17 @@ class Vignette(Component):
     fades from transparent at the centre to the configured *color* at
     the edges, with *intensity* controlling the gradient spread.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        vig = bui.Vignette(
-            bui.Image(src="landscape.png"),
-            intensity=0.5,
-            color="#000000",
-        )
-    
-    Args:
-        intensity:
-            Vignette strength (``0.0`` transparent – ``1.0``
-            opaque edges).  Defaults to ``0.45``.
-        opacity:
-            Backward-compatible alias for ``*intensity* (the runtime accepts either)``. When both fields are provided, ``*intensity* (the runtime accepts either)`` takes precedence and this alias is kept only for compatibility.
-        color:
-            Edge colour of the vignette gradient.  Defaults to
-            the theme's default scaffold/background colour.
-        enabled:
-            When ``False`` the overlay is hidden and the child
-            renders unmodified.
+    ```python
+    import butterflyui as bui
+
+    vig = bui.Vignette(
+        bui.Image(src="landscape.png"),
+        intensity=0.5,
+        color="#000000",
+    )
+    ```
     """
 
 

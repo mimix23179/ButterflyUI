@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["CropBox"]
 
 class CropBox(Component):
-    """Overlay that renders a rectangular crop region on top of a child control.
+    """
+    Overlay that renders a rectangular crop region on top of a child control.
     
     The runtime draws the crop rectangle with a coloured border and a
     semi-transparent shade over the area outside the crop. The rect is
@@ -22,20 +23,6 @@ class CropBox(Component):
         border_color="#448aff",
     )
     ```
-    
-    Args:
-        rect:
-            Crop rectangle as ``{"x": ..., "y": ..., "width": ..., "height": ...}``. Defaults to ``{"x": 24, "y": 24, "width": 120, "height": 90}``.
-        shade_color:
-            Colour of the semi-transparent shade painted over the non-cropped area. Defaults to ``black26`` at ``0.18`` opacity.
-        border_color:
-            Colour of the crop rectangle border. Defaults to ``Colors.blueAccent``.
-        border_width:
-            Stroke width of the crop rectangle border. Defaults to ``2``.
-        enabled:
-            If ``False``, the crop overlay is non-interactive.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

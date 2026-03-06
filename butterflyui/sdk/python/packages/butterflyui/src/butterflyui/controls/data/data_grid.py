@@ -9,7 +9,8 @@ __all__ = ["DataGrid"]
 
 
 class DataGrid(Component):
-    """Structured data grid with sorting, filtering, paging, and selection.
+    """
+    Structured data grid with sorting, filtering, paging, and selection.
     
     ``DataGrid`` is the high-density tabular surface intended for data-heavy
     experiences such as inventory editors, admin dashboards, and asset browsers.
@@ -40,42 +41,6 @@ class DataGrid(Component):
         events=["change", "sort", "select"],
     )
     ```
-    
-    Args:
-        columns:
-            Column descriptors consumed by the Flutter renderer.
-        rows:
-            Row objects rendered by the grid.
-        sortable:
-            Enables sort affordances in headers.
-        filterable:
-            Enables built-in query/filter UI behavior.
-        selectable:
-            Controls whether rows, items, or text content can be selected by the user.
-        dense:
-            Reduces row height and cell spacing for compact layouts.
-        striped:
-            Alternates row background treatment for readability.
-        show_header:
-            If ``False``, header row is hidden.
-        show_footer:
-            If ``True``, footer/status area is rendered.
-        page_size:
-            Preferred rows-per-page when pagination is enabled by the client.
-        sort_column:
-            Identifier of the column currently used to sort the control's data.
-        sort_ascending:
-            Controls whether the active sort uses ascending order instead of descending order.
-        filter_query:
-            Initial query string applied by the renderer.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

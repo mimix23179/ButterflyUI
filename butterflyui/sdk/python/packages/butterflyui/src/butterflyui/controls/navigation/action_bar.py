@@ -9,7 +9,8 @@ __all__ = ["ActionBar"]
 
 
 class ActionBar(Component):
-    """Horizontal command surface for global and context-sensitive actions.
+    """
+    Horizontal command surface for global and context-sensitive actions.
     
     Supports explicit ``items`` payloads and/or child controls. Item payloads
     may include icon descriptors and optional metadata so runtime events can
@@ -18,6 +19,8 @@ class ActionBar(Component):
     The control also participates in shared layout props used across navigation
     and overlay surfaces, including alignment/positioning, margin, size
     constraints, radius, and clip behavior.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -31,44 +34,6 @@ class ActionBar(Component):
         events=["action"],
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        dense:
-            Reduces item height and padding.
-        spacing:
-            Gap between items in logical pixels.
-        wrap:
-            When ``True`` items wrap onto a second line when space runs out.
-        alignment:
-            Horizontal alignment of items within the bar.
-        bgcolor:
-            Background fill color of the bar.
-        context:
-            Arbitrary context payload associated with this action surface.
-        selection:
-            Selection payload (IDs or descriptors) used by contextual actions.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        align / alignment / position:
-            Placement hints for wrapper alignment in parent layouts.
-        margin:
-            Outer spacing around the action bar.
-        width / height / min_width / max_width / min_height / max_height:
-            Optional sizing and constraint hints.
-        radius:
-            Outer clipping/shape radius for the action bar shell.
-        clip_behavior:
-            Clip strategy for rounded shells and overflow.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props forwarded to the shared style pipeline.
     """
 
 

@@ -16,6 +16,8 @@ class Popover(Component):
     ``dismissible`` closes on outside tap. ``transition_type`` and
     ``duration_ms`` configure animation.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -26,27 +28,6 @@ class Popover(Component):
         position="bottom",
     )
     ```
-
-    Args:
-        anchor:
-            The widget that the popover is visually attached to.
-        content:
-            The widget rendered inside the popover panel.
-        open:
-            When ``True`` the popover is visible.
-        position:
-            Preferred placement relative to the anchor. Values:
-            ``"top"``, ``"bottom"``, ``"left"``, ``"right"``.
-        offset:
-            Additional displacement from the anchor edge in logical pixels.
-        dismissible:
-            When ``True`` tapping outside the popover closes it.
-        transition:
-            Explicit transition spec mapping.
-        transition_type:
-            Named animation type. Values: ``"fade"``, ``"scale"``.
-        duration_ms:
-            Duration of the show/hide animation in milliseconds.
     """
 
 

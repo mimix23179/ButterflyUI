@@ -651,13 +651,29 @@ class ControlRenderer {
       case 'surface':
       case 'box':
       case 'container':
-        return buildContainerControl(props, rawChildren, context.buildChild);
+        return buildContainerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'decorated_box':
         return buildDecoratedBoxControl(props, rawChildren, context.buildChild);
 
       case 'frame':
-        return buildFrameControl(props, rawChildren, context.buildChild);
+        return buildFrameControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'align':
         return buildAlignControl(
@@ -682,7 +698,15 @@ class ControlRenderer {
         );
 
       case 'aspect_ratio':
-        return buildAspectRatioControl(props, rawChildren, context.buildChild);
+        return buildAspectRatioControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'fitted_box':
         return buildFittedBoxControl(props, rawChildren, context.buildChild);
@@ -741,18 +765,26 @@ class ControlRenderer {
 
       case 'row':
         return buildRowControl(
+          controlId,
           props,
           rawChildren,
           context.tokens,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'column':
         return buildColumnControl(
+          controlId,
           props,
           rawChildren,
           context.tokens,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'stack':
@@ -770,10 +802,14 @@ class ControlRenderer {
 
       case 'wrap':
         return buildWrapControl(
+          controlId,
           props,
           rawChildren,
           context.tokens,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'split_view':
@@ -800,7 +836,15 @@ class ControlRenderer {
         );
 
       case 'pane':
-        return buildContainerControl(props, rawChildren, context.buildChild);
+        return buildContainerControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'expanded':
         {
@@ -870,6 +914,8 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -878,6 +924,8 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -886,6 +934,8 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -894,6 +944,8 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -1113,11 +1165,20 @@ class ControlRenderer {
           controlId,
           props,
           context.tokens,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
       case 'icon_button':
-        return buildIconButtonControl(controlId, props, context.sendEvent);
+        return buildIconButtonControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.tokens,
+          context.sendEvent,
+        );
 
       case 'async_action_button':
         return buildAsyncActionButtonControl(
@@ -1148,6 +1209,9 @@ class ControlRenderer {
               ? true
               : (props['emit_on_change'] == true),
           debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
+          events: props['events'],
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1171,6 +1235,9 @@ class ControlRenderer {
               ? true
               : (props['emit_on_change'] == true),
           debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
+          events: props['events'],
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1181,6 +1248,8 @@ class ControlRenderer {
           value: _coerceBoolOrNull(props['value'] ?? props['checked']),
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
           tristate: props['tristate'] == true,
+          autofocus: props['autofocus'] == true,
+          events: props['events'],
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
@@ -1197,6 +1266,10 @@ class ControlRenderer {
           offLabel: props['off_label']?.toString(),
           onLabel: props['on_label']?.toString(),
           segments: _coerceStringList(props['segments']),
+          autofocus: props['autofocus'] == true,
+          events: props['events'],
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1209,6 +1282,10 @@ class ControlRenderer {
           label: props['label']?.toString(),
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
           dense: props['dense'] == true,
+          autofocus: props['autofocus'] == true,
+          events: props['events'],
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1224,6 +1301,8 @@ class ControlRenderer {
           label: props['label']?.toString(),
           labels: props['labels'] == true,
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
+          autofocus: props['autofocus'] == true,
+          events: props['events'],
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
@@ -1239,6 +1318,10 @@ class ControlRenderer {
           dense: props['dense'] == true,
           label: props['label']?.toString(),
           hint: props['hint']?.toString() ?? props['placeholder']?.toString(),
+          autofocus: props['autofocus'] == true,
+          events: props['events'],
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
         );
 
@@ -1906,10 +1989,14 @@ class ControlRenderer {
 
       case 'card':
         return buildCardControl(
+          controlId,
           props,
           rawChildren,
           context.tokens,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'field_group':

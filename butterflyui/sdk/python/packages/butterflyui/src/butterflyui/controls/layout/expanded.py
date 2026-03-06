@@ -15,6 +15,8 @@ class Expanded(Component):
     space: ``"tight"`` forces the child to fill, ``"loose"`` allows it to be
     smaller.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -23,16 +25,7 @@ class Expanded(Component):
         bui.Expanded(bui.Text("Fill remaining"), flex=1),
     )
     ```
-
-    Args:
-        flex:
-            Flex factor. Higher values claim a larger share of available space
-            relative to sibling flex children. Defaults to ``1``.
-        fit:
-            How the child fills the allocated space. Values: ``"tight"``
-            (fill exactly), ``"loose"`` (at most the allocated size).
     """
-
 
     fit: str | None = None
     """

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DragHandle"]
 
 class DragHandle(Component):
-    """Marks its child as an individual drag handle within a reorderable list.
+    """
+    Marks its child as an individual drag handle within a reorderable list.
     
     Wraps the child in a drag-feedback region that the parent
     reorderable container recognises by ``index``.  An optional
@@ -16,6 +17,8 @@ class DragHandle(Component):
     respond to the drag.  Drag lifecycle events (``drag_start``,
     ``drag_end``, ``drag_cancel``) are emitted when the gesture
     starts, ends, or is cancelled.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,20 +30,6 @@ class DragHandle(Component):
         drag_type="list_item",
     )
     ```
-    
-    Args:
-        index:
-            Zero-based position of this handle in the parent
-            reorderable list.
-        enabled:
-            If ``False``, dragging is disabled.
-        payload:
-            Arbitrary mapping attached to the drag and delivered
-            to the drop target.
-        drag_type:
-            String tag used to match compatible drop zones.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

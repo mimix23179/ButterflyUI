@@ -9,7 +9,8 @@ __all__ = ["Sidebar"]
 
 
 class Sidebar(Component):
-    """Configurable navigation sidebar with sections, search, and selection state.
+    """
+    Configurable navigation sidebar with sections, search, and selection state.
     
     ``Sidebar`` is the canonical replacement for legacy ``navigator``. It can
     render either a flat list (``items``) or grouped sections (``sections``),
@@ -17,6 +18,8 @@ class Sidebar(Component):
     
     Through ``props`` the control also supports shared placement/layout hints
     (alignment/position, margin, constraints, radius/clip behavior).
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -32,36 +35,6 @@ class Sidebar(Component):
         events=["select", "search"],
     )
     ```
-    
-    Args:
-        sections:
-            Grouped navigation sections, each containing nested ``items``.
-        items:
-            Flat list of navigation item descriptors.
-        selected_id:
-            Identifier of the currently selected item, tab, route, or navigation destination.
-        title:
-            Primary heading text rendered by the control.
-        show_search:
-            Enables a search input at the top of the sidebar.
-        query:
-            Current query string used to filter, search, or narrow the control's content.
-        collapsible:
-            Enables collapsible section behavior.
-        dense:
-            Enables a denser layout with reduced gaps, padding, or row height.
-        emit_on_search_change:
-            Emits search events while typing.
-        search_debounce_ms:
-            Debounce window for incremental search events.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

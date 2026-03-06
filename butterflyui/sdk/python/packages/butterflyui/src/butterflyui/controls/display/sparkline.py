@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Sparkline"]
 
 class Sparkline(Component):
-    """Compact inline line chart for trend visualisation.
+    """
+    Compact inline line chart for trend visualisation.
     
     Renders a small ``CustomPaint`` polyline (default height 40 px)
     using ``_LineChartPainter``.  Intended for dashboard cells,
@@ -16,25 +17,17 @@ class Sparkline(Component):
     
     Use ``set_data`` to update the data points at runtime.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        spark = bui.Sparkline(
-            values=[3, 7, 4, 8, 2, 6],
-            color="#4f46e5",
-            fill=True,
-        )
-    
-    Args:
-        values:
-            Numeric data points for the sparkline.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        fill:
-            Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
-        color:
-            Primary color value used by the control for text, icons, strokes, or accent surfaces.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    spark = bui.Sparkline(
+        values=[3, 7, 4, 8, 2, 6],
+        color="#4f46e5",
+        fill=True,
+    )
+    ```
     """
 
 

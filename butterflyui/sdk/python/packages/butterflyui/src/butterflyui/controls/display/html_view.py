@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["HtmlView"]
 
 class HtmlView(Component):
-    """Embedded HTML renderer backed by a platform WebView.
+    """
+    Embedded HTML renderer backed by a platform WebView.
     
     Displays arbitrary HTML inside a ``WebView`` widget.  Content can
     be supplied inline via ``value`` / ``html`` / ``text``, or loaded
@@ -19,27 +20,15 @@ class HtmlView(Component):
     ``set_value`` to replace it, and ``load_file`` to swap in a new
     file path at runtime.
     
-    Example::
-    
-        import butterflyui as bui
-    
-        view = bui.HtmlView(
-            value="<h2>Report</h2><p>Details here...</p>",
-        )
-    
-    Args:
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        html:
-            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
-        text:
-            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
-        html_file:
-            Local file path to an ``.html`` file.  Converted to a ``file://`` URL at runtime.
-        base_url:
-            Explicit base URL for resolving relative paths inside the HTML.  Defaults to the directory of ``html_file``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    Example:
+
+    ```python
+    import butterflyui as bui
+
+    view = bui.HtmlView(
+        value="<h2>Report</h2><p>Details here...</p>",
+    )
+    ```
     """
 
 

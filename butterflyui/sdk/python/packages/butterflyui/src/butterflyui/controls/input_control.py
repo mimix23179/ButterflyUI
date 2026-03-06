@@ -10,14 +10,6 @@ __all__ = ["InputControl"]
 class InputControl(LayoutControl):
     """
     Shared input behavior for controls that carry a user-editable value.
-
-    Args:
-        value:
-            Current value held by the input control.
-        label:
-            Human-readable label shown with the input.
-        placeholder:
-            Hint text shown when the input value is empty.
     """
 
     value: Any = None

@@ -1,8 +1,269 @@
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
+
+Widget buildContainerControl(
+  String controlId,
+  Map<String, Object?> props,
+  List<dynamic> rawChildren,
+  Widget Function(Map<String, Object?> child) buildFromControl,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent,
+) {
+  return _ContainerControl(
+    controlId: controlId,
+    props: props,
+    rawChildren: rawChildren,
+    buildFromControl: buildFromControl,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
+
+class _ContainerControl extends StatefulWidget {
+  const _ContainerControl({
+    required this.controlId,
+    required this.props,
+    required this.rawChildren,
+    required this.buildFromControl,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final List<dynamic> rawChildren;
+  final Widget Function(Map<String, Object?> child) buildFromControl;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_ContainerControl> createState() => _ContainerControlState();
+}
+
+class _ContainerControlState extends State<_ContainerControl> {
+  late Map<String, Object?> _liveProps;
+
+  @override
+  void initState() {
+    super.initState();
+    _liveProps = <String, Object?>{...widget.props};
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ContainerControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
+    if (oldWidget.props != widget.props) {
+      _liveProps = <String, Object?>{...widget.props};
+    }
+  }
+
+  @override
+  void dispose() {
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_layout':
+      case 'set_style':
+        setState(() {
+          _liveProps = <String, Object?>{..._liveProps, ...args};
+        });
+        return _statePayload();
+      case 'get_state':
+      case 'get_layout':
+        return _statePayload();
+      default:
+        throw UnsupportedError('Unknown container method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      if (_liveProps['width'] != null) 'width': _liveProps['width'],
+      if (_liveProps['height'] != null) 'height': _liveProps['height'],
+      if (_liveProps['min_width'] != null) 'min_width': _liveProps['min_width'],
+      if (_liveProps['min_height'] != null)
+        'min_height': _liveProps['min_height'],
+      if (_liveProps['max_width'] != null) 'max_width': _liveProps['max_width'],
+      if (_liveProps['max_height'] != null)
+        'max_height': _liveProps['max_height'],
+      if (_liveProps['bgcolor'] != null || _liveProps['color'] != null)
+        'bgcolor': _liveProps['bgcolor'] ?? _liveProps['color'],
+      if (_liveProps['radius'] != null) 'radius': _liveProps['radius'],
+      if (_liveProps['content_layout'] != null)
+        'content_layout': _liveProps['content_layout'],
+      if (_liveProps['content_gap'] != null)
+        'content_gap': _liveProps['content_gap'],
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final childMaps = resolveControlChildMaps(widget.rawChildren, _liveProps);
+    final width = coerceDouble(_liveProps['width']);
+    final height = coerceDouble(_liveProps['height']);
+    final minWidth = coerceDouble(_liveProps['min_width']);
+    final minHeight = coerceDouble(_liveProps['min_height']);
+    final maxWidth = coerceDouble(_liveProps['max_width']);
+    final maxHeight = coerceDouble(_liveProps['max_height']);
+    final margin = coercePadding(_liveProps['margin']);
+    final opacity = coerceDouble(_liveProps['opacity']);
+    final contentPadding = coercePadding(_liveProps['content_padding']);
+    final contentAlignment = parseLayoutAlignment(
+      _liveProps['content_alignment'],
+    );
+    final bgColor = coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']);
+    final borderColor = coerceColor(_liveProps['border_color']);
+    final borderWidth = coerceDouble(_liveProps['border_width']) ?? 0.0;
+    final radius = coerceDouble(_liveProps['radius']);
+    final boxShadow = coerceBoxShadow(_liveProps['shadow']);
+    final gradient = coerceGradient(_liveProps['gradient']);
+    final image = coerceDecorationImage(_liveProps['image']);
+    final shapeStr = _liveProps['shape']?.toString().toLowerCase();
+    final shape = shapeStr == 'circle' ? BoxShape.circle : BoxShape.rectangle;
+    final blur = _effectiveBlur(coerceDouble(_liveProps['blur']));
+    final contentGap = coerceDouble(_liveProps['content_gap']) ?? 0.0;
+    final contentLayout =
+        (_liveProps['content_layout']?.toString().toLowerCase() ?? 'single')
+            .trim();
+    final clipBehavior =
+        parseLayoutClip(_liveProps['clip_behavior']) ?? Clip.none;
+    final scrollAxis = parseLayoutAxis(_liveProps['content_scroll']);
+
+    Widget? content;
+    if (childMaps.length == 1) {
+      content = widget.buildFromControl(childMaps.first);
+    } else if (childMaps.length > 1) {
+      final builtChildren = childMaps.map(widget.buildFromControl).toList();
+      if (contentLayout == 'row' || contentLayout == 'horizontal') {
+        content = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: buildSpacedChildren(
+            builtChildren,
+            Axis.horizontal,
+            contentGap,
+          ),
+        );
+      } else if (contentLayout == 'stack') {
+        content = Stack(children: builtChildren);
+      } else {
+        content = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: buildSpacedChildren(
+            builtChildren,
+            Axis.vertical,
+            contentGap,
+          ),
+        );
+      }
+    }
+    if (content != null && scrollAxis != null) {
+      content = SingleChildScrollView(
+        scrollDirection: scrollAxis,
+        child: content,
+      );
+    }
+
+    Widget container = Container(
+      width: width,
+      height: height,
+      constraints: buildLayoutConstraints(
+        minWidth: minWidth,
+        minHeight: minHeight,
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+      ),
+      margin: margin,
+      alignment: contentAlignment,
+      padding: contentPadding,
+      decoration: _buildBoxDecoration(
+        color: bgColor,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        radius: radius,
+        boxShadow: boxShadow,
+        gradient: gradient,
+        image: image,
+        shape: shape,
+      ),
+      child: content,
+    );
+
+    if (opacity != null && opacity >= 0 && opacity < 1) {
+      container = Opacity(opacity: opacity.clamp(0.0, 1.0), child: container);
+    }
+
+    if (blur > 0) {
+      Widget blurred = ClipRRect(
+        borderRadius: (shape == BoxShape.circle || radius == null)
+            ? BorderRadius.zero
+            : BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: container,
+        ),
+      );
+      if (shape == BoxShape.circle) {
+        blurred = ClipOval(clipBehavior: clipBehavior, child: blurred);
+      } else if (clipBehavior != Clip.none) {
+        blurred = ClipRRect(
+          clipBehavior: clipBehavior,
+          borderRadius: radius == null
+              ? BorderRadius.zero
+              : BorderRadius.circular(radius),
+          child: blurred,
+        );
+      }
+      return blurred;
+    }
+
+    if (shape == BoxShape.circle) {
+      return ClipOval(clipBehavior: clipBehavior, child: container);
+    }
+    if (clipBehavior != Clip.none) {
+      return ClipRRect(
+        clipBehavior: clipBehavior,
+        borderRadius: radius == null
+            ? BorderRadius.zero
+            : BorderRadius.circular(radius),
+        child: container,
+      );
+    }
+    return container;
+  }
+}
 
 BoxDecoration? _buildBoxDecoration({
   Color? color,
@@ -38,276 +299,11 @@ BoxDecoration? _buildBoxDecoration({
   );
 }
 
-Widget buildContainerControl(
-  Map<String, Object?> props,
-  List children,
-  Widget Function(Map<String, Object?> child) buildFromControl,
-) {
-  final sourceChildren = children.isEmpty && props['children'] is List
-      ? props['children'] as List
-      : children;
-  final childMaps = _childMaps(sourceChildren);
-  if (childMaps.isEmpty && props['child'] is Map) {
-    childMaps.add(coerceObjectMap(props['child'] as Map));
-  }
-  final width = coerceDouble(props['width']);
-  final height = coerceDouble(props['height']);
-  final minWidth = coerceDouble(props['min_width']);
-  final minHeight = coerceDouble(props['min_height']);
-  final maxWidth = coerceDouble(props['max_width']);
-  final maxHeight = coerceDouble(props['max_height']);
-  final margin = coercePadding(props['margin']);
-  final opacity = coerceDouble(props['opacity']);
-  final contentPadding = coercePadding(props['content_padding']);
-  final contentAlignment = _parseAlignment(props['content_alignment']);
-  // Use 'color' as alias for 'bgcolor' for consistency with headers style
-  final bgColor = coerceColor(props['bgcolor'] ?? props['color']);
-  final borderColor = coerceColor(props['border_color']);
-  final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
-  final radius = coerceDouble(props['radius']);
-  final boxShadow = coerceBoxShadow(props['shadow']);
-  final gradient = coerceGradient(props['gradient']);
-  final image = coerceDecorationImage(props['image']);
-  final shapeStr = props['shape']?.toString().toLowerCase();
-  final shape = shapeStr == 'circle' ? BoxShape.circle : BoxShape.rectangle;
-  final blur = _effectiveBlur(coerceDouble(props['blur']));
-  final contentGap = coerceDouble(props['content_gap']) ?? 0.0;
-  final contentLayout =
-      (props['content_layout']?.toString().toLowerCase() ?? 'single').trim();
-  final clipBehavior = _parseClip(props['clip_behavior']) ?? Clip.none;
-  final scrollAxis = _parseAxis(props['content_scroll']);
-
-  Widget? content;
-  if (childMaps.length == 1) {
-    content = buildFromControl(childMaps.first);
-  } else if (childMaps.length > 1) {
-    final builtChildren = childMaps.map(buildFromControl).toList();
-    if (contentLayout == 'row' || contentLayout == 'horizontal') {
-      content = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _withSpacing(builtChildren, Axis.horizontal, contentGap),
-      );
-    } else if (contentLayout == 'stack') {
-      content = Stack(children: builtChildren);
-    } else {
-      content = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _withSpacing(builtChildren, Axis.vertical, contentGap),
-      );
-    }
-  }
-  if (content != null && scrollAxis != null) {
-    content = SingleChildScrollView(
-      scrollDirection: scrollAxis,
-      child: content,
-    );
-  }
-
-  final decoration = _buildBoxDecoration(
-    color: bgColor,
-    borderColor: borderColor,
-    borderWidth: borderWidth,
-    radius: radius,
-    boxShadow: boxShadow,
-    gradient: gradient,
-    image: image,
-    shape: shape,
-  );
-
-  Widget container = Container(
-    width: width,
-    height: height,
-    constraints: _buildConstraints(
-      minWidth: minWidth,
-      minHeight: minHeight,
-      maxWidth: maxWidth,
-      maxHeight: maxHeight,
-    ),
-    margin: margin,
-    alignment: contentAlignment,
-    padding: contentPadding,
-    decoration: decoration,
-    child: content,
-  );
-
-  if (opacity != null && opacity >= 0 && opacity < 1) {
-    container = Opacity(opacity: opacity.clamp(0.0, 1.0), child: container);
-  }
-
-  if (blur > 0) {
-    // For glassmorphism, we clip the blur to the container's shape
-    Widget blurred = ClipRRect(
-      borderRadius: (shape == BoxShape.circle || radius == null)
-          ? BorderRadius.zero
-          : BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: container,
-      ),
-    );
-    if (shape == BoxShape.circle) {
-      blurred = ClipOval(clipBehavior: clipBehavior, child: blurred);
-    } else if (clipBehavior != Clip.none) {
-      blurred = ClipRRect(
-        clipBehavior: clipBehavior,
-        borderRadius: radius == null
-            ? BorderRadius.zero
-            : BorderRadius.circular(radius),
-        child: blurred,
-      );
-    }
-    return blurred;
-  }
-
-  if (shape == BoxShape.circle) {
-    return ClipOval(clipBehavior: clipBehavior, child: container);
-  }
-  if (clipBehavior != Clip.none) {
-    return ClipRRect(
-      clipBehavior: clipBehavior,
-      borderRadius: radius == null
-          ? BorderRadius.zero
-          : BorderRadius.circular(radius),
-      child: container,
-    );
-  }
-
-  return container;
-}
-
 double _effectiveBlur(double? value) {
   if (value == null || value <= 0) return 0.0;
   var blur = value.clamp(0.0, 16.0);
-  // Backdrop blur can hitch badly on Windows when layered many times.
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     blur = blur.clamp(0.0, 6.0);
   }
   return blur.toDouble();
-}
-
-BoxConstraints? _buildConstraints({
-  double? minWidth,
-  double? minHeight,
-  double? maxWidth,
-  double? maxHeight,
-}) {
-  if (minWidth == null &&
-      minHeight == null &&
-      maxWidth == null &&
-      maxHeight == null) {
-    return null;
-  }
-  return BoxConstraints(
-    minWidth: minWidth ?? 0,
-    minHeight: minHeight ?? 0,
-    maxWidth: maxWidth ?? double.infinity,
-    maxHeight: maxHeight ?? double.infinity,
-  );
-}
-
-List<Map<String, Object?>> _childMaps(List children) {
-  final out = <Map<String, Object?>>[];
-  for (final child in children) {
-    if (child is Map) {
-      out.add(coerceObjectMap(child));
-    }
-  }
-  return out;
-}
-
-List<Widget> _withSpacing(List<Widget> items, Axis axis, double spacing) {
-  if (spacing <= 0 || items.length < 2) return items;
-  final out = <Widget>[];
-  for (var i = 0; i < items.length; i += 1) {
-    if (i > 0) {
-      out.add(
-        axis == Axis.horizontal
-            ? SizedBox(width: spacing)
-            : SizedBox(height: spacing),
-      );
-    }
-    out.add(items[i]);
-  }
-  return out;
-}
-
-Alignment? _parseAlignment(Object? value) {
-  if (value == null) return null;
-  if (value is List && value.length >= 2) {
-    final x = coerceDouble(value[0]) ?? 0.0;
-    final y = coerceDouble(value[1]) ?? 0.0;
-    return Alignment(x, y);
-  }
-  if (value is Map) {
-    final map = coerceObjectMap(value);
-    final x = coerceDouble(map['x']);
-    final y = coerceDouble(map['y']);
-    if (x != null || y != null) {
-      return Alignment(x ?? 0.0, y ?? 0.0);
-    }
-  }
-  final s = value
-      .toString()
-      .toLowerCase()
-      .replaceAll('-', '_')
-      .replaceAll(' ', '_');
-  switch (s) {
-    case 'center':
-      return Alignment.center;
-    case 'top':
-    case 'top_center':
-      return Alignment.topCenter;
-    case 'bottom':
-    case 'bottom_center':
-      return Alignment.bottomCenter;
-    case 'left':
-    case 'center_left':
-    case 'start':
-      return Alignment.centerLeft;
-    case 'right':
-    case 'center_right':
-    case 'end':
-      return Alignment.centerRight;
-    case 'top_left':
-      return Alignment.topLeft;
-    case 'top_right':
-      return Alignment.topRight;
-    case 'bottom_left':
-      return Alignment.bottomLeft;
-    case 'bottom_right':
-      return Alignment.bottomRight;
-  }
-  return null;
-}
-
-Clip? _parseClip(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'hardedge':
-    case 'hard_edge':
-      return Clip.hardEdge;
-    case 'antialias':
-    case 'anti_alias':
-      return Clip.antiAlias;
-    case 'antialiaswithsavelayer':
-    case 'anti_alias_with_save_layer':
-      return Clip.antiAliasWithSaveLayer;
-    case 'none':
-      return Clip.none;
-  }
-  return null;
-}
-
-Axis? _parseAxis(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'horizontal':
-    case 'x':
-      return Axis.horizontal;
-    case 'vertical':
-    case 'y':
-      return Axis.vertical;
-  }
-  return null;
 }

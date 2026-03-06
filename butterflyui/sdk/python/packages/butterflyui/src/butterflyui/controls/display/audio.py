@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Audio"]
 
 class Audio(Component):
-    """Audio player control with playback and volume management.
+    """
+    Audio player control with playback and volume management.
     
     Embeds an audio player backed by the platform media stack.  Supports
     ``autoplay``, ``loop``, and initial ``volume`` / ``muted`` state.
@@ -17,34 +18,18 @@ class Audio(Component):
     methods to control playback programmatically, and ``get_state`` to
     retrieve the current position, duration, and playing status.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        player = bui.Audio(
-            src="/media/track.mp3",
-            title="Lo-fi Beats",
-            autoplay=True,
-            volume=0.8,
-        )
-    
-    Args:
-        src:
-            URI or file path of the audio source.
-        autoplay:
-            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
-        loop:
-            Controls whether playback restarts automatically after the media reaches the end of the stream.
-        volume:
-            Initial volume level from ``0.0`` (silent) to ``1.0``.
-        muted:
-            Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
-        title:
-            Display title shown in the player chrome.
-        artist:
-            Artist name shown alongside the title.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    player = bui.Audio(
+        src="/media/track.mp3",
+        title="Lo-fi Beats",
+        autoplay=True,
+        volume=0.8,
+    )
+    ```
     """
 
 

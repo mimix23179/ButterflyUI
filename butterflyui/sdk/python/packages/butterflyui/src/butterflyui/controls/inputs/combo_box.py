@@ -9,12 +9,15 @@ __all__ = ["ComboBox"]
 
 
 class ComboBox(Component):
-    """Editable combo-box input with option lists and async loading hooks.
+    """
+    Editable combo-box input with option lists and async loading hooks.
     
     ``ComboBox`` is the canonical merged control for both ``combo_box`` and
     legacy ``combobox`` usage. It supports typed input with selectable options,
     grouped option sections, loading state for remote queries, and debounce
     configuration for server-driven suggestion pipelines.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,38 +30,6 @@ class ComboBox(Component):
         events=["change", "query"],
     )
     ```
-    
-    Args:
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        options:
-            Option descriptors shown in the dropdown.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        groups:
-            Group descriptors for grouped option sections.
-        label:
-            Primary label text rendered by the control or its active action.
-        hint:
-            Hint text shown when input is empty.
-        placeholder:
-            Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
-        loading:
-            If ``True``, shows loading affordances.
-        async_source:
-            Identifier used by your runtime for remote option lookups.
-        debounce_ms:
-            Debounce window (milliseconds) for query events.
-        enabled:
-            If ``False``, input is non-interactive.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

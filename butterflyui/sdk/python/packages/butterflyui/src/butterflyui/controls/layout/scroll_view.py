@@ -6,12 +6,15 @@ from .._shared import Component, merge_props
 __all__ = ["ScrollView"]
 
 class ScrollView(Component):
-    """Scrollable container for arbitrary content along a configurable axis.
+    """
+    Scrollable container for arbitrary content along a configurable axis.
     
     The runtime wraps Flutter's ``SingleChildScrollView``. ``direction`` sets
     the scroll axis (``"vertical"`` or ``"horizontal"``); ``reverse`` flips
     the scroll direction. ``content_padding`` pads the inner content.
     ``initial_offset`` sets the starting scroll position.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -24,18 +27,6 @@ class ScrollView(Component):
         events=["scroll"],
     )
     ```
-    
-    Args:
-        direction:
-            Scroll axis. Values: ``"vertical"`` (default), ``"horizontal"``.
-        reverse:
-            When ``True`` the content is scrolled in the reverse direction.
-        content_padding:
-            Padding applied inside the scrollable area.
-        initial_offset:
-            Starting scroll offset in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

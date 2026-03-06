@@ -9,11 +9,14 @@ __all__ = ["Route"]
 
 
 class Route(Component):
-    """Route node describing one navigable view inside a router.
+    """
+    Route node describing one navigable view inside a router.
     
     ``Route`` is the canonical replacement for legacy ``route_view`` and
     ``route_host`` control wrappers. It can hold inline child content and
     route metadata used by router containers.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -26,31 +29,6 @@ class Route(Component):
         events=["change"],
     )
     ```
-    
-    Args:
-        child:
-            Primary child control rendered when this route is active.
-        children:
-            Optional child collection for multi-child route layouts.
-        route_id:
-            Stable identifier used to reference this route within navigation state.
-        title:
-            Route title used by navigation UIs.
-        label:
-            Primary label text rendered by the control or its active action.
-        layout:
-            Child layout hint (for example ``"column"``, ``"row"``,
-            ``"stack"``, ``"wrap"``).
-        spacing:
-            Spacing between children for multi-child layouts.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

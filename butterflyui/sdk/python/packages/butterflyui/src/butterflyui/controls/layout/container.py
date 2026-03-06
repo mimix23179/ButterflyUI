@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Container"]
 
 class Container(Component):
-    """Decorated layout container combining sizing, spacing, and visual decoration.
+    """
+    Decorated layout container combining sizing, spacing, and visual decoration.
     
     Maps to Flutter's ``Container`` widget. Combines ``width``/``height``
     constraints, ``padding`` and ``margin`` spacing, background and border
@@ -24,6 +25,8 @@ class Container(Component):
     - effects layer: ``effects``, ``effect_order``, ``effect_clip``,
       ``effect_target``.
     - visual tokens: ``icon``, ``color``, and ``transparency``.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -37,32 +40,6 @@ class Container(Component):
         events=["tap"],
     )
     ```
-    
-    Args:
-        width:
-            Requested width of the control in logical pixels.
-        height:
-            Requested height of the control in logical pixels.
-        padding:
-            Inner spacing between the container edge and its children.
-        margin:
-            Outer spacing around the container.
-        alignment:
-            How children are aligned within the container.
-        bgcolor:
-            Background color painted behind the control's content area.
-        border_color:
-            Border color applied to the outer edge of the rendered control or decorative surface.
-        border_width:
-            Border stroke width in logical pixels.
-        radius:
-            Corner radius in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        **kwargs:
-            Additional runtime props, including universal style/modifier/motion/
-            effects props handled by the shared renderer, plus optional
-            ``icon``, ``color``, and ``transparency`` hints.
     """
 
 

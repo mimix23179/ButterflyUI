@@ -28,16 +28,6 @@ class VerticalDivider(Divider):
         bui.Text("Right"),
     )
     ```
-
-    Args:
-        thickness:
-            Line thickness in logical pixels.
-        indent:
-            Leading inset before the divider starts.
-        end_indent:
-            Trailing inset before the divider ends.
-        color:
-            Divider color value passed to the runtime.
     """
 
 

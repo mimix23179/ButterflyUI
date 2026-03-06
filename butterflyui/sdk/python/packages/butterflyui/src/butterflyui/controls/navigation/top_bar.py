@@ -7,7 +7,8 @@ __all__ = ["TopBar"]
 
 
 class TopBar(Component):
-    """Application top bar with optional inline search and trailing actions.
+    """
+    Application top bar with optional inline search and trailing actions.
     
     The runtime renders a top navigation surface composed of ``title`` and
     optional ``subtitle`` plus a search field and trailing ``actions``.
@@ -16,6 +17,8 @@ class TopBar(Component):
     ``TopBar`` uses the same runtime renderer as ``AppBar`` and supports
     shared layout hints through ``props`` (alignment/position, margin,
     constraints, radius, and clip behavior).
+    
+    Example:
     
     ```python
     import butterflyui as bui
@@ -28,26 +31,6 @@ class TopBar(Component):
         events=["search", "action"],
     )
     ```
-    
-    Args:
-        title:
-            Primary heading text rendered by the control.
-        subtitle:
-            Optional secondary text shown below the title.
-        center_title:
-            Centers the title when ``True``.
-        show_search:
-            Shows an inline search field when ``True``.
-        search_value:
-            Current text value shown in the control's search input.
-        search_placeholder:
-            Placeholder text for the search field.
-        actions:
-            Ordered list of action descriptors rendered or triggered by this control. Each entry should match the runtime payload shape expected for the control type.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 

@@ -9,7 +9,8 @@ __all__ = ["Pagination"]
 
 
 class Pagination(Component):
-    """Unified pagination control for page-number and stepper-style navigation.
+    """
+    Unified pagination control for page-number and stepper-style navigation.
     
     ``Pagination`` is the canonical replacement for legacy ``page_nav`` and
     ``page_stepper`` controls. It supports numeric page buttons, previous/next
@@ -19,6 +20,8 @@ class Pagination(Component):
     The Flutter runtime exposes imperative methods (``set_page``,
     ``next_page``, ``prev_page``, ``first_page``, ``last_page``) so server-side
     handlers can drive the active page after initial render.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -33,38 +36,6 @@ class Pagination(Component):
         events=["change"],
     )
     ```
-    
-    Args:
-        page:
-            Current page index or page number used by the paginator.
-        page_count:
-            Total number of pages. If omitted, the renderer can derive it from
-            ``total_items`` and ``page_size``.
-        page_size:
-            Number of items per page used for derived ``page_count``.
-        total_items:
-            Total item count used with ``page_size`` to derive ``page_count``.
-        max_visible:
-            Maximum number of visible page buttons in numeric mode.
-        show_edges:
-            If ``True``, first/last jump buttons are shown when truncated.
-        dense:
-            Uses compact spacing and control sizing.
-        prev_label:
-            Label for the previous-page action.
-        next_label:
-            Label text rendered for the control's next-page or next-step action.
-        mode:
-            Optional display mode hint (for example ``"numbers"`` or
-            ``"stepper"``) interpreted by the renderer.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

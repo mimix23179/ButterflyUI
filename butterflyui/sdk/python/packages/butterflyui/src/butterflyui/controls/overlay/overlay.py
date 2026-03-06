@@ -9,7 +9,8 @@ __all__ = ["Overlay"]
 
 
 class Overlay(Component):
-    """General-purpose overlay and overlay-stack host.
+    """
+    General-purpose overlay and overlay-stack host.
     
     ``Overlay`` now also absorbs legacy ``overlay_host`` capabilities. You can
     render a single floating child (traditional overlay behavior) or provide a
@@ -18,6 +19,8 @@ class Overlay(Component):
     Like other core controls, ``Overlay`` forwards universal styling props
     through ``**kwargs`` so icon/color/transparency and motion/effects
     pipelines can be applied consistently.
+    
+    Example:
     
     ```python
     import butterflyui as bui
@@ -30,50 +33,6 @@ class Overlay(Component):
         events=["close"],
     )
     ```
-    
-    Args:
-        open:
-            When ``True`` the overlay is visible.
-        dismissible:
-            When ``True`` tapping the scrim closes the overlay.
-        alignment:
-            Alignment of the floating content within the overlay area.
-        scrim_color:
-            Color of the background scrim overlay.
-        base:
-            Base style map applied in the idle state before any interactive or disabled overrides are merged.
-        overlays:
-            Overlay layer controls composed above ``base``.
-        active_overlay:
-            Active overlay ID or list of active IDs.
-        active_id:
-            Backward-compatible alias for ``a single active overlay ID``. When both fields are provided, ``a single active overlay ID`` takes precedence and this alias is kept only for compatibility.
-        active_index:
-            Zero-based index of the currently active item, overlay, or page within the control.
-        show_all_overlays:
-            If ``True``, all overlays are visible simultaneously.
-        show_default_overlay:
-            If ``True``, first overlay is shown by default.
-        max_visible_overlays:
-            Maximum number of overlays visible at once.
-        transition:
-            Overlay transition descriptor mapping.
-        transition_type:
-            Named transition preset for overlay changes.
-        transition_ms:
-            Transition duration in milliseconds.
-        clip:
-            If ``True``, clip overlay layers to host bounds.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ContextMenu"]
 
 class ContextMenu(Component):
-    """Popup context menu bound to a child trigger surface.
+    """
+    Popup context menu bound to a child trigger surface.
     
     ``ContextMenu`` opens a floating action list on secondary click, long
     press, or tap (depending on ``trigger``/``open_on_tap``). Items may define
@@ -16,6 +17,8 @@ class ContextMenu(Component):
     The menu shell supports styling/shape hints through ``props`` (for example
     ``bgcolor``, ``radius``, ``elevation``), and the trigger surface also
     accepts shared layout hints through ``props``.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -28,23 +31,6 @@ class ContextMenu(Component):
         ],
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        trigger:
-            Gesture that opens the menu. Values: ``"secondary_tap"``,
-            ``"long_press"``.
-        open_on_tap:
-            When ``True`` a primary tap also opens the context menu.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props passed through to Flutter.
     """
 
 

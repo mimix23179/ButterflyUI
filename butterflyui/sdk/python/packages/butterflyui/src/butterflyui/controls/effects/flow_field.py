@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["FlowField"]
 
 class FlowField(Component):
-    """Animated vector flow-field visualisation rendered with a
+    """
+    Animated vector flow-field visualisation rendered with a
     ``CustomPainter``.
     
     The Flutter runtime draws a grid of short line segments whose
@@ -15,39 +16,19 @@ class FlowField(Component):
     continuously advances the time parameter so the field appears to
     ripple and flow.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        field = bui.FlowField(
-            density=20,
-            speed=0.5,
-            line_width=1.5,
-            color="#22d3ee",
-            opacity=0.6,
-        )
-    
-    Args:
-        seed:
-            Integer seed that offsets the noise function,
-            producing a different field pattern.  Defaults to ``1``.
-        density:
-            Spacing in logical pixels between grid points
-            (``8`` – ``120``).  Defaults to ``24``.
-        speed:
-            Animation speed multiplier (``0.0`` – ``5.0``).
-            Defaults to ``0.35``.
-        line_width:
-            Stroke width of each segment in logical pixels
-            (``0.2`` – ``8.0``).  Defaults to ``1.1``.
-        color:
-            Stroke colour of the line segments.
-            Defaults to ``#22d3ee``.
-        opacity:
-            Stroke opacity (``0.0`` – ``1.0``).
-            Defaults to ``0.6``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    field = bui.FlowField(
+        density=20,
+        speed=0.5,
+        line_width=1.5,
+        color="#22d3ee",
+        opacity=0.6,
+    )
+    ```
     """
 
 

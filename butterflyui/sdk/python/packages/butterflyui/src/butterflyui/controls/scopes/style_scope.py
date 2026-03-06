@@ -9,39 +9,8 @@ __all__ = ["StyleScope", "Style"]
 
 
 class StyleScope(Component):
-    """Subtree style context control for packs, tokens, and component recipes.
-    
-    Args:
-        child:
-            Primary child control placed inside the style scope.
-        style_pack:
-            Named style pack activated for the subtree.
-        pack:
-            Backward-compatible alias for ``style_pack``. When both fields are provided, ``style_pack`` takes precedence and this alias is kept only for compatibility.
-        tokens:
-            Token overrides applied inside the scope.
-        token_overrides:
-            Additional token overrides merged into ``tokens``.
-        style_tokens:
-            Named style-token overrides scoped to the wrapped subtree.
-        recipes:
-            Component recipe payloads available inside the scope.
-        default_style:
-            Default style values merged into descendant controls.
-        default_modifiers:
-            Default modifiers applied within the scope.
-        default_motion:
-            Default motion payload applied within the scope.
-        state:
-            Current state token or state identifier forwarded into styling and runtime behavior.
-        variant:
-            Variant token or preset name used to select a specific visual style.
-        classes:
-            Scoped class tokens used by descendant styling.
-        effects:
-            Scoped effects payload applied by the runtime.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    """
+    Subtree style context control for packs, tokens, and component recipes.
     """
 
 

@@ -9,7 +9,8 @@ __all__ = ["Display"]
 
 
 class Display(Component):
-    """Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
+    """
+    Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
     
     ``Display`` replaces several narrow widgets with a role-driven API:
     ``identity``, ``status``, ``rating``, ``reactions``, ``check``, and
@@ -22,104 +23,20 @@ class Display(Component):
     consistently with Candy/Skins/Gallery.
     
     Example:
-        ```python
-        import butterflyui as bui
-    
-        profile = bui.Display(
-            role="identity",
-            title="Nina Hart",
-            subtitle="Design Systems",
-            avatar="https://example.com/avatar.png",
-            tags=["Owner", "Core Team"],
-            trailing={"type": "icon", "props": {"name": "chevron_right"}},
-            interactive=True,
-            events=["tap"],
-        )
-        ```
-    
-    Args:
-        role:
-            Role/variant selector. Recommended values:
-            ``"identity"``, ``"status"``, ``"rating"``, ``"reactions"``,
-            ``"check"``, ``"ownership"``.
-        variant:
-            Variant token or preset name used to select a specific visual style.
-        title:
-            Primary heading text rendered by the control.
-        subtitle:
-            Secondary text rendered beneath or beside the primary title.
-        caption:
-            Tertiary/supporting caption line.
-        description:
-            Longer descriptive text rendered beneath or alongside the control's primary label.
-        name:
-            Human-readable name used to identify this item, style pack, or preset.
-        tone:
-            Semantic tone (``neutral/info/success/warn/danger``).
-        size:
-            Size token (for example ``sm``, ``md``, ``lg``).
-        interactive:
-            Enables hover/focus affordances and tap emission.
-        icon:
-            Icon descriptor for role surfaces.
-        leading:
-            Leading slot descriptor (control map/string/icon).
-        trailing:
-            Trailing content or descriptor rendered after the control's primary body.
-        avatar:
-            Avatar source or descriptor rendered alongside the control's primary content.
-        initials:
-            Fallback initials rendered when an avatar or image source is not available.
-        tags:
-            List of tag labels associated with the rendered item or record.
-        status:
-            Status text or key for status role.
-        badge:
-            Badge value or descriptor rendered as a compact status marker near the control's main content.
-        color:
-            Primary color value used by the control for text, icons, strokes, or accent surfaces.
-        value:
-            Numeric/text value for rating/status/metric roles.
-        max:
-            Maximum bound used in rating role.
-        allow_half:
-            Enables half values in rating role.
-        count:
-            Count label for rating/reaction roles.
-        items:
-            Item descriptors for reactions/check roles.
-        selected:
-            Selected reaction/item identifiers.
-        checked:
-            List of checked item identifiers or payloads used by the display role when it renders multi-check or selection state.
-        checked_value:
-            Boolean check state for a single-check role usage.
-        dot_count:
-            Dot count for typing-like status visuals.
-        document_id:
-            Identifier of the backing document, record, or content item shown by the control.
-        ranges:
-            List of value ranges, highlight segments, or annotated spans rendered by the control.
-        owners:
-            Ordered collection of owner entries associated with the rendered record or item.
-        owner:
-            Single owner descriptor associated with the rendered record or item.
-        show_avatars:
-            Shows avatars in identity/ownership variants.
-        compact:
-            Enables a more compact visual density with reduced padding, gaps, or surface size.
-        dense:
-            Enables a denser layout with reduced gaps, padding, or row height.
-        aria_label:
-            Accessibility label announced to assistive technologies when the control does not expose enough visible text on its own.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    ```python
+    import butterflyui as bui
+
+    profile = bui.Display(
+        role="identity",
+        title="Nina Hart",
+        subtitle="Design Systems",
+        avatar="https://example.com/avatar.png",
+        tags=["Owner", "Core Team"],
+        trailing={"type": "icon", "props": {"name": "chevron_right"}},
+        interactive=True,
+        events=["tap"],
+    )
+    ```
     """
 
 

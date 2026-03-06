@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Sprite"]
 
 class Sprite(Component):
-    """Sprite-sheet animation player that steps through frames at a given FPS.
+    """
+    Sprite-sheet animation player that steps through frames at a given FPS.
     
     The runtime loads an image sprite sheet from ``src`` and plays it as an
     animation. ``frame_width``/``frame_height`` define the size of each frame
@@ -16,6 +17,8 @@ class Sprite(Component):
     describe the sprite-sheet grid. ``fit`` sets the Flutter box-fit mode.
     ``opacity`` controls transparency. ``progress`` seeks to a fractional
     position (0.0--1.0).
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -31,36 +34,6 @@ class Sprite(Component):
         events=["complete"],
     )
     ```
-    
-    Args:
-        src:
-            Asset path or URL of the sprite-sheet image.
-        frame_width:
-            Width of a single frame cell in logical pixels.
-        frame_height:
-            Height of a single frame cell in logical pixels.
-        frames:
-            Total number of frames in the sprite sheet.
-        fps:
-            Playback speed in frames per second.
-        loop:
-            When ``True`` the animation repeats after the last frame.
-        autoplay:
-            When ``True`` playback begins immediately on mount.
-        play:
-            Live play/pause toggle. ``True`` plays; ``False`` pauses.
-        columns:
-            Number of frame columns in the sprite-sheet grid.
-        rows:
-            Number of frame rows in the sprite-sheet grid.
-        fit:
-            Flutter ``BoxFit`` mode for rendering the sprite.
-        opacity:
-            Opacity value in the range 0.0--1.0.
-        progress:
-            Normalised seek position (0.0 = first frame, 1.0 = last frame).
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

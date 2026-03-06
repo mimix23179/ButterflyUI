@@ -9,7 +9,8 @@ __all__ = ["Modifier"]
 
 
 class Modifier(Component):
-    """Composable modifier host that injects layout/visual/interaction effects into descendants.
+    """
+    Composable modifier host that injects layout/visual/interaction effects into descendants.
     
     ``Modifier`` is the glue control for reusable visual behavior. Instead of creating
     many one-off controls, you can wrap a subtree and apply:
@@ -28,81 +29,22 @@ class Modifier(Component):
     - ``on_focus`` and ``on_focus_modifiers``
     
     Example:
-        ```python
-        import butterflyui as bui
     
-        cta = bui.Modifier(
-            modifiers=[
-                {"type": "glass", "blur": 20, "radius": 999},
-                {"type": "glow", "color": "$primary", "blur": 18, "opacity": 0.75},
-                "hover_lift",
-                "press_scale",
-            ],
-            on_hover=[{"type": "glow", "blur": 26, "opacity": 0.95}],
-            cursor="click",
-            child=bui.Button("Start Natively"),
-        )
-        ```
-    
-    Args:
-        child:
-            Single child control or payload wrapped by this control.
-        children:
-            Ordered list of child payloads nested inside this reusable component spec.
-        modifiers:
-            Base modifier descriptors merged into descendants.
-        motion:
-            Default motion spec for descendants.
-        on_hover:
-            Modifier descriptors activated on hover state.
-        on_hover_modifiers:
-            Modifiers activated while the pointer is hovering the control.
-        on_pressed:
-            Modifier descriptors activated on pressed state.
-        on_pressed_modifiers:
-            Explicit alias of ``on_pressed``.
-        on_focus:
-            Modifier descriptors activated on focus state.
-        on_focus_modifiers:
-            Modifiers activated while the control or wrapped child currently has focus.
-        cursor:
-            Cursor override for descendants.
-        padding:
-            Inner spacing applied between the control's border and its content.
-        margin:
-            Outer spacing applied around the control before neighboring layout items are positioned.
-        align:
-            Alignment configuration that positions the child or content within the available layout space.
-        max_width:
-            Descendant max width constraint.
-        max_height:
-            Descendant max height constraint.
-        min_width:
-            Descendant min width constraint.
-        min_height:
-            Descendant min height constraint.
-        border:
-            Border descriptor merged into descendant style.
-        background:
-            Background color/gradient descriptor merged into descendant style.
-        shadow:
-            Shadow descriptor merged into descendant style.
-        glow:
-            Glow effect configuration merged into the rendered modifier payload.
-        glass:
-            Glass-effect configuration applied by the modifier pipeline for this control.
-        focus_ring:
-            Focus-ring configuration applied when the control receives keyboard or accessibility focus. Typical values control ring color, width, inset, or animation depending on the renderer.
-        hit_test:
-            Hit-test behavior that determines how this control participates in pointer targeting.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    ```python
+    import butterflyui as bui
+
+    cta = bui.Modifier(
+        modifiers=[
+            {"type": "glass", "blur": 20, "radius": 999},
+            {"type": "glow", "color": "$primary", "blur": 18, "opacity": 0.75},
+            "hover_lift",
+            "press_scale",
+        ],
+        on_hover=[{"type": "glow", "blur": 26, "opacity": 0.95}],
+        cursor="click",
+        child=bui.Button("Start Natively"),
+    )
+    ```
     """
 
 

@@ -1,0 +1,6952 @@
+[
+  {
+    "consumed_props": [
+      "allow_empty",
+      "dense",
+      "expanded",
+      "index",
+      "labels",
+      "multiple",
+      "sections",
+      "show_dividers",
+      "spacing"
+    ],
+    "control_type": "accordion",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/accordion.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_expanded"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/accordion.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "active_id",
+      "alignment",
+      "background",
+      "bgcolor",
+      "border_color",
+      "dense",
+      "enabled",
+      "items",
+      "main_axis",
+      "max_visible",
+      "padding",
+      "radius",
+      "run_spacing",
+      "scrollable",
+      "selected",
+      "selected_id",
+      "spacing",
+      "subtitle",
+      "title",
+      "wrap"
+    ],
+    "control_type": "action_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/action_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "center",
+      "emit",
+      "end",
+      "filled",
+      "get_state",
+      "outlined",
+      "right",
+      "set_items",
+      "set_props",
+      "set_selected",
+      "space_around",
+      "space_between",
+      "space_evenly",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/action_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "actions",
+      "child",
+      "close_on_escape",
+      "content",
+      "dismissible",
+      "duration_ms",
+      "max_width",
+      "min_width",
+      "open",
+      "radius",
+      "scrim_color",
+      "source_rect",
+      "title",
+      "transition",
+      "transition_type",
+      "trap_focus"
+    ],
+    "control_type": "alert_dialog",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/alert_dialog.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "action",
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "elevated",
+      "fade",
+      "filled",
+      "get_state",
+      "glass_sheet",
+      "outlined",
+      "pop",
+      "pop_from_rect",
+      "set_open",
+      "slide",
+      "zoom"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/alert_dialog.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "align",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/align.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "colors",
+      "curve",
+      "duration",
+      "duration_ms",
+      "loop"
+    ],
+    "control_type": "animated_background",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/animated_background.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/animated_background.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "angle",
+      "autoplay",
+      "begin",
+      "center",
+      "colors",
+      "duration",
+      "duration_ms",
+      "end",
+      "end_angle",
+      "kind",
+      "loop",
+      "ping_pong",
+      "play",
+      "playing",
+      "radius",
+      "shift",
+      "start_angle",
+      "stops",
+      "tile_mode",
+      "type",
+      "variant"
+    ],
+    "control_type": "animated_gradient",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/animated_gradient.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "bottom_left",
+      "bottom_right",
+      "center",
+      "clamp",
+      "decal",
+      "get_state",
+      "mirror",
+      "pause",
+      "play",
+      "repeat",
+      "repeated",
+      "set_angle",
+      "set_colors",
+      "set_stops",
+      "top_left",
+      "top_right"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/animated_gradient.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "blur",
+      "child",
+      "color",
+      "curve",
+      "delay_ms",
+      "duration",
+      "duration_ms",
+      "enabled",
+      "from",
+      "keyframes",
+      "mirror",
+      "offset",
+      "opacity",
+      "play",
+      "repeat",
+      "reverse",
+      "rotation",
+      "scale",
+      "to"
+    ],
+    "control_type": "animation",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/animation.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/animation_effect.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "radius",
+      "search_value",
+      "subtitle",
+      "title"
+    ],
+    "control_type": "app_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/app_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props",
+      "set_title",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/app_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action_label",
+      "clickable",
+      "label",
+      "message",
+      "title"
+    ],
+    "control_type": "artifact_card",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/artifact_card.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_content"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/artifact_card.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "aspect_ratio",
+      "ratio"
+    ],
+    "control_type": "aspect_ratio",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/aspect_ratio.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout",
+      "set_ratio"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/aspect_ratio.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "busy",
+      "busy_label",
+      "color",
+      "disabled_while_busy",
+      "enabled",
+      "glyph",
+      "icon",
+      "icon_color",
+      "label",
+      "leading_icon",
+      "loading",
+      "text",
+      "variant"
+    ],
+    "control_type": "async_action_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/async_action_button.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "elevated",
+      "emit",
+      "filled",
+      "get_state",
+      "outlined",
+      "set_busy",
+      "text"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/async_action_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "artist",
+      "autoplay",
+      "duration",
+      "muted",
+      "position",
+      "src",
+      "title",
+      "volume"
+    ],
+    "control_type": "audio",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/media/audio.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py",
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "pause",
+      "play",
+      "set_position",
+      "set_volume"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/audio.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "color",
+      "enabled",
+      "icon",
+      "image",
+      "initials",
+      "label",
+      "name",
+      "radius",
+      "size",
+      "src",
+      "status"
+    ],
+    "control_type": "avatar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/avatar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "click"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/avatar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "avatars",
+      "max",
+      "max_count",
+      "max_visible",
+      "overflow_label",
+      "overlap",
+      "size",
+      "stack_order"
+    ],
+    "control_type": "avatar_stack",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/avatar_stack.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_avatars",
+      "set_avatars"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/avatar_stack.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "clickable",
+      "color",
+      "count",
+      "dot",
+      "dot_size",
+      "font_size",
+      "label",
+      "padding",
+      "pulse",
+      "radius",
+      "severity",
+      "text",
+      "text_color",
+      "value"
+    ],
+    "control_type": "badge",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/badge.dart"
+    ],
+    "demo_files": [
+      "demo/drawer.py"
+    ],
+    "emitted_events": [
+      "change",
+      "click"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_value",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/badge.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "bar_chart",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/bar_chart.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "bar_plot",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/bar_plot.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "enabled",
+      "items",
+      "label",
+      "options",
+      "preview",
+      "sample",
+      "value"
+    ],
+    "control_type": "blend_mode_picker",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/blend_mode_picker.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "options_changed"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_value",
+      "multiply",
+      "overlay",
+      "plus",
+      "screen",
+      "set_options",
+      "set_value",
+      "soft_light",
+      "softlight"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/blend_mode_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "color",
+      "count",
+      "max_radius",
+      "min_radius",
+      "opacity",
+      "progress",
+      "seed"
+    ],
+    "control_type": "blob_field",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/blob_field.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "regenerated"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "regenerate",
+      "set_playing",
+      "set_progress",
+      "set_seed"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/blob_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "animated",
+      "border_color",
+      "border_width",
+      "color",
+      "duration_ms",
+      "padding",
+      "radius",
+      "side",
+      "sides",
+      "width"
+    ],
+    "control_type": "border",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/border.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/skins.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "bottom",
+      "left",
+      "right",
+      "set_style",
+      "top"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/border_effect.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "animated",
+      "bottom",
+      "color",
+      "duration_ms",
+      "left",
+      "length",
+      "right",
+      "side",
+      "top",
+      "width"
+    ],
+    "control_type": "border_side",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/border_side.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "left",
+      "right",
+      "set_style",
+      "top"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/border_side.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "align",
+      "alignment",
+      "background",
+      "bgcolor",
+      "child",
+      "clip_behavior",
+      "curve",
+      "dismissible",
+      "duration",
+      "duration_ms",
+      "elevation",
+      "height",
+      "margin",
+      "max_height",
+      "max_width",
+      "min_height",
+      "min_width",
+      "open",
+      "panel_alignment",
+      "panel_margin",
+      "panel_max_width",
+      "panel_min_width",
+      "panel_width",
+      "radius",
+      "scrim_color",
+      "show_handle",
+      "width"
+    ],
+    "control_type": "bottom_sheet",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/bottom_sheet.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "easein",
+      "easeinout",
+      "emit",
+      "get_state",
+      "set_open",
+      "set_props",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/bottom_sheet.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "box",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/box.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "compact",
+      "crumbs",
+      "current_index",
+      "dense",
+      "items",
+      "max_items",
+      "path",
+      "path_items",
+      "radius",
+      "routes",
+      "separator",
+      "show_root"
+    ],
+    "control_type": "breadcrumb_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/breadcrumb_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/breadcrumb_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "bubble",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/bubble.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "append_message",
+      "chat",
+      "composer",
+      "danger",
+      "emit",
+      "error",
+      "get_state",
+      "info",
+      "jump_to_bottom",
+      "jump_to_message",
+      "prepend_messages",
+      "set_props",
+      "set_value",
+      "submit",
+      "success",
+      "thread",
+      "warn",
+      "warning"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/bubble.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "variant",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/README.md",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "base",
+      "events",
+      "hover",
+      "items",
+      "options",
+      "pressed",
+      "value"
+    ],
+    "control_type": "button_style",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/button_style.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "options_changed",
+      "state_style_change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_value",
+      "set_options",
+      "set_state_style",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/button_style.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "absorb_pointer",
+      "animated_background",
+      "border_radius",
+      "brightness",
+      "clip",
+      "clip_radius",
+      "clip_shape",
+      "glow",
+      "ignore_pointer",
+      "liquid_morph",
+      "module",
+      "opacity",
+      "parallax",
+      "particles",
+      "radius",
+      "scanline",
+      "shape",
+      "shimmer",
+      "tokens",
+      "vignette",
+      "visible"
+    ],
+    "control_type": "candy",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/candy/candy.dart"
+    ],
+    "demo_files": [
+      "demo/README.md"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/candy/candy.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "absorb_pointer",
+      "animated_background",
+      "border_radius",
+      "brightness",
+      "clip",
+      "clip_radius",
+      "clip_shape",
+      "glow",
+      "ignore_pointer",
+      "liquid_morph",
+      "module",
+      "opacity",
+      "parallax",
+      "particles",
+      "radius",
+      "scanline",
+      "shape",
+      "shimmer",
+      "tokens",
+      "vignette",
+      "visible"
+    ],
+    "control_type": "candy_scope",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/candy/candy.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/candy/candy.py"
+    ],
+    "registry_registered": true,
+    "renderer_registered": false,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "canvas",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/canvas.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "card",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/card.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/card.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "center",
+    "dart_files": [],
+    "demo_files": [
+      "demo/drawer.py",
+      "demo/skins.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/starry_editor/workspace/README.md"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/center.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "chart_type",
+      "color",
+      "data",
+      "empty_label",
+      "fill",
+      "grouped",
+      "height",
+      "points",
+      "stacked",
+      "type",
+      "values"
+    ],
+    "control_type": "chart",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/chart.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_data"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/chart.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "checkbox",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/checkbox.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "set_value",
+      "toggle"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/checkbox.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "dismissible",
+      "enabled",
+      "items",
+      "label",
+      "multi_select",
+      "multiple",
+      "options",
+      "run_spacing",
+      "selected",
+      "spacing",
+      "text",
+      "value",
+      "values"
+    ],
+    "control_type": "chip",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/chip.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "get_values",
+      "set_selected",
+      "set_values"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/chip.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "chromatic_shift",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/chromatic_shift.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "border_radius",
+      "child",
+      "clip_behavior",
+      "radius",
+      "shape"
+    ],
+    "control_type": "clip",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/clip.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/clip.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "color",
+      "enabled",
+      "font_size",
+      "foreground",
+      "height",
+      "label",
+      "meta_color",
+      "meta_size",
+      "min_contrast",
+      "padding",
+      "radius",
+      "shape",
+      "show_hex",
+      "show_label",
+      "size",
+      "spacing",
+      "text_color",
+      "value",
+      "width"
+    ],
+    "control_type": "color",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/color.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/color.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "color_picker",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/color_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alpha",
+      "angle",
+      "background",
+      "bg_color",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "color",
+      "colors",
+      "columns",
+      "content_padding",
+      "enabled",
+      "gradient",
+      "input_label",
+      "input_placeholder",
+      "opacity",
+      "padding",
+      "preset_size",
+      "preset_spacing",
+      "presets",
+      "radius",
+      "selected_id",
+      "selected_index",
+      "shadow_blur",
+      "shadow_color",
+      "shadow_dx",
+      "shadow_dy",
+      "show_add",
+      "show_alpha",
+      "show_angle",
+      "show_input",
+      "show_labels",
+      "show_picker",
+      "show_presets",
+      "show_remove",
+      "show_swatches",
+      "size",
+      "spacing",
+      "stops",
+      "swatches",
+      "value"
+    ],
+    "control_type": "color_tools",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/color_tools.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "angle_change",
+      "change",
+      "select",
+      "stops_change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "add_stop",
+      "get_state",
+      "get_value",
+      "remove_stop",
+      "set_angle",
+      "set_colors",
+      "set_selected",
+      "set_stops",
+      "set_style",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/color_tools.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "clip_behavior",
+      "cross_axis",
+      "gap",
+      "main_axis",
+      "main_axis_size",
+      "spacing"
+    ],
+    "control_type": "column",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/column.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/column.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "autofocus",
+      "dense",
+      "enabled",
+      "events",
+      "hint",
+      "items",
+      "label",
+      "loading",
+      "options",
+      "placeholder",
+      "text",
+      "value"
+    ],
+    "control_type": "combo_box",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/combo_box.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "set_loading",
+      "set_options",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/combo_box.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "confetti_burst",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/confetti_burst.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "container",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/container.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/container.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": [
+      "butterflyui/src/test/runtime_control_shells_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [],
+    "control_type": "container_style",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/container_style.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "bgcolor",
+      "elevation",
+      "enabled",
+      "items",
+      "label",
+      "open_on_tap",
+      "radius",
+      "trigger"
+    ],
+    "control_type": "context_menu",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/context_menu.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "open_at",
+      "set_items",
+      "set_props",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/context_menu.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "border_color",
+      "border_width",
+      "height",
+      "rect",
+      "shade_color"
+    ],
+    "control_type": "crop_box",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/crop_box.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_rect"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/crop_box.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "show_header",
+      "striped"
+    ],
+    "control_type": "data_grid",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/data_grid.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/data_grid.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "query",
+      "selected_id",
+      "show_search",
+      "sources"
+    ],
+    "control_type": "data_source_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/data_source_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_query",
+      "set_selected",
+      "set_sources"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/data_source_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "columns",
+      "dense",
+      "filter_query",
+      "filterable",
+      "rows",
+      "selectable",
+      "show_header",
+      "sort_ascending",
+      "sort_column",
+      "sortable",
+      "striped"
+    ],
+    "control_type": "data_table",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/data_table.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "clear_filter",
+      "clear_selection",
+      "clear_sort",
+      "emit",
+      "get_state",
+      "set_filter",
+      "set_sort"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/data_table.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "date",
+      "dense",
+      "enabled",
+      "end",
+      "end_date",
+      "label",
+      "max",
+      "max_date",
+      "min",
+      "min_date",
+      "mode",
+      "placeholder",
+      "start",
+      "start_date",
+      "value"
+    ],
+    "control_type": "date_picker",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/date_picker.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "input"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "clear",
+      "get_value",
+      "open",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/date_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "bgcolor",
+      "border_color",
+      "border_radius",
+      "border_width",
+      "child",
+      "clip_behavior",
+      "color",
+      "gradient",
+      "image",
+      "margin",
+      "padding",
+      "radius",
+      "shadow",
+      "shape"
+    ],
+    "control_type": "decorated_box",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/decorated_box.dart"
+    ],
+    "demo_files": [
+      "demo/skins.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/decorated_box.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "directory_picker",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/directory_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "display",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/display.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "check",
+      "check_list",
+      "checklist",
+      "danger",
+      "emit",
+      "error",
+      "get_state",
+      "identity",
+      "ok",
+      "ownership",
+      "ownership_marker",
+      "persona",
+      "rating",
+      "rating_display",
+      "reaction_bar",
+      "reactions",
+      "result_card",
+      "set_checked",
+      "set_props",
+      "status",
+      "status_mark",
+      "success",
+      "summary",
+      "typing",
+      "typing_indicator",
+      "warn",
+      "warning"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/display.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "color",
+      "end_indent",
+      "indent",
+      "thickness",
+      "vertical"
+    ],
+    "control_type": "divider",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/divider.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/divider.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "drag_type",
+      "enabled",
+      "index",
+      "payload"
+    ],
+    "control_type": "drag_handle",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/drag_handle.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/drag_handle.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "border_color",
+      "child",
+      "clip_behavior",
+      "collapsible",
+      "curve",
+      "dense",
+      "dismissible",
+      "duration",
+      "duration_ms",
+      "elevation",
+      "emit_on_search_change",
+      "height",
+      "icon_color",
+      "items",
+      "margin",
+      "open",
+      "panel_margin",
+      "position",
+      "query",
+      "radius",
+      "scrim_color",
+      "search_debounce_ms",
+      "search_placeholder",
+      "sections",
+      "selected",
+      "selected_color",
+      "selected_id",
+      "selected_text_color",
+      "show_search",
+      "side",
+      "size",
+      "subtitle",
+      "text_color",
+      "title",
+      "value",
+      "width"
+    ],
+    "control_type": "drawer",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/drawer.dart"
+    ],
+    "demo_files": [
+      "demo/README.md",
+      "demo/drawer.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "bottom",
+      "easein",
+      "easeinout",
+      "emit",
+      "get_state",
+      "left",
+      "right",
+      "set_open",
+      "set_props",
+      "set_query",
+      "set_selected",
+      "top",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/drawer.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "accept_types",
+      "accepts",
+      "enabled",
+      "subtitle",
+      "title"
+    ],
+    "control_type": "drop_zone",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/drop_zone.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/drop_zone.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "dropdown",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/dropdown.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "blend_mode",
+      "blur",
+      "brightness",
+      "color",
+      "contrast",
+      "enabled",
+      "grayscale",
+      "opacity",
+      "saturation"
+    ],
+    "control_type": "effects",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/effects.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/effects.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "elevated_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/elevated_button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/elevated_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [],
+    "control_type": "emoji_icon",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/emoji_icon.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "categories",
+      "category",
+      "columns",
+      "emojis",
+      "include_metadata",
+      "items",
+      "query",
+      "recent",
+      "show_recent",
+      "show_search",
+      "skin_tone",
+      "spacing",
+      "value"
+    ],
+    "control_type": "emoji_picker",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/emoji_picker.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_value",
+      "search",
+      "set_category",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/emoji_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "expanded",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/expanded.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "error_text",
+      "helper_text",
+      "label",
+      "required",
+      "spacing"
+    ],
+    "control_type": "field_group",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/field_group.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/field_group.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "allow_multiple",
+      "allowed_extensions",
+      "dialog_title",
+      "directory",
+      "enabled",
+      "extensions",
+      "file_name",
+      "file_type",
+      "initial_directory",
+      "label",
+      "lock_parent_window",
+      "mode",
+      "multiple",
+      "pick_directory",
+      "save_file",
+      "show_selection",
+      "text",
+      "type",
+      "with_data",
+      "with_path"
+    ],
+    "control_type": "file_picker",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/file_picker.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "cancel",
+      "change",
+      "error",
+      "pick"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "all",
+      "any",
+      "audio",
+      "clear",
+      "custom",
+      "get_files",
+      "image",
+      "images",
+      "media",
+      "open",
+      "pick",
+      "pick_directory",
+      "pick_files",
+      "save_file",
+      "video",
+      "videos"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/file_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "filled_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/filled_button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/filled_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alignment",
+      "child",
+      "clip_behavior",
+      "fit"
+    ],
+    "control_type": "fitted_box",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/fitted_box.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/fitted_box.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "flex"
+    ],
+    "control_type": "flex_spacer",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/flex_spacer.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/flex_spacer.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "color",
+      "density",
+      "line_width",
+      "opacity",
+      "seed",
+      "speed"
+    ],
+    "control_type": "flow_field",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/flow_field.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/flow_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "axis",
+      "enabled",
+      "folds",
+      "progress",
+      "shadow"
+    ],
+    "control_type": "fold_layer",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/fold_layer.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_progress"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/fold_layer.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child",
+      "content_padding",
+      "dense",
+      "description",
+      "error_text",
+      "errors",
+      "fields",
+      "helper_text",
+      "items",
+      "label",
+      "messages",
+      "padding",
+      "radius",
+      "required",
+      "schema",
+      "spacing",
+      "submit_label",
+      "title",
+      "values"
+    ],
+    "control_type": "form",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/form.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "submit"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "get_values",
+      "set_field_value",
+      "set_values",
+      "submit",
+      "validate"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/productivity/form.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "form_field",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/productivity/form_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "frame",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/frame.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/frame.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "label",
+      "module"
+    ],
+    "control_type": "gallery",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/gallery/gallery.dart"
+    ],
+    "demo_files": [
+      "demo/README.md",
+      "demo/gallery.py",
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/gallery/gallery.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "gallery_scope",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/gallery/gallery.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "double_tap_enabled",
+      "enabled",
+      "long_press_enabled",
+      "pan_enabled",
+      "scale_enabled",
+      "tap_enabled"
+    ],
+    "control_type": "gesture_area",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/gesture_area.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/gesture_area.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "glass_blur",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/glass_blur.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "glow_effect",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/glow_effect.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "color",
+      "enabled",
+      "foreground",
+      "glyph",
+      "icon",
+      "icon_color",
+      "icon_size",
+      "interactive",
+      "min_contrast",
+      "size",
+      "tooltip"
+    ],
+    "control_type": "glyph_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/glyph_button.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/glyph_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "gradient",
+    "dart_files": [],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/skins.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/gradient_effect.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "gradient_editor",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/gradient_editor.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "gradient_sweep",
+    "dart_files": [],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/gradient_sweep.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "grain_overlay",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/grain_overlay.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child_aspect_ratio",
+      "columns",
+      "content_padding",
+      "cross_axis_count",
+      "direction",
+      "items",
+      "padding",
+      "primary",
+      "reverse",
+      "run_spacing",
+      "scrollable",
+      "shrink_wrap",
+      "spacing"
+    ],
+    "control_type": "grid",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/grid.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/grid.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "grid_view",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/grid_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "opacity"
+    ],
+    "control_type": "histogram_overlay",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/histogram_overlay.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/histogram_overlay.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "bins",
+      "color",
+      "compact",
+      "height",
+      "show_grid"
+    ],
+    "control_type": "histogram_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/customization/histogram_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_bins"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/histogram_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "cursor",
+      "enabled",
+      "events",
+      "opaque",
+      "throttle_ms"
+    ],
+    "control_type": "hover_region",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/hover_region.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/hover_region.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "base_url",
+      "height",
+      "html",
+      "html_file",
+      "text",
+      "url",
+      "value"
+    ],
+    "control_type": "html_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/html_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/html_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "color",
+      "emoji",
+      "enabled",
+      "fallback",
+      "foreground",
+      "label",
+      "min_contrast",
+      "padding",
+      "radius",
+      "semantic_label",
+      "size",
+      "tooltip",
+      "value"
+    ],
+    "control_type": "icon",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/icon.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/style.py"
+    ],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/icon.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "icon_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/icon_button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/icon_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "icon_picker",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/icon_picker.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/icon_picker.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "cache",
+      "fit",
+      "placeholder",
+      "radius",
+      "src"
+    ],
+    "control_type": "image",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/media/image.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/image.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "item_tile",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/item_tile.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "key_listener",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/key_listener.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "key"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/key_listener.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "enabled",
+      "placeholder",
+      "show_clear",
+      "value"
+    ],
+    "control_type": "keybind_recorder",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/keybind_recorder.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_value",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/keybind_recorder.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "line_chart",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/line_chart.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "line_plot",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/line_plot.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/line_plot.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "animate",
+      "duration_ms",
+      "max_radius",
+      "min_radius"
+    ],
+    "control_type": "liquid_morph",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/liquid_morph.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/liquid_morph.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "enabled",
+      "icon",
+      "id",
+      "label",
+      "leading_icon",
+      "leading_text",
+      "meta",
+      "selected",
+      "subtitle",
+      "text",
+      "title",
+      "trailing_icon",
+      "trailing_text",
+      "value"
+    ],
+    "control_type": "list_tile",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/list_tile.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "set_enabled",
+      "set_selected"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/list_tile.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "list_view",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/list_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "content_padding",
+      "padding",
+      "scrollable",
+      "selectable",
+      "shrink_wrap",
+      "use_flutter_markdown"
+    ],
+    "control_type": "markdown_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/markdown_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_value",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/markdown_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "border_color",
+      "dense",
+      "divider_color",
+      "enabled",
+      "height",
+      "icon",
+      "id",
+      "items",
+      "label",
+      "leading_icon",
+      "menus",
+      "meta",
+      "padding",
+      "radius",
+      "selected",
+      "shortcut",
+      "subtitle",
+      "text",
+      "title",
+      "trailing_text",
+      "value"
+    ],
+    "control_type": "menu_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/menu_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "dismiss",
+      "open",
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_items",
+      "set_menus",
+      "set_props",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/menu_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "menu_item",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/menu_item.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "modifiers",
+      "motion",
+      "style"
+    ],
+    "control_type": "modifier",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/modifier.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/modifier.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "animate",
+      "color",
+      "duration_ms",
+      "max_radius",
+      "min_radius",
+      "width"
+    ],
+    "control_type": "morphing_border",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/morphing_border.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/morphing_border.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "axis",
+      "duration",
+      "duration_ms",
+      "glow_blur",
+      "glow_color",
+      "glow_opacity",
+      "glow_spread"
+    ],
+    "control_type": "motion",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/motion.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "ease_out_cubic",
+      "easein",
+      "easeinout",
+      "easeout",
+      "easeoutcubic",
+      "emphasized",
+      "enter_fade_up",
+      "fast_out_slow_in",
+      "fastoutslowin",
+      "focus_pulse",
+      "get_state",
+      "hover_lift",
+      "hover_lift_glow",
+      "long",
+      "medium",
+      "press_sink",
+      "set_play",
+      "set_props",
+      "shared_axis",
+      "short",
+      "spring"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/motion.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "border_color",
+      "dense",
+      "items",
+      "padding",
+      "policy",
+      "radius",
+      "selected",
+      "selected_color",
+      "selected_id",
+      "selected_text_color",
+      "spacing",
+      "text_color",
+      "value"
+    ],
+    "control_type": "navigation_ring",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/navigation_ring.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "always",
+      "emit",
+      "get_state",
+      "never",
+      "set_props",
+      "set_selected",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/navigation_ring.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "neon_edge",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/neon_edge.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "noise_displacement",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/noise_displacement.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "noise_field",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/noise_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action_id",
+      "action_label",
+      "dismissible",
+      "radius",
+      "text",
+      "variant"
+    ],
+    "control_type": "notice_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/notice_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "action",
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/notice_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "items",
+      "max_items",
+      "notifications",
+      "show_clear_all",
+      "title"
+    ],
+    "control_type": "notification_center",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/notification_center.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "clear",
+      "dismiss",
+      "open"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "add_item",
+      "clear",
+      "clear_all",
+      "dismiss",
+      "get_items",
+      "push",
+      "remove"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/notification_center.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "description",
+      "enabled",
+      "icon",
+      "label",
+      "selected",
+      "value"
+    ],
+    "control_type": "option",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/option.dart"
+    ],
+    "demo_files": [
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/skins.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/option.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "nodes",
+      "selected_id",
+      "show_icons"
+    ],
+    "control_type": "outline",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/outline.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/outline.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "outlined_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/outlined_button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/outlined_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alignment",
+      "child",
+      "dismissible",
+      "open",
+      "scrim_color"
+    ],
+    "control_type": "overlay",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/overlay.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/overlay.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "animate",
+      "axis",
+      "duration_ms",
+      "index",
+      "initial_page",
+      "keep_alive",
+      "pad_ends",
+      "page_snapping",
+      "reverse",
+      "scroll_direction",
+      "viewport_fraction"
+    ],
+    "control_type": "page_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/page_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "next",
+      "next_page",
+      "prev",
+      "prev_page",
+      "previous_page",
+      "set_index",
+      "set_page"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/page_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "enabled",
+      "max_visible",
+      "next_label",
+      "page",
+      "page_count",
+      "page_size",
+      "prev_label",
+      "show_edges",
+      "total_items"
+    ],
+    "control_type": "pagination",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/pagination.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "first",
+      "get_state",
+      "last",
+      "next",
+      "next_page",
+      "prev",
+      "prev_page",
+      "set_page"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/pagination.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "pane",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/pane.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child",
+      "max_offset",
+      "reset_on_exit"
+    ],
+    "control_type": "parallax",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/parallax.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/parallax.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "autoplay",
+      "colors",
+      "count",
+      "direction",
+      "direction_deg",
+      "direction_degrees",
+      "loop",
+      "max_size",
+      "max_speed",
+      "min_size",
+      "min_speed",
+      "opacity",
+      "play",
+      "playing",
+      "seed",
+      "shape",
+      "size",
+      "speed",
+      "spread"
+    ],
+    "control_type": "particle_field",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/particle_field.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "seed_change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "pause",
+      "play",
+      "set_seed"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/particle_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "particles",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/particles.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/particles.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "colors",
+      "donut",
+      "hole",
+      "labels",
+      "start_angle",
+      "values"
+    ],
+    "control_type": "pie_plot",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/display/pie_plot.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "tap"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/pie_plot.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "amount",
+      "enabled"
+    ],
+    "control_type": "pixelate",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/pixelate.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/pixelate.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "popover",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/popover.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/popover.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alignment",
+      "child",
+      "clip",
+      "dismissible",
+      "offset",
+      "open",
+      "overlay",
+      "passthrough",
+      "portal",
+      "scrim_color"
+    ],
+    "control_type": "portal",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/portal.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/portal.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "enabled",
+      "focus_enabled",
+      "hover_enabled"
+    ],
+    "control_type": "pressable",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/interaction/pressable.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/interaction/pressable.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "loading",
+      "source",
+      "subtitle",
+      "title"
+    ],
+    "control_type": "preview_surface",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/preview_surface.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "open"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/preview_surface.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background_color",
+      "color",
+      "indeterminate",
+      "label",
+      "stroke_width",
+      "value"
+    ],
+    "control_type": "progress_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/feedback/progress_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/progress_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background_color",
+      "color",
+      "indeterminate",
+      "label",
+      "size",
+      "stroke_width",
+      "value"
+    ],
+    "control_type": "progress_ring",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/feedback/progress_ring.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/progress_ring.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "radio",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/radio.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "select_next",
+      "select_previous",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/radio.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "dense",
+      "extended",
+      "icon_color",
+      "indicator_color",
+      "items",
+      "label_type",
+      "min_extended_width",
+      "min_width",
+      "policy",
+      "radius",
+      "selected",
+      "selected_icon_color",
+      "selected_id",
+      "selected_text_color",
+      "text_color",
+      "value"
+    ],
+    "control_type": "rail_navigation",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/rail_navigation.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props",
+      "set_selected",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/rail_navigation.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "handle",
+      "items"
+    ],
+    "control_type": "reorderable_list_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/reorderable_list_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_items"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/reorderable_list_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "color",
+      "count",
+      "duration_ms",
+      "max_radius"
+    ],
+    "control_type": "ripple_burst",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/ripple_burst.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "burst"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "burst",
+      "emit",
+      "get_state"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/ripple_burst.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child",
+      "child_layout",
+      "children",
+      "emit_route_change_alias",
+      "layout",
+      "route_event_throttle_ms",
+      "route_id",
+      "spacing"
+    ],
+    "control_type": "route",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/route.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change",
+      "route_change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "column",
+      "emit",
+      "get_state",
+      "row",
+      "set_route",
+      "set_route_id",
+      "stack",
+      "wrap"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/shell/route.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "clip_behavior",
+      "cross_axis",
+      "gap",
+      "main_axis",
+      "main_axis_size",
+      "spacing"
+    ],
+    "control_type": "row",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/row.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/row.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "bottom",
+      "left",
+      "maintain_bottom_view_padding",
+      "minimum",
+      "right",
+      "top"
+    ],
+    "control_type": "safe_area",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/safe_area.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/safe_area.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "color",
+      "enabled",
+      "line_spacing",
+      "line_thickness",
+      "opacity",
+      "spacing",
+      "thickness"
+    ],
+    "control_type": "scanline_overlay",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/scanline_overlay.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/scanline_overlay.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "grid_size",
+      "show_axes",
+      "show_grid"
+    ],
+    "control_type": "scene_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/scene_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/customization/scene_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "content_padding",
+      "direction",
+      "events",
+      "initial_offset",
+      "reverse"
+    ],
+    "control_type": "scroll_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/scroll_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/scroll_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "content_padding",
+      "events",
+      "gap",
+      "initial_offset",
+      "reverse",
+      "spacing"
+    ],
+    "control_type": "scrollable_column",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/scrollable_column.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/scrollable_column.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "content_padding",
+      "events",
+      "gap",
+      "initial_offset",
+      "reverse",
+      "spacing"
+    ],
+    "control_type": "scrollable_row",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/scrollable_row.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/scrollable_row.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "select",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/select.dart"
+    ],
+    "demo_files": [
+      "demo/drawer.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/starry_editor/starry_demo.py"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "select_next",
+      "select_previous",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/select.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "blur",
+      "color",
+      "offset_x",
+      "offset_y",
+      "radius",
+      "shadows",
+      "spread"
+    ],
+    "control_type": "shadow",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/shadow.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/skins.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/shadow.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "shadow_stack",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/shadow_stack.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "shimmer",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/shimmer.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "angle",
+      "base_color",
+      "duration_ms",
+      "highlight_color",
+      "opacity",
+      "radius",
+      "shadows"
+    ],
+    "control_type": "shimmer_shadow",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/shimmer_shadow.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "pause",
+      "play",
+      "start",
+      "stop"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/shimmer_shadow.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "border_color",
+      "icon_color",
+      "padding",
+      "query",
+      "radius",
+      "search_placeholder",
+      "selected",
+      "selected_color",
+      "selected_id",
+      "selected_text_color",
+      "text_color",
+      "value"
+    ],
+    "control_type": "sidebar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/sidebar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props",
+      "set_selected",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/sidebar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "absorb_pointer",
+      "border_radius",
+      "brightness",
+      "clip",
+      "clip_radius",
+      "clip_shape",
+      "ignore_pointer",
+      "opacity",
+      "radius",
+      "shape",
+      "skin",
+      "tokens",
+      "visible"
+    ],
+    "control_type": "skins",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/skins/skins.dart"
+    ],
+    "demo_files": [
+      "demo/README.md"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/skins/skins.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "absorb_pointer",
+      "border_radius",
+      "brightness",
+      "clip",
+      "clip_radius",
+      "clip_shape",
+      "ignore_pointer",
+      "opacity",
+      "radius",
+      "shape",
+      "skin",
+      "tokens",
+      "visible"
+    ],
+    "control_type": "skins_scope",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/skins/skins.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/skins/skins.py"
+    ],
+    "registry_registered": true,
+    "renderer_registered": false,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "child",
+      "clip_behavior",
+      "curve",
+      "dismissible",
+      "duration",
+      "duration_ms",
+      "elevation",
+      "height",
+      "margin",
+      "open",
+      "panel_margin",
+      "position",
+      "radius",
+      "scrim_color",
+      "side",
+      "size",
+      "width"
+    ],
+    "control_type": "slide_panel",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/slide_panel.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "bottom",
+      "easein",
+      "easeinout",
+      "emit",
+      "get_state",
+      "left",
+      "right",
+      "set_open",
+      "set_props",
+      "top",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/slide_panel.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "slider",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/slider.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "decrement",
+      "get_state",
+      "get_value",
+      "increment",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/slider.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action_label",
+      "animation",
+      "duration_ms",
+      "icon",
+      "instant",
+      "label",
+      "message",
+      "open",
+      "priority",
+      "style",
+      "text",
+      "toast_position",
+      "use_flushbar",
+      "use_fluttertoast",
+      "variant"
+    ],
+    "control_type": "snack_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/snack_bar.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/snack_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "emit_on_drag",
+      "emit_on_hover",
+      "emit_on_press",
+      "line_color",
+      "line_width",
+      "major_line_color",
+      "major_line_width",
+      "show_grid",
+      "spacing",
+      "subdivisions"
+    ],
+    "control_type": "snap_grid",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/snap_grid.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "drag",
+      "hover",
+      "press"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/snap_grid.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "columns",
+      "dense",
+      "sort_ascending",
+      "sort_column"
+    ],
+    "control_type": "sortable_header",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/sortable_header.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "sort_change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "clear_sort",
+      "emit",
+      "get_state",
+      "set_sort"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/sortable_header.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "spacer",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/spacer.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "spark_plot",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/spark_plot.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "sparkline",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/sparkline.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "active",
+      "auto_start",
+      "background",
+      "color",
+      "duration_ms",
+      "hide_on_complete",
+      "loading",
+      "message",
+      "min_duration_ms",
+      "progress",
+      "radius",
+      "show_progress",
+      "skip_enabled",
+      "subtitle",
+      "title"
+    ],
+    "control_type": "splash",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/splash.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "complete",
+      "progress",
+      "skip",
+      "splash",
+      "tap"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "set_progress",
+      "skip",
+      "start",
+      "stop",
+      "trigger"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/splash.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "split_pane",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/split_pane.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "axis",
+      "direction",
+      "divider_color",
+      "divider_size",
+      "draggable",
+      "first",
+      "max_ratio",
+      "min_ratio",
+      "ratio",
+      "second"
+    ],
+    "control_type": "split_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/split_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "horizontal",
+      "row",
+      "set_ratio",
+      "x"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/split_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "sprite",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/shell/sprite.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alignment",
+      "clip",
+      "fit",
+      "z",
+      "z_index"
+    ],
+    "control_type": "stack",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/stack.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/stack.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "direction",
+      "duration_ms",
+      "play",
+      "stagger",
+      "stagger_ms"
+    ],
+    "control_type": "stagger",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/stagger.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_play"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/stagger.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "background",
+      "bgcolor",
+      "border_color",
+      "dense",
+      "items",
+      "padding",
+      "radius",
+      "text"
+    ],
+    "control_type": "status_bar",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/status_bar.dart"
+    ],
+    "demo_files": [
+      "demo/skins.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "danger",
+      "emit",
+      "error",
+      "get_state",
+      "idle",
+      "info",
+      "ok",
+      "set_items",
+      "set_props",
+      "set_text",
+      "success",
+      "trigger",
+      "warn",
+      "warning"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/status_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "cache_extent",
+      "padding",
+      "reverse",
+      "scrollable",
+      "sections",
+      "shrink_wrap",
+      "spacing"
+    ],
+    "control_type": "sticky_list",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/sticky_list.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/sticky_list.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "modifiers",
+      "motion",
+      "state",
+      "style",
+      "style_pack",
+      "style_tokens",
+      "token_overrides",
+      "tokens",
+      "variant"
+    ],
+    "control_type": "style",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/style.dart"
+    ],
+    "demo_files": [
+      "demo/README.md",
+      "demo/candy.py",
+      "demo/drawer.py",
+      "demo/gallery.py",
+      "demo/skins.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_props"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/scopes/style_scope.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "surface",
+    "dart_files": [],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/skins.py",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/surface.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "switch",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/switch.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/gallery.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/starry_editor/workspace/docs/night_notes.md"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "set_value",
+      "toggle"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/switch.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "events",
+      "initial_offset",
+      "initial_offset_x",
+      "initial_offset_y"
+    ],
+    "control_type": "table",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/table.dart"
+    ],
+    "demo_files": [
+      "demo/candy.py"
+    ],
+    "emitted_events": [
+      "row_tap",
+      "scroll",
+      "scroll_end",
+      "scroll_start"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "easein",
+      "easeinout",
+      "easeout",
+      "get_scroll_metrics",
+      "scroll_by",
+      "scroll_to",
+      "scroll_to_end",
+      "scroll_to_start"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/table.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dense",
+      "show_header",
+      "striped"
+    ],
+    "control_type": "table_view",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/table_view.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/table_view.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "tabs",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/navigation/tabs.dart"
+    ],
+    "demo_files": [
+      "demo/starry_editor/README.md",
+      "demo/starry_editor/starry_demo.py",
+      "demo/starry_editor/workspace/README.md"
+    ],
+    "emitted_events": [
+      "add",
+      "change",
+      "close"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/tabs.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "text",
+    "dart_files": [],
+    "demo_files": [
+      "demo/candy.py",
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json",
+      "demo/skins.py",
+      "demo/starry_editor/README.md",
+      "demo/starry_editor/starry_core.py",
+      "demo/starry_editor/starry_demo.py",
+      "demo/starry_editor/workspace/config/theme.json",
+      "demo/style.py",
+      "demo/umbrella.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/text.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": [
+      "butterflyui/src/test/runtime_control_shells_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [],
+    "control_type": "text_area",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/text_area.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "action",
+      "action_event",
+      "action_id",
+      "action_payload",
+      "actions",
+      "alpha",
+      "auto_contrast",
+      "background",
+      "bgcolor",
+      "border_color",
+      "border_width",
+      "busy",
+      "color",
+      "content_padding",
+      "elevation",
+      "enabled",
+      "events",
+      "fgcolor",
+      "font_family",
+      "font_size",
+      "font_weight",
+      "foreground",
+      "glyph",
+      "glyph_position",
+      "icon",
+      "icon_background",
+      "icon_color",
+      "icon_foreground",
+      "icon_position",
+      "icon_size",
+      "icon_spacing",
+      "label",
+      "leading_icon",
+      "letter_spacing",
+      "loading",
+      "min_contrast",
+      "opacity",
+      "overlay_color",
+      "radius",
+      "shadow_color",
+      "size",
+      "splash_color",
+      "text",
+      "text_color",
+      "trailing_icon",
+      "translucency",
+      "transparency",
+      "value",
+      "weight",
+      "window_action",
+      "window_action_delay_ms"
+    ],
+    "control_type": "text_button",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/buttons/text_button.dart",
+      "butterflyui/src/lib/src/core/controls/buttons/button_runtime.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [
+      "action",
+      "click",
+      "press",
+      "tap"
+    ],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "black",
+      "bold",
+      "elevated",
+      "elevated_button",
+      "extra_bold",
+      "extra_light",
+      "extrabold",
+      "extralight",
+      "filled",
+      "filled_button",
+      "get_state",
+      "icon_button",
+      "light",
+      "medium",
+      "normal",
+      "outlined",
+      "outlined_button",
+      "press",
+      "semi_bold",
+      "semibold",
+      "set_busy",
+      "set_enabled",
+      "text",
+      "text_button",
+      "thin",
+      "w100",
+      "w200",
+      "w300",
+      "w400",
+      "w500",
+      "w600",
+      "w700",
+      "w800",
+      "w900"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/text_button.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "text_field",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/text_field.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": true,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "get_value",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/text_field.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "enabled",
+      "label",
+      "placeholder",
+      "use_24h",
+      "value"
+    ],
+    "control_type": "time_select",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/inputs/time_select.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "change"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_value",
+      "open",
+      "set_value"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/inputs/time_select.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "direction",
+      "duration_ms",
+      "play",
+      "spacing",
+      "tracks"
+    ],
+    "control_type": "timeline",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/feedback/timeline.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "emit",
+      "get_state",
+      "set_play"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/timeline.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "toast",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/feedback/toast.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "action"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/toast.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "dismissible",
+      "items",
+      "latest_on_top",
+      "max_items",
+      "padding",
+      "position",
+      "spacing",
+      "toasts"
+    ],
+    "control_type": "toast_host",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/overlay/toast_host.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "dismiss"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "add_item",
+      "bottom",
+      "bottom_center",
+      "bottom_left",
+      "bottom_right",
+      "center",
+      "clear",
+      "clear_all",
+      "danger",
+      "dismiss",
+      "emit",
+      "error",
+      "get_items",
+      "push",
+      "remove",
+      "set_items",
+      "success",
+      "top",
+      "top_center",
+      "top_left",
+      "top_right",
+      "warning"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/toast_host.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "tooltip",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/feedback/tooltip.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/overlay/tooltip.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "top_bar",
+    "dart_files": [],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/navigation/top_bar.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "mismatch",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child",
+      "curve",
+      "duration_ms",
+      "enabled",
+      "preset",
+      "state",
+      "transition",
+      "transition_type",
+      "value"
+    ],
+    "control_type": "transition",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/transition.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/transition_effect.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "vertical_divider",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/vertical_divider.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/vertical_divider.py",
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/vertical_divider.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "aspect_ratio",
+      "autoplay",
+      "fit",
+      "position",
+      "radius",
+      "source"
+    ],
+    "control_type": "video",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/media/video.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py",
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "contain",
+      "cover",
+      "emit",
+      "fill",
+      "get_state",
+      "pause",
+      "play",
+      "set_position"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/display/video.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "color",
+      "enabled",
+      "intensity",
+      "opacity"
+    ],
+    "control_type": "vignette",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/vignette.dart"
+    ],
+    "demo_files": [
+      "demo/style.py"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_state",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/vignette.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child_aspect_ratio",
+      "columns",
+      "content_padding",
+      "cross_axis_count",
+      "has_more",
+      "initial_offset",
+      "items",
+      "loading",
+      "padding",
+      "prefetch_threshold",
+      "reverse",
+      "run_spacing",
+      "scrollable",
+      "shrink_wrap",
+      "skeleton_count",
+      "spacing"
+    ],
+    "control_type": "virtual_grid",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/virtual_grid.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py"
+    ],
+    "emitted_events": [
+      "prefetch",
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_scroll_metrics",
+      "scroll_to",
+      "scroll_to_end",
+      "scroll_to_start"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/virtual_grid.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "cache_extent",
+      "content_padding",
+      "dense",
+      "events",
+      "footer",
+      "has_more",
+      "header",
+      "initial_index",
+      "initial_offset",
+      "item_extent",
+      "items",
+      "loading",
+      "padding",
+      "prefetch_threshold",
+      "reverse",
+      "scrollable",
+      "separator",
+      "shrink_wrap",
+      "skeleton_count"
+    ],
+    "control_type": "virtual_list",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/lists/virtual_list.dart"
+    ],
+    "demo_files": [
+      "demo/gallery.py"
+    ],
+    "emitted_events": [
+      "prefetch",
+      "scroll",
+      "select"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_scroll_metrics",
+      "scroll_to",
+      "scroll_to_end",
+      "scroll_to_index",
+      "scroll_to_start"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/data/virtual_list.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "angle",
+      "autoplay",
+      "axis",
+      "blue",
+      "blur",
+      "border_color",
+      "border_glow",
+      "border_width",
+      "color",
+      "colors",
+      "count",
+      "direction",
+      "duration",
+      "duration_ms",
+      "emit_on_complete",
+      "enable_chromatic_shift",
+      "enable_glass_blur",
+      "enable_glow",
+      "enable_gradient_sweep",
+      "end_angle",
+      "hide_button",
+      "intensity",
+      "loop",
+      "noise_opacity",
+      "offset_x",
+      "offset_y",
+      "opacity",
+      "play",
+      "playing",
+      "radius",
+      "red",
+      "shift",
+      "spread",
+      "start_angle",
+      "stops"
+    ],
+    "control_type": "visual_fx",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/effects/visual_fx.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "burst",
+      "change",
+      "complete"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "burst",
+      "get_state",
+      "pause",
+      "play",
+      "set_angle",
+      "set_colors",
+      "set_shift",
+      "set_style"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/effects/visual_fx.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "complete",
+    "test_files": []
+  },
+  {
+    "consumed_props": [],
+    "control_type": "webview",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/webview/webview.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/webview/webview.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": false,
+    "status": "stub",
+    "test_files": [
+      "butterflyui/src/test/runtime_controls_test.dart"
+    ]
+  },
+  {
+    "consumed_props": [
+      "border_color",
+      "button_color",
+      "button_height",
+      "button_width",
+      "close_border_color",
+      "close_button_color",
+      "close_icon_color",
+      "icon_color",
+      "radius",
+      "show_close",
+      "show_maximize",
+      "show_minimize",
+      "spacing"
+    ],
+    "control_type": "window_controls",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/window_controls.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "action"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/shell/window_controls.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "child",
+      "draggable",
+      "emit_move",
+      "maximize_on_double_tap",
+      "min_height",
+      "move_event_throttle_ms",
+      "native_drag",
+      "native_maximize_action"
+    ],
+    "control_type": "window_drag_region",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/window_drag_region.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/shell/window_drag_region.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "acrylic_effect",
+      "acrylic_opacity",
+      "background",
+      "bgcolor",
+      "blur",
+      "border_color",
+      "border_width",
+      "child",
+      "content_padding",
+      "custom_frame",
+      "draggable",
+      "elevation",
+      "emit_move",
+      "emit_move_events",
+      "glass",
+      "leading",
+      "move_event_throttle_ms",
+      "native_title_bar",
+      "native_window_actions",
+      "open",
+      "radius",
+      "shadow",
+      "show_close",
+      "show_default_controls",
+      "show_maximize",
+      "show_minimize",
+      "system_title_bar",
+      "title",
+      "title_color",
+      "title_content",
+      "title_height",
+      "title_leading",
+      "title_trailing",
+      "title_widget",
+      "use_native_title_bar",
+      "visible",
+      "window_actions",
+      "window_controls"
+    ],
+    "control_type": "window_frame",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/window_frame.dart"
+    ],
+    "demo_files": [],
+    "emitted_events": [
+      "drag_start",
+      "move"
+    ],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/shell/window_frame.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  },
+  {
+    "consumed_props": [
+      "alignment",
+      "cross_axis",
+      "direction",
+      "run_alignment",
+      "run_spacing",
+      "spacing"
+    ],
+    "control_type": "wrap",
+    "dart_files": [
+      "butterflyui/src/lib/src/core/controls/layout/wrap.dart"
+    ],
+    "demo_files": [
+      "demo/runtime_control_completion_showcase/foundation_buttons_inputs_showcase.json"
+    ],
+    "emitted_events": [],
+    "has_focus": false,
+    "has_semantics": true,
+    "invoke_methods": [
+      "get_layout",
+      "get_state",
+      "set_layout"
+    ],
+    "python_files": [
+      "butterflyui/sdk/python/packages/butterflyui/src/butterflyui/controls/layout/wrap.py"
+    ],
+    "registry_registered": false,
+    "renderer_registered": true,
+    "runtime_registered": true,
+    "stateful": true,
+    "status": "partial",
+    "test_files": []
+  }
+]

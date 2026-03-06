@@ -187,6 +187,8 @@ class SkinsTokens:
     Use ``from_dict`` to construct from an existing mapping and ``to_json``
     when preparing data for runtime serialization.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -720,6 +722,8 @@ class SkinsScope(Component):
     recipes using ``style_slots`` and ``classes`` to keep skin behavior
     consistent across Candy, Display, Bubble, and Gallery nodes.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -729,17 +733,6 @@ class SkinsScope(Component):
         brightness="dark",
     )
     ```
-
-    Args:
-        skin:
-            Named built-in skin preset. Values include ``"default"``,
-            ``"shadow"``, ``"fire"``, ``"earth"``, ``"gaming"``.
-            Custom names registered through ``register_skin``/``create_skin``
-            are also supported.
-        tokens:
-            Custom ``SkinsTokens`` instance or raw mapping.
-        brightness:
-            Color mode override. Values: ``"light"``, ``"dark"``.
     """
 
 
@@ -820,6 +813,8 @@ class Skins(Component):
     Skins modules use the same universal decorator contract as the rest of the
     runtime: ``modifiers`` + state modifier keys, ``motion`` + enter/hover/
     press motion keys, and ``effects`` + effect ordering/clipping keys.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -830,22 +825,6 @@ class Skins(Component):
         events=["tap"],
     )
     ```
-    
-    Args:
-        module:
-            Name of the runtime module to render.
-        layout:
-            Backward-compatible alias for ``module``. When both fields are provided, ``module`` takes precedence and this alias is kept only for compatibility.
-        state:
-            Active state name used for state-driven styling.
-        states:
-            List of all recognized state names for this control.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        **kwargs:
-            Additional module-specific props forwarded to runtime.
     """
 
 

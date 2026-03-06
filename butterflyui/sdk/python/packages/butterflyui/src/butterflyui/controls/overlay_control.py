@@ -10,16 +10,6 @@ __all__ = ["OverlayControl"]
 class OverlayControl(LayoutControl):
     """
     Shared overlay behavior for dismissible or positioned popup controls.
-
-    Args:
-        open:
-            Whether the overlay is currently visible.
-        dismissible:
-            Whether clicking outside or performing a dismiss action should
-            close the overlay.
-        offset:
-            Placement offset applied by the runtime when positioning the
-            overlay.
     """
 
     open: bool = False

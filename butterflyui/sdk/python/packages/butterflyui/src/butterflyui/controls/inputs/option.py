@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Option"]
 
 class Option(Component):
-    """Single selectable option item for use inside list or select controls.
+    """
+    Single selectable option item for use inside list or select controls.
     
     Renders a ``ListTile``-style item with an optional leading icon,
     description subtitle, and checkbox/radio indicator depending on
     the parent context.  Tapping the item emits a ``select`` event
     carrying ``label`` and ``value``.  Setting ``selected`` pre-checks
     the item; setting ``enabled`` to ``False`` makes it non-interactive.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -24,24 +27,6 @@ class Option(Component):
         icon="code",
     )
     ```
-    
-    Args:
-        label:
-            Primary label text rendered by the control or its active action.
-        value:
-            Machine-readable value emitted with selection events.
-        description:
-            Secondary subtitle text rendered below the label.
-        icon:
-            Icon value or icon descriptor rendered by the control.
-        selected:
-            If ``True``, the option is pre-selected.
-        enabled:
-            If ``False``, the option is non-interactive.
-        dense:
-            If ``True``, the item uses compact height.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

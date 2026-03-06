@@ -13,6 +13,8 @@ class FlexSpacer(Component):
     ``flex`` is the flex factor; larger values claim more of the available
     space relative to sibling flex children.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -22,11 +24,6 @@ class FlexSpacer(Component):
         bui.Text("Right"),
     )
     ```
-
-    Args:
-        flex:
-            Flex factor shared among sibling ``Expanded`` children. Defaults
-            to ``1``.
     """
 
     flex: int = 1

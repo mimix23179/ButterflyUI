@@ -9,7 +9,8 @@ __all__ = ["SnackBar"]
 
 
 class SnackBar(Component):
-    """Transient snackbar feedback control with optional action affordance.
+    """
+    Transient snackbar feedback control with optional action affordance.
     
     ``SnackBar`` is the canonical control name replacing legacy ``snackbar``.
     It is designed for short-lived status feedback such as save confirmations,
@@ -17,6 +18,8 @@ class SnackBar(Component):
     
     Supports icon payloads directly and forwards style pipeline fields via
     ``**kwargs`` for color/transparency and motion/effect customization.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,45 +32,6 @@ class SnackBar(Component):
         duration_ms=2600,
     )
     ```
-    
-    Args:
-        message:
-            Main message text rendered inside the control.
-        label:
-            Primary label text rendered by the control or its active action.
-        open:
-            If ``True``, snackbar is visible.
-        duration_ms:
-            Auto-dismiss timeout in milliseconds.
-        action_label:
-            Label text rendered for the control's inline action when that action is available.
-        variant:
-            Semantic style hint (for example ``"info"``, ``"success"``,
-            ``"warning"``, ``"error"``).
-        style_name:
-            Renderer style mode, defaults to ``"snackbar"``.
-        icon:
-            Icon value or icon descriptor rendered by the control.
-        instant:
-            If ``True``, bypasses queued animation behavior when supported.
-        priority:
-            Queue priority hint for host-level scheduling.
-        use_flushbar:
-            Runtime integration hint for Flushbar-style presentation.
-        use_fluttertoast:
-            Runtime integration hint for FlutterToast-style presentation.
-        toast_position:
-            Preferred toast/snackbar placement hint.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
 

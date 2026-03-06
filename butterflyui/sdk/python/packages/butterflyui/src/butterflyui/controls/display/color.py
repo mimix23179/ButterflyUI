@@ -9,7 +9,8 @@ __all__ = ["Color"]
 
 
 class Color(Component):
-    """Renderable color-value control for swatches and live UI diagnostics.
+    """
+    Renderable color-value control for swatches and live UI diagnostics.
     
     ``Color`` serializes color payloads into a visible swatch surface with
     optional labels and metadata. It can be used as a standalone display
@@ -29,50 +30,6 @@ class Color(Component):
         auto_contrast=True,
     )
     ```
-    
-    Args:
-        value:
-            Primary color payload to resolve and display.
-        color:
-            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
-        label:
-            Optional label shown with the swatch.
-        show_label:
-            Whether to render the ``label`` text.
-        show_hex:
-            Whether to render resolved hex metadata.
-        size:
-            Base swatch size used when width/height are omitted.
-        width:
-            Requested width of the control in logical pixels.
-        height:
-            Requested height of the control in logical pixels.
-        radius:
-            Border radius for rectangular shapes.
-        shape:
-            Swatch shape (for example ``"rectangle"`` or ``"circle"``).
-        border_color:
-            Border color applied to the outer edge of the rendered control or decorative surface.
-        border_width:
-            Border thickness used when rendering the outline around the control.
-        background:
-            Optional background for the full control surface.
-        auto_contrast:
-            Enables automatic foreground contrast when supported.
-        min_contrast:
-            Minimum target contrast when ``auto_contrast`` is enabled.
-        enabled:
-            Enables interaction events when supported.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer.
     """
 
 

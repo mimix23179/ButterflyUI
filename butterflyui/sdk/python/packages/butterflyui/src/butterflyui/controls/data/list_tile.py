@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ListTile"]
 
 class ListTile(Component):
-    """Data-oriented list tile with selectable and disabled states, leading/
+    """
+    Data-oriented list tile with selectable and disabled states, leading/
     trailing icons, and tap-to-select behaviour.
     
     The runtime renders a Material ``ListTile`` whose ``title`` falls
@@ -28,22 +29,6 @@ class ListTile(Component):
         trailing_icon="chevron_right",
     )
     ```
-    
-    Args:
-        title:
-            Primary title text.  Falls back to ``label`` or ``text`` props in the runtime.
-        subtitle:
-            Secondary supporting text rendered beneath the title.
-        leading_icon:
-            Icon name/data rendered at the leading edge (18 px).  The runtime also accepts ``icon`` or ``leading_text``.
-        trailing_icon:
-            Icon name/data rendered at the trailing edge (18 px).
-        meta:
-            Metadata string shown as trailing text when no ``trailing_icon`` is supplied.  Also accepted via ``trailing_text``.
-        selected:
-            If ``True``, the tile renders in its selected visual state.
-        enabled:
-            If ``False``, the tile is visually dimmed and non-interactive.  Defaults to ``True``.
     """
 
 

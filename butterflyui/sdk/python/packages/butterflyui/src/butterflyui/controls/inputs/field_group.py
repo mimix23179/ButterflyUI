@@ -15,6 +15,8 @@ class FieldGroup(Component):
     optional ``error_text`` shown in red.  When ``required`` is
     ``True`` a red asterisk is appended to the label.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -25,20 +27,6 @@ class FieldGroup(Component):
         required=True,
     )
     ```
-
-    Args:
-        label:
-            Bold header text rendered above the group.
-        helper_text:
-            Subdued helper note shown below the last child.
-        error_text:
-            Error message shown in red below the group.
-        spacing:
-            Vertical gap in logical pixels between children.
-            Defaults to ``8``.
-        required:
-            If ``True``, a red ``" *"`` suffix is appended to
-            ``label``.
     """
 
 

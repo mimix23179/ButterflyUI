@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ArtifactCard"]
 
 class ArtifactCard(Component):
-    """Structured output card for displaying generated artifacts.
+    """
+    Structured output card for displaying generated artifacts.
     
     Renders a Material ``Card`` with a bold title, body message, and optional
     action button.  When ``clickable`` is enabled the entire card is wrapped
@@ -17,32 +18,18 @@ class ArtifactCard(Component):
     Use ``set_content`` to update the title and message programmatically
     after the card is created, and ``emit`` to fire arbitrary custom events.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        card = bui.ArtifactCard(
-            title="Analysis Complete",
-            message="3 issues found in your code.",
-            action_label="View Details",
-            clickable=True,
-        )
-    
-    Args:
-        title:
-            Bold heading text displayed at the top of the card.
-        message:
-            Body text rendered beneath the title.
-        variant:
-            Visual variant key forwarded to the runtime theme.
-        label:
-            Optional short label displayed alongside the title.
-        action_label:
-            Text for the action ``TextButton`` at the bottom. When present the button emits ``"action"`` on click.
-        clickable:
-            Controls whether the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press. Set it to ``False`` to disable this behavior.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    card = bui.ArtifactCard(
+        title="Analysis Complete",
+        message="3 issues found in your code.",
+        action_label="View Details",
+        clickable=True,
+    )
+    ```
     """
 
 

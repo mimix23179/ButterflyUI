@@ -9,7 +9,8 @@ __all__ = ["Bubble"]
 
 
 class Bubble(Component):
-    """Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
+    """
+    Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
     
     ``Bubble`` is the consolidated control for conversational UX in ButterflyUI.
     It replaces the older split controls such as ``chat_bubble``, ``chat_thread``,
@@ -26,189 +27,22 @@ class Bubble(Component):
     ``trailing``, ``overlay``) and state modifier lists.
     
     Example:
-        ```python
-        import butterflyui as bui
-    
-        thread = bui.Bubble(
-            variant="thread",
-            messages=[
-                {"id": "m1", "sender_name": "Ari", "text": "Morning update?"},
-                {"id": "m2", "role": "assistant", "text": "Build succeeded."},
-            ],
-            group_messages=True,
-            unread_divider_label="Unread",
-            show_input=True,
-            input_placeholder="Write a reply...",
-            events=["reach_top", "scroll_state_changed", "submit", "attach"],
-        )
-        ```
-    
-    Args:
-        variant:
-            Bubble role. Supported runtime values are ``"message"``, ``"thread"``,
-            ``"chat"``, and ``"composer"``.
-        role:
-            Semantic author role for message rows (for example ``"user"``,
-            ``"assistant"``, ``"system"``).
-        tone:
-            Semantic tone (``"neutral"``, ``"info"``, ``"success"``, ``"warn"``,
-            ``"danger"``). Used as a styling hint.
-        density:
-            Density hint (``"compact"``, ``"normal"``, ``"cozy"``).
-        compact:
-            Enables a more compact visual density with reduced padding, gaps, or surface size.
-        dense:
-            Enables a denser layout with reduced gaps, padding, or row height.
-        align:
-            Message alignment hint: ``"left"``, ``"right"``, or ``"auto"``.
-        max_width:
-            Maximum width constraint for message cards/composer surface.
-        grouping:
-            Grouping strategy for adjacent messages (for example ``"auto"``).
-        group_messages:
-            Legacy grouping toggle for thread mode.
-        grouped:
-            Hint that this specific message belongs to a visual group.
-        selectable:
-            Enables text selection for message/composer text.
-        clickable:
-            Emits click/tap events from bubble body when enabled.
-        sender_name:
-            Sender/author name in message header.
-        author:
-            Legacy alias for ``sender_name``.
-        avatar:
-            Sender avatar descriptor (URL, asset path, initials, or map).
-        role_badge:
-            Optional badge shown next to sender metadata.
-        title:
-            Primary heading text rendered by the control.
-        subtitle:
-            Secondary text rendered beneath or beside the primary title.
-        text:
-            Message body text (or composer initial value alias).
-        markdown:
-            Markdown body source for message content.
-        child:
-            Optional child control rendered inside the bubble body.
-        timestamp:
-            Timestamp string rendered with the message or item metadata.
-        edited:
-            Controls whether edited is enabled for this control.
-        delivered:
-            Controls whether delivered is enabled for this control.
-        read:
-            Reflects whether the message or item has been marked as read.
-        status:
-            Status/meta label shown in message header.
-        error_notice:
-            Error or failure notice shown inside the message.
-        notice:
-            Informational notice shown inside the message.
-        attachments:
-            Attachment descriptors for message mode.
-        reactions:
-            Reaction descriptors (emoji/count/selected payloads).
-        actions:
-            Inline action descriptors (reply/edit/delete/custom).
-        quote_text:
-            Quoted text snippet rendered inside the message preview.
-        quote_author:
-            Author label rendered for the quoted message or referenced content.
-        quote_timestamp:
-            Timestamp label rendered for the quoted message or referenced content.
-        quote_compact:
-            Controls whether the quoted content is rendered in its compact visual variant.
-        mention_label:
-            Label text rendered for mention.
-        mention_color:
-            Color value applied to mention when the control renders that visual element.
-        mention_text_color:
-            Color value applied to mention text.
-        mention_clickable:
-            Emits ``mention_click`` event when mention chip is tapped.
-        divider_label:
-            Optional label text rendered inside or alongside the divider.
-        divider_color:
-            Color used when rendering the divider line or separator surface.
-        messages:
-            Message list for thread/chat variant.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        pinned_messages:
-            Pinned message descriptors rendered above timeline.
-        spacing:
-            Vertical spacing between thread rows.
-        reverse:
-            Controls whether the control renders its items in reverse order.
-        scrollable:
-            Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
-        autoscroll:
-            Thread scroll mode: ``"follow_latest"`` or ``"manual"``.
-        follow_latest:
-            Boolean alias for autoscroll follow mode.
-        unread_divider_label:
-            Label for unread boundary divider.
-        unread_after_id:
-            Inserts unread divider after this message id.
-        unread_index:
-            Inserts unread divider after this index.
-        date_separators:
-            Optional date-separator descriptors for thread rendering.
-        empty_state:
-            Empty-thread text or descriptor shown when no messages exist.
-        typing_indicator:
-            Typing indicator descriptor/text.
-        show_timestamps:
-            Thread-level timestamp visibility hint.
-        show_input:
-            Shows integrated composer when variant is thread/chat.
-        input_placeholder:
-            Placeholder text for integrated composer.
-        send_label:
-            Label text rendered for the send action associated with the control.
-        send_on_enter:
-            Sends on Enter (Shift+Enter inserts newline).
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        placeholder:
-            Placeholder text shown when the control has no current value.
-        min_lines:
-            Minimum visible lines for composer input.
-        max_lines:
-            Maximum visible lines for composer input.
-        auto_expand:
-            If ``True``, composer grows between min/max lines.
-        leading:
-            Leading composer slot descriptor.
-        trailing:
-            Trailing composer slot descriptor.
-        show_attach:
-            Controls whether the control should display its attachment action or attachment slot.
-        draft_key:
-            Persistent key used to store and restore draft state for this control.
-        char_limit:
-            Maximum number of characters accepted or displayed by the control.
-        show_counter:
-            Shows character counter when char limit is active.
-        cooldown_ms:
-            Optional send cooldown in milliseconds.
-        disabled:
-            State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
-        read_only:
-            Controls whether the control remains visible but blocks direct user editing.
-        emit_on_change:
-            Emits change events while typing.
-        clear_on_send:
-            Controls whether the current input value is cleared automatically after a send action completes.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    ```python
+    import butterflyui as bui
+
+    thread = bui.Bubble(
+        variant="thread",
+        messages=[
+            {"id": "m1", "sender_name": "Ari", "text": "Morning update?"},
+            {"id": "m2", "role": "assistant", "text": "Build succeeded."},
+        ],
+        group_messages=True,
+        unread_divider_label="Unread",
+        show_input=True,
+        input_placeholder="Write a reply...",
+        events=["reach_top", "scroll_state_changed", "submit", "attach"],
+    )
+    ```
     """
 
 

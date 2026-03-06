@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Badge"]
 
 class Badge(Component):
-    """Displays a compact label, count, or status indicator.
+    """
+    Displays a compact label, count, or status indicator.
     
     The runtime colours the badge according to `severity` (``"success"``,
     ``"warning"``, ``"error"``) or uses explicit `bgcolor` / `color`
@@ -21,36 +22,6 @@ class Badge(Component):
     
     bui.Badge("New", severity="success", pulse=True)
     ```
-    
-    Args:
-        label:
-            Display text. Resolved from `text` when ``None``.
-        text:
-            Backward-compatible alias for ``label``. When both fields are provided, ``label`` takes precedence and this alias is kept only for compatibility.
-        value:
-            Arbitrary value exposed to event payloads and the ``get_value`` / ``set_value`` invoke methods.
-        color:
-            Foreground (text) colour. Overrides the severity-derived colour.
-        bgcolor:
-            Background colour. Overrides the severity-derived background.
-        text_color:
-            Backward-compatible alias for ``color``. When both fields are provided, ``color`` takes precedence and this alias is kept only for compatibility.
-        severity:
-            Semantic severity controlling the theme colour scheme. One of ``"success"``, ``"warning"`` / ``"warn"``, ``"error"`` / ``"danger"``. Defaults to the primary colour.
-        variant:
-            Visual variant hint forwarded to the runtime.
-        dot:
-            If ``True``, renders a small coloured dot instead of text.
-        pulse:
-            If ``True``, the badge animates with a subtle pulse (scale tween).
-        count:
-            When set, overrides the display text with this integer count.
-        radius:
-            Corner radius of the badge container. Defaults to a large pill shape (``999``) or fully round for dots.
-        padding:
-            Inner padding of the badge. Accepts a number, list, or dict. Defaults to ``horizontal: 8, vertical: 3``.
-        clickable:
-            If ``True``, the badge becomes tappable and emits a ``"click"`` event with the current display value.
     """
 
 

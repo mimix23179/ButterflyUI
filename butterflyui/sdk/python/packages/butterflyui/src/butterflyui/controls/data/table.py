@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Table"]
 
 class Table(Component):
-    """Dual-axis scrollable table backed by Flutter’s ``DataTable`` with
+    """
+    Dual-axis scrollable table backed by Flutter’s ``DataTable`` with
     scroll-position invoke commands.
     
     The runtime renders a ``DataTable`` inside nested horizontal and
@@ -31,12 +32,6 @@ class Table(Component):
         ],
     )
     ```
-    
-    Args:
-        columns:
-            Column header labels — a list of plain strings.
-        rows:
-            Row data — a list of lists where each inner list contains cell values aligned to ``columns``.
     """
 
 

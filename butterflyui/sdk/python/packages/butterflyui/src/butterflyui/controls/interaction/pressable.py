@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Pressable"]
 
 class Pressable(Component):
-    """Adds press, hover, and focus interaction states to its child.
+    """
+    Adds press, hover, and focus interaction states to its child.
     
     Wraps the child in a Flutter ``GestureDetector`` + ``MouseRegion``
     + ``Focus`` combination.  The interaction state (``pressed``,
@@ -20,6 +21,8 @@ class Pressable(Component):
     - ``hover_exit``   — pointer left the bounds.
     - ``focus_gained`` — focus node received keyboard focus.
     - ``focus_lost``   — focus node lost keyboard focus.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -30,21 +33,6 @@ class Pressable(Component):
         focus_enabled=True,
     )
     ```
-    
-    Args:
-        enabled:
-            Master switch.  If ``False``, no interaction events are
-            fired.
-        autofocus:
-            If ``True``, the focus node requests focus on mount.
-        hover_enabled:
-            If ``True``, ``hover_enter`` and ``hover_exit`` events are
-            fired.
-        focus_enabled:
-            If ``True``, ``focus_gained`` and ``focus_lost`` events are
-            fired.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

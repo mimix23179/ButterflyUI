@@ -7,7 +7,8 @@ from .button import Button
 __all__ = ["IconButton"]
 
 class IconButton(Button):
-    """Tappable icon-only button control.
+    """
+    Tappable icon-only button control.
     
     ``IconButton`` is the icon-focused member of the button family. It keeps
     the full action/event behavior of :class:`Button` while prioritizing icon
@@ -16,6 +17,8 @@ class IconButton(Button):
     
     Use this for toolbar buttons, compact overlay actions, or quick actions
     where a label would add unnecessary visual weight.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,41 +30,6 @@ class IconButton(Button):
         action_id="delete_current_item",
     )
     ```
-    
-    Args:
-        icon:
-            Material icon name, codepoint integer, or runtime icon payload.
-        tooltip:
-            Tooltip text shown when the user hovers or long-presses the control.
-        size:
-            Requested icon, glyph, or control size in logical pixels or runtime size units.
-        color:
-            Icon color value accepted by runtime.
-        enabled:
-            If ``False``, the control is non-interactive.
-        value:
-            Arbitrary payload emitted with click events.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        action:
-            Declarative action descriptor fired on press.
-        action_id:
-            Registered action ID to dispatch on press.
-        action_event:
-            Event name forwarded to the action dispatcher.
-        action_payload:
-            Extra payload mapping for action dispatch.
-        actions:
-            Action descriptor list executed on press.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer. This can include
-            style/modifier/motion/effects fields and optional transparency.
     """
 
 

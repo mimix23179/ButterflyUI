@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/scrollable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildScrollViewControl(
@@ -49,7 +50,6 @@ class ButterflyUIScrollView extends StatefulWidget {
 
 class _ButterflyUIScrollViewState extends State<ButterflyUIScrollView> {
   late final ScrollController _controller;
-  double _lastPixels = 0.0;
 
   @override
   void initState() {
@@ -101,92 +101,28 @@ class _ButterflyUIScrollViewState extends State<ButterflyUIScrollView> {
     String method,
     Map<String, Object?> args,
   ) async {
-    final axis = _parseAxis(widget.props['direction']) ?? Axis.vertical;
+    final axis =
+        parseScrollableAxis(widget.props['direction']) ?? Axis.vertical;
     final reverse = widget.props['reverse'] == true;
-    if (!_controller.hasClients) {
-      throw StateError('ScrollView has no attached ScrollPosition');
-    }
-
-    final position = _controller.position;
-
-    double resolveOffset(Object? value) {
-      final v = coerceDouble(value);
-      if (v != null) return v;
-      if (axis == Axis.horizontal) {
-        return coerceDouble(args['x'] ?? args['dx']) ?? 0.0;
-      }
-      return coerceDouble(args['y'] ?? args['dy']) ?? 0.0;
-    }
-
-    Future<void> moveTo(double target) async {
-      final clamp = args['clamp'] == null ? true : (args['clamp'] == true);
-      final animate = args['animate'] == null
-          ? true
-          : (args['animate'] == true);
-      final durationMs =
-          coerceOptionalInt(args['duration_ms'] ?? args['durationMs']) ?? 250;
-      final curve = _parseCurve(args['curve']);
-
-      final resolved = clamp
-          ? target
-                .clamp(position.minScrollExtent, position.maxScrollExtent)
-                .toDouble()
-          : target;
-      if (animate) {
-        await _controller.animateTo(
-          resolved,
-          duration: Duration(milliseconds: durationMs),
-          curve: curve,
-        );
-      } else {
-        _controller.jumpTo(resolved);
-      }
-    }
-
-    switch (method) {
-      case 'get_scroll_metrics':
-        return <String, Object?>{
-          'pixels': position.pixels,
-          'min_scroll_extent': position.minScrollExtent,
-          'max_scroll_extent': position.maxScrollExtent,
-          'viewport_dimension': position.viewportDimension,
-          'axis': axis == Axis.horizontal ? 'horizontal' : 'vertical',
-          'reverse': reverse,
-          'at_start': position.pixels <= position.minScrollExtent + 0.5,
-          'at_end': position.pixels >= position.maxScrollExtent - 0.5,
-        };
-      case 'scroll_to':
-        await moveTo(resolveOffset(args['offset'] ?? args['pixels']));
-        return null;
-      case 'scroll_by':
-        final delta = resolveOffset(
-          args['delta'] ?? args['scroll_delta'] ?? args['scrollDelta'],
-        );
-        await moveTo(position.pixels + delta);
-        return null;
-      case 'scroll_to_start':
-        await moveTo(position.minScrollExtent);
-        return null;
-      case 'scroll_to_end':
-        await moveTo(position.maxScrollExtent);
-        return null;
-      default:
-        throw UnsupportedError('Unknown scroll_view method: $method');
-    }
+    return handleScrollableInvoke(
+      controlType: 'scroll_view',
+      controller: _controller,
+      axis: axis,
+      reverse: reverse,
+      method: method,
+      args: args,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final childMap = _firstChildMap(widget.children);
-    final direction = _parseAxis(widget.props['direction']) ?? Axis.vertical;
+    final direction =
+        parseScrollableAxis(widget.props['direction']) ?? Axis.vertical;
     final contentPadding = coercePadding(widget.props['content_padding']);
     final reverse = widget.props['reverse'] == true;
 
-    final events = _coerceStringSet(widget.props['events']);
-    final wantsScrollStart = events.contains('scroll_start');
-    final wantsScroll = events.contains('scroll');
-    final wantsScrollEnd = events.contains('scroll_end');
-    final anyScrollEvents = wantsScrollStart || wantsScroll || wantsScrollEnd;
+    final events = coerceScrollableEvents(widget.props['events']);
 
     Widget scrollable = SingleChildScrollView(
       controller: _controller,
@@ -198,57 +134,12 @@ class _ButterflyUIScrollViewState extends State<ButterflyUIScrollView> {
           : widget.buildFromControl(childMap),
     );
 
-    if (!anyScrollEvents || widget.controlId.isEmpty) {
-      return scrollable;
-    }
-
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        final metrics = notification.metrics;
-        final axis = metrics.axis;
-        final delta = notification is ScrollUpdateNotification
-            ? (notification.scrollDelta ?? (metrics.pixels - _lastPixels))
-            : 0.0;
-        _lastPixels = metrics.pixels;
-
-        Map<String, Object?> payload(String name) {
-          return <String, Object?>{
-            'name': name,
-            'pixels': metrics.pixels,
-            'min_scroll_extent': metrics.minScrollExtent,
-            'max_scroll_extent': metrics.maxScrollExtent,
-            'viewport_dimension': metrics.viewportDimension,
-            'axis': axis == Axis.horizontal ? 'horizontal' : 'vertical',
-            'delta': delta,
-            'at_start': metrics.pixels <= metrics.minScrollExtent + 0.5,
-            'at_end': metrics.pixels >= metrics.maxScrollExtent - 0.5,
-          };
-        }
-
-        if (notification is ScrollStartNotification) {
-          if (wantsScrollStart) {
-            widget.sendEvent(
-              widget.controlId,
-              'scroll_start',
-              payload('scroll_start'),
-            );
-          }
-        } else if (notification is ScrollUpdateNotification) {
-          if (wantsScroll) {
-            widget.sendEvent(widget.controlId, 'scroll', payload('scroll'));
-          }
-        } else if (notification is ScrollEndNotification) {
-          if (wantsScrollEnd) {
-            widget.sendEvent(
-              widget.controlId,
-              'scroll_end',
-              payload('scroll_end'),
-            );
-          }
-        }
-        return false;
-      },
+    return wrapScrollableNotifications(
       child: scrollable,
+      controller: _controller,
+      controlId: widget.controlId,
+      events: events,
+      sendEvent: widget.sendEvent,
     );
   }
 }
@@ -261,48 +152,3 @@ Map<String, Object?>? _firstChildMap(List children) {
   }
   return null;
 }
-
-Axis? _parseAxis(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'horizontal':
-    case 'row':
-      return Axis.horizontal;
-    case 'vertical':
-    case 'column':
-      return Axis.vertical;
-  }
-  return null;
-}
-
-Set<String> _coerceStringSet(Object? value) {
-  final out = <String>{};
-  if (value is List) {
-    for (final v in value) {
-      final s = v?.toString();
-      if (s != null && s.isNotEmpty) out.add(s);
-    }
-  }
-  return out;
-}
-
-Curve _parseCurve(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
-    case 'linear':
-      return Curves.linear;
-    case 'ease_in':
-    case 'easein':
-      return Curves.easeIn;
-    case 'ease_out':
-    case 'easeout':
-      return Curves.easeOut;
-    case 'ease_in_out':
-    case 'easeinout':
-      return Curves.easeInOut;
-    case 'ease':
-    default:
-      return Curves.ease;
-  }
-}
-

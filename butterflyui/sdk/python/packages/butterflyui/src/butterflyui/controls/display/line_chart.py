@@ -7,7 +7,8 @@ from .chart import Chart
 __all__ = ["LineChart"]
 
 class LineChart(Chart):
-    """Line chart with optional area fill.
+    """
+    Line chart with optional area fill.
     
     Extends ``Chart`` and forces ``chart_type`` to ``"line"``.  Data
     is drawn as a continuous polyline using ``_LineChartPainter``.
@@ -17,27 +18,17 @@ class LineChart(Chart):
     
     Use ``set_data`` to replace the data series at runtime.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        chart = bui.LineChart(
-            values=[10, 42, 28, 55, 33],
-            fill=True,
-            color="#4f46e5",
-        )
-    
-    Args:
-        values:
-            Numeric data points for the polyline.
-        points:
-            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
-        fill:
-            Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
-        color:
-            Stroke colour for the line and fill region.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    chart = bui.LineChart(
+        values=[10, 42, 28, 55, 33],
+        fill=True,
+        color="#4f46e5",
+    )
+    ```
     """
 
 

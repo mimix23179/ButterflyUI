@@ -10,12 +10,15 @@ __all__ = ["OutlinedButton"]
 
 
 class OutlinedButton(Button):
-    """Outlined emphasis button preset.
+    """
+    Outlined emphasis button preset.
     
     ``OutlinedButton`` uses :class:`Button` behavior and forces
     ``variant="outlined"`` for medium-emphasis actions. It supports the same
     click events, declarative action dispatch, and runtime style/customization
     forwarding as the base button family.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -26,34 +29,6 @@ class OutlinedButton(Button):
         icon="search",
     )
     ```
-    
-    Args:
-        label:
-            Button caption text. ``text`` takes precedence when both are set.
-        text:
-            Caption text alias for ``label``.
-        value:
-            Arbitrary payload emitted with click events.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        action:
-            Declarative action descriptor fired on press.
-        action_id:
-            Registered action ID to dispatch on press.
-        action_event:
-            Event name forwarded to the action dispatcher.
-        action_payload:
-            Extra payload mapping for action dispatch.
-        actions:
-            Action descriptor list executed on press.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer.
     """
 
 

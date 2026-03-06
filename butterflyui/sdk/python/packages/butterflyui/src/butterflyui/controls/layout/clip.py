@@ -15,6 +15,8 @@ class Clip(Component):
     ``clip_behavior`` controls anti-aliasing: ``"hardEdge"``,
     ``"antiAlias"``, or ``"antiAliasWithSaveLayer"``.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -23,15 +25,6 @@ class Clip(Component):
         shape="oval",
     )
     ```
-
-    Args:
-        shape:
-            Clip shape. Values: ``"rect"``, ``"oval"``, ``"rrect"`` (default).
-        radius:
-            Corner radius in logical pixels for rounded-rect clips.
-        clip_behavior:
-            Anti-aliasing mode. Values: ``"hardEdge"``, ``"antiAlias"``,
-            ``"antiAliasWithSaveLayer"``.
     """
 
 

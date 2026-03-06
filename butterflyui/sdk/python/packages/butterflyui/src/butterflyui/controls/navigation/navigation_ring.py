@@ -9,7 +9,8 @@ __all__ = ["NavigationRing"]
 
 
 class NavigationRing(Component):
-    """Compact ring-style navigation selector with icon-first destinations.
+    """
+    Compact ring-style navigation selector with icon-first destinations.
     
     Renders a rounded destination cluster for compact mode switching and
     dashboard navigation shells. Keeps selected state, emits ``select`` and
@@ -23,41 +24,22 @@ class NavigationRing(Component):
     placement and clipping (alignment, margin, constraints, radius, clip).
     
     Example:
-        ```python
-        import butterflyui as bui
-    
-        bui.NavigationRing(
-            items=[
-                {"id": "home", "label": "Home", "icon": "home"},
-                {"id": "gallery", "label": "Gallery", "icon": "image", "badge": "3"},
-                {"id": "search", "label": "Search", "icon": "search"},
-            ],
-            selected_id="home",
-            policy="selected_only",
-            dense=False,
-            events=["select", "change"],
-        )
-        ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        selected_id:
-            Identifier of the currently selected item, tab, route, or navigation destination.
-        policy:
-            Label visibility policy: ``"always"``, ``"selected_only"``, ``"never"``.
-        dense:
-            Enables compact spacing and icon sizing.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra passthrough props for advanced renderer customization.
+
+    ```python
+    import butterflyui as bui
+
+    bui.NavigationRing(
+        items=[
+            {"id": "home", "label": "Home", "icon": "home"},
+            {"id": "gallery", "label": "Gallery", "icon": "image", "badge": "3"},
+            {"id": "search", "label": "Search", "icon": "search"},
+        ],
+        selected_id="home",
+        policy="selected_only",
+        dense=False,
+        events=["select", "change"],
+    )
+    ```
     """
 
 

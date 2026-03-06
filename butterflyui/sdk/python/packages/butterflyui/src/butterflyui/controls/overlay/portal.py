@@ -16,6 +16,8 @@ class Portal(Component):
     widgets behind the portal. ``alignment`` and ``offset`` position the
     portal content.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -26,20 +28,6 @@ class Portal(Component):
         alignment="center",
     )
     ```
-
-    Args:
-        portal:
-            The widget projected into the top-level overlay layer.
-        open:
-            When ``True`` the portal overlay is visible.
-        dismissible:
-            When ``True`` tapping outside closes the portal.
-        passthrough:
-            When ``True`` pointer events pass through to widgets below.
-        alignment:
-            Alignment of the portal content within the overlay area.
-        offset:
-            Offset of the portal content from the alignment position.
     """
 
 

@@ -14,21 +14,13 @@ class Checkbox(Component):
     cycles through ``True``, ``False``, and ``None`` (indeterminate).
     Toggling the checkbox emits a ``change`` event with the new value.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
     bui.Checkbox(value=True, label="Accept terms")
     ```
-
-    Args:
-        value:
-            Current checked state — ``True``, ``False``, or ``None``
-            (indeterminate) when ``tristate`` is enabled.
-        label:
-            Optional text rendered beside the checkbox.
-        tristate:
-            If ``True``, the checkbox supports a third ``None``
-            (indeterminate) state in addition to checked/unchecked.
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["RippleBurst"]
 
 class RippleBurst(Component):
-    """Expanding concentric ripple rings triggered by tap or
+    """
+    Expanding concentric ripple rings triggered by tap or
     programmatic ``burst()`` call.
     
     The Flutter runtime paints *count* concentric circles on a
@@ -16,33 +17,19 @@ class RippleBurst(Component):
     fires a burst on tap; the ``burst()`` invoke method triggers the
     same animation from Python.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        ripple = bui.RippleBurst(
-            bui.Container(width=200, height=200),
-            color="#22d3ee",
-            count=4,
-            duration_ms=600,
-            max_radius=120,
-        )
-    
-    Args:
-        color:
-            Ripple ring colour.  Defaults to the primary colour
-            from the current theme.
-        count:
-            Number of concentric rings per burst (``1`` – ``8``).
-            Defaults to ``3``.
-        duration_ms:
-            Burst animation duration in milliseconds.
-            Defaults to ``500``.
-        max_radius:
-            Maximum expansion radius in logical pixels.
-            Defaults to ``90``.
-        center:
-            Reserved — custom ripple origin point.
+    ```python
+    import butterflyui as bui
+
+    ripple = bui.RippleBurst(
+        bui.Container(width=200, height=200),
+        color="#22d3ee",
+        count=4,
+        duration_ms=600,
+        max_radius=120,
+    )
+    ```
     """
 
 

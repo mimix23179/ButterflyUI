@@ -7,12 +7,15 @@ from .split_view import SplitView
 __all__ = ["SplitPane"]
 
 class SplitPane(SplitView):
-    """Draggable two-panel split with bounded resize constraints.
+    """
+    Draggable two-panel split with bounded resize constraints.
     
     Extends ``SplitView`` by adding ``min_ratio`` and ``max_ratio`` to
     constrain where the divider can be dragged. Prefer ``SplitPane`` over
     ``SplitView`` when the split position must stay within bounds during
     user interaction.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,22 +30,6 @@ class SplitPane(SplitView):
         events=["resize"],
     )
     ```
-    
-    Args:
-        axis:
-            Split direction. Values: ``"horizontal"``, ``"vertical"``.
-        ratio:
-            Initial fractional position of the divider (0.0-1.0).
-        min_ratio:
-            Minimum allowed divider ratio during drag.
-        max_ratio:
-            Maximum allowed divider ratio during drag.
-        draggable:
-            When ``True`` the user can drag the divider to resize panels.
-        divider_size:
-            Width or height of the divider affordance in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

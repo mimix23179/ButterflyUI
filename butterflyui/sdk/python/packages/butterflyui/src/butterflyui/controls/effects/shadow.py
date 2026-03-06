@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Shadow"]
 
 class Shadow(Component):
-    """Box-shadow decorator that wraps children in a ``DecoratedBox``
+    """
+    Box-shadow decorator that wraps children in a ``DecoratedBox``
     with configurable ``BoxShadow`` entries.
     
     The Flutter runtime renders either a single shadow from the
@@ -14,39 +15,19 @@ class Shadow(Component):
     *offset_y*) or a full list of shadow definitions via *shadows*.
     An optional *radius* rounds the decoration corners.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        card = bui.Shadow(
-            bui.Container(width=200, height=120),
-            color="#00000033",
-            blur=12,
-            offset_y=4,
-            radius=8,
-        )
-    
-    Args:
-        color:
-            Shadow colour.  Defaults to ``#33000000`` (20 %
-            black).
-        blur:
-            Blur radius of the shadow.  Defaults to ``12``.
-        spread:
-            Spread radius.  Defaults to ``0``.
-        offset_x:
-            Horizontal shadow offset.  Defaults to ``0``.
-        offset_y:
-            Vertical shadow offset.  Defaults to ``4``.
-        radius:
-            Corner radius of the ``BoxDecoration``.  Defaults to
-            ``0`` (sharp corners).
-        shadows:
-            Explicit list of shadow definition mappings, each
-            with ``color``, ``blur``, ``spread``, ``offset_x``,
-            ``offset_y``.  Overrides the shorthand parameters.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    card = bui.Shadow(
+        bui.Container(width=200, height=120),
+        color="#00000033",
+        blur=12,
+        offset_y=4,
+        radius=8,
+    )
+    ```
     """
 
 

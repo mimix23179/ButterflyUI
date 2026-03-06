@@ -9,28 +9,11 @@ __all__ = ["ShimmerShadow"]
 
 
 class ShimmerShadow(Component):
-    """Combined shimmer + layered shadow effect wrapper.
+    """
+    Combined shimmer + layered shadow effect wrapper.
     
     This control applies a shadow stack and then overlays shimmer animation
     around the same child.
-    
-    Args:
-        child:
-            Primary child control wrapped by the combined effect.
-        shimmer:
-            Shimmer animation configuration or strength used by the shadow effect.
-        shadow:
-            Base shadow configuration payload.
-        duration_ms:
-            Duration of the shimmer cycle in milliseconds.
-        angle:
-            Angle value used by the effect, shadow, or shimmer renderer.
-        opacity:
-            Overall opacity of the wrapper effect.
-        shadows:
-            Layered shadow definitions applied under the child.
-        radius:
-            Corner radius shared by the shimmer and shadow layers.
     """
 
 

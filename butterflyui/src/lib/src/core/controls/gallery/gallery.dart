@@ -878,11 +878,14 @@ Widget buildGalleryControl(
           actions: toolbarActions,
           tokens: tokens,
           buildChild: buildChild,
+          registerInvokeHandler: registerInvokeHandler,
+          unregisterInvokeHandler: unregisterInvokeHandler,
           sendEvent: sendEvent,
         );
   final content = toolbarWidget == null
       ? layoutWidget
       : buildColumnControl(
+          _galleryControlId(controlId, 'content_column'),
           {'spacing': mainAxisSpacing},
           [
             {'type': '__gallery_toolbar', 'props': {}},
@@ -899,6 +902,9 @@ Widget buildGalleryControl(
             }
             return buildChild(child);
           },
+          registerInvokeHandler,
+          unregisterInvokeHandler,
+          sendEvent,
         );
 
   final containerChildren = rawChildren.isEmpty
@@ -907,23 +913,31 @@ Widget buildGalleryControl(
         ]
       : rawChildren;
 
-  return buildContainerControl(effectiveProps, containerChildren, (childProps) {
-    final childType = childProps['type']?.toString();
-    if (childType != '__gallery_content') {
-      return buildChild(childProps);
-    }
-    if (isLoading) {
-      return _buildGalleryProgressIndicator();
-    }
-    if (items.isEmpty) {
-      return _buildGalleryEmptyState(
-        icon: 'photo_library',
-        title: 'No items in gallery',
-        message: 'Add some items to get started',
-      );
-    }
-    return content;
-  });
+  return buildContainerControl(
+    controlId,
+    effectiveProps,
+    containerChildren,
+    (childProps) {
+      final childType = childProps['type']?.toString();
+      if (childType != '__gallery_content') {
+        return buildChild(childProps);
+      }
+      if (isLoading) {
+        return _buildGalleryProgressIndicator();
+      }
+      if (items.isEmpty) {
+        return _buildGalleryEmptyState(
+          icon: 'photo_library',
+          title: 'No items in gallery',
+          message: 'Add some items to get started',
+        );
+      }
+      return content;
+    },
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
+  );
 }
 
 Widget _buildGalleryLayout({
@@ -1019,6 +1033,7 @@ Widget _buildGalleryLayout({
                   ? raw.whereType<Map>().map(coerceObjectMap).toList()
                   : <Map<String, Object?>>[];
               return buildColumnControl(
+                _galleryControlId(controlId, 'list_column'),
                 {'spacing': mainAxisSpacing},
                 childMaps,
                 tokens,
@@ -1038,6 +1053,9 @@ Widget _buildGalleryLayout({
                   itemBorderRadius: itemBorderRadius,
                   useControlWidgets: useControlWidgets,
                 ),
+                registerInvokeHandler,
+                unregisterInvokeHandler,
+                sendEvent,
               );
             }
             return buildChild(child);
@@ -1401,6 +1419,7 @@ Widget _buildCardItem({
         child: GestureDetector(
           onTap: () {},
           child: buildCardControl(
+            _galleryControlId(controlId, 'card_${item.id}'),
             {
               'radius': borderRadius,
               'elevation': isHovered ? 4 : 1,
@@ -1462,13 +1481,21 @@ Widget _buildCardItem({
                     }
                     if (stackType == '__gallery_card_hover') {
                       return buildContainerControl(
+                        _galleryControlId(controlId, 'card_hover_${item.id}'),
                         {'bgcolor': hoverColor},
                         const [],
                         buildChild,
+                        registerInvokeHandler,
+                        unregisterInvokeHandler,
+                        sendEvent,
                       );
                     }
                     if (stackType == '__gallery_card_selected') {
                       return buildContainerControl(
+                        _galleryControlId(
+                          controlId,
+                          'card_selected_${item.id}',
+                        ),
                         {'bgcolor': selectedColor, 'radius': 12, 'padding': 4},
                         [
                           {'type': '__gallery_check_icon', 'props': {}},
@@ -1483,6 +1510,9 @@ Widget _buildCardItem({
                           }
                           return buildChild(iconChild);
                         },
+                        registerInvokeHandler,
+                        unregisterInvokeHandler,
+                        sendEvent,
                       );
                     }
                     if (stackType == '__gallery_card_status') {
@@ -1512,6 +1542,9 @@ Widget _buildCardItem({
                               'size': 32,
                               'bgcolor': Colors.black54,
                             },
+                            registerInvokeHandler,
+                            unregisterInvokeHandler,
+                            tokens,
                             sendEvent,
                           ),
                           const SizedBox(width: 8),
@@ -1522,6 +1555,9 @@ Widget _buildCardItem({
                               'size': 32,
                               'bgcolor': Colors.black54,
                             },
+                            registerInvokeHandler,
+                            unregisterInvokeHandler,
+                            tokens,
                             sendEvent,
                           ),
                           const SizedBox(width: 8),
@@ -1532,6 +1568,9 @@ Widget _buildCardItem({
                               'size': 32,
                               'bgcolor': Colors.black54,
                             },
+                            registerInvokeHandler,
+                            unregisterInvokeHandler,
+                            tokens,
                             sendEvent,
                           ),
                         ],
@@ -1612,6 +1651,9 @@ Widget _buildCardItem({
               }
               return buildChild(child);
             },
+            registerInvokeHandler,
+            unregisterInvokeHandler,
+            sendEvent,
           ),
         ),
       );
@@ -1685,6 +1727,7 @@ Widget _buildTileItem({
           }
           if (type == '__gallery_tile_selected') {
             return buildContainerControl(
+              _galleryControlId(controlId, 'tile_selected_${item.id}'),
               {
                 'bgcolor': resolvedSelectedColor.withOpacity(0.3),
                 'radius': resolvedRadius,
@@ -1705,6 +1748,9 @@ Widget _buildTileItem({
                 }
                 return buildChild(iconChild);
               },
+              registerInvokeHandler,
+              unregisterInvokeHandler,
+              sendEvent,
             );
           }
           if (type == '__gallery_tile_meta') {
@@ -2031,11 +2077,17 @@ Widget _buildListItem({
                   buildIconButtonControl(
                     _galleryControlId(controlId, 'list_like_${item.id}'),
                     {'icon': 'favorite_border', 'size': 20},
+                    registerInvokeHandler,
+                    unregisterInvokeHandler,
+                    tokens,
                     sendEvent,
                   ),
                   buildIconButtonControl(
                     _galleryControlId(controlId, 'list_share_${item.id}'),
                     {'icon': 'share', 'size': 20},
+                    registerInvokeHandler,
+                    unregisterInvokeHandler,
+                    tokens,
                     sendEvent,
                   ),
                 ],
@@ -2058,6 +2110,7 @@ Widget _buildListItem({
           : Colors.grey[100],
     ),
     child: buildRowControl(
+      _galleryControlId(controlId, 'list_row_${item.id}'),
       {'spacing': 12, 'padding': 12},
       [
         {
@@ -2149,6 +2202,9 @@ Widget _buildListItem({
       ],
       tokens,
       buildChild,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      sendEvent,
     ),
   );
 }
@@ -2260,16 +2316,25 @@ Widget _buildGalleryListItem({
               buildIconButtonControl(
                 _galleryControlId(controlId, 'list_like_${item.id}'),
                 {'icon': 'favorite_border', 'size': 20},
+                registerInvokeHandler,
+                unregisterInvokeHandler,
+                tokens,
                 sendEvent,
               ),
               buildIconButtonControl(
                 _galleryControlId(controlId, 'list_share_${item.id}'),
                 {'icon': 'share', 'size': 20},
+                registerInvokeHandler,
+                unregisterInvokeHandler,
+                tokens,
                 sendEvent,
               ),
               buildIconButtonControl(
                 _galleryControlId(controlId, 'list_more_${item.id}'),
                 {'icon': 'more_vert', 'size': 20},
+                registerInvokeHandler,
+                unregisterInvokeHandler,
+                tokens,
                 sendEvent,
               ),
             ],
@@ -2561,6 +2626,7 @@ Widget _buildGalleryPreviewWrapper({
   required bool useControlWidgets,
 }) {
   return buildAspectRatioControl(
+    _galleryControlId(controlId, 'preview_ratio_${item.id}'),
     {'ratio': item.aspectRatio ?? 1.0},
     [
       {
@@ -2594,6 +2660,9 @@ Widget _buildGalleryPreviewWrapper({
       }
       return buildChild(child);
     },
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
   );
 }
 
@@ -2602,35 +2671,48 @@ Widget _buildGalleryToolbar({
   required List<Map<String, Object?>> actions,
   required CandyTokens tokens,
   required Widget Function(Map<String, Object?> control) buildChild,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   required ButterflyUISendRuntimeEvent sendEvent,
 }) {
   final children = actions
       .map((action) => {'type': '__gallery_action', 'props': action})
       .toList();
-  return buildRowControl({'spacing': 8, 'main_axis': 'end'}, children, tokens, (
-    child,
-  ) {
-    final type = child['type']?.toString();
-    if (type == '__gallery_action') {
-      final rawProps = child['props'];
-      final props = rawProps is Map
-          ? coerceObjectMap(rawProps)
-          : <String, Object?>{};
-      return _buildGalleryActionButton(
-        controlId: controlId,
-        action: props,
-        tokens: tokens,
-        sendEvent: sendEvent,
-      );
-    }
-    return buildChild(child);
-  });
+  return buildRowControl(
+    _galleryControlId(controlId, 'toolbar'),
+    {'spacing': 8, 'main_axis': 'end'},
+    children,
+    tokens,
+    (child) {
+      final type = child['type']?.toString();
+      if (type == '__gallery_action') {
+        final rawProps = child['props'];
+        final props = rawProps is Map
+            ? coerceObjectMap(rawProps)
+            : <String, Object?>{};
+        return _buildGalleryActionButton(
+          controlId: controlId,
+          action: props,
+          tokens: tokens,
+          registerInvokeHandler: registerInvokeHandler,
+          unregisterInvokeHandler: unregisterInvokeHandler,
+          sendEvent: sendEvent,
+        );
+      }
+      return buildChild(child);
+    },
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
+  );
 }
 
 Widget _buildGalleryActionButton({
   required String controlId,
   required Map<String, Object?> action,
   required CandyTokens tokens,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   required ButterflyUISendRuntimeEvent sendEvent,
 }) {
   final variant = (action['variant'] ?? action['style'] ?? 'text')
@@ -2650,22 +2732,61 @@ Widget _buildGalleryActionButton({
     if (color != null) 'color': color,
   };
   if (icon != null && (label == null || label.isEmpty)) {
-    return buildIconButtonControl(actionId, {
-      'icon': icon,
-      if (color != null) 'color': color,
-    }, sendEvent);
+    return buildIconButtonControl(
+      actionId,
+      {'icon': icon, if (color != null) 'color': color},
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+      tokens,
+      sendEvent,
+    );
   }
   switch (variant) {
     case 'filled':
-      return buildFilledButtonControl(actionId, props, tokens, sendEvent);
+      return buildFilledButtonControl(
+        actionId,
+        props,
+        tokens,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
     case 'outlined':
-      return buildOutlinedButtonControl(actionId, props, tokens, sendEvent);
+      return buildOutlinedButtonControl(
+        actionId,
+        props,
+        tokens,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
     case 'text':
-      return buildTextButtonControl(actionId, props, tokens, sendEvent);
+      return buildTextButtonControl(
+        actionId,
+        props,
+        tokens,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
     case 'elevated':
-      return buildElevatedButtonControl(actionId, props, tokens, sendEvent);
+      return buildElevatedButtonControl(
+        actionId,
+        props,
+        tokens,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
     default:
-      return buildButtonControl(actionId, props, tokens, sendEvent);
+      return buildButtonControl(
+        actionId,
+        props,
+        tokens,
+        registerInvokeHandler,
+        unregisterInvokeHandler,
+        sendEvent,
+      );
   }
 }
 
@@ -2918,22 +3039,14 @@ String _extractExtension(String? source) {
 
 Widget _buildFallback(GalleryItem item, bool useControlWidgets) {
   if (useControlWidgets) {
-    return buildContainerControl(
-      {'bgcolor': Colors.grey[300]},
-      [
-        {'type': '__gallery_fallback_icon', 'props': {}},
-      ],
-      (child) {
-        if (child['type']?.toString() == '__gallery_fallback_icon') {
-          return Center(
-            child: buildIconControl(_getIconForType(item.type), {
-              'size': 48,
-              'color': Colors.grey[600],
-            }),
-          );
-        }
-        return const SizedBox.shrink();
-      },
+    return Container(
+      color: Colors.grey[300],
+      child: Center(
+        child: buildIconControl(_getIconForType(item.type), {
+          'size': 48,
+          'color': Colors.grey[600],
+        }),
+      ),
     );
   }
   return Container(

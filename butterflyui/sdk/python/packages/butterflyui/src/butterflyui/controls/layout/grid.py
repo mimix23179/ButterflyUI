@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Grid"]
 
 class Grid(Component):
-    """Grid layout that arranges children into a fixed number of columns.
+    """
+    Grid layout that arranges children into a fixed number of columns.
     
     The runtime renders a Flutter ``GridView.count``. ``columns`` sets the
     cross-axis count; ``spacing`` and ``run_spacing`` add gaps between cells.
     ``child_aspect_ratio`` fixes each cell's width-to-height ratio.
     ``direction`` switches between vertical and horizontal scrolling.
     ``shrink_wrap`` sizes the grid to its content instead of filling the parent.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -25,26 +28,6 @@ class Grid(Component):
         events=["select"],
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        columns:
-            Number of columns (cross-axis cell count).
-        spacing:
-            Horizontal gap between cells in logical pixels.
-        run_spacing:
-            Vertical gap between rows in logical pixels.
-        child_aspect_ratio:
-            Width-to-height ratio for each cell. Defaults to ``1.0``.
-        direction:
-            Scroll axis. Values: ``"vertical"`` (default), ``"horizontal"``.
-        reverse:
-            When ``True`` items are laid out in reverse order.
-        shrink_wrap:
-            When ``True`` the grid sizes itself to its content.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

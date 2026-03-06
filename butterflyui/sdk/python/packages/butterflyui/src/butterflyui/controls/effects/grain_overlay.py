@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["GrainOverlay"]
 
 class GrainOverlay(Component):
-    """Film-grain noise texture overlay rendered with a ``CustomPainter``.
+    """
+    Film-grain noise texture overlay rendered with a ``CustomPainter``.
     
     The Flutter runtime paints randomly positioned single-pixel
     rectangles over the child using a seeded ``Random`` instance.  The
@@ -14,37 +15,18 @@ class GrainOverlay(Component):
     An optional ``animated`` flag increments the seed each frame for a
     flickering grain effect.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        grain = bui.GrainOverlay(
-            bui.Image(src="photo.png"),
-            opacity=0.08,
-            density=0.45,
-            color="#ffffff",
-        )
-    
-    Args:
-        opacity:
-            Opacity of each grain dot (``0.0`` – ``1.0``).
-            Defaults to ``0.08``.
-        density:
-            Relative density of grain dots (``0.0`` – ``1.0``).
-            Defaults to ``0.45``.
-        seed:
-            Integer seed for the pseudo-random number generator.
-            Defaults to ``0``.
-        color:
-            Colour of the grain dots.  Defaults to white.
-        animated:
-            When ``True`` the seed auto-increments to produce
-            flickering grain.
-        fps:
-            Target frames per second for the animated grain
-            refresh.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    grain = bui.GrainOverlay(
+        bui.Image(src="photo.png"),
+        opacity=0.08,
+        density=0.45,
+        color="#ffffff",
+    )
+    ```
     """
 
 

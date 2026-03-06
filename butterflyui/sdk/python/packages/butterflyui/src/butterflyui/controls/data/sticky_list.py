@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["StickyList"]
 
 class StickyList(Component):
-    """Sectioned scrollable list with sticky section headers.
+    """
+    Sectioned scrollable list with sticky section headers.
     
     When ``sections`` are provided, each section mapping should carry
     a ``header`` (or ``title``) string and an ``items`` list.  The
@@ -33,26 +34,6 @@ class StickyList(Component):
         scrollable=True,
     )
     ```
-    
-    Args:
-        sections:
-            Section payloads — list of mappings each containing ``"header"`` (or ``"title"``) and ``"items"`` (list of item mappings with at least ``"label"``/``"id"``).
-        spacing:
-            Vertical spacing in logical pixels between items or sections.  Defaults to ``8``.
-        padding:
-            Outer list padding (single number or per-edge spec).
-        scrollable:
-            Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
-        shrink_wrap:
-            If ``True``, the list shrink-wraps its content for embedding inside other scrollable parents.
-        reverse:
-            If ``True``, the scroll direction is reversed (bottom-to-top).
-        cache_extent:
-            Cache extent in logical pixels for viewport pre-building of off-screen items.
-        header_extent:
-            Fixed extent for section header rows (forwarded to the runtime).
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

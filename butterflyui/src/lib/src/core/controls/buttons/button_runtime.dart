@@ -3,39 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/focusable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
-import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/color_value.dart';
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 import 'package:butterflyui_runtime/src/core/window/window_api.dart';
-
-String normalizeControlEventName(String value) {
-  final input = value.trim().replaceAll('-', '_');
-  if (input.isEmpty) return '';
-  final out = StringBuffer();
-  for (var i = 0; i < input.length; i += 1) {
-    final ch = input[i];
-    final isUpper = ch.toUpperCase() == ch && ch.toLowerCase() != ch;
-    if (isUpper && i > 0 && input[i - 1] != '_') {
-      out.write('_');
-    }
-    out.write(ch.toLowerCase());
-  }
-  return out.toString();
-}
-
-Set<String>? resolveSubscribedEvents(Object? events) {
-  if (events is! List) return null;
-  return events
-      .map((e) => normalizeControlEventName(e?.toString() ?? ''))
-      .where((name) => name.isNotEmpty)
-      .toSet();
-}
-
-bool isControlEventSubscribed(Set<String>? subscribedEvents, String name) {
-  if (subscribedEvents == null) return name == 'click';
-  return subscribedEvents.contains(normalizeControlEventName(name));
-}
 
 Future<void> maybeDispatchWindowAction(Map<String, Object?> props) async {
   final windowAction = props['window_action']?.toString();
@@ -71,8 +45,7 @@ void emitControlPressEvents({
 }) {
   if (controlId.isEmpty) return;
 
-  final events = props['events'];
-  final subscribedEvents = resolveSubscribedEvents(events);
+  final subscribedEvents = resolveSubscribedEvents(props['events']);
   final actionId = props['action_id']?.toString();
   final actionEventName = props['action_event']?.toString();
   final actionPayload = props['action_payload'];
@@ -95,7 +68,7 @@ void emitControlPressEvents({
     Object? actionArgs;
 
     if (actionSpec == null) {
-      // Keep defaults from top-level props.
+      // Keep the top-level props as the default action specification.
     } else if (actionSpec is String) {
       final trimmed = actionSpec.trim();
       if (trimmed.isNotEmpty) {
@@ -156,7 +129,7 @@ void emitControlPressEvents({
     sendEvent(controlId, resolvedEvent, actionEventPayload);
   }
 
-  if (events is! List) {
+  if (props['events'] is! List) {
     sendEvent(controlId, 'click', payloadWithActions);
     emitDeclarativeAction(props['action'], force: true);
     if (props['actions'] is List) {
@@ -478,4 +451,402 @@ FontWeight? parseButtonFontWeight(Object? value) {
       return FontWeight.w900;
   }
   return null;
+}
+
+Widget buildButtonVariantControl({
+  required String controlId,
+  required Map<String, Object?> props,
+  required CandyTokens tokens,
+  required String variant,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  required ButterflyUISendRuntimeEvent sendEvent,
+}) {
+  return _ButterflyUIButtonControl(
+    controlId: controlId,
+    props: props,
+    tokens: tokens,
+    variant: variant,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
+}
+
+class _ButterflyUIButtonControl extends StatefulWidget {
+  const _ButterflyUIButtonControl({
+    required this.controlId,
+    required this.props,
+    required this.tokens,
+    required this.variant,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final CandyTokens tokens;
+  final String variant;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_ButterflyUIButtonControl> createState() =>
+      _ButterflyUIButtonControlState();
+}
+
+class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
+  late final FocusNode _focusNode = FocusNode(
+    debugLabel: 'butterflyui:button:${widget.variant}:${widget.controlId}',
+  );
+  late bool _enabled;
+  late bool _busy;
+  bool _hovered = false;
+
+  bool get _canPress => _enabled && !_busy;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromProps();
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ButterflyUIButtonControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
+    if (oldWidget.props != widget.props) {
+      _syncFromProps();
+    }
+  }
+
+  @override
+  void dispose() {
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _syncFromProps() {
+    _enabled = coerceShellBool(widget.props['enabled'], fallback: true);
+    _busy = coerceShellBool(
+      widget.props['busy'] ?? widget.props['loading'],
+      fallback: false,
+    );
+  }
+
+  Map<String, Object?> _effectiveProps() {
+    return <String, Object?>{
+      'variant': widget.variant,
+      ...widget.props,
+      'enabled': _enabled,
+      'busy': _busy,
+      'loading': _busy,
+    };
+  }
+
+  ButterflyUIButtonVisualSpec _currentSpec(
+    Map<String, Object?> effectiveProps,
+  ) {
+    return buildButtonVisualSpec(
+      props: effectiveProps,
+      tokens: widget.tokens,
+      variant: widget.variant,
+      fallbackLabel: widget.variant == 'icon_button' ? '' : 'Button',
+    );
+  }
+
+  Map<String, Object?> _statePayload({
+    ButterflyUIButtonVisualSpec? spec,
+    Map<String, Object?>? effectiveProps,
+  }) {
+    final resolvedProps = effectiveProps ?? _effectiveProps();
+    final resolvedSpec = spec ?? _currentSpec(resolvedProps);
+    return <String, Object?>{
+      'label': resolvedSpec.label,
+      'variant': widget.variant,
+      'enabled': _enabled,
+      'busy': _busy,
+      'focused': _focusNode.hasFocus,
+      'hovered': _hovered,
+      if (resolvedProps['value'] != null) 'value': resolvedProps['value'],
+    };
+  }
+
+  void _dispatchPress({
+    ButterflyUIButtonVisualSpec? spec,
+    Map<String, Object?>? effectiveProps,
+  }) {
+    final resolvedProps = effectiveProps ?? _effectiveProps();
+    final resolvedSpec = spec ?? _currentSpec(resolvedProps);
+    if (!_canPress) return;
+    unawaited(maybeDispatchWindowAction(resolvedProps));
+    emitControlPressEvents(
+      controlId: widget.controlId,
+      props: resolvedProps,
+      payload: buildBasePressPayload(
+        label: resolvedSpec.label,
+        variant: widget.variant,
+        props: resolvedProps,
+        busy: _busy,
+      ),
+      sendEvent: widget.sendEvent,
+    );
+  }
+
+  void _handleHoverChange(bool value) {
+    if (_hovered == value) return;
+    setState(() {
+      _hovered = value;
+    });
+    final payload = _statePayload();
+    emitSubscribedEvent(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.props['events'],
+      name: value ? 'hover_enter' : 'hover_exit',
+      payload: payload,
+      sendEvent: widget.sendEvent,
+    );
+    emitSubscribedEvent(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.props['events'],
+      name: 'hover',
+      payload: <String, Object?>{...payload, 'value': value},
+      sendEvent: widget.sendEvent,
+    );
+  }
+
+  void _handleFocusChange(bool value) {
+    final payload = _statePayload();
+    emitSubscribedEvent(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.props['events'],
+      name: value ? 'focus' : 'blur',
+      payload: payload,
+      sendEvent: widget.sendEvent,
+    );
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    return handleFocusableInvoke(
+      context: context,
+      focusNode: _focusNode,
+      method: method,
+      args: args,
+      onUnhandled: (name, payload) async {
+        switch (name) {
+          case 'press':
+            _dispatchPress();
+            return _canPress;
+          case 'set_enabled':
+            final nextEnabled = coerceShellBoolOrNull(
+              payload['enabled'] ?? payload['value'],
+            );
+            if (nextEnabled != null) {
+              setState(() {
+                _enabled = nextEnabled;
+              });
+            }
+            return _enabled;
+          case 'set_busy':
+            final nextBusy = coerceShellBoolOrNull(
+              payload['busy'] ?? payload['loading'] ?? payload['value'],
+            );
+            if (nextBusy != null) {
+              setState(() {
+                _busy = nextBusy;
+              });
+            }
+            return _busy;
+          case 'get_state':
+            return _statePayload();
+          default:
+            throw UnsupportedError(
+              'Unknown ${widget.variant} button method: $name',
+            );
+        }
+      },
+    );
+  }
+
+  Widget _buildBusyContent(Widget child) {
+    final spinnerColor =
+        _currentSpec(_effectiveProps()).iconColor ??
+        Theme.of(context).colorScheme.onPrimary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 14,
+          height: 14,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color?>(spinnerColor),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(fit: FlexFit.loose, child: child),
+      ],
+    );
+  }
+
+  Widget _buildIconButton(
+    Map<String, Object?> effectiveProps,
+    ButterflyUIButtonVisualSpec spec,
+  ) {
+    final iconValue =
+        effectiveProps['icon'] ??
+        effectiveProps['glyph'] ??
+        effectiveProps['value'];
+    final tooltip = effectiveProps['tooltip']?.toString();
+    final background = resolveColorValue(
+      effectiveProps['background'] ?? effectiveProps['bgcolor'],
+      autoContrast: spec.autoContrast,
+      minContrast: spec.minContrast,
+    );
+    final iconWidget = _busy
+        ? SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color?>(spec.iconColor),
+            ),
+          )
+        : (buildIconValue(
+                iconValue,
+                colorValue:
+                    effectiveProps['color'] ??
+                    effectiveProps['icon_color'] ??
+                    spec.iconColor,
+                color: spec.iconColor,
+                background: background,
+                size: spec.iconSize,
+                autoContrast: spec.autoContrast,
+                minContrast: spec.minContrast,
+                fallbackIcon: Icons.help_outline,
+              ) ??
+              Icon(
+                Icons.help_outline,
+                size: spec.iconSize,
+                color: spec.iconColor,
+              ));
+    final splashRadius = coerceDouble(effectiveProps['splash_radius']);
+    final padding = coercePadding(effectiveProps['padding']);
+
+    Widget button = IconButton(
+      icon: iconWidget,
+      splashRadius: splashRadius,
+      tooltip: tooltip,
+      onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+      color: spec.iconColor,
+      style:
+          (background != null ||
+              effectiveProps['padding'] != null ||
+              effectiveProps['shape'] != null)
+          ? ButtonStyle(
+              backgroundColor: background == null
+                  ? null
+                  : WidgetStateProperty.all(background),
+              padding: padding == null
+                  ? null
+                  : WidgetStateProperty.all(padding),
+            )
+          : null,
+    );
+    if (tooltip != null && tooltip.isNotEmpty) {
+      button = Tooltip(message: tooltip, child: button);
+    }
+    return button;
+  }
+
+  Widget _buildVariantButton(
+    Map<String, Object?> effectiveProps,
+    ButterflyUIButtonVisualSpec spec,
+  ) {
+    Widget content = buildButtonContent(
+      spec: spec,
+      fallbackLabel: widget.variant == 'icon_button' ? '' : 'Button',
+    );
+    if (_busy && widget.variant != 'icon_button') {
+      content = _buildBusyContent(content);
+    }
+
+    switch (widget.variant) {
+      case 'text':
+      case 'text_button':
+        return TextButton(
+          onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+          style: spec.style,
+          child: content,
+        );
+      case 'outlined':
+      case 'outlined_button':
+        return OutlinedButton(
+          onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+          style: spec.style,
+          child: content,
+        );
+      case 'filled':
+      case 'filled_button':
+        return FilledButton(
+          onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+          style: spec.style,
+          child: content,
+        );
+      case 'elevated':
+      case 'elevated_button':
+        return ElevatedButton(
+          onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+          style: spec.style,
+          child: content,
+        );
+      case 'icon_button':
+        return _buildIconButton(effectiveProps, spec);
+      default:
+        return ElevatedButton(
+          onPressed: _canPress ? () => _dispatchPress(spec: spec) : null,
+          style: spec.style,
+          child: content,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveProps = _effectiveProps();
+    final spec = _currentSpec(effectiveProps);
+    Widget button = _buildVariantButton(effectiveProps, spec);
+    button = FocusableActionDetector(
+      focusNode: _focusNode,
+      autofocus: effectiveProps['autofocus'] == true,
+      enabled: true,
+      mouseCursor: _canPress
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
+      onShowHoverHighlight: _handleHoverChange,
+      onFocusChange: _handleFocusChange,
+      child: button,
+    );
+    return applyControlTransparency(child: button, props: effectiveProps);
+  }
 }

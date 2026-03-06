@@ -9,7 +9,8 @@ __all__ = ["PageView"]
 
 
 class PageView(Component):
-    """Swipeable page container with index control and optional animation.
+    """
+    Swipeable page container with index control and optional animation.
     
     ``PageView`` renders multiple children as horizontally or vertically
     swipeable pages. The active page is controlled by ``index`` and can be
@@ -20,6 +21,8 @@ class PageView(Component):
     Runtime supports both animated and instant page transitions. Layout knobs
     like ``viewport_fraction`` and ``pad_ends`` make it usable for carousel
     layouts in Gallery-like screens.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -34,32 +37,6 @@ class PageView(Component):
         events=["change"],
     )
     ```
-    
-    Args:
-        index:
-            Zero-based index of the visible page.
-        animate:
-            If ``True``, page changes animate instead of switching instantly.
-        duration_ms:
-            Transition duration in milliseconds.
-        keep_alive:
-            If ``True``, keeps non-visible pages mounted.
-        scroll_direction:
-            Page axis: ``"horizontal"`` (default) or ``"vertical"``.
-        reverse:
-            If ``True``, reverses page traversal direction.
-        page_snapping:
-            If ``True``, releases snap to page boundaries.
-        pad_ends:
-            If ``True``, adds implicit padding at beginning/end when
-            ``viewport_fraction`` is below ``1.0``.
-        viewport_fraction:
-            Fraction of viewport each page occupies. Useful for carousel-style
-            previews. Typical range: ``0.6`` .. ``1.0``.
-        initial_page:
-            Alias for ``index``. When both are provided, ``index`` wins.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

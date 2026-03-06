@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Surface"]
 
 class Surface(Component):
-    """Elevated surface card with background color, border, and corner radius.
+    """
+    Elevated surface card with background color, border, and corner radius.
     
     A simplified decorated container for material-style surfaces. Accepts
     ``padding`` for inner spacing, ``radius`` for corner rounding, ``bgcolor``
@@ -18,6 +19,8 @@ class Surface(Component):
     Candy/Skins/Style/Modifier/Gallery through ``**kwargs`` (for example
     ``variant``, ``classes``, ``modifiers``, ``motion``, ``effects``,
     ``on_hover_modifiers``, ``icon``, ``color``, ``transparency``).
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,22 +32,6 @@ class Surface(Component):
         padding=16,
     )
     ```
-    
-    Args:
-        padding:
-            Inner spacing between the surface edge and its children.
-        radius:
-            Corner radius in logical pixels.
-        bgcolor:
-            Background color painted behind the control's content area.
-        border_color:
-            Border color applied to the outer edge of the rendered control or decorative surface.
-        border_width:
-            Border stroke width in logical pixels.
-        **kwargs:
-            Additional runtime props forwarded to the universal renderer
-            pipeline (style, modifiers, motion, effects, and optional
-            icon/color/transparency hints).
     """
 
 

@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["EmojiPicker"]
 
 class EmojiPicker(Component):
-    """Scrollable emoji grid with category tabs and optional search.
+    """
+    Scrollable emoji grid with category tabs and optional search.
     
     The Flutter runtime renders a paginated emoji panel grouped by
     category (smileys, animals, food, etc.).  A ``show_search`` bar
@@ -17,6 +18,8 @@ class EmojiPicker(Component):
     
     Use :meth:`set_category`, :meth:`search`, and :meth:`set_value` to
     control the panel imperatively.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,39 +30,6 @@ class EmojiPicker(Component):
         columns=8,
     )
     ```
-    
-    Args:
-        value:
-            Current value rendered or edited by the control. The exact payload shape depends on the control type.
-        categories:
-            List of category names to display.  Defaults to all
-            standard emoji categories.
-        recent:
-            List of recently used emoji characters to pre-populate
-            the *Recent* tab.
-        skin_tone:
-            Default skin tone modifier applied to applicable emoji
-            (e.g. ``"light"``, ``"medium"``, ``"dark"``).
-        show_search:
-            If ``True``, a search text field is rendered above the
-            grid.
-        show_recent:
-            If ``True``, a *Recently Used* category tab is shown.
-        category:
-            Category name or identifier used to group, filter, or preselect the control's current content.
-        query:
-            Initial search query pre-filled in the search field.
-        include_metadata:
-            If ``True``, the ``pick`` event payload includes extra
-            metadata (name, group, annotations).
-        recent_limit:
-            Maximum number of entries stored in the recent tab.
-        columns:
-            Number of emoji columns per row in the grid.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

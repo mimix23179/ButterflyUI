@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
@@ -10,38 +8,17 @@ Widget buildOutlinedButtonControl(
   String controlId,
   Map<String, Object?> props,
   CandyTokens tokens,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final effectiveProps = <String, Object?>{'variant': 'outlined', ...props};
-  final spec = buildButtonVisualSpec(
-    props: effectiveProps,
+  return buildButtonVariantControl(
+    controlId: controlId,
+    props: <String, Object?>{'variant': 'outlined', ...props},
     tokens: tokens,
     variant: 'outlined',
-    fallbackLabel: 'Button',
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
   );
-  final enabled = effectiveProps['enabled'] == null
-      ? true
-      : (effectiveProps['enabled'] == true);
-  final content = buildButtonContent(spec: spec, fallbackLabel: 'Button');
-
-  void onPressed() {
-    unawaited(maybeDispatchWindowAction(effectiveProps));
-    emitControlPressEvents(
-      controlId: controlId,
-      props: effectiveProps,
-      payload: buildBasePressPayload(
-        label: spec.label,
-        variant: 'outlined',
-        props: effectiveProps,
-      ),
-      sendEvent: sendEvent,
-    );
-  }
-
-  final button = OutlinedButton(
-    onPressed: enabled ? onPressed : null,
-    style: spec.style,
-    child: content,
-  );
-  return applyControlTransparency(child: button, props: effectiveProps);
 }

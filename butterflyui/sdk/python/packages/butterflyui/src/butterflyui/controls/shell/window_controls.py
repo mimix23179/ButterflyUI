@@ -15,6 +15,8 @@ class WindowControls(Component):
     ``button_width``/``button_height`` fix button dimensions. ``radius``
     sets the corner radius of each button.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -25,22 +27,6 @@ class WindowControls(Component):
         spacing=8,
     )
     ```
-
-    Args:
-        show_minimize:
-            When ``True`` the minimize button is rendered.
-        show_maximize:
-            When ``True`` the maximize/restore button is rendered.
-        show_close:
-            When ``True`` the close button is rendered.
-        spacing:
-            Gap in logical pixels between adjacent control buttons.
-        button_width:
-            Fixed width in logical pixels for each control button.
-        button_height:
-            Fixed height in logical pixels for each control button.
-        radius:
-            Corner radius applied to each control button surface.
     """
 
 

@@ -9,7 +9,8 @@ __all__ = ["BreadcrumbBar"]
 
 
 class BreadcrumbBar(Component):
-    """Interactive breadcrumb bar with path parsing and overflow behaviors.
+    """
+    Interactive breadcrumb bar with path parsing and overflow behaviors.
     
     Renders clickable path segments from either a slash-delimited ``path`` or
     explicit ``items`` payloads. ``crumbs`` and ``routes`` remain accepted
@@ -18,6 +19,8 @@ class BreadcrumbBar(Component):
     Supports shared placement props via ``props`` (alignment, margin, size
     constraints, radius/clip) so breadcrumb surfaces can be docked in custom
     headers/toolbars.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,34 +32,6 @@ class BreadcrumbBar(Component):
         events=["navigate"],
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        crumbs:
-            Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
-        routes:
-            Alias for ``items`` used by legacy ``breadcrumbs`` payloads.
-        path:
-            Forward-slash-delimited path string auto-split into segments.
-        current_index:
-            Zero-based index of the currently active segment.
-        separator:
-            String or icon name rendered between segments.
-        max_items:
-            Maximum number of segments to display before truncating.
-        dense:
-            Reduces segment height and padding.
-        dropdown_levels:
-            When ``True`` parent levels are shown in a dropdown on overflow.
-        show_root:
-            When ``True`` the root segment is always visible.
-        compact:
-            When ``True`` middle segments are collapsed to an ellipsis.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 

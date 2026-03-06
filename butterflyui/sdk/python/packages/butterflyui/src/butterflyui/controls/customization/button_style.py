@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ButtonStyle"]
 
 class ButtonStyle(Component):
-    """Style-preset picker rendered as a row of ``ChoiceChip`` widgets.
+    """
+    Style-preset picker rendered as a row of ``ChoiceChip`` widgets.
     
     The default presets are ``"solid"``, ``"outline"``, and ``"ghost"``.
     Selecting a chip emits a ``"change"`` event with the chosen preset's
@@ -25,36 +26,6 @@ class ButtonStyle(Component):
         ],
     )
     ```
-    
-    Args:
-        value:
-            Currently selected style preset ``id``.
-        options:
-            Ordered list of option descriptors rendered by the control. Each item can be a primitive shortcut or a mapping with the keys the Flutter side expects for this control.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        base:
-            Base style map applied in the idle state before any interactive or disabled overrides are merged.
-        hover:
-            State-specific style map applied while the pointer hovers the control. Use it to override hover-time visual properties such as background, border, elevation, or text color.
-        pressed:
-            State-specific style map applied while the control is actively pressed. Use it for press-time feedback such as scale, elevation, tint, or shadow changes.
-        disabled:
-            State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
-        focus_ring:
-            Focus-ring configuration applied when the control receives keyboard or accessibility focus. Typical values control ring color, width, inset, or animation depending on the renderer.
-        motion_behavior:
-            Motion configuration used when transitioning between interaction states. Use it to tune duration, easing, and animation behavior for hover, press, focus, or selection changes.
-        action:
-            Action identifier dispatched when the selected preset changes.
-        actions:
-            Ordered list of action descriptors executed or rendered by this control. Each item should match the action shape expected by the runtime for this control type.
-        action_id:
-            Specific action id to emit on change.
-        action_event:
-            Event name used when dispatching the action.
-        action_payload:
-            Additional payload merged into the action dispatch.
     """
 
 

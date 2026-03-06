@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["GestureArea"]
 
 class GestureArea(Component):
-    """Transparent overlay that captures gesture events over its child.
+    """
+    Transparent overlay that captures gesture events over its child.
     
     Wraps the child in a ``GestureDetector``.  Each gesture type can
     be enabled or disabled individually; only enabled gesture types
@@ -19,6 +20,8 @@ class GestureArea(Component):
       with delta and velocity.
     - ``scale_start`` / ``scale_update`` / ``scale_end`` — pinch/scale
       gesture with scale and rotation.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -29,24 +32,6 @@ class GestureArea(Component):
         pan_enabled=True,
     )
     ```
-    
-    Args:
-        enabled:
-            Master switch.  If ``False``, no gesture events are fired.
-        tap_enabled:
-            If ``True``, single-tap events are captured and emitted.
-        double_tap_enabled:
-            If ``True``, double-tap events are captured and emitted.
-        long_press_enabled:
-            If ``True``, long-press events are captured and emitted.
-        pan_enabled:
-            If ``True``, pan/drag gesture events are captured and
-            emitted.
-        scale_enabled:
-            If ``True``, pinch-to-scale and rotate gesture events are
-            captured and emitted.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

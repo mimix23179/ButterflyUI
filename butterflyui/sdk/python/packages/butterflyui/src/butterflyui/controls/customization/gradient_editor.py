@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["GradientEditor"]
 
 class GradientEditor(Component):
-    """Interactive gradient editor with an angle slider and colour-stop
+    """
+    Interactive gradient editor with an angle slider and colour-stop
     controls.
     
     The runtime renders a ``Slider`` for the angle (``0``–``360``°) and a
@@ -25,22 +26,6 @@ class GradientEditor(Component):
         angle=135,
     )
     ```
-    
-    Args:
-        stops:
-            List of colour-stop dicts, each with ``"position"`` (``0.0``–``1.0``) and ``"color"`` (hex string).
-        angle:
-            Initial gradient angle in degrees (``0``–``360``). Defaults to ``0``.
-        show_angle:
-            Controls whether (default), the angle slider is visible. Set it to ``False`` to disable this behavior.
-        show_add:
-            Controls whether (default), the "add stop" button is visible. Set it to ``False`` to disable this behavior.
-        show_remove:
-            Controls whether (default), each stop shows a remove affordance. Set it to ``False`` to disable this behavior.
-        live_preview:
-            If ``True``, a live gradient preview is rendered alongside the controls.
-        export_format:
-            Hint for the desired export format of gradient data (e.g. ``"css"``, ``"json"``).
     """
 
 

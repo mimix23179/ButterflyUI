@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["BlendModePicker"]
 
 class BlendModePicker(Component):
-    """Dropdown selector for choosing a compositing blend mode.
+    """
+    Dropdown selector for choosing a compositing blend mode.
     
     Renders a ``DropdownButtonFormField`` in the runtime with an optional
     live preview that demonstrates the selected mode by blending a pair of
@@ -24,24 +25,6 @@ class BlendModePicker(Component):
         sample={"base": "#ff0000", "overlay": "#0000ff"},
     )
     ```
-    
-    Args:
-        value:
-            Currently selected blend mode string, e.g. ``"multiply"`` or ``"screen"``. Emitted in ``"change"`` events.
-        options:
-            List of blend-mode strings offered in the dropdown. Defaults to ``["srcOver", "multiply", "screen", "overlay", "plus"]``.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        label:
-            Label text displayed above the dropdown field. Defaults to ``"Blend Mode"``.
-        preview:
-            If ``True``, a small colour swatch preview of the selected blend mode is rendered below the dropdown.
-        sample:
-            Dict with ``"base"`` and ``"overlay"`` colour strings used by the blend-mode preview swatch.
-        dense:
-            If ``True``, renders the dropdown in a compact, dense layout.
-        enabled:
-            If ``False``, the dropdown is disabled and non-interactive.
     """
 
 

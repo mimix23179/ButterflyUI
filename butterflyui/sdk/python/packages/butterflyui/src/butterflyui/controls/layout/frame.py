@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Frame"]
 
 class Frame(Component):
-    """Sized and decorated frame with constraints, spacing, and visual styling.
+    """
+    Sized and decorated frame with constraints, spacing, and visual styling.
     
     The runtime renders a container that applies combined width/height
     constraints (including min/max bounds), padding/margin spacing, background
@@ -16,6 +17,8 @@ class Frame(Component):
     ``Frame`` forwards additional style pipeline props through ``**kwargs``,
     including classes/modifiers/motion/effects plus optional ``icon``,
     ``color``, and ``transparency`` hints.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -30,41 +33,6 @@ class Frame(Component):
         events=["resize"],
     )
     ```
-    
-    Args:
-        width:
-            Requested width of the control in logical pixels.
-        height:
-            Requested height of the control in logical pixels.
-        min_width:
-            Minimum width constraint in logical pixels.
-        min_height:
-            Minimum height constraint in logical pixels.
-        max_width:
-            Maximum width constraint in logical pixels.
-        max_height:
-            Maximum height constraint in logical pixels.
-        padding:
-            Inner spacing between the frame edge and its child.
-        margin:
-            Outer spacing applied around the control before neighboring layout items are positioned.
-        alignment:
-            How the child is aligned inside the frame.
-        bgcolor:
-            Background color painted behind the control's content area.
-        border_color:
-            Border color applied to the outer edge of the rendered control or decorative surface.
-        border_width:
-            Border stroke width in logical pixels.
-        radius:
-            Corner radius in logical pixels.
-        clip_behavior:
-            Anti-aliasing clip mode. Values: ``"hardEdge"``, ``"antiAlias"``,
-            ``"antiAliasWithSaveLayer"``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        **kwargs:
-            Additional runtime props forwarded to the shared renderer pipeline.
     """
 
 

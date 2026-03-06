@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["NoiseDisplacement"]
 
 class NoiseDisplacement(Component):
-    """Noise-driven translation jitter that randomly displaces the child
+    """
+    Noise-driven translation jitter that randomly displaces the child
     on one or both axes.
     
     The Flutter runtime uses an ``AnimationController`` and a seeded
@@ -16,43 +17,19 @@ class NoiseDisplacement(Component):
     ``autoplay``).  The ``axis`` parameter restricts motion to
     ``"x"``, ``"y"``, or ``"both"``.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        shake = bui.NoiseDisplacement(
-            bui.Text("Shake"),
-            strength=4,
-            speed=1.5,
-            axis="x",
-            autoplay=True,
-        )
-    
-    Args:
-        strength:
-            Maximum displacement in logical pixels.  Defaults
-            to ``3``.
-        speed:
-            Speed multiplier (``0.1`` – ``6.0``).  Higher values
-            shorten the animation duration.  Defaults to ``1``.
-        axis:
-            Displacement axis — ``"x"``, ``"y"``, or ``"both"``
-            (default).
-        seed:
-            Integer seed for the pseudo-random offset generator.
-        animated:
-            When ``True`` the effect plays automatically.
-        loop:
-            When ``True`` the displacement repeats with reverse.
-        play:
-            Controls whether the effect or animation should currently be playing.
-        autoplay:
-            When ``True`` the animation starts on mount.
-        duration_ms:
-            Base animation duration in milliseconds.  Defaults
-            to ``350``; actual duration is divided by *speed*.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    shake = bui.NoiseDisplacement(
+        bui.Text("Shake"),
+        strength=4,
+        speed=1.5,
+        axis="x",
+        autoplay=True,
+    )
+    ```
     """
 
 

@@ -15,6 +15,8 @@ class SafeArea(Component):
     ``maintain_bottom_view_padding`` to preserve bottom padding when the
     on-screen keyboard is displayed.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -24,21 +26,6 @@ class SafeArea(Component):
         bottom=True,
     )
     ```
-
-    Args:
-        left:
-            When ``True`` applies the safe-area inset on the left edge.
-        top:
-            When ``True`` applies the safe-area inset on the top edge.
-        right:
-            When ``True`` applies the safe-area inset on the right edge.
-        bottom:
-            When ``True`` applies the safe-area inset on the bottom edge.
-        minimum:
-            Minimum inset padding that overrides the OS-reported value.
-        maintain_bottom_view_padding:
-            When ``True`` preserves the bottom view padding when the keyboard
-            is visible.
     """
 
 

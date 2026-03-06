@@ -10,7 +10,8 @@ __all__ = ["FilledButton"]
 
 
 class FilledButton(Button):
-    """Filled emphasis button preset.
+    """
+    Filled emphasis button preset.
     
     ``FilledButton`` forwards all interaction, action dispatch, style, and
     customization behavior from :class:`Button` while forcing
@@ -20,6 +21,8 @@ class FilledButton(Button):
     In addition to typed parameters, runtime keys passed through ``**kwargs``
     are preserved. This includes optional icon/color/transparency props and
     style pipeline fields such as classes, modifiers, motion, and effects.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -31,34 +34,6 @@ class FilledButton(Button):
         transparency=0.04,
     )
     ```
-    
-    Args:
-        label:
-            Button caption text. ``text`` takes precedence when both are set.
-        text:
-            Caption text alias for ``label``.
-        value:
-            Arbitrary payload emitted with click events.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        action:
-            Declarative action descriptor fired on press.
-        action_id:
-            Registered action ID to dispatch on press.
-        action_event:
-            Event name forwarded to the action dispatcher.
-        action_payload:
-            Extra payload mapping for action dispatch.
-        actions:
-            Action descriptor list executed on press.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Extra runtime props forwarded to the renderer.
     """
 
 

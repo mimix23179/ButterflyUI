@@ -6,12 +6,15 @@ from .._shared import Component, merge_props
 __all__ = ["PreviewSurface"]
 
 class PreviewSurface(Component):
-    """Overlay surface for displaying a live or static content preview.
+    """
+    Overlay surface for displaying a live or static content preview.
     
     The runtime renders a floating preview pane. ``source`` provides a
     URL or asset path for an image or media preview. ``loading`` shows a
     loading indicator while content fetches. ``title`` and ``subtitle``
     label the preview panel header.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -23,18 +26,6 @@ class PreviewSurface(Component):
         events=["close"],
     )
     ```
-    
-    Args:
-        source:
-            URL or asset path of the content to preview.
-        loading:
-            When ``True`` a loading spinner is shown in place of the content.
-        title:
-            Heading text displayed in the preview panel header.
-        subtitle:
-            Secondary text shown below the title.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

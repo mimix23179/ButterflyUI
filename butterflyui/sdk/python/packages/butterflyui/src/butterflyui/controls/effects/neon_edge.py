@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["NeonEdge"]
 
 class NeonEdge(Component):
-    """Neon-glow border effect rendered as a ``BoxDecoration`` with a
+    """
+    Neon-glow border effect rendered as a ``BoxDecoration`` with a
     coloured ``Border.all`` stroke and a matching ``BoxShadow``.
     
     The Flutter runtime wraps the child in either a plain ``Container``
@@ -14,41 +15,20 @@ class NeonEdge(Component):
     ``BoxDecoration`` combines a coloured border, a glow shadow, and a
     corner radius.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        neon = bui.NeonEdge(
-            bui.Text("Glow"),
-            color="#22d3ee",
-            width=2,
-            glow=12,
-            radius=12,
-            animated=True,
-        )
-    
-    Args:
-        color:
-            Border and glow colour.  Defaults to ``#22D3EE``.
-        width:
-            Border stroke width in logical pixels.  Defaults to
-            ``1.6``.
-        glow:
-            Blur radius of the outer glow ``BoxShadow``.  Defaults
-            to ``10``.
-        spread:
-            Spread radius of the glow shadow.  Defaults to ``0``.
-        radius:
-            Corner radius of the ``BoxDecoration``.  Defaults to
-            ``12``.
-        animated:
-            When ``True`` the container uses
-            ``AnimatedContainer`` for smooth property transitions.
-        duration_ms:
-            Animation duration in milliseconds when
-            *animated* is ``True``.  Defaults to ``300``.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    neon = bui.NeonEdge(
+        bui.Text("Glow"),
+        color="#22d3ee",
+        width=2,
+        glow=12,
+        radius=12,
+        animated=True,
+    )
+    ```
     """
 
 

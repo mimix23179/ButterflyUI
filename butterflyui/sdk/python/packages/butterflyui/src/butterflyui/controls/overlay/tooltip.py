@@ -14,6 +14,8 @@ class Tooltip(Component):
     tooltip below the child when ``True`` (default) or above when ``False``.
     ``wait_ms`` sets the hover delay before the tooltip appears.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -24,14 +26,6 @@ class Tooltip(Component):
         wait_ms=500,
     )
     ```
-
-    Args:
-        message:
-            Text displayed inside the tooltip bubble.
-        prefer_below:
-            When ``True`` the tooltip prefers to appear below the child.
-        wait_ms:
-            Hover delay in milliseconds before the tooltip is shown.
     """
 
 

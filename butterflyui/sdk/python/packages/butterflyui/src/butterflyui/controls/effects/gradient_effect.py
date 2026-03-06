@@ -11,50 +11,6 @@ __all__ = ["GradientEffect", "Gradient"]
 class GradientEffect(Component):
     """
     Apply a gradient fill or mesh gradient to a child wrapper.
-
-    Args:
-        variant:
-            Gradient variant name such as linear, radial, sweep, or mesh.
-        colors:
-            Gradient color stops in display order.
-        stops:
-            Explicit stop positions aligned with ``colors``.
-        tile_mode:
-            Tile mode forwarded to the runtime gradient builder.
-        begin:
-            Begin alignment or position for linear gradients.
-        end:
-            End alignment or position for linear gradients.
-        center:
-            Center position for radial or sweep gradients.
-        radius:
-            Radius used by radial gradients.
-        focal:
-            Focal point used by focal radial gradients.
-        focal_radius:
-            Radius of the focal point highlight.
-        start_angle:
-            Sweep gradient start angle in radians.
-        end_angle:
-            Sweep gradient end angle in radians.
-        start_degrees:
-            Sweep gradient start angle in degrees.
-        end_degrees:
-            Sweep gradient end angle in degrees.
-        bgcolor:
-            Flat background color blended with the gradient.
-        background:
-            Alias background payload for the wrapper.
-        background_color:
-            Alternate background color alias.
-        opacity:
-            Overall opacity applied to the gradient wrapper.
-        mesh:
-            Mesh gradient definition payload.
-        mesh_points:
-            Mesh control points used by the runtime.
-        points:
-            Alternate mesh point payload alias.
     """
 
 

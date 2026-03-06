@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["MenuBar"]
 
 class MenuBar(Component):
-    """Application-level horizontal menu bar with dropdown menu groups.
+    """
+    Application-level horizontal menu bar with dropdown menu groups.
     
     ``MenuBar`` accepts ``menus`` or ``items`` payloads. Each top-level menu
     can include nested actions, separators, shortcuts, icons, and custom
@@ -15,6 +16,8 @@ class MenuBar(Component):
     
     The control also supports shared layout/placement hints through ``props``
     (alignment, margin, size constraints, radius, clip behavior).
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -40,26 +43,6 @@ class MenuBar(Component):
         events=["open", "select", "change"],
     )
     ```
-    
-    Args:
-        menus:
-            List of top-level menu spec mappings.
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        dense:
-            Reduces bar height and menu item padding.
-        height:
-            Explicit bar height in logical pixels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
-        **kwargs:
-            Additional runtime props passed through to Flutter.
     """
 
 

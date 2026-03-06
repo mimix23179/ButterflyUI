@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Timeline"]
 
 class Timeline(Component):
-    """Sequenced animation timeline that orchestrates child widgets
+    """
+    Sequenced animation timeline that orchestrates child widgets
     along configurable tracks.
     
     *Timeline* is a container-level orchestrator: it holds one or more
@@ -14,41 +15,20 @@ class Timeline(Component):
     per-child animation keyframes, delays, and ordering.  Playback
     can be auto-started on mount or toggled via ``set_play()``.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        tl = bui.Timeline(
-            bui.Text("Step 1"),
-            bui.Text("Step 2"),
-            duration_ms=1000,
-            delay_ms=200,
-            direction="vertical",
-            autoplay=True,
-        )
-    
-    Args:
-        tracks:
-            List of track definition mappings describing
-            per-child animation configuration.
-        direction:
-            Layout direction — ``"vertical"`` or
-            ``"horizontal"``.
-        spacing:
-            Gap between children in logical pixels.
-        autoplay:
-            When ``True`` the timeline starts on mount.
-        play:
-            Explicit play toggle.  ``True`` starts, ``False``
-            pauses.
-        duration_ms:
-            Total timeline duration in milliseconds.
-        delay_ms:
-            Initial delay before the timeline begins playing.
-        repeat:
-            When ``True`` the timeline loops after completion.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    tl = bui.Timeline(
+        bui.Text("Step 1"),
+        bui.Text("Step 2"),
+        duration_ms=1000,
+        delay_ms=200,
+        direction="vertical",
+        autoplay=True,
+    )
+    ```
     """
 
 

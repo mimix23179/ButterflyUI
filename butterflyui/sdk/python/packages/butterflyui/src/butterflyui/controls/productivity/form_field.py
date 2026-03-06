@@ -15,6 +15,8 @@ class FormField(Component):
     a secondary hint. ``required`` appends a required indicator to the label.
     ``helper_text`` shows a hint below the input. ``error_text`` displays a
     validation error message.
+    
+    Example:
 
     ```python
     import butterflyui as bui
@@ -26,18 +28,6 @@ class FormField(Component):
         helper_text="As shown on your ID",
     )
     ```
-
-    Args:
-        label:
-            Field label text shown above or beside the input.
-        description:
-            Secondary hint text displayed below the label.
-        required:
-            When ``True`` a required indicator is added to the label.
-        helper_text:
-            Hint text shown below the input when no error is present.
-        error_text:
-            Validation error message shown below the input.
     """
 
 

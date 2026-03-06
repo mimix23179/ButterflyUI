@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUISwitch extends StatefulWidget {
@@ -14,6 +16,10 @@ class ButterflyUISwitch extends StatefulWidget {
     required this.offLabel,
     required this.onLabel,
     required this.segments,
+    this.autofocus = false,
+    this.events,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
     required this.sendEvent,
   });
 
@@ -26,6 +32,10 @@ class ButterflyUISwitch extends StatefulWidget {
   final String? offLabel;
   final String? onLabel;
   final List<String> segments;
+  final bool autofocus;
+  final Object? events;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
 
   @override
@@ -33,20 +43,77 @@ class ButterflyUISwitch extends StatefulWidget {
 }
 
 class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
+  late final FocusNode _focusNode = FocusNode(
+    debugLabel: 'butterflyui:switch:${widget.controlId}',
+  );
   late bool _value;
 
   @override
   void initState() {
     super.initState();
     _value = widget.value;
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUISwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
     if (widget.value != oldWidget.value) {
       _value = widget.value;
     }
+  }
+
+  @override
+  void dispose() {
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    return handleFormFieldInvoke(
+      context: context,
+      focusNode: _focusNode,
+      method: method,
+      args: args,
+      onUnhandled: (name, payload) async {
+        switch (name) {
+          case 'set_value':
+            final next = coerceShellBoolOrNull(payload['value']) ?? _value;
+            setState(() {
+              _value = next;
+            });
+            return <String, Object?>{'value': _value};
+          case 'toggle':
+            setState(() {
+              _value = !_value;
+            });
+            return <String, Object?>{'value': _value};
+          case 'get_value':
+          case 'get_state':
+            return <String, Object?>{'value': _value};
+          default:
+            throw UnsupportedError('Unknown switch method: $name');
+        }
+      },
+    );
   }
 
   void _handleChanged(bool next) {
@@ -54,9 +121,13 @@ class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
       _value = next;
     });
     final payload = <String, Object?>{'value': next};
-    widget.sendEvent(widget.controlId, 'change', payload);
-    widget.sendEvent(widget.controlId, 'input', payload);
-    widget.sendEvent(widget.controlId, 'toggle', payload);
+    emitFormFieldValueEvents(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.events,
+      payload: payload,
+      sendEvent: widget.sendEvent,
+      emitToggle: true,
+    );
   }
 
   Widget _buildSegmented() {
@@ -99,17 +170,32 @@ class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
             onChanged: widget.enabled ? _handleChanged : null,
           );
 
-    if (label == null || label.trim().isEmpty) return control;
-    if (widget.inline) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [control, const SizedBox(width: 8), Text(label)],
-      );
-    }
-    return SwitchListTile(
-      value: _value,
-      title: Text(label),
-      onChanged: widget.enabled ? _handleChanged : null,
+    final child = (label == null || label.trim().isEmpty)
+        ? control
+        : (widget.inline
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [control, const SizedBox(width: 8), Text(label)],
+                )
+              : SwitchListTile(
+                  value: _value,
+                  title: Text(label),
+                  onChanged: widget.enabled ? _handleChanged : null,
+                ));
+
+    return wrapFocusableFormField(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      onFocusChange: (value) {
+        emitSubscribedEvent(
+          controlId: widget.controlId,
+          subscribedEventsSource: widget.events,
+          name: value ? 'focus' : 'blur',
+          payload: <String, Object?>{'focused': value},
+          sendEvent: widget.sendEvent,
+        );
+      },
+      child: child,
     );
   }
 }

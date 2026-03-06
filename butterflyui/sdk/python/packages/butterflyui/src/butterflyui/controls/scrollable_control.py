@@ -8,12 +8,6 @@ __all__ = ["ScrollableControl"]
 class ScrollableControl(LayoutControl):
     """
     Shared scrollable behavior for controls with a viewport.
-
-    Args:
-        scrollable:
-            Whether the runtime should attach scrolling behavior.
-        initial_offset:
-            Initial scroll position applied when the viewport is first built.
     """
 
     scrollable: bool | None = None

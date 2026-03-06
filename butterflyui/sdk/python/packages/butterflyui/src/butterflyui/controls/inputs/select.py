@@ -14,6 +14,8 @@ class Select(Component):
     ``value`` or ``index``.  Selecting a different option emits a
     ``change`` event carrying the new ``value`` and ``index``.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -23,20 +25,6 @@ class Select(Component):
         label="Size",
     )
     ```
-
-    Args:
-        options:
-            List of option items.  Each entry may be a plain string
-            or a mapping with ``"label"`` and optional ``"value"``
-            keys.
-        index:
-            Zero-based index of the initially selected option.
-        value:
-            Value of the initially selected option.
-        label:
-            Floating label text above the drop-down field.
-        hint:
-            Hint text shown when no option is selected.
     """
 
 

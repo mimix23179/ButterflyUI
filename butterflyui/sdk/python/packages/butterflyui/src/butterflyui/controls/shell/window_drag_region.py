@@ -17,6 +17,8 @@ class WindowDragRegion(Component):
     ``native_maximize_action`` uses the OS-level maximize-on-double-click
     behaviour.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -26,19 +28,6 @@ class WindowDragRegion(Component):
         maximize_on_double_tap=True,
     )
     ```
-
-    Args:
-        draggable:
-            When ``True`` the region participates in native window dragging.
-        maximize_on_double_tap:
-            When ``True`` double-clicking the region maximises the window.
-        emit_move:
-            When ``True`` window-position events are emitted to Python.
-        native_drag:
-            When ``True`` the platform's native drag API is used.
-        native_maximize_action:
-            When ``True`` the OS-level maximize-on-double-click behaviour
-            is used.
     """
 
 

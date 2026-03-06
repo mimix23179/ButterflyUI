@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["VirtualList"]
 
 class VirtualList(Component):
-    """Virtualized scrollable list for large datasets with fixed item
+    """
+    Virtualized scrollable list for large datasets with fixed item
     extent, separator support, and prefetch-near-end loading.
     
     When ``item_extent`` is set every row is given the same fixed height,
@@ -30,22 +31,6 @@ class VirtualList(Component):
         prefetch_threshold=20,
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        item_extent:
-            Fixed row height in logical pixels.  Enables constant-time scroll-offset calculations for large lists.
-        cache_extent:
-            Cache extent in logical pixels — controls how far off-screen the viewport pre-builds items.
-        separator:
-            If ``True``, a ``Divider`` is inserted between each row.
-        has_more:
-            If ``True``, signals that more data can be requested when nearing the end.
-        loading:
-            If ``True``, a loading indicator is displayed at the tail of the list.
-        prefetch_threshold:
-            Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
 

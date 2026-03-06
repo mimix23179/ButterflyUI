@@ -14,6 +14,8 @@ class Form(Component):
     ``description`` add a header above the fields. ``spacing`` sets the
     gap between child field widgets. Fields are passed as children.
 
+    Example:
+
     ```python
     import butterflyui as bui
 
@@ -23,14 +25,6 @@ class Form(Component):
         spacing=16,
     )
     ```
-
-    Args:
-        title:
-            Optional heading displayed at the top of the form.
-        description:
-            Optional description text displayed below the title.
-        spacing:
-            Vertical gap in logical pixels between form field children.
     """
 
 

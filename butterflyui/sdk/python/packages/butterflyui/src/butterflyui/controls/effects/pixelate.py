@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Pixelate"]
 
 class Pixelate(Component):
-    """Pixelation effect achieved by cascading two ``Transform.scale``
+    """
+    Pixelation effect achieved by cascading two ``Transform.scale``
     widgets with ``FilterQuality.none``.
     
     The Flutter runtime first scales the child down by a factor
@@ -15,24 +16,16 @@ class Pixelate(Component):
     filtering disabled.  The result is a retro mosaic / pixel-art
     look.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        px = bui.Pixelate(
-            bui.Image(src="photo.png"),
-            amount=0.5,
-        )
-    
-    Args:
-        amount:
-            Pixelation intensity (``0.0`` no effect – ``1.0``
-            maximum).  Defaults to ``0.35``.  Internally mapped to a
-            downscale factor ``1 − amount × 0.9``.
-        enabled:
-            When ``False`` the child is rendered unmodified.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    px = bui.Pixelate(
+        bui.Image(src="photo.png"),
+        amount=0.5,
+    )
+    ```
     """
 
 

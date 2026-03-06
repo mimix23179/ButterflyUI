@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["AnimatedGradient"]
 
 class AnimatedGradient(Component):
-    """Paints an animated gradient background that continuously transitions its
+    """
+    Paints an animated gradient background that continuously transitions its
     colors over time, optionally wrapping a child control.
     
     The runtime supports linear, radial, and sweep gradient variants. The
@@ -25,52 +26,6 @@ class AnimatedGradient(Component):
         ping_pong=True,
     )
     ```
-    
-    Args:
-        variant:
-            Gradient variant. One of ``"linear"`` (default), ``"radial"``, or ``"sweep"``/``"conic"``.
-        kind:
-            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
-        gradient:
-            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
-        type:
-            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
-        colors:
-            List of colour values (hex strings or colour objects). At least two colours are required; the runtime falls back to purple-cyan if fewer are given.
-        stops:
-            Gradient stop positions, each in ``[0.0, 1.0]``. Must match the length of `colors`; ignored if the count differs.
-        duration_ms:
-            Total animation duration in milliseconds. Defaults to ``1800``. Clamped to ``[1, 600000]``.
-        duration:
-            Backward-compatible alias for ``duration_ms``. When both fields are provided, ``duration_ms`` takes precedence and this alias is kept only for compatibility.
-        radius:
-            Corner radius applied to the decorated box that contains the gradient.
-        begin:
-            Start alignment of a linear gradient (e.g. ``"top_left"`` or ``[x, y]``). Defaults to ``Alignment.topLeft``.
-        end:
-            End alignment of a linear gradient. Defaults to ``Alignment.bottomRight``.
-        angle:
-            Initial rotation angle in degrees. The animation rotates a full 360° over one cycle starting from this value.
-        start_angle:
-            Start angle for sweep gradients, in degrees. Defaults to ``0``. Also used as the initial rotation angle for linear gradients.
-        end_angle:
-            End angle for sweep gradients, in degrees. Defaults to ``360``.
-        opacity:
-            Overall opacity of the gradient surface, ``0.0``–``1.0``.
-        loop:
-            Controls whether playback restarts automatically after the media reaches the end of the stream.
-        autoplay:
-            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
-        play:
-            Backward-compatible alias for ``playing``. When both fields are provided, ``playing`` takes precedence and this alias is kept only for compatibility.
-        playing:
-            Controls whether the animation is running. Set ``False`` to pause.
-        ping_pong:
-            If ``True``, the animation reverses direction at each cycle end instead of snapping back.
-        shift:
-            If ``True``, the colour list is cyclically rotated as the animation progresses, producing a "rolling" colour effect.
-        throttle_ms:
-            Minimum interval in milliseconds between runtime change events.
     """
 
 

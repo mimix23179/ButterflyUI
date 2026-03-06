@@ -10,19 +10,6 @@ __all__ = ["Control", "Component"]
 class Control(BaseControl):
     """
     Common props shared by most renderable ButterflyUI controls.
-
-    Args:
-        key:
-            Stable application-defined identifier used to distinguish this
-            control across updates.
-        visible:
-            Whether the control should be rendered by the Flutter client.
-        enabled:
-            Whether the control should accept interaction and appear enabled.
-        tooltip:
-            Hover or long-press help text shown by the runtime.
-        semantics:
-            Accessibility metadata forwarded to the client.
     """
 
     key: str | None = None

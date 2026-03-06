@@ -10,42 +10,6 @@ __all__ = ["LayoutControl"]
 class LayoutControl(Control):
     """
     Shared layout behavior for visual ButterflyUI controls.
-
-    Args:
-        left:
-            Absolute left inset used by positioned layouts.
-        top:
-            Absolute top inset used by positioned layouts.
-        right:
-            Absolute right inset used by positioned layouts.
-        bottom:
-            Absolute bottom inset used by positioned layouts.
-        width:
-            Fixed width in logical pixels or supported dimension token.
-        height:
-            Fixed height in logical pixels or supported dimension token.
-        min_width:
-            Minimum allowed width constraint.
-        min_height:
-            Minimum allowed height constraint.
-        max_width:
-            Maximum allowed width constraint.
-        max_height:
-            Maximum allowed height constraint.
-        aspect_ratio:
-            Preferred width-to-height ratio for the control.
-        padding:
-            Inner spacing between the control boundary and its content.
-        margin:
-            Outer spacing around the control.
-        alignment:
-            Alignment of child content within the control's box.
-        animation:
-            Implicit animation configuration used for layout or style changes.
-        flex:
-            Flex factor used by flex-based parent layouts.
-        expand:
-            Whether the control should expand to fill available space.
     """
 
     left: float | None = None

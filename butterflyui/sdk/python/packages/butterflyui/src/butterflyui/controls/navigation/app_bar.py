@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["AppBar"]
 
 class AppBar(Component):
-    """Application top bar with title block, optional search, and trailing actions.
+    """
+    Application top bar with title block, optional search, and trailing actions.
     
     ``AppBar`` and ``TopBar`` share the same runtime renderer. ``leading``
     places a widget at the start edge, ``actions`` supplies trailing widgets,
@@ -15,6 +16,8 @@ class AppBar(Component):
     The control accepts shared frame/layout props through ``props`` (alignment,
     margin, sizing constraints, radius, clip behavior) for consistent placement
     in custom shells.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -26,20 +29,6 @@ class AppBar(Component):
         events=["action"],
     )
     ```
-    
-    Args:
-        title:
-            Primary title text displayed in the app bar.
-        subtitle:
-            Optional secondary text shown below the title.
-        leading:
-            Widget placed at the leading (start) edge of the bar.
-        actions:
-            List of trailing action widget specs shown at the end of the bar.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 

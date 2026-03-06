@@ -9,7 +9,8 @@ __all__ = ["ProgressRing"]
 
 
 class ProgressRing(Component):
-    """Circular progress indicator for determinate or indeterminate tasks.
+    """
+    Circular progress indicator for determinate or indeterminate tasks.
     
     ``ProgressRing`` sends the canonical ``progress_ring`` control type and pins
     ``variant="circular"`` / ``circular=True`` so the Flutter side always
@@ -21,22 +22,6 @@ class ProgressRing(Component):
     
     ring = bui.ProgressRing(value=0.72, label="Syncing", stroke_width=6)
     ```
-    
-    Args:
-        value:
-            Progress value for determinate mode.
-        indeterminate:
-            If ``True``, renders an animated indeterminate ring.
-        label:
-            Optional text label shown with the indicator.
-        stroke_width:
-            Thickness of the rendered stroke in logical pixels.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

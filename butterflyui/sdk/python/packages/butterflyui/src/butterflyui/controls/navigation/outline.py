@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Outline"]
 
 class Outline(Component):
-    """Expandable tree outline panel for hierarchical navigation.
+    """
+    Expandable tree outline panel for hierarchical navigation.
     
     The runtime renders a collapsible tree of nodes. ``nodes`` supplies the
     hierarchy, where each node may have a ``children`` list. ``expanded`` is
     a list of node IDs that are currently open. ``selected_id`` highlights
     the active node. ``dense`` reduces row height; ``show_icons`` controls
     icon visibility.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -27,21 +30,6 @@ class Outline(Component):
         events=["select", "expand"],
     )
     ```
-    
-    Args:
-        nodes:
-            List of tree node spec mappings. Nodes may include ``id``,
-            ``label``, ``icon``, and ``children``.
-        expanded:
-            List of node IDs whose subtrees are currently expanded.
-        selected_id:
-            The ``id`` of the currently selected node.
-        dense:
-            Reduces row height and indent padding.
-        show_icons:
-            When ``True`` icon decorations are shown beside node labels.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

@@ -10,10 +10,6 @@ __all__ = ["EffectControl"]
 class EffectControl(ScopeControl):
     """
     Shared child-wrapping behavior for effect and decorator controls.
-
-    Args:
-        child:
-            Primary child control wrapped by the effect.
     """
 
     child: Any = None

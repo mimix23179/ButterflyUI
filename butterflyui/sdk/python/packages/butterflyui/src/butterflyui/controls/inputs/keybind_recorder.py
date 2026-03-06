@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["KeybindRecorder"]
 
 class KeybindRecorder(Component):
-    """Keyboard shortcut recorder field.
+    """
+    Keyboard shortcut recorder field.
     
     Renders a focusable ``TextField``-style widget that captures raw
     key events while focused and converts them to a human-readable
@@ -17,6 +18,8 @@ class KeybindRecorder(Component):
     
     Use :meth:`set_value` to inject a shortcut string from Python and
     :meth:`get_value` to read the current binding.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -26,19 +29,6 @@ class KeybindRecorder(Component):
         show_clear=True,
     )
     ```
-    
-    Args:
-        value:
-            Currently recorded keyboard shortcut string.
-        placeholder:
-            Hint text shown when no shortcut has been recorded.
-        enabled:
-            If ``False``, the recorder is non-interactive.
-        show_clear:
-            If ``True``, a trailing ``×`` button clears the current
-            binding.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

@@ -9,11 +9,14 @@ __all__ = ["ToastHost"]
 
 
 class ToastHost(Component):
-    """Host container for toast and notification stacks.
+    """
+    Host container for toast and notification stacks.
     
     ``ToastHost`` is the canonical replacement for legacy
     ``notification_host``. It can display compact toasts and richer
     notification cards through a shared queue model.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -24,32 +27,6 @@ class ToastHost(Component):
         dismissible=True,
     )
     ```
-    
-    Args:
-        items:
-            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-        notifications:
-            Alias for ``items`` from legacy notification host payloads.
-        toasts:
-            Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
-        position:
-            Screen corner where the toast stack is anchored. Values:
-            ``"top_left"``, ``"top_right"``, ``"bottom_left"``,
-            ``"bottom_right"``.
-        max_items:
-            Maximum number of toasts shown simultaneously.
-        latest_on_top:
-            When ``True`` the newest toast appears at the top of the stack.
-        dismissible:
-            When ``True`` each toast shows a close button.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
-        style:
-            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
-        strict:
-            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

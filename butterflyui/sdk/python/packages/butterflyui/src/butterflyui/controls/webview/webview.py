@@ -30,6 +30,8 @@ class WebView(Component):
     
     Programmatic methods (``reload``, ``go_back``, ``load_url``,
     ``run_javascript``, *etc.*) are invoked via a session handle.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -41,53 +43,6 @@ class WebView(Component):
         init_timeout_ms=10000,
     )
     ```
-    
-    Args:
-        url:
-            Initial URL to load in the webview.
-        html:
-            Inline HTML string to render, used instead of ``url``.
-        base_url:
-            Origin URL used when loading ``html`` from a string.
-        engine:
-            Webview rendering engine. Normalised to ``"windows"`` on desktop.
-        webview_engine:
-            Backward-compatible alias for ``engine``. When both fields are provided, ``engine`` takes precedence and this alias is kept only for compatibility.
-        fallback_engine:
-            Fallback engine identifier if the primary engine fails.
-        prevent_links:
-            List of URL patterns whose navigation is intercepted and blocked.
-        request_headers:
-            Custom HTTP headers sent with every request.
-        user_agent:
-            Custom User-Agent string override.
-        javascript_enabled:
-            When ``True`` (default) JavaScript execution is enabled.
-        dom_storage_enabled:
-            When ``True`` DOM/localStorage storage is enabled.
-        third_party_cookies_enabled:
-            When ``True`` third-party cookies are allowed.
-        cache_enabled:
-            When ``True`` the browser cache is active.
-        clear_cache_on_start:
-            When ``True`` the cache is cleared when the view initialises.
-        incognito:
-            When ``True`` no browsing data is persisted between sessions.
-        media_playback_requires_user_gesture:
-            When ``True`` media autoplay requires a user interaction first.
-        allows_inline_media_playback:
-            When ``True`` media can play inline without entering fullscreen.
-        allow_file_access:
-            When ``True`` ``file://`` URLs can be loaded.
-        allow_universal_access_from_file_urls:
-            When ``True`` file-origin pages can access cross-origin content.
-        allow_popups:
-            When ``True`` ``window.open()`` calls are permitted.
-        open_external_links:
-            When ``True`` external links open in the system browser.
-        init_timeout_ms:
-            Maximum milliseconds to wait for the WebView engine to
-            initialise. Defaults to ``15000``.
     """
 
 

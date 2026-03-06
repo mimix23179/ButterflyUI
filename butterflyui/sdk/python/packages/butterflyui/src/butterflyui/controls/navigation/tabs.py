@@ -6,13 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Tabs"]
 
 class Tabs(Component):
-    """Horizontal tab bar for switching between views.
+    """
+    Horizontal tab bar for switching between views.
     
     The runtime renders a Flutter tab bar. ``labels`` supplies the tab
     label strings. ``index`` sets the active tab (0-based). ``scrollable``
     allows the tab bar to scroll horizontally when there are more tabs than
     fit in the available width. Positional children can inject custom tab
     content.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -24,14 +27,6 @@ class Tabs(Component):
         index=0,
     )
     ```
-    
-    Args:
-        labels:
-            Ordered list of label strings rendered by the control.
-        index:
-            Zero-based index of the currently selected tab.
-        scrollable:
-            When ``True`` the tab bar scrolls horizontally on overflow.
     """
 
 

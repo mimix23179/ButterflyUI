@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["ContainerStyle"]
 
 class ContainerStyle(Component):
-    """Surface decorator that applies background, border, shadow, and
+    """
+    Surface decorator that applies background, border, shadow, and
     corner-radius styling to a child control.
     
     The runtime wraps the child in a ``Container`` with a ``BoxDecoration``
@@ -26,54 +27,6 @@ class ContainerStyle(Component):
         content_padding=16,
     )
     ```
-    
-    Args:
-        variant:
-            Named style variant hint forwarded to the runtime.
-        bgcolor:
-            Background colour of the container.
-        color:
-            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
-        border_color:
-            Colour of the container border. A border is only drawn when this is set.
-        border_width:
-            Width of the container border in logical pixels. Defaults to ``1``.
-        radius:
-            Corner radius for the ``BorderRadius``. Defaults to ``8``.
-        shape:
-            Container shape hint (e.g. ``"circle"``, ``"rectangle"``).
-        outline_width:
-            Width of an additional outline stroke outside the border.
-        outline_color:
-            Outline color rendered around the control independently of its main border.
-        stroke_width:
-            Backward-compatible alias for ``outline_width``. When both fields are provided, ``outline_width`` takes precedence and this alias is kept only for compatibility.
-        stroke_color:
-            Backward-compatible alias for ``outline_color``. When both fields are provided, ``outline_color`` takes precedence and this alias is kept only for compatibility.
-        shadow_color:
-            Color tint applied to the rendered shadow effect.
-        shadow_blur:
-            Blur radius of the ``BoxShadow``.
-        shadow_dx:
-            Horizontal offset of the ``BoxShadow``.
-        shadow_dy:
-            Vertical offset of the ``BoxShadow``.
-        glow_color:
-            Colour of a secondary glow shadow.
-        glow_blur:
-            Blur radius used when rendering the glow effect around the control.
-        background:
-            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
-        bg_color:
-            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
-        content_padding:
-            Inner padding of the container. Accepts a number, list, or dict. Defaults to ``8``.
-        inner_padding:
-            Backward-compatible alias for ``content_padding``. When both fields are provided, ``content_padding`` takes precedence and this alias is kept only for compatibility.
-        icon_padding:
-            Padding around any icon content inside the container.
-        animation:
-            Animation configuration dict (e.g. ``{"duration_ms": 200}``). Enables smooth transitions when style properties change.
     """
 
 

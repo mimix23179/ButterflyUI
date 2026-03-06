@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUISlider extends StatefulWidget {
@@ -15,6 +17,8 @@ class ButterflyUISlider extends StatefulWidget {
     required this.label,
     required this.labels,
     required this.enabled,
+    this.autofocus = false,
+    this.events,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
     required this.sendEvent,
@@ -30,6 +34,8 @@ class ButterflyUISlider extends StatefulWidget {
   final String? label;
   final bool labels;
   final bool enabled;
+  final bool autofocus;
+  final Object? events;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
   final ButterflyUISendRuntimeEvent sendEvent;
@@ -39,6 +45,9 @@ class ButterflyUISlider extends StatefulWidget {
 }
 
 class _ButterflyUISliderState extends State<ButterflyUISlider> {
+  late final FocusNode _focusNode = FocusNode(
+    debugLabel: 'butterflyui:slider:${widget.controlId}',
+  );
   late double _value;
   late double _start;
   late double _end;
@@ -52,14 +61,23 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
   void initState() {
     super.initState();
     _syncFromWidget();
-    if (widget.controlId.isNotEmpty) {
-      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
-    }
+    registerInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      handler: _handleInvoke,
+    );
   }
 
   @override
   void didUpdateWidget(covariant ButterflyUISlider oldWidget) {
     super.didUpdateWidget(oldWidget);
+    syncInvokeHandlerRegistration(
+      previousControlId: oldWidget.controlId,
+      currentControlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      handler: _handleInvoke,
+    );
     if (widget.value != oldWidget.value ||
         widget.start != oldWidget.start ||
         widget.end != oldWidget.end ||
@@ -72,9 +90,11 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
 
   @override
   void dispose() {
-    if (widget.controlId.isNotEmpty) {
-      widget.unregisterInvokeHandler(widget.controlId);
-    }
+    unregisterInvokeHandlerIfNeeded(
+      controlId: widget.controlId,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+    );
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -115,53 +135,56 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
     String method,
     Map<String, Object?> args,
   ) async {
-    switch (method) {
-      case 'set_value':
-        final nextValue = _coerceDouble(args['value']);
-        final nextStart = _coerceDouble(args['start']);
-        final nextEnd = _coerceDouble(args['end']);
-        setState(() {
-          if (_isRange || nextStart != null || nextEnd != null) {
-            final s = _snap(_clamp(nextStart ?? _start));
-            final e = _snap(_clamp(nextEnd ?? _end));
-            _start = s <= e ? s : e;
-            _end = s <= e ? e : s;
-          } else if (nextValue != null) {
-            _value = _snap(_clamp(nextValue));
-          }
-        });
-        return _statePayload();
-      case 'increment':
-        final amount =
-            _coerceDouble(args['amount']) ??
-            (_stepSize() > 0 ? _stepSize() : 1.0);
-        setState(() {
-          if (_isRange) {
-            _end = _snap(_clamp(_end + amount));
-            if (_end < _start) _start = _end;
-          } else {
-            _value = _snap(_clamp(_value + amount));
-          }
-        });
-        return _statePayload();
-      case 'decrement':
-        final amount =
-            _coerceDouble(args['amount']) ??
-            (_stepSize() > 0 ? _stepSize() : 1.0);
-        setState(() {
-          if (_isRange) {
-            _start = _snap(_clamp(_start - amount));
-            if (_start > _end) _end = _start;
-          } else {
-            _value = _snap(_clamp(_value - amount));
-          }
-        });
-        return _statePayload();
-      case 'get_value':
-        return _statePayload();
-      default:
-        throw UnsupportedError('Unknown slider method: $method');
-    }
+    return handleFormFieldInvoke(
+      context: context,
+      focusNode: _focusNode,
+      method: method,
+      args: args,
+      onUnhandled: (name, payload) async {
+        switch (name) {
+          case 'set_value':
+            final nextValue = _coerceDouble(payload['value']);
+            final nextStart = _coerceDouble(payload['start']);
+            final nextEnd = _coerceDouble(payload['end']);
+            setState(() {
+              if (_isRange || nextStart != null || nextEnd != null) {
+                final s = _snap(_clamp(nextStart ?? _start));
+                final e = _snap(_clamp(nextEnd ?? _end));
+                _start = s <= e ? s : e;
+                _end = s <= e ? e : s;
+              } else if (nextValue != null) {
+                _value = _snap(_clamp(nextValue));
+              }
+            });
+            return _statePayload();
+          case 'increment':
+          case 'decrement':
+            final amount =
+                _coerceDouble(payload['amount']) ??
+                (_stepSize() > 0 ? _stepSize() : 1.0);
+            final signedAmount = name == 'increment' ? amount : -amount;
+            setState(() {
+              if (_isRange) {
+                if (signedAmount >= 0) {
+                  _end = _snap(_clamp(_end + signedAmount));
+                  if (_end < _start) _start = _end;
+                } else {
+                  _start = _snap(_clamp(_start + signedAmount));
+                  if (_start > _end) _end = _start;
+                }
+              } else {
+                _value = _snap(_clamp(_value + signedAmount));
+              }
+            });
+            return _statePayload();
+          case 'get_value':
+          case 'get_state':
+            return _statePayload();
+          default:
+            throw UnsupportedError('Unknown slider method: $name');
+        }
+      },
+    );
   }
 
   Map<String, Object?> _statePayload() {
@@ -181,79 +204,109 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
   }
 
   void _emitChange(Map<String, Object?> payload, {required String stage}) {
-    widget.sendEvent(widget.controlId, stage, payload);
+    emitSubscribedEvent(
+      controlId: widget.controlId,
+      subscribedEventsSource: widget.events,
+      name: stage,
+      payload: payload,
+      sendEvent: widget.sendEvent,
+    );
     if (stage == 'change') {
-      widget.sendEvent(widget.controlId, 'input', payload);
+      emitSubscribedEvent(
+        controlId: widget.controlId,
+        subscribedEventsSource: widget.events,
+        name: 'input',
+        payload: payload,
+        sendEvent: widget.sendEvent,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isRange) {
-      final values = RangeValues(_start, _end);
-      return RangeSlider(
-        values: values,
-        min: _rangeMin,
-        max: _rangeMax,
-        divisions: widget.divisions,
-        labels: widget.labels
-            ? RangeLabels(_start.toStringAsFixed(2), _end.toStringAsFixed(2))
-            : null,
-        onChanged: widget.enabled
-            ? (next) {
-                setState(() {
-                  _start = _snap(_clamp(next.start));
-                  _end = _snap(_clamp(next.end));
-                });
-                _emitChange(_statePayload(), stage: 'change');
-              }
-            : null,
-        onChangeStart: widget.enabled
-            ? (next) => _emitChange(<String, Object?>{
-                'start': next.start,
-                'end': next.end,
-              }, stage: 'change_start')
-            : null,
-        onChangeEnd: widget.enabled
-            ? (next) => _emitChange(<String, Object?>{
-                'start': next.start,
-                'end': next.end,
-              }, stage: 'change_end')
-            : null,
-      );
-    }
+    final child = _isRange
+        ? RangeSlider(
+            values: RangeValues(_start, _end),
+            min: _rangeMin,
+            max: _rangeMax,
+            divisions: widget.divisions,
+            labels: widget.labels
+                ? RangeLabels(
+                    _start.toStringAsFixed(2),
+                    _end.toStringAsFixed(2),
+                  )
+                : null,
+            onChanged: widget.enabled
+                ? (next) {
+                    setState(() {
+                      _start = _snap(_clamp(next.start));
+                      _end = _snap(_clamp(next.end));
+                    });
+                    _emitChange(_statePayload(), stage: 'change');
+                  }
+                : null,
+            onChangeStart: widget.enabled
+                ? (next) => _emitChange(<String, Object?>{
+                    'start': next.start,
+                    'end': next.end,
+                  }, stage: 'change_start')
+                : null,
+            onChangeEnd: widget.enabled
+                ? (next) => _emitChange(<String, Object?>{
+                    'start': next.start,
+                    'end': next.end,
+                  }, stage: 'change_end')
+                : null,
+          )
+        : Slider(
+            value: _value,
+            min: _rangeMin,
+            max: _rangeMax,
+            divisions: widget.divisions,
+            label: widget.labels
+                ? ((widget.label?.replaceAll(
+                        '{value}',
+                        _value.toStringAsFixed(2),
+                      )) ??
+                      _value.toStringAsFixed(2))
+                : widget.label?.replaceAll(
+                    '{value}',
+                    _value.toStringAsFixed(2),
+                  ),
+            onChanged: widget.enabled
+                ? (next) {
+                    final snapped = _snap(next);
+                    setState(() {
+                      _value = snapped;
+                    });
+                    _emitChange(_statePayload(), stage: 'change');
+                  }
+                : null,
+            onChangeStart: widget.enabled
+                ? (next) => _emitChange(<String, Object?>{
+                    'value': _snap(next),
+                  }, stage: 'change_start')
+                : null,
+            onChangeEnd: widget.enabled
+                ? (next) => _emitChange(<String, Object?>{
+                    'value': _snap(next),
+                  }, stage: 'change_end')
+                : null,
+          );
 
-    final resolvedLabel = widget.label?.replaceAll(
-      '{value}',
-      _value.toStringAsFixed(2),
-    );
-    return Slider(
-      value: _value,
-      min: _rangeMin,
-      max: _rangeMax,
-      divisions: widget.divisions,
-      label: widget.labels
-          ? (resolvedLabel ?? _value.toStringAsFixed(2))
-          : resolvedLabel,
-      onChanged: widget.enabled
-          ? (next) {
-              final snapped = _snap(next);
-              setState(() {
-                _value = snapped;
-              });
-              _emitChange(_statePayload(), stage: 'change');
-            }
-          : null,
-      onChangeStart: widget.enabled
-          ? (next) => _emitChange(<String, Object?>{
-              'value': _snap(next),
-            }, stage: 'change_start')
-          : null,
-      onChangeEnd: widget.enabled
-          ? (next) => _emitChange(<String, Object?>{
-              'value': _snap(next),
-            }, stage: 'change_end')
-          : null,
+    return wrapFocusableFormField(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      onFocusChange: (value) {
+        emitSubscribedEvent(
+          controlId: widget.controlId,
+          subscribedEventsSource: widget.events,
+          name: value ? 'focus' : 'blur',
+          payload: <String, Object?>{'focused': value},
+          sendEvent: widget.sendEvent,
+        );
+      },
+      child: child,
     );
   }
 }

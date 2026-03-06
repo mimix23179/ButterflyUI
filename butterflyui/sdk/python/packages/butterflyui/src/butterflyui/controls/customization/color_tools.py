@@ -15,20 +15,6 @@ class ColorTools(Component):
     Renders ``color_picker`` and ``color_swatch_grid`` together as one
     control so callers can manage value entry and palette selection from a
     single node.
-
-    Args:
-        picker:
-            Configuration forwarded to the embedded picker portion.
-        swatches:
-            Configuration forwarded to the embedded swatch grid portion.
-        presets:
-            Preset colors exposed by the toolbox.
-        show_picker:
-            Whether the picker portion should be visible.
-        show_swatches:
-            Whether the swatch grid portion should be visible.
-        spacing:
-            Spacing between the picker and swatch sections.
     """
 
 

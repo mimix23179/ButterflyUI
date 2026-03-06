@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Avatar"]
 
 class Avatar(Component):
-    """Circular avatar with image, initials, or icon fallback.
+    """
+    Circular avatar with image, initials, or icon fallback.
     
     Renders a ``CircleAvatar`` that resolves its content in priority
     order: a network/asset image from ``src`` or ``image``, then
@@ -20,44 +21,18 @@ class Avatar(Component):
     the image at runtime and ``get_state`` to retrieve the resolved
     display values.
     
-    Example::
+    Example:
     
-        import butterflyui as bui
-    
-        avatar = bui.Avatar(
-            name="Ada Lovelace",
-            status="online",
-            bgcolor="#334155",
-            size=40,
-        )
-    
-    Args:
-        src:
-            Image URL or asset path used as the primary avatar image.
-        image:
-            Alias for ``src`` — the two are interchangeable.
-        name:
-            Full name used to auto-derive initials when ``initials`` is not provided.
-        initials:
-            Explicit one- or two-letter initials shown when no image is available.
-        icon:
-            Fallback Material icon name rendered when neither an image nor initials are present.
-        size:
-            Diameter of the avatar circle in logical pixels.
-        radius:
-            Explicit corner radius (defaults to half of ``size``).
-        color:
-            Foreground colour for initials or icon text.
-        bgcolor:
-            Background fill colour for the circle.
-        status:
-            Presence indicator — ``"online"``, ``"away"``, ``"busy"``, or ``"offline"``.
-        badge:
-            Arbitrary badge content overlaid on the avatar.
-        enabled:
-            Controls whether the user can interact with the control. Disable it to show the control without allowing input or activation.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
+    ```python
+    import butterflyui as bui
+
+    avatar = bui.Avatar(
+        name="Ada Lovelace",
+        status="online",
+        bgcolor="#334155",
+        size=40,
+    )
+    ```
     """
 
 

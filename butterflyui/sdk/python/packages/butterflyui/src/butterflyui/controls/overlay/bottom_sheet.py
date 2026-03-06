@@ -6,7 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["BottomSheet"]
 
 class BottomSheet(Component):
-    """Modal bottom sheet surface with configurable panel alignment and sizing.
+    """
+    Modal bottom sheet surface with configurable panel alignment and sizing.
     
     The runtime renders an overlay sheet that can be opened/closed via
     ``set_open`` and updated via ``set_props``. It emits ``open``, ``close``,
@@ -16,6 +17,8 @@ class BottomSheet(Component):
     accepts extended panel-placement props through ``props``:
     ``alignment``/``align``/``panel_alignment``, ``margin``/``panel_margin``,
     ``width``/``panel_width``, and panel width constraints.
+
+    Example:
     
     ```python
     import butterflyui as bui
@@ -28,22 +31,6 @@ class BottomSheet(Component):
         events=["close"],
     )
     ```
-    
-    Args:
-        open:
-            When ``True`` the bottom sheet is visible.
-        dismissible:
-            When ``True`` tapping the scrim closes the sheet.
-        scrim_color:
-            Color of the background scrim overlay.
-        height:
-            Fixed sheet height in logical pixels.
-        max_height:
-            Maximum sheet height when content determines its size.
-        events:
-            List of runtime event names that should be emitted back to Python for this control instance.
-        props:
-            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
