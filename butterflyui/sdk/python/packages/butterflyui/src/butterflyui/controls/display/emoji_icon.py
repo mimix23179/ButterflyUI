@@ -52,6 +52,52 @@ class EmojiIcon(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    emoji: str | None = None
+    """
+    Emoji character or string to display.
+    """
+
+    label: str | None = None
+    """
+    Accessible tooltip shown on hover.
+    """
+
+    size: float | None = None
+    """
+    Font size of the emoji in logical pixels.
+    """
+
+    color: Any | None = None
+    """
+    Foreground colour applied to the emoji text.
+    """
+
+    fallback: str | None = None
+    """
+    Fallback emoji used when ``emoji`` is empty (defaults to ``"😀"``).
+    """
+
+    variant: str | None = None
+    """
+    Visual variant key forwarded to the runtime.
+    """
+
+    background: Any | None = None
+    """
+    Background fill colour drawn behind the emoji.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius for the background shape.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "emoji_icon"
 
     def __init__(

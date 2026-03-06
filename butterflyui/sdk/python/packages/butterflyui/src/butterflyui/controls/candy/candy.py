@@ -473,36 +473,77 @@ class CandyScope(Component):
         effects={"glassBlur": 18},
     )
     ```
+    """
 
-    Args:
-        tokens:
-            Flat token map or ``CandyTokens`` instance applied to the scope.
-        theme:
-            Structured ``CandyTheme`` or mapping with theme category buckets.
-        brightness:
-            Color mode. Values: ``"light"``, ``"dark"``.
-        radius:
-            Radius token bucket mapping.
-        colors:
-            Color token bucket mapping.
-        typography:
-            Typography token bucket mapping.
-        spacing:
-            Spacing token bucket mapping.
-        elevation:
-            Elevation/shadow token bucket mapping.
-        motion:
-            Motion/animation token bucket mapping.
-        button:
-            Button style token bucket mapping.
-        card:
-            Card style token bucket mapping.
-        effects:
-            Effects token bucket, for example ``{"glassBlur": 18}``.
-        ui:
-            General UI token bucket mapping.
-        webview:
-            Webview-specific token overrides.
+
+    tokens: CandyTokens | Mapping[str, Any] | None = None
+    """
+    Flat token map or ``CandyTokens`` instance applied to the scope.
+    """
+
+    theme: CandyTheme | Mapping[str, Any] | None = None
+    """
+    Structured ``CandyTheme`` or mapping with theme category buckets.
+    """
+
+    brightness: str | None = None
+    """
+    Color mode. Values: ``"light"``, ``"dark"``.
+    """
+
+    radius: Mapping[str, Any] | None = None
+    """
+    Radius token bucket mapping.
+    """
+
+    colors: Mapping[str, Any] | None = None
+    """
+    Color token bucket mapping.
+    """
+
+    typography: Mapping[str, Any] | None = None
+    """
+    Typography token bucket mapping.
+    """
+
+    spacing: Mapping[str, Any] | None = None
+    """
+    Spacing token bucket mapping.
+    """
+
+    elevation: Mapping[str, Any] | None = None
+    """
+    Elevation/shadow token bucket mapping.
+    """
+
+    motion: Mapping[str, Any] | None = None
+    """
+    Motion/animation token bucket mapping.
+    """
+
+    button: Mapping[str, Any] | None = None
+    """
+    Button style token bucket mapping.
+    """
+
+    card: Mapping[str, Any] | None = None
+    """
+    Card style token bucket mapping.
+    """
+
+    effects: Mapping[str, Any] | None = None
+    """
+    Effects token bucket, for example ``{"glassBlur": 18}``.
+    """
+
+    ui: Mapping[str, Any] | None = None
+    """
+    General UI token bucket mapping.
+    """
+
+    webview: Mapping[str, Any] | None = None
+    """
+    Webview-specific token overrides.
     """
 
 
@@ -604,30 +645,36 @@ class Candy(Component):
         events=["tap"],
     )
     ```
+    """
 
-    Args:
-        module:
-            Name of the Flutter module to render. Also accepts ``layout``
-            as an alias. Values include ``"row"``, ``"column"``,
-            ``"stack"``, ``"wrap"``, ``"container"``, ``"card"``,
-            ``"page"``, ``"button"``, ``"badge"``, ``"text"``,
-            ``"icon"``, ``"avatar"``, and more.
-        layout:
-            Alias for ``module``.
-        state:
-            Active state name used for state-driven styling.
-        states:
-            List of all recognized state names for this control.
-        events:
-            List of event names the Flutter runtime should emit to Python.
-        style:
-            Optional visual style map applied by the shared control renderer.
-            Common keys include ``gradient``, ``shadow``, ``radius``,
-            ``border_color``, ``border_width``, ``clip_behavior``,
-            ``backdrop_blur``/``backdrop_color`` (glass effect), and
-            per-slot overrides under ``style={"slots": {...}}``.
-        **kwargs:
-            Additional module-specific props forwarded to runtime.
+
+    module: str | None = None
+    """
+    Name of the Flutter module to render. Also accepts ``layout``
+    as an alias. Values include ``"row"``, ``"column"``,
+    ``"stack"``, ``"wrap"``, ``"container"``, ``"card"``,
+    ``"page"``, ``"button"``, ``"badge"``, ``"text"``,
+    ``"icon"``, ``"avatar"``, and more.
+    """
+
+    layout: str | None = None
+    """
+    Alias for ``module``.
+    """
+
+    state: str | None = None
+    """
+    Active state name used for state-driven styling.
+    """
+
+    states: Iterable[str] | None = None
+    """
+    List of all recognized state names for this control.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
     """
 
 

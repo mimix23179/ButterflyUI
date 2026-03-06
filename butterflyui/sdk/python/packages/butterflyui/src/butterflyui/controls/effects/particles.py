@@ -67,6 +67,93 @@ class Particles(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    count: int | None = None
+    """
+    Number of particles to spawn (``0`` – ``2000``).
+    Defaults to ``40``.
+    """
+
+    colors: list[Any] | None = None
+    """
+    List of particle colours.  Falls back to the theme
+    accent palette when empty.
+    """
+
+    min_size: float | None = None
+    """
+    Minimum particle diameter in logical pixels.
+    Defaults to ``2``.
+    """
+
+    max_size: float | None = None
+    """
+    Maximum particle diameter.  Defaults to ``6``.
+    """
+
+    speed: float | None = None
+    """
+    Uniform particle speed; overrides both *min_speed*
+    and *max_speed*.
+    """
+
+    min_speed: float | None = None
+    """
+    Minimum particle velocity in pixels per second.
+    Defaults to ``8``.
+    """
+
+    max_speed: float | None = None
+    """
+    Maximum particle velocity.  Defaults to ``32``.
+    """
+
+    direction: float | None = None
+    """
+    Emission direction in **degrees** (0 = right,
+    90 = down).  ``None`` emits omnidirectionally.
+    """
+
+    spread: float | None = None
+    """
+    Angular spread in degrees around *direction*.
+    Defaults to ``30``.
+    """
+
+    opacity: float | None = None
+    """
+    Global particle opacity (``0.0`` – ``1.0``).
+    Defaults to ``0.6``.
+    """
+
+    seed: int | None = None
+    """
+    Integer seed for deterministic particle layout.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` (default) particles wrap around the
+    canvas edges.
+    """
+
+    play: bool | None = None
+    """
+    When ``True`` (default) the animation runs; ``False``
+    pauses.
+    """
+
+    shape: str | None = None
+    """
+    Particle shape — ``"circle"`` (default) or
+    ``"square"``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "particles"
 
     def __init__(

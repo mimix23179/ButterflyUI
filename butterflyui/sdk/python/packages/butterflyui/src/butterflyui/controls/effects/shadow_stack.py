@@ -37,6 +37,24 @@ class ShadowStack(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    shadows: list[Mapping[str, Any]] | None = None
+    """
+    List of shadow definition mappings.  Each may contain ``color``, ``blur``, ``spread``, ``offset_x``,
+    and ``offset_y``.  Defaults to a two-layer elevation preset.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the ``BoxDecoration``.  Defaults to
+    ``12``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "shadow_stack"
 
     def __init__(

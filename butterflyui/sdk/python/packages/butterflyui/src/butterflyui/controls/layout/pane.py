@@ -37,6 +37,22 @@ class Pane(Component):
             Explicit height hint in logical pixels.
     """
 
+
+    slot: str | None = None
+    """
+    Slot identifier that controls placement within the parent layout.
+    """
+
+    title: str | None = None
+    """
+    Optional display title for the pane.
+    """
+
+    size: float | None = None
+    """
+    Preferred size in logical pixels along the pane's constrained axis.
+    """
+
     control_type = "pane"
 
     def __init__(

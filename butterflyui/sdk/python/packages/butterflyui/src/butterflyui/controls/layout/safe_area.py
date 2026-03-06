@@ -41,6 +41,18 @@ class SafeArea(Component):
             is visible.
     """
 
+
+    minimum: Any | None = None
+    """
+    Minimum inset padding that overrides the OS-reported value.
+    """
+
+    maintain_bottom_view_padding: bool | None = None
+    """
+    When ``True`` preserves the bottom view padding when the keyboard
+    is visible.
+    """
+
     control_type = "safe_area"
 
     def __init__(

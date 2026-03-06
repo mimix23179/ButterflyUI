@@ -45,6 +45,22 @@ class ReorderableListView(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    items: Sequence[Any] | None = None
+    """
+    Ordered item descriptors rendered by the list.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, uses compact row spacing.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "reorderable_list_view"
 
     def __init__(

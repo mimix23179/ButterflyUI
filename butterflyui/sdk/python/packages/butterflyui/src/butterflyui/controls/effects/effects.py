@@ -57,6 +57,63 @@ class Effects(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    blur: float | None = None
+    """
+    Gaussian blur sigma applied equally in X and Y.
+    Values ≤ 0 are ignored.
+    """
+
+    opacity: float | None = None
+    """
+    Layer opacity (``0.0`` – ``1.0``).
+    Values ≥ 1 are ignored.
+    """
+
+    color: Any | None = None
+    """
+    Tint colour applied via ``ColorFilter.mode``.
+    """
+
+    blend_mode: str | None = None
+    """
+    Blend mode string used with *color* (e.g. ``"multiply"``,
+    ``"screen"``, ``"overlay"``).  Defaults to ``"src_atop"``.
+    """
+
+    brightness: float | None = None
+    """
+    Brightness multiplier where ``1.0`` is unchanged.
+    Internally shifts the colour-matrix offset channel.
+    """
+
+    contrast: float | None = None
+    """
+    Contrast multiplier where ``1.0`` is unchanged.
+    """
+
+    saturation: float | None = None
+    """
+    Saturation multiplier where ``1.0`` is unchanged and
+    ``0.0`` is fully desaturated.
+    """
+
+    hue_rotate: float | None = None
+    """
+    Reserved — hue rotation angle in degrees.
+    """
+
+    grayscale: float | None = None
+    """
+    Grayscale mix (``0.0`` – ``1.0``) blended into the
+    luminance-weighted colour matrix.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "effects"
 
     def __init__(

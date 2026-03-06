@@ -51,6 +51,43 @@ class ItemTile(ListTile):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    title: str | None = None
+    """
+    Primary title text displayed on the tile.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary supporting text rendered beneath the title.
+    """
+
+    leading_icon: str | None = None
+    """
+    Icon name or data rendered at the leading edge of the tile.
+    """
+
+    trailing_icon: str | None = None
+    """
+    Icon name or data rendered at the trailing edge.
+    """
+
+    meta: str | None = None
+    """
+    Additional metadata string displayed as trailing text or forwarded in event payloads.
+    """
+
+    selected: bool | None = None
+    """
+    If ``True``, the tile renders in its selected visual state.
+    """
+
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "item_tile"
 
     def __init__(

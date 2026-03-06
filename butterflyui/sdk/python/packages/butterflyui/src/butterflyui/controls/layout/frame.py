@@ -68,6 +68,38 @@ class Frame(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    bgcolor: Any | None = None
+    """
+    Background fill color.
+    """
+
+    border_color: Any | None = None
+    """
+    Border stroke color.
+    """
+
+    border_width: float | None = None
+    """
+    Border stroke width in logical pixels.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels.
+    """
+
+    clip_behavior: str | None = None
+    """
+    Anti-aliasing clip mode. Values: ``"hardEdge"``, ``"antiAlias"``,
+    ``"antiAliasWithSaveLayer"``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "frame"
 
     def __init__(

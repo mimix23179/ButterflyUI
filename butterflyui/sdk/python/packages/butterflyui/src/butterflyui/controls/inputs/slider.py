@@ -49,6 +49,47 @@ class Slider(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    value: float | int | None = None
+    """
+    Single-value slider position.
+    """
+
+    start: float | int | None = None
+    """
+    Range start value for dual-thumb mode.
+    """
+
+    end: float | int | None = None
+    """
+    Range end value for dual-thumb mode.
+    """
+
+    min: float | int | None = None
+    """
+    Minimum allowed value.
+    """
+
+    max: float | int | None = None
+    """
+    Maximum allowed value.
+    """
+
+    divisions: int | None = None
+    """
+    Number of discrete steps between ``min`` and ``max``.
+    """
+
+    label: str | None = None
+    """
+    Optional label/caption text.
+    """
+
+    labels: bool | None = None
+    """
+    If ``True``, renderer may display value labels.
+    """
+
     control_type = "slider"
 
     def __init__(

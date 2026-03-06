@@ -50,6 +50,55 @@ class Timeline(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    tracks: list[Mapping[str, Any]] | None = None
+    """
+    List of track definition mappings describing
+    per-child animation configuration.
+    """
+
+    direction: str | None = None
+    """
+    Layout direction — ``"vertical"`` or
+    ``"horizontal"``.
+    """
+
+    spacing: float | None = None
+    """
+    Gap between children in logical pixels.
+    """
+
+    autoplay: bool | None = None
+    """
+    When ``True`` the timeline starts on mount.
+    """
+
+    play: bool | None = None
+    """
+    Explicit play toggle.  ``True`` starts, ``False``
+    pauses.
+    """
+
+    duration_ms: int | None = None
+    """
+    Total timeline duration in milliseconds.
+    """
+
+    delay_ms: int | None = None
+    """
+    Initial delay before the timeline begins playing.
+    """
+
+    repeat: bool | None = None
+    """
+    When ``True`` the timeline loops after completion.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "timeline"
 
     def __init__(

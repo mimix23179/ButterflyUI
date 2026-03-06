@@ -9,7 +9,112 @@ __all__ = ["StyleScope", "Style"]
 
 
 class StyleScope(Component):
-    """Subtree style context control for packs, tokens, and component recipes."""
+    """
+    Subtree style context control for packs, tokens, and component recipes.
+
+    Args:
+        child:
+            Primary child control placed inside the style scope.
+        style_pack:
+            Named style pack activated for the subtree.
+        pack:
+            Alias for ``style_pack``.
+        tokens:
+            Token overrides applied inside the scope.
+        token_overrides:
+            Additional token overrides merged into ``tokens``.
+        style_tokens:
+            Alternate token override alias.
+        recipes:
+            Component recipe payloads available inside the scope.
+        default_style:
+            Default style values merged into descendant controls.
+        default_modifiers:
+            Default modifiers applied within the scope.
+        default_motion:
+            Default motion payload applied within the scope.
+        state:
+            Active scoped state token.
+        variant:
+            Active scoped variant token.
+        classes:
+            Scoped class tokens used by descendant styling.
+        effects:
+            Scoped effects payload applied by the runtime.
+        events:
+            Runtime events emitted by the style scope.
+    """
+
+
+    style_pack: str | None = None
+    """
+    Named style pack activated for the subtree.
+    """
+
+    pack: str | None = None
+    """
+    Alias for ``style_pack``.
+    """
+
+    tokens: Mapping[str, Any] | None = None
+    """
+    Token overrides applied inside the scope.
+    """
+
+    token_overrides: Mapping[str, Any] | None = None
+    """
+    Additional token overrides merged into ``tokens``.
+    """
+
+    style_tokens: Mapping[str, Any] | None = None
+    """
+    Alternate token override alias.
+    """
+
+    recipes: Mapping[str, Any] | None = None
+    """
+    Component recipe payloads available inside the scope.
+    """
+
+    default_style: Mapping[str, Any] | None = None
+    """
+    Default style values merged into descendant controls.
+    """
+
+    default_modifiers: list[Any] | None = None
+    """
+    Default modifiers applied within the scope.
+    """
+
+    default_motion: Any | None = None
+    """
+    Default motion payload applied within the scope.
+    """
+
+    state: str | None = None
+    """
+    Active scoped state token.
+    """
+
+    variant: Any | None = None
+    """
+    Active scoped variant token.
+    """
+
+    classes: str | list[str] | None = None
+    """
+    Scoped class tokens used by descendant styling.
+    """
+
+    effects: Any | None = None
+    """
+    Scoped effects payload applied by the runtime.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime events emitted by the style scope.
+    """
 
     control_type = "style"
 

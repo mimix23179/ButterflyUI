@@ -68,6 +68,102 @@ class ColorPicker(Component):
         enabled: 
             If ``False``, the entire picker is disabled and non-interactive.
     """
+
+
+    value: Any | None = None
+    """
+    Initial colour value (hex string). Also used for ``get_value`` / ``set_value``.
+    """
+
+    color: Any | None = None
+    """
+    Alias for `value`.
+    """
+
+    mode: str | None = None
+    """
+    Picker layout mode hint forwarded to the runtime.
+    """
+
+    picker_mode: str | None = None
+    """
+    Alias for `mode`.
+    """
+
+    show_alpha: bool | None = None
+    """
+    If ``True``, displays an alpha-channel slider below the colour swatch.
+    """
+
+    alpha: bool | None = None
+    """
+    Alias for `show_alpha`.
+    """
+
+    presets: list[Any] | None = None
+    """
+    List of preset colour strings displayed as selectable circles below the picker.
+    """
+
+    emit_on_change: bool | None = None
+    """
+    If ``True``, a ``"change"`` event is emitted on every interaction (not just on commit).
+    """
+
+    show_actions: bool | None = None
+    """
+    If ``True``, shows commit/cancel action buttons.
+    """
+
+    show_input: bool | None = None
+    """
+    If ``True`` (default), the hex ``TextField`` is visible.
+    """
+
+    show_hex: bool | None = None
+    """
+    Alias for `show_input`.
+    """
+
+    show_presets: bool | None = None
+    """
+    If ``True`` (default when presets are supplied), the preset- swatches grid is visible.
+    """
+
+    preset_size: float | None = None
+    """
+    Diameter of each preset swatch circle. Defaults to ``20``.
+    """
+
+    preset_spacing: float | None = None
+    """
+    Spacing between preset swatch circles. Defaults to ``6``.
+    """
+
+    preview_height: float | None = None
+    """
+    Height of the colour-preview swatch area.
+    """
+
+    input_label: str | None = None
+    """
+    Label text displayed above the hex input ``TextField``.
+    """
+
+    input_placeholder: str | None = None
+    """
+    Placeholder text shown inside the hex input when empty.
+    """
+
+    commit_text: str | None = None
+    """
+    Label for the commit/OK action button.
+    """
+
+    cancel_text: str | None = None
+    """
+    Label for the cancel action button.
+    """
     control_type = "color_picker"
 
     def __init__(

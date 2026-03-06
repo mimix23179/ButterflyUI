@@ -55,6 +55,37 @@ class GlyphButton(Component):
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
+
+
+    glyph: str | int | None = None
+    """
+    Icon name, codepoint, or glyph string payload.
+    """
+
+    icon: str | int | None = None
+    """
+    Alias for ``glyph``.
+    """
+
+    size: float | None = None
+    """
+    Glyph size in logical pixels.
+    """
+
+    color: Any | None = None
+    """
+    Foreground color for the glyph.
+    """
+
+    interactive: bool | None = None
+    """
+    If ``False``, renders as a passive glyph without button semantics.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names to subscribe to.
+    """
     control_type = "glyph_button"
 
     def __init__(

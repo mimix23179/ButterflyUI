@@ -42,6 +42,32 @@ class BorderSide(Component):
         duration_ms: 
             Animation duration in milliseconds. Defaults to ``180``.
     """
+
+
+    side: str | None = None
+    """
+    Which side to draw: ``"top"``, ``"right"``, ``"bottom"`` (default), or ``"left"``.
+    """
+
+    color: Any | None = None
+    """
+    Line colour. Defaults to ``"#64748b"`` (slate-500).
+    """
+
+    length: float | None = None
+    """
+    Line length in logical pixels. Defaults to ``double.infinity`` (stretches to fill).
+    """
+
+    animated: bool | None = None
+    """
+    If ``True``, transitions are animated via ``AnimatedContainer``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Animation duration in milliseconds. Defaults to ``180``.
+    """
     control_type = "border_side"
 
     def __init__(

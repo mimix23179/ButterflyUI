@@ -344,8 +344,164 @@ class Component(LayoutControl):
 
     Any non-``None`` keyword arguments are merged into the outgoing ``props``
     payload, which keeps Python wrappers and Dart runtime props loosely coupled.
+
+    Args:
+        child:
+            Single convenience child appended to the control tree.
+        variant:
+            Variant token forwarded into the shared style pipeline.
+        tone:
+            Tone token forwarded into the shared style pipeline.
+        size:
+            Size token forwarded into the shared style pipeline.
+        density:
+            Density token forwarded into the shared style pipeline.
+        classes:
+            Class tokens used by recipes, packs, or runtime selectors.
+        modifiers:
+            Base modifier list applied to the control.
+        on_hover_modifiers:
+            Modifiers activated while the pointer hovers the control.
+        on_pressed_modifiers:
+            Modifiers activated while the control is pressed.
+        on_focus_modifiers:
+            Modifiers activated while the control is focused.
+        motion:
+            Base motion configuration for the control.
+        enter_motion:
+            Motion played when the control enters.
+        exit_motion:
+            Motion played when the control exits.
+        hover_motion:
+            Motion played during hover.
+        press_motion:
+            Motion played during press.
+        effects:
+            Visual effects applied by the shared renderer pipeline.
+        effect_order:
+            Ordering hint controlling when effects are applied.
+        effect_clip:
+            Clip behavior or shape used when rendering effects.
+        effect_target:
+            Target surface for shared effects.
+        style_slots:
+            Slot-specific local style overrides.
+        state:
+            Active state token forwarded into styling and motion resolution.
+        style:
+            Local style map merged into the outgoing control payload.
     """
     control_type: str = ""
+
+    child: Any = None
+    """
+    Single convenience child appended to the control tree.
+    """
+
+    variant: Any = None
+    """
+    Variant token forwarded into the shared style pipeline.
+    """
+
+    tone: str | None = None
+    """
+    Tone token forwarded into the shared style pipeline.
+    """
+
+    size: str | None = None
+    """
+    Size token forwarded into the shared style pipeline.
+    """
+
+    density: str | None = None
+    """
+    Density token forwarded into the shared style pipeline.
+    """
+
+    classes: str | Iterable[str] | None = None
+    """
+    Class tokens used by recipes, packs, or runtime selectors.
+    """
+
+    modifiers: Iterable[Any] | None = None
+    """
+    Base modifier list applied to the control.
+    """
+
+    on_hover_modifiers: Iterable[Any] | None = None
+    """
+    Modifiers activated while the pointer hovers the control.
+    """
+
+    on_pressed_modifiers: Iterable[Any] | None = None
+    """
+    Modifiers activated while the control is pressed.
+    """
+
+    on_focus_modifiers: Iterable[Any] | None = None
+    """
+    Modifiers activated while the control is focused.
+    """
+
+    motion: Any | None = None
+    """
+    Base motion configuration for the control.
+    """
+
+    enter_motion: Any | None = None
+    """
+    Motion played when the control enters.
+    """
+
+    exit_motion: Any | None = None
+    """
+    Motion played when the control exits.
+    """
+
+    hover_motion: Any | None = None
+    """
+    Motion played during hover.
+    """
+
+    press_motion: Any | None = None
+    """
+    Motion played during press.
+    """
+
+    effects: Any | None = None
+    """
+    Visual effects applied by the shared renderer pipeline.
+    """
+
+    effect_order: str | None = None
+    """
+    Ordering hint controlling when effects are applied.
+    """
+
+    effect_clip: Any | None = None
+    """
+    Clip behavior or shape used when rendering effects.
+    """
+
+    effect_target: str | None = None
+    """
+    Target surface for shared effects.
+    """
+
+    style_slots: Mapping[str, Any] | None = None
+    """
+    Slot-specific local style overrides.
+    """
+
+    state: str | None = None
+    """
+    Active state token forwarded into styling and motion resolution.
+    """
+
+    style: Mapping[str, Any] | None = None
+    """
+    Local style map merged into the outgoing control payload.
+    """
 
     def __init__(
         self,

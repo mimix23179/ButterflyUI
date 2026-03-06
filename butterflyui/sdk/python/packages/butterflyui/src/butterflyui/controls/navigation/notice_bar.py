@@ -52,6 +52,44 @@ class NoticeBar(Component):
             Additional props, including layout/placement hints.
     """
 
+
+    dismissible: bool | None = None
+    """
+    Shows a close action when ``True``.
+    """
+
+
+    text: str | None = None
+    """
+    Notice message text.
+    """
+
+    variant: str | None = None
+    """
+    Semantic tone token (for example ``"info"``, ``"success"``,
+    ``"warning"``, ``"error"``).
+    """
+
+    icon: str | None = None
+    """
+    Optional leading icon descriptor.
+    """
+
+    action_label: str | None = None
+    """
+    Optional inline action label.
+    """
+
+    action_id: str | None = None
+    """
+    Identifier emitted for the inline action.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime events the control may emit.
+    """
+
     control_type = "notice_bar"
 
     def __init__(

@@ -43,6 +43,32 @@ class Canvas(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    strokes: list[Mapping[str, Any]] | None = None
+    """
+    Legacy alias for ``shapes``.
+    """
+
+    shapes: list[Mapping[str, Any]] | None = None
+    """
+    List of shape dicts drawn by the ``CustomPainter``. Each dict should contain ``"type"`` plus geometry keys.
+    """
+
+    background: Any | None = None
+    """
+    Background colour for the canvas container.
+    """
+
+    grid: bool | None = None
+    """
+    If ``True`` a reference grid is drawn behind the shapes.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "canvas"
 
     def __init__(

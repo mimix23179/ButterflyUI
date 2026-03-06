@@ -40,6 +40,27 @@ class ProgressBar(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    value: float | None = None
+    """
+    Progress value for determinate mode.
+    """
+
+    indeterminate: bool | None = None
+    """
+    If ``True``, renders an animated indeterminate bar.
+    """
+
+    label: str | None = None
+    """
+    Optional text label shown with the indicator.
+    """
+
+    stroke_width: float | None = None
+    """
+    Thickness of the progress track/indicator.
+    """
+
     control_type = "progress_bar"
 
     def __init__(

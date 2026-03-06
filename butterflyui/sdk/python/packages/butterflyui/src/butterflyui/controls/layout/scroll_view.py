@@ -39,6 +39,33 @@ class ScrollView(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    initial_offset: float | None = None
+    """
+    Starting scroll offset in logical pixels.
+    """
+
+
+    direction: str | None = None
+    """
+    Scroll axis. Values: ``"vertical"`` (default), ``"horizontal"``.
+    """
+
+    reverse: bool | None = None
+    """
+    When ``True`` the content is scrolled in the reverse direction.
+    """
+
+    content_padding: Any | None = None
+    """
+    Padding applied inside the scrollable area.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "scroll_view"
 
     def __init__(

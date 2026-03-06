@@ -716,6 +716,25 @@ class SkinsScope(Component):
     """
 
 
+    skin: str | None = None
+    """
+    Named built-in skin preset. Values include ``"default"``,
+    ``"shadow"``, ``"fire"``, ``"earth"``, ``"gaming"``.
+    Custom names registered through ``register_skin``/``create_skin``
+    are also supported.
+    """
+
+    tokens: SkinsTokens | Mapping[str, Any] | None = None
+    """
+    Custom ``SkinsTokens`` instance or raw mapping.
+    """
+
+    brightness: str | None = None
+    """
+    Color mode override. Values: ``"light"``, ``"dark"``.
+    """
+
+
     control_type = "skins_scope"
 
     def __init__(
@@ -803,6 +822,32 @@ class Skins(Component):
             layers via ``backdrop_blur`` + ``backdrop_color``.
         **kwargs:
             Additional module-specific props forwarded to runtime.
+    """
+
+
+    module: str | None = None
+    """
+    Name of the runtime module to render.
+    """
+
+    layout: str | None = None
+    """
+    Alias for ``module``.
+    """
+
+    state: str | None = None
+    """
+    Active state name used for state-driven styling.
+    """
+
+    states: Iterable[str] | None = None
+    """
+    List of all recognized state names for this control.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the runtime should emit to Python.
     """
 
 

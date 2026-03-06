@@ -53,6 +53,64 @@ class GlowEffect(Component):
         duration_ms: 
             Animation duration in milliseconds when *animated* is enabled.
     """
+
+
+    color: Any | None = None
+    """
+    Glow colour.  Defaults to ``#8800FFFF`` (semi-transparent cyan).
+    """
+
+    blur: float | None = None
+    """
+    Base blur radius of the ``BoxShadow``.  Defaults to ``16``.
+    """
+
+    spread: float | None = None
+    """
+    Spread radius of the ``BoxShadow``.  Defaults to ``0``.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the ``BoxDecoration``.  Defaults to ``12``.
+    """
+
+    offset_x: float | None = None
+    """
+    Horizontal shadow offset in logical pixels. Defaults to ``0``.
+    """
+
+    offset_y: float | None = None
+    """
+    Vertical shadow offset in logical pixels. Defaults to ``0``.
+    """
+
+    clip: bool | None = None
+    """
+    Reserved — whether to clip the glow to the container bounds.
+    """
+
+    intensity: float | None = None
+    """
+    Multiplier applied to *blur*
+    (e.g. ``2.0`` doubles the effective blur radius).  Defaults to ``1``.
+    """
+
+    direction: Any | None = None
+    """
+    Alternative offset specified as a two-element list
+    ``[x, y]``; overrides *offset_x* / *offset_y* when present.
+    """
+
+    animated: bool | None = None
+    """
+    Reserved — enable animated glow pulsing.
+    """
+
+    duration_ms: int | None = None
+    """
+    Animation duration in milliseconds when *animated* is enabled.
+    """
     control_type = "glow_effect"
 
     def __init__(

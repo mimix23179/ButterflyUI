@@ -72,6 +72,49 @@ class VisualFx(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    glow: Mapping[str, Any] | None = None
+    """
+    Mapping for glow stage parameters, such as color, blur radius,
+    spread, intensity, and blend mode (renderer dependent).
+    """
+
+    glass_blur: Mapping[str, Any] | None = None
+    """
+    Mapping for glass/frosted stage parameters, typically blur sigma,
+    tint color, and optional border/highlight knobs.
+    """
+
+    chromatic_shift: Mapping[str, Any] | None = None
+    """
+    Mapping for RGB shift/aberration stage parameters.
+    """
+
+    gradient_sweep: Mapping[str, Any] | None = None
+    """
+    Mapping for animated or static gradient sweep overlay parameters.
+    """
+
+    enable_glow: bool | None = None
+    """
+    Enables or disables the glow stage.
+    """
+
+    enable_glass_blur: bool | None = None
+    """
+    Enables or disables the glass blur stage.
+    """
+
+    enable_chromatic_shift: bool | None = None
+    """
+    Enables or disables the chromatic shift stage.
+    """
+
+    enable_gradient_sweep: bool | None = None
+    """
+    Enables or disables the gradient sweep stage.
+    """
+
     control_type = "visual_fx"
 
     def __init__(

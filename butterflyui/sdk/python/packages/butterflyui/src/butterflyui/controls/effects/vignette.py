@@ -37,6 +37,24 @@ class Vignette(Component):
             When ``False`` the overlay is hidden and the child
             renders unmodified.
     """
+
+
+    intensity: float | None = None
+    """
+    Vignette strength (``0.0`` transparent – ``1.0``
+    opaque edges).  Defaults to ``0.45``.
+    """
+
+    opacity: float | None = None
+    """
+    Alias for *intensity* (the runtime accepts either).
+    """
+
+    color: Any | None = None
+    """
+    Edge colour of the vignette gradient.  Defaults to
+    the theme's default scaffold/background colour.
+    """
     control_type = "vignette"
 
     def __init__(

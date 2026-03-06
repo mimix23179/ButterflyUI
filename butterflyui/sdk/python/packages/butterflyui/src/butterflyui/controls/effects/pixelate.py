@@ -34,6 +34,19 @@ class Pixelate(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    amount: float | None = None
+    """
+    Pixelation intensity (``0.0`` no effect – ``1.0``
+    maximum).  Defaults to ``0.35``.  Internally mapped to a
+    downscale factor ``1 − amount × 0.9``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "pixelate"
 
     def __init__(

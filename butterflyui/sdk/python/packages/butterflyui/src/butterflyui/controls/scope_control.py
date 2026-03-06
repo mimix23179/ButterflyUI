@@ -8,29 +8,29 @@ __all__ = ["ScopeControl"]
 
 
 class ScopeControl(LayoutControl):
-    """Shared subtree scope behavior for style and umbrella controls."""
+    """
+    Shared subtree scope behavior for style and umbrella controls.
 
-    @property
-    def classes(self) -> Any:
-        return self.get_prop("classes")
+    Args:
+        classes:
+            Space-separated or structured class tokens applied to the subtree.
+        state:
+            Active scope state used by recipes or conditional styling.
+        variant:
+            Named or structured variant value applied to descendants.
+    """
 
-    @classes.setter
-    def classes(self, value: Any) -> None:
-        self.set_prop("classes", value)
+    classes: Any = None
+    """
+    Space-separated or structured class tokens applied to the subtree.
+    """
 
-    @property
-    def state(self) -> str | None:
-        value = self.get_prop("state")
-        return str(value) if value is not None else None
+    state: str | None = None
+    """
+    Active scope state used by recipes or conditional styling.
+    """
 
-    @state.setter
-    def state(self, value: str | None) -> None:
-        self.set_prop("state", value)
-
-    @property
-    def variant(self) -> Any:
-        return self.get_prop("variant")
-
-    @variant.setter
-    def variant(self, value: Any) -> None:
-        self.set_prop("variant", value)
+    variant: Any = None
+    """
+    Named or structured variant value applied to descendants.
+    """

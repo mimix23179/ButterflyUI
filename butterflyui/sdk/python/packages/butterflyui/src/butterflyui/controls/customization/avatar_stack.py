@@ -51,6 +51,52 @@ class AvatarStack(Component):
         expand_on_hover: 
             If ``True``, the stack expands to reveal hidden avatars on hover.
     """
+
+
+    avatars: list[Any] | None = None
+    """
+    List of avatar descriptors. Each item may be a dict with keys ``label`` / ``name``, ``color``, ``text_color``, ``id``, or a plain string used as the label.
+    """
+
+    size: float | None = None
+    """
+    Diameter of each avatar circle in logical pixels. Defaults to ``28``.
+    """
+
+    overlap: float | None = None
+    """
+    Horizontal overlap between adjacent avatars in logical pixels. Defaults to ``8``.
+    """
+
+    max: int | None = None
+    """
+    Maximum number of avatars to display before showing an overflow indicator. Avatars beyond this count are hidden.
+    """
+
+    max_visible: int | None = None
+    """
+    Alias for `max`.
+    """
+
+    max_count: int | None = None
+    """
+    Alias for `max`.
+    """
+
+    overflow_label: str | None = None
+    """
+    Custom text for the overflow chip. When omitted, the runtime displays ``"+N"`` where ``N`` is the hidden count.
+    """
+
+    stack_order: str | None = None
+    """
+    Set to ``"reverse"`` to render avatars in reversed stacking order.
+    """
+
+    expand_on_hover: bool | None = None
+    """
+    If ``True``, the stack expands to reveal hidden avatars on hover.
+    """
     control_type = "avatar_stack"
 
     def __init__(

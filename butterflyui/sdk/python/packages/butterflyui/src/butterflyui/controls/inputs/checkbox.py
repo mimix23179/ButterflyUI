@@ -30,6 +30,24 @@ class Checkbox(Component):
             If ``True``, the checkbox supports a third ``None``
             (indeterminate) state in addition to checked/unchecked.
     """
+
+
+    value: bool | None = None
+    """
+    Current checked state — ``True``, ``False``, or ``None``
+    (indeterminate) when ``tristate`` is enabled.
+    """
+
+    label: str | None = None
+    """
+    Optional text rendered beside the checkbox.
+    """
+
+    tristate: bool | None = None
+    """
+    If ``True``, the checkbox supports a third ``None``
+    (indeterminate) state in addition to checked/unchecked.
+    """
     control_type = "checkbox"
 
     def __init__(

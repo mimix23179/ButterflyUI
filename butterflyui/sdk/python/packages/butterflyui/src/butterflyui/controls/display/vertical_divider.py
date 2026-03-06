@@ -40,6 +40,27 @@ class VerticalDivider(Divider):
             Divider color value passed to the runtime.
     """
 
+
+    thickness: float | None = None
+    """
+    Line thickness in logical pixels.
+    """
+
+    indent: float | None = None
+    """
+    Leading inset before the divider starts.
+    """
+
+    end_indent: float | None = None
+    """
+    Trailing inset before the divider ends.
+    """
+
+    color: Any | None = None
+    """
+    Divider color value passed to the runtime.
+    """
+
     control_type = "vertical_divider"
 
     def __init__(

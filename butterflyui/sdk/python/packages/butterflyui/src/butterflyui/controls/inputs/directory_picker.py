@@ -25,6 +25,12 @@ class DirectoryPicker(FilePicker):
         label:
             Button/field label displayed in the UI.
     """
+
+
+    label: str | None = None
+    """
+    Button/field label displayed in the UI.
+    """
     control_type = "directory_picker"
 
     def __init__(

@@ -65,6 +65,62 @@ class DataTable(Component):
             Initial text pre-filled in the filter ``TextField``.
     """
 
+
+    columns: list[Any] | None = None
+    """
+    Column definitions — a list of mapping objects with ``"id"``, ``"label"``, and optional ``"numeric"`` keys, or plain strings used as both id and label.
+    """
+
+    rows: list[Any] | None = None
+    """
+    Row data items — lists of cell values, mapping objects keyed by column ``id``, or objects containing a ``"cells"`` list.
+    """
+
+    sortable: bool | None = None
+    """
+    If ``True`` (default), column headers are tappable for sorting.  Emits ``"sort_change"`` with the column id and direction.
+    """
+
+    filterable: bool | None = None
+    """
+    If ``True``, a search ``TextField`` appears above the table for live case-insensitive row filtering.
+    """
+
+    selectable: bool | None = None
+    """
+    If ``True``, each row gets a leading checkbox and emits ``"row_select"`` events.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, rows use compact height (32–40 lp) and tighter column spacing.
+    """
+
+    striped: bool | None = None
+    """
+    If ``True``, odd rows receive a semi-transparent surface highlight for visual separation.
+    """
+
+    show_header: bool | None = None
+    """
+    If ``True`` (default), the column header row is rendered.  Set to ``False`` to hide headers.
+    """
+
+    sort_column: str | None = None
+    """
+    Initial column ``id`` by which the table is sorted.
+    """
+
+    sort_ascending: bool | None = None
+    """
+    If ``True`` (default), the initial sort direction is ascending.
+    """
+
+    filter_query: str | None = None
+    """
+    Initial text pre-filled in the filter ``TextField``.
+    """
+
     control_type = "data_table"
 
     def __init__(

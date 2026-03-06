@@ -32,6 +32,22 @@ class Center(Align):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    width_factor: float | None = None
+    """
+    If set, the widget's width is this multiple of the child's width.
+    """
+
+    height_factor: float | None = None
+    """
+    If set, the widget's height is this multiple of the child's height.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "center"
 
     def __init__(

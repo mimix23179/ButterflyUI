@@ -33,6 +33,13 @@ class Expanded(Component):
             (fill exactly), ``"loose"`` (at most the allocated size).
     """
 
+
+    fit: str | None = None
+    """
+    How the child fills the allocated space. Values: ``"tight"``
+    (fill exactly), ``"loose"`` (at most the allocated size).
+    """
+
     control_type = "expanded"
 
     def __init__(

@@ -51,6 +51,43 @@ class Switch(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    value: bool | None = None
+    """
+    Current boolean state.
+    """
+
+    label: str | None = None
+    """
+    Label shown next to the switch.
+    """
+
+    inline: bool | None = None
+    """
+    If ``True``, aligns label and switch inline.
+    """
+
+    mode: str | None = None
+    """
+    Rendering mode (for example ``"toggle"`` or ``"segmented"``
+    depending on renderer support).
+    """
+
+    on_label: str | None = None
+    """
+    Label for the enabled state.
+    """
+
+    off_label: str | None = None
+    """
+    Label for the disabled state.
+    """
+
+    segments: list[Any] | None = None
+    """
+    Segment descriptors for segmented presentation mode.
+    """
+
     control_type = "switch"
 
     def __init__(

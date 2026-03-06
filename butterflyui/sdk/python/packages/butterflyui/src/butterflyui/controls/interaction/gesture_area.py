@@ -49,6 +49,39 @@ class GestureArea(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    tap_enabled: bool | None = None
+    """
+    If ``True``, single-tap events are captured and emitted.
+    """
+
+    double_tap_enabled: bool | None = None
+    """
+    If ``True``, double-tap events are captured and emitted.
+    """
+
+    long_press_enabled: bool | None = None
+    """
+    If ``True``, long-press events are captured and emitted.
+    """
+
+    pan_enabled: bool | None = None
+    """
+    If ``True``, pan/drag gesture events are captured and
+    emitted.
+    """
+
+    scale_enabled: bool | None = None
+    """
+    If ``True``, pinch-to-scale and rotate gesture events are
+    captured and emitted.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "gesture_area"
 
     def __init__(

@@ -42,6 +42,33 @@ class Portal(Component):
             Offset of the portal content from the alignment position.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the portal overlay is visible.
+    """
+
+    dismissible: bool | None = None
+    """
+    When ``True`` tapping outside closes the portal.
+    """
+
+    offset: Any | None = None
+    """
+    Offset of the portal content from the alignment position.
+    """
+
+
+    portal: Any | None = None
+    """
+    The widget projected into the top-level overlay layer.
+    """
+
+    passthrough: bool | None = None
+    """
+    When ``True`` pointer events pass through to widgets below.
+    """
+
     control_type = "portal"
 
     def __init__(

@@ -48,6 +48,52 @@ class Grid(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    items: list[Any] | None = None
+    """
+    List of item spec mappings rendered as grid cells.
+    """
+
+    columns: int | None = None
+    """
+    Number of columns (cross-axis cell count).
+    """
+
+    spacing: float | None = None
+    """
+    Horizontal gap between cells in logical pixels.
+    """
+
+    run_spacing: float | None = None
+    """
+    Vertical gap between rows in logical pixels.
+    """
+
+    child_aspect_ratio: float | None = None
+    """
+    Width-to-height ratio for each cell. Defaults to ``1.0``.
+    """
+
+    direction: str | None = None
+    """
+    Scroll axis. Values: ``"vertical"`` (default), ``"horizontal"``.
+    """
+
+    reverse: bool | None = None
+    """
+    When ``True`` items are laid out in reverse order.
+    """
+
+    shrink_wrap: bool | None = None
+    """
+    When ``True`` the grid sizes itself to its content.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "grid"
 
     def __init__(

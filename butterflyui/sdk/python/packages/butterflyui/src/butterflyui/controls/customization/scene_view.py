@@ -37,6 +37,32 @@ class SceneView(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    background: Any | None = None
+    """
+    Background colour of the scene surface.
+    """
+
+    show_grid: bool | None = None
+    """
+    If ``True``, a reference grid is drawn on the scene.
+    """
+
+    show_axes: bool | None = None
+    """
+    If ``True``, X/Y coordinate axes are drawn.
+    """
+
+    camera: Mapping[str, Any] | None = None
+    """
+    Camera/viewport configuration dict with keys such as ``"zoom"``, ``"x"``, and ``"y"``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "scene_view"
 
     def __init__(

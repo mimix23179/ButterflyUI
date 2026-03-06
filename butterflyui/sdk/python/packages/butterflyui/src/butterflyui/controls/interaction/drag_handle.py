@@ -43,6 +43,29 @@ class DragHandle(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    index: int | None = None
+    """
+    Zero-based position of this handle in the parent
+    reorderable list.
+    """
+
+    payload: Mapping[str, Any] | None = None
+    """
+    Arbitrary mapping attached to the drag and delivered
+    to the drop target.
+    """
+
+    drag_type: str | None = None
+    """
+    String tag used to match compatible drop zones.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "drag_handle"
 
     def __init__(

@@ -48,6 +48,41 @@ class MorphingBorder(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    min_radius: float | None = None
+    """
+    Corner radius when *animate* is ``False``.  Defaults
+    to ``8``.
+    """
+
+    max_radius: float | None = None
+    """
+    Corner radius the animation targets.  Defaults to
+    ``24``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Transition duration in milliseconds.  Defaults to
+    ``1200``; clamped to ``1 – 600 000``.
+    """
+
+    animate: bool | None = None
+    """
+    When ``True`` (default) the radius animates to
+    *max_radius*; ``False`` snaps to *min_radius*.
+    """
+
+    color: Any | None = None
+    """
+    Border stroke colour.  Defaults to ``#60a5fa``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "morphing_border"
 
     def __init__(

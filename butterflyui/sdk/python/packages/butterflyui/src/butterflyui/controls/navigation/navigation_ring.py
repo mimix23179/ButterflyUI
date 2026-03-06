@@ -62,6 +62,32 @@ class NavigationRing(Component):
             Extra passthrough props for advanced renderer customization.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    Destination mappings rendered by the ring.
+    """
+
+    selected_id: str | None = None
+    """
+    Active destination ``id``.
+    """
+
+    policy: str | None = None
+    """
+    Label visibility policy: ``"always"``, ``"selected_only"``, ``"never"``.
+    """
+
+    dense: bool | None = None
+    """
+    Enables compact spacing and icon sizing.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event whitelist emitted by the Flutter renderer.
+    """
+
     control_type = "navigation_ring"
 
     def __init__(

@@ -64,6 +64,58 @@ class IconButton(Button):
             Extra runtime props forwarded to the renderer. This can include
             style/modifier/motion/effects fields and optional transparency.
     """
+
+
+    events: list[str] | None = None
+    """
+    Runtime event names to subscribe to.
+    """
+
+    action: Any | None = None
+    """
+    Declarative action descriptor fired on press.
+    """
+
+    action_id: str | None = None
+    """
+    Registered action ID to dispatch on press.
+    """
+
+    action_event: str | None = None
+    """
+    Event name forwarded to the action dispatcher.
+    """
+
+    action_payload: Mapping[str, Any] | None = None
+    """
+    Extra payload mapping for action dispatch.
+    """
+
+    actions: list[Any] | None = None
+    """
+    Action descriptor list executed on press.
+    """
+
+
+    icon: str | int | None = None
+    """
+    Material icon name, codepoint integer, or runtime icon payload.
+    """
+
+    size: float | None = None
+    """
+    Icon size in logical pixels.
+    """
+
+    color: Any | None = None
+    """
+    Icon color value accepted by runtime.
+    """
+
+    value: Any | None = None
+    """
+    Arbitrary payload emitted with click events.
+    """
     control_type = "icon_button"
 
     def __init__(

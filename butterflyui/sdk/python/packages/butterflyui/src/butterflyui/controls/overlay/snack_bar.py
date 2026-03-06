@@ -71,6 +71,86 @@ class SnackBar(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    _butterflyui_field_aliases = {"style_name": "style"}
+
+    open: bool | None = None
+    """
+    If ``True``, snackbar is visible.
+    """
+
+
+    message: str | None = None
+    """
+    Primary snackbar message text.
+    """
+
+    label: str | None = None
+    """
+    Optional secondary label text.
+    """
+
+    duration_ms: int | None = None
+    """
+    Auto-dismiss timeout in milliseconds.
+    """
+
+    action_label: str | None = None
+    """
+    Optional action button label.
+    """
+
+    variant: str | None = None
+    """
+    Semantic style hint (for example ``"info"``, ``"success"``,
+    ``"warning"``, ``"error"``).
+    """
+
+    style_name: str | None = None
+    """
+    Renderer style mode, defaults to ``"snackbar"``.
+    """
+
+    icon: Any | None = None
+    """
+    Optional icon descriptor.
+    """
+
+    instant: bool | None = None
+    """
+    If ``True``, bypasses queued animation behavior when supported.
+    """
+
+    priority: int | None = None
+    """
+    Queue priority hint for host-level scheduling.
+    """
+
+    use_flushbar: bool | None = None
+    """
+    Runtime integration hint for Flushbar-style presentation.
+    """
+
+    use_fluttertoast: bool | None = None
+    """
+    Runtime integration hint for FlutterToast-style presentation.
+    """
+
+    toast_position: str | None = None
+    """
+    Preferred toast/snackbar placement hint.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
+    style: Mapping[str, Any] | None = None
+    """
+    Style map forwarded to the renderer style pipeline.
+    """
+
     control_type = "snack_bar"
 
     def __init__(

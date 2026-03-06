@@ -106,6 +106,97 @@ class Modifier(Component):
             Enables strict validation when supported.
     """
 
+
+    modifiers: list[Any] | None = None
+    """
+    Base modifier descriptors merged into descendants.
+    """
+
+    motion: Any | None = None
+    """
+    Default motion spec for descendants.
+    """
+
+    on_hover: list[Any] | None = None
+    """
+    Modifier descriptors activated on hover state.
+    """
+
+    on_hover_modifiers: list[Any] | None = None
+    """
+    Explicit alias of ``on_hover``.
+    """
+
+    on_pressed: list[Any] | None = None
+    """
+    Modifier descriptors activated on pressed state.
+    """
+
+    on_pressed_modifiers: list[Any] | None = None
+    """
+    Explicit alias of ``on_pressed``.
+    """
+
+    on_focus: list[Any] | None = None
+    """
+    Modifier descriptors activated on focus state.
+    """
+
+    on_focus_modifiers: list[Any] | None = None
+    """
+    Explicit alias of ``on_focus``.
+    """
+
+    cursor: str | None = None
+    """
+    Cursor override for descendants.
+    """
+
+    align: Any | None = None
+    """
+    Descendant alignment override.
+    """
+
+    border: Any | None = None
+    """
+    Border descriptor merged into descendant style.
+    """
+
+    background: Any | None = None
+    """
+    Background color/gradient descriptor merged into descendant style.
+    """
+
+    shadow: Any | None = None
+    """
+    Shadow descriptor merged into descendant style.
+    """
+
+    glow: Any | None = None
+    """
+    Glow descriptor shorthand.
+    """
+
+    glass: Any | None = None
+    """
+    Glass descriptor shorthand.
+    """
+
+    focus_ring: Any | None = None
+    """
+    Focus ring descriptor shorthand.
+    """
+
+    hit_test: str | None = None
+    """
+    Hit test behavior hint.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event subscriptions for this modifier host.
+    """
+
     control_type = "modifier"
 
     def __init__(

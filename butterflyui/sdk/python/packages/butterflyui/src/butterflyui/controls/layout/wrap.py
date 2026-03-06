@@ -43,6 +43,33 @@ class Wrap(Component):
             ``"vertical"``.
     """
 
+
+    spacing: float | None = None
+    """
+    Gap between consecutive children along the main axis.
+    """
+
+    run_spacing: float | None = None
+    """
+    Gap between consecutive runs along the cross axis.
+    """
+
+    run_alignment: str | None = None
+    """
+    Alignment of runs along the cross axis.
+    """
+
+    cross_axis: str | None = None
+    """
+    Alignment of children within a run along the cross axis.
+    """
+
+    direction: str | None = None
+    """
+    Main-axis direction. Values: ``"horizontal"`` (default),
+    ``"vertical"``.
+    """
+
     control_type = "wrap"
 
     def __init__(

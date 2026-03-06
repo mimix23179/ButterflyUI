@@ -31,6 +31,32 @@ class Divider(Component):
         color: 
             Divider line colour.
     """
+
+
+    vertical: bool | None = None
+    """
+    If ``True`` renders a vertical divider instead of horizontal.
+    """
+
+    thickness: float | None = None
+    """
+    Line thickness in logical pixels.
+    """
+
+    indent: float | None = None
+    """
+    Leading blank space before the divider line.
+    """
+
+    end_indent: float | None = None
+    """
+    Trailing blank space after the divider line.
+    """
+
+    color: Any | None = None
+    """
+    Divider line colour.
+    """
     control_type = "divider"
 
     def __init__(

@@ -51,6 +51,47 @@ class VirtualGrid(Component):
             Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
+
+    items: list[Any] | None = None
+    """
+    Item payload list used to build tiles when no explicit children are given.
+    """
+
+    columns: int | None = None
+    """
+    Number of grid columns.
+    """
+
+    spacing: float | None = None
+    """
+    Main-axis spacing in logical pixels between tiles.
+    """
+
+    run_spacing: float | None = None
+    """
+    Cross-axis spacing in logical pixels between tile runs.
+    """
+
+    child_aspect_ratio: float | None = None
+    """
+    Width-to-height ratio of each tile (e.g. ``1.0`` for square tiles).
+    """
+
+    has_more: bool | None = None
+    """
+    If ``True``, signals that more data can be requested when nearing the end.
+    """
+
+    loading: bool | None = None
+    """
+    If ``True``, a loading indicator is displayed at the tail of the grid.
+    """
+
+    prefetch_threshold: int | None = None
+    """
+    Number of remaining items at which a ``"prefetch"`` event is emitted.
+    """
+
     control_type = "virtual_grid"
 
     def __init__(

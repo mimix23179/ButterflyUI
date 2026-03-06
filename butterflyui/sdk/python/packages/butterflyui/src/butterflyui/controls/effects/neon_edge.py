@@ -50,6 +50,46 @@ class NeonEdge(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    color: Any | None = None
+    """
+    Border and glow colour.  Defaults to ``#22D3EE``.
+    """
+
+    glow: float | None = None
+    """
+    Blur radius of the outer glow ``BoxShadow``.  Defaults
+    to ``10``.
+    """
+
+    spread: float | None = None
+    """
+    Spread radius of the glow shadow.  Defaults to ``0``.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the ``BoxDecoration``.  Defaults to
+    ``12``.
+    """
+
+    animated: bool | None = None
+    """
+    When ``True`` the container uses
+    ``AnimatedContainer`` for smooth property transitions.
+    """
+
+    duration_ms: int | None = None
+    """
+    Animation duration in milliseconds when
+    *animated* is ``True``.  Defaults to ``300``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "neon_edge"
 
     def __init__(

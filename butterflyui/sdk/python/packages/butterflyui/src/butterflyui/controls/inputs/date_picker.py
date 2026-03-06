@@ -56,6 +56,52 @@ class DatePicker(Component):
         strict:
             When ``True``, unknown props raise validation errors.
     """
+
+
+    value: str | None = None
+    """
+    Selected date as ``"YYYY-MM-DD"`` when ``mode="single"``.
+    """
+
+    start: str | None = None
+    """
+    Range start date when ``mode`` is ``"range"`` or ``"span"``.
+    """
+
+    end: str | None = None
+    """
+    Range end date when ``mode`` is ``"range"`` or ``"span"``.
+    """
+
+    mode: str | None = None
+    """
+    ``"single"`` (default), ``"range"``, or ``"span"``.
+    """
+
+    label: str | None = None
+    """
+    Floating label text shown above the field.
+    """
+
+    placeholder: str | None = None
+    """
+    Hint text shown when no date is selected.
+    """
+
+    min_date: str | None = None
+    """
+    Earliest selectable date as ``"YYYY-MM-DD"``.
+    """
+
+    max_date: str | None = None
+    """
+    Latest selectable date as ``"YYYY-MM-DD"``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "date_picker"
 
     def __init__(

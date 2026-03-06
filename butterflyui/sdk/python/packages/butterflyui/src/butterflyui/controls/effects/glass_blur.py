@@ -52,6 +52,54 @@ class GlassBlur(Component):
             Optional colour for an outer glow 
             ``BoxShadow`` rendered behind the panel.
     """
+
+
+    blur: float | None = None
+    """
+    Gaussian blur sigma applied to the backdrop.
+    Defaults to ``14``.
+    """
+
+    opacity: float | None = None
+    """
+    Opacity of the tinted colour fill (``0.0`` – ``1.0``).
+    Defaults to ``0.16``.
+    """
+
+    color: Any | None = None
+    """
+    Fill colour composited on top of the blur.
+    Defaults to white.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the clipping ``RRect`` and ``BoxDecoration``.
+    Defaults to ``12``.
+    """
+
+    border_color: Any | None = None
+    """
+    Optional border colour drawn around the glass panel.
+    """
+
+    border_width: float | None = None
+    """
+    Stroke width of the border in logical pixels.
+    Defaults to ``1``.
+    """
+
+    noise_opacity: float | None = None
+    """
+    Opacity of the random-dot noise texture overlay (``0.0`` – ``1.0``).
+    ``0`` disables the texture.
+    """
+
+    border_glow: Any | None = None
+    """
+    Optional colour for an outer glow
+    ``BoxShadow`` rendered behind the panel.
+    """
     control_type = "glass_blur"
 
     def __init__(

@@ -60,6 +60,53 @@ class TextButton(Button):
             Extra runtime props forwarded to the renderer.
     """
 
+
+    label: str | None = None
+    """
+    Button caption text. ``text`` takes precedence when both are set.
+    """
+
+    text: str | None = None
+    """
+    Caption text alias for ``label``.
+    """
+
+    value: Any | None = None
+    """
+    Arbitrary payload emitted with click events.
+    """
+
+    action: Any | None = None
+    """
+    Declarative action descriptor fired on press.
+    """
+
+    action_id: str | None = None
+    """
+    Registered action ID to dispatch on press.
+    """
+
+    action_event: str | None = None
+    """
+    Event name forwarded to the action dispatcher.
+    """
+
+    action_payload: Mapping[str, Any] | None = None
+    """
+    Extra payload mapping for action dispatch.
+    """
+
+    actions: list[Any] | None = None
+    """
+    Action descriptor list executed on press.
+    """
+
+
+    events: list[str] | None = None
+    """
+    Runtime event names to subscribe to.
+    """
+
     control_type = "text_button"
 
     def __init__(

@@ -70,6 +70,87 @@ class SnapGrid(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    show_grid: bool | None = None
+    """
+    If ``True`` (default), the visual grid lines are painted.  Set to ``False`` to hide the grid while keeping snapping.
+    """
+
+    spacing: float | None = None
+    """
+    Major grid-cell spacing in logical pixels (clamped ``2`` – ``200``).  Defaults to ``16``.
+    """
+
+    subdivisions: int | None = None
+    """
+    Number of minor divisions within each major cell (clamped ``1`` – ``16``).  Defaults to ``1``.
+    """
+
+    line_color: Any | None = None
+    """
+    Colour of minor grid lines.  Defaults to ``#22FFFFFF``.
+    """
+
+    major_line_color: Any | None = None
+    """
+    Colour of major grid lines.  Defaults to ``#44FFFFFF``.
+    """
+
+    line_width: float | None = None
+    """
+    Stroke width of minor lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.0``.
+    """
+
+    major_line_width: float | None = None
+    """
+    Stroke width of major lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.2``.
+    """
+
+    background: Any | None = None
+    """
+    Background colour/paint applied behind the grid lines.
+    """
+
+    origin: Any | None = None
+    """
+    Grid origin point or offset configuration.
+    """
+
+    snap: bool | None = None
+    """
+    If ``True``, pointer coordinates are rounded to the nearest grid intersection.
+    """
+
+    snap_spacing: float | None = None
+    """
+    Snap interval in logical pixels (overrides ``spacing`` for snapping calculations).
+    """
+
+    snap_mode: str | None = None
+    """
+    Snap strategy hint forwarded to the runtime.
+    """
+
+    emit_on_hover: bool | None = None
+    """
+    If ``True``, emits ``"hover"`` events with ``x``/``y`` as the pointer moves over the grid.
+    """
+
+    emit_on_press: bool | None = None
+    """
+    If ``True``, emits ``"press"`` events with ``x``/``y`` on pointer down.
+    """
+
+    emit_on_drag: bool | None = None
+    """
+    If ``True``, emits ``"drag"`` events with ``x``/``y``/``dx``/``dy`` during drag gestures.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "snap_grid"
 
     def __init__(

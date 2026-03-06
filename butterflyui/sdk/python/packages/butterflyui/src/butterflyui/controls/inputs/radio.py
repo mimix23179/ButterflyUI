@@ -37,6 +37,29 @@ class Radio(Component):
         label:
             Optional label rendered above the radio group.
     """
+
+
+    options: list[Any] | None = None
+    """
+    List of option items.  Each entry may be a plain string
+    or a mapping with ``"label"`` and ``"value"`` keys.
+    """
+
+    index: int | None = None
+    """
+    Zero-based index of the initially selected option.
+    """
+
+    value: Any | None = None
+    """
+    Value of the initially selected option.  Takes precedence
+    over ``index`` when both are provided.
+    """
+
+    label: str | None = None
+    """
+    Optional label rendered above the radio group.
+    """
     control_type = "radio"
 
     def __init__(

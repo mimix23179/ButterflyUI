@@ -35,6 +35,17 @@ class Stack(Component):
             When ``True`` children that overflow the stack bounds are clipped.
     """
 
+
+    fit: str | None = None
+    """
+    How the stack sizes itself. Values: ``"loose"``, ``"expand"``.
+    """
+
+    clip: bool | None = None
+    """
+    When ``True`` children that overflow the stack bounds are clipped.
+    """
+
     control_type = "stack"
 
     def __init__(

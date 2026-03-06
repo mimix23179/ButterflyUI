@@ -49,6 +49,42 @@ class FlowField(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    seed: int | None = None
+    """
+    Integer seed that offsets the noise function,
+    producing a different field pattern.  Defaults to ``1``.
+    """
+
+    speed: float | None = None
+    """
+    Animation speed multiplier (``0.0`` – ``5.0``).
+    Defaults to ``0.35``.
+    """
+
+    line_width: float | None = None
+    """
+    Stroke width of each segment in logical pixels
+    (``0.2`` – ``8.0``).  Defaults to ``1.1``.
+    """
+
+    color: Any | None = None
+    """
+    Stroke colour of the line segments.
+    Defaults to ``#22d3ee``.
+    """
+
+    opacity: float | None = None
+    """
+    Stroke opacity (``0.0`` – ``1.0``).
+    Defaults to ``0.6``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "flow_field"
 
     def __init__(

@@ -37,6 +37,37 @@ class BarPlot(BarChart):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    values: list[Any] | None = None
+    """
+    Numeric bar values for a single series.
+    """
+
+    points: list[Any] | None = None
+    """
+    Alias for ``values``.
+    """
+
+    labels: list[str] | None = None
+    """
+    Category labels for each bar.
+    """
+
+    fill: bool | None = None
+    """
+    Whether bars are solid-filled.
+    """
+
+    color: Any | None = None
+    """
+    Bar colour applied to every bar.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "bar_plot"
 
     def __init__(

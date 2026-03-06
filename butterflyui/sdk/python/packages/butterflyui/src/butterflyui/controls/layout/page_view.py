@@ -63,6 +63,64 @@ class PageView(Component):
             Runtime event names that should be emitted to Python.
     """
 
+
+    index: int | None = None
+    """
+    Zero-based index of the visible page.
+    """
+
+    animate: bool | None = None
+    """
+    If ``True``, page changes animate instead of switching instantly.
+    """
+
+    duration_ms: int | None = None
+    """
+    Transition duration in milliseconds.
+    """
+
+    keep_alive: bool | None = None
+    """
+    If ``True``, keeps non-visible pages mounted.
+    """
+
+    scroll_direction: str | None = None
+    """
+    Page axis: ``"horizontal"`` (default) or ``"vertical"``.
+    """
+
+    reverse: bool | None = None
+    """
+    If ``True``, reverses page traversal direction.
+    """
+
+    page_snapping: bool | None = None
+    """
+    If ``True``, releases snap to page boundaries.
+    """
+
+    pad_ends: bool | None = None
+    """
+    If ``True``, adds implicit padding at beginning/end when
+    ``viewport_fraction`` is below ``1.0``.
+    """
+
+    viewport_fraction: float | None = None
+    """
+    Fraction of viewport each page occupies. Useful for carousel-style
+    previews. Typical range: ``0.6`` .. ``1.0``.
+    """
+
+    initial_page: int | None = None
+    """
+    Alias for ``index``. When both are provided, ``index`` wins.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names that should be emitted to Python.
+    """
+
     control_type = "page_view"
 
     def __init__(

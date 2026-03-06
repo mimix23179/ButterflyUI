@@ -62,6 +62,76 @@ class GradientSweep(Component):
         playing: 
             Alias for *play*.
     """
+
+
+    colors: list[Any] | None = None
+    """
+    List of gradient-stop colours.  Defaults to a built-in
+    cyan / purple / pink / green palette if empty.
+    """
+
+    stops: list[float] | None = None
+    """
+    Optional list of gradient stop positions (``0.0`` –
+    ``1.0``), one per colour.  Length must match *colors*.
+    """
+
+    duration_ms: int | None = None
+    """
+    Full rotation period in milliseconds.  Defaults
+    to ``1800``; clamped to ``1 – 600 000``.
+    """
+
+    duration: int | None = None
+    """
+    Alias for *duration_ms*.
+    """
+
+    angle: float | None = None
+    """
+    Static base angle in **degrees** added to the animated
+    rotation.
+    """
+
+    start_angle: float | None = None
+    """
+    Sweep gradient start angle in degrees.  Defaults
+    to ``0``.
+    """
+
+    end_angle: float | None = None
+    """
+    Sweep gradient end angle in degrees.  Defaults to
+    ``360``.
+    """
+
+    opacity: float | None = None
+    """
+    Shader mask opacity (``0.0`` – ``1.0``).  Defaults to
+    ``0.6``.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` (default) the rotation repeats
+    indefinitely.
+    """
+
+    autoplay: bool | None = None
+    """
+    When ``True`` (default) the animation starts on
+    mount.
+    """
+
+    play: bool | None = None
+    """
+    Explicit play flag; ``True`` starts, ``False`` pauses.
+    """
+
+    playing: bool | None = None
+    """
+    Alias for *play*.
+    """
     control_type = "gradient_sweep"
 
     def __init__(

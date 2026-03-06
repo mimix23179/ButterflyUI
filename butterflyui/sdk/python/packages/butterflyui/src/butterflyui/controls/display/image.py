@@ -22,6 +22,12 @@ class Image(Component):
         src: 
             Image URL or local asset path.
     """
+
+
+    src: str | None = None
+    """
+    Image URL or local asset path.
+    """
     control_type = "image"
 
     def __init__(

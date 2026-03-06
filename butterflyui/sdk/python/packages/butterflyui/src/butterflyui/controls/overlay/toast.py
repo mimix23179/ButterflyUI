@@ -40,6 +40,35 @@ class Toast(Component):
             ``"warning"``, ``"error"``.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the toast is visible.
+    """
+
+
+    message: str | None = None
+    """
+    The notification message text.
+    """
+
+    duration_ms: int | None = None
+    """
+    Milliseconds before the toast auto-dismisses. Use ``0`` to
+    disable auto-dismiss.
+    """
+
+    action_label: str | None = None
+    """
+    Label for an optional inline action button.
+    """
+
+    variant: str | None = None
+    """
+    Semantic color variant. Values: ``"info"``, ``"success"``,
+    ``"warning"``, ``"error"``.
+    """
+
     control_type = "toast"
 
     def __init__(

@@ -55,6 +55,45 @@ class DropZone(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    accepts: list[str] | None = None
+    """
+    List of ``drag_type`` strings this zone will accept.
+    Alias ``accept_types`` is kept in sync.
+    """
+
+    accept_types: list[str] | None = None
+    """
+    Alias for ``accepts``.
+    """
+
+    accept_mimes: list[str] | None = None
+    """
+    List of MIME type strings accepted for desktop file drops.
+    """
+
+    title: str | None = None
+    """
+    Heading text shown in the default empty-state card.
+    """
+
+    subtitle: str | None = None
+    """
+    Subheading text shown below ``title`` in the empty-state
+    card.
+    """
+
+    use_desktop_drop: bool | None = None
+    """
+    If ``True``, the zone also listens for system-level
+    file-drop events (desktop only).
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "drop_zone"
 
     def __init__(

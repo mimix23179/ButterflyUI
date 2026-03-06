@@ -38,6 +38,24 @@ class Column(Component):
             ``end``, ``stretch``, ``baseline``.
     """
 
+
+    spacing: float | None = None
+    """
+    Vertical gap between children in logical pixels.  Aliased as ``gap``.
+    """
+
+    main_axis: str | None = None
+    """
+    Main-axis alignment for the column.  Values: ``start``, ``center``,
+    ``end``, ``space_between``, ``space_around``, ``space_evenly``.
+    """
+
+    cross_axis: str | None = None
+    """
+    Cross-axis alignment for children.  Values: ``start``, ``center``,
+    ``end``, ``stretch``, ``baseline``.
+    """
+
     control_type = "column"
 
     def __init__(

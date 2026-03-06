@@ -38,6 +38,34 @@ class Select(Component):
         hint:
             Hint text shown when no option is selected.
     """
+
+
+    options: list[Any] | None = None
+    """
+    List of option items.  Each entry may be a plain string
+    or a mapping with ``"label"`` and optional ``"value"``
+    keys.
+    """
+
+    index: int | None = None
+    """
+    Zero-based index of the initially selected option.
+    """
+
+    value: Any | None = None
+    """
+    Value of the initially selected option.
+    """
+
+    label: str | None = None
+    """
+    Floating label text above the drop-down field.
+    """
+
+    hint: str | None = None
+    """
+    Hint text shown when no option is selected.
+    """
     control_type = "select"
 
     def __init__(

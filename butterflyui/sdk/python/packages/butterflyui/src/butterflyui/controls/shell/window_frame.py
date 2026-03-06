@@ -70,6 +70,87 @@ class WindowFrame(Component):
             Widget placed at the trailing (right) end of the title bar.
     """
 
+
+    title: str | None = None
+    """
+    Text displayed in the window title bar.
+    """
+
+    show_close: bool | None = None
+    """
+    When ``True`` the close button is shown in the title bar.
+    """
+
+    show_maximize: bool | None = None
+    """
+    When ``True`` the maximize/restore button is shown.
+    """
+
+    show_minimize: bool | None = None
+    """
+    When ``True`` the minimize button is shown.
+    """
+
+    draggable: bool | None = None
+    """
+    When ``True`` the title bar acts as a window-drag region.
+    """
+
+    acrylic_effect: bool | None = None
+    """
+    When ``True`` an acrylic (translucent blur) background is applied.
+    """
+
+    acrylic_opacity: float | None = None
+    """
+    Opacity of the acrylic background (0.0--1.0).
+    """
+
+    custom_frame: bool | None = None
+    """
+    When ``True`` a fully custom window border is rendered.
+    """
+
+    use_native_title_bar: bool | None = None
+    """
+    When ``True`` the OS native title bar is used instead.
+    """
+
+    native_window_actions: bool | None = None
+    """
+    When ``True`` window control actions are delegated to the OS.
+    """
+
+    show_default_controls: bool | None = None
+    """
+    When ``True`` the built-in window control button row is shown.
+    """
+
+    emit_move_events: bool | None = None
+    """
+    When ``True`` window-position events are emitted to Python.
+    """
+
+    move_event_throttle_ms: int | None = None
+    """
+    Minimum milliseconds between consecutive move events.
+    """
+
+    title_leading: Any | None = None
+    """
+    Widget placed at the leading (left) end of the title bar.
+    """
+
+    title_content: Any | None = None
+    """
+    Widget replacing the default title text in the title bar.
+    """
+
+    title_trailing: Any | None = None
+    """
+    Widget placed at the trailing (right) end of the title bar.
+    """
+
     control_type = "window_frame"
 
     def __init__(

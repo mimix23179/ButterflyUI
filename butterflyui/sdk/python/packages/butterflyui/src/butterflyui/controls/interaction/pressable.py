@@ -47,6 +47,29 @@ class Pressable(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    autofocus: bool | None = None
+    """
+    If ``True``, the focus node requests focus on mount.
+    """
+
+    hover_enabled: bool | None = None
+    """
+    If ``True``, ``hover_enter`` and ``hover_exit`` events are
+    fired.
+    """
+
+    focus_enabled: bool | None = None
+    """
+    If ``True``, ``focus_gained`` and ``focus_lost`` events are
+    fired.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "pressable"
 
     def __init__(

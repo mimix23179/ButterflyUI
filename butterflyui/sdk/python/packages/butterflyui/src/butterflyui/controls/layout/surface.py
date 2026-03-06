@@ -48,6 +48,27 @@ class Surface(Component):
             icon/color/transparency hints).
     """
 
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background fill color.
+    """
+
+    border_color: Any | None = None
+    """
+    Border stroke color.
+    """
+
+    border_width: float | None = None
+    """
+    Border stroke width in logical pixels.
+    """
+
     control_type = "surface"
 
     def __init__(

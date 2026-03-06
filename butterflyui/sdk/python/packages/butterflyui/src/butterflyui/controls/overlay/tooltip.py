@@ -34,6 +34,22 @@ class Tooltip(Component):
             Hover delay in milliseconds before the tooltip is shown.
     """
 
+
+    message: str | None = None
+    """
+    Text displayed inside the tooltip bubble.
+    """
+
+    prefer_below: bool | None = None
+    """
+    When ``True`` the tooltip prefers to appear below the child.
+    """
+
+    wait_ms: int | None = None
+    """
+    Hover delay in milliseconds before the tooltip is shown.
+    """
+
     control_type = "tooltip"
 
     def __init__(

@@ -68,6 +68,64 @@ class Pagination(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    page: int | None = None
+    """
+    Current page number (1-based).
+    """
+
+    page_count: int | None = None
+    """
+    Total number of pages. If omitted, the renderer can derive it from
+    ``total_items`` and ``page_size``.
+    """
+
+    page_size: int | None = None
+    """
+    Number of items per page used for derived ``page_count``.
+    """
+
+    total_items: int | None = None
+    """
+    Total item count used with ``page_size`` to derive ``page_count``.
+    """
+
+    max_visible: int | None = None
+    """
+    Maximum number of visible page buttons in numeric mode.
+    """
+
+    show_edges: bool | None = None
+    """
+    If ``True``, first/last jump buttons are shown when truncated.
+    """
+
+    dense: bool | None = None
+    """
+    Uses compact spacing and control sizing.
+    """
+
+    prev_label: str | None = None
+    """
+    Label for the previous-page action.
+    """
+
+    next_label: str | None = None
+    """
+    Label for the next-page action.
+    """
+
+    mode: str | None = None
+    """
+    Optional display mode hint (for example ``"numbers"`` or
+    ``"stepper"``) interpreted by the renderer.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "pagination"
 
     def __init__(

@@ -33,6 +33,17 @@ class ListView(Component):
             If ``True``, a ``Divider`` is inserted between each row.
     """
 
+
+    items: list[Any] | None = None
+    """
+    Data-item payloads used to build rows when no explicit children are given.
+    """
+
+    separator: bool | None = None
+    """
+    If ``True``, a ``Divider`` is inserted between each row.
+    """
+
     control_type = "list_view"
 
     def __init__(

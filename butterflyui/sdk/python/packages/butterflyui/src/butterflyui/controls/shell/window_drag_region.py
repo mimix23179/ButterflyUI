@@ -41,6 +41,33 @@ class WindowDragRegion(Component):
             is used.
     """
 
+
+    draggable: bool | None = None
+    """
+    When ``True`` the region participates in native window dragging.
+    """
+
+    maximize_on_double_tap: bool | None = None
+    """
+    When ``True`` double-clicking the region maximises the window.
+    """
+
+    emit_move: bool | None = None
+    """
+    When ``True`` window-position events are emitted to Python.
+    """
+
+    native_drag: bool | None = None
+    """
+    When ``True`` the platform's native drag API is used.
+    """
+
+    native_maximize_action: bool | None = None
+    """
+    When ``True`` the OS-level maximize-on-double-click behaviour
+    is used.
+    """
+
     control_type = "window_drag_region"
 
     def __init__(

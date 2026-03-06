@@ -66,6 +66,62 @@ class Sidebar(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    sections: list[Mapping[str, Any]] | None = None
+    """
+    Grouped navigation sections, each containing nested ``items``.
+    """
+
+    items: list[Any] | None = None
+    """
+    Flat list of navigation item descriptors.
+    """
+
+    selected_id: str | None = None
+    """
+    Selected item ID.
+    """
+
+    title: str | None = None
+    """
+    Optional sidebar heading label.
+    """
+
+    show_search: bool | None = None
+    """
+    Enables a search input at the top of the sidebar.
+    """
+
+    query: str | None = None
+    """
+    Initial search query value.
+    """
+
+    collapsible: bool | None = None
+    """
+    Enables collapsible section behavior.
+    """
+
+    dense: bool | None = None
+    """
+    Uses compact row spacing.
+    """
+
+    emit_on_search_change: bool | None = None
+    """
+    Emits search events while typing.
+    """
+
+    search_debounce_ms: int | None = None
+    """
+    Debounce window for incremental search events.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "sidebar"
 
     def __init__(

@@ -59,6 +59,67 @@ class Avatar(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    src: str | None = None
+    """
+    Image URL or asset path used as the primary avatar image.
+    """
+
+    image: str | None = None
+    """
+    Alias for ``src`` — the two are interchangeable.
+    """
+
+    name: str | None = None
+    """
+    Full name used to auto-derive initials when ``initials`` is not provided.
+    """
+
+    initials: str | None = None
+    """
+    Explicit one- or two-letter initials shown when no image is available.
+    """
+
+    icon: str | None = None
+    """
+    Fallback Material icon name rendered when neither an image nor initials are present.
+    """
+
+    size: float | None = None
+    """
+    Diameter of the avatar circle in logical pixels.
+    """
+
+    radius: float | None = None
+    """
+    Explicit corner radius (defaults to half of ``size``).
+    """
+
+    color: Any | None = None
+    """
+    Foreground colour for initials or icon text.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background fill colour for the circle.
+    """
+
+    status: str | None = None
+    """
+    Presence indicator — ``"online"``, ``"away"``, ``"busy"``, or ``"offline"``.
+    """
+
+    badge: Any | None = None
+    """
+    Arbitrary badge content overlaid on the avatar.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "avatar"
 
     def __init__(

@@ -31,6 +31,17 @@ class GridView(Component):
             Number of grid columns.  Defaults to the runtime's layout heuristic when ``None``.
     """
 
+
+    items: list[Any] | None = None
+    """
+    Data-item payloads used by the runtime to construct tiles when no explicit children are given.
+    """
+
+    columns: int | None = None
+    """
+    Number of grid columns.  Defaults to the runtime's layout heuristic when ``None``.
+    """
+
     control_type = "grid_view"
 
     def __init__(

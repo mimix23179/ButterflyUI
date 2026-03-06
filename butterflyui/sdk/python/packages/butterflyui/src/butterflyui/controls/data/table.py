@@ -40,6 +40,17 @@ class Table(Component):
             Row data — a list of lists where each inner list contains cell values aligned to ``columns``.
     """
 
+
+    columns: list[Any] | None = None
+    """
+    Column header labels — a list of plain strings.
+    """
+
+    rows: list[Any] | None = None
+    """
+    Row data — a list of lists where each inner list contains cell values aligned to ``columns``.
+    """
+
     control_type = "table"
 
     def __init__(

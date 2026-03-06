@@ -48,6 +48,51 @@ class Shadow(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    color: Any | None = None
+    """
+    Shadow colour.  Defaults to ``#33000000`` (20 %
+    black).
+    """
+
+    blur: float | None = None
+    """
+    Blur radius of the shadow.  Defaults to ``12``.
+    """
+
+    spread: float | None = None
+    """
+    Spread radius.  Defaults to ``0``.
+    """
+
+    offset_x: float | None = None
+    """
+    Horizontal shadow offset.  Defaults to ``0``.
+    """
+
+    offset_y: float | None = None
+    """
+    Vertical shadow offset.  Defaults to ``4``.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the ``BoxDecoration``.  Defaults to
+    ``0`` (sharp corners).
+    """
+
+    shadows: list[Mapping[str, Any]] | None = None
+    """
+    Explicit list of shadow definition mappings, each
+    with ``color``, ``blur``, ``spread``, ``offset_x``,
+    ``offset_y``.  Overrides the shorthand parameters.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "shadow"
 
     def __init__(

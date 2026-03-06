@@ -33,6 +33,20 @@ class AnimatedBackground(Component):
             Total cycle duration in milliseconds.  Defaults to ``2400``; 
             clamped to the range ``1 – 600 000``.
     """
+
+
+    colors: list[Any] | None = None
+    """
+    Sequence of colour values (hex strings, integers, or
+    any format accepted by the runtime ``coerceColor``
+    helper that the background cycles through.
+    """
+
+    duration_ms: int | None = None
+    """
+    Total cycle duration in milliseconds.  Defaults to ``2400``;
+    clamped to the range ``1 – 600 000``.
+    """
     control_type = "animated_background"
 
     def __init__(

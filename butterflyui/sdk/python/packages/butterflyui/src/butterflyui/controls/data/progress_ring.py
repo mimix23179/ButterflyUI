@@ -40,6 +40,27 @@ class ProgressRing(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    value: float | None = None
+    """
+    Progress value for determinate mode.
+    """
+
+    indeterminate: bool | None = None
+    """
+    If ``True``, renders an animated indeterminate ring.
+    """
+
+    label: str | None = None
+    """
+    Optional text label shown with the indicator.
+    """
+
+    stroke_width: float | None = None
+    """
+    Thickness of the ring stroke.
+    """
+
     control_type = "progress_ring"
 
     def __init__(

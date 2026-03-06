@@ -926,6 +926,101 @@ class Gallery(Component):
     """
 
 
+    items: Iterable[GalleryItem | Mapping[str, Any]] | None = None
+    """
+    Iterable of ``GalleryItem`` or mapping objects.
+    """
+
+    module: str | None = None
+    """
+    Optional umbrella module selector.
+    """
+
+    layout: str | None = None
+    """
+    Layout mode string.
+    """
+
+    type_filter: str | None = None
+    """
+    Optional media type filter such as ``"image"`` or ``"font"``.
+    """
+
+    columns: int | None = None
+    """
+    Grid/virtual-grid column count.
+    """
+
+    spacing: float | None = None
+    """
+    Base item spacing.
+    """
+
+    main_axis_spacing: float | None = None
+    """
+    Main-axis spacing override.
+    """
+
+    cross_axis_spacing: float | None = None
+    """
+    Cross-axis spacing override.
+    """
+
+    carousel_height: float | None = None
+    """
+    Fixed pixel height for carousel mode. Use when gallery is placed
+    in shrink-wrapped or unconstrained parents.
+    """
+
+    carousel_aspect_ratio: float | None = None
+    """
+    Fallback ``width / height`` ratio for carousel mode when
+    ``carousel_height`` is not provided.
+    """
+
+    carousel_viewport_fraction: float | None = None
+    """
+    Fraction of viewport each carousel page should occupy.
+    ``1.0`` uses full width; lower values reveal neighboring cards.
+    """
+
+    carousel_pad_ends: bool | None = None
+    """
+    Whether carousel adds leading/trailing padding at the ends.
+    """
+
+    carousel_page_snapping: bool | None = None
+    """
+    Whether swipe settles exactly on page boundaries.
+    """
+
+    carousel_initial_page: int | None = None
+    """
+    Initial page index used when the carousel is first built.
+    """
+
+    carousel_overlay_opacity: float | None = None
+    """
+    Overlay gradient opacity applied to carousel captions
+    (0.0 to 1.0).
+    """
+
+    carousel_horizontal_inset: float | None = None
+    """
+    Horizontal margin around each carousel tile.
+    """
+
+    carousel_vertical_inset: float | None = None
+    """
+    Vertical margin around each carousel tile.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names to emit to Python.
+    """
+
+
     control_type = "gallery"
 
     def __init__(

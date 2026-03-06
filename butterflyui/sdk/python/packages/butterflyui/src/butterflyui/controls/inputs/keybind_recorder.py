@@ -41,6 +41,28 @@ class KeybindRecorder(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Currently recorded keyboard shortcut string.
+    """
+
+    placeholder: str | None = None
+    """
+    Hint text shown when no shortcut has been recorded.
+    """
+
+    show_clear: bool | None = None
+    """
+    If ``True``, a trailing ``×`` button clears the current
+    binding.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "keybind_recorder"
 
     def __init__(

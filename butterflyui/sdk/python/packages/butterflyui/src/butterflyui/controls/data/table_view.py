@@ -72,6 +72,82 @@ class TableView(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    columns: Sequence[Any] | None = None
+    """
+    Column descriptors consumed by the Flutter renderer.
+    """
+
+    rows: Sequence[Any] | None = None
+    """
+    Row objects rendered by the table.
+    """
+
+    caption: str | None = None
+    """
+    Optional title/caption shown above table content.
+    """
+
+    footer_note: str | None = None
+    """
+    Optional annotation shown near the table footer.
+    """
+
+    sortable: bool | None = None
+    """
+    Enables sort affordances in headers.
+    """
+
+    filterable: bool | None = None
+    """
+    Enables built-in query/filter behavior.
+    """
+
+    selectable: bool | None = None
+    """
+    Enables row selection state.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces row height and spacing for compact layouts.
+    """
+
+    striped: bool | None = None
+    """
+    Alternates row background treatment for readability.
+    """
+
+    show_header: bool | None = None
+    """
+    If ``False``, header row is hidden.
+    """
+
+    sticky_header: bool | None = None
+    """
+    Pins table header during vertical scrolling when supported.
+    """
+
+    sort_column: str | None = None
+    """
+    Initial column key to sort by.
+    """
+
+    sort_ascending: bool | None = None
+    """
+    Initial sort direction.
+    """
+
+    filter_query: str | None = None
+    """
+    Initial query string applied by the renderer.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "table_view"
 
     def __init__(

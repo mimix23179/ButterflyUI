@@ -44,6 +44,31 @@ class ScanlineOverlay(Component):
             When ``False`` the overlay is hidden and the child
             is rendered unmodified.
     """
+
+
+    spacing: float | None = None
+    """
+    Vertical distance between scanlines in logical pixels
+    (``1`` – ``256``).  Defaults to ``6``.
+    """
+
+    thickness: float | None = None
+    """
+    Stroke thickness of each scanline (``0.5`` –
+    ``32``).  Defaults to ``1``.
+    """
+
+    opacity: float | None = None
+    """
+    Scanline opacity (``0.0`` – ``1.0``).  Defaults to
+    ``0.18``.
+    """
+
+    color: Any | None = None
+    """
+    Scanline colour.  Defaults to the current theme's
+    text colour.
+    """
     control_type = "scanline_overlay"
 
     def __init__(

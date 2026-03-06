@@ -53,6 +53,72 @@ class Badge(Component):
         clickable: 
             If ``True``, the badge becomes tappable and emits a ``"click"`` event with the current display value.
     """
+
+
+    label: str | None = None
+    """
+    Display text. Resolved from `text` when ``None``.
+    """
+
+    text: str | None = None
+    """
+    Alias for `label`.
+    """
+
+    value: Any | None = None
+    """
+    Arbitrary value exposed to event payloads and the ``get_value`` / ``set_value`` invoke methods.
+    """
+
+    color: Any | None = None
+    """
+    Foreground (text) colour. Overrides the severity-derived colour.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background colour. Overrides the severity-derived background.
+    """
+
+    text_color: Any | None = None
+    """
+    Alias for `color`.
+    """
+
+    severity: str | None = None
+    """
+    Semantic severity controlling the theme colour scheme. One of ``"success"``, ``"warning"`` / ``"warn"``, ``"error"`` / ``"danger"``. Defaults to the primary colour.
+    """
+
+    variant: str | None = None
+    """
+    Visual variant hint forwarded to the runtime.
+    """
+
+    dot: bool | None = None
+    """
+    If ``True``, renders a small coloured dot instead of text.
+    """
+
+    pulse: bool | None = None
+    """
+    If ``True``, the badge animates with a subtle pulse (scale tween).
+    """
+
+    count: int | None = None
+    """
+    When set, overrides the display text with this integer count.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the badge container. Defaults to a large pill shape (``999``) or fully round for dots.
+    """
+
+    clickable: bool | None = None
+    """
+    If ``True``, the badge becomes tappable and emits a ``"click"`` event with the current display value.
+    """
     control_type = "badge"
 
     def __init__(

@@ -46,6 +46,39 @@ class TimeSelect(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Currently selected time as ``"HH:MM"``.
+    """
+
+    label: str | None = None
+    """
+    Floating label text shown above the field.
+    """
+
+    placeholder: str | None = None
+    """
+    Hint text shown when no time is selected.
+    """
+
+    minute_step: int | None = None
+    """
+    Granularity of the minute selector in the picker dialog.
+    Common values: ``1``, ``5``, ``15``, ``30``.
+    """
+
+    use_24h: bool | None = None
+    """
+    If ``True``, the picker dialog uses 24-hour format.
+    If ``False`` (default), 12-hour AM/PM format is used.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "time_select"
 
     def __init__(

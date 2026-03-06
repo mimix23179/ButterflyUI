@@ -40,6 +40,34 @@ class FieldGroup(Component):
             If ``True``, a red ``" *"`` suffix is appended to
             ``label``.
     """
+
+
+    label: str | None = None
+    """
+    Bold header text rendered above the group.
+    """
+
+    helper_text: str | None = None
+    """
+    Subdued helper note shown below the last child.
+    """
+
+    error_text: str | None = None
+    """
+    Error message shown in red below the group.
+    """
+
+    spacing: float | None = None
+    """
+    Vertical gap in logical pixels between children.
+    Defaults to ``8``.
+    """
+
+    required: bool | None = None
+    """
+    If ``True``, a red ``" *"`` suffix is appended to
+    ``label``.
+    """
     control_type = "field_group"
 
     def __init__(

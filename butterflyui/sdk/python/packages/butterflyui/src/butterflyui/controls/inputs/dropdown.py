@@ -53,6 +53,64 @@ class Dropdown(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Currently selected value.
+    """
+
+    options: list[Any] | None = None
+    """
+    List of option items (strings or ``{"label", "value"}``
+    mappings).
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for ``options``.
+    """
+
+    groups: list[Mapping[str, Any]] | None = None
+    """
+    List of grouped option sections, each with
+    ``"label"`` and ``"options"`` keys.
+    """
+
+    label: str | None = None
+    """
+    Floating label text above the field.
+    """
+
+    hint: str | None = None
+    """
+    Hint/placeholder text shown when nothing is selected.
+    """
+
+    placeholder: str | None = None
+    """
+    Alias for ``hint``.
+    """
+
+    loading: bool | None = None
+    """
+    If ``True``, a progress indicator is shown.
+    """
+
+    async_source: str | None = None
+    """
+    Enables async filtering mode.
+    """
+
+    debounce_ms: int | None = None
+    """
+    Debounce delay in milliseconds for async input events.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "dropdown"
 
     def __init__(

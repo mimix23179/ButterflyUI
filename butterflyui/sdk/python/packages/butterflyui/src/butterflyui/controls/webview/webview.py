@@ -91,6 +91,118 @@ class WebView(Component):
             initialise. Defaults to ``15000``.
     """
 
+
+    url: str | None = None
+    """
+    Initial URL to load in the webview.
+    """
+
+    html: str | None = None
+    """
+    Inline HTML string to render, used instead of ``url``.
+    """
+
+    base_url: str | None = None
+    """
+    Origin URL used when loading ``html`` from a string.
+    """
+
+    engine: str | None = None
+    """
+    Webview rendering engine. Normalised to ``"windows"`` on desktop.
+    """
+
+    webview_engine: str | None = None
+    """
+    Alias for ``engine``.
+    """
+
+    fallback_engine: str | None = None
+    """
+    Fallback engine identifier if the primary engine fails.
+    """
+
+    prevent_links: list[str] | None = None
+    """
+    List of URL patterns whose navigation is intercepted and blocked.
+    """
+
+    request_headers: Mapping[str, Any] | None = None
+    """
+    Custom HTTP headers sent with every request.
+    """
+
+    user_agent: str | None = None
+    """
+    Custom User-Agent string override.
+    """
+
+    javascript_enabled: bool | None = None
+    """
+    When ``True`` (default) JavaScript execution is enabled.
+    """
+
+    dom_storage_enabled: bool | None = None
+    """
+    When ``True`` DOM/localStorage storage is enabled.
+    """
+
+    third_party_cookies_enabled: bool | None = None
+    """
+    When ``True`` third-party cookies are allowed.
+    """
+
+    cache_enabled: bool | None = None
+    """
+    When ``True`` the browser cache is active.
+    """
+
+    clear_cache_on_start: bool | None = None
+    """
+    When ``True`` the cache is cleared when the view initialises.
+    """
+
+    incognito: bool | None = None
+    """
+    When ``True`` no browsing data is persisted between sessions.
+    """
+
+    media_playback_requires_user_gesture: bool | None = None
+    """
+    When ``True`` media autoplay requires a user interaction first.
+    """
+
+    allows_inline_media_playback: bool | None = None
+    """
+    When ``True`` media can play inline without entering fullscreen.
+    """
+
+    allow_file_access: bool | None = None
+    """
+    When ``True`` ``file://`` URLs can be loaded.
+    """
+
+    allow_universal_access_from_file_urls: bool | None = None
+    """
+    When ``True`` file-origin pages can access cross-origin content.
+    """
+
+    allow_popups: bool | None = None
+    """
+    When ``True`` ``window.open()`` calls are permitted.
+    """
+
+    open_external_links: bool | None = None
+    """
+    When ``True`` external links open in the system browser.
+    """
+
+    init_timeout_ms: int | None = None
+    """
+    Maximum milliseconds to wait for the WebView engine to
+    initialise. Defaults to ``15000``.
+    """
+
     control_type = "webview"
 
     def __init__(

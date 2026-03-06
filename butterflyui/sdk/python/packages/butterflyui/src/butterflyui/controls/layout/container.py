@@ -66,6 +66,32 @@ class Container(Component):
             ``icon``, ``color``, and ``transparency`` hints.
     """
 
+
+    bgcolor: Any | None = None
+    """
+    Background fill color.
+    """
+
+    border_color: Any | None = None
+    """
+    Border stroke color.
+    """
+
+    border_width: float | None = None
+    """
+    Border stroke width in logical pixels.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "container"
 
     def __init__(

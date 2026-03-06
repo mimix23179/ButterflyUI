@@ -29,6 +29,12 @@ class FlexSpacer(Component):
             to ``1``.
     """
 
+    flex: int = 1
+    """
+    Flex factor shared among sibling ``Expanded`` children. Defaults
+    to ``1``.
+    """
+
     control_type = "flex_spacer"
 
     def __init__(

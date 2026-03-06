@@ -124,6 +124,195 @@ class Display(Component):
             Enables strict schema validation when supported.
     """
 
+
+    role: str | None = None
+    """
+    Role/variant selector. Recommended values:
+    ``"identity"``, ``"status"``, ``"rating"``, ``"reactions"``,
+    ``"check"``, ``"ownership"``.
+    """
+
+    variant: str | None = None
+    """
+    Legacy alias for ``role``.
+    """
+
+    title: str | None = None
+    """
+    Primary line.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary line.
+    """
+
+    caption: str | None = None
+    """
+    Tertiary/supporting caption line.
+    """
+
+    description: str | None = None
+    """
+    Body text alias.
+    """
+
+    name: str | None = None
+    """
+    Identity name alias.
+    """
+
+    tone: str | None = None
+    """
+    Semantic tone (``neutral/info/success/warn/danger``).
+    """
+
+    size: str | None = None
+    """
+    Size token (for example ``sm``, ``md``, ``lg``).
+    """
+
+    interactive: bool | None = None
+    """
+    Enables hover/focus affordances and tap emission.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor for role surfaces.
+    """
+
+    leading: Any | None = None
+    """
+    Leading slot descriptor (control map/string/icon).
+    """
+
+    trailing: Any | None = None
+    """
+    Trailing slot descriptor.
+    """
+
+    avatar: Any | None = None
+    """
+    Avatar descriptor.
+    """
+
+    initials: str | None = None
+    """
+    Avatar fallback initials.
+    """
+
+    tags: list[Any] | None = None
+    """
+    Identity tags/chips.
+    """
+
+    status: str | None = None
+    """
+    Status text or key for status role.
+    """
+
+    badge: str | None = None
+    """
+    Badge label.
+    """
+
+    color: Any | None = None
+    """
+    Optional role accent override.
+    """
+
+    value: Any | None = None
+    """
+    Numeric/text value for rating/status/metric roles.
+    """
+
+    max: int | None = None
+    """
+    Maximum bound used in rating role.
+    """
+
+    allow_half: bool | None = None
+    """
+    Enables half values in rating role.
+    """
+
+    count: int | None = None
+    """
+    Count label for rating/reaction roles.
+    """
+
+    items: list[Any] | None = None
+    """
+    Item descriptors for reactions/check roles.
+    """
+
+    selected: list[Any] | None = None
+    """
+    Selected reaction/item identifiers.
+    """
+
+    checked: list[Any] | None = None
+    """
+    Checked ids for check role.
+    """
+
+    checked_value: bool | None = None
+    """
+    Boolean check state for a single-check role usage.
+    """
+
+    dot_count: int | None = None
+    """
+    Dot count for typing-like status visuals.
+    """
+
+    document_id: str | None = None
+    """
+    Ownership document identifier.
+    """
+
+    ranges: list[Mapping[str, Any]] | None = None
+    """
+    Ownership ranges.
+    """
+
+    owners: list[Mapping[str, Any]] | None = None
+    """
+    Ownership descriptors.
+    """
+
+    owner: Mapping[str, Any] | None = None
+    """
+    Single-owner alias.
+    """
+
+    show_avatars: bool | None = None
+    """
+    Shows avatars in identity/ownership variants.
+    """
+
+    compact: bool | None = None
+    """
+    Compact density alias.
+    """
+
+    dense: bool | None = None
+    """
+    Dense density alias.
+    """
+
+    aria_label: str | None = None
+    """
+    Accessibility label alias.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event subscriptions (for example ``tap``, ``rate``,
+    ``react``, ``check_change``).
+    """
+
     control_type = "display"
 
     def __init__(

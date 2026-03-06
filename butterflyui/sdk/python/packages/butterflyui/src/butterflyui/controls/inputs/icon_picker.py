@@ -41,6 +41,43 @@ class IconPicker(EmojiPicker):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Pre-selected icon identifier string.
+    """
+
+    categories: list[str] | None = None
+    """
+    List of icon category names to display.
+    """
+
+    recent: list[str] | None = None
+    """
+    List of recently used icon identifiers.
+    """
+
+    skin_tone: str | None = None
+    """
+    Skin-tone modifier (applicable only when icon set
+    supports it).
+    """
+
+    show_search: bool | None = None
+    """
+    If ``True``, a search field is rendered above the grid.
+    """
+
+    show_recent: bool | None = None
+    """
+    If ``True``, a *Recently Used* tab is shown.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "icon_picker"
 
     def __init__(

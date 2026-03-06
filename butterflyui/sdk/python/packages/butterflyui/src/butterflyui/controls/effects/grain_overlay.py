@@ -46,6 +46,41 @@ class GrainOverlay(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    opacity: float | None = None
+    """
+    Opacity of each grain dot (``0.0`` – ``1.0``).
+    Defaults to ``0.08``.
+    """
+
+    seed: int | None = None
+    """
+    Integer seed for the pseudo-random number generator.
+    Defaults to ``0``.
+    """
+
+    color: Any | None = None
+    """
+    Colour of the grain dots.  Defaults to white.
+    """
+
+    animated: bool | None = None
+    """
+    When ``True`` the seed auto-increments to produce
+    flickering grain.
+    """
+
+    fps: int | None = None
+    """
+    Target frames per second for the animated grain
+    refresh.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "grain_overlay"
 
     def __init__(

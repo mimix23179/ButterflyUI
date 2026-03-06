@@ -47,6 +47,41 @@ class FoldLayer(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    folds: int | None = None
+    """
+    Number of alternating stripes (``1`` – ``24``).
+    Defaults to ``4``.
+    """
+
+    progress: float | None = None
+    """
+    Fold intensity (``0.0`` flat – ``1.0`` fully folded).
+    Controls both stripe darkness and the subtle scale-down.
+    """
+
+    axis: str | None = None
+    """
+    ``"vertical"`` (default) for left-right pleats or
+    ``"horizontal"`` for top-bottom pleats.
+    """
+
+    perspective: float | None = None
+    """
+    Reserved — perspective depth factor.
+    """
+
+    shadow: float | None = None
+    """
+    Maximum shadow alpha on darkened stripes (``0.0`` – ``1.0``).
+    Defaults to ``0.15``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "fold_layer"
 
     def __init__(

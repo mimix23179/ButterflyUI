@@ -47,6 +47,37 @@ class ListTile(Component):
             If ``False``, the tile is visually dimmed and non-interactive.  Defaults to ``True``.
     """
 
+
+    title: str | None = None
+    """
+    Primary title text.  Falls back to ``label`` or ``text`` props in the runtime.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary supporting text rendered beneath the title.
+    """
+
+    leading_icon: str | None = None
+    """
+    Icon name/data rendered at the leading edge (18 px).  The runtime also accepts ``icon`` or ``leading_text``.
+    """
+
+    trailing_icon: str | None = None
+    """
+    Icon name/data rendered at the trailing edge (18 px).
+    """
+
+    meta: str | None = None
+    """
+    Metadata string shown as trailing text when no ``trailing_icon`` is supplied.  Also accepted via ``trailing_text``.
+    """
+
+    selected: bool | None = None
+    """
+    If ``True``, the tile renders in its selected visual state.
+    """
+
     control_type = "list_tile"
 
     def __init__(

@@ -64,6 +64,27 @@ class MenuBar(Component):
             Additional runtime props passed through to Flutter.
     """
 
+
+    menus: list[Mapping[str, Any]] | None = None
+    """
+    List of top-level menu spec mappings.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias of ``menus`` when constructing from generic payloads.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces bar height and menu item padding.
+    """
+
+    events: list[str] | None = None
+    """
+    Optional runtime event whitelist.
+    """
+
     control_type = "menu_bar"
 
     def __init__(

@@ -34,6 +34,23 @@ class Clip(Component):
             ``"antiAliasWithSaveLayer"``.
     """
 
+
+    shape: str | None = None
+    """
+    Clip shape. Values: ``"rect"``, ``"oval"``, ``"rrect"`` (default).
+    """
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels for rounded-rect clips.
+    """
+
+    clip_behavior: str | None = None
+    """
+    Anti-aliasing mode. Values: ``"hardEdge"``, ``"antiAlias"``,
+    ``"antiAliasWithSaveLayer"``.
+    """
+
     control_type = "clip"
 
     def __init__(

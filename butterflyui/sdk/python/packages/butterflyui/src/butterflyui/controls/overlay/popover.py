@@ -49,6 +49,54 @@ class Popover(Component):
             Duration of the show/hide animation in milliseconds.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the popover is visible.
+    """
+
+    offset: Any | None = None
+    """
+    Additional displacement from the anchor edge in logical pixels.
+    """
+
+    dismissible: bool | None = None
+    """
+    When ``True`` tapping outside the popover closes it.
+    """
+
+
+    anchor: Any | None = None
+    """
+    The widget that the popover is visually attached to.
+    """
+
+    content: Any | None = None
+    """
+    The widget rendered inside the popover panel.
+    """
+
+    position: str | None = None
+    """
+    Preferred placement relative to the anchor. Values:
+    ``"top"``, ``"bottom"``, ``"left"``, ``"right"``.
+    """
+
+    transition: Mapping[str, Any] | None = None
+    """
+    Explicit transition spec mapping.
+    """
+
+    transition_type: str | None = None
+    """
+    Named animation type. Values: ``"fade"``, ``"scale"``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Duration of the show/hide animation in milliseconds.
+    """
+
     control_type = "popover"
 
     def __init__(

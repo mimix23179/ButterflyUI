@@ -29,6 +29,22 @@ class TextField(Component):
         label:
             Floating label text shown above the field when focused.
     """
+
+
+    value: str | None = None
+    """
+    Initial text value.
+    """
+
+    placeholder: str | None = None
+    """
+    Hint text displayed when the field is empty.
+    """
+
+    label: str | None = None
+    """
+    Floating label text shown above the field when focused.
+    """
     control_type = "text_field"
 
     def __init__(

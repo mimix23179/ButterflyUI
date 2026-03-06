@@ -35,6 +35,32 @@ class LinePlot(LineChart):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    values: list[Any] | None = None
+    """
+    Numeric data points for the polyline.
+    """
+
+    points: list[Any] | None = None
+    """
+    Alias for ``values``.
+    """
+
+    fill: bool | None = None
+    """
+    If ``True`` the area under the line is filled.
+    """
+
+    color: Any | None = None
+    """
+    Stroke colour for the line.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "line_plot"
 
     def __init__(

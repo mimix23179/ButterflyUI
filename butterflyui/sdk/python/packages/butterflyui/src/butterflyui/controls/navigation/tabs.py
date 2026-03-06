@@ -35,6 +35,23 @@ class Tabs(Component):
             When ``True`` the tab bar scrolls horizontally on overflow.
     """
 
+
+    scrollable: bool | None = None
+    """
+    When ``True`` the tab bar scrolls horizontally on overflow.
+    """
+
+
+    labels: list[str] | None = None
+    """
+    List of tab label strings.
+    """
+
+    index: int | None = None
+    """
+    Zero-based index of the currently selected tab.
+    """
+
     control_type = "tabs"
 
     def __init__(

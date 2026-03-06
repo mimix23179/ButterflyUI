@@ -60,6 +60,32 @@ class RailNavigation(Component):
             Extra passthrough props for advanced renderer customization.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    Rail destination mappings.
+    """
+
+    selected_id: str | None = None
+    """
+    Active destination ``id``.
+    """
+
+    dense: bool | None = None
+    """
+    Enables compact spacing and icon sizing.
+    """
+
+    extended: bool | None = None
+    """
+    Expands rail width and displays labels inline.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event whitelist emitted by the Flutter renderer.
+    """
+
     control_type = "rail_navigation"
 
     def __init__(

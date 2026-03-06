@@ -63,6 +63,78 @@ class EmojiPicker(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Pre-selected emoji character.
+    """
+
+    categories: list[str] | None = None
+    """
+    List of category names to display.  Defaults to all
+    standard emoji categories.
+    """
+
+    recent: list[str] | None = None
+    """
+    List of recently used emoji characters to pre-populate
+    the *Recent* tab.
+    """
+
+    skin_tone: str | None = None
+    """
+    Default skin tone modifier applied to applicable emoji
+    (e.g. ``"light"``, ``"medium"``, ``"dark"``).
+    """
+
+    show_search: bool | None = None
+    """
+    If ``True``, a search text field is rendered above the
+    grid.
+    """
+
+    show_recent: bool | None = None
+    """
+    If ``True``, a *Recently Used* category tab is shown.
+    """
+
+    category: str | None = None
+    """
+    Initially active category name.
+    """
+
+    query: str | None = None
+    """
+    Initial search query pre-filled in the search field.
+    """
+
+    include_metadata: bool | None = None
+    """
+    If ``True``, the ``pick`` event payload includes extra
+    metadata (name, group, annotations).
+    """
+
+    recent_limit: int | None = None
+    """
+    Maximum number of entries stored in the recent tab.
+    """
+
+    columns: int | None = None
+    """
+    Number of emoji columns per row in the grid.
+    """
+
+    items: list[str] | None = None
+    """
+    Explicit list of emoji characters to display, overriding
+    the default full set.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "emoji_picker"
 
     def __init__(

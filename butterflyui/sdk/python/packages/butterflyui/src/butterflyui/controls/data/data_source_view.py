@@ -48,6 +48,37 @@ class DataSourceView(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    sources: list[Mapping[str, Any]] | None = None
+    """
+    List of source mapping objects.  Each should contain at least ``"id"``; ``"title"``, ``"label"``, and ``"subtitle"`` keys are used for display.
+    """
+
+    selected_id: str | None = None
+    """
+    The ``id`` of the currently highlighted / selected source row.
+    """
+
+    query: str | None = None
+    """
+    Initial search-filter text pre-filled in the search field.
+    """
+
+    show_search: bool | None = None
+    """
+    If ``True``, a ``TextField`` with a search icon is rendered above the list for live filtering.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, list tiles use compact vertical density.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "data_source_view"
 
     def __init__(

@@ -76,6 +76,77 @@ class Color(Component):
             Extra runtime props forwarded to the renderer.
     """
 
+
+    value: Any | None = None
+    """
+    Primary color payload to resolve and display.
+    """
+
+    color: Any | None = None
+    """
+    Alias for ``value``.
+    """
+
+    label: str | None = None
+    """
+    Optional label shown with the swatch.
+    """
+
+    show_label: bool | None = None
+    """
+    Whether to render the ``label`` text.
+    """
+
+    show_hex: bool | None = None
+    """
+    Whether to render resolved hex metadata.
+    """
+
+    size: float | None = None
+    """
+    Base swatch size used when width/height are omitted.
+    """
+
+    radius: float | None = None
+    """
+    Border radius for rectangular shapes.
+    """
+
+    shape: str | None = None
+    """
+    Swatch shape (for example ``"rectangle"`` or ``"circle"``).
+    """
+
+    border_color: Any | None = None
+    """
+    Optional swatch border color.
+    """
+
+    border_width: float | None = None
+    """
+    Swatch border width.
+    """
+
+    background: Any | None = None
+    """
+    Optional background for the full control surface.
+    """
+
+    auto_contrast: bool | None = None
+    """
+    Enables automatic foreground contrast when supported.
+    """
+
+    min_contrast: float | None = None
+    """
+    Minimum target contrast when ``auto_contrast`` is enabled.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names to subscribe to.
+    """
+
     control_type = "color"
 
     def __init__(

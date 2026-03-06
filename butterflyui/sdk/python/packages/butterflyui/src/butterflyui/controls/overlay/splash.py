@@ -71,6 +71,98 @@ class Splash(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    active: bool | None = None
+    """
+    When ``True`` the splash screen is visible.
+    """
+
+    color: Any | None = None
+    """
+    Background fill color of the splash screen.
+    """
+
+    duration_ms: int | None = None
+    """
+    Minimum display duration in milliseconds before auto-hide.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius applied to the splash surface.
+    """
+
+    centered: bool | None = None
+    """
+    When ``True`` content is centered within the splash area.
+    """
+
+    title: str | None = None
+    """
+    Primary branding or title text.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary text shown below the title.
+    """
+
+    message: str | None = None
+    """
+    Body or status message text.
+    """
+
+    loading: bool | None = None
+    """
+    When ``True`` a loading spinner is shown.
+    """
+
+    progress: float | None = None
+    """
+    Determinate progress value (0.0--1.0) for the progress bar.
+    """
+
+    show_progress: bool | None = None
+    """
+    When ``True`` a determinate progress bar is rendered.
+    """
+
+    skip_enabled: bool | None = None
+    """
+    When ``True`` a skip button is shown to dismiss early.
+    """
+
+    auto_start: bool | None = None
+    """
+    When ``True`` the splash starts automatically on mount.
+    """
+
+    hide_on_complete: bool | None = None
+    """
+    When ``True`` the splash dismisses automatically when
+    ``progress`` reaches 1.0.
+    """
+
+    min_duration_ms: int | None = None
+    """
+    Minimum time in milliseconds the splash stays visible.
+    """
+
+    background: Any | None = None
+    """
+    Background widget or image shown behind the splash content.
+    """
+
+    effect: str | None = None
+    """
+    Named visual transition effect applied to the splash.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "splash"
 
     def __init__(

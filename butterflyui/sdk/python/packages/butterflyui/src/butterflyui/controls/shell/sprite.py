@@ -64,6 +64,77 @@ class Sprite(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    src: str | None = None
+    """
+    Asset path or URL of the sprite-sheet image.
+    """
+
+    frame_width: float | None = None
+    """
+    Width of a single frame cell in logical pixels.
+    """
+
+    frame_height: float | None = None
+    """
+    Height of a single frame cell in logical pixels.
+    """
+
+    frames: int | None = None
+    """
+    Total number of frames in the sprite sheet.
+    """
+
+    fps: float | None = None
+    """
+    Playback speed in frames per second.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` the animation repeats after the last frame.
+    """
+
+    autoplay: bool | None = None
+    """
+    When ``True`` playback begins immediately on mount.
+    """
+
+    play: bool | None = None
+    """
+    Live play/pause toggle. ``True`` plays; ``False`` pauses.
+    """
+
+    columns: int | None = None
+    """
+    Number of frame columns in the sprite-sheet grid.
+    """
+
+    rows: int | None = None
+    """
+    Number of frame rows in the sprite-sheet grid.
+    """
+
+    fit: str | None = None
+    """
+    Flutter ``BoxFit`` mode for rendering the sprite.
+    """
+
+    opacity: float | None = None
+    """
+    Opacity value in the range 0.0--1.0.
+    """
+
+    progress: float | None = None
+    """
+    Normalised seek position (0.0 = first frame, 1.0 = last frame).
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "sprite"
 
     def __init__(

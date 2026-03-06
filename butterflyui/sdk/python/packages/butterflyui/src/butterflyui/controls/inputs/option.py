@@ -44,6 +44,42 @@ class Option(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    label: str | None = None
+    """
+    Display text for the option.
+    """
+
+    value: Any | None = None
+    """
+    Machine-readable value emitted with selection events.
+    """
+
+    description: str | None = None
+    """
+    Secondary subtitle text rendered below the label.
+    """
+
+    icon: str | None = None
+    """
+    Leading icon name or codepoint.
+    """
+
+    selected: bool | None = None
+    """
+    If ``True``, the option is pre-selected.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, the item uses compact height.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "option"
 
     def __init__(

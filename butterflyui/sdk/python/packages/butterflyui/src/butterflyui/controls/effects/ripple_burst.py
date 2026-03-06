@@ -44,6 +44,36 @@ class RippleBurst(Component):
         center: 
             Reserved — custom ripple origin point.
     """
+
+
+    color: Any | None = None
+    """
+    Ripple ring colour.  Defaults to the primary colour
+    from the current theme.
+    """
+
+    count: int | None = None
+    """
+    Number of concentric rings per burst (``1`` – ``8``).
+    Defaults to ``3``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Burst animation duration in milliseconds.
+    Defaults to ``500``.
+    """
+
+    max_radius: float | None = None
+    """
+    Maximum expansion radius in logical pixels.
+    Defaults to ``90``.
+    """
+
+    center: Any | None = None
+    """
+    Reserved — custom ripple origin point.
+    """
     control_type = "ripple_burst"
 
     def __init__(

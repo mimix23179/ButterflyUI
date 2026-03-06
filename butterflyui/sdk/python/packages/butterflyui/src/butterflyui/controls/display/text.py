@@ -25,6 +25,19 @@ class Text(Component):
         text: 
             Alias for ``value`` — takes precedence when both are supplied.
     """
+
+
+    _butterflyui_field_aliases = {"value": "text"}
+
+    value: Any = ""
+    """
+    Text content to display (coerced to ``str``).
+    """
+
+    text: str | None = None
+    """
+    Alias for ``value`` — takes precedence when both are supplied.
+    """
     control_type = "text"
 
     def __init__(

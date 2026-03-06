@@ -220,6 +220,393 @@ class Bubble(Component):
             Enables strict schema validation when supported.
     """
 
+
+    scrollable: bool | None = None
+    """
+    Enables thread scrolling.
+    """
+
+
+    variant: str | None = None
+    """
+    Bubble role. Supported runtime values are ``"message"``, ``"thread"``,
+    ``"chat"``, and ``"composer"``.
+    """
+
+    role: str | None = None
+    """
+    Semantic author role for message rows (for example ``"user"``,
+    ``"assistant"``, ``"system"``).
+    """
+
+    tone: str | None = None
+    """
+    Semantic tone (``"neutral"``, ``"info"``, ``"success"``, ``"warn"``,
+    ``"danger"``). Used as a styling hint.
+    """
+
+    density: str | None = None
+    """
+    Density hint (``"compact"``, ``"normal"``, ``"cozy"``).
+    """
+
+    compact: bool | None = None
+    """
+    Legacy density alias.
+    """
+
+    dense: bool | None = None
+    """
+    Legacy density alias.
+    """
+
+    align: str | None = None
+    """
+    Message alignment hint: ``"left"``, ``"right"``, or ``"auto"``.
+    """
+
+    grouping: str | None = None
+    """
+    Grouping strategy for adjacent messages (for example ``"auto"``).
+    """
+
+    group_messages: bool | None = None
+    """
+    Legacy grouping toggle for thread mode.
+    """
+
+    grouped: bool | None = None
+    """
+    Hint that this specific message belongs to a visual group.
+    """
+
+    selectable: bool | None = None
+    """
+    Enables text selection for message/composer text.
+    """
+
+    clickable: bool | None = None
+    """
+    Emits click/tap events from bubble body when enabled.
+    """
+
+    sender_name: str | None = None
+    """
+    Sender/author name in message header.
+    """
+
+    author: str | None = None
+    """
+    Legacy alias for ``sender_name``.
+    """
+
+    avatar: Any | None = None
+    """
+    Sender avatar descriptor (URL, asset path, initials, or map).
+    """
+
+    role_badge: str | None = None
+    """
+    Optional badge shown next to sender metadata.
+    """
+
+    title: str | None = None
+    """
+    Primary title/headline line.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary line under title.
+    """
+
+    text: str | None = None
+    """
+    Message body text (or composer initial value alias).
+    """
+
+    markdown: str | None = None
+    """
+    Markdown body source for message content.
+    """
+
+    timestamp: str | None = None
+    """
+    Message timestamp string.
+    """
+
+    edited: bool | None = None
+    """
+    Marks message as edited.
+    """
+
+    delivered: bool | None = None
+    """
+    Marks message as delivered.
+    """
+
+    read: bool | None = None
+    """
+    Marks message as read.
+    """
+
+    status: str | None = None
+    """
+    Status/meta label shown in message header.
+    """
+
+    error_notice: str | None = None
+    """
+    Error or failure notice shown inside the message.
+    """
+
+    notice: str | None = None
+    """
+    Informational notice shown inside the message.
+    """
+
+    attachments: list[Any] | None = None
+    """
+    Attachment descriptors for message mode.
+    """
+
+    reactions: list[Any] | None = None
+    """
+    Reaction descriptors (emoji/count/selected payloads).
+    """
+
+    actions: list[Any] | None = None
+    """
+    Inline action descriptors (reply/edit/delete/custom).
+    """
+
+    quote_text: str | None = None
+    """
+    Quoted/referenced body text.
+    """
+
+    quote_author: str | None = None
+    """
+    Quoted author label.
+    """
+
+    quote_timestamp: str | None = None
+    """
+    Quoted timestamp label.
+    """
+
+    quote_compact: bool | None = None
+    """
+    Compacts quote block rendering.
+    """
+
+    mention_label: str | None = None
+    """
+    Mention chip label.
+    """
+
+    mention_color: Any | None = None
+    """
+    Mention chip background.
+    """
+
+    mention_text_color: Any | None = None
+    """
+    Mention chip foreground.
+    """
+
+    mention_clickable: bool | None = None
+    """
+    Emits ``mention_click`` event when mention chip is tapped.
+    """
+
+    divider_label: str | None = None
+    """
+    Label for a top divider row.
+    """
+
+    divider_color: Any | None = None
+    """
+    Divider color override.
+    """
+
+    messages: list[Any] | None = None
+    """
+    Message list for thread/chat variant.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for ``messages``.
+    """
+
+    pinned_messages: list[Any] | None = None
+    """
+    Pinned message descriptors rendered above timeline.
+    """
+
+    spacing: float | None = None
+    """
+    Vertical spacing between thread rows.
+    """
+
+    reverse: bool | None = None
+    """
+    Reverses message list order.
+    """
+
+    autoscroll: str | None = None
+    """
+    Thread scroll mode: ``"follow_latest"`` or ``"manual"``.
+    """
+
+    follow_latest: bool | None = None
+    """
+    Boolean alias for autoscroll follow mode.
+    """
+
+    unread_divider_label: str | None = None
+    """
+    Label for unread boundary divider.
+    """
+
+    unread_after_id: str | None = None
+    """
+    Inserts unread divider after this message id.
+    """
+
+    unread_index: int | None = None
+    """
+    Inserts unread divider after this index.
+    """
+
+    date_separators: list[Any] | None = None
+    """
+    Optional date-separator descriptors for thread rendering.
+    """
+
+    empty_state: Any | None = None
+    """
+    Empty-thread text or descriptor shown when no messages exist.
+    """
+
+    typing_indicator: Any | None = None
+    """
+    Typing indicator descriptor/text.
+    """
+
+    show_timestamps: bool | None = None
+    """
+    Thread-level timestamp visibility hint.
+    """
+
+    show_input: bool | None = None
+    """
+    Shows integrated composer when variant is thread/chat.
+    """
+
+    input_placeholder: str | None = None
+    """
+    Placeholder text for integrated composer.
+    """
+
+    send_label: str | None = None
+    """
+    Send action label.
+    """
+
+    send_on_enter: bool | None = None
+    """
+    Sends on Enter (Shift+Enter inserts newline).
+    """
+
+    value: str | None = None
+    """
+    Composer current value.
+    """
+
+    placeholder: str | None = None
+    """
+    Composer placeholder alias.
+    """
+
+    min_lines: int | None = None
+    """
+    Minimum visible lines for composer input.
+    """
+
+    max_lines: int | None = None
+    """
+    Maximum visible lines for composer input.
+    """
+
+    auto_expand: bool | None = None
+    """
+    If ``True``, composer grows between min/max lines.
+    """
+
+    leading: Any | None = None
+    """
+    Leading composer slot descriptor.
+    """
+
+    trailing: Any | None = None
+    """
+    Trailing composer slot descriptor.
+    """
+
+    show_attach: bool | None = None
+    """
+    Shows attachment action.
+    """
+
+    draft_key: str | None = None
+    """
+    Optional draft-persistence key.
+    """
+
+    char_limit: int | None = None
+    """
+    Maximum composer characters.
+    """
+
+    show_counter: bool | None = None
+    """
+    Shows character counter when char limit is active.
+    """
+
+    cooldown_ms: int | None = None
+    """
+    Optional send cooldown in milliseconds.
+    """
+
+    disabled: bool | None = None
+    """
+    Disables interaction.
+    """
+
+    read_only: bool | None = None
+    """
+    Locks composer edits.
+    """
+
+    emit_on_change: bool | None = None
+    """
+    Emits change events while typing.
+    """
+
+    clear_on_send: bool | None = None
+    """
+    Clears composer after submit.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names emitted by runtime (examples: ``submit``, ``change``,
+    ``attach``, ``reach_top``, ``scroll_state_changed``, ``action``,
+    ``react``, ``message_click``).
+    """
+
     control_type = "bubble"
 
     def __init__(

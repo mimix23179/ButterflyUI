@@ -55,6 +55,52 @@ class Video(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    src: str | None = None
+    """
+    URI or file path of the video source.
+    """
+
+    poster: str | None = None
+    """
+    Image URL shown as a thumbnail before playback.
+    """
+
+    autoplay: bool | None = None
+    """
+    If ``True`` playback starts automatically.
+    """
+
+    loop: bool | None = None
+    """
+    If ``True`` the video restarts when it finishes.
+    """
+
+    muted: bool | None = None
+    """
+    If ``True`` audio is muted.
+    """
+
+    controls: bool | None = None
+    """
+    If ``True`` native player controls are shown.
+    """
+
+    fit: str | None = None
+    """
+    Box-fit mode (e.g. ``"contain"``, ``"cover"``).
+    """
+
+    volume: float | None = None
+    """
+    Initial volume level from ``0.0`` to ``1.0``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "video"
 
     def __init__(

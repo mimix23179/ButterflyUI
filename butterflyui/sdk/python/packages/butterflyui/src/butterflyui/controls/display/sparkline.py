@@ -36,6 +36,27 @@ class Sparkline(Component):
         color: 
             Stroke colour for the polyline.
     """
+
+
+    values: list[Any] | None = None
+    """
+    Numeric data points for the sparkline.
+    """
+
+    points: list[Any] | None = None
+    """
+    Alias for ``values``.
+    """
+
+    fill: bool | None = None
+    """
+    If ``True`` the area under the line is shaded.
+    """
+
+    color: Any | None = None
+    """
+    Stroke colour for the polyline.
+    """
     control_type = "sparkline"
 
     def __init__(

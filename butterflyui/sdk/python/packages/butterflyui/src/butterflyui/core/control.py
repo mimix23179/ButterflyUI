@@ -65,6 +65,65 @@ try:
 except Exception:
     _STDLIB_ROOTS = ()
 _CONTROL_REGISTRY: "weakref.WeakValueDictionary[str, Control]" = weakref.WeakValueDictionary()
+_CONTROL_FIELD_DEFAULT_MISSING = object()
+_CONTROL_FIELD_EXCLUDE_NAMES = {
+    "control_type",
+    "control_id",
+    "props",
+    "children",
+    "meta",
+}
+_CONTROL_RUNTIME_ATTRS = {
+    "__class__",
+    "__dict__",
+    "__weakref__",
+    "__module__",
+    "__doc__",
+    "__annotations__",
+    "__dataclass_fields__",
+    "__dataclass_params__",
+    "__orig_class__",
+    "__slots__",
+    "__match_args__",
+    "control_type",
+    "control_id",
+    "props",
+    "children",
+    "meta",
+}
+
+
+def _collect_doc_only_field_names(cls: type["Control"]) -> frozenset[str]:
+    names: list[str] = []
+    seen: set[str] = set()
+    for base in reversed(cls.__mro__):
+        declared = getattr(base, "_butterflyui_doc_only_fields", ())
+        if not isinstance(declared, (set, frozenset, list, tuple)):
+            continue
+        for name in declared:
+            if not isinstance(name, str):
+                continue
+            if name.startswith("_") or name in _CONTROL_FIELD_EXCLUDE_NAMES:
+                continue
+            if name not in seen:
+                names.append(name)
+                seen.add(name)
+    return frozenset(names)
+
+
+def _collect_control_field_aliases(cls: type["Control"]) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for base in reversed(cls.__mro__):
+        declared = getattr(base, "_butterflyui_field_aliases", {})
+        if not isinstance(declared, Mapping):
+            continue
+        for key, value in declared.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                continue
+            if key.startswith("_") or key in _CONTROL_FIELD_EXCLUDE_NAMES:
+                continue
+            aliases[key] = value
+    return aliases
 
 
 def _is_internal_path(path: str | None) -> bool:
@@ -119,6 +178,47 @@ def _register_control(control: "Control") -> None:
 
 def _get_control_by_id(control_id: str) -> "Control | None":
     return _CONTROL_REGISTRY.get(str(control_id))
+
+
+def _collect_control_field_names(
+    cls: type["Control"], *, doc_only_fields: frozenset[str] | None = None
+) -> frozenset[str]:
+    names: list[str] = []
+    seen: set[str] = set()
+    excluded = set(doc_only_fields or ())
+    for base in reversed(cls.__mro__):
+        annotations = getattr(base, "__annotations__", {})
+        if not isinstance(annotations, dict):
+            continue
+        for name in annotations:
+            if not isinstance(name, str):
+                continue
+            if name.startswith("_") or name in _CONTROL_FIELD_EXCLUDE_NAMES:
+                continue
+            if name in excluded:
+                continue
+            if name not in seen:
+                names.append(name)
+                seen.add(name)
+    return frozenset(names)
+
+
+def _control_field_default(cls: type["Control"], name: str) -> Any:
+    for base in cls.__mro__:
+        if name in getattr(base, "__dict__", {}):
+            return inspect.getattr_static(base, name)
+    return _CONTROL_FIELD_DEFAULT_MISSING
+
+
+def _control_field_prop_name(cls: type["Control"], name: str) -> str:
+    aliases = getattr(cls, "_butterflyui_field_aliases", {})
+    if isinstance(aliases, Mapping):
+        alias = aliases.get(name)
+        if isinstance(alias, str) and alias:
+            return alias
+    if name.endswith("_") and len(name) > 1:
+        return name[:-1]
+    return name
 
 
 def _coerce_int(value: Any) -> Any:
@@ -585,6 +685,11 @@ class Control:
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super(Control, cls).__init_subclass__(**kwargs)
+        cls._butterflyui_doc_only_fields = _collect_doc_only_field_names(cls)
+        cls._butterflyui_field_aliases = _collect_control_field_aliases(cls)
+        cls._butterflyui_control_fields = _collect_control_field_names(
+            cls, doc_only_fields=cls._butterflyui_doc_only_fields
+        )
         if "__init__" not in cls.__dict__:
             return
         init = cls.__init__
@@ -677,6 +782,68 @@ class Control:
 
         wrapped._butterflyui_wrapped = True  # type: ignore[attr-defined]
         cls.__init__ = wrapped  # type: ignore[assignment]
+
+    def __getattribute__(self, name: str) -> Any:
+        if name.startswith("_") or name in _CONTROL_RUNTIME_ATTRS:
+            return object.__getattribute__(self, name)
+        cls = object.__getattribute__(self, "__class__")
+        field_names = getattr(cls, "_butterflyui_control_fields", ())
+        if name in field_names:
+            try:
+                props = object.__getattribute__(self, "props")
+            except AttributeError:
+                return object.__getattribute__(self, name)
+            prop_name = _control_field_prop_name(cls, name)
+            if prop_name == "child":
+                children = object.__getattribute__(self, "children")
+                if children:
+                    return children[0]
+            if prop_name in props:
+                return props.get(prop_name)
+            default = _control_field_default(cls, name)
+            if default is not _CONTROL_FIELD_DEFAULT_MISSING:
+                return default
+            return None
+        return object.__getattribute__(self, name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name.startswith("_") or name in _CONTROL_RUNTIME_ATTRS:
+            object.__setattr__(self, name, value)
+            return
+        cls = object.__getattribute__(self, "__class__")
+        field_names = getattr(cls, "_butterflyui_control_fields", ())
+        if name in field_names:
+            try:
+                props = object.__getattribute__(self, "props")
+            except AttributeError:
+                object.__setattr__(self, name, value)
+                return
+            prop_name = _control_field_prop_name(cls, name)
+            if prop_name == "child":
+                children = object.__getattribute__(self, "children")
+                if children:
+                    children[0] = value
+                elif value is None:
+                    props.pop("child", None)
+                else:
+                    children.append(value)
+                return
+            if value is None:
+                props.pop(prop_name, None)
+            else:
+                props[prop_name] = value
+            if prop_name == "events":
+                self.mark_events_dirty()
+            return
+        object.__setattr__(self, name, value)
+
+    def __delattr__(self, name: str) -> None:
+        cls = object.__getattribute__(self, "__class__")
+        field_names = getattr(cls, "_butterflyui_control_fields", ())
+        if name in field_names:
+            self.__setattr__(name, None)
+            return
+        object.__delattr__(self, name)
 
     def patch(self, *, session: "ButterflyUISession | None" = None, **props: Any) -> None:
         """Update props in-place and optionally notify the runtime."""

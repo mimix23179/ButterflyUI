@@ -41,6 +41,37 @@ class ChromaticShift(Component):
             Colour used for the *blue* channel ghost layer. 
             Defaults to ``Colors.blue``.
     """
+
+
+    shift: float | None = None
+    """
+    Pixel distance each colour channel is
+    offset from the original.  Defaults to ``1.2``.
+    """
+
+    opacity: float | None = None
+    """
+    Opacity of the red and blue ghost layers
+    (``0.0`` – ``1.0``).  Defaults to ``0.35``.
+    """
+
+    axis: str | None = None
+    """
+    Displacement axis — ``"x"`` (horizontal, default)
+    or ``"y"`` (vertical).
+    """
+
+    red: Any | None = None
+    """
+    Colour used for the *red* channel ghost layer.
+    Defaults to ``Colors.red``.
+    """
+
+    blue: Any | None = None
+    """
+    Colour used for the *blue* channel ghost layer.
+    Defaults to ``Colors.blue``.
+    """
     control_type = "chromatic_shift"
 
     def __init__(

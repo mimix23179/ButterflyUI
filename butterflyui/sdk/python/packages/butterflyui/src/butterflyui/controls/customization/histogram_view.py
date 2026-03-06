@@ -41,6 +41,42 @@ class HistogramView(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    bins: list[float] | None = None
+    """
+    List of bin values (relative bar heights, ``0.0``–``1.0``).
+    """
+
+    channels: list[Mapping[str, Any]] | None = None
+    """
+    Per-channel histograms. Each item is a dict with ``"bins"`` and ``"color"`` keys.
+    """
+
+    domain: list[float] | None = None
+    """
+    Domain range ``[min, max]`` used for axis labelling.
+    """
+
+    normalized: bool | None = None
+    """
+    If ``True``, bin values are normalised to the tallest bin.
+    """
+
+    show_grid: bool | None = None
+    """
+    If ``True``, a background reference grid is drawn.
+    """
+
+    compact: bool | None = None
+    """
+    If ``True``, the chart renders at a shorter height (``84`` px instead of ``140`` px).
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "histogram_view"
 
     def __init__(

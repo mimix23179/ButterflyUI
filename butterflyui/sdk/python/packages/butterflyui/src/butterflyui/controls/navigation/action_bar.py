@@ -72,6 +72,47 @@ class ActionBar(Component):
             Additional runtime props forwarded to the shared style pipeline.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    List of action item spec mappings to display in the bar.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces item height and padding.
+    """
+
+    spacing: float | None = None
+    """
+    Gap between items in logical pixels.
+    """
+
+    wrap: bool | None = None
+    """
+    When ``True`` items wrap onto a second line when space runs out.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background fill color of the bar.
+    """
+
+    context: Mapping[str, Any] | None = None
+    """
+    Arbitrary context payload associated with this action surface.
+    """
+
+    selection: list[Any] | Mapping[str, Any] | None = None
+    """
+    Selection payload (IDs or descriptors) used by contextual actions.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "action_bar"
 
     def __init__(

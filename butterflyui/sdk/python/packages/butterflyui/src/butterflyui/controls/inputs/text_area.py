@@ -54,6 +54,54 @@ class TextArea(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Initial text content of the field.
+    """
+
+    placeholder: str | None = None
+    """
+    Hint text shown when the field is empty.
+    """
+
+    label: str | None = None
+    """
+    Floating label text shown above the field.
+    """
+
+    min_lines: int | None = None
+    """
+    Minimum number of visible text lines.
+    """
+
+    max_lines: int | None = None
+    """
+    Maximum number of visible lines before scrolling.
+    """
+
+    read_only: bool | None = None
+    """
+    If ``True``, the content is visible but not editable.
+    """
+
+    emit_on_change: bool | None = None
+    """
+    If ``True``, ``change`` events are fired on every
+    keystroke.
+    """
+
+    debounce_ms: int | None = None
+    """
+    Milliseconds to debounce ``change`` events when
+    ``emit_on_change`` is ``True``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "text_area"
 
     def __init__(

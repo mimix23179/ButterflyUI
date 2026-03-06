@@ -14,6 +14,60 @@ class ShimmerShadow(Component):
 
     This control applies a shadow stack and then overlays shimmer animation
     around the same child.
+
+    Args:
+        child:
+            Primary child control wrapped by the combined effect.
+        shimmer:
+            Shimmer configuration payload.
+        shadow:
+            Base shadow configuration payload.
+        duration_ms:
+            Duration of the shimmer cycle in milliseconds.
+        angle:
+            Shimmer travel angle.
+        opacity:
+            Overall opacity of the wrapper effect.
+        shadows:
+            Layered shadow definitions applied under the child.
+        radius:
+            Corner radius shared by the shimmer and shadow layers.
+    """
+
+
+    shimmer: Mapping[str, Any] | None = None
+    """
+    Shimmer configuration payload.
+    """
+
+    shadow: Mapping[str, Any] | None = None
+    """
+    Base shadow configuration payload.
+    """
+
+    duration_ms: int | None = None
+    """
+    Duration of the shimmer cycle in milliseconds.
+    """
+
+    angle: float | None = None
+    """
+    Shimmer travel angle.
+    """
+
+    opacity: float | None = None
+    """
+    Overall opacity of the wrapper effect.
+    """
+
+    shadows: list[Mapping[str, Any]] | None = None
+    """
+    Layered shadow definitions applied under the child.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius shared by the shimmer and shadow layers.
     """
 
     control_type = "shimmer_shadow"

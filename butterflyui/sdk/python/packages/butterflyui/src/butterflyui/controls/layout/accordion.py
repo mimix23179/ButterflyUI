@@ -49,6 +49,58 @@ class Accordion(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    sections: list[Mapping[str, Any]] | None = None
+    """
+    List of section spec mappings, each with a ``title`` and content.
+    """
+
+    labels: list[str] | None = None
+    """
+    Optional list of plain-string section titles.
+    """
+
+    index: int | list[int] | None = None
+    """
+    Index or list of indices of the currently expanded section(s).
+    Alias for ``expanded``.
+    """
+
+    expanded: int | list[int] | None = None
+    """
+    Alias for ``index``.
+    """
+
+    multiple: bool | None = None
+    """
+    When ``True`` more than one section may be open at the same time.
+    """
+
+    allow_empty: bool | None = None
+    """
+    When ``True`` all sections may be collapsed simultaneously.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces section header height and padding.
+    """
+
+    show_dividers: bool | None = None
+    """
+    Adds horizontal dividers between sections.
+    """
+
+    spacing: float | None = None
+    """
+    Vertical gap between sections in logical pixels.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "accordion"
 
     def __init__(

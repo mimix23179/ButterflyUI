@@ -43,6 +43,47 @@ class PiePlot(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    values: list[float] | None = None
+    """
+    Numeric values for each pie segment.
+    """
+
+    labels: list[str] | None = None
+    """
+    Optional labels for each segment.
+    """
+
+    colors: list[Any] | None = None
+    """
+    List of colours cycled across segments.  Defaults to a built-in five-colour palette.
+    """
+
+    donut: bool | None = None
+    """
+    If ``True`` a hole is drawn in the centre.
+    """
+
+    hole: float | None = None
+    """
+    Ratio of the hole radius to the outer radius (``0.0``–``0.9``; default ``0.55``).
+    """
+
+    start_angle: float | None = None
+    """
+    Start angle in degrees (default ``-90``).
+    """
+
+    clockwise: bool | None = None
+    """
+    If ``True`` segments are drawn clockwise.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "pie_plot"
 
     def __init__(

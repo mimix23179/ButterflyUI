@@ -64,6 +64,45 @@ class SlidePanel(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the panel is visible.
+    """
+
+    dismissible: bool | None = None
+    """
+    When ``True`` tapping the scrim closes the panel.
+    """
+
+
+    side: str | None = None
+    """
+    Edge from which the panel slides. Values: ``"left"``,
+    ``"right"``, ``"top"``, ``"bottom"``.
+    """
+
+    position: str | None = None
+    """
+    Alias for ``side``.
+    """
+
+    size: float | None = None
+    """
+    Panel width (left/right) or height (top/bottom) in logical
+    pixels.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Color of the background scrim overlay.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "slide_panel"
 
     def __init__(

@@ -48,6 +48,45 @@ class NoiseField(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    seed: int | None = None
+    """
+    Integer seed for the ``Random`` generator.  Defaults to
+    ``0``.
+    """
+
+    intensity: float | None = None
+    """
+    Per-pixel alpha multiplier (``0.0`` – ``1.0``).
+    Defaults to ``0.35``.
+    """
+
+    speed: float | None = None
+    """
+    Reserved — animation speed multiplier.
+    """
+
+    color: Any | None = None
+    """
+    Pixel colour.  Defaults to white.
+    """
+
+    kind: str | None = None
+    """
+    Reserved — noise algorithm variant name.
+    """
+
+    animated: bool | None = None
+    """
+    When ``True`` the painter transitions via a
+    ``TweenAnimationBuilder``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "noise_field"
 
     def __init__(

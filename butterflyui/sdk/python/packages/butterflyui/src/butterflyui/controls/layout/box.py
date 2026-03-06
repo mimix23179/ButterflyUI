@@ -46,6 +46,12 @@ class Box(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    bgcolor: Any | None = None
+    """
+    Background fill color.
+    """
+
     control_type = "box"
 
     def __init__(

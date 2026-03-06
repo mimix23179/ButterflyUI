@@ -50,6 +50,56 @@ class ConfettiBurst(Component):
         hide_button: 
             When ``True`` the default *Burst* toggle button is hidden.
     """
+
+
+    colors: list[Any] | None = None
+    """
+    List of confetti-piece colours.
+    Defaults to a built-in cyan / purple / pink / green palette.
+    """
+
+    count: int | None = None
+    """
+    Number of confetti rectangles per burst (``1`` – ``200``).
+    Defaults to ``18``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Burst animation duration in milliseconds.
+    Defaults to ``900``; clamped to ``1 – 600 000``.
+    """
+
+    duration: int | None = None
+    """
+    Alias for *duration_ms*.
+    """
+
+    gravity: float | None = None
+    """
+    Reserved — gravity multiplier for particle fall speed.
+    """
+
+    autoplay: bool | None = None
+    """
+    When ``True`` a burst fires automatically on mount.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` the burst replays continuously.
+    """
+
+    emit_on_complete: bool | None = None
+    """
+    When ``True`` the runtime emits a ``"complete"`` event
+    after each burst finishes.
+    """
+
+    hide_button: bool | None = None
+    """
+    When ``True`` the default *Burst* toggle button is hidden.
+    """
     control_type = "confetti_burst"
 
     def __init__(

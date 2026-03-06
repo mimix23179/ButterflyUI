@@ -45,6 +45,42 @@ class Shimmer(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    duration_ms: int | None = None
+    """
+    Full sweep period in milliseconds.  Defaults to
+    ``1200``; clamped to ``200 – 600 000``.
+    """
+
+    angle: float | None = None
+    """
+    Gradient rotation angle in **degrees**.  Defaults to
+    ``18``.
+    """
+
+    opacity: float | None = None
+    """
+    Overall shimmer opacity (``0.0`` – ``1.0``).
+    Defaults to ``0.85``.
+    """
+
+    base_color: Any | None = None
+    """
+    Gradient base colour.  Defaults to the theme's
+    ``surfaceContainerHighest`` at 45 % opacity.
+    """
+
+    highlight_color: Any | None = None
+    """
+    Bright highlight band colour.  Defaults to
+    the theme's ``surface`` at 75 % opacity.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "shimmer"
 
     def __init__(

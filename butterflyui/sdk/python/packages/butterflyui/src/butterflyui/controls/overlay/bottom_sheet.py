@@ -48,6 +48,28 @@ class BottomSheet(Component):
             clip behavior, radius, and sizing constraints.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the bottom sheet is visible.
+    """
+
+    dismissible: bool | None = None
+    """
+    When ``True`` tapping the scrim closes the sheet.
+    """
+
+
+    scrim_color: Any | None = None
+    """
+    Color of the background scrim overlay.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "bottom_sheet"
 
     def __init__(

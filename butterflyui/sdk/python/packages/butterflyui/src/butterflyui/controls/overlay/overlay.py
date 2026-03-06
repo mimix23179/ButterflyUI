@@ -77,6 +77,88 @@ class Overlay(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    open: bool | None = None
+    """
+    When ``True`` the overlay is visible.
+    """
+
+    dismissible: bool | None = None
+    """
+    When ``True`` tapping the scrim closes the overlay.
+    """
+
+
+    scrim_color: Any | None = None
+    """
+    Color of the background scrim overlay.
+    """
+
+    base: Any | None = None
+    """
+    Base/background control for overlay-host style composition.
+    """
+
+    overlays: list[Any] | None = None
+    """
+    Overlay layer controls composed above ``base``.
+    """
+
+    active_overlay: str | list[str] | tuple[str, ...] | None = None
+    """
+    Active overlay ID or list of active IDs.
+    """
+
+    active_id: str | None = None
+    """
+    Alias for a single active overlay ID.
+    """
+
+    active_index: int | None = None
+    """
+    Active overlay index.
+    """
+
+    show_all_overlays: bool | None = None
+    """
+    If ``True``, all overlays are visible simultaneously.
+    """
+
+    show_default_overlay: bool | None = None
+    """
+    If ``True``, first overlay is shown by default.
+    """
+
+    max_visible_overlays: int | None = None
+    """
+    Maximum number of overlays visible at once.
+    """
+
+    transition: Mapping[str, Any] | None = None
+    """
+    Overlay transition descriptor mapping.
+    """
+
+    transition_type: str | None = None
+    """
+    Named transition preset for overlay changes.
+    """
+
+    transition_ms: int | None = None
+    """
+    Transition duration in milliseconds.
+    """
+
+    clip: bool | None = None
+    """
+    If ``True``, clip overlay layers to host bounds.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "overlay"
 
     def __init__(

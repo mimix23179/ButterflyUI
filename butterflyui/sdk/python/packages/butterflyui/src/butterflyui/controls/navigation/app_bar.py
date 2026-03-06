@@ -47,6 +47,32 @@ class AppBar(Component):
             ``width``/``height`` constraints, ``radius``, and ``clip_behavior``.
     """
 
+
+    title: str | None = None
+    """
+    Primary title text displayed in the app bar.
+    """
+
+    subtitle: str | None = None
+    """
+    Optional secondary text shown below the title.
+    """
+
+    leading: Any | None = None
+    """
+    Widget placed at the leading (start) edge of the bar.
+    """
+
+    actions: list[Any] | None = None
+    """
+    List of trailing action widget specs shown at the end of the bar.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "app_bar"
 
     def __init__(

@@ -57,6 +57,77 @@ class ButtonStyle(Component):
         action_payload: 
             Additional payload merged into the action dispatch.
     """
+
+
+    value: str | None = None
+    """
+    Currently selected style preset ``id``.
+    """
+
+    options: list[Any] | None = None
+    """
+    List of preset descriptors, each a dict with ``"id"`` and ``"label"`` keys. Defaults to solid / outline / ghost.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for `options`.
+    """
+
+    base: Mapping[str, Any] | None = None
+    """
+    Style properties applied in the default (idle) button state.
+    """
+
+    hover: Mapping[str, Any] | None = None
+    """
+    Style overrides applied when the button is hovered.
+    """
+
+    pressed: Mapping[str, Any] | None = None
+    """
+    Style overrides applied while the button is pressed.
+    """
+
+    disabled: Mapping[str, Any] | None = None
+    """
+    Style overrides applied when the button is disabled.
+    """
+
+    focus_ring: Mapping[str, Any] | None = None
+    """
+    Configuration for the focus-ring appearance when the button is focused.
+    """
+
+    motion_behavior: Mapping[str, Any] | None = None
+    """
+    Motion/animation configuration for state transitions.
+    """
+
+    action: Any | None = None
+    """
+    Action identifier dispatched when the selected preset changes.
+    """
+
+    actions: list[Any] | None = None
+    """
+    List of action descriptors fired on change.
+    """
+
+    action_id: str | None = None
+    """
+    Specific action id to emit on change.
+    """
+
+    action_event: str | None = None
+    """
+    Event name used when dispatching the action.
+    """
+
+    action_payload: Mapping[str, Any] | None = None
+    """
+    Additional payload merged into the action dispatch.
+    """
     control_type = "button_style"
 
     def __init__(

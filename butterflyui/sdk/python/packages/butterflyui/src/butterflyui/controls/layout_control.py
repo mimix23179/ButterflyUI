@@ -8,43 +8,130 @@ __all__ = ["LayoutControl"]
 
 
 class LayoutControl(Control):
-    """Shared layout behavior for visual ButterflyUI controls."""
+    """
+    Shared layout behavior for visual ButterflyUI controls.
 
-    @property
-    def left(self) -> float | None:
-        value = self.get_prop("left")
-        return float(value) if value is not None else None
+    Args:
+        left:
+            Absolute left inset used by positioned layouts.
+        top:
+            Absolute top inset used by positioned layouts.
+        right:
+            Absolute right inset used by positioned layouts.
+        bottom:
+            Absolute bottom inset used by positioned layouts.
+        width:
+            Fixed width in logical pixels or supported dimension token.
+        height:
+            Fixed height in logical pixels or supported dimension token.
+        min_width:
+            Minimum allowed width constraint.
+        min_height:
+            Minimum allowed height constraint.
+        max_width:
+            Maximum allowed width constraint.
+        max_height:
+            Maximum allowed height constraint.
+        aspect_ratio:
+            Preferred width-to-height ratio for the control.
+        padding:
+            Inner spacing between the control boundary and its content.
+        margin:
+            Outer spacing around the control.
+        alignment:
+            Alignment of child content within the control's box.
+        animation:
+            Implicit animation configuration used for layout or style changes.
+        flex:
+            Flex factor used by flex-based parent layouts.
+        expand:
+            Whether the control should expand to fill available space.
+    """
 
-    @left.setter
-    def left(self, value: float | None) -> None:
-        self.set_prop("left", None if value is None else float(value))
+    left: float | None = None
+    """
+    Absolute left inset used by positioned layouts.
+    """
 
-    @property
-    def top(self) -> float | None:
-        value = self.get_prop("top")
-        return float(value) if value is not None else None
+    top: float | None = None
+    """
+    Absolute top inset used by positioned layouts.
+    """
 
-    @top.setter
-    def top(self, value: float | None) -> None:
-        self.set_prop("top", None if value is None else float(value))
+    right: float | None = None
+    """
+    Absolute right inset used by positioned layouts.
+    """
 
-    @property
-    def right(self) -> float | None:
-        value = self.get_prop("right")
-        return float(value) if value is not None else None
+    bottom: float | None = None
+    """
+    Absolute bottom inset used by positioned layouts.
+    """
 
-    @right.setter
-    def right(self, value: float | None) -> None:
-        self.set_prop("right", None if value is None else float(value))
+    width: float | str | None = None
+    """
+    Fixed width in logical pixels or supported dimension token.
+    """
 
-    @property
-    def bottom(self) -> float | None:
-        value = self.get_prop("bottom")
-        return float(value) if value is not None else None
+    height: float | str | None = None
+    """
+    Fixed height in logical pixels or supported dimension token.
+    """
 
-    @bottom.setter
-    def bottom(self, value: float | None) -> None:
-        self.set_prop("bottom", None if value is None else float(value))
+    min_width: float | str | None = None
+    """
+    Minimum allowed width constraint.
+    """
+
+    min_height: float | str | None = None
+    """
+    Minimum allowed height constraint.
+    """
+
+    max_width: float | str | None = None
+    """
+    Maximum allowed width constraint.
+    """
+
+    max_height: float | str | None = None
+    """
+    Maximum allowed height constraint.
+    """
+
+    aspect_ratio: float | None = None
+    """
+    Preferred width-to-height ratio for the control.
+    """
+
+    padding: Any | None = None
+    """
+    Inner spacing between the control boundary and its content.
+    """
+
+    margin: Any | None = None
+    """
+    Outer spacing around the control.
+    """
+
+    alignment: Any | None = None
+    """
+    Alignment of child content within the control's box.
+    """
+
+    animation: Any | None = None
+    """
+    Implicit animation configuration used for layout or style changes.
+    """
+
+    flex: int | None = None
+    """
+    Flex factor used by flex-based parent layouts.
+    """
+
+    expand: bool = False
+    """
+    Whether the control should expand to fill available space.
+    """
 
     def frame(self, **kwargs: Any) -> "LayoutControl":
         self.patch(**kwargs)

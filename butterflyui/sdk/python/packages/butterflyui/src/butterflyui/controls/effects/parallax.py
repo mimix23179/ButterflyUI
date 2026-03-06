@@ -39,6 +39,30 @@ class Parallax(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    max_offset: float | None = None
+    """
+    Maximum translation in logical pixels along each
+    axis.  Defaults to ``14``; clamped to ``0 – 200``.
+    """
+
+    reset_on_exit: bool | None = None
+    """
+    When ``True`` (default) the offset smoothly
+    resets to zero when the pointer leaves the widget.
+    """
+
+    depths: list[float] | None = None
+    """
+    Reserved — per-layer depth factors for multi-layer
+    parallax.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "parallax"
 
     def __init__(

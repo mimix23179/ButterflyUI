@@ -43,6 +43,42 @@ class GradientEditor(Component):
         export_format: 
             Hint for the desired export format of gradient data (e.g. ``"css"``, ``"json"``).
     """
+
+
+    stops: list[Any] | None = None
+    """
+    List of colour-stop dicts, each with ``"position"`` (``0.0``–``1.0``) and ``"color"`` (hex string).
+    """
+
+    angle: float | None = None
+    """
+    Initial gradient angle in degrees (``0``–``360``). Defaults to ``0``.
+    """
+
+    show_angle: bool | None = None
+    """
+    If ``True`` (default), the angle slider is visible.
+    """
+
+    show_add: bool | None = None
+    """
+    If ``True`` (default), the "add stop" button is visible.
+    """
+
+    show_remove: bool | None = None
+    """
+    If ``True`` (default), each stop shows a remove affordance.
+    """
+
+    live_preview: bool | None = None
+    """
+    If ``True``, a live gradient preview is rendered alongside the controls.
+    """
+
+    export_format: str | None = None
+    """
+    Hint for the desired export format of gradient data (e.g. ``"css"``, ``"json"``).
+    """
     control_type = "gradient_editor"
 
     def __init__(

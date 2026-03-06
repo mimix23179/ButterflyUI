@@ -43,6 +43,42 @@ class WindowControls(Component):
             Corner radius applied to each control button surface.
     """
 
+
+    show_minimize: bool | None = None
+    """
+    When ``True`` the minimize button is rendered.
+    """
+
+    show_maximize: bool | None = None
+    """
+    When ``True`` the maximize/restore button is rendered.
+    """
+
+    show_close: bool | None = None
+    """
+    When ``True`` the close button is rendered.
+    """
+
+    spacing: float | None = None
+    """
+    Gap in logical pixels between adjacent control buttons.
+    """
+
+    button_width: float | None = None
+    """
+    Fixed width in logical pixels for each control button.
+    """
+
+    button_height: float | None = None
+    """
+    Fixed height in logical pixels for each control button.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius applied to each control button surface.
+    """
+
     control_type = "window_controls"
 
     def __init__(

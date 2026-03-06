@@ -36,6 +36,28 @@ class MarkdownView(Component):
         scrollable: 
             If ``True`` (default) the widget scrolls when content overflows; otherwise it sizes to fit.
     """
+
+
+    scrollable: bool | None = None
+    """
+    If ``True`` (default) the widget scrolls when content overflows; otherwise it sizes to fit.
+    """
+
+
+    value: str | None = None
+    """
+    Markdown source string.
+    """
+
+    text: str | None = None
+    """
+    Alias for ``value``.
+    """
+
+    selectable: bool | None = None
+    """
+    If ``True`` the rendered text is selectable.
+    """
     control_type = "markdown_view"
 
     def __init__(

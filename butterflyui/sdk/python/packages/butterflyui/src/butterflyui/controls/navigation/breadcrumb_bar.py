@@ -60,6 +60,67 @@ class BreadcrumbBar(Component):
             Raw prop overrides and extended layout hints.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    Explicit list of segment spec mappings. Overrides ``path``.
+    """
+
+    crumbs: list[Mapping[str, Any]] | None = None
+    """
+    Alias for ``items``.
+    """
+
+    routes: list[Mapping[str, Any]] | None = None
+    """
+    Alias for ``items`` used by legacy ``breadcrumbs`` payloads.
+    """
+
+    path: str | None = None
+    """
+    Forward-slash-delimited path string auto-split into segments.
+    """
+
+    current_index: int | None = None
+    """
+    Zero-based index of the currently active segment.
+    """
+
+    separator: str | None = None
+    """
+    String or icon name rendered between segments.
+    """
+
+    max_items: int | None = None
+    """
+    Maximum number of segments to display before truncating.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces segment height and padding.
+    """
+
+    dropdown_levels: bool | None = None
+    """
+    When ``True`` parent levels are shown in a dropdown on overflow.
+    """
+
+    show_root: bool | None = None
+    """
+    When ``True`` the root segment is always visible.
+    """
+
+    compact: bool | None = None
+    """
+    When ``True`` middle segments are collapsed to an ellipsis.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "breadcrumb_bar"
 
     def __init__(

@@ -8,32 +8,35 @@ __all__ = ["OverlayControl"]
 
 
 class OverlayControl(LayoutControl):
-    """Shared overlay behavior for dismissible or positioned popup controls."""
+    """
+    Shared overlay behavior for dismissible or positioned popup controls.
 
-    @property
-    def open(self) -> bool:
-        return bool(self.get_prop("open", False))
+    Args:
+        open:
+            Whether the overlay is currently visible.
+        dismissible:
+            Whether clicking outside or performing a dismiss action should
+            close the overlay.
+        offset:
+            Placement offset applied by the runtime when positioning the
+            overlay.
+    """
 
-    @open.setter
-    def open(self, value: bool) -> None:
-        self.set_prop("open", bool(value))
+    open: bool = False
+    """
+    Whether the overlay is currently visible.
+    """
 
-    @property
-    def dismissible(self) -> bool | None:
-        value = self.get_prop("dismissible")
-        return bool(value) if value is not None else None
+    dismissible: bool | None = None
+    """
+    Whether clicking outside or performing a dismiss action should close the
+    overlay.
+    """
 
-    @dismissible.setter
-    def dismissible(self, value: bool | None) -> None:
-        self.set_prop("dismissible", None if value is None else bool(value))
-
-    @property
-    def offset(self) -> Any:
-        return self.get_prop("offset")
-
-    @offset.setter
-    def offset(self, value: Any) -> None:
-        self.set_prop("offset", value)
+    offset: Any = None
+    """
+    Placement offset applied by the runtime when positioning the overlay.
+    """
 
     def show(self) -> "OverlayControl":
         self.open = True

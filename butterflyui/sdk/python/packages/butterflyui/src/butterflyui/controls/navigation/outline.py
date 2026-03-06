@@ -45,6 +45,38 @@ class Outline(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    nodes: list[Mapping[str, Any]] | None = None
+    """
+    List of tree node spec mappings. Nodes may include ``id``,
+    ``label``, ``icon``, and ``children``.
+    """
+
+    expanded: list[str] | None = None
+    """
+    List of node IDs whose subtrees are currently expanded.
+    """
+
+    selected_id: str | None = None
+    """
+    The ``id`` of the currently selected node.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces row height and indent padding.
+    """
+
+    show_icons: bool | None = None
+    """
+    When ``True`` icon decorations are shown beside node labels.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "outline"
 
     def __init__(

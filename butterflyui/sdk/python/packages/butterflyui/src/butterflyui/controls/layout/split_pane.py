@@ -46,6 +46,43 @@ class SplitPane(SplitView):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    axis: str | None = None
+    """
+    Split direction. Values: ``"horizontal"``, ``"vertical"``.
+    """
+
+    ratio: float | None = None
+    """
+    Initial fractional position of the divider (0.0-1.0).
+    """
+
+    min_ratio: float | None = None
+    """
+    Minimum allowed divider ratio during drag.
+    """
+
+    max_ratio: float | None = None
+    """
+    Maximum allowed divider ratio during drag.
+    """
+
+    draggable: bool | None = None
+    """
+    When ``True`` the user can drag the divider to resize panels.
+    """
+
+    divider_size: float | None = None
+    """
+    Width or height of the divider affordance in logical pixels.
+    """
+
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "split_pane"
 
     def __init__(

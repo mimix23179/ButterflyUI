@@ -15,6 +15,51 @@ class ColorTools(Component):
     Renders ``color_picker`` and ``color_swatch_grid`` together as one
     control so callers can manage value entry and palette selection from a
     single node.
+
+    Args:
+        picker:
+            Configuration forwarded to the embedded picker portion.
+        swatches:
+            Configuration forwarded to the embedded swatch grid portion.
+        presets:
+            Preset colors exposed by the toolbox.
+        show_picker:
+            Whether the picker portion should be visible.
+        show_swatches:
+            Whether the swatch grid portion should be visible.
+        spacing:
+            Spacing between the picker and swatch sections.
+    """
+
+
+    picker: Mapping[str, Any] | None = None
+    """
+    Configuration forwarded to the embedded picker portion.
+    """
+
+    swatches: Mapping[str, Any] | None = None
+    """
+    Configuration forwarded to the embedded swatch grid portion.
+    """
+
+    presets: list[Any] | None = None
+    """
+    Preset colors exposed by the toolbox.
+    """
+
+    show_picker: bool | None = None
+    """
+    Whether the picker portion should be visible.
+    """
+
+    show_swatches: bool | None = None
+    """
+    Whether the swatch grid portion should be visible.
+    """
+
+    spacing: float | None = None
+    """
+    Spacing between the picker and swatch sections.
     """
 
     control_type = "color_tools"

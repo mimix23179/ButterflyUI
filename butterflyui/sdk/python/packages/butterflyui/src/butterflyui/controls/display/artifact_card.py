@@ -44,6 +44,42 @@ class ArtifactCard(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    title: str | None = None
+    """
+    Bold heading text displayed at the top of the card.
+    """
+
+    message: str | None = None
+    """
+    Body text rendered beneath the title.
+    """
+
+    variant: str | None = None
+    """
+    Visual variant key forwarded to the runtime theme.
+    """
+
+    label: str | None = None
+    """
+    Optional short label displayed alongside the title.
+    """
+
+    action_label: str | None = None
+    """
+    Text for the action ``TextButton`` at the bottom. When present the button emits ``"action"`` on click.
+    """
+
+    clickable: bool | None = None
+    """
+    If ``True`` the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "artifact_card"
 
     def __init__(

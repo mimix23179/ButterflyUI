@@ -70,6 +70,91 @@ class ParticleField(Component):
         shape: 
             ``"circle"`` (default) or ``"square"``.
     """
+
+
+    count: int | None = None
+    """
+    Number of particles (``0`` – ``2000``).  Defaults to
+    ``40``.
+    """
+
+    colors: list[Any] | None = None
+    """
+    List of particle colours.  Falls back to the theme
+    accent palette when empty.
+    """
+
+    size: float | None = None
+    """
+    Uniform particle diameter; sets both *min_size* and
+    *max_size*.
+    """
+
+    min_size: float | None = None
+    """
+    Minimum particle diameter in logical pixels.
+    Defaults to ``2``.
+    """
+
+    max_size: float | None = None
+    """
+    Maximum particle diameter.  Defaults to ``6``.
+    """
+
+    speed: float | None = None
+    """
+    Uniform speed; sets both *min_speed* and *max_speed*.
+    """
+
+    min_speed: float | None = None
+    """
+    Minimum velocity in logical pixels per second.
+    Defaults to ``8``.
+    """
+
+    max_speed: float | None = None
+    """
+    Maximum velocity.  Defaults to ``32``.
+    """
+
+    direction: float | None = None
+    """
+    Emission direction in **degrees** (0 = right,
+    90 = down).  ``None`` emits omnidirectionally.
+    """
+
+    spread: float | None = None
+    """
+    Angular spread in degrees around *direction*.
+    Defaults to ``30``.
+    """
+
+    opacity: float | None = None
+    """
+    Global opacity multiplier (``0.0`` – ``1.0``).
+    Defaults to ``0.6``.
+    """
+
+    seed: int | None = None
+    """
+    Integer seed for deterministic layout.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` (default) particles wrap at canvas
+    edges.
+    """
+
+    play: bool | None = None
+    """
+    When ``True`` (default) the animation runs.
+    """
+
+    shape: str | None = None
+    """
+    ``"circle"`` (default) or ``"square"``.
+    """
     control_type = "particle_field"
 
     def __init__(

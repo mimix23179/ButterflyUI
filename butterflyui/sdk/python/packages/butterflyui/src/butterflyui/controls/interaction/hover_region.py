@@ -37,6 +37,24 @@ class HoverRegion(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    opaque: bool | None = None
+    """
+    If ``True``, the region absorbs pointer events rather than
+    passing them through.
+    """
+
+    cursor: str | None = None
+    """
+    Mouse cursor to display while hovering — e.g. ``"click"``,
+    ``"text"``, ``"grab"``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "hover_region"
 
     def __init__(

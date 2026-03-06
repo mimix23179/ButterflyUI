@@ -108,6 +108,159 @@ class Motion(Component):
             Enables strict validation when supported.
     """
 
+
+    _butterflyui_doc_only_fields = {
+        "hover",
+        "press",
+        "focus",
+        "selected",
+        "disabled",
+    }
+
+    hover: Mapping[str, Any] | None = None
+    """
+    Shortcut state map for hover.
+    """
+
+    press: Mapping[str, Any] | None = None
+    """
+    Shortcut state map for press.
+    """
+
+    focus: Mapping[str, Any] | None = None
+    """
+    Shortcut state map for focus.
+    """
+
+    selected: Mapping[str, Any] | None = None
+    """
+    Shortcut state map for selected.
+    """
+
+    disabled: Mapping[str, Any] | None = None
+    """
+    Shortcut state map for disabled.
+    """
+
+    from_: Mapping[str, Any] | None = None
+    """
+    Base state map used as animation origin.
+    """
+
+    preset: str | None = None
+    """
+    Preset choreography name (for example ``hover_lift``, ``press_sink``,
+    ``hover_lift_glow``, ``focus_pulse``, ``enter_fade_up``,
+    ``shared_axis``).
+    """
+
+    motion: Any | None = None
+    """
+    Legacy motion preset/spec alias.
+    """
+
+    enter_motion: Any | None = None
+    """
+    Enter transition motion spec for initial mount.
+    """
+
+    exit_motion: Any | None = None
+    """
+    Exit transition motion spec for removal/hide transitions.
+    """
+
+    hover_motion: Any | None = None
+    """
+    Motion spec used for hover-driven interaction.
+    """
+
+    press_motion: Any | None = None
+    """
+    Motion spec used for pressed-state interaction.
+    """
+
+    states: Mapping[str, Mapping[str, Any]] | None = None
+    """
+    State map for ``hover``, ``press``, ``focus``, ``selected``,
+    ``disabled``. Each value is a map of animated props.
+    """
+
+    to: Mapping[str, Any] | None = None
+    """
+    Base state map used as animation target while ``play=True``.
+    """
+
+    duration: str | None = None
+    """
+    Named duration token (``short``, ``medium``, ``long``).
+    """
+
+    duration_ms: int | None = None
+    """
+    Explicit duration in milliseconds.
+    """
+
+    curve: str | None = None
+    """
+    Easing curve name.
+    """
+
+    play: bool | None = None
+    """
+    Enables/disables playback of base from/to transition.
+    """
+
+    interactive: bool | None = None
+    """
+    Enables hover/press/focus input tracking.
+    """
+
+    axis: str | None = None
+    """
+    Axis hint used by some presets (x/y/z).
+    """
+
+    opacity: float | None = None
+    """
+    Shortcut target opacity.
+    """
+
+    scale: float | None = None
+    """
+    Shortcut target scale.
+    """
+
+    x: float | None = None
+    """
+    Shortcut target x translation.
+    """
+
+    y: float | None = None
+    """
+    Shortcut target y translation.
+    """
+
+    blur: float | None = None
+    """
+    Shortcut target blur.
+    """
+
+    glow: Mapping[str, Any] | None = None
+    """
+    Glow descriptor merged into active state.
+    """
+
+    shadow: Mapping[str, Any] | None = None
+    """
+    Shadow descriptor merged into active state.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime events emitted from motion host (for example
+    ``state_changed``, ``hover``, ``press``, ``focus``).
+    """
+
     control_type = "motion"
 
     def __init__(
@@ -187,6 +340,11 @@ class Motion(Component):
             **kwargs,
         )
         super().__init__(child=child, props=merged, style=style, strict=strict)
+        self.hover = dict(hover) if hover is not None else None
+        self.press = dict(press) if press is not None else None
+        self.focus = dict(focus) if focus is not None else None
+        self.selected = dict(selected) if selected is not None else None
+        self.disabled = dict(disabled) if disabled is not None else None
 
     def set_play(self, session: Any, play: bool) -> dict[str, Any]:
         return self.invoke(session, "set_play", {"play": play})

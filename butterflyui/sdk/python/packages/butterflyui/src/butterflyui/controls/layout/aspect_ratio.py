@@ -30,6 +30,12 @@ class AspectRatio(Component):
             Alias for ``ratio``.
     """
 
+
+    ratio: float | None = None
+    """
+    The desired width-to-height ratio. Alias for ``aspect_ratio``.
+    """
+
     control_type = "aspect_ratio"
 
     def __init__(

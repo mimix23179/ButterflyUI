@@ -32,6 +32,12 @@ class Spacer(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "spacer"
 
     def __init__(

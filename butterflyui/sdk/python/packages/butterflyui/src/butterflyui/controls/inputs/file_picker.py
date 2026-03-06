@@ -66,6 +66,87 @@ class FilePicker(Component):
             If ``True``, the parent window is blocked while the picker
             dialog is open (Windows only).
     """
+
+
+    label: str | None = None
+    """
+    Button / field label displayed in the UI.
+    """
+
+    file_type: str | None = None
+    """
+    MIME category hint — e.g. ``"image"``, ``"video"``,
+    ``"audio"``, ``"any"``.
+    """
+
+    extensions: list[str] | None = None
+    """
+    List of allowed extensions without the dot
+    (e.g. ``["txt", "md"]``).
+    """
+
+    allowed_extensions: list[str] | None = None
+    """
+    Alias for ``extensions``.
+    """
+
+    multiple: bool | None = None
+    """
+    If ``True``, the user can select multiple files.
+    """
+
+    allow_multiple: bool | None = None
+    """
+    Alias for ``multiple``.
+    """
+
+    with_data: bool | None = None
+    """
+    If ``True``, file bytes are included in the result payload.
+    """
+
+    with_path: bool | None = None
+    """
+    If ``True``, absolute file paths are included in the result
+    payload.
+    """
+
+    mode: str | None = None
+    """
+    Picker mode override — ``"open"``, ``"save"``, or
+    ``"directory"``.
+    """
+
+    pick_directory: bool | None = None
+    """
+    If ``True``, forces directory-selection mode.
+    """
+
+    save_file: bool | None = None
+    """
+    If ``True``, the dialog opens in save mode.
+    """
+
+    file_name: str | None = None
+    """
+    Default file name pre-filled in save dialogs.
+    """
+
+    dialog_title: str | None = None
+    """
+    Title string shown in the native file-picker dialog.
+    """
+
+    initial_directory: str | None = None
+    """
+    Absolute path of the directory the dialog starts in.
+    """
+
+    lock_parent_window: bool | None = None
+    """
+    If ``True``, the parent window is blocked while the picker
+    dialog is open (Windows only).
+    """
     control_type = "file_picker"
 
     def __init__(

@@ -46,6 +46,47 @@ class Audio(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    src: str | None = None
+    """
+    URI or file path of the audio source.
+    """
+
+    autoplay: bool | None = None
+    """
+    If ``True`` playback begins automatically on mount.
+    """
+
+    loop: bool | None = None
+    """
+    If ``True`` the track restarts when it finishes.
+    """
+
+    volume: float | None = None
+    """
+    Initial volume level from ``0.0`` (silent) to ``1.0``.
+    """
+
+    muted: bool | None = None
+    """
+    If ``True`` audio output is muted regardless of volume.
+    """
+
+    title: str | None = None
+    """
+    Display title shown in the player chrome.
+    """
+
+    artist: str | None = None
+    """
+    Artist name shown alongside the title.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "audio"
 
     def __init__(

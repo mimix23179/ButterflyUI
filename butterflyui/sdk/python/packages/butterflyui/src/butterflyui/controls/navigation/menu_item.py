@@ -40,6 +40,34 @@ class MenuItem(Component):
             When ``True`` the item renders in a checked or highlighted state.
     """
 
+
+    _butterflyui_field_aliases = {"item_id": "id"}
+
+    label: str | None = None
+    """
+    Display text for the menu item.
+    """
+
+    item_id: str | None = None
+    """
+    Identifier emitted when the item is selected.
+    """
+
+    icon: str | None = None
+    """
+    Icon glyph name shown beside the label.
+    """
+
+    shortcut: str | None = None
+    """
+    Keyboard shortcut string displayed on the right of the item.
+    """
+
+    selected: bool | None = None
+    """
+    When ``True`` the item renders in a checked or highlighted state.
+    """
+
     control_type = "menu_item"
 
     def __init__(

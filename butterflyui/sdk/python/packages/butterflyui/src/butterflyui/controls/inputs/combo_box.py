@@ -62,6 +62,62 @@ class ComboBox(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    value: str | None = None
+    """
+    Current selected/typed value.
+    """
+
+    options: list[Any] | None = None
+    """
+    Option descriptors shown in the dropdown.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for ``options``.
+    """
+
+    groups: list[Mapping[str, Any]] | None = None
+    """
+    Group descriptors for grouped option sections.
+    """
+
+    label: str | None = None
+    """
+    Field label text.
+    """
+
+    hint: str | None = None
+    """
+    Hint text shown when input is empty.
+    """
+
+    placeholder: str | None = None
+    """
+    Alias for ``hint``.
+    """
+
+    loading: bool | None = None
+    """
+    If ``True``, shows loading affordances.
+    """
+
+    async_source: str | None = None
+    """
+    Identifier used by your runtime for remote option lookups.
+    """
+
+    debounce_ms: int | None = None
+    """
+    Debounce window (milliseconds) for query events.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "combo_box"
 
     def __init__(

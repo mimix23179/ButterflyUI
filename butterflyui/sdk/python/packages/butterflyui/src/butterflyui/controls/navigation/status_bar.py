@@ -40,6 +40,22 @@ class StatusBar(Component):
             Additional runtime props, including layout and visual hints.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    List of status segment spec mappings.
+    """
+
+    text: str | None = None
+    """
+    Simple plain-text status message (used instead of ``items``).
+    """
+
+    dense: bool | None = None
+    """
+    Reduces bar height and item padding.
+    """
+
     control_type = "status_bar"
 
     def __init__(

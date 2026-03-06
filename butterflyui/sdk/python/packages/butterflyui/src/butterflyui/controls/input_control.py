@@ -8,30 +8,29 @@ __all__ = ["InputControl"]
 
 
 class InputControl(LayoutControl):
-    """Shared input behavior for controls that carry a user-editable value."""
+    """
+    Shared input behavior for controls that carry a user-editable value.
 
-    @property
-    def value(self) -> Any:
-        return self.get_prop("value")
+    Args:
+        value:
+            Current value held by the input control.
+        label:
+            Human-readable label shown with the input.
+        placeholder:
+            Hint text shown when the input value is empty.
+    """
 
-    @value.setter
-    def value(self, value: Any) -> None:
-        self.set_prop("value", value)
+    value: Any = None
+    """
+    Current value held by the input control.
+    """
 
-    @property
-    def label(self) -> str | None:
-        value = self.get_prop("label")
-        return str(value) if value is not None else None
+    label: str | None = None
+    """
+    Human-readable label shown with the input.
+    """
 
-    @label.setter
-    def label(self, value: str | None) -> None:
-        self.set_prop("label", value)
-
-    @property
-    def placeholder(self) -> str | None:
-        value = self.get_prop("placeholder")
-        return str(value) if value is not None else None
-
-    @placeholder.setter
-    def placeholder(self, value: str | None) -> None:
-        self.set_prop("placeholder", value)
+    placeholder: str | None = None
+    """
+    Hint text shown when the input value is empty.
+    """

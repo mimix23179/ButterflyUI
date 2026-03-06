@@ -74,6 +74,73 @@ class Chip(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    dismissible: bool | None = None
+    """
+    If ``True``, the chip can be dismissed.
+    """
+
+
+    label: str | None = None
+    """
+    Label text for single-chip mode.
+    """
+
+    value: Any | None = None
+    """
+    Value for single-chip mode.
+    """
+
+    options: list[Any] | None = None
+    """
+    Option descriptors for grouped mode.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for ``options``.
+    """
+
+    values: list[Any] | None = None
+    """
+    Selected values for grouped multi-select mode.
+    """
+
+    multi_select: bool | None = None
+    """
+    Enables multi-selection when rendering grouped chips.
+    """
+
+    selected: bool | None = None
+    """
+    Selected state for single-chip mode.
+    """
+
+    color: Any | None = None
+    """
+    Color override for chip background/accent treatment.
+    """
+
+    dense: bool | None = None
+    """
+    Uses compact spacing.
+    """
+
+    spacing: float | None = None
+    """
+    Horizontal spacing between chips in grouped mode.
+    """
+
+    run_spacing: float | None = None
+    """
+    Vertical spacing between chip rows in wrapped layouts.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "chip"
 
     def __init__(

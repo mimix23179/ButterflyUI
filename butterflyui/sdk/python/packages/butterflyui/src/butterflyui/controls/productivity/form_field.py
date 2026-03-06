@@ -40,6 +40,32 @@ class FormField(Component):
             Validation error message shown below the input.
     """
 
+
+    label: str | None = None
+    """
+    Field label text shown above or beside the input.
+    """
+
+    description: str | None = None
+    """
+    Secondary hint text displayed below the label.
+    """
+
+    required: bool | None = None
+    """
+    When ``True`` a required indicator is added to the label.
+    """
+
+    helper_text: str | None = None
+    """
+    Hint text shown below the input when no error is present.
+    """
+
+    error_text: str | None = None
+    """
+    Validation error message shown below the input.
+    """
+
     control_type = "form_field"
 
     def __init__(

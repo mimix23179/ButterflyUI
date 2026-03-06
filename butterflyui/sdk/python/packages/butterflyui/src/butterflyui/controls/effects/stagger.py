@@ -51,6 +51,49 @@ class Stagger(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    stagger_ms: int | None = None
+    """
+    Per-item delay in milliseconds between successive
+    child animations (``0`` – ``4000``).  Defaults to ``40``.
+    """
+
+    stagger: int | None = None
+    """
+    Alias for *stagger_ms*.
+    """
+
+    direction: str | None = None
+    """
+    Layout and slide direction — ``"vertical"``
+    (default, slides from below) or ``"horizontal"`` (slides
+    from the right).
+    """
+
+    play: bool | None = None
+    """
+    When ``True`` (default) the stagger starts on mount;
+    set to ``False`` to defer.
+    """
+
+    duration_ms: int | None = None
+    """
+    Total animation controller duration in
+    milliseconds.  Defaults to ``420``; clamped to
+    ``50 – 60 000``.
+    """
+
+    curve: str | None = None
+    """
+    Named easing curve (e.g. ``"ease_out_cubic"``).
+    Defaults to ``ease_out_cubic``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "stagger"
 
     def __init__(

@@ -56,6 +56,48 @@ class StickyList(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    scrollable: bool | None = None
+    """
+    If ``True`` (default), the list scrolls with ``AlwaysScrollableScrollPhysics``.  Set to ``False`` for ``NeverScrollableScrollPhysics``.
+    """
+
+
+    sections: list[Mapping[str, Any]] | None = None
+    """
+    Section payloads — list of mappings each containing ``"header"`` (or ``"title"``) and ``"items"`` (list of item mappings with at least ``"label"``/``"id"``).
+    """
+
+    spacing: float | None = None
+    """
+    Vertical spacing in logical pixels between items or sections.  Defaults to ``8``.
+    """
+
+    shrink_wrap: bool | None = None
+    """
+    If ``True``, the list shrink-wraps its content for embedding inside other scrollable parents.
+    """
+
+    reverse: bool | None = None
+    """
+    If ``True``, the scroll direction is reversed (bottom-to-top).
+    """
+
+    cache_extent: float | None = None
+    """
+    Cache extent in logical pixels for viewport pre-building of off-screen items.
+    """
+
+    header_extent: float | None = None
+    """
+    Fixed extent for section header rows (forwarded to the runtime).
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "sticky_list"
 
     def __init__(

@@ -37,6 +37,33 @@ class ScrollableRow(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    initial_offset: float | None = None
+    """
+    Starting scroll offset in logical pixels.
+    """
+
+
+    spacing: float | None = None
+    """
+    Horizontal gap between children in logical pixels.
+    """
+
+    reverse: bool | None = None
+    """
+    When ``True`` children are laid out in reverse scroll order.
+    """
+
+    content_padding: Any | None = None
+    """
+    Padding applied around the scrollable content area.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "scrollable_row"
 
     def __init__(

@@ -47,6 +47,32 @@ class SortableHeader(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    columns: list[Mapping[str, Any]] | None = None
+    """
+    Header column definitions — list of mappings with ``"key"`` (or ``"id"``/``"field"``) and ``"label"`` (or ``"title"``) keys.
+    """
+
+    sort_column: str | None = None
+    """
+    The ``key`` of the currently sorted column.  ``None`` means no column is sorted.
+    """
+
+    sort_ascending: bool | None = None
+    """
+    If ``True`` (default), the current sort direction is ascending.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, header chips use compact padding and smaller icon size.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "sortable_header"
 
     def __init__(

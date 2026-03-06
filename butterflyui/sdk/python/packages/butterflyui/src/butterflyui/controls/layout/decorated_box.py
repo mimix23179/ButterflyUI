@@ -60,6 +60,58 @@ class DecoratedBox(Component):
             Additional runtime props forwarded to the shared renderer pipeline.
     """
 
+
+    color: Any | None = None
+    """
+    Background fill color. Alias for ``bgcolor``.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background fill color. Alias for ``color``.
+    """
+
+    gradient: Mapping[str, Any] | None = None
+    """
+    Gradient spec mapping (e.g. ``LinearGradient`` or
+    ``RadialGradient``).
+    """
+
+    image: Mapping[str, Any] | None = None
+    """
+    ``DecorationImage`` spec mapping shown as a background image.
+    """
+
+    border_color: Any | None = None
+    """
+    Border stroke color.
+    """
+
+    border_width: float | None = None
+    """
+    Border stroke width in logical pixels.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels.
+    """
+
+    shape: str | None = None
+    """
+    Box shape. Values: ``"rectangle"`` (default), ``"circle"``.
+    """
+
+    shadow: Any | None = None
+    """
+    List of box-shadow spec mappings.
+    """
+
+    clip_behavior: str | None = None
+    """
+    Anti-aliasing clip mode applied to the decoration boundary.
+    """
+
     control_type = "decorated_box"
 
     def __init__(

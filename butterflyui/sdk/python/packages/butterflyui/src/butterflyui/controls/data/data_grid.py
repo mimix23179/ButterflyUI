@@ -79,6 +79,77 @@ class DataGrid(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    columns: Sequence[Any] | None = None
+    """
+    Column descriptors consumed by the Flutter renderer.
+    """
+
+    rows: Sequence[Any] | None = None
+    """
+    Row objects rendered by the grid.
+    """
+
+    sortable: bool | None = None
+    """
+    Enables sort affordances in headers.
+    """
+
+    filterable: bool | None = None
+    """
+    Enables built-in query/filter UI behavior.
+    """
+
+    selectable: bool | None = None
+    """
+    Enables row selection state.
+    """
+
+    dense: bool | None = None
+    """
+    Reduces row height and cell spacing for compact layouts.
+    """
+
+    striped: bool | None = None
+    """
+    Alternates row background treatment for readability.
+    """
+
+    show_header: bool | None = None
+    """
+    If ``False``, header row is hidden.
+    """
+
+    show_footer: bool | None = None
+    """
+    If ``True``, footer/status area is rendered.
+    """
+
+    page_size: int | None = None
+    """
+    Preferred rows-per-page when pagination is enabled by the client.
+    """
+
+    sort_column: str | None = None
+    """
+    Initial column key to sort by.
+    """
+
+    sort_ascending: bool | None = None
+    """
+    Initial sort direction.
+    """
+
+    filter_query: str | None = None
+    """
+    Initial query string applied by the renderer.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "data_grid"
 
     def __init__(

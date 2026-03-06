@@ -37,6 +37,13 @@ class KeyListener(Component):
         enabled:
             If ``False``, key events are not captured or emitted.
     """
+
+
+    autofocus: bool | None = None
+    """
+    If ``True``, the focus node requests focus when first
+    mounted.
+    """
     control_type = "key_listener"
 
     def __init__(

@@ -39,6 +39,42 @@ class HistogramOverlay(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    bins: list[float] | None = None
+    """
+    List of bin values (relative heights, ``0.0``–``1.0``) that form the histogram bars.
+    """
+
+    channels: list[Mapping[str, Any]] | None = None
+    """
+    Per-channel histogram data. Each item is a dict with keys like ``"bins"`` and ``"color"``.
+    """
+
+    opacity: float | None = None
+    """
+    Opacity of the histogram overlay, ``0.0``–``1.0``. Defaults to ``0.45``.
+    """
+
+    blend_mode: str | None = None
+    """
+    Compositing blend mode used when painting the histogram.
+    """
+
+    compact: bool | None = None
+    """
+    If ``True``, the histogram renders at a shorter height (``84`` px vs ``140`` px).
+    """
+
+    show_grid: bool | None = None
+    """
+    If ``True``, a background reference grid is drawn behind the bars.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "histogram_overlay"
 
     def __init__(

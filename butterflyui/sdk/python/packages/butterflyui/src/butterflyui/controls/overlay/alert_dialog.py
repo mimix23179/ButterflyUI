@@ -74,6 +74,77 @@ class AlertDialog(Component):
             including style/modifier/motion/effects and transparency hints.
     """
 
+
+    _butterflyui_doc_only_fields = {"title", "content", "actions", "modal"}
+
+    title: Any | None = None
+    """
+    Title node or primitive text value.
+    """
+
+    content: Any | None = None
+    """
+    Body node or primitive text value.
+    """
+
+    actions: Sequence[Any] | None = None
+    """
+    Footer action descriptors or primitive labels.
+    """
+
+    modal: bool | None = None
+    """
+    Alias for modal behavior. When set, it drives default
+    ``dismissible`` (``modal=True`` implies ``dismissible=False``).
+    """
+
+    open: bool | None = None
+    """
+    If ``True``, the dialog is visible.
+    """
+
+    dismissible: bool | None = None
+    """
+    If ``True``, outside taps dismiss the dialog.
+    """
+
+
+    close_on_escape: bool | None = None
+    """
+    If ``True``, Escape dismisses the dialog.
+    """
+
+    trap_focus: bool | None = None
+    """
+    If ``True``, keyboard focus remains inside the dialog while open.
+    """
+
+    duration_ms: int | None = None
+    """
+    Open/close transition duration in milliseconds.
+    """
+
+    transition: Mapping[str, Any] | None = None
+    """
+    Explicit transition descriptor mapping.
+    """
+
+    transition_type: str | None = 'fade'
+    """
+    Named transition preset (for example ``"fade"``, ``"slide"``,
+    ``"pop"``, ``"pop_from_rect"``).
+    """
+
+    source_rect: Mapping[str, Any] | list[float] | tuple[float, ...] | None = None
+    """
+    Optional transition origin rectangle.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Overlay scrim color.
+    """
+
     control_type = "alert_dialog"
 
     def __init__(
@@ -128,6 +199,10 @@ class AlertDialog(Component):
             style=style,
             strict=strict,
         )
+        self.title = title
+        self.content = content
+        self.actions = list(actions) if actions is not None else None
+        self.modal = modal
 
     @staticmethod
     def _compose_dialog_body(

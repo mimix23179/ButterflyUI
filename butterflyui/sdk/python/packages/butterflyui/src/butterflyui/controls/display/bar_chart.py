@@ -52,6 +52,62 @@ class BarChart(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    values: list[Any] | None = None
+    """
+    Primary list of numeric bar values.
+    """
+
+    points: list[Any] | None = None
+    """
+    Alias for ``values``.
+    """
+
+    labels: list[str] | None = None
+    """
+    Category labels displayed along the x-axis.
+    """
+
+    datasets: list[Mapping[str, Any]] | None = None
+    """
+    List of dataset mappings, each containing a ``"values"`` key, for multi-series bar charts.
+    """
+
+    grouped: bool | None = None
+    """
+    If ``True`` multiple datasets are drawn side-by-side.
+    """
+
+    stacked: bool | None = None
+    """
+    If ``True`` datasets are stacked vertically.
+    """
+
+    fill: bool | None = None
+    """
+    Whether bars are solid-filled (default ``True``).
+    """
+
+    color: Any | None = None
+    """
+    Primary bar colour forwarded to the painter.
+    """
+
+    animate: bool | None = None
+    """
+    If ``True`` the runtime animates data transitions.
+    """
+
+    show_tooltip: bool | None = None
+    """
+    If ``True`` a tooltip appears on bar hover.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "bar_chart"
 
     def __init__(

@@ -74,6 +74,117 @@ class AnimatedGradient(Component):
             Minimum interval in milliseconds between runtime change events.
     """
 
+
+    variant: str | None = None
+    """
+    Gradient variant. One of ``"linear"`` (default), ``"radial"``, or ``"sweep"``/``"conic"``.
+    """
+
+    kind: str | None = None
+    """
+    Alias for `variant`.
+    """
+
+    gradient: str | None = None
+    """
+    Alias for `variant`.
+    """
+
+    type: str | None = None
+    """
+    Alias for `variant`.
+    """
+
+    colors: list[Any] | None = None
+    """
+    List of colour values (hex strings or colour objects). At least two colours are required; the runtime falls back to purple-cyan if fewer are given.
+    """
+
+    stops: list[float] | None = None
+    """
+    Gradient stop positions, each in ``[0.0, 1.0]``. Must match the length of `colors`; ignored if the count differs.
+    """
+
+    duration_ms: int | None = None
+    """
+    Total animation duration in milliseconds. Defaults to ``1800``. Clamped to ``[1, 600000]``.
+    """
+
+    duration: int | None = None
+    """
+    Alias for `duration_ms`.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius applied to the decorated box that contains the gradient.
+    """
+
+    begin: Any | None = None
+    """
+    Start alignment of a linear gradient (e.g. ``"top_left"`` or ``[x, y]``). Defaults to ``Alignment.topLeft``.
+    """
+
+    end: Any | None = None
+    """
+    End alignment of a linear gradient. Defaults to ``Alignment.bottomRight``.
+    """
+
+    angle: float | None = None
+    """
+    Initial rotation angle in degrees. The animation rotates a full 360° over one cycle starting from this value.
+    """
+
+    start_angle: float | None = None
+    """
+    Start angle for sweep gradients, in degrees. Defaults to ``0``. Also used as the initial rotation angle for linear gradients.
+    """
+
+    end_angle: float | None = None
+    """
+    End angle for sweep gradients, in degrees. Defaults to ``360``.
+    """
+
+    opacity: float | None = None
+    """
+    Overall opacity of the gradient surface, ``0.0``–``1.0``.
+    """
+
+    loop: bool | None = None
+    """
+    If ``True`` (default), the animation repeats indefinitely. When ``False``, it plays once and stops.
+    """
+
+    autoplay: bool | None = None
+    """
+    If ``True`` (default), the animation starts automatically on mount.
+    """
+
+    play: bool | None = None
+    """
+    Alias for `playing`.
+    """
+
+    playing: bool | None = None
+    """
+    Controls whether the animation is running. Set ``False`` to pause.
+    """
+
+    ping_pong: bool | None = None
+    """
+    If ``True``, the animation reverses direction at each cycle end instead of snapping back.
+    """
+
+    shift: bool | None = None
+    """
+    If ``True``, the colour list is cyclically rotated as the animation progresses, producing a "rolling" colour effect.
+    """
+
+    throttle_ms: int | None = None
+    """
+    Minimum interval in milliseconds between runtime change events.
+    """
+
     control_type = "animated_gradient"
 
     def __init__(

@@ -42,6 +42,37 @@ class SplitView(Component):
             Width or height of the divider affordance in logical pixels.
     """
 
+
+    axis: str | None = None
+    """
+    Split direction. Values: ``"horizontal"``, ``"vertical"``.
+    """
+
+    ratio: float | None = None
+    """
+    Initial fractional position of the divider (0.0-1.0).
+    """
+
+    min_ratio: float | None = None
+    """
+    Minimum allowed divider ratio during drag.
+    """
+
+    max_ratio: float | None = None
+    """
+    Maximum allowed divider ratio during drag.
+    """
+
+    draggable: bool | None = None
+    """
+    When ``True`` the user can drag the divider to resize panels.
+    """
+
+    divider_size: float | None = None
+    """
+    Width or height of the divider affordance in logical pixels.
+    """
+
     control_type = "split_view"
 
     def __init__(

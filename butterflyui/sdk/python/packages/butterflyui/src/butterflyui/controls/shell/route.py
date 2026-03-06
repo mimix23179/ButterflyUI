@@ -54,6 +54,38 @@ class Route(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    route_id: str | None = None
+    """
+    Stable route identifier.
+    """
+
+    title: str | None = None
+    """
+    Route title used by navigation UIs.
+    """
+
+    label: str | None = None
+    """
+    Optional display label alias.
+    """
+
+    layout: str | None = None
+    """
+    Child layout hint (for example ``"column"``, ``"row"``,
+    ``"stack"``, ``"wrap"``).
+    """
+
+    spacing: float | None = None
+    """
+    Spacing between children for multi-child layouts.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "route"
 
     def __init__(

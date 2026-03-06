@@ -53,6 +53,50 @@ class ToastHost(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    dismissible: bool | None = None
+    """
+    When ``True`` each toast shows a close button.
+    """
+
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    Initial list of toast spec mappings.
+    """
+
+    notifications: list[Mapping[str, Any]] | None = None
+    """
+    Alias for ``items`` from legacy notification host payloads.
+    """
+
+    toasts: list[Mapping[str, Any]] | None = None
+    """
+    Alias for ``items``.
+    """
+
+    position: str | None = None
+    """
+    Screen corner where the toast stack is anchored. Values:
+    ``"top_left"``, ``"top_right"``, ``"bottom_left"``,
+    ``"bottom_right"``.
+    """
+
+    max_items: int | None = None
+    """
+    Maximum number of toasts shown simultaneously.
+    """
+
+    latest_on_top: bool | None = None
+    """
+    When ``True`` the newest toast appears at the top of the stack.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter side should emit to Python.
+    """
+
     control_type = "toast_host"
 
     def __init__(

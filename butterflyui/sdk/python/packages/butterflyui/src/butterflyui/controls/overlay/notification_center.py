@@ -39,6 +39,33 @@ class NotificationCenter(Component):
             Maximum number of notification items to retain.
     """
 
+
+    items: list[Mapping[str, Any]] | None = None
+    """
+    List of notification spec mappings. Alias for
+    ``notifications``.
+    """
+
+    notifications: list[Mapping[str, Any]] | None = None
+    """
+    Alias for ``items``.
+    """
+
+    title: str | None = None
+    """
+    Heading text displayed at the top of the panel.
+    """
+
+    show_clear_all: bool | None = None
+    """
+    When ``True`` a clear-all button is shown in the header.
+    """
+
+    max_items: int | None = None
+    """
+    Maximum number of notification items to retain.
+    """
+
     control_type = "notification_center"
 
     def __init__(

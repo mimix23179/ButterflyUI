@@ -8,50 +8,48 @@ __all__ = ["Control", "Component"]
 
 
 class Control(BaseControl):
-    """Common props shared by most renderable ButterflyUI controls."""
+    """
+    Common props shared by most renderable ButterflyUI controls.
 
-    @property
-    def key(self) -> str | None:
-        value = self.get_prop("key")
-        return str(value) if value is not None else None
+    Args:
+        key:
+            Stable application-defined identifier used to distinguish this
+            control across updates.
+        visible:
+            Whether the control should be rendered by the Flutter client.
+        enabled:
+            Whether the control should accept interaction and appear enabled.
+        tooltip:
+            Hover or long-press help text shown by the runtime.
+        semantics:
+            Accessibility metadata forwarded to the client.
+    """
 
-    @key.setter
-    def key(self, value: str | None) -> None:
-        self.set_prop("key", value)
+    key: str | None = None
+    """
+    Stable application-defined identifier used to distinguish this control
+    across updates.
+    """
 
-    @property
-    def visible(self) -> bool:
-        return bool(self.get_prop("visible", True))
+    visible: bool = True
+    """
+    Whether the control should be rendered by the Flutter client.
+    """
 
-    @visible.setter
-    def visible(self, value: bool) -> None:
-        self.set_prop("visible", bool(value))
+    enabled: bool | None = None
+    """
+    Whether the control should accept interaction and appear enabled.
+    """
 
-    @property
-    def enabled(self) -> bool | None:
-        value = self.get_prop("enabled")
-        return bool(value) if value is not None else None
+    tooltip: str | None = None
+    """
+    Hover or long-press help text shown by the runtime.
+    """
 
-    @enabled.setter
-    def enabled(self, value: bool | None) -> None:
-        self.set_prop("enabled", None if value is None else bool(value))
-
-    @property
-    def tooltip(self) -> str | None:
-        value = self.get_prop("tooltip")
-        return str(value) if value is not None else None
-
-    @tooltip.setter
-    def tooltip(self, value: str | None) -> None:
-        self.set_prop("tooltip", value)
-
-    @property
-    def semantics(self) -> Any:
-        return self.get_prop("semantics")
-
-    @semantics.setter
-    def semantics(self, value: Any) -> None:
-        self.set_prop("semantics", value)
+    semantics: Any = None
+    """
+    Accessibility metadata forwarded to the client.
+    """
 
 
 Component = Control

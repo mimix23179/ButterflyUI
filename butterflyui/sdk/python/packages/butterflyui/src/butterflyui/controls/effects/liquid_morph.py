@@ -41,6 +41,36 @@ class LiquidMorph(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    min_radius: float | None = None
+    """
+    Corner radius when *animate* is ``False`` or at
+    the animation start.  Defaults to ``8``.
+    """
+
+    max_radius: float | None = None
+    """
+    Corner radius the animation targets.  Defaults
+    to ``24``.
+    """
+
+    duration_ms: int | None = None
+    """
+    Transition duration in milliseconds.  Defaults
+    to ``1200``; clamped to ``1 – 600 000``.
+    """
+
+    animate: bool | None = None
+    """
+    When ``True`` (default) the radius animates to
+    *max_radius*; when ``False`` it stays at *min_radius*.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "liquid_morph"
 
     def __init__(

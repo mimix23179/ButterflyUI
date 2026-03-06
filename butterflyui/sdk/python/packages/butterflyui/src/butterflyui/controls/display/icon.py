@@ -45,6 +45,12 @@ class Icon(Component):
             ``padding``, ``radius``, ``border_color``, ``border_width``,
             ``auto_contrast``, and ``min_contrast``.
     """
+
+
+    icon: str | int | None = None
+    """
+    Icon payload, typically a name string or codepoint integer.
+    """
     control_type = "icon"
 
     def __init__(

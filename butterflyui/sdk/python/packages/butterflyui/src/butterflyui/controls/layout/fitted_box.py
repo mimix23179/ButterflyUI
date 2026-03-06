@@ -35,6 +35,18 @@ class FittedBox(Component):
             Anti-aliasing clip mode applied when the child overflows.
     """
 
+
+    fit: str | None = None
+    """
+    Scaling mode. Values: ``"contain"``, ``"cover"``, ``"fill"``,
+    ``"fitWidth"``, ``"fitHeight"``, ``"none"``, ``"scaleDown"``.
+    """
+
+    clip_behavior: str | None = None
+    """
+    Anti-aliasing clip mode applied when the child overflows.
+    """
+
     control_type = "fitted_box"
 
     def __init__(

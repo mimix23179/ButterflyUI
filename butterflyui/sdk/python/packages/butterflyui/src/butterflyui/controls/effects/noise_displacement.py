@@ -54,6 +54,61 @@ class NoiseDisplacement(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    strength: float | None = None
+    """
+    Maximum displacement in logical pixels.  Defaults
+    to ``3``.
+    """
+
+    speed: float | None = None
+    """
+    Speed multiplier (``0.1`` – ``6.0``).  Higher values
+    shorten the animation duration.  Defaults to ``1``.
+    """
+
+    axis: str | None = None
+    """
+    Displacement axis — ``"x"``, ``"y"``, or ``"both"``
+    (default).
+    """
+
+    seed: int | None = None
+    """
+    Integer seed for the pseudo-random offset generator.
+    """
+
+    animated: bool | None = None
+    """
+    When ``True`` the effect plays automatically.
+    """
+
+    loop: bool | None = None
+    """
+    When ``True`` the displacement repeats with reverse.
+    """
+
+    play: bool | None = None
+    """
+    Explicit play toggle.
+    """
+
+    autoplay: bool | None = None
+    """
+    When ``True`` the animation starts on mount.
+    """
+
+    duration_ms: int | None = None
+    """
+    Base animation duration in milliseconds.  Defaults
+    to ``350``; actual duration is divided by *speed*.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "noise_displacement"
 
     def __init__(

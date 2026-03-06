@@ -9,7 +9,65 @@ __all__ = ["TransitionEffect", "Transition"]
 
 
 class TransitionEffect(Component):
-    """Animated content switcher for stateful child transitions."""
+    """
+    Animated content switcher for stateful child transitions.
+
+    Args:
+        child:
+            Primary child control used as the current transition content.
+        duration_ms:
+            Transition duration in milliseconds.
+        curve:
+            Animation curve name used for the transition.
+        transition_type:
+            Transition type identifier forwarded to the runtime.
+        preset:
+            Alias preset for ``transition_type``.
+        state:
+            State token used to select transition branches.
+        mode:
+            Transition mode or layout strategy.
+        enabled:
+            Whether the transition wrapper is active.
+        events:
+            Runtime events emitted by the transition wrapper.
+    """
+
+
+    duration_ms: int | None = None
+    """
+    Transition duration in milliseconds.
+    """
+
+    curve: str | None = None
+    """
+    Animation curve name used for the transition.
+    """
+
+    transition_type: str | None = None
+    """
+    Transition type identifier forwarded to the runtime.
+    """
+
+    preset: str | None = None
+    """
+    Alias preset for ``transition_type``.
+    """
+
+    state: str | None = None
+    """
+    State token used to select transition branches.
+    """
+
+    mode: str | None = None
+    """
+    Transition mode or layout strategy.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime events emitted by the transition wrapper.
+    """
 
     control_type = "transition"
 

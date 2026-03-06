@@ -68,6 +68,73 @@ class AsyncActionButton(Button):
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
+
+
+    label: str | None = None
+    """
+    Button text. ``text`` takes precedence when both are set.
+    """
+
+    text: str | None = None
+    """
+    Button text alias for ``label``.
+    """
+
+    value: Any | None = None
+    """
+    Arbitrary payload emitted with click events.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names to subscribe to.
+    """
+
+    action: Any | None = None
+    """
+    Declarative action descriptor fired on press.
+    """
+
+    action_id: str | None = None
+    """
+    Registered action ID to dispatch on press.
+    """
+
+    action_event: str | None = None
+    """
+    Event name forwarded to the action dispatcher.
+    """
+
+    action_payload: Mapping[str, Any] | None = None
+    """
+    Extra payload mapping for action dispatch.
+    """
+
+    actions: list[Any] | None = None
+    """
+    Action descriptor list executed on press.
+    """
+
+
+    busy: bool | None = None
+    """
+    Busy/loading state flag.
+    """
+
+    loading: bool | None = None
+    """
+    Alias for ``busy``.
+    """
+
+    disabled_while_busy: bool | None = None
+    """
+    If ``True``, disables interaction while busy.
+    """
+
+    busy_label: str | None = None
+    """
+    Optional text shown while busy.
+    """
     control_type = "async_action_button"
 
     def __init__(

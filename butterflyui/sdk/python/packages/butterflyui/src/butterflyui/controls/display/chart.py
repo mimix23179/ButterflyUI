@@ -41,6 +41,32 @@ class Chart(Component):
         color: 
             Primary colour used by the chart painter.
     """
+
+
+    values: list[Any] | None = None
+    """
+    Numeric data points for the chart.
+    """
+
+    points: list[Any] | None = None
+    """
+    Alias for ``values``.
+    """
+
+    chart_type: str | None = None
+    """
+    ``"line"`` (default), ``"area"``, ``"bar"``, or ``"column"``.
+    """
+
+    fill: bool | None = None
+    """
+    If ``True`` the area under a line chart is shaded.
+    """
+
+    color: Any | None = None
+    """
+    Primary colour used by the chart painter.
+    """
     control_type = "chart"
 
     def __init__(

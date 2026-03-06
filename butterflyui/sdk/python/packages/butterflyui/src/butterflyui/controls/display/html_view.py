@@ -41,6 +41,37 @@ class HtmlView(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    value: str | None = None
+    """
+    Inline HTML content string.
+    """
+
+    html: str | None = None
+    """
+    Alias for ``value``.
+    """
+
+    text: str | None = None
+    """
+    Alias for ``value``.
+    """
+
+    html_file: str | None = None
+    """
+    Local file path to an ``.html`` file.  Converted to a ``file://`` URL at runtime.
+    """
+
+    base_url: str | None = None
+    """
+    Explicit base URL for resolving relative paths inside the HTML.  Defaults to the directory of ``html_file``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "html_view"
 
     def __init__(

@@ -9,7 +9,56 @@ __all__ = ["BorderEffect", "Border"]
 
 
 class BorderEffect(Component):
-    """Wrap a child control in a configurable border decoration."""
+    """
+    Wrap a child control in a configurable border decoration.
+
+    Args:
+        color:
+            Border color applied around the wrapped child.
+        width:
+            Border stroke width in logical pixels.
+        radius:
+            Corner radius of the border decoration.
+        side:
+            Single-side shortcut, such as ``"top"`` or ``"bottom"``.
+        sides:
+            Per-side border payload for advanced border configuration.
+        animated:
+            Whether border changes should animate.
+        duration_ms:
+            Duration of the border animation in milliseconds.
+    """
+
+
+    color: Any | None = None
+    """
+    Border color applied around the wrapped child.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius of the border decoration.
+    """
+
+    side: str | None = None
+    """
+    Single-side shortcut, such as ``"top"`` or ``"bottom"``.
+    """
+
+    sides: Mapping[str, Any] | None = None
+    """
+    Per-side border payload for advanced border configuration.
+    """
+
+    animated: bool | None = None
+    """
+    Whether border changes should animate.
+    """
+
+    duration_ms: int | None = None
+    """
+    Duration of the border animation in milliseconds.
+    """
 
     control_type = "border"
 

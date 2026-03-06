@@ -38,6 +38,32 @@ class CropBox(Component):
         events:
             List of event names the Flutter runtime should emit to Python.
     """
+
+
+    rect: Mapping[str, Any] | None = None
+    """
+    Crop rectangle as ``{"x": ..., "y": ..., "width": ..., "height": ...}``. Defaults to ``{"x": 24, "y": 24, "width": 120, "height": 90}``.
+    """
+
+    shade_color: Any | None = None
+    """
+    Colour of the semi-transparent shade painted over the non-cropped area. Defaults to ``black26`` at ``0.18`` opacity.
+    """
+
+    border_color: Any | None = None
+    """
+    Colour of the crop rectangle border. Defaults to ``Colors.blueAccent``.
+    """
+
+    border_width: float | None = None
+    """
+    Stroke width of the crop rectangle border. Defaults to ``2``.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
     control_type = "crop_box"
 
     def __init__(

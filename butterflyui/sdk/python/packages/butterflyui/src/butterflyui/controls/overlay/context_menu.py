@@ -49,6 +49,23 @@ class ContextMenu(Component):
             Additional runtime props passed through to Flutter.
     """
 
+
+    items: list[Any] | None = None
+    """
+    List of menu item spec mappings shown in the context menu.
+    """
+
+    trigger: str | None = None
+    """
+    Gesture that opens the menu. Values: ``"secondary_tap"``,
+    ``"long_press"``.
+    """
+
+    open_on_tap: bool | None = None
+    """
+    When ``True`` a primary tap also opens the context menu.
+    """
+
     control_type = "context_menu"
 
     def __init__(

@@ -33,6 +33,22 @@ class Form(Component):
             Vertical gap in logical pixels between form field children.
     """
 
+
+    title: str | None = None
+    """
+    Optional heading displayed at the top of the form.
+    """
+
+    description: str | None = None
+    """
+    Optional description text displayed below the title.
+    """
+
+    spacing: float | None = None
+    """
+    Vertical gap in logical pixels between form field children.
+    """
+
     control_type = "form"
 
     def __init__(

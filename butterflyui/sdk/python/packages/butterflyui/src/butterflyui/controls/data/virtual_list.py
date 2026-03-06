@@ -49,6 +49,42 @@ class VirtualList(Component):
             Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
+
+    items: list[Any] | None = None
+    """
+    Item payload list used to build rows when no explicit children are given.
+    """
+
+    item_extent: float | None = None
+    """
+    Fixed row height in logical pixels.  Enables constant-time scroll-offset calculations for large lists.
+    """
+
+    cache_extent: float | None = None
+    """
+    Cache extent in logical pixels — controls how far off-screen the viewport pre-builds items.
+    """
+
+    separator: bool | None = None
+    """
+    If ``True``, a ``Divider`` is inserted between each row.
+    """
+
+    has_more: bool | None = None
+    """
+    If ``True``, signals that more data can be requested when nearing the end.
+    """
+
+    loading: bool | None = None
+    """
+    If ``True``, a loading indicator is displayed at the tail of the list.
+    """
+
+    prefetch_threshold: int | None = None
+    """
+    Number of remaining items at which a ``"prefetch"`` event is emitted.
+    """
+
     control_type = "virtual_list"
 
     def __init__(

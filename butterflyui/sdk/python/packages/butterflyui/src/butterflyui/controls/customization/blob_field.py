@@ -57,6 +57,82 @@ class BlobField(Component):
         progress: 
             Draw progress from ``0.0`` (nothing) to ``1.0`` (full field). Defaults to ``1.0``.
     """
+
+
+    count: int | None = None
+    """
+    Number of blobs to generate. Defaults to ``12``.
+    """
+
+    seed: int | None = None
+    """
+    Random seed controlling blob positions and sizes. Defaults to ``7``. Change it to produce a new random layout.
+    """
+
+    color: Any | None = None
+    """
+    Primary colour for the blobs (hex string or colour object). Defaults to ``"#8b5cf6"`` (violet).
+    """
+
+    colors: list[Any] | None = None
+    """
+    Optional list of colours. When provided, each blob picks from this palette.
+    """
+
+    background: Any | None = None
+    """
+    Colour painted behind the blob field.
+    """
+
+    min_radius: float | None = None
+    """
+    Minimum blob radius as a fraction of the canvas size. Defaults to ``0.05``.
+    """
+
+    max_radius: float | None = None
+    """
+    Maximum blob radius as a fraction of the canvas size. Defaults to ``0.2``.
+    """
+
+    speed: float | None = None
+    """
+    Animation speed multiplier for blob motion.
+    """
+
+    opacity: float | None = None
+    """
+    Overall opacity of the blobs, ``0.0``–``1.0``. Defaults to ``0.3``.
+    """
+
+    blur_sigma: float | None = None
+    """
+    Gaussian blur sigma applied to each blob’s mask filter. Higher values produce softer edges.
+    """
+
+    loop: bool | None = None
+    """
+    If ``True``, the animation loops continuously.
+    """
+
+    play: bool | None = None
+    """
+    Alias for `playing`.
+    """
+
+    playing: bool | None = None
+    """
+    Controls whether any animation is running.
+    """
+
+    autoplay: bool | None = None
+    """
+    If ``True``, the animation starts automatically on mount.
+    """
+
+    progress: float | None = None
+    """
+    Draw progress from ``0.0`` (nothing) to ``1.0`` (full field). Defaults to ``1.0``.
+    """
     control_type = "blob_field"
 
     def __init__(

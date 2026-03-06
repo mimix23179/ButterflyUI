@@ -76,6 +76,117 @@ class ContainerStyle(Component):
         animation: 
             Animation configuration dict (e.g. ``{"duration_ms": 200}``). Enables smooth transitions when style properties change.
     """
+
+
+    variant: str | None = None
+    """
+    Named style variant hint forwarded to the runtime.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background colour of the container.
+    """
+
+    color: Any | None = None
+    """
+    Alias for `bgcolor`.
+    """
+
+    border_color: Any | None = None
+    """
+    Colour of the container border. A border is only drawn when this is set.
+    """
+
+    border_width: float | None = None
+    """
+    Width of the container border in logical pixels. Defaults to ``1``.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius for the ``BorderRadius``. Defaults to ``8``.
+    """
+
+    shape: str | None = None
+    """
+    Container shape hint (e.g. ``"circle"``, ``"rectangle"``).
+    """
+
+    outline_width: float | None = None
+    """
+    Width of an additional outline stroke outside the border.
+    """
+
+    outline_color: Any | None = None
+    """
+    Colour of the outline stroke.
+    """
+
+    stroke_width: float | None = None
+    """
+    Alias for `outline_width`.
+    """
+
+    stroke_color: Any | None = None
+    """
+    Alias for `outline_color`.
+    """
+
+    shadow_color: Any | None = None
+    """
+    Colour of the ``BoxShadow``.
+    """
+
+    shadow_blur: float | None = None
+    """
+    Blur radius of the ``BoxShadow``.
+    """
+
+    shadow_dx: float | None = None
+    """
+    Horizontal offset of the ``BoxShadow``.
+    """
+
+    shadow_dy: float | None = None
+    """
+    Vertical offset of the ``BoxShadow``.
+    """
+
+    glow_color: Any | None = None
+    """
+    Colour of a secondary glow shadow.
+    """
+
+    glow_blur: float | None = None
+    """
+    Blur radius of the glow shadow.
+    """
+
+    background: Any | None = None
+    """
+    Alias for `bgcolor`.
+    """
+
+    bg_color: Any | None = None
+    """
+    Alias for `bgcolor`.
+    """
+
+    content_padding: Any | None = None
+    """
+    Inner padding of the container. Accepts a number, list, or dict. Defaults to ``8``.
+    """
+
+    inner_padding: Any | None = None
+    """
+    Alias for `content_padding`.
+    """
+
+    icon_padding: Any | None = None
+    """
+    Padding around any icon content inside the container.
+    """
     control_type = "container_style"
 
     def __init__(

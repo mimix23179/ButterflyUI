@@ -51,6 +51,47 @@ class TopBar(Component):
             Additional runtime props, including shared placement/layout hints.
     """
 
+
+    title: str | None = None
+    """
+    Primary title text.
+    """
+
+    subtitle: str | None = None
+    """
+    Optional secondary text shown below the title.
+    """
+
+    center_title: bool | None = None
+    """
+    Centers the title when ``True``.
+    """
+
+    show_search: bool | None = None
+    """
+    Shows an inline search field when ``True``.
+    """
+
+    search_value: str | None = None
+    """
+    Current search query value.
+    """
+
+    search_placeholder: str | None = None
+    """
+    Placeholder text for the search field.
+    """
+
+    actions: list[Any] | None = None
+    """
+    Trailing action widget specs.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime event names to emit.
+    """
+
     control_type = "top_bar"
 
     def __init__(

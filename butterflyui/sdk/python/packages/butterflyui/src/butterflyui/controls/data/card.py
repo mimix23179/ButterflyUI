@@ -41,6 +41,32 @@ class Card(Component):
             Inner padding applied around the card's child content (single number or per-edge spec).
     """
 
+
+    title: str | None = None
+    """
+    Optional primary title text forwarded as metadata in the control props.
+    """
+
+    subtitle: str | None = None
+    """
+    Optional secondary title text forwarded as metadata in the control props.
+    """
+
+    elevated: bool | None = None
+    """
+    If ``True``, applies elevated card styling with a non-zero ``elevation`` value.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius in logical pixels.  Overrides the Candy ``card.radius`` / ``radii.md`` tokens.
+    """
+
+    content_padding: Any | None = None
+    """
+    Inner padding applied around the card's child content (single number or per-edge spec).
+    """
+
     control_type = "card"
 
     def __init__(

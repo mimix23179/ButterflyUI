@@ -38,6 +38,32 @@ class PreviewSurface(Component):
             List of event names the Flutter runtime should emit to Python.
     """
 
+
+    source: str | None = None
+    """
+    URL or asset path of the content to preview.
+    """
+
+    loading: bool | None = None
+    """
+    When ``True`` a loading spinner is shown in place of the content.
+    """
+
+    title: str | None = None
+    """
+    Heading text displayed in the preview panel header.
+    """
+
+    subtitle: str | None = None
+    """
+    Secondary text shown below the title.
+    """
+
+    events: list[str] | None = None
+    """
+    List of event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "preview_surface"
 
     def __init__(

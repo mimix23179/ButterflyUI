@@ -44,6 +44,42 @@ class BlendModePicker(Component):
         enabled: 
             If ``False``, the dropdown is disabled and non-interactive.
     """
+
+
+    value: str | None = None
+    """
+    Currently selected blend mode string, e.g. ``"multiply"`` or ``"screen"``. Emitted in ``"change"`` events.
+    """
+
+    options: list[Any] | None = None
+    """
+    List of blend-mode strings offered in the dropdown. Defaults to ``["srcOver", "multiply", "screen", "overlay", "plus"]``.
+    """
+
+    items: list[Any] | None = None
+    """
+    Alias for `options`.
+    """
+
+    label: str | None = None
+    """
+    Label text displayed above the dropdown field. Defaults to ``"Blend Mode"``.
+    """
+
+    preview: bool | None = None
+    """
+    If ``True``, a small colour swatch preview of the selected blend mode is rendered below the dropdown.
+    """
+
+    sample: Mapping[str, Any] | None = None
+    """
+    Dict with ``"base"`` and ``"overlay"`` colour strings used by the blend-mode preview swatch.
+    """
+
+    dense: bool | None = None
+    """
+    If ``True``, renders the dropdown in a compact, dense layout.
+    """
     control_type = "blend_mode_picker"
 
     def __init__(

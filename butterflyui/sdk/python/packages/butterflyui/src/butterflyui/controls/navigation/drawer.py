@@ -80,6 +80,78 @@ class Drawer(Component):
             When ``True``, unknown props raise validation errors.
     """
 
+
+    open: bool | None = None
+    """
+    If ``True``, the drawer is shown.
+    """
+
+    dismissible: bool | None = None
+    """
+    If ``True``, tapping the scrim dismisses the drawer.
+    """
+
+
+    side: str | None = None
+    """
+    Drawer edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
+    """
+
+    size: float | None = None
+    """
+    Width for left/right drawers, or height for top/bottom drawers.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color shown behind the drawer while open.
+    """
+
+    modal: bool | None = None
+    """
+    Modal behavior hint for host runtimes.
+    """
+
+    persistent: bool | None = None
+    """
+    Persistent layout hint for host runtimes.
+    """
+
+    items: list[Any] | None = None
+    """
+    Flat list of menu item descriptors for built-in menu rendering.
+    """
+
+    sections: list[Mapping[str, Any]] | None = None
+    """
+    Sectioned item descriptors for grouped menu rendering.
+    """
+
+    selected_id: str | None = None
+    """
+    Selected item ID when using data-driven menu content.
+    """
+
+    show_search: bool | None = None
+    """
+    Enables built-in search input for menu content.
+    """
+
+    query: str | None = None
+    """
+    Initial search query text.
+    """
+
+    collapsible: bool | None = None
+    """
+    Enables collapsible sections in sectioned mode.
+    """
+
+    events: list[str] | None = None
+    """
+    Event names the Flutter runtime should emit to Python.
+    """
+
     control_type = "drawer"
 
     def __init__(
