@@ -8,46 +8,46 @@ __all__ = ["ConfettiBurst"]
 class ConfettiBurst(Component):
     """Animated confetti-particle burst painted on a ``CustomPaint``
     canvas.
-
+    
     The Flutter runtime uses an ``AnimationController`` to drive
     rectangular confetti pieces that fly outward with random
     trajectories and fade as they fall.  A built-in *Burst* button is
     shown by default; set ``hide_button`` to suppress it and trigger
     bursts programmatically via the ``burst()`` method.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         confetti = bui.ConfettiBurst(
             colors=["#22d3ee", "#a78bfa", "#f472b6", "#34d399"],
             count=30,
             duration_ms=1200,
             hide_button=True,
         )
-
+    
     Args:
-        colors: 
-            List of confetti-piece colours.  
+        colors:
+            List of confetti-piece colours.
             Defaults to a built-in cyan / purple / pink / green palette.
-        count: 
-            Number of confetti rectangles per burst (``1`` – ``200``). 
+        count:
+            Number of confetti rectangles per burst (``1`` – ``200``).
             Defaults to ``18``.
-        duration_ms: 
-            Burst animation duration in milliseconds. 
+        duration_ms:
+            Burst animation duration in milliseconds.
             Defaults to ``900``; clamped to ``1 – 600 000``.
-        duration: 
-            Alias for *duration_ms*.
-        gravity: 
+        duration:
+            Backward-compatible alias for ``*duration_ms*``. When both fields are provided, ``*duration_ms*`` takes precedence and this alias is kept only for compatibility.
+        gravity:
             Reserved — gravity multiplier for particle fall speed.
-        autoplay: 
+        autoplay:
             When ``True`` a burst fires automatically on mount.
-        loop: 
+        loop:
             When ``True`` the burst replays continuously.
-        emit_on_complete: 
-            When ``True`` the runtime emits a ``"complete"`` event 
+        emit_on_complete:
+            When ``True`` the runtime emits a ``"complete"`` event
             after each burst finishes.
-        hide_button: 
+        hide_button:
             When ``True`` the default *Burst* toggle button is hidden.
     """
 
@@ -72,7 +72,7 @@ class ConfettiBurst(Component):
 
     duration: int | None = None
     """
-    Alias for *duration_ms*.
+    Backward-compatible alias for ``*duration_ms*``. When both fields are provided, ``*duration_ms*`` takes precedence and this alias is kept only for compatibility.
     """
 
     gravity: float | None = None

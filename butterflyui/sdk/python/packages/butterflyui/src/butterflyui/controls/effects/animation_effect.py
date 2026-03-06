@@ -9,9 +9,8 @@ __all__ = ["AnimationEffect", "Animation"]
 
 
 class AnimationEffect(Component):
-    """
-    Low-level timeline animation wrapper for opacity and transform transitions.
-
+    """Low-level timeline animation wrapper for opacity and transform transitions.
+    
     Args:
         child:
             Primary child control wrapped by the animation.
@@ -54,7 +53,7 @@ class AnimationEffect(Component):
         color:
             Tint or overlay color animated by the wrapper.
         events:
-            Runtime events emitted by the animation wrapper.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -151,7 +150,7 @@ class AnimationEffect(Component):
 
     events: list[str] | None = None
     """
-    Runtime events emitted by the animation wrapper.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "animation"

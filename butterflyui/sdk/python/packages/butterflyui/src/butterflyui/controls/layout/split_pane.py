@@ -7,17 +7,16 @@ from .split_view import SplitView
 __all__ = ["SplitPane"]
 
 class SplitPane(SplitView):
-    """
-    Draggable two-panel split with bounded resize constraints.
-
+    """Draggable two-panel split with bounded resize constraints.
+    
     Extends ``SplitView`` by adding ``min_ratio`` and ``max_ratio`` to
     constrain where the divider can be dragged. Prefer ``SplitPane`` over
     ``SplitView`` when the split position must stay within bounds during
     user interaction.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.SplitPane(
         bui.Text("Left panel"),
         bui.Text("Right panel"),
@@ -28,7 +27,7 @@ class SplitPane(SplitView):
         events=["resize"],
     )
     ```
-
+    
     Args:
         axis:
             Split direction. Values: ``"horizontal"``, ``"vertical"``.
@@ -43,7 +42,7 @@ class SplitPane(SplitView):
         divider_size:
             Width or height of the divider affordance in logical pixels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -80,7 +79,7 @@ class SplitPane(SplitView):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "split_pane"
@@ -100,6 +99,7 @@ class SplitPane(SplitView):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             *children,
             axis=axis,
@@ -108,7 +108,7 @@ class SplitPane(SplitView):
             max_ratio=max_ratio,
             draggable=draggable,
             divider_size=divider_size,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

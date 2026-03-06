@@ -8,16 +8,16 @@ __all__ = ["Shadow"]
 class Shadow(Component):
     """Box-shadow decorator that wraps children in a ``DecoratedBox``
     with configurable ``BoxShadow`` entries.
-
+    
     The Flutter runtime renders either a single shadow from the
     shorthand parameters (*color*, *blur*, *spread*, *offset_x*,
     *offset_y*) or a full list of shadow definitions via *shadows*.
     An optional *radius* rounds the decoration corners.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         card = bui.Shadow(
             bui.Container(width=200, height=120),
             color="#00000033",
@@ -25,28 +25,28 @@ class Shadow(Component):
             offset_y=4,
             radius=8,
         )
-
+    
     Args:
-        color: 
+        color:
             Shadow colour.  Defaults to ``#33000000`` (20 %
             black).
-        blur: 
+        blur:
             Blur radius of the shadow.  Defaults to ``12``.
-        spread: 
+        spread:
             Spread radius.  Defaults to ``0``.
-        offset_x: 
+        offset_x:
             Horizontal shadow offset.  Defaults to ``0``.
-        offset_y: 
+        offset_y:
             Vertical shadow offset.  Defaults to ``4``.
-        radius: 
+        radius:
             Corner radius of the ``BoxDecoration``.  Defaults to
             ``0`` (sharp corners).
-        shadows: 
+        shadows:
             Explicit list of shadow definition mappings, each
             with ``color``, ``blur``, ``spread``, ``offset_x``,
             ``offset_y``.  Overrides the shorthand parameters.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -91,7 +91,7 @@ class Shadow(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "shadow"
 

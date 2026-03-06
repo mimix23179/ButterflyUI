@@ -9,23 +9,22 @@ __all__ = ["Display"]
 
 
 class Display(Component):
-    """
-    Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
-
+    """Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
+    
     ``Display`` replaces several narrow widgets with a role-driven API:
     ``identity``, ``status``, ``rating``, ``reactions``, ``check``, and
     ``ownership``. Legacy variants are still accepted and mapped by the
     runtime for backward compatibility.
-
+    
     Display now uses the shared universal renderer pipeline too, so the same
     ``classes``/``style_slots``/``modifiers``/``motion``/``effects`` props
     can style identity/status/rating/reaction/check/ownership roles
     consistently with Candy/Skins/Gallery.
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         profile = bui.Display(
             role="identity",
             title="Nina Hart",
@@ -37,24 +36,24 @@ class Display(Component):
             events=["tap"],
         )
         ```
-
+    
     Args:
         role:
             Role/variant selector. Recommended values:
             ``"identity"``, ``"status"``, ``"rating"``, ``"reactions"``,
             ``"check"``, ``"ownership"``.
         variant:
-            Legacy alias for ``role``.
+            Variant token or preset name used to select a specific visual style.
         title:
-            Primary line.
+            Primary heading text rendered by the control.
         subtitle:
-            Secondary line.
+            Secondary text rendered beneath or beside the primary title.
         caption:
             Tertiary/supporting caption line.
         description:
-            Body text alias.
+            Longer descriptive text rendered beneath or alongside the control's primary label.
         name:
-            Identity name alias.
+            Human-readable name used to identify this item, style pack, or preset.
         tone:
             Semantic tone (``neutral/info/success/warn/danger``).
         size:
@@ -66,19 +65,19 @@ class Display(Component):
         leading:
             Leading slot descriptor (control map/string/icon).
         trailing:
-            Trailing slot descriptor.
+            Trailing content or descriptor rendered after the control's primary body.
         avatar:
-            Avatar descriptor.
+            Avatar source or descriptor rendered alongside the control's primary content.
         initials:
-            Avatar fallback initials.
+            Fallback initials rendered when an avatar or image source is not available.
         tags:
-            Identity tags/chips.
+            List of tag labels associated with the rendered item or record.
         status:
             Status text or key for status role.
         badge:
-            Badge label.
+            Badge value or descriptor rendered as a compact status marker near the control's main content.
         color:
-            Optional role accent override.
+            Primary color value used by the control for text, icons, strokes, or accent surfaces.
         value:
             Numeric/text value for rating/status/metric roles.
         max:
@@ -92,36 +91,35 @@ class Display(Component):
         selected:
             Selected reaction/item identifiers.
         checked:
-            Checked ids for check role.
+            List of checked item identifiers or payloads used by the display role when it renders multi-check or selection state.
         checked_value:
             Boolean check state for a single-check role usage.
         dot_count:
             Dot count for typing-like status visuals.
         document_id:
-            Ownership document identifier.
+            Identifier of the backing document, record, or content item shown by the control.
         ranges:
-            Ownership ranges.
+            List of value ranges, highlight segments, or annotated spans rendered by the control.
         owners:
-            Ownership descriptors.
+            Ordered collection of owner entries associated with the rendered record or item.
         owner:
-            Single-owner alias.
+            Single owner descriptor associated with the rendered record or item.
         show_avatars:
             Shows avatars in identity/ownership variants.
         compact:
-            Compact density alias.
+            Enables a more compact visual density with reduced padding, gaps, or surface size.
         dense:
-            Dense density alias.
+            Enables a denser layout with reduced gaps, padding, or row height.
         aria_label:
-            Accessibility label alias.
+            Accessibility label announced to assistive technologies when the control does not expose enough visible text on its own.
         events:
-            Runtime event subscriptions (for example ``tap``, ``rate``,
-            ``react``, ``check_change``).
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Local style map merged by the style resolver.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -134,17 +132,17 @@ class Display(Component):
 
     variant: str | None = None
     """
-    Legacy alias for ``role``.
+    Variant token or preset name used to select a specific visual style.
     """
 
     title: str | None = None
     """
-    Primary line.
+    Primary heading text rendered by the control.
     """
 
     subtitle: str | None = None
     """
-    Secondary line.
+    Secondary text rendered beneath or beside the primary title.
     """
 
     caption: str | None = None
@@ -154,12 +152,12 @@ class Display(Component):
 
     description: str | None = None
     """
-    Body text alias.
+    Longer descriptive text rendered beneath or alongside the control's primary label.
     """
 
     name: str | None = None
     """
-    Identity name alias.
+    Human-readable name used to identify this item, style pack, or preset.
     """
 
     tone: str | None = None
@@ -189,22 +187,22 @@ class Display(Component):
 
     trailing: Any | None = None
     """
-    Trailing slot descriptor.
+    Trailing content or descriptor rendered after the control's primary body.
     """
 
     avatar: Any | None = None
     """
-    Avatar descriptor.
+    Avatar source or descriptor rendered alongside the control's primary content.
     """
 
     initials: str | None = None
     """
-    Avatar fallback initials.
+    Fallback initials rendered when an avatar or image source is not available.
     """
 
     tags: list[Any] | None = None
     """
-    Identity tags/chips.
+    List of tag labels associated with the rendered item or record.
     """
 
     status: str | None = None
@@ -214,12 +212,12 @@ class Display(Component):
 
     badge: str | None = None
     """
-    Badge label.
+    Badge value or descriptor rendered as a compact status marker near the control's main content.
     """
 
     color: Any | None = None
     """
-    Optional role accent override.
+    Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
     value: Any | None = None
@@ -254,7 +252,7 @@ class Display(Component):
 
     checked: list[Any] | None = None
     """
-    Checked ids for check role.
+    List of checked item identifiers or payloads used by the display role when it renders multi-check or selection state.
     """
 
     checked_value: bool | None = None
@@ -269,22 +267,22 @@ class Display(Component):
 
     document_id: str | None = None
     """
-    Ownership document identifier.
+    Identifier of the backing document, record, or content item shown by the control.
     """
 
     ranges: list[Mapping[str, Any]] | None = None
     """
-    Ownership ranges.
+    List of value ranges, highlight segments, or annotated spans rendered by the control.
     """
 
     owners: list[Mapping[str, Any]] | None = None
     """
-    Ownership descriptors.
+    Ordered collection of owner entries associated with the rendered record or item.
     """
 
     owner: Mapping[str, Any] | None = None
     """
-    Single-owner alias.
+    Single owner descriptor associated with the rendered record or item.
     """
 
     show_avatars: bool | None = None
@@ -294,23 +292,22 @@ class Display(Component):
 
     compact: bool | None = None
     """
-    Compact density alias.
+    Enables a more compact visual density with reduced padding, gaps, or surface size.
     """
 
     dense: bool | None = None
     """
-    Dense density alias.
+    Enables a denser layout with reduced gaps, padding, or row height.
     """
 
     aria_label: str | None = None
     """
-    Accessibility label alias.
+    Accessibility label announced to assistive technologies when the control does not expose enough visible text on its own.
     """
 
     events: list[str] | None = None
     """
-    Runtime event subscriptions (for example ``tap``, ``rate``,
-    ``react``, ``check_change``).
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "display"
@@ -362,51 +359,52 @@ class Display(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        role=role if role is not None else variant,
+                        variant=variant if variant is not None else role,
+                        title=title,
+                        subtitle=subtitle,
+                        caption=caption,
+                        description=description,
+                        name=name,
+                        tone=tone,
+                        size=size,
+                        interactive=interactive,
+                        status=status,
+                        badge=badge,
+                        color=color,
+                        avatar=avatar,
+                        initials=initials,
+                        icon=icon,
+                        leading=leading,
+                        trailing=trailing,
+                        tags=tags,
+                        value=value,
+                        max=max,
+                        allow_half=allow_half,
+                        count=count,
+                        items=items,
+                        selected=selected,
+                        checked=checked,
+                        checked_value=checked_value,
+                        dot_count=dot_count,
+                        document_id=document_id,
+                        ranges=ranges,
+                        owners=owners if owners is not None else ([dict(owner)] if owner else None),
+                        owner=dict(owner) if owner else None,
+                        show_avatars=show_avatars,
+                        compact=compact,
+                        dense=dense,
+                        aria_label=aria_label,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
             *children_args,
             child=child,
             children=children,
-            props=merge_props(
-                props,
-                role=role if role is not None else variant,
-                variant=variant if variant is not None else role,
-                title=title,
-                subtitle=subtitle,
-                caption=caption,
-                description=description,
-                name=name,
-                tone=tone,
-                size=size,
-                interactive=interactive,
-                status=status,
-                badge=badge,
-                color=color,
-                avatar=avatar,
-                initials=initials,
-                icon=icon,
-                leading=leading,
-                trailing=trailing,
-                tags=tags,
-                value=value,
-                max=max,
-                allow_half=allow_half,
-                count=count,
-                items=items,
-                selected=selected,
-                checked=checked,
-                checked_value=checked_value,
-                dot_count=dot_count,
-                document_id=document_id,
-                ranges=ranges,
-                owners=owners if owners is not None else ([dict(owner)] if owner else None),
-                owner=dict(owner) if owner else None,
-                show_avatars=show_avatars,
-                compact=compact,
-                dense=dense,
-                aria_label=aria_label,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

@@ -6,25 +6,24 @@ from .._shared import Component, merge_props
 __all__ = ["Align"]
 
 class Align(Component):
-    """
-    Positions its child at a specified alignment within the available space.
-
+    """Positions its child at a specified alignment within the available space.
+    
     The runtime wraps Flutter's ``Align`` widget. ``alignment`` accepts a
     string such as ``"center"``, ``"top_left"``, or ``"bottom_right"``, or a
     mapping with ``x`` and ``y`` values in the range -1.0 to 1.0. Setting
     ``width_factor`` or ``height_factor`` shrinks the widget to a fraction of
     the child's corresponding dimension.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Align(
         bui.Text("Hello"),
         alignment="bottom_right",
         events=["layout"],
     )
     ```
-
+    
     Args:
         alignment:
             The alignment position. Accepts a named string or an ``{x, y}``
@@ -34,7 +33,7 @@ class Align(Component):
         height_factor:
             If set, the widget's height is this multiple of the child's height.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -50,7 +49,7 @@ class Align(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "align"

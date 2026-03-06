@@ -136,6 +136,9 @@ class CandyTokens:
 
 
     data: dict[str, Any] = field(default_factory=dict)
+    """
+    Raw mapping payload stored by this helper type and forwarded to the runtime after JSON-safe normalization.
+    """
 
     @staticmethod
     def from_dict(values: Mapping[str, Any]) -> "CandyTokens":
@@ -173,17 +176,53 @@ class CandyTheme:
 
 
     brightness: str = "light"
+    """
+    Brightness mode associated with the scoped theme or token bundle, typically ``"light"`` or ``"dark"``.
+    """
     colors: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named color tokens to the concrete color values used by the renderer.
+    """
     typography: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named typography tokens to reusable text-style values such as size, weight, family, and line height.
+    """
     radii: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named radius tokens to reusable corner-radius values.
+    """
     spacing: dict[str, Any] = field(default_factory=dict)
+    """
+    Base spacing value used between items or structural regions inside the control.
+    """
     elevation: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named elevation tokens to reusable shadow, blur, or surface depth settings.
+    """
     motion: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named motion tokens to reusable duration, easing, or transition specifications used by animated controls.
+    """
     button: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named button style tokens to reusable button appearances consumed by recipes, variants, or control defaults.
+    """
     card: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of named card style tokens to reusable surface, border, and elevation settings for card-like components.
+    """
     effects: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of effect tokens or effect definitions bundled with this theme, pack, or control.
+    """
     ui: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of shared UI tokens used across general-purpose controls, surfaces, and layout primitives.
+    """
     webview: dict[str, Any] = field(default_factory=dict)
+    """
+    Mapping of webview-specific tokens or settings forwarded to the runtime.
+    """
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -219,13 +258,37 @@ class CandyStylePack:
     """
 
     name: str
+    """
+    Human-readable name used to identify this item, style pack, or preset.
+    """
     tokens: CandyTokens | Mapping[str, Any] | None = None
+    """
+    Token mapping or token helper object that provides reusable design values to this definition.
+    """
     base: str | None = None
+    """
+    Base style map applied in the idle state before any interactive or disabled overrides are merged.
+    """
     background: Any | None = None
+    """
+    Background value or surface descriptor applied by the style pack when it defines a global page or shell backdrop.
+    """
     overrides: Mapping[str, Any] | None = None
+    """
+    Override mapping merged on top of the base theme, preset, or style definition.
+    """
     components: Mapping[str, Any] | None = None
+    """
+    Component-specific overrides or named component definitions bundled with this theme or style pack.
+    """
     motion: Mapping[str, Any] | None = None
+    """
+    Mapping of named motion tokens to reusable duration, easing, or transition specifications used by animated controls.
+    """
     effects: Mapping[str, Any] | None = None
+    """
+    Mapping of effect tokens or effect definitions bundled with this theme, pack, or control.
+    """
 
     def to_spec(self) -> dict[str, Any]:
         """
@@ -327,13 +390,37 @@ class CandyComponentSpec:
     """
 
     module: str = "container"
+    """
+    Runtime module identifier that tells the umbrella control which Flutter-side implementation to render.
+    """
     props: dict[str, Any] = field(default_factory=dict)
+    """
+    Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
+    """
     style: dict[str, Any] = field(default_factory=dict)
+    """
+    Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
+    """
     children: list[Any] = field(default_factory=list)
+    """
+    Ordered list of child payloads nested inside this reusable component spec.
+    """
     scope_tokens: dict[str, Any] | None = None
+    """
+    Token overrides applied by the reusable component when it creates a scope wrapper for its children.
+    """
     scope_theme: dict[str, Any] | None = None
+    """
+    Theme mapping injected into the generated ``CandyScope`` when this component spec is instantiated with scope wrapping enabled.
+    """
     scope_brightness: str | None = None
+    """
+    Brightness override applied when this component spec wraps the instantiated control in a ``CandyScope``.
+    """
     strict: bool = False
+    """
+    Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    """
 
     def add_children(self, *children: Any) -> "CandyComponentSpec":
         """
@@ -493,42 +580,42 @@ class CandyScope(Component):
 
     radius: Mapping[str, Any] | None = None
     """
-    Radius token bucket mapping.
+    Mapping of named radius tokens to the concrete corner-radius values used by the renderer. Use this bucket to centralize reusable radius tokens for themes, recipes, or component defaults.
     """
 
     colors: Mapping[str, Any] | None = None
     """
-    Color token bucket mapping.
+    Mapping of named color tokens to the concrete values used by the renderer. Use this bucket to centralize reusable color-related settings.
     """
 
     typography: Mapping[str, Any] | None = None
     """
-    Typography token bucket mapping.
+    Mapping of named typography tokens to reusable text-style values such as size, weight, family, or line-height settings.
     """
 
     spacing: Mapping[str, Any] | None = None
     """
-    Spacing token bucket mapping.
+    Mapping of named spacing tokens to the gap, padding, or margin values consumed by the renderer.
     """
 
     elevation: Mapping[str, Any] | None = None
     """
-    Elevation/shadow token bucket mapping.
+    Mapping of named elevation/shadow tokens to the concrete values used by the renderer. Use this bucket to centralize reusable elevation/shadow-related settings.
     """
 
     motion: Mapping[str, Any] | None = None
     """
-    Motion/animation token bucket mapping.
+    Mapping of named motion/animation tokens to the concrete values used by the renderer. Use this bucket to centralize reusable motion/animation-related settings.
     """
 
     button: Mapping[str, Any] | None = None
     """
-    Button style token bucket mapping.
+    Mapping of named button style tokens to the concrete values used by the renderer. Use this bucket to centralize reusable button style-related settings.
     """
 
     card: Mapping[str, Any] | None = None
     """
-    Card style token bucket mapping.
+    Mapping of named card style tokens to the concrete values used by the renderer. Use this bucket to centralize reusable card style-related settings.
     """
 
     effects: Mapping[str, Any] | None = None
@@ -538,7 +625,7 @@ class CandyScope(Component):
 
     ui: Mapping[str, Any] | None = None
     """
-    General UI token bucket mapping.
+    Mapping of named general ui tokens to the concrete values used by the renderer. Use this bucket to centralize reusable general ui-related settings.
     """
 
     webview: Mapping[str, Any] | None = None
@@ -659,7 +746,7 @@ class Candy(Component):
 
     layout: str | None = None
     """
-    Alias for ``module``.
+    Backward-compatible alias for ``module``. When both fields are provided, ``module`` takes precedence and this alias is kept only for compatibility.
     """
 
     state: str | None = None
@@ -674,7 +761,7 @@ class Candy(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

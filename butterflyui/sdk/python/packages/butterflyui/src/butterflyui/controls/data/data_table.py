@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["DataTable"]
 
 class DataTable(Component):
-    """
-    Feature-rich tabular data view with column sorting, row filtering,
+    """Feature-rich tabular data view with column sorting, row filtering,
     checkbox selection, and striped-row styling.
-
+    
     The runtime renders a Flutter ``DataTable`` wrapped in horizontal and
     vertical ``SingleChildScrollView`` widgets for overflow scrolling.
     Columns are parsed from mapping objects (keys ``id``/``label``/
@@ -20,10 +19,10 @@ class DataTable(Component):
     sortable header emits ``"sort_change"``; toggling a row checkbox
     emits ``"row_select"``; tapping a cell emits ``"row_tap"``;
     typing in the filter field emits ``"filter_change"``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DataTable(
         columns=[
             {"id": "name", "label": "Name"},
@@ -39,29 +38,29 @@ class DataTable(Component):
         striped=True,
     )
     ```
-
+    
     Args:
-        columns: 
+        columns:
             Column definitions — a list of mapping objects with ``"id"``, ``"label"``, and optional ``"numeric"`` keys, or plain strings used as both id and label.
-        rows: 
+        rows:
             Row data items — lists of cell values, mapping objects keyed by column ``id``, or objects containing a ``"cells"`` list.
-        sortable: 
-            If ``True`` (default), column headers are tappable for sorting.  Emits ``"sort_change"`` with the column id and direction.
-        filterable: 
+        sortable:
+            Controls whether (default), column headers are tappable for sorting. Emits ``"sort_change"`` with the column id and direction. Set it to ``False`` to disable this behavior.
+        filterable:
             If ``True``, a search ``TextField`` appears above the table for live case-insensitive row filtering.
-        selectable: 
+        selectable:
             If ``True``, each row gets a leading checkbox and emits ``"row_select"`` events.
-        dense: 
+        dense:
             If ``True``, rows use compact height (32–40 lp) and tighter column spacing.
-        striped: 
+        striped:
             If ``True``, odd rows receive a semi-transparent surface highlight for visual separation.
-        show_header: 
-            If ``True`` (default), the column header row is rendered.  Set to ``False`` to hide headers.
-        sort_column: 
+        show_header:
+            Controls whether (default), the column header row is rendered. Set to ``False`` to hide headers. Set it to ``False`` to disable this behavior.
+        sort_column:
             Initial column ``id`` by which the table is sorted.
-        sort_ascending: 
-            If ``True`` (default), the initial sort direction is ascending.
-        filter_query: 
+        sort_ascending:
+            Controls whether (default), the initial sort direction is ascending. Set it to ``False`` to disable this behavior.
+        filter_query:
             Initial text pre-filled in the filter ``TextField``.
     """
 
@@ -78,7 +77,7 @@ class DataTable(Component):
 
     sortable: bool | None = None
     """
-    If ``True`` (default), column headers are tappable for sorting.  Emits ``"sort_change"`` with the column id and direction.
+    Controls whether (default), column headers are tappable for sorting. Emits ``"sort_change"`` with the column id and direction. Set it to ``False`` to disable this behavior.
     """
 
     filterable: bool | None = None
@@ -103,7 +102,7 @@ class DataTable(Component):
 
     show_header: bool | None = None
     """
-    If ``True`` (default), the column header row is rendered.  Set to ``False`` to hide headers.
+    Controls whether (default), the column header row is rendered. Set to ``False`` to hide headers. Set it to ``False`` to disable this behavior.
     """
 
     sort_column: str | None = None
@@ -113,7 +112,7 @@ class DataTable(Component):
 
     sort_ascending: bool | None = None
     """
-    If ``True`` (default), the initial sort direction is ascending.
+    Controls whether (default), the initial sort direction is ascending. Set it to ``False`` to disable this behavior.
     """
 
     filter_query: str | None = None

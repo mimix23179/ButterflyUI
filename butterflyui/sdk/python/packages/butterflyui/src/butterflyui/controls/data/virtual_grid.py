@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["VirtualGrid"]
 
 class VirtualGrid(Component):
-    """
-    Virtualized grid view for large datasets with prefetch-near-end
+    """Virtualized grid view for large datasets with prefetch-near-end
     and loading-state support.
-
+    
     Items are arranged into ``columns`` columns.  ``spacing`` and
     ``run_spacing`` control the gap between tiles along the main and
     cross axes respectively, while ``child_aspect_ratio`` sets the
@@ -18,10 +17,10 @@ class VirtualGrid(Component):
     a ``"prefetch"`` event is emitted so the app can append more data.
     Setting ``loading`` to ``True`` displays a loading indicator at the
     grid’s tail.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.VirtualGrid(
         items=[{"label": f"Tile {i}"} for i in range(100)],
         columns=3,
@@ -31,35 +30,35 @@ class VirtualGrid(Component):
         prefetch_threshold=10,
     )
     ```
-
+    
     Args:
-        items: 
-            Item payload list used to build tiles when no explicit children are given.
-        columns: 
-            Number of grid columns.
-        spacing: 
+        items:
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
+        columns:
+            Number of columns used when the control lays out content in a grid.
+        spacing:
             Main-axis spacing in logical pixels between tiles.
-        run_spacing: 
+        run_spacing:
             Cross-axis spacing in logical pixels between tile runs.
-        child_aspect_ratio: 
+        child_aspect_ratio:
             Width-to-height ratio of each tile (e.g. ``1.0`` for square tiles).
-        has_more: 
+        has_more:
             If ``True``, signals that more data can be requested when nearing the end.
-        loading: 
+        loading:
             If ``True``, a loading indicator is displayed at the tail of the grid.
-        prefetch_threshold: 
+        prefetch_threshold:
             Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
 
     items: list[Any] | None = None
     """
-    Item payload list used to build tiles when no explicit children are given.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     columns: int | None = None
     """
-    Number of grid columns.
+    Number of columns used when the control lays out content in a grid.
     """
 
     spacing: float | None = None

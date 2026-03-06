@@ -7,22 +7,22 @@ __all__ = ["Text"]
 
 class Text(Component):
     """Simple text label.
-
+    
     Renders a Flutter ``Text`` widget from the ``value`` or ``text``
     parameter.  The value is coerced to a string.  Additional
     typographic options (font size, weight, colour, etc.) can be
     passed through ``props`` or ``**kwargs``.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         label = bui.Text("Hello, world!")
-
+    
     Args:
-        value: 
+        value:
             Text content to display (coerced to ``str``).
-        text: 
+        text:
             Alias for ``value`` — takes precedence when both are supplied.
     """
 

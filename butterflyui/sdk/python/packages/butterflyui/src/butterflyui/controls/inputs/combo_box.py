@@ -9,17 +9,16 @@ __all__ = ["ComboBox"]
 
 
 class ComboBox(Component):
-    """
-    Editable combo-box input with option lists and async loading hooks.
-
+    """Editable combo-box input with option lists and async loading hooks.
+    
     ``ComboBox`` is the canonical merged control for both ``combo_box`` and
     legacy ``combobox`` usage. It supports typed input with selectable options,
     grouped option sections, loading state for remote queries, and debounce
     configuration for server-driven suggestion pipelines.
-
+    
     ```python
     import butterflyui as bui
-
+    
     field = bui.ComboBox(
         label="Assignee",
         options=[{"label": "Ava", "value": "ava"}],
@@ -28,22 +27,22 @@ class ComboBox(Component):
         events=["change", "query"],
     )
     ```
-
+    
     Args:
         value:
-            Current selected/typed value.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         options:
             Option descriptors shown in the dropdown.
         items:
-            Alias for ``options``.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         groups:
             Group descriptors for grouped option sections.
         label:
-            Field label text.
+            Primary label text rendered by the control or its active action.
         hint:
             Hint text shown when input is empty.
         placeholder:
-            Alias for ``hint``.
+            Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
         loading:
             If ``True``, shows loading affordances.
         async_source:
@@ -53,19 +52,19 @@ class ComboBox(Component):
         enabled:
             If ``False``, input is non-interactive.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     value: str | None = None
     """
-    Current selected/typed value.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     options: list[Any] | None = None
@@ -75,7 +74,7 @@ class ComboBox(Component):
 
     items: list[Any] | None = None
     """
-    Alias for ``options``.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     groups: list[Mapping[str, Any]] | None = None
@@ -85,7 +84,7 @@ class ComboBox(Component):
 
     label: str | None = None
     """
-    Field label text.
+    Primary label text rendered by the control or its active action.
     """
 
     hint: str | None = None
@@ -95,7 +94,7 @@ class ComboBox(Component):
 
     placeholder: str | None = None
     """
-    Alias for ``hint``.
+    Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
     """
 
     loading: bool | None = None
@@ -115,7 +114,7 @@ class ComboBox(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "combo_box"
@@ -140,23 +139,24 @@ class ComboBox(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        value=value,
+                        options=options if options is not None else items,
+                        items=items if items is not None else options,
+                        groups=groups,
+                        label=label,
+                        hint=hint if hint is not None else placeholder,
+                        placeholder=placeholder if placeholder is not None else hint,
+                        loading=loading,
+                        async_source=async_source,
+                        debounce_ms=debounce_ms,
+                        enabled=enabled,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                value=value,
-                options=options if options is not None else items,
-                items=items if items is not None else options,
-                groups=groups,
-                label=label,
-                hint=hint if hint is not None else placeholder,
-                placeholder=placeholder if placeholder is not None else hint,
-                loading=loading,
-                async_source=async_source,
-                debounce_ms=debounce_ms,
-                enabled=enabled,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

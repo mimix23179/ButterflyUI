@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["Table"]
 
 class Table(Component):
-    """
-    Dual-axis scrollable table backed by Flutter’s ``DataTable`` with
+    """Dual-axis scrollable table backed by Flutter’s ``DataTable`` with
     scroll-position invoke commands.
-
+    
     The runtime renders a ``DataTable`` inside nested horizontal and
     vertical ``SingleChildScrollView`` widgets.  ``columns`` are used
     as plain header labels and ``rows`` as lists of cell values.
@@ -20,10 +19,10 @@ class Table(Component):
     Programmatic scrolling is available through ``scroll_to``,
     ``scroll_by``, ``scroll_to_start``, ``scroll_to_end``, and
     ``get_scroll_metrics`` invoke methods.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Table(
         columns=["Name", "Role", "Status"],
         rows=[
@@ -32,11 +31,11 @@ class Table(Component):
         ],
     )
     ```
-
+    
     Args:
-        columns: 
+        columns:
             Column header labels — a list of plain strings.
-        rows: 
+        rows:
             Row data — a list of lists where each inner list contains cell values aligned to ``columns``.
     """
 

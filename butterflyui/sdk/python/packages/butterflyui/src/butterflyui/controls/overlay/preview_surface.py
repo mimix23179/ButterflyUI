@@ -6,17 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["PreviewSurface"]
 
 class PreviewSurface(Component):
-    """
-    Overlay surface for displaying a live or static content preview.
-
+    """Overlay surface for displaying a live or static content preview.
+    
     The runtime renders a floating preview pane. ``source`` provides a
     URL or asset path for an image or media preview. ``loading`` shows a
     loading indicator while content fetches. ``title`` and ``subtitle``
     label the preview panel header.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.PreviewSurface(
         source="https://example.com/thumbnail.png",
         title="Image Preview",
@@ -24,7 +23,7 @@ class PreviewSurface(Component):
         events=["close"],
     )
     ```
-
+    
     Args:
         source:
             URL or asset path of the content to preview.
@@ -35,7 +34,7 @@ class PreviewSurface(Component):
         subtitle:
             Secondary text shown below the title.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +60,7 @@ class PreviewSurface(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "preview_surface"

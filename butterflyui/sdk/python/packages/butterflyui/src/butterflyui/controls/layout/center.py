@@ -7,29 +7,28 @@ from .align import Align
 __all__ = ["Center"]
 
 class Center(Align):
-    """
-    Centers its child within the available space.
-
+    """Centers its child within the available space.
+    
     A convenience specialization of ``Align`` that defaults ``alignment`` to
     ``"center"``. Inherits the ``width_factor`` and ``height_factor``
     shrink-wrap behaviour from ``Align``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Center(
         bui.Text("Centered"),
         events=["layout"],
     )
     ```
-
+    
     Args:
         width_factor:
             If set, the widget's width is this multiple of the child's width.
         height_factor:
             If set, the widget's height is this multiple of the child's height.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -45,7 +44,7 @@ class Center(Align):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "center"

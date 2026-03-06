@@ -6,20 +6,19 @@ from .._shared import Component, merge_props
 __all__ = ["MenuBar"]
 
 class MenuBar(Component):
-    """
-    Application-level horizontal menu bar with dropdown menu groups.
-
+    """Application-level horizontal menu bar with dropdown menu groups.
+    
     ``MenuBar`` accepts ``menus`` or ``items`` payloads. Each top-level menu
     can include nested actions, separators, shortcuts, icons, and custom
     payload metadata. Runtime emits ``open``, ``dismiss``, ``select``, and
     ``change`` events as users interact with menu groups.
-
+    
     The control also supports shared layout/placement hints through ``props``
     (alignment, margin, size constraints, radius, clip behavior).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.MenuBar(
         menus=[
             {
@@ -41,25 +40,24 @@ class MenuBar(Component):
         events=["open", "select", "change"],
     )
     ```
-
+    
     Args:
         menus:
             List of top-level menu spec mappings.
         items:
-            Alias of ``menus`` when constructing from generic payloads.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         dense:
             Reduces bar height and menu item padding.
         height:
             Explicit bar height in logical pixels.
         events:
-            Optional runtime event whitelist.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides including menu styling and layout hints
-            (alignment/position, margin, sizing constraints, radius/clip).
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props passed through to Flutter.
     """
@@ -72,7 +70,7 @@ class MenuBar(Component):
 
     items: list[Any] | None = None
     """
-    Alias of ``menus`` when constructing from generic payloads.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     dense: bool | None = None
@@ -82,7 +80,7 @@ class MenuBar(Component):
 
     events: list[str] | None = None
     """
-    Optional runtime event whitelist.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "menu_bar"

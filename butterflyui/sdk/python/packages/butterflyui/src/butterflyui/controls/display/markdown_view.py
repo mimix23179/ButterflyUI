@@ -7,56 +7,58 @@ __all__ = ["MarkdownView"]
 
 class MarkdownView(Component):
     """Rendered Markdown content viewer.
-
-    Displays a Markdown string using ``flutter_markdown_plus``.  When
-    ``scrollable`` is ``True`` (default) the content is wrapped in a
-    scrollable ``Markdown`` widget; otherwise a non-scrollable
-    ``MarkdownBody`` is used.  Setting ``selectable`` allows the user
-    to select and copy rendered text.
-
-    Use ``get_value`` to retrieve the current Markdown source and
-    ``set_value`` to replace it at runtime.
-
-    Example::
-
-        import butterflyui as bui
-
-        view = bui.MarkdownView(
-            value="## Features\n- Fast\n- Lightweight",
-            selectable=True,
-        )
-
+    
+        Displays a Markdown string using ``flutter_markdown_plus``.  When
+        ``scrollable`` is ``True`` (default) the content is wrapped in a
+        scrollable ``Markdown`` widget; otherwise a non-scrollable
+        ``MarkdownBody`` is used.  Setting ``selectable`` allows the user
+        to select and copy rendered text.
+    
+        Use ``get_value`` to retrieve the current Markdown source and
+        ``set_value`` to replace it at runtime.
+    
+        Example::
+    
+            import butterflyui as bui
+    
+            view = bui.MarkdownView(
+                value="## Features
+    - Fast
+    - Lightweight",
+                selectable=True,
+            )
+    
     Args:
-        value: 
-            Markdown source string.
-        text: 
-            Alias for ``value``.
-        selectable: 
-            If ``True`` the rendered text is selectable.
-        scrollable: 
-            If ``True`` (default) the widget scrolls when content overflows; otherwise it sizes to fit.
+        value:
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
+        text:
+            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
+        selectable:
+            Controls whether rendered text content can be selected and copied by the user.
+        scrollable:
+            Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
     """
 
 
     scrollable: bool | None = None
     """
-    If ``True`` (default) the widget scrolls when content overflows; otherwise it sizes to fit.
+    Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
     """
 
 
     value: str | None = None
     """
-    Markdown source string.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     text: str | None = None
     """
-    Alias for ``value``.
+    Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
     """
 
     selectable: bool | None = None
     """
-    If ``True`` the rendered text is selectable.
+    Controls whether rendered text content can be selected and copied by the user.
     """
     control_type = "markdown_view"
 

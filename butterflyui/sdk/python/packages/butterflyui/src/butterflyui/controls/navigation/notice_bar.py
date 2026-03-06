@@ -7,20 +7,19 @@ __all__ = ["NoticeBar"]
 
 
 class NoticeBar(Component):
-    """
-    Inline banner for status messages, warnings, and lightweight actions.
-
+    """Inline banner for status messages, warnings, and lightweight actions.
+    
     ``NoticeBar`` renders a compact horizontal notification strip. ``variant``
     selects semantic tone, ``icon`` prepends a glyph, ``dismissible`` enables
     close interaction, and ``action_label``/``action_id`` define an inline
     command surface.
-
+    
     The control accepts shared layout hints through ``props`` so notice bars
     can be aligned and clipped consistently in headers/content regions.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.NoticeBar(
         text="Deployment completed successfully.",
         variant="success",
@@ -31,10 +30,10 @@ class NoticeBar(Component):
         events=["dismiss", "action"],
     )
     ```
-
+    
     Args:
         text:
-            Notice message text.
+            Primary text value rendered by the control.
         variant:
             Semantic tone token (for example ``"info"``, ``"success"``,
             ``"warning"``, ``"error"``).
@@ -43,13 +42,13 @@ class NoticeBar(Component):
         dismissible:
             Shows a close action when ``True``.
         action_label:
-            Optional inline action label.
+            Label text rendered for the control's inline action when that action is available.
         action_id:
             Identifier emitted for the inline action.
         events:
-            Runtime events the control may emit.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional props, including layout/placement hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
@@ -61,7 +60,7 @@ class NoticeBar(Component):
 
     text: str | None = None
     """
-    Notice message text.
+    Primary text value rendered by the control.
     """
 
     variant: str | None = None
@@ -77,7 +76,7 @@ class NoticeBar(Component):
 
     action_label: str | None = None
     """
-    Optional inline action label.
+    Label text rendered for the control's inline action when that action is available.
     """
 
     action_id: str | None = None
@@ -87,7 +86,7 @@ class NoticeBar(Component):
 
     events: list[str] | None = None
     """
-    Runtime events the control may emit.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "notice_bar"

@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DragHandle"]
 
 class DragHandle(Component):
-    """
-    Marks its child as an individual drag handle within a reorderable list.
-
+    """Marks its child as an individual drag handle within a reorderable list.
+    
     Wraps the child in a drag-feedback region that the parent
     reorderable container recognises by ``index``.  An optional
     ``payload`` mapping is attached to the drag operation so the
@@ -17,10 +16,10 @@ class DragHandle(Component):
     respond to the drag.  Drag lifecycle events (``drag_start``,
     ``drag_end``, ``drag_cancel``) are emitted when the gesture
     starts, ends, or is cancelled.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DragHandle(
         bui.Icon("drag_indicator"),
         index=0,
@@ -28,7 +27,7 @@ class DragHandle(Component):
         drag_type="list_item",
     )
     ```
-
+    
     Args:
         index:
             Zero-based position of this handle in the parent
@@ -41,7 +40,7 @@ class DragHandle(Component):
         drag_type:
             String tag used to match compatible drop zones.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -64,7 +63,7 @@ class DragHandle(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "drag_handle"
 

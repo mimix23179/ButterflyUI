@@ -9,19 +9,18 @@ __all__ = ["AlertDialog"]
 
 
 class AlertDialog(Component):
-    """
-    Dialog overlay for alerts, confirms, and modal prompts.
-
+    """Dialog overlay for alerts, confirms, and modal prompts.
+    
     ``AlertDialog`` is the canonical replacement for legacy ``modal`` control
     APIs. You can provide a fully custom ``child`` node or let the wrapper
     auto-compose a simple title/content/actions body.
-
+    
     The action row accepts normal button controls, so it works directly with
     icon-enabled button variants and declarative action dispatch.
-
+    
     ```python
     import butterflyui as bui
-
+    
     dialog = bui.AlertDialog(
         title="Delete project?",
         content="This action cannot be undone.",
@@ -30,7 +29,7 @@ class AlertDialog(Component):
         dismissible=False,
     )
     ```
-
+    
     Args:
         title:
             Title node or primitive text value.
@@ -59,16 +58,16 @@ class AlertDialog(Component):
         source_rect:
             Optional transition origin rectangle.
         scrim_color:
-            Overlay scrim color.
+            Color used for the modal scrim or backdrop behind the overlay.
         modal:
             Alias for modal behavior. When set, it drives default
             ``dismissible`` (``modal=True`` implies ``dismissible=False``).
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props forwarded to the shared renderer pipeline,
             including style/modifier/motion/effects and transparency hints.
@@ -142,7 +141,7 @@ class AlertDialog(Component):
 
     scrim_color: Any | None = None
     """
-    Overlay scrim color.
+    Color used for the modal scrim or backdrop behind the overlay.
     """
 
     control_type = "alert_dialog"
@@ -181,21 +180,22 @@ class AlertDialog(Component):
         if resolved_dismissible is None and modal is not None:
             resolved_dismissible = not bool(modal)
 
+        merged = merge_props(
+                        props,
+                        open=open,
+                        dismissible=resolved_dismissible,
+                        close_on_escape=close_on_escape,
+                        trap_focus=trap_focus,
+                        duration_ms=duration_ms,
+                        transition=transition,
+                        transition_type=transition_type,
+                        source_rect=source_rect,
+                        scrim_color=scrim_color,
+                        **kwargs,
+                    )
         super().__init__(
             child=resolved_child,
-            props=merge_props(
-                props,
-                open=open,
-                dismissible=resolved_dismissible,
-                close_on_escape=close_on_escape,
-                trap_focus=trap_focus,
-                duration_ms=duration_ms,
-                transition=transition,
-                transition_type=transition_type,
-                source_rect=source_rect,
-                scrim_color=scrim_color,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

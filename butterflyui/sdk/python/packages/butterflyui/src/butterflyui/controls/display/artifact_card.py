@@ -7,42 +7,42 @@ __all__ = ["ArtifactCard"]
 
 class ArtifactCard(Component):
     """Structured output card for displaying generated artifacts.
-
+    
     Renders a Material ``Card`` with a bold title, body message, and optional
     action button.  When ``clickable`` is enabled the entire card is wrapped
     in an ``InkWell`` that emits a ``"tap"`` event.  The action button is a
     ``TextButton`` that emits ``"action"`` when pressed.  Child controls
     are placed below the message text inside the card body.
-
+    
     Use ``set_content`` to update the title and message programmatically
     after the card is created, and ``emit`` to fire arbitrary custom events.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         card = bui.ArtifactCard(
             title="Analysis Complete",
             message="3 issues found in your code.",
             action_label="View Details",
             clickable=True,
         )
-
+    
     Args:
-        title: 
+        title:
             Bold heading text displayed at the top of the card.
-        message: 
+        message:
             Body text rendered beneath the title.
-        variant: 
+        variant:
             Visual variant key forwarded to the runtime theme.
-        label: 
+        label:
             Optional short label displayed alongside the title.
-        action_label: 
+        action_label:
             Text for the action ``TextButton`` at the bottom. When present the button emits ``"action"`` on click.
-        clickable: 
-            If ``True`` the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press.
+        clickable:
+            Controls whether the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press. Set it to ``False`` to disable this behavior.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -73,12 +73,12 @@ class ArtifactCard(Component):
 
     clickable: bool | None = None
     """
-    If ``True`` the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press.
+    Controls whether the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press. Set it to ``False`` to disable this behavior.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "artifact_card"
 

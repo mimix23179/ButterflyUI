@@ -6,40 +6,39 @@ from .._shared import Component, merge_props
 __all__ = ["HistogramView"]
 
 class HistogramView(Component):
-    """
-    Standalone histogram bar chart rendered via ``CustomPaint``.
-
+    """Standalone histogram bar chart rendered via ``CustomPaint``.
+    
     Each bin value is drawn as a vertical bar whose height is proportional
     to the value. The default bar colour is ``#60a5fa``. A background
     reference grid is shown when `show_grid` is ``True``. Use ``compact``
     for a shorter chart (``84`` px vs ``140`` px default).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.HistogramView(
         bins=[0.1, 0.35, 0.7, 0.55, 0.2],
         show_grid=True,
     )
     ```
-
+    
     Args:
-        bins: 
+        bins:
             List of bin values (relative bar heights, ``0.0``–``1.0``).
-        channels: 
+        channels:
             Per-channel histograms. Each item is a dict with ``"bins"`` and ``"color"`` keys.
-        domain: 
+        domain:
             Domain range ``[min, max]`` used for axis labelling.
-        normalized: 
+        normalized:
             If ``True``, bin values are normalised to the tallest bin.
-        show_grid: 
+        show_grid:
             If ``True``, a background reference grid is drawn.
-        compact: 
+        compact:
             If ``True``, the chart renders at a shorter height (``84`` px instead of ``140`` px).
-        height: 
+        height:
             Explicit canvas height in logical pixels. Overrides ``compact`` when set.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -75,7 +74,7 @@ class HistogramView(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "histogram_view"
 

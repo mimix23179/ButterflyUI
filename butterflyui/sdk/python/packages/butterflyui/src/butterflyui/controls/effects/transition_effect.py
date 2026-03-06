@@ -9,9 +9,8 @@ __all__ = ["TransitionEffect", "Transition"]
 
 
 class TransitionEffect(Component):
-    """
-    Animated content switcher for stateful child transitions.
-
+    """Animated content switcher for stateful child transitions.
+    
     Args:
         child:
             Primary child control used as the current transition content.
@@ -30,7 +29,7 @@ class TransitionEffect(Component):
         enabled:
             Whether the transition wrapper is active.
         events:
-            Runtime events emitted by the transition wrapper.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -66,7 +65,7 @@ class TransitionEffect(Component):
 
     events: list[str] | None = None
     """
-    Runtime events emitted by the transition wrapper.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "transition"

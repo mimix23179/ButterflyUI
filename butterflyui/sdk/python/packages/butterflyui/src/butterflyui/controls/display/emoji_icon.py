@@ -7,50 +7,50 @@ __all__ = ["EmojiIcon"]
 
 class EmojiIcon(Component):
     """Emoji character rendered as a tappable icon.
-
+    
     Displays a single emoji character at a configurable ``size``.  The
     emoji resolves from ``emoji``, falling back to ``fallback`` when
     the value is empty.  An optional coloured ``background`` circle is
     drawn behind the glyph using ``BorderRadius`` from ``radius``.
-
+    
     When ``enabled`` is ``True`` (default) and the control has an ID,
     tapping emits a ``"select"`` event with the resolved emoji and
     label.  Use ``set_emoji`` to swap the emoji character at runtime.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         icon = bui.EmojiIcon(
-            emoji="\U0001f680",
+            emoji="🚀",
             label="Rocket",
             size=28,
             background="#1e293b",
         )
-
+    
     Args:
-        emoji: 
+        emoji:
             Emoji character or string to display.
-        label: 
+        label:
             Accessible tooltip shown on hover.
-        size: 
+        size:
             Font size of the emoji in logical pixels.
-        color: 
+        color:
             Foreground colour applied to the emoji text.
-        fallback: 
-            Fallback emoji used when ``emoji`` is empty (defaults to ``"\U0001f600"``).
-        variant: 
+        fallback:
+            Fallback emoji used when ``emoji`` is empty (defaults to ``"😀"``).
+        variant:
             Visual variant key forwarded to the runtime.
-        background: 
+        background:
             Background fill colour drawn behind the emoji.
-        radius: 
+        radius:
             Corner radius for the background shape.
-        padding: 
+        padding:
             Padding between the background edge and the emoji.
-        enabled: 
-            If ``True`` (default) the emoji emits tap events.
+        enabled:
+            Controls whether the user can interact with the control. Disable it to show the control without allowing input or activation.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -96,7 +96,7 @@ class EmojiIcon(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "emoji_icon"
 

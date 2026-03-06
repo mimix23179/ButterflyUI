@@ -9,22 +9,21 @@ __all__ = ["DataGrid"]
 
 
 class DataGrid(Component):
-    """
-    Structured data grid with sorting, filtering, paging, and selection.
-
+    """Structured data grid with sorting, filtering, paging, and selection.
+    
     ``DataGrid`` is the high-density tabular surface intended for data-heavy
     experiences such as inventory editors, admin dashboards, and asset browsers.
     Compared to lightweight table wrappers, it keeps all table behavior in one
     payload: sorting, filter query state, selectable rows, striped styling, and
     optional header/footer chrome.
-
+    
     Runtime methods such as :meth:`set_sort`, :meth:`set_filter`, and
     :meth:`clear_selection` let Python handlers update the live widget after it
     has already been rendered.
-
+    
     ```python
     import butterflyui as bui
-
+    
     grid = bui.DataGrid(
         columns=[
             {"key": "name", "label": "Name"},
@@ -41,7 +40,7 @@ class DataGrid(Component):
         events=["change", "sort", "select"],
     )
     ```
-
+    
     Args:
         columns:
             Column descriptors consumed by the Flutter renderer.
@@ -52,7 +51,7 @@ class DataGrid(Component):
         filterable:
             Enables built-in query/filter UI behavior.
         selectable:
-            Enables row selection state.
+            Controls whether rows, items, or text content can be selected by the user.
         dense:
             Reduces row height and cell spacing for compact layouts.
         striped:
@@ -64,19 +63,19 @@ class DataGrid(Component):
         page_size:
             Preferred rows-per-page when pagination is enabled by the client.
         sort_column:
-            Initial column key to sort by.
+            Identifier of the column currently used to sort the control's data.
         sort_ascending:
-            Initial sort direction.
+            Controls whether the active sort uses ascending order instead of descending order.
         filter_query:
             Initial query string applied by the renderer.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -102,7 +101,7 @@ class DataGrid(Component):
 
     selectable: bool | None = None
     """
-    Enables row selection state.
+    Controls whether rows, items, or text content can be selected by the user.
     """
 
     dense: bool | None = None
@@ -132,12 +131,12 @@ class DataGrid(Component):
 
     sort_column: str | None = None
     """
-    Initial column key to sort by.
+    Identifier of the column currently used to sort the control's data.
     """
 
     sort_ascending: bool | None = None
     """
-    Initial sort direction.
+    Controls whether the active sort uses ascending order instead of descending order.
     """
 
     filter_query: str | None = None
@@ -147,7 +146,7 @@ class DataGrid(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "data_grid"
@@ -174,25 +173,26 @@ class DataGrid(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        columns=list(columns) if columns is not None else None,
+                        rows=list(rows) if rows is not None else None,
+                        sortable=sortable,
+                        filterable=filterable,
+                        selectable=selectable,
+                        dense=dense,
+                        striped=striped,
+                        show_header=show_header,
+                        show_footer=show_footer,
+                        page_size=page_size,
+                        sort_column=sort_column,
+                        sort_ascending=sort_ascending,
+                        filter_query=filter_query,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                columns=list(columns) if columns is not None else None,
-                rows=list(rows) if rows is not None else None,
-                sortable=sortable,
-                filterable=filterable,
-                selectable=selectable,
-                dense=dense,
-                striped=striped,
-                show_header=show_header,
-                show_footer=show_footer,
-                page_size=page_size,
-                sort_column=sort_column,
-                sort_ascending=sort_ascending,
-                filter_query=filter_query,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

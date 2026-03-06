@@ -7,17 +7,17 @@ __all__ = ["NoiseField"]
 
 class NoiseField(Component):
     """Procedural noise-texture field rendered with a ``CustomPainter``.
-
+    
     The Flutter runtime paints a grid of 2×2-pixel rectangles whose
     alpha is derived from a seeded ``Random`` multiplied by
     ``intensity``.  Wrapping the painter in a
     ``TweenAnimationBuilder`` allows an optional animated transition.
     Tapping the widget increments the seed and emits a ``"tap"`` event.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         noise = bui.NoiseField(
             seed=42,
             intensity=0.35,
@@ -25,28 +25,28 @@ class NoiseField(Component):
             height=120,
             animated=True,
         )
-
+    
     Args:
-        seed: 
+        seed:
             Integer seed for the ``Random`` generator.  Defaults to
             ``0``.
-        intensity: 
+        intensity:
             Per-pixel alpha multiplier (``0.0`` – ``1.0``).
             Defaults to ``0.35``.
-        speed: 
+        speed:
             Reserved — animation speed multiplier.
-        color: 
+        color:
             Pixel colour.  Defaults to white.
-        kind: 
+        kind:
             Reserved — noise algorithm variant name.
-        height: 
+        height:
             Explicit height of the ``SizedBox`` containing the
             canvas.  Defaults to ``100`` logical pixels.
-        animated: 
+        animated:
             When ``True`` the painter transitions via a
             ``TweenAnimationBuilder``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -85,7 +85,7 @@ class NoiseField(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "noise_field"
 

@@ -7,41 +7,41 @@ __all__ = ["PiePlot"]
 
 class PiePlot(Component):
     """Pie or donut chart rendered with ``CustomPaint``.
-
+    
     Draws coloured arc segments proportional to ``values`` using a
     ``CustomPainter``.  When ``donut`` is ``True`` (or ``hole`` > 0)
     a circular cut-out is drawn in the centre.  The chart cycles
     through ``colors`` (or a built-in palette) for each segment.
-
+    
     Tapping the chart emits a ``"tap"`` event with local coordinates.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         pie = bui.PiePlot(
             values=[40, 30, 20, 10],
             labels=["A", "B", "C", "D"],
             donut=True,
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric values for each pie segment.
-        labels: 
+        labels:
             Optional labels for each segment.
-        colors: 
+        colors:
             List of colours cycled across segments.  Defaults to a built-in five-colour palette.
-        donut: 
-            If ``True`` a hole is drawn in the centre.
-        hole: 
-            Ratio of the hole radius to the outer radius (``0.0``\u2013``0.9``; default ``0.55``).
-        start_angle: 
+        donut:
+            Controls whether a hole is drawn in the centre. Set it to ``False`` to disable this behavior.
+        hole:
+            Ratio of the hole radius to the outer radius (``0.0``–``0.9``; default ``0.55``).
+        start_angle:
             Start angle in degrees (default ``-90``).
-        clockwise: 
-            If ``True`` segments are drawn clockwise.
+        clockwise:
+            Controls whether segments are drawn clockwise. Set it to ``False`` to disable this behavior.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -62,7 +62,7 @@ class PiePlot(Component):
 
     donut: bool | None = None
     """
-    If ``True`` a hole is drawn in the centre.
+    Controls whether a hole is drawn in the centre. Set it to ``False`` to disable this behavior.
     """
 
     hole: float | None = None
@@ -77,12 +77,12 @@ class PiePlot(Component):
 
     clockwise: bool | None = None
     """
-    If ``True`` segments are drawn clockwise.
+    Controls whether segments are drawn clockwise. Set it to ``False`` to disable this behavior.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "pie_plot"
 

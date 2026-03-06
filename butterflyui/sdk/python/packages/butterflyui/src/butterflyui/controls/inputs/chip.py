@@ -9,21 +9,20 @@ __all__ = ["Chip"]
 
 
 class Chip(Component):
-    """
-    Unified chip surface for single chips and grouped chip sets.
-
+    """Unified chip surface for single chips and grouped chip sets.
+    
     ``Chip`` replaces the old ``chip_group`` API. It can represent one
     dismissible/interactive chip, or render a collection of selectable chips via
     ``options``/``items``. In grouped mode, use ``multi_select`` with
     ``values`` to support multi-selection workflows.
-
+    
     ``Chip`` also forwards universal style pipeline fields through ``**kwargs``
     so color accents, transparency, and effect/motion styling remain
     consistent with Candy/Skins contracts.
-
+    
     ```python
     import butterflyui as bui
-
+    
     filters = bui.Chip(
         options=[
             {"label": "Images", "value": "image"},
@@ -34,16 +33,16 @@ class Chip(Component):
         events=["change"],
     )
     ```
-
+    
     Args:
         label:
             Label text for single-chip mode.
         value:
-            Value for single-chip mode.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         options:
             Option descriptors for grouped mode.
         items:
-            Alias for ``options``.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         values:
             Selected values for grouped multi-select mode.
         multi_select:
@@ -57,19 +56,19 @@ class Chip(Component):
         color:
             Color override for chip background/accent treatment.
         dense:
-            Uses compact spacing.
+            Enables a denser layout with reduced gaps, padding, or row height.
         spacing:
             Horizontal spacing between chips in grouped mode.
         run_spacing:
             Vertical spacing between chip rows in wrapped layouts.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props forwarded to the shared renderer pipeline.
     """
@@ -88,7 +87,7 @@ class Chip(Component):
 
     value: Any | None = None
     """
-    Value for single-chip mode.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     options: list[Any] | None = None
@@ -98,7 +97,7 @@ class Chip(Component):
 
     items: list[Any] | None = None
     """
-    Alias for ``options``.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     values: list[Any] | None = None
@@ -123,7 +122,7 @@ class Chip(Component):
 
     dense: bool | None = None
     """
-    Uses compact spacing.
+    Enables a denser layout with reduced gaps, padding, or row height.
     """
 
     spacing: float | None = None
@@ -138,7 +137,7 @@ class Chip(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "chip"
@@ -165,25 +164,26 @@ class Chip(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        label=label,
+                        value=value,
+                        options=options if options is not None else items,
+                        items=items if items is not None else options,
+                        values=values,
+                        multi_select=multi_select,
+                        selected=selected,
+                        enabled=enabled,
+                        dismissible=dismissible,
+                        color=color,
+                        dense=dense,
+                        spacing=spacing,
+                        run_spacing=run_spacing,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                label=label,
-                value=value,
-                options=options if options is not None else items,
-                items=items if items is not None else options,
-                values=values,
-                multi_select=multi_select,
-                selected=selected,
-                enabled=enabled,
-                dismissible=dismissible,
-                color=color,
-                dense=dense,
-                spacing=spacing,
-                run_spacing=run_spacing,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

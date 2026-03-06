@@ -6,28 +6,27 @@ from .._shared import Component, merge_props
 __all__ = ["AspectRatio"]
 
 class AspectRatio(Component):
-    """
-    Forces its child to a fixed width-to-height aspect ratio.
-
+    """Forces its child to a fixed width-to-height aspect ratio.
+    
     The runtime wraps Flutter's ``AspectRatio`` widget. The child is scaled to
     satisfy ``ratio`` (width / height) while fitting the parent's constraints.
     Both ``ratio`` and ``aspect_ratio`` are accepted as aliases for the same
     property.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.AspectRatio(
         bui.Image(src="photo.png"),
         ratio=16 / 9,
     )
     ```
-
+    
     Args:
         ratio:
             The desired width-to-height ratio. Alias for ``aspect_ratio``.
         aspect_ratio:
-            Alias for ``ratio``.
+            Backward-compatible alias for ``ratio``. When both fields are provided, ``ratio`` takes precedence and this alias is kept only for compatibility.
     """
 
 

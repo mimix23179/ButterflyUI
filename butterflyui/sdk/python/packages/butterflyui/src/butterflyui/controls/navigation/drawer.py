@@ -9,26 +9,25 @@ __all__ = ["Drawer"]
 
 
 class Drawer(Component):
-    """
-    Standalone drawer overlay control with optional built-in navigation content.
-
+    """Standalone drawer overlay control with optional built-in navigation content.
+    
     ``Drawer`` is backed by its own Dart control implementation (not an alias
     of ``slide_panel``). It supports both:
     - custom content mode via ``child`` / ``children``, and
     - data-driven menu mode via ``items`` or grouped ``sections``.
-
+    
     The built-in menu mode includes selection, optional search, optional
     collapsible sections, and runtime events for open/close/dismiss/select.
     Drawer presentation is edge-anchored through ``side`` and can be sized
     with ``size`` (or width/height aliases passed through ``props``).
-
+    
     Layout and placement props are supported through the shared runtime contract
     (for example ``margin``, ``radius``, ``clip_behavior``, ``align`` /
     ``alignment`` / ``position``, and sizing constraints).
-
+    
     ```python
     import butterflyui as bui
-
+    
     drawer = bui.Drawer(
         side="left",
         size=280,
@@ -42,7 +41,7 @@ class Drawer(Component):
         events=["open", "close", "select"],
     )
     ```
-
+    
     Args:
         open:
             If ``True``, the drawer is shown.
@@ -67,17 +66,17 @@ class Drawer(Component):
         show_search:
             Enables built-in search input for menu content.
         query:
-            Initial search query text.
+            Current query string used to filter, search, or narrow the control's content.
         collapsible:
             Enables collapsible sections in sectioned mode.
         events:
-            Event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -139,7 +138,7 @@ class Drawer(Component):
 
     query: str | None = None
     """
-    Initial search query text.
+    Current query string used to filter, search, or narrow the control's content.
     """
 
     collapsible: bool | None = None
@@ -149,7 +148,7 @@ class Drawer(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "drawer"

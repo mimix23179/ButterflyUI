@@ -6,21 +6,20 @@ from .._shared import Component, merge_props
 __all__ = ["StatusBar"]
 
 class StatusBar(Component):
-    """
-    Horizontal status bar displayed at the bottom of an application window.
-
+    """Horizontal status bar displayed at the bottom of an application window.
+    
     The runtime renders a fixed-height bar at the bottom edge. ``items``
     supply labelled status segments (left or right aligned). ``text`` sets
     a single plain-text message when a full item list is not needed.
     ``dense`` reduces bar height. Runtime invokes support item/text updates
     and arbitrary event emission.
-
+    
     Shared layout hints are accepted through ``props`` for dock/placement
     control (alignment/position, margin, width/height constraints, radius/clip).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.StatusBar(
         items=[
             {"id": "branch", "label": "main", "icon": "branch"},
@@ -28,22 +27,22 @@ class StatusBar(Component):
         ],
     )
     ```
-
+    
     Args:
         items:
-            List of status segment spec mappings.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         text:
             Simple plain-text status message (used instead of ``items``).
         dense:
             Reduces bar height and item padding.
         props:
-            Additional runtime props, including layout and visual hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
     items: list[Mapping[str, Any]] | None = None
     """
-    List of status segment spec mappings.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     text: str | None = None

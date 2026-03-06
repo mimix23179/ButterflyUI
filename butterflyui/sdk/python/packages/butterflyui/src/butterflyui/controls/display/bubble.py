@@ -9,27 +9,26 @@ __all__ = ["Bubble"]
 
 
 class Bubble(Component):
-    """
-    Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
-
+    """Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
+    
     ``Bubble`` is the consolidated control for conversational UX in ButterflyUI.
     It replaces the older split controls such as ``chat_bubble``, ``chat_thread``,
     ``message_bubble``, ``message_composer``, and ``prompt_composer`` while keeping
     a single prop model and invoke API.
-
+    
     The control is intentionally variant-scoped:
     - ``variant="message"``: one message tile with metadata, attachments, actions, reactions.
     - ``variant="thread"`` / ``variant="chat"``: message list ergonomics, separators, jump APIs.
     - ``variant="composer"``: expanding input row with attach/send behaviors.
-
+    
     Bubble supports the same universal style/modifier/motion/effects contract
     as other core controls, including slot styling (``label``, ``leading``,
     ``trailing``, ``overlay``) and state modifier lists.
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         thread = bui.Bubble(
             variant="thread",
             messages=[
@@ -43,7 +42,7 @@ class Bubble(Component):
             events=["reach_top", "scroll_state_changed", "submit", "attach"],
         )
         ```
-
+    
     Args:
         variant:
             Bubble role. Supported runtime values are ``"message"``, ``"thread"``,
@@ -57,9 +56,9 @@ class Bubble(Component):
         density:
             Density hint (``"compact"``, ``"normal"``, ``"cozy"``).
         compact:
-            Legacy density alias.
+            Enables a more compact visual density with reduced padding, gaps, or surface size.
         dense:
-            Legacy density alias.
+            Enables a denser layout with reduced gaps, padding, or row height.
         align:
             Message alignment hint: ``"left"``, ``"right"``, or ``"auto"``.
         max_width:
@@ -74,7 +73,6 @@ class Bubble(Component):
             Enables text selection for message/composer text.
         clickable:
             Emits click/tap events from bubble body when enabled.
-
         sender_name:
             Sender/author name in message header.
         author:
@@ -84,9 +82,9 @@ class Bubble(Component):
         role_badge:
             Optional badge shown next to sender metadata.
         title:
-            Primary title/headline line.
+            Primary heading text rendered by the control.
         subtitle:
-            Secondary line under title.
+            Secondary text rendered beneath or beside the primary title.
         text:
             Message body text (or composer initial value alias).
         markdown:
@@ -94,60 +92,57 @@ class Bubble(Component):
         child:
             Optional child control rendered inside the bubble body.
         timestamp:
-            Message timestamp string.
+            Timestamp string rendered with the message or item metadata.
         edited:
-            Marks message as edited.
+            Controls whether edited is enabled for this control.
         delivered:
-            Marks message as delivered.
+            Controls whether delivered is enabled for this control.
         read:
-            Marks message as read.
+            Reflects whether the message or item has been marked as read.
         status:
             Status/meta label shown in message header.
         error_notice:
             Error or failure notice shown inside the message.
         notice:
             Informational notice shown inside the message.
-
         attachments:
             Attachment descriptors for message mode.
         reactions:
             Reaction descriptors (emoji/count/selected payloads).
         actions:
             Inline action descriptors (reply/edit/delete/custom).
-
         quote_text:
-            Quoted/referenced body text.
+            Quoted text snippet rendered inside the message preview.
         quote_author:
-            Quoted author label.
+            Author label rendered for the quoted message or referenced content.
         quote_timestamp:
-            Quoted timestamp label.
+            Timestamp label rendered for the quoted message or referenced content.
         quote_compact:
-            Compacts quote block rendering.
+            Controls whether the quoted content is rendered in its compact visual variant.
         mention_label:
-            Mention chip label.
+            Label text rendered for mention.
         mention_color:
-            Mention chip background.
+            Color value applied to mention when the control renders that visual element.
         mention_text_color:
-            Mention chip foreground.
+            Color value applied to mention text.
         mention_clickable:
             Emits ``mention_click`` event when mention chip is tapped.
         divider_label:
-            Label for a top divider row.
+            Optional label text rendered inside or alongside the divider.
         divider_color:
-            Divider color override.
-
+            Color used when rendering the divider line or separator surface.
         messages:
             Message list for thread/chat variant.
         items:
-            Alias for ``messages``.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         pinned_messages:
             Pinned message descriptors rendered above timeline.
         spacing:
             Vertical spacing between thread rows.
         reverse:
-            Reverses message list order.
+            Controls whether the control renders its items in reverse order.
         scrollable:
-            Enables thread scrolling.
+            Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
         autoscroll:
             Thread scroll mode: ``"follow_latest"`` or ``"manual"``.
         follow_latest:
@@ -166,19 +161,18 @@ class Bubble(Component):
             Typing indicator descriptor/text.
         show_timestamps:
             Thread-level timestamp visibility hint.
-
         show_input:
             Shows integrated composer when variant is thread/chat.
         input_placeholder:
             Placeholder text for integrated composer.
         send_label:
-            Send action label.
+            Label text rendered for the send action associated with the control.
         send_on_enter:
             Sends on Enter (Shift+Enter inserts newline).
         value:
-            Composer current value.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         placeholder:
-            Composer placeholder alias.
+            Placeholder text shown when the control has no current value.
         min_lines:
             Minimum visible lines for composer input.
         max_lines:
@@ -190,40 +184,37 @@ class Bubble(Component):
         trailing:
             Trailing composer slot descriptor.
         show_attach:
-            Shows attachment action.
+            Controls whether the control should display its attachment action or attachment slot.
         draft_key:
-            Optional draft-persistence key.
+            Persistent key used to store and restore draft state for this control.
         char_limit:
-            Maximum composer characters.
+            Maximum number of characters accepted or displayed by the control.
         show_counter:
             Shows character counter when char limit is active.
         cooldown_ms:
             Optional send cooldown in milliseconds.
         disabled:
-            Disables interaction.
+            State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
         read_only:
-            Locks composer edits.
+            Controls whether the control remains visible but blocks direct user editing.
         emit_on_change:
             Emits change events while typing.
         clear_on_send:
-            Clears composer after submit.
-
+            Controls whether the current input value is cleared automatically after a send action completes.
         events:
-            Event names emitted by runtime (examples: ``submit``, ``change``,
-            ``attach``, ``reach_top``, ``scroll_state_changed``, ``action``,
-            ``react``, ``message_click``).
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Local style map forwarded to the style resolver.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     scrollable: bool | None = None
     """
-    Enables thread scrolling.
+    Controls whether overflowing content is wrapped in a scrollable host instead of being laid out at its full intrinsic size.
     """
 
 
@@ -252,12 +243,12 @@ class Bubble(Component):
 
     compact: bool | None = None
     """
-    Legacy density alias.
+    Enables a more compact visual density with reduced padding, gaps, or surface size.
     """
 
     dense: bool | None = None
     """
-    Legacy density alias.
+    Enables a denser layout with reduced gaps, padding, or row height.
     """
 
     align: str | None = None
@@ -312,12 +303,12 @@ class Bubble(Component):
 
     title: str | None = None
     """
-    Primary title/headline line.
+    Primary heading text rendered by the control.
     """
 
     subtitle: str | None = None
     """
-    Secondary line under title.
+    Secondary text rendered beneath or beside the primary title.
     """
 
     text: str | None = None
@@ -332,22 +323,22 @@ class Bubble(Component):
 
     timestamp: str | None = None
     """
-    Message timestamp string.
+    Timestamp string rendered with the message or item metadata.
     """
 
     edited: bool | None = None
     """
-    Marks message as edited.
+    Controls whether edited is enabled for this control.
     """
 
     delivered: bool | None = None
     """
-    Marks message as delivered.
+    Controls whether delivered is enabled for this control.
     """
 
     read: bool | None = None
     """
-    Marks message as read.
+    Reflects whether the message or item has been marked as read.
     """
 
     status: str | None = None
@@ -382,37 +373,37 @@ class Bubble(Component):
 
     quote_text: str | None = None
     """
-    Quoted/referenced body text.
+    Quoted text snippet rendered inside the message preview.
     """
 
     quote_author: str | None = None
     """
-    Quoted author label.
+    Author label rendered for the quoted message or referenced content.
     """
 
     quote_timestamp: str | None = None
     """
-    Quoted timestamp label.
+    Timestamp label rendered for the quoted message or referenced content.
     """
 
     quote_compact: bool | None = None
     """
-    Compacts quote block rendering.
+    Controls whether the quoted content is rendered in its compact visual variant.
     """
 
     mention_label: str | None = None
     """
-    Mention chip label.
+    Label text rendered for mention.
     """
 
     mention_color: Any | None = None
     """
-    Mention chip background.
+    Color value applied to mention when the control renders that visual element.
     """
 
     mention_text_color: Any | None = None
     """
-    Mention chip foreground.
+    Color value applied to mention text.
     """
 
     mention_clickable: bool | None = None
@@ -422,12 +413,12 @@ class Bubble(Component):
 
     divider_label: str | None = None
     """
-    Label for a top divider row.
+    Optional label text rendered inside or alongside the divider.
     """
 
     divider_color: Any | None = None
     """
-    Divider color override.
+    Color used when rendering the divider line or separator surface.
     """
 
     messages: list[Any] | None = None
@@ -437,7 +428,7 @@ class Bubble(Component):
 
     items: list[Any] | None = None
     """
-    Alias for ``messages``.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     pinned_messages: list[Any] | None = None
@@ -452,7 +443,7 @@ class Bubble(Component):
 
     reverse: bool | None = None
     """
-    Reverses message list order.
+    Controls whether the control renders its items in reverse order.
     """
 
     autoscroll: str | None = None
@@ -512,7 +503,7 @@ class Bubble(Component):
 
     send_label: str | None = None
     """
-    Send action label.
+    Label text rendered for the send action associated with the control.
     """
 
     send_on_enter: bool | None = None
@@ -522,12 +513,12 @@ class Bubble(Component):
 
     value: str | None = None
     """
-    Composer current value.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     placeholder: str | None = None
     """
-    Composer placeholder alias.
+    Placeholder text shown when the control has no current value.
     """
 
     min_lines: int | None = None
@@ -557,17 +548,17 @@ class Bubble(Component):
 
     show_attach: bool | None = None
     """
-    Shows attachment action.
+    Controls whether the control should display its attachment action or attachment slot.
     """
 
     draft_key: str | None = None
     """
-    Optional draft-persistence key.
+    Persistent key used to store and restore draft state for this control.
     """
 
     char_limit: int | None = None
     """
-    Maximum composer characters.
+    Maximum number of characters accepted or displayed by the control.
     """
 
     show_counter: bool | None = None
@@ -582,12 +573,12 @@ class Bubble(Component):
 
     disabled: bool | None = None
     """
-    Disables interaction.
+    State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
     """
 
     read_only: bool | None = None
     """
-    Locks composer edits.
+    Controls whether the control remains visible but blocks direct user editing.
     """
 
     emit_on_change: bool | None = None
@@ -597,14 +588,12 @@ class Bubble(Component):
 
     clear_on_send: bool | None = None
     """
-    Clears composer after submit.
+    Controls whether the current input value is cleared automatically after a send action completes.
     """
 
     events: list[str] | None = None
     """
-    Event names emitted by runtime (examples: ``submit``, ``change``,
-    ``attach``, ``reach_top``, ``scroll_state_changed``, ``action``,
-    ``react``, ``message_click``).
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "bubble"
@@ -696,91 +685,92 @@ class Bubble(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        variant=variant,
+                        role=role,
+                        tone=tone,
+                        density=density,
+                        compact=compact,
+                        dense=dense,
+                        align=align,
+                        max_width=max_width,
+                        grouping=grouping,
+                        group_messages=group_messages,
+                        grouped=grouped,
+                        selectable=selectable,
+                        clickable=clickable,
+                        sender_name=sender_name if sender_name is not None else author,
+                        author=author if author is not None else sender_name,
+                        avatar=avatar,
+                        role_badge=role_badge,
+                        title=title,
+                        subtitle=subtitle,
+                        text=text,
+                        markdown=markdown,
+                        timestamp=timestamp,
+                        edited=edited,
+                        delivered=delivered,
+                        read=read,
+                        status=status,
+                        error_notice=error_notice,
+                        notice=notice,
+                        attachments=attachments,
+                        reactions=reactions,
+                        actions=actions,
+                        quote_text=quote_text,
+                        quote_author=quote_author,
+                        quote_timestamp=quote_timestamp,
+                        quote_compact=quote_compact,
+                        mention_label=mention_label,
+                        mention_color=mention_color,
+                        mention_text_color=mention_text_color,
+                        mention_clickable=mention_clickable,
+                        divider_label=divider_label,
+                        divider_color=divider_color,
+                        messages=messages if messages is not None else items,
+                        items=items if items is not None else messages,
+                        pinned_messages=pinned_messages,
+                        spacing=spacing,
+                        reverse=reverse,
+                        scrollable=scrollable,
+                        autoscroll=autoscroll,
+                        follow_latest=follow_latest,
+                        unread_divider_label=unread_divider_label,
+                        unread_after_id=unread_after_id,
+                        unread_index=unread_index,
+                        date_separators=date_separators,
+                        empty_state=empty_state,
+                        typing_indicator=typing_indicator,
+                        show_timestamps=show_timestamps,
+                        show_input=show_input,
+                        input_placeholder=input_placeholder if input_placeholder is not None else placeholder,
+                        send_label=send_label,
+                        send_on_enter=send_on_enter,
+                        value=value if value is not None else text,
+                        placeholder=placeholder if placeholder is not None else input_placeholder,
+                        min_lines=min_lines,
+                        max_lines=max_lines,
+                        auto_expand=auto_expand,
+                        leading=leading,
+                        trailing=trailing,
+                        show_attach=show_attach,
+                        draft_key=draft_key,
+                        char_limit=char_limit,
+                        show_counter=show_counter,
+                        cooldown_ms=cooldown_ms,
+                        disabled=disabled,
+                        read_only=read_only,
+                        emit_on_change=emit_on_change,
+                        clear_on_send=clear_on_send,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
             *children_args,
             child=child,
             children=children,
-            props=merge_props(
-                props,
-                variant=variant,
-                role=role,
-                tone=tone,
-                density=density,
-                compact=compact,
-                dense=dense,
-                align=align,
-                max_width=max_width,
-                grouping=grouping,
-                group_messages=group_messages,
-                grouped=grouped,
-                selectable=selectable,
-                clickable=clickable,
-                sender_name=sender_name if sender_name is not None else author,
-                author=author if author is not None else sender_name,
-                avatar=avatar,
-                role_badge=role_badge,
-                title=title,
-                subtitle=subtitle,
-                text=text,
-                markdown=markdown,
-                timestamp=timestamp,
-                edited=edited,
-                delivered=delivered,
-                read=read,
-                status=status,
-                error_notice=error_notice,
-                notice=notice,
-                attachments=attachments,
-                reactions=reactions,
-                actions=actions,
-                quote_text=quote_text,
-                quote_author=quote_author,
-                quote_timestamp=quote_timestamp,
-                quote_compact=quote_compact,
-                mention_label=mention_label,
-                mention_color=mention_color,
-                mention_text_color=mention_text_color,
-                mention_clickable=mention_clickable,
-                divider_label=divider_label,
-                divider_color=divider_color,
-                messages=messages if messages is not None else items,
-                items=items if items is not None else messages,
-                pinned_messages=pinned_messages,
-                spacing=spacing,
-                reverse=reverse,
-                scrollable=scrollable,
-                autoscroll=autoscroll,
-                follow_latest=follow_latest,
-                unread_divider_label=unread_divider_label,
-                unread_after_id=unread_after_id,
-                unread_index=unread_index,
-                date_separators=date_separators,
-                empty_state=empty_state,
-                typing_indicator=typing_indicator,
-                show_timestamps=show_timestamps,
-                show_input=show_input,
-                input_placeholder=input_placeholder if input_placeholder is not None else placeholder,
-                send_label=send_label,
-                send_on_enter=send_on_enter,
-                value=value if value is not None else text,
-                placeholder=placeholder if placeholder is not None else input_placeholder,
-                min_lines=min_lines,
-                max_lines=max_lines,
-                auto_expand=auto_expand,
-                leading=leading,
-                trailing=trailing,
-                show_attach=show_attach,
-                draft_key=draft_key,
-                char_limit=char_limit,
-                show_counter=show_counter,
-                cooldown_ms=cooldown_ms,
-                disabled=disabled,
-                read_only=read_only,
-                emit_on_change=emit_on_change,
-                clear_on_send=clear_on_send,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

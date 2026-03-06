@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Splash"]
 
 class Splash(Component):
-    """
-    Full-screen splash or loading overlay shown during app startup or transitions.
-
+    """Full-screen splash or loading overlay shown during app startup or transitions.
+    
     The runtime renders a full-screen overlay with optional branding,
     loading indicator, and progress tracking. ``active`` shows or hides the
     splash. ``color`` sets the background fill. ``title``/``subtitle``/
@@ -17,10 +16,10 @@ class Splash(Component):
     ``skip_enabled`` adds a skip button. ``auto_start`` starts the splash
     immediately; ``hide_on_complete`` dismisses it when progress reaches 1.0.
     ``effect`` selects a visual transition effect.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Splash(
         active=True,
         title="My App",
@@ -30,7 +29,7 @@ class Splash(Component):
         events=["skip", "complete"],
     )
     ```
-
+    
     Args:
         active:
             When ``True`` the splash screen is visible.
@@ -43,11 +42,11 @@ class Splash(Component):
         centered:
             When ``True`` content is centered within the splash area.
         title:
-            Primary branding or title text.
+            Primary heading text rendered by the control.
         subtitle:
             Secondary text shown below the title.
         message:
-            Body or status message text.
+            Main message text rendered inside the control.
         loading:
             When ``True`` a loading spinner is shown.
         progress:
@@ -68,7 +67,7 @@ class Splash(Component):
         effect:
             Named visual transition effect applied to the splash.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -99,7 +98,7 @@ class Splash(Component):
 
     title: str | None = None
     """
-    Primary branding or title text.
+    Primary heading text rendered by the control.
     """
 
     subtitle: str | None = None
@@ -109,7 +108,7 @@ class Splash(Component):
 
     message: str | None = None
     """
-    Body or status message text.
+    Main message text rendered inside the control.
     """
 
     loading: bool | None = None
@@ -160,7 +159,7 @@ class Splash(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "splash"

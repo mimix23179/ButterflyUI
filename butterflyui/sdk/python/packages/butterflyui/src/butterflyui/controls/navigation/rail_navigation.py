@@ -9,23 +9,22 @@ __all__ = ["RailNavigation"]
 
 
 class RailNavigation(Component):
-    """
-    Vertical navigation rail with selectable destinations and icon states.
-
+    """Vertical navigation rail with selectable destinations and icon states.
+    
     ``RailNavigation`` is suitable for desktop/tablet shell layouts where
     major sections are represented as left or right rail destinations.
     Supports dense mode, extended mode, and runtime selection updates.
-
+    
     Item mappings may define ``icon`` and ``selected_icon`` descriptors along
     with ``id``, ``label``, and ``enabled`` state.
-
+    
     Shared frame/layout hints are accepted through ``props`` to place rails
     in custom shells (alignment, margin, sizing constraints, radius/clip).
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         bui.RailNavigation(
             items=[
                 {"id": "inbox", "label": "Inbox", "icon": "inbox"},
@@ -37,25 +36,24 @@ class RailNavigation(Component):
             events=["select", "change"],
         )
         ```
-
+    
     Args:
         items:
-            Rail destination mappings.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         selected_id:
-            Active destination ``id``.
+            Identifier of the currently selected item, tab, route, or navigation destination.
         dense:
             Enables compact spacing and icon sizing.
         extended:
             Expands rail width and displays labels inline.
         events:
-            Runtime event whitelist emitted by the Flutter renderer.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional raw props merged after typed arguments, including
-            indicator/text/icon color options and layout hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style token map forwarded to the style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, schema validation errors are raised for unknown props.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra passthrough props for advanced renderer customization.
     """
@@ -63,12 +61,12 @@ class RailNavigation(Component):
 
     items: list[Mapping[str, Any]] | None = None
     """
-    Rail destination mappings.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     selected_id: str | None = None
     """
-    Active destination ``id``.
+    Identifier of the currently selected item, tab, route, or navigation destination.
     """
 
     dense: bool | None = None
@@ -83,7 +81,7 @@ class RailNavigation(Component):
 
     events: list[str] | None = None
     """
-    Runtime event whitelist emitted by the Flutter renderer.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "rail_navigation"

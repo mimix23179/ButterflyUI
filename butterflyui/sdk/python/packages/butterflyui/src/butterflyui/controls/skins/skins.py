@@ -199,6 +199,9 @@ class SkinsTokens:
     """
 
     data: dict[str, Any] = field(default_factory=dict)
+    """
+    Raw mapping payload stored by this helper type and forwarded to the runtime after JSON-safe normalization.
+    """
 
     @staticmethod
     def from_dict(values: Mapping[str, Any]) -> "SkinsTokens":
@@ -576,13 +579,37 @@ class SkinsComponentSpec:
     """
 
     module: str = "container"
+    """
+    Runtime module identifier that tells the umbrella control which Flutter-side implementation to render.
+    """
     props: dict[str, Any] = field(default_factory=dict)
+    """
+    Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
+    """
     style: dict[str, Any] = field(default_factory=dict)
+    """
+    Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
+    """
     children: list[Any] = field(default_factory=list)
+    """
+    Ordered list of child payloads nested inside this reusable component spec.
+    """
     scope_skin: str | None = None
+    """
+    Name of the skin preset automatically applied when this component spec instantiates inside a ``SkinsScope``.
+    """
     scope_tokens: dict[str, Any] | None = None
+    """
+    Token overrides injected into the generated ``SkinsScope`` when this component spec is instantiated.
+    """
     scope_brightness: str | None = None
+    """
+    Brightness override applied when this component spec wraps the instantiated control in a ``SkinsScope``.
+    """
     strict: bool = False
+    """
+    Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
+    """
 
     def add_children(self, *children: Any) -> "SkinsComponentSpec":
         """
@@ -772,54 +799,51 @@ class SkinsScope(Component):
 
 
 class Skins(Component):
-    """
-    Umbrella Skins control that renders skin modules.
-
+    """Umbrella Skins control that renders skin modules.
+    
     ``Skins`` dispatches to one module at a time and is the runtime-facing
     entry point for skin-aware UI composition.
-
+    
     Common module groups:
     - layout: ``row``, ``column``, ``stack``, ``wrap``, ``container``, ``card``
     - decoration: ``gradient``, ``decorated``, ``clip``, ``border``
     - effects/motion: ``effects``, ``particles``, ``animation``, ``transition``
-
+    
     Module aliases are normalized before serialization. For example,
     ``decorated_box`` maps to ``decorated``, ``apply`` maps to ``button``, and
     ``color_editor`` maps to ``gradient``.
-
+    
     The constructor also bridges some common props, for example:
     - ``label`` -> ``text`` for button-like modules
     - ``background`` -> ``bgcolor`` for decorated modules
-
+    
     Skins modules use the same universal decorator contract as the rest of the
     runtime: ``modifiers`` + state modifier keys, ``motion`` + enter/hover/
     press motion keys, and ``effects`` + effect ordering/clipping keys.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Skins(
         bui.Text("Card content"),
         module="card",
         events=["tap"],
     )
     ```
-
+    
     Args:
         module:
             Name of the runtime module to render.
         layout:
-            Alias for ``module``.
+            Backward-compatible alias for ``module``. When both fields are provided, ``module`` takes precedence and this alias is kept only for compatibility.
         state:
             Active state name used for state-driven styling.
         states:
             List of all recognized state names for this control.
         events:
-            List of event names the runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         style:
-            Optional style map handled by the shared renderer. Use this for
-            gradients, glow/shadow, rounded corners, clipping, and glass-like
-            layers via ``backdrop_blur`` + ``backdrop_color``.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         **kwargs:
             Additional module-specific props forwarded to runtime.
     """
@@ -832,7 +856,7 @@ class Skins(Component):
 
     layout: str | None = None
     """
-    Alias for ``module``.
+    Backward-compatible alias for ``module``. When both fields are provided, ``module`` takes precedence and this alias is kept only for compatibility.
     """
 
     state: str | None = None
@@ -847,7 +871,7 @@ class Skins(Component):
 
     events: list[str] | None = None
     """
-    List of event names the runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

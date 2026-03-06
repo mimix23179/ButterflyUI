@@ -8,30 +8,30 @@ __all__ = ["SparkPlot"]
 
 class SparkPlot(Sparkline):
     """Alias for ``Sparkline`` with event subscription support.
-
+    
     Extends ``Sparkline`` with an explicit ``events`` parameter for
     subscribing to runtime events.  Behaviour is otherwise identical.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         plot = bui.SparkPlot(
             values=[1, 4, 2, 5, 3],
             color="#059669",
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric data points for the sparkline.
-        points: 
-            Alias for ``values``.
-        fill: 
-            If ``True`` the area under the line is shaded.
-        color: 
-            Stroke colour for the polyline.
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        fill:
+            Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
+        color:
+            Primary color value used by the control for text, icons, strokes, or accent surfaces.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -42,23 +42,23 @@ class SparkPlot(Sparkline):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     fill: bool | None = None
     """
-    If ``True`` the area under the line is shaded.
+    Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
     """
 
     color: Any | None = None
     """
-    Stroke colour for the polyline.
+    Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "spark_plot"
 
@@ -75,12 +75,13 @@ class SparkPlot(Sparkline):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             values=values,
             points=points,
             fill=fill,
             color=color,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

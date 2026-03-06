@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["TextArea"]
 
 class TextArea(Component):
-    """
-    Multi-line text input with auto-grow and debounced change events.
-
+    """Multi-line text input with auto-grow and debounced change events.
+    
     Renders a Flutter ``TextField`` with ``maxLines: null`` so the
     widget grows vertically as the user types.  The minimum visible
     height can be set via ``min_lines``.  When ``emit_on_change`` is
@@ -17,10 +16,10 @@ class TextArea(Component):
     value is emitted.  ``read_only`` makes the field non-editable
     while still showing the content.  Use :meth:`set_value` and
     :meth:`get_value` to drive the field from Python.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.TextArea(
         placeholder="Write a description…",
         min_lines=4,
@@ -29,7 +28,7 @@ class TextArea(Component):
         debounce_ms=300,
     )
     ```
-
+    
     Args:
         value:
             Initial text content of the field.
@@ -52,7 +51,7 @@ class TextArea(Component):
             Milliseconds to debounce ``change`` events when
             ``emit_on_change`` is ``True``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -100,7 +99,7 @@ class TextArea(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "text_area"
 

@@ -6,24 +6,23 @@ from .._shared import Component, merge_props
 __all__ = ["TextField"]
 
 class TextField(Component):
-    """
-    Single-line text input field.
-
+    """Single-line text input field.
+    
     Renders a Flutter ``TextField`` with a single line of editable
     text.  The optional ``label`` floats above the field when focused;
     ``placeholder`` is shown as hint text when the field is empty.
     Submitting the field (pressing *Enter*) emits a ``submit`` event;
     changes can also be observed via the ``change`` event.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.TextField(placeholder="Enter your name", label="Name")
     ```
-
+    
     Args:
         value:
-            Initial text value.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         placeholder:
             Hint text displayed when the field is empty.
         label:
@@ -33,7 +32,7 @@ class TextField(Component):
 
     value: str | None = None
     """
-    Initial text value.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     placeholder: str | None = None

@@ -6,38 +6,37 @@ from .._shared import Component, merge_props
 __all__ = ["HistogramOverlay"]
 
 class HistogramOverlay(Component):
-    """
-    Renders a histogram chart layered on top of a child control.
-
+    """Renders a histogram chart layered on top of a child control.
+    
     The runtime stacks the child beneath an ``IgnorePointer`` histogram
     (delegated to the ``HistogramView`` painter) at reduced opacity, so
     the histogram floats over the content without intercepting input.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.HistogramOverlay(
         my_image,
         bins=[0.1, 0.4, 0.9, 0.6, 0.2],
         opacity=0.45,
     )
     ```
-
+    
     Args:
-        bins: 
+        bins:
             List of bin values (relative heights, ``0.0``–``1.0``) that form the histogram bars.
-        channels: 
+        channels:
             Per-channel histogram data. Each item is a dict with keys like ``"bins"`` and ``"color"``.
-        opacity: 
+        opacity:
             Opacity of the histogram overlay, ``0.0``–``1.0``. Defaults to ``0.45``.
-        blend_mode: 
+        blend_mode:
             Compositing blend mode used when painting the histogram.
-        compact: 
+        compact:
             If ``True``, the histogram renders at a shorter height (``84`` px vs ``140`` px).
-        show_grid: 
+        show_grid:
             If ``True``, a background reference grid is drawn behind the bars.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -73,7 +72,7 @@ class HistogramOverlay(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "histogram_overlay"
 

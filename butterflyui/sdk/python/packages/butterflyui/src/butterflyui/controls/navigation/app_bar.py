@@ -6,20 +6,19 @@ from .._shared import Component, merge_props
 __all__ = ["AppBar"]
 
 class AppBar(Component):
-    """
-    Application top bar with title block, optional search, and trailing actions.
-
+    """Application top bar with title block, optional search, and trailing actions.
+    
     ``AppBar`` and ``TopBar`` share the same runtime renderer. ``leading``
     places a widget at the start edge, ``actions`` supplies trailing widgets,
     and ``title``/``subtitle`` populate the label block.
-
+    
     The control accepts shared frame/layout props through ``props`` (alignment,
     margin, sizing constraints, radius, clip behavior) for consistent placement
     in custom shells.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.AppBar(
         title="My App",
         subtitle="Dashboard",
@@ -27,7 +26,7 @@ class AppBar(Component):
         events=["action"],
     )
     ```
-
+    
     Args:
         title:
             Primary title text displayed in the app bar.
@@ -38,13 +37,9 @@ class AppBar(Component):
         actions:
             List of trailing action widget specs shown at the end of the bar.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop map for extended options, including ``show_search``,
-            ``search_value``, ``search_placeholder``, ``search_enabled``,
-            ``emit_on_search_change``, ``search_debounce_ms``, plus layout
-            fields such as ``align``/``alignment``/``position``, ``margin``,
-            ``width``/``height`` constraints, ``radius``, and ``clip_behavior``.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
@@ -70,7 +65,7 @@ class AppBar(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "app_bar"

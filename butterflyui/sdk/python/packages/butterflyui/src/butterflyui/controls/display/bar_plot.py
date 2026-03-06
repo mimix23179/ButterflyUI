@@ -8,34 +8,34 @@ __all__ = ["BarPlot"]
 
 class BarPlot(BarChart):
     """Simplified bar-chart alias for quick single-series plots.
-
+    
     Extends ``BarChart`` with a reduced parameter set tailored for
     single-series data.  Multi-series features (``datasets``,
     ``grouped``, ``stacked``) are omitted — pass ``values`` and an
     optional ``color`` for a one-liner bar plot.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         plot = bui.BarPlot(
             values=[4, 8, 15, 16, 23, 42],
             color="#7c3aed",
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric bar values for a single series.
-        points: 
-            Alias for ``values``.
-        labels: 
-            Category labels for each bar.
-        fill: 
-            Whether bars are solid-filled.
-        color: 
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        labels:
+            Ordered list of label strings rendered by the control.
+        fill:
+            Fill color or paint descriptor used when rendering the chart or visual surface.
+        color:
             Bar colour applied to every bar.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -46,17 +46,17 @@ class BarPlot(BarChart):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     labels: list[str] | None = None
     """
-    Category labels for each bar.
+    Ordered list of label strings rendered by the control.
     """
 
     fill: bool | None = None
     """
-    Whether bars are solid-filled.
+    Fill color or paint descriptor used when rendering the chart or visual surface.
     """
 
     color: Any | None = None
@@ -66,7 +66,7 @@ class BarPlot(BarChart):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "bar_plot"
 

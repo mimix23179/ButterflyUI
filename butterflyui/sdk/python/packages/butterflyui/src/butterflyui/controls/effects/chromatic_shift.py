@@ -8,37 +8,37 @@ __all__ = ["ChromaticShift"]
 class ChromaticShift(Component):
     """Chromatic aberration effect that renders offset red and blue
     colour-filtered copies of the child behind the original.
-
+    
     The Flutter runtime stacks three layers: a red-tinted copy shifted
     by ``-shift`` pixels, a blue-tinted copy shifted by ``+shift``
     pixels, and the unmodified child on top.  The shift direction is
     governed by ``axis`` (``"x"`` or ``"y"``).
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         fx = bui.ChromaticShift(
             bui.Image(src="photo.png"),
             shift=2.5,
             opacity=0.35,
         )
-
+    
     Args:
-        shift: 
-            Pixel distance each colour channel is 
+        shift:
+            Pixel distance each colour channel is
             offset from the original.  Defaults to ``1.2``.
-        opacity: 
-            Opacity of the red and blue ghost layers 
+        opacity:
+            Opacity of the red and blue ghost layers
             (``0.0`` – ``1.0``).  Defaults to ``0.35``.
-        axis: 
-            Displacement axis — ``"x"`` (horizontal, default) 
+        axis:
+            Displacement axis — ``"x"`` (horizontal, default)
             or ``"y"`` (vertical).
-        red: 
-            Colour used for the *red* channel ghost layer. 
+        red:
+            Colour used for the *red* channel ghost layer.
             Defaults to ``Colors.red``.
-        blue: 
-            Colour used for the *blue* channel ghost layer. 
+        blue:
+            Colour used for the *blue* channel ghost layer.
             Defaults to ``Colors.blue``.
     """
 

@@ -6,21 +6,20 @@ from .._shared import Component, merge_props
 __all__ = ["BottomSheet"]
 
 class BottomSheet(Component):
-    """
-    Modal bottom sheet surface with configurable panel alignment and sizing.
-
+    """Modal bottom sheet surface with configurable panel alignment and sizing.
+    
     The runtime renders an overlay sheet that can be opened/closed via
     ``set_open`` and updated via ``set_props``. It emits ``open``, ``close``,
     ``dismiss``, ``change``, and ``state`` events.
-
+    
     In addition to ``height``/``max_height`` and scrim behavior, this control
     accepts extended panel-placement props through ``props``:
     ``alignment``/``align``/``panel_alignment``, ``margin``/``panel_margin``,
     ``width``/``panel_width``, and panel width constraints.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.BottomSheet(
         bui.Text("Sheet content"),
         open=True,
@@ -29,7 +28,7 @@ class BottomSheet(Component):
         events=["close"],
     )
     ```
-
+    
     Args:
         open:
             When ``True`` the bottom sheet is visible.
@@ -42,10 +41,9 @@ class BottomSheet(Component):
         max_height:
             Maximum sheet height when content determines its size.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional runtime props including panel alignment, panel margins,
-            clip behavior, radius, and sizing constraints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
@@ -67,7 +65,7 @@ class BottomSheet(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "bottom_sheet"

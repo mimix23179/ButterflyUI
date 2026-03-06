@@ -8,36 +8,36 @@ __all__ = ["LineChart"]
 
 class LineChart(Chart):
     """Line chart with optional area fill.
-
+    
     Extends ``Chart`` and forces ``chart_type`` to ``"line"``.  Data
     is drawn as a continuous polyline using ``_LineChartPainter``.
     When ``fill`` is ``True`` the area under the curve is shaded at
     20% opacity.  Tapping the chart emits a ``"select"`` event with
     the nearest data-point index and value.
-
+    
     Use ``set_data`` to replace the data series at runtime.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         chart = bui.LineChart(
             values=[10, 42, 28, 55, 33],
             fill=True,
             color="#4f46e5",
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric data points for the polyline.
-        points: 
-            Alias for ``values``.
-        fill: 
-            If ``True`` the area under the line is filled.
-        color: 
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        fill:
+            Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
+        color:
             Stroke colour for the line and fill region.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -48,12 +48,12 @@ class LineChart(Chart):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     fill: bool | None = None
     """
-    If ``True`` the area under the line is filled.
+    Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
     """
 
     color: Any | None = None
@@ -64,7 +64,7 @@ class LineChart(Chart):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "line_chart"
 
@@ -81,13 +81,14 @@ class LineChart(Chart):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             values=values,
             points=points,
             chart_type="line",
             fill=fill,
             color=color,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

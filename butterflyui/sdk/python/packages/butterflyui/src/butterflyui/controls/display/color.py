@@ -9,20 +9,19 @@ __all__ = ["Color"]
 
 
 class Color(Component):
-    """
-    Renderable color-value control for swatches and live UI diagnostics.
-
+    """Renderable color-value control for swatches and live UI diagnostics.
+    
     ``Color`` serializes color payloads into a visible swatch surface with
     optional labels and metadata. It can be used as a standalone display
     control or embedded in larger layout/overlay UIs to preview runtime tokens,
     theme slots, and dynamic color choices.
-
+    
     The control accepts string colors, numeric color payloads, and mapping
     payloads, making it compatible with both simple and structured color flows.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Color(
         value={"value": "#4F8BFF", "opacity": 0.9},
         label="Primary",
@@ -30,12 +29,12 @@ class Color(Component):
         auto_contrast=True,
     )
     ```
-
+    
     Args:
         value:
             Primary color payload to resolve and display.
         color:
-            Alias for ``value``.
+            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
         label:
             Optional label shown with the swatch.
         show_label:
@@ -45,17 +44,17 @@ class Color(Component):
         size:
             Base swatch size used when width/height are omitted.
         width:
-            Swatch width override.
+            Requested width of the control in logical pixels.
         height:
-            Swatch height override.
+            Requested height of the control in logical pixels.
         radius:
             Border radius for rectangular shapes.
         shape:
             Swatch shape (for example ``"rectangle"`` or ``"circle"``).
         border_color:
-            Optional swatch border color.
+            Border color applied to the outer edge of the rendered control or decorative surface.
         border_width:
-            Swatch border width.
+            Border thickness used when rendering the outline around the control.
         background:
             Optional background for the full control surface.
         auto_contrast:
@@ -65,13 +64,13 @@ class Color(Component):
         enabled:
             Enables interaction events when supported.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
@@ -84,7 +83,7 @@ class Color(Component):
 
     color: Any | None = None
     """
-    Alias for ``value``.
+    Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
     """
 
     label: str | None = None
@@ -119,12 +118,12 @@ class Color(Component):
 
     border_color: Any | None = None
     """
-    Optional swatch border color.
+    Border color applied to the outer edge of the rendered control or decorative surface.
     """
 
     border_width: float | None = None
     """
-    Swatch border width.
+    Border thickness used when rendering the outline around the control.
     """
 
     background: Any | None = None
@@ -144,7 +143,7 @@ class Color(Component):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "color"

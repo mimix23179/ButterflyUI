@@ -6,28 +6,27 @@ from .._shared import Component, merge_props
 __all__ = ["KeybindRecorder"]
 
 class KeybindRecorder(Component):
-    """
-    Keyboard shortcut recorder field.
-
+    """Keyboard shortcut recorder field.
+    
     Renders a focusable ``TextField``-style widget that captures raw
     key events while focused and converts them to a human-readable
     shortcut string (e.g. ``"Ctrl+Shift+S"``).  The recorded binding
     is stored as ``value`` and emitted via a ``change`` event when the
     user releases the last key.  An optional clear button resuls the
     value to empty when ``show_clear`` is ``True``.
-
+    
     Use :meth:`set_value` to inject a shortcut string from Python and
     :meth:`get_value` to read the current binding.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.KeybindRecorder(
         placeholder="Press a shortcut…",
         show_clear=True,
     )
     ```
-
+    
     Args:
         value:
             Currently recorded keyboard shortcut string.
@@ -39,7 +38,7 @@ class KeybindRecorder(Component):
             If ``True``, a trailing ``×`` button clears the current
             binding.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +60,7 @@ class KeybindRecorder(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "keybind_recorder"
 

@@ -7,26 +7,26 @@ __all__ = ["Image"]
 
 class Image(Component):
     """Network or asset image display.
-
+    
     Renders a Flutter ``Image`` widget from the URL or asset path
     given in ``src``.  Additional sizing, fit, and alignment options
     can be passed through ``props`` or ``**kwargs``.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         img = bui.Image(src="https://example.com/photo.jpg")
-
+    
     Args:
-        src: 
-            Image URL or local asset path.
+        src:
+            Source URI, file path, or asset reference rendered by the control.
     """
 
 
     src: str | None = None
     """
-    Image URL or local asset path.
+    Source URI, file path, or asset reference rendered by the control.
     """
     control_type = "image"
 

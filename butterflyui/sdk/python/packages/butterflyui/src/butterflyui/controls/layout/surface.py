@@ -6,23 +6,22 @@ from .._shared import Component, merge_props
 __all__ = ["Surface"]
 
 class Surface(Component):
-    """
-    Elevated surface card with background color, border, and corner radius.
-
+    """Elevated surface card with background color, border, and corner radius.
+    
     A simplified decorated container for material-style surfaces. Accepts
     ``padding`` for inner spacing, ``radius`` for corner rounding, ``bgcolor``
     for the background fill, and ``border_color``/``border_width`` for an
     optional border stroke.
-
+    
     ``Surface`` participates in the universal styling/effects pipeline exposed
     by the shared renderer. You can pass the same cross-control props used by
     Candy/Skins/Style/Modifier/Gallery through ``**kwargs`` (for example
     ``variant``, ``classes``, ``modifiers``, ``motion``, ``effects``,
     ``on_hover_modifiers``, ``icon``, ``color``, ``transparency``).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Surface(
         bui.Text("Card content"),
         radius=12,
@@ -30,16 +29,16 @@ class Surface(Component):
         padding=16,
     )
     ```
-
+    
     Args:
         padding:
             Inner spacing between the surface edge and its children.
         radius:
             Corner radius in logical pixels.
         bgcolor:
-            Background fill color.
+            Background color painted behind the control's content area.
         border_color:
-            Border stroke color.
+            Border color applied to the outer edge of the rendered control or decorative surface.
         border_width:
             Border stroke width in logical pixels.
         **kwargs:
@@ -56,12 +55,12 @@ class Surface(Component):
 
     bgcolor: Any | None = None
     """
-    Background fill color.
+    Background color painted behind the control's content area.
     """
 
     border_color: Any | None = None
     """
-    Border stroke color.
+    Border color applied to the outer edge of the rendered control or decorative surface.
     """
 
     border_width: float | None = None

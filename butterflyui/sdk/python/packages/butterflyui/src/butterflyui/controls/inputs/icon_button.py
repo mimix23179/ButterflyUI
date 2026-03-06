@@ -7,20 +7,19 @@ from .button import Button
 __all__ = ["IconButton"]
 
 class IconButton(Button):
-    """
-    Tappable icon-only button control.
-
+    """Tappable icon-only button control.
+    
     ``IconButton`` is the icon-focused member of the button family. It keeps
     the full action/event behavior of :class:`Button` while prioritizing icon
     payloads over text captions. The runtime can resolve icon name strings,
     integer code points, and compatible icon payload objects.
-
+    
     Use this for toolbar buttons, compact overlay actions, or quick actions
     where a label would add unnecessary visual weight.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.IconButton(
         icon="delete",
         tooltip="Delete item",
@@ -28,14 +27,14 @@ class IconButton(Button):
         action_id="delete_current_item",
     )
     ```
-
+    
     Args:
         icon:
             Material icon name, codepoint integer, or runtime icon payload.
         tooltip:
-            Assistive tooltip text.
+            Tooltip text shown when the user hovers or long-presses the control.
         size:
-            Icon size in logical pixels.
+            Requested icon, glyph, or control size in logical pixels or runtime size units.
         color:
             Icon color value accepted by runtime.
         enabled:
@@ -43,7 +42,7 @@ class IconButton(Button):
         value:
             Arbitrary payload emitted with click events.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         action:
             Declarative action descriptor fired on press.
         action_id:
@@ -55,11 +54,11 @@ class IconButton(Button):
         actions:
             Action descriptor list executed on press.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer. This can include
             style/modifier/motion/effects fields and optional transparency.
@@ -68,7 +67,7 @@ class IconButton(Button):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     action: Any | None = None
@@ -104,7 +103,7 @@ class IconButton(Button):
 
     size: float | None = None
     """
-    Icon size in logical pixels.
+    Requested icon, glyph, or control size in logical pixels or runtime size units.
     """
 
     color: Any | None = None
@@ -138,17 +137,18 @@ class IconButton(Button):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        icon=icon,
+                        tooltip=tooltip,
+                        size=size,
+                        color=color,
+                        enabled=enabled,
+                        value=value,
+                    )
         super().__init__(
             label=None,
-            props=merge_props(
-                props,
-                icon=icon,
-                tooltip=tooltip,
-                size=size,
-                color=color,
-                enabled=enabled,
-                value=value,
-            ),
+            props=merged,
             events=events,
             action=action,
             action_id=action_id,

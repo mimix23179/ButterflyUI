@@ -10,27 +10,26 @@ __all__ = ["TextButton"]
 
 
 class TextButton(Button):
-    """
-    Low-emphasis text button preset.
-
+    """Low-emphasis text button preset.
+    
     ``TextButton`` reuses :class:`Button` behavior while forcing
     ``variant="text"``. It is suited for tertiary actions, inline links, and
     toolbar actions where minimal chrome is preferred.
-
+    
     The control still supports action IDs, action payloads, and runtime event
     emission. Additional visual/runtime props can be supplied through
     ``**kwargs``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.TextButton(
         "Undo",
         action_id="undo_last",
         icon="undo",
     )
     ```
-
+    
     Args:
         label:
             Button caption text. ``text`` takes precedence when both are set.
@@ -39,7 +38,7 @@ class TextButton(Button):
         value:
             Arbitrary payload emitted with click events.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         action:
             Declarative action descriptor fired on press.
         action_id:
@@ -51,11 +50,11 @@ class TextButton(Button):
         actions:
             Action descriptor list executed on press.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
@@ -104,7 +103,7 @@ class TextButton(Button):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "text_button"
@@ -126,6 +125,7 @@ class TextButton(Button):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             label=label,
             text=text,
@@ -137,7 +137,7 @@ class TextButton(Button):
             action_event=action_event,
             action_payload=action_payload,
             actions=actions,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

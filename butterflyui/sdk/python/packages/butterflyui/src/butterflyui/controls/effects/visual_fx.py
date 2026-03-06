@@ -9,22 +9,21 @@ __all__ = ["VisualFx"]
 
 
 class VisualFx(Component):
-    """
-    Composite visual-effects pipeline for staged post-processing around one child.
-
+    """Composite visual-effects pipeline for staged post-processing around one child.
+    
     ``VisualFx`` wraps a single child control and applies optional visual
     processing stages such as glow, glass blur, chromatic shift, and gradient
     sweep. Each stage accepts a mapping so advanced parameters can be forwarded
     directly to the Flutter renderer without changing this Python API.
-
+    
     Stages are merged into outgoing ``props`` as plain JSON-like objects:
     ``glow``, ``glass_blur``, ``chromatic_shift``, and ``gradient_sweep``.
     Corresponding ``enable_*`` flags can be used to toggle stages on/off at
     runtime while retaining the stage configuration payload.
-
+    
     ```python
     import butterflyui as bui
-
+    
     fx = bui.VisualFx(
         child=bui.Container(
             bui.Text("Neon Card"),
@@ -42,7 +41,7 @@ class VisualFx(Component):
         enable_gradient_sweep=True,
     )
     ```
-
+    
     Args:
         child:
             The control to render and decorate with visual effect stages.
@@ -65,11 +64,11 @@ class VisualFx(Component):
         enable_gradient_sweep:
             Enables or disables the gradient sweep stage.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 

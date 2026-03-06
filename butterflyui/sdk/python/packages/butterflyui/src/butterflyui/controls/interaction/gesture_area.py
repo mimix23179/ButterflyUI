@@ -6,13 +6,12 @@ from .._shared import Component, merge_props
 __all__ = ["GestureArea"]
 
 class GestureArea(Component):
-    """
-    Transparent overlay that captures gesture events over its child.
-
+    """Transparent overlay that captures gesture events over its child.
+    
     Wraps the child in a ``GestureDetector``.  Each gesture type can
     be enabled or disabled individually; only enabled gesture types
     emit events.  Emitted events carry pointer position and metadata:
-
+    
     - ``tap`` — single tap with ``{"x", "y"}`` position.
     - ``double_tap`` — double tap with position.
     - ``long_press`` — long press with position.
@@ -20,17 +19,17 @@ class GestureArea(Component):
       with delta and velocity.
     - ``scale_start`` / ``scale_update`` / ``scale_end`` — pinch/scale
       gesture with scale and rotation.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.GestureArea(
         bui.Container(width=200, height=200),
         tap_enabled=True,
         pan_enabled=True,
     )
     ```
-
+    
     Args:
         enabled:
             Master switch.  If ``False``, no gesture events are fired.
@@ -47,7 +46,7 @@ class GestureArea(Component):
             If ``True``, pinch-to-scale and rotate gesture events are
             captured and emitted.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -80,7 +79,7 @@ class GestureArea(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "gesture_area"
 

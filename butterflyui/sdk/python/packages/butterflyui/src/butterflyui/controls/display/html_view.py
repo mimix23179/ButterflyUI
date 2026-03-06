@@ -7,55 +7,55 @@ __all__ = ["HtmlView"]
 
 class HtmlView(Component):
     """Embedded HTML renderer backed by a platform WebView.
-
+    
     Displays arbitrary HTML inside a ``WebView`` widget.  Content can
     be supplied inline via ``value`` / ``html`` / ``text``, or loaded
     from a local file using ``html_file``.  When ``html_file`` is set
     the runtime converts the path to a ``file://`` URL and derives a
     ``base_url`` from its parent directory so relative assets resolve
     correctly.
-
+    
     Use ``get_value`` to retrieve the current HTML string,
     ``set_value`` to replace it, and ``load_file`` to swap in a new
     file path at runtime.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         view = bui.HtmlView(
             value="<h2>Report</h2><p>Details here...</p>",
         )
-
+    
     Args:
-        value: 
-            Inline HTML content string.
-        html: 
-            Alias for ``value``.
-        text: 
-            Alias for ``value``.
-        html_file: 
+        value:
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
+        html:
+            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
+        text:
+            Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
+        html_file:
             Local file path to an ``.html`` file.  Converted to a ``file://`` URL at runtime.
-        base_url: 
+        base_url:
             Explicit base URL for resolving relative paths inside the HTML.  Defaults to the directory of ``html_file``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     value: str | None = None
     """
-    Inline HTML content string.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     html: str | None = None
     """
-    Alias for ``value``.
+    Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
     """
 
     text: str | None = None
     """
-    Alias for ``value``.
+    Backward-compatible alias for ``value``. When both fields are provided, ``value`` takes precedence and this alias is kept only for compatibility.
     """
 
     html_file: str | None = None
@@ -70,7 +70,7 @@ class HtmlView(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "html_view"
 

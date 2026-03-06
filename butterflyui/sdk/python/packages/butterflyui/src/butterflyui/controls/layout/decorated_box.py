@@ -6,22 +6,21 @@ from .._shared import Component, merge_props
 __all__ = ["DecoratedBox"]
 
 class DecoratedBox(Component):
-    """
-    Paints a decoration (color, gradient, border, shadow) behind its child.
-
+    """Paints a decoration (color, gradient, border, shadow) behind its child.
+    
     The runtime wraps Flutter's ``DecoratedBox``. ``color``/``bgcolor`` set a
     solid background. ``gradient`` accepts a mapping describing a
     ``LinearGradient`` or ``RadialGradient``. ``image`` sets a
     ``DecorationImage``. ``shadow`` accepts a list of box-shadow specs.
     ``shape`` can be ``"rectangle"`` (default) or ``"circle"``.
-
+    
     Through ``**kwargs`` this control also supports universal style pipeline
     fields (classes/modifiers/motion/effects) and optional icon/color/
     transparency hints used by Candy/Skins styling flows.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DecoratedBox(
         bui.Text("Styled"),
         bgcolor="#2196F3",
@@ -29,7 +28,7 @@ class DecoratedBox(Component):
         padding=16,
     )
     ```
-
+    
     Args:
         color:
             Background fill color. Alias for ``bgcolor``.
@@ -41,7 +40,7 @@ class DecoratedBox(Component):
         image:
             ``DecorationImage`` spec mapping shown as a background image.
         border_color:
-            Border stroke color.
+            Border color applied to the outer edge of the rendered control or decorative surface.
         border_width:
             Border stroke width in logical pixels.
         radius:
@@ -84,7 +83,7 @@ class DecoratedBox(Component):
 
     border_color: Any | None = None
     """
-    Border stroke color.
+    Border color applied to the outer edge of the rendered control or decorative surface.
     """
 
     border_width: float | None = None

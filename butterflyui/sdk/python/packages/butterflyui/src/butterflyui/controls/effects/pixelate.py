@@ -8,31 +8,31 @@ __all__ = ["Pixelate"]
 class Pixelate(Component):
     """Pixelation effect achieved by cascading two ``Transform.scale``
     widgets with ``FilterQuality.none``.
-
+    
     The Flutter runtime first scales the child down by a factor
     derived from ``amount`` (higher amounts = more pixelation), then
     scales it back up to its original size, both with nearest-neighbour
     filtering disabled.  The result is a retro mosaic / pixel-art
     look.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         px = bui.Pixelate(
             bui.Image(src="photo.png"),
             amount=0.5,
         )
-
+    
     Args:
-        amount: 
+        amount:
             Pixelation intensity (``0.0`` no effect – ``1.0``
             maximum).  Defaults to ``0.35``.  Internally mapped to a
             downscale factor ``1 − amount × 0.9``.
-        enabled: 
+        enabled:
             When ``False`` the child is rendered unmodified.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -45,7 +45,7 @@ class Pixelate(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "pixelate"
 

@@ -6,24 +6,23 @@ from .._shared import Component, merge_props
 __all__ = ["ScrollableColumn"]
 
 class ScrollableColumn(Component):
-    """
-    Vertically scrollable column of children.
-
+    """Vertically scrollable column of children.
+    
     The runtime renders a vertical ``ListView``-backed column. ``spacing``
     adds a gap between children; ``reverse`` flips the scroll direction so
     content starts from the bottom. ``content_padding`` adds padding around
     the scrollable area. ``initial_offset`` sets the starting scroll position.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ScrollableColumn(
         *[bui.Text(f"Item {i}") for i in range(20)],
         spacing=8,
         events=["scroll"],
     )
     ```
-
+    
     Args:
         spacing:
             Vertical gap between children in logical pixels.
@@ -34,7 +33,7 @@ class ScrollableColumn(Component):
         initial_offset:
             Starting scroll offset in logical pixels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +60,7 @@ class ScrollableColumn(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "scrollable_column"

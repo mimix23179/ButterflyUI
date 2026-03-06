@@ -16,25 +16,24 @@ def _normalize_webview_engine(value: str | None) -> str:
 
 
 class WebView(Component):
-    """
-    Embedded browser window powered by a platform WebView engine.
-
+    """Embedded browser window powered by a platform WebView engine.
+    
     The runtime embeds a native webview (WebView2 on Windows, etc.) that
     loads ``url`` or inline ``html``. ``engine`` / ``webview_engine`` selects
     the rendering backend — currently normalised to ``"windows"`` on desktop.
     ``base_url`` sets the origin for local HTML content. ``prevent_links``
     intercepts navigation to matching URL patterns before they load.
-
+    
     Full browser-capability flags control JavaScript, DOM storage, cookies,
     caching, incognito mode, media playback, file access, and popup
     behaviour. ``init_timeout_ms`` caps the engine startup wait.
-
+    
     Programmatic methods (``reload``, ``go_back``, ``load_url``,
     ``run_javascript``, *etc.*) are invoked via a session handle.
-
+    
     ```python
     import butterflyui as bui
-
+    
     view = bui.WebView(
         url="https://example.com",
         javascript_enabled=True,
@@ -42,7 +41,7 @@ class WebView(Component):
         init_timeout_ms=10000,
     )
     ```
-
+    
     Args:
         url:
             Initial URL to load in the webview.
@@ -53,7 +52,7 @@ class WebView(Component):
         engine:
             Webview rendering engine. Normalised to ``"windows"`` on desktop.
         webview_engine:
-            Alias for ``engine``.
+            Backward-compatible alias for ``engine``. When both fields are provided, ``engine`` takes precedence and this alias is kept only for compatibility.
         fallback_engine:
             Fallback engine identifier if the primary engine fails.
         prevent_links:
@@ -114,7 +113,7 @@ class WebView(Component):
 
     webview_engine: str | None = None
     """
-    Alias for ``engine``.
+    Backward-compatible alias for ``engine``. When both fields are provided, ``engine`` takes precedence and this alias is kept only for compatibility.
     """
 
     fallback_engine: str | None = None

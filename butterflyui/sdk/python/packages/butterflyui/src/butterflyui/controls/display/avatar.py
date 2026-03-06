@@ -7,57 +7,57 @@ __all__ = ["Avatar"]
 
 class Avatar(Component):
     """Circular avatar with image, initials, or icon fallback.
-
+    
     Renders a ``CircleAvatar`` that resolves its content in priority
     order: a network/asset image from ``src`` or ``image``, then
     ``initials`` (or auto-derived initials from ``name``), then an
     ``icon`` fallback.  An optional coloured status dot (``"online"``,
     ``"away"``, ``"busy"``, ``"offline"``) is overlaid at the bottom-right
     corner.
-
+    
     When ``enabled`` is ``True`` (default) the avatar is wrapped in an
     ``InkWell`` that emits ``"click"`` on tap.  Use ``set_src`` to swap
     the image at runtime and ``get_state`` to retrieve the resolved
     display values.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         avatar = bui.Avatar(
             name="Ada Lovelace",
             status="online",
             bgcolor="#334155",
             size=40,
         )
-
+    
     Args:
-        src: 
+        src:
             Image URL or asset path used as the primary avatar image.
-        image: 
+        image:
             Alias for ``src`` — the two are interchangeable.
-        name: 
+        name:
             Full name used to auto-derive initials when ``initials`` is not provided.
-        initials: 
+        initials:
             Explicit one- or two-letter initials shown when no image is available.
-        icon: 
+        icon:
             Fallback Material icon name rendered when neither an image nor initials are present.
-        size: 
+        size:
             Diameter of the avatar circle in logical pixels.
-        radius: 
+        radius:
             Explicit corner radius (defaults to half of ``size``).
-        color: 
+        color:
             Foreground colour for initials or icon text.
-        bgcolor: 
+        bgcolor:
             Background fill colour for the circle.
-        status: 
+        status:
             Presence indicator — ``"online"``, ``"away"``, ``"busy"``, or ``"offline"``.
-        badge: 
+        badge:
             Arbitrary badge content overlaid on the avatar.
-        enabled: 
-            If ``True`` (default) the avatar emits click events.
+        enabled:
+            Controls whether the user can interact with the control. Disable it to show the control without allowing input or activation.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -118,7 +118,7 @@ class Avatar(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "avatar"
 

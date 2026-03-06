@@ -7,11 +7,10 @@ from .list_tile import ListTile
 __all__ = ["ItemTile"]
 
 class ItemTile(ListTile):
-    """
-    Selectable list tile tailored for data-oriented item rows, extending
+    """Selectable list tile tailored for data-oriented item rows, extending
     ``ListTile`` with an ``events`` convenience parameter and invoke
     helpers for runtime state management.
-
+    
     Renders the same ``ListTile`` widget as its parent class —
     ``title``, optional ``subtitle``, ``leading_icon``, and
     ``trailing_icon`` — but also surfaces ``set_selected()``,
@@ -19,10 +18,10 @@ class ItemTile(ListTile):
     Python.  Tapping the tile emits a ``"select"`` event whose payload
     includes the ``id``, ``title``, ``value``, and ``meta`` fields when
     present.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ItemTile(
         title="Build artefact",
         subtitle="245 KB",
@@ -31,24 +30,24 @@ class ItemTile(ListTile):
         selected=False,
     )
     ```
-
+    
     Args:
-        title: 
+        title:
             Primary title text displayed on the tile.
-        subtitle: 
+        subtitle:
             Secondary supporting text rendered beneath the title.
-        leading_icon: 
+        leading_icon:
             Icon name or data rendered at the leading edge of the tile.
-        trailing_icon: 
+        trailing_icon:
             Icon name or data rendered at the trailing edge.
-        meta: 
+        meta:
             Additional metadata string displayed as trailing text or forwarded in event payloads.
-        selected: 
+        selected:
             If ``True``, the tile renders in its selected visual state.
-        enabled: 
+        enabled:
             If ``False``, the tile is visually dimmed and non-interactive.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -85,7 +84,7 @@ class ItemTile(ListTile):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "item_tile"
@@ -106,6 +105,7 @@ class ItemTile(ListTile):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             title=title,
             subtitle=subtitle,
@@ -114,7 +114,7 @@ class ItemTile(ListTile):
             meta=meta,
             selected=selected,
             enabled=enabled,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

@@ -9,20 +9,19 @@ __all__ = ["TableView"]
 
 
 class TableView(Component):
-    """
-    Presentation-first table surface for report and document style layouts.
-
+    """Presentation-first table surface for report and document style layouts.
+    
     ``TableView`` wraps table semantics with report-oriented chrome such as
     captions, footer notes, and sticky header behavior. Use this control when
     readability and narrative presentation matter more than dense spreadsheet
     ergonomics.
-
+    
     Methods mirror :class:`DataGrid` so you can still drive sorting, filtering,
     and selection state imperatively from Python after initial render.
-
+    
     ```python
     import butterflyui as bui
-
+    
     table = bui.TableView(
         caption="Quarterly Revenue",
         footer_note="Values in USD",
@@ -32,7 +31,7 @@ class TableView(Component):
         sortable=True,
     )
     ```
-
+    
     Args:
         columns:
             Column descriptors consumed by the Flutter renderer.
@@ -47,7 +46,7 @@ class TableView(Component):
         filterable:
             Enables built-in query/filter behavior.
         selectable:
-            Enables row selection state.
+            Controls whether rows, items, or text content can be selected by the user.
         dense:
             Reduces row height and spacing for compact layouts.
         striped:
@@ -57,19 +56,19 @@ class TableView(Component):
         sticky_header:
             Pins table header during vertical scrolling when supported.
         sort_column:
-            Initial column key to sort by.
+            Identifier of the column currently used to sort the control's data.
         sort_ascending:
-            Initial sort direction.
+            Controls whether the active sort uses ascending order instead of descending order.
         filter_query:
             Initial query string applied by the renderer.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -105,7 +104,7 @@ class TableView(Component):
 
     selectable: bool | None = None
     """
-    Enables row selection state.
+    Controls whether rows, items, or text content can be selected by the user.
     """
 
     dense: bool | None = None
@@ -130,12 +129,12 @@ class TableView(Component):
 
     sort_column: str | None = None
     """
-    Initial column key to sort by.
+    Identifier of the column currently used to sort the control's data.
     """
 
     sort_ascending: bool | None = None
     """
-    Initial sort direction.
+    Controls whether the active sort uses ascending order instead of descending order.
     """
 
     filter_query: str | None = None
@@ -145,7 +144,7 @@ class TableView(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "table_view"
@@ -173,26 +172,27 @@ class TableView(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        columns=list(columns) if columns is not None else None,
+                        rows=list(rows) if rows is not None else None,
+                        caption=caption,
+                        footer_note=footer_note,
+                        sortable=sortable,
+                        filterable=filterable,
+                        selectable=selectable,
+                        dense=dense,
+                        striped=striped,
+                        show_header=show_header,
+                        sticky_header=sticky_header,
+                        sort_column=sort_column,
+                        sort_ascending=sort_ascending,
+                        filter_query=filter_query,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                columns=list(columns) if columns is not None else None,
-                rows=list(rows) if rows is not None else None,
-                caption=caption,
-                footer_note=footer_note,
-                sortable=sortable,
-                filterable=filterable,
-                selectable=selectable,
-                dense=dense,
-                striped=striped,
-                show_header=show_header,
-                sticky_header=sticky_header,
-                sort_column=sort_column,
-                sort_ascending=sort_ascending,
-                filter_query=filter_query,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

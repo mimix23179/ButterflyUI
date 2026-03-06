@@ -6,21 +6,20 @@ from .._shared import Component, merge_props
 __all__ = ["Button"]
 
 class Button(Component):
-    """
-    Base interactive button control.
-
+    """Base interactive button control.
+    
     ``Button`` is the shared click surface used by specialized button
     controls. It serializes caption, variant, events, and declarative actions
     into one runtime payload.
-
+    
     In addition to typed parameters, extra keys passed via ``**kwargs`` are
     forwarded to runtime. This allows advanced visual and pipeline fields like
     ``icon``, ``color``, ``transparency``, ``classes``, ``modifiers``,
     ``motion``, and ``effects``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Button(
         "Submit",
         variant="filled",
@@ -29,7 +28,7 @@ class Button(Component):
         transparency=0.08,
     )
     ```
-
+    
     Args:
         label:
             Caption text. Alias ``text`` takes precedence when both are set.
@@ -41,7 +40,7 @@ class Button(Component):
             Visual variant, such as ``"filled"``, ``"outlined"``,
             ``"text"``, ``"elevated"``, or ``"tonal"``.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         action:
             Declarative action descriptor fired on press.
         action_id:
@@ -58,11 +57,11 @@ class Button(Component):
         window_action_delay_ms:
             Delay before running ``window_action``.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props, including style/modifier/motion/effects
             fields and optional icon/color/transparency fields.
@@ -92,7 +91,7 @@ class Button(Component):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     action: Any | None = None

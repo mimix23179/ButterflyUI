@@ -6,35 +6,34 @@ from .._shared import Component, merge_props
 __all__ = ["GridView"]
 
 class GridView(Component):
-    """
-    Multi-column grid layout that arranges child controls or item
+    """Multi-column grid layout that arranges child controls or item
     payloads into a configurable number of columns.
-
+    
     When explicit ``children`` are supplied they are rendered directly as
     grid tiles.  Alternatively, an ``items`` payload list can be passed
     to let the runtime build tiles from data.  The ``columns`` parameter
     controls how many tiles appear per row.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.GridView(
         bui.Text("A"), bui.Text("B"), bui.Text("C"), bui.Text("D"),
         columns=2,
     )
     ```
-
+    
     Args:
-        items: 
-            Data-item payloads used by the runtime to construct tiles when no explicit children are given.
-        columns: 
+        items:
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
+        columns:
             Number of grid columns.  Defaults to the runtime's layout heuristic when ``None``.
     """
 
 
     items: list[Any] | None = None
     """
-    Data-item payloads used by the runtime to construct tiles when no explicit children are given.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     columns: int | None = None

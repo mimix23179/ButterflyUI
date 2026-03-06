@@ -8,17 +8,17 @@ __all__ = ["FlowField"]
 class FlowField(Component):
     """Animated vector flow-field visualisation rendered with a
     ``CustomPainter``.
-
+    
     The Flutter runtime draws a grid of short line segments whose
     angles are derived from a sinusoidal noise function seeded by
     ``seed``.  An ``AnimationController`` running in an infinite loop
     continuously advances the time parameter so the field appears to
     ripple and flow.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         field = bui.FlowField(
             density=20,
             speed=0.5,
@@ -26,28 +26,28 @@ class FlowField(Component):
             color="#22d3ee",
             opacity=0.6,
         )
-
+    
     Args:
-        seed: 
-            Integer seed that offsets the noise function, 
+        seed:
+            Integer seed that offsets the noise function,
             producing a different field pattern.  Defaults to ``1``.
-        density: 
-            Spacing in logical pixels between grid points 
+        density:
+            Spacing in logical pixels between grid points
             (``8`` – ``120``).  Defaults to ``24``.
-        speed: 
-            Animation speed multiplier (``0.0`` – ``5.0``). 
+        speed:
+            Animation speed multiplier (``0.0`` – ``5.0``).
             Defaults to ``0.35``.
-        line_width: 
-            Stroke width of each segment in logical pixels 
+        line_width:
+            Stroke width of each segment in logical pixels
             (``0.2`` – ``8.0``).  Defaults to ``1.1``.
-        color: 
-            Stroke colour of the line segments.  
+        color:
+            Stroke colour of the line segments.
             Defaults to ``#22d3ee``.
-        opacity: 
-            Stroke opacity (``0.0`` – ``1.0``).  
+        opacity:
+            Stroke opacity (``0.0`` – ``1.0``).
             Defaults to ``0.6``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -83,7 +83,7 @@ class FlowField(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "flow_field"
 

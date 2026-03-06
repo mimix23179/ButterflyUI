@@ -9,16 +9,15 @@ __all__ = ["Route"]
 
 
 class Route(Component):
-    """
-    Route node describing one navigable view inside a router.
-
+    """Route node describing one navigable view inside a router.
+    
     ``Route`` is the canonical replacement for legacy ``route_view`` and
     ``route_host`` control wrappers. It can hold inline child content and
     route metadata used by router containers.
-
+    
     ```python
     import butterflyui as bui
-
+    
     route = bui.Route(
         bui.Text("Dashboard"),
         route_id="dashboard",
@@ -27,37 +26,37 @@ class Route(Component):
         events=["change"],
     )
     ```
-
+    
     Args:
         child:
             Primary child control rendered when this route is active.
         children:
             Optional child collection for multi-child route layouts.
         route_id:
-            Stable route identifier.
+            Stable identifier used to reference this route within navigation state.
         title:
             Route title used by navigation UIs.
         label:
-            Optional display label alias.
+            Primary label text rendered by the control or its active action.
         layout:
             Child layout hint (for example ``"column"``, ``"row"``,
             ``"stack"``, ``"wrap"``).
         spacing:
             Spacing between children for multi-child layouts.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     route_id: str | None = None
     """
-    Stable route identifier.
+    Stable identifier used to reference this route within navigation state.
     """
 
     title: str | None = None
@@ -67,7 +66,7 @@ class Route(Component):
 
     label: str | None = None
     """
-    Optional display label alias.
+    Primary label text rendered by the control or its active action.
     """
 
     layout: str | None = None
@@ -83,7 +82,7 @@ class Route(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "route"
@@ -104,19 +103,20 @@ class Route(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        route_id=route_id,
+                        title=title,
+                        label=label,
+                        layout=layout,
+                        spacing=spacing,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
             child=child,
             children=children,
-            props=merge_props(
-                props,
-                route_id=route_id,
-                title=title,
-                label=label,
-                layout=layout,
-                spacing=spacing,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

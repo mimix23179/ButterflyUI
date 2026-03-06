@@ -9,29 +9,28 @@ __all__ = ["Modifier"]
 
 
 class Modifier(Component):
-    """
-    Composable modifier host that injects layout/visual/interaction effects into descendants.
-
+    """Composable modifier host that injects layout/visual/interaction effects into descendants.
+    
     ``Modifier`` is the glue control for reusable visual behavior. Instead of creating
     many one-off controls, you can wrap a subtree and apply:
     - layout constraints (padding/margin/alignment/constrain),
     - visual effects (background/border/shadow/glow/glass),
     - interaction affordances (cursor/focus ring/hover/press state lists),
     - motion defaults for descendants.
-
+    
     The runtime merges these modifier definitions into each child control's
     ``modifiers`` list and style props, but only for controls that advertise
     modifier/style/motion capabilities through the shared manifest.
-
+    
     State-specific modifier keys are available in both short and explicit form:
     - ``on_hover`` and ``on_hover_modifiers``
     - ``on_pressed`` and ``on_pressed_modifiers``
     - ``on_focus`` and ``on_focus_modifiers``
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         cta = bui.Modifier(
             modifiers=[
                 {"type": "glass", "blur": 20, "radius": 999},
@@ -44,12 +43,12 @@ class Modifier(Component):
             child=bui.Button("Start Natively"),
         )
         ```
-
+    
     Args:
         child:
-            Primary child control.
+            Single child control or payload wrapped by this control.
         children:
-            Additional child controls.
+            Ordered list of child payloads nested inside this reusable component spec.
         modifiers:
             Base modifier descriptors merged into descendants.
         motion:
@@ -57,7 +56,7 @@ class Modifier(Component):
         on_hover:
             Modifier descriptors activated on hover state.
         on_hover_modifiers:
-            Explicit alias of ``on_hover``.
+            Modifiers activated while the pointer is hovering the control.
         on_pressed:
             Modifier descriptors activated on pressed state.
         on_pressed_modifiers:
@@ -65,15 +64,15 @@ class Modifier(Component):
         on_focus:
             Modifier descriptors activated on focus state.
         on_focus_modifiers:
-            Explicit alias of ``on_focus``.
+            Modifiers activated while the control or wrapped child currently has focus.
         cursor:
             Cursor override for descendants.
         padding:
-            Descendant padding override.
+            Inner spacing applied between the control's border and its content.
         margin:
-            Descendant margin override.
+            Outer spacing applied around the control before neighboring layout items are positioned.
         align:
-            Descendant alignment override.
+            Alignment configuration that positions the child or content within the available layout space.
         max_width:
             Descendant max width constraint.
         max_height:
@@ -89,21 +88,21 @@ class Modifier(Component):
         shadow:
             Shadow descriptor merged into descendant style.
         glow:
-            Glow descriptor shorthand.
+            Glow effect configuration merged into the rendered modifier payload.
         glass:
-            Glass descriptor shorthand.
+            Glass-effect configuration applied by the modifier pipeline for this control.
         focus_ring:
-            Focus ring descriptor shorthand.
+            Focus-ring configuration applied when the control receives keyboard or accessibility focus. Typical values control ring color, width, inset, or animation depending on the renderer.
         hit_test:
-            Hit test behavior hint.
+            Hit-test behavior that determines how this control participates in pointer targeting.
         events:
-            Runtime event subscriptions for this modifier host.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed args.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map for the modifier host itself.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -124,7 +123,7 @@ class Modifier(Component):
 
     on_hover_modifiers: list[Any] | None = None
     """
-    Explicit alias of ``on_hover``.
+    Modifiers activated while the pointer is hovering the control.
     """
 
     on_pressed: list[Any] | None = None
@@ -144,7 +143,7 @@ class Modifier(Component):
 
     on_focus_modifiers: list[Any] | None = None
     """
-    Explicit alias of ``on_focus``.
+    Modifiers activated while the control or wrapped child currently has focus.
     """
 
     cursor: str | None = None
@@ -154,7 +153,7 @@ class Modifier(Component):
 
     align: Any | None = None
     """
-    Descendant alignment override.
+    Alignment configuration that positions the child or content within the available layout space.
     """
 
     border: Any | None = None
@@ -174,27 +173,27 @@ class Modifier(Component):
 
     glow: Any | None = None
     """
-    Glow descriptor shorthand.
+    Glow effect configuration merged into the rendered modifier payload.
     """
 
     glass: Any | None = None
     """
-    Glass descriptor shorthand.
+    Glass-effect configuration applied by the modifier pipeline for this control.
     """
 
     focus_ring: Any | None = None
     """
-    Focus ring descriptor shorthand.
+    Focus-ring configuration applied when the control receives keyboard or accessibility focus. Typical values control ring color, width, inset, or animation depending on the renderer.
     """
 
     hit_test: str | None = None
     """
-    Hit test behavior hint.
+    Hit-test behavior that determines how this control participates in pointer targeting.
     """
 
     events: list[str] | None = None
     """
-    Runtime event subscriptions for this modifier host.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "modifier"
@@ -232,43 +231,44 @@ class Modifier(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        modifiers=modifiers,
+                        motion=motion,
+                        on_hover=on_hover if on_hover is not None else on_hover_modifiers,
+                        on_hover_modifiers=on_hover_modifiers
+                        if on_hover_modifiers is not None
+                        else on_hover,
+                        on_pressed=on_pressed if on_pressed is not None else on_pressed_modifiers,
+                        on_pressed_modifiers=on_pressed_modifiers
+                        if on_pressed_modifiers is not None
+                        else on_pressed,
+                        on_focus=on_focus if on_focus is not None else on_focus_modifiers,
+                        on_focus_modifiers=on_focus_modifiers
+                        if on_focus_modifiers is not None
+                        else on_focus,
+                        cursor=cursor,
+                        padding=padding,
+                        margin=margin,
+                        align=align,
+                        max_width=max_width,
+                        max_height=max_height,
+                        min_width=min_width,
+                        min_height=min_height,
+                        border=border,
+                        background=background,
+                        shadow=shadow,
+                        glow=glow,
+                        glass=glass,
+                        focus_ring=focus_ring,
+                        hit_test=hit_test,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
             *children_args,
             child=child,
-            props=merge_props(
-                props,
-                modifiers=modifiers,
-                motion=motion,
-                on_hover=on_hover if on_hover is not None else on_hover_modifiers,
-                on_hover_modifiers=on_hover_modifiers
-                if on_hover_modifiers is not None
-                else on_hover,
-                on_pressed=on_pressed if on_pressed is not None else on_pressed_modifiers,
-                on_pressed_modifiers=on_pressed_modifiers
-                if on_pressed_modifiers is not None
-                else on_pressed,
-                on_focus=on_focus if on_focus is not None else on_focus_modifiers,
-                on_focus_modifiers=on_focus_modifiers
-                if on_focus_modifiers is not None
-                else on_focus,
-                cursor=cursor,
-                padding=padding,
-                margin=margin,
-                align=align,
-                max_width=max_width,
-                max_height=max_height,
-                min_width=min_width,
-                min_height=min_height,
-                border=border,
-                background=background,
-                shadow=shadow,
-                glow=glow,
-                glass=glass,
-                focus_ring=focus_ring,
-                hit_test=hit_test,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

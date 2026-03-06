@@ -6,18 +6,17 @@ from .._shared import Component, merge_props
 __all__ = ["GradientEditor"]
 
 class GradientEditor(Component):
-    """
-    Interactive gradient editor with an angle slider and colour-stop
+    """Interactive gradient editor with an angle slider and colour-stop
     controls.
-
+    
     The runtime renders a ``Slider`` for the angle (``0``–``360``°) and a
     ``Wrap`` of circular colour-stop chips. Each stop has a position and
     colour. An add button appends stops; individual stops can be removed.
     Emits ``"angle_change"`` and ``"stops_change"`` events.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.GradientEditor(
         stops=[
             {"position": 0.0, "color": "#7c3aed"},
@@ -26,21 +25,21 @@ class GradientEditor(Component):
         angle=135,
     )
     ```
-
+    
     Args:
-        stops: 
+        stops:
             List of colour-stop dicts, each with ``"position"`` (``0.0``–``1.0``) and ``"color"`` (hex string).
-        angle: 
+        angle:
             Initial gradient angle in degrees (``0``–``360``). Defaults to ``0``.
-        show_angle: 
-            If ``True`` (default), the angle slider is visible.
-        show_add: 
-            If ``True`` (default), the "add stop" button is visible.
-        show_remove: 
-            If ``True`` (default), each stop shows a remove affordance.
-        live_preview: 
+        show_angle:
+            Controls whether (default), the angle slider is visible. Set it to ``False`` to disable this behavior.
+        show_add:
+            Controls whether (default), the "add stop" button is visible. Set it to ``False`` to disable this behavior.
+        show_remove:
+            Controls whether (default), each stop shows a remove affordance. Set it to ``False`` to disable this behavior.
+        live_preview:
             If ``True``, a live gradient preview is rendered alongside the controls.
-        export_format: 
+        export_format:
             Hint for the desired export format of gradient data (e.g. ``"css"``, ``"json"``).
     """
 
@@ -57,17 +56,17 @@ class GradientEditor(Component):
 
     show_angle: bool | None = None
     """
-    If ``True`` (default), the angle slider is visible.
+    Controls whether (default), the angle slider is visible. Set it to ``False`` to disable this behavior.
     """
 
     show_add: bool | None = None
     """
-    If ``True`` (default), the "add stop" button is visible.
+    Controls whether (default), the "add stop" button is visible. Set it to ``False`` to disable this behavior.
     """
 
     show_remove: bool | None = None
     """
-    If ``True`` (default), each stop shows a remove affordance.
+    Controls whether (default), each stop shows a remove affordance. Set it to ``False`` to disable this behavior.
     """
 
     live_preview: bool | None = None

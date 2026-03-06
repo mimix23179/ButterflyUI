@@ -6,25 +6,24 @@ from .._shared import Component, merge_props
 __all__ = ["HoverRegion"]
 
 class HoverRegion(Component):
-    """
-    Tracks pointer hover state over its child and emits hover events.
-
+    """Tracks pointer hover state over its child and emits hover events.
+    
     Wraps the child in a ``MouseRegion`` that fires ``enter`` and
     ``exit`` events when the pointer moves in or out of the bounds,
     and a ``hover`` event on every pointer movement while inside.
     An optional ``cursor`` override changes the displayed mouse cursor
     while hovering.  When ``opaque`` is ``True`` the region absorbs
     pointer events so they do not reach widgets underneath.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.HoverRegion(
         bui.Card(bui.Text("Hover for info")),
         cursor="click",
     )
     ```
-
+    
     Args:
         enabled:
             If ``False``, hover detection is inactive.
@@ -35,7 +34,7 @@ class HoverRegion(Component):
             Mouse cursor to display while hovering — e.g. ``"click"``,
             ``"text"``, ``"grab"``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -53,7 +52,7 @@ class HoverRegion(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "hover_region"
 

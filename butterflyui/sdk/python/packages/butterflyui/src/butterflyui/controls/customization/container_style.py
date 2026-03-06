@@ -6,18 +6,17 @@ from .._shared import Component, merge_props
 __all__ = ["ContainerStyle"]
 
 class ContainerStyle(Component):
-    """
-    Surface decorator that applies background, border, shadow, and
+    """Surface decorator that applies background, border, shadow, and
     corner-radius styling to a child control.
-
+    
     The runtime wraps the child in a ``Container`` with a ``BoxDecoration``
     built from the supplied style properties. A ``BoxShadow`` is added when
     any shadow property is set. Gradient fills are supported alongside or
     instead of a flat background colour.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ContainerStyle(
         my_content,
         bgcolor="#1e293b",
@@ -27,53 +26,53 @@ class ContainerStyle(Component):
         content_padding=16,
     )
     ```
-
+    
     Args:
-        variant: 
+        variant:
             Named style variant hint forwarded to the runtime.
-        bgcolor: 
+        bgcolor:
             Background colour of the container.
-        color: 
-            Alias for `bgcolor`.
-        border_color: 
+        color:
+            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
+        border_color:
             Colour of the container border. A border is only drawn when this is set.
-        border_width: 
+        border_width:
             Width of the container border in logical pixels. Defaults to ``1``.
-        radius: 
+        radius:
             Corner radius for the ``BorderRadius``. Defaults to ``8``.
-        shape: 
+        shape:
             Container shape hint (e.g. ``"circle"``, ``"rectangle"``).
-        outline_width: 
+        outline_width:
             Width of an additional outline stroke outside the border.
-        outline_color: 
-            Colour of the outline stroke.
-        stroke_width: 
-            Alias for `outline_width`.
-        stroke_color: 
-            Alias for `outline_color`.
-        shadow_color: 
-            Colour of the ``BoxShadow``.
-        shadow_blur: 
+        outline_color:
+            Outline color rendered around the control independently of its main border.
+        stroke_width:
+            Backward-compatible alias for ``outline_width``. When both fields are provided, ``outline_width`` takes precedence and this alias is kept only for compatibility.
+        stroke_color:
+            Backward-compatible alias for ``outline_color``. When both fields are provided, ``outline_color`` takes precedence and this alias is kept only for compatibility.
+        shadow_color:
+            Color tint applied to the rendered shadow effect.
+        shadow_blur:
             Blur radius of the ``BoxShadow``.
-        shadow_dx: 
+        shadow_dx:
             Horizontal offset of the ``BoxShadow``.
-        shadow_dy: 
+        shadow_dy:
             Vertical offset of the ``BoxShadow``.
-        glow_color: 
+        glow_color:
             Colour of a secondary glow shadow.
-        glow_blur: 
-            Blur radius of the glow shadow.
-        background: 
-            Alias for `bgcolor`.
-        bg_color: 
-            Alias for `bgcolor`.
-        content_padding: 
+        glow_blur:
+            Blur radius used when rendering the glow effect around the control.
+        background:
+            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
+        bg_color:
+            Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
+        content_padding:
             Inner padding of the container. Accepts a number, list, or dict. Defaults to ``8``.
-        inner_padding: 
-            Alias for `content_padding`.
-        icon_padding: 
+        inner_padding:
+            Backward-compatible alias for ``content_padding``. When both fields are provided, ``content_padding`` takes precedence and this alias is kept only for compatibility.
+        icon_padding:
             Padding around any icon content inside the container.
-        animation: 
+        animation:
             Animation configuration dict (e.g. ``{"duration_ms": 200}``). Enables smooth transitions when style properties change.
     """
 
@@ -90,7 +89,7 @@ class ContainerStyle(Component):
 
     color: Any | None = None
     """
-    Alias for `bgcolor`.
+    Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
     """
 
     border_color: Any | None = None
@@ -120,22 +119,22 @@ class ContainerStyle(Component):
 
     outline_color: Any | None = None
     """
-    Colour of the outline stroke.
+    Outline color rendered around the control independently of its main border.
     """
 
     stroke_width: float | None = None
     """
-    Alias for `outline_width`.
+    Backward-compatible alias for ``outline_width``. When both fields are provided, ``outline_width`` takes precedence and this alias is kept only for compatibility.
     """
 
     stroke_color: Any | None = None
     """
-    Alias for `outline_color`.
+    Backward-compatible alias for ``outline_color``. When both fields are provided, ``outline_color`` takes precedence and this alias is kept only for compatibility.
     """
 
     shadow_color: Any | None = None
     """
-    Colour of the ``BoxShadow``.
+    Color tint applied to the rendered shadow effect.
     """
 
     shadow_blur: float | None = None
@@ -160,17 +159,17 @@ class ContainerStyle(Component):
 
     glow_blur: float | None = None
     """
-    Blur radius of the glow shadow.
+    Blur radius used when rendering the glow effect around the control.
     """
 
     background: Any | None = None
     """
-    Alias for `bgcolor`.
+    Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
     """
 
     bg_color: Any | None = None
     """
-    Alias for `bgcolor`.
+    Backward-compatible alias for ``bgcolor``. When both fields are provided, ``bgcolor`` takes precedence and this alias is kept only for compatibility.
     """
 
     content_padding: Any | None = None
@@ -180,7 +179,7 @@ class ContainerStyle(Component):
 
     inner_padding: Any | None = None
     """
-    Alias for `content_padding`.
+    Backward-compatible alias for ``content_padding``. When both fields are provided, ``content_padding`` takes precedence and this alias is kept only for compatibility.
     """
 
     icon_padding: Any | None = None

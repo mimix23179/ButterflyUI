@@ -8,38 +8,38 @@ __all__ = ["LiquidMorph"]
 class LiquidMorph(Component):
     """Animated border-radius morph that transitions between a minimum
     and maximum corner radius using ``AnimatedContainer``.
-
+    
     The Flutter runtime wraps the child in an ``AnimatedContainer``
     with ``Clip.antiAlias`` and a ``BoxDecoration`` whose
     ``borderRadius`` animates between *min_radius* and *max_radius*.
     When ``animate`` is ``False`` the radius snaps to *min_radius*.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         morph = bui.LiquidMorph(
             bui.Container(width=100, height=100, color="#22d3ee"),
             min_radius=8,
             max_radius=32,
             duration_ms=1500,
         )
-
+    
     Args:
-        min_radius: 
+        min_radius:
             Corner radius when *animate* is ``False`` or at
             the animation start.  Defaults to ``8``.
-        max_radius: 
+        max_radius:
             Corner radius the animation targets.  Defaults
             to ``24``.
-        duration_ms: 
+        duration_ms:
             Transition duration in milliseconds.  Defaults
             to ``1200``; clamped to ``1 – 600 000``.
-        animate: 
+        animate:
             When ``True`` (default) the radius animates to
             *max_radius*; when ``False`` it stays at *min_radius*.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -69,7 +69,7 @@ class LiquidMorph(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "liquid_morph"
 

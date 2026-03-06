@@ -7,53 +7,51 @@ __all__ = ["Video"]
 
 class Video(Component):
     """Video player control with playback management.
-
+    
     Embeds a video player backed by the platform media stack.  Supports
     ``autoplay``, ``loop``, ``muted``, and optional native ``controls``.
     A ``poster`` image can be displayed before playback starts, and
     ``fit`` controls how the video is scaled inside its container.
-
+    
     Use ``play``, ``pause``, ``set_position``, and ``get_state`` to
     manage playback programmatically.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         vid = bui.Video(
             src="/media/intro.mp4",
             poster="/media/thumb.jpg",
             autoplay=False,
             controls=True,
         )
-
+    
     Args:
-        src: 
+        src:
             URI or file path of the video source.
-        poster: 
+        poster:
             Image URL shown as a thumbnail before playback.
-        autoplay: 
-            If ``True`` playback starts automatically.
-        loop: 
-            If ``True`` the video restarts when it finishes.
-        muted: 
-            If ``True`` audio is muted.
-        controls: 
-            If ``True`` native player controls are shown.
-        fit: 
+        autoplay:
+            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
+        loop:
+            Controls whether playback restarts automatically after the media reaches the end of the stream.
+        muted:
+            Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
+        controls:
+            Controls whether the platform's native playback controls are shown, such as play/pause, seek, volume, or fullscreen actions when available.
+        fit:
             Box-fit mode (e.g. ``"contain"``, ``"cover"``).
-        volume: 
+        volume:
             Initial volume level from ``0.0`` to ``1.0``.
-        events: 
-            Event names to subscribe to (e.g. ``["play", "pause"]``).
-        props: 
-            Extra properties forwarded to the Flutter runtime.
-        style: 
-            Inline style overrides applied to the player.
-        strict: 
-            If ``True`` unknown property keys raise an error.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
+        props:
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
+        style:
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
+        strict:
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -69,22 +67,22 @@ class Video(Component):
 
     autoplay: bool | None = None
     """
-    If ``True`` playback starts automatically.
+    Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
     """
 
     loop: bool | None = None
     """
-    If ``True`` the video restarts when it finishes.
+    Controls whether playback restarts automatically after the media reaches the end of the stream.
     """
 
     muted: bool | None = None
     """
-    If ``True`` audio is muted.
+    Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
     """
 
     controls: bool | None = None
     """
-    If ``True`` native player controls are shown.
+    Controls whether the platform's native playback controls are shown, such as play/pause, seek, volume, or fullscreen actions when available.
     """
 
     fit: str | None = None
@@ -99,7 +97,7 @@ class Video(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "video"
 

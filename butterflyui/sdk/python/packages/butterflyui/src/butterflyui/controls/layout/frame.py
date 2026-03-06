@@ -6,21 +6,20 @@ from .._shared import Component, merge_props
 __all__ = ["Frame"]
 
 class Frame(Component):
-    """
-    Sized and decorated frame with constraints, spacing, and visual styling.
-
+    """Sized and decorated frame with constraints, spacing, and visual styling.
+    
     The runtime renders a container that applies combined width/height
     constraints (including min/max bounds), padding/margin spacing, background
     color, border, corner radius, and clip behaviour. ``alignment`` positions
     the child within the frame.
-
+    
     ``Frame`` forwards additional style pipeline props through ``**kwargs``,
     including classes/modifiers/motion/effects plus optional ``icon``,
     ``color``, and ``transparency`` hints.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Frame(
         bui.Text("Content"),
         width=400,
@@ -31,12 +30,12 @@ class Frame(Component):
         events=["resize"],
     )
     ```
-
+    
     Args:
         width:
-            Fixed width in logical pixels.
+            Requested width of the control in logical pixels.
         height:
-            Fixed height in logical pixels.
+            Requested height of the control in logical pixels.
         min_width:
             Minimum width constraint in logical pixels.
         min_height:
@@ -48,13 +47,13 @@ class Frame(Component):
         padding:
             Inner spacing between the frame edge and its child.
         margin:
-            Outer spacing around the frame.
+            Outer spacing applied around the control before neighboring layout items are positioned.
         alignment:
             How the child is aligned inside the frame.
         bgcolor:
-            Background fill color.
+            Background color painted behind the control's content area.
         border_color:
-            Border stroke color.
+            Border color applied to the outer edge of the rendered control or decorative surface.
         border_width:
             Border stroke width in logical pixels.
         radius:
@@ -63,7 +62,7 @@ class Frame(Component):
             Anti-aliasing clip mode. Values: ``"hardEdge"``, ``"antiAlias"``,
             ``"antiAliasWithSaveLayer"``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         **kwargs:
             Additional runtime props forwarded to the shared renderer pipeline.
     """
@@ -71,12 +70,12 @@ class Frame(Component):
 
     bgcolor: Any | None = None
     """
-    Background fill color.
+    Background color painted behind the control's content area.
     """
 
     border_color: Any | None = None
     """
-    Border stroke color.
+    Border color applied to the outer edge of the rendered control or decorative surface.
     """
 
     border_width: float | None = None
@@ -97,7 +96,7 @@ class Frame(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "frame"

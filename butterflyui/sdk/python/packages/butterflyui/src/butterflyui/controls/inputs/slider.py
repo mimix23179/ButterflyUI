@@ -9,50 +9,49 @@ __all__ = ["Slider"]
 
 
 class Slider(Component):
-    """
-    Single-value or range-value slider input.
-
+    """Single-value or range-value slider input.
+    
     ``Slider`` is the merged replacement for legacy ``span_slider``. Use
     ``value`` for standard single-knob behavior, or pass ``start`` and ``end``
     for range mode with two thumbs.
-
+    
     ```python
     import butterflyui as bui
-
+    
     volume = bui.Slider(value=65, min=0, max=100, divisions=20, label="Volume")
     ```
-
+    
     Args:
         value:
-            Single-value slider position.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         start:
             Range start value for dual-thumb mode.
         end:
             Range end value for dual-thumb mode.
         min:
-            Minimum allowed value.
+            Minimum value accepted by the control.
         max:
-            Maximum allowed value.
+            Maximum value, count, or visible item limit enforced by this control.
         divisions:
             Number of discrete steps between ``min`` and ``max``.
         label:
-            Optional label/caption text.
+            Primary label text rendered by the control or its active action.
         labels:
             If ``True``, renderer may display value labels.
         enabled:
             If ``False``, the slider is non-interactive.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     value: float | int | None = None
     """
-    Single-value slider position.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     start: float | int | None = None
@@ -67,12 +66,12 @@ class Slider(Component):
 
     min: float | int | None = None
     """
-    Minimum allowed value.
+    Minimum value accepted by the control.
     """
 
     max: float | int | None = None
     """
-    Maximum allowed value.
+    Maximum value, count, or visible item limit enforced by this control.
     """
 
     divisions: int | None = None
@@ -82,7 +81,7 @@ class Slider(Component):
 
     label: str | None = None
     """
-    Optional label/caption text.
+    Primary label text rendered by the control or its active action.
     """
 
     labels: bool | None = None
@@ -109,20 +108,21 @@ class Slider(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        value=value,
+                        start=start,
+                        end=end,
+                        min=min,
+                        max=max,
+                        divisions=divisions,
+                        label=label,
+                        labels=labels,
+                        enabled=enabled,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                value=value,
-                start=start,
-                end=end,
-                min=min,
-                max=max,
-                divisions=divisions,
-                label=label,
-                labels=labels,
-                enabled=enabled,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

@@ -6,18 +6,17 @@ from .._shared import Component, merge_props
 __all__ = ["Grid"]
 
 class Grid(Component):
-    """
-    Grid layout that arranges children into a fixed number of columns.
-
+    """Grid layout that arranges children into a fixed number of columns.
+    
     The runtime renders a Flutter ``GridView.count``. ``columns`` sets the
     cross-axis count; ``spacing`` and ``run_spacing`` add gaps between cells.
     ``child_aspect_ratio`` fixes each cell's width-to-height ratio.
     ``direction`` switches between vertical and horizontal scrolling.
     ``shrink_wrap`` sizes the grid to its content instead of filling the parent.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Grid(
         items=[{"label": "A"}, {"label": "B"}, {"label": "C"}],
         columns=3,
@@ -26,10 +25,10 @@ class Grid(Component):
         events=["select"],
     )
     ```
-
+    
     Args:
         items:
-            List of item spec mappings rendered as grid cells.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         columns:
             Number of columns (cross-axis cell count).
         spacing:
@@ -45,13 +44,13 @@ class Grid(Component):
         shrink_wrap:
             When ``True`` the grid sizes itself to its content.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     items: list[Any] | None = None
     """
-    List of item spec mappings rendered as grid cells.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     columns: int | None = None
@@ -91,7 +90,7 @@ class Grid(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "grid"

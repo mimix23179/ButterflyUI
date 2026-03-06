@@ -9,21 +9,20 @@ __all__ = ["SlidePanel"]
 
 
 class SlidePanel(Component):
-    """
-    Edge-anchored panel overlay for drawers, side panels, and utility trays.
-
+    """Edge-anchored panel overlay for drawers, side panels, and utility trays.
+    
     ``SlidePanel`` is the dedicated side-panel primitive. It can slide from
     any edge and accepts sizing aliases (``width`` / ``height``) in addition
     to ``size``. The runtime keeps open/closed state, supports invoke mutation,
     and emits ``open``, ``close``, ``dismiss``, ``change``, and ``state``.
-
+    
     Extended panel-placement props are accepted through ``props`` such as
     ``margin`` / ``panel_margin``, ``radius``, ``clip_behavior``, and
     transition tuning fields.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.SlidePanel(
         bui.Text("Panel content"),
         side="right",
@@ -33,7 +32,7 @@ class SlidePanel(Component):
         events=["open", "close"],
     )
     ```
-
+    
     Args:
         open:
             When ``True`` the panel is visible.
@@ -41,27 +40,26 @@ class SlidePanel(Component):
             Edge from which the panel slides. Values: ``"left"``,
             ``"right"``, ``"top"``, ``"bottom"``.
         position:
-            Alias for ``side``.
+            Backward-compatible alias for ``side``. When both fields are provided, ``side`` takes precedence and this alias is kept only for compatibility.
         size:
             Panel width (left/right) or height (top/bottom) in logical
             pixels.
         width:
-            Alias for horizontal ``size``.
+            Requested width of the control in logical pixels.
         height:
-            Alias for vertical ``size``.
+            Requested height of the control in logical pixels.
         dismissible:
             When ``True`` tapping the scrim closes the panel.
         scrim_color:
             Color of the background scrim overlay.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments, including panel
-            placement/layout and shell styling hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -84,7 +82,7 @@ class SlidePanel(Component):
 
     position: str | None = None
     """
-    Alias for ``side``.
+    Backward-compatible alias for ``side``. When both fields are provided, ``side`` takes precedence and this alias is kept only for compatibility.
     """
 
     size: float | None = None
@@ -100,7 +98,7 @@ class SlidePanel(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "slide_panel"

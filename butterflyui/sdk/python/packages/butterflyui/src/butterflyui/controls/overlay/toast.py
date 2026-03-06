@@ -6,17 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["Toast"]
 
 class Toast(Component):
-    """
-    Ephemeral notification toast that appears briefly and auto-dismisses.
-
+    """Ephemeral notification toast that appears briefly and auto-dismisses.
+    
     The runtime renders a transient message overlay. ``message`` sets the
     notification text. ``open`` controls visibility. ``duration_ms`` sets
     the auto-dismiss delay. ``action_label`` adds an inline action button.
     ``variant`` applies a semantic color scheme.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Toast(
         message="Changes saved!",
         open=True,
@@ -24,10 +23,10 @@ class Toast(Component):
         variant="success",
     )
     ```
-
+    
     Args:
         message:
-            The notification message text.
+            Main message text rendered inside the control.
         open:
             When ``True`` the toast is visible.
         duration_ms:
@@ -49,7 +48,7 @@ class Toast(Component):
 
     message: str | None = None
     """
-    The notification message text.
+    Main message text rendered inside the control.
     """
 
     duration_ms: int | None = None

@@ -6,14 +6,13 @@ from .._shared import Component, merge_props
 __all__ = ["Container"]
 
 class Container(Component):
-    """
-    Decorated layout container combining sizing, spacing, and visual decoration.
-
+    """Decorated layout container combining sizing, spacing, and visual decoration.
+    
     Maps to Flutter's ``Container`` widget. Combines ``width``/``height``
     constraints, ``padding`` and ``margin`` spacing, background and border
     decoration (``bgcolor``, ``border_color``, ``border_width``, ``radius``),
     and child ``alignment`` in one component.
-
+    
     ``Container`` also supports the universal ButterflyUI styling pipeline via
     forwarded ``**kwargs``:
     - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
@@ -25,10 +24,10 @@ class Container(Component):
     - effects layer: ``effects``, ``effect_order``, ``effect_clip``,
       ``effect_target``.
     - visual tokens: ``icon``, ``color``, and ``transparency``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Container(
         bui.Text("Hello"),
         width=300,
@@ -38,12 +37,12 @@ class Container(Component):
         events=["tap"],
     )
     ```
-
+    
     Args:
         width:
-            Fixed width in logical pixels.
+            Requested width of the control in logical pixels.
         height:
-            Fixed height in logical pixels.
+            Requested height of the control in logical pixels.
         padding:
             Inner spacing between the container edge and its children.
         margin:
@@ -51,15 +50,15 @@ class Container(Component):
         alignment:
             How children are aligned within the container.
         bgcolor:
-            Background fill color.
+            Background color painted behind the control's content area.
         border_color:
-            Border stroke color.
+            Border color applied to the outer edge of the rendered control or decorative surface.
         border_width:
             Border stroke width in logical pixels.
         radius:
             Corner radius in logical pixels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         **kwargs:
             Additional runtime props, including universal style/modifier/motion/
             effects props handled by the shared renderer, plus optional
@@ -69,12 +68,12 @@ class Container(Component):
 
     bgcolor: Any | None = None
     """
-    Background fill color.
+    Background color painted behind the control's content area.
     """
 
     border_color: Any | None = None
     """
-    Border stroke color.
+    Border color applied to the outer edge of the rendered control or decorative surface.
     """
 
     border_width: float | None = None
@@ -89,7 +88,7 @@ class Container(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "container"

@@ -7,44 +7,44 @@ __all__ = ["Audio"]
 
 class Audio(Component):
     """Audio player control with playback and volume management.
-
+    
     Embeds an audio player backed by the platform media stack.  Supports
     ``autoplay``, ``loop``, and initial ``volume`` / ``muted`` state.
     Display metadata (``title`` and ``artist``) can be shown in the
     player chrome when the runtime supports it.
-
+    
     Use the ``play``, ``pause``, ``set_position``, and ``set_volume``
     methods to control playback programmatically, and ``get_state`` to
     retrieve the current position, duration, and playing status.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         player = bui.Audio(
             src="/media/track.mp3",
             title="Lo-fi Beats",
             autoplay=True,
             volume=0.8,
         )
-
+    
     Args:
-        src: 
+        src:
             URI or file path of the audio source.
-        autoplay: 
-            If ``True`` playback begins automatically on mount.
-        loop: 
-            If ``True`` the track restarts when it finishes.
-        volume: 
+        autoplay:
+            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
+        loop:
+            Controls whether playback restarts automatically after the media reaches the end of the stream.
+        volume:
             Initial volume level from ``0.0`` (silent) to ``1.0``.
-        muted: 
-            If ``True`` audio output is muted regardless of volume.
-        title: 
+        muted:
+            Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
+        title:
             Display title shown in the player chrome.
-        artist: 
+        artist:
             Artist name shown alongside the title.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -55,12 +55,12 @@ class Audio(Component):
 
     autoplay: bool | None = None
     """
-    If ``True`` playback begins automatically on mount.
+    Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
     """
 
     loop: bool | None = None
     """
-    If ``True`` the track restarts when it finishes.
+    Controls whether playback restarts automatically after the media reaches the end of the stream.
     """
 
     volume: float | None = None
@@ -70,7 +70,7 @@ class Audio(Component):
 
     muted: bool | None = None
     """
-    If ``True`` audio output is muted regardless of volume.
+    Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
     """
 
     title: str | None = None
@@ -85,7 +85,7 @@ class Audio(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "audio"
 

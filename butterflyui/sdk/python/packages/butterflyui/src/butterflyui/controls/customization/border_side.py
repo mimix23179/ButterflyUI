@@ -6,40 +6,39 @@ from .._shared import Component, merge_props
 __all__ = ["BorderSide"]
 
 class BorderSide(Component):
-    """
-    Renders a single border line on one or more sides of the parent.
-
+    """Renders a single border line on one or more sides of the parent.
+    
     Unlike :class:`Border`, which wraps a child, ``BorderSide`` draws a
     standalone line (a thin ``SizedBox`` with a side decoration). It is
     useful for separator-style borders. It also accepts per-side maps via
     `top`, `right`, `bottom`, and `left` for individual configuration.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.BorderSide(side="bottom", color="#64748b", width=1)
     ```
-
+    
     Args:
-        side: 
+        side:
             Which side to draw: ``"top"``, ``"right"``, ``"bottom"`` (default), or ``"left"``.
-        color: 
+        color:
             Line colour. Defaults to ``"#64748b"`` (slate-500).
-        width: 
+        width:
             Line thickness in logical pixels. Defaults to ``1``.
-        length: 
+        length:
             Line length in logical pixels. Defaults to ``double.infinity`` (stretches to fill).
-        top: 
+        top:
             Per-side override for the top border as a dict with ``"color"`` and/or ``"width"``.
-        right: 
+        right:
             Per-side override for the right border.
-        bottom: 
+        bottom:
             Per-side override for the bottom border.
-        left: 
+        left:
             Per-side override for the left border.
-        animated: 
+        animated:
             If ``True``, transitions are animated via ``AnimatedContainer``.
-        duration_ms: 
+        duration_ms:
             Animation duration in milliseconds. Defaults to ``180``.
     """
 

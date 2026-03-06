@@ -9,30 +9,29 @@ __all__ = ["ToastHost"]
 
 
 class ToastHost(Component):
-    """
-    Host container for toast and notification stacks.
-
+    """Host container for toast and notification stacks.
+    
     ``ToastHost`` is the canonical replacement for legacy
     ``notification_host``. It can display compact toasts and richer
     notification cards through a shared queue model.
-
+    
     ```python
     import butterflyui as bui
-
+    
     host = bui.ToastHost(
         position="bottom_right",
         max_items=3,
         dismissible=True,
     )
     ```
-
+    
     Args:
         items:
-            Initial list of toast spec mappings.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         notifications:
             Alias for ``items`` from legacy notification host payloads.
         toasts:
-            Alias for ``items``.
+            Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
         position:
             Screen corner where the toast stack is anchored. Values:
             ``"top_left"``, ``"top_right"``, ``"bottom_left"``,
@@ -44,13 +43,13 @@ class ToastHost(Component):
         dismissible:
             When ``True`` each toast shows a close button.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -62,7 +61,7 @@ class ToastHost(Component):
 
     items: list[Mapping[str, Any]] | None = None
     """
-    Initial list of toast spec mappings.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     notifications: list[Mapping[str, Any]] | None = None
@@ -72,7 +71,7 @@ class ToastHost(Component):
 
     toasts: list[Mapping[str, Any]] | None = None
     """
-    Alias for ``items``.
+    Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
     """
 
     position: str | None = None
@@ -94,7 +93,7 @@ class ToastHost(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "toast_host"

@@ -6,19 +6,18 @@ from .._shared import Component, merge_props
 __all__ = ["AvatarStack"]
 
 class AvatarStack(Component):
-    """
-    Renders a horizontal row of overlapping circular avatar bubbles.
-
+    """Renders a horizontal row of overlapping circular avatar bubbles.
+    
     Each avatar shows the first character of its ``label`` (or ``name``) in
     a coloured circle. When there are more avatars than `max`, an overflow
     chip shows the remaining count (e.g. ``"+3"``).
-
+    
     Tapping an individual avatar emits a ``"select"`` event with the
     avatar's ``index``, ``id``, and ``label``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.AvatarStack(
         avatars=[
             {"label": "Alice", "color": "#7c3aed"},
@@ -30,32 +29,32 @@ class AvatarStack(Component):
         max=5,
     )
     ```
-
+    
     Args:
-        avatars: 
-            List of avatar descriptors. Each item may be a dict with keys ``label`` / ``name``, ``color``, ``text_color``, ``id``, or a plain string used as the label.
-        size: 
+        avatars:
+            Ordered list of avatar entries rendered by the stack. Each item can be a plain label string or a mapping with avatar metadata such as label, color, text color, and id.
+        size:
             Diameter of each avatar circle in logical pixels. Defaults to ``28``.
-        overlap: 
+        overlap:
             Horizontal overlap between adjacent avatars in logical pixels. Defaults to ``8``.
-        max: 
+        max:
             Maximum number of avatars to display before showing an overflow indicator. Avatars beyond this count are hidden.
-        max_visible: 
-            Alias for `max`.
-        max_count: 
-            Alias for `max`.
-        overflow_label: 
+        max_visible:
+            Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
+        max_count:
+            Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
+        overflow_label:
             Custom text for the overflow chip. When omitted, the runtime displays ``"+N"`` where ``N`` is the hidden count.
-        stack_order: 
+        stack_order:
             Set to ``"reverse"`` to render avatars in reversed stacking order.
-        expand_on_hover: 
+        expand_on_hover:
             If ``True``, the stack expands to reveal hidden avatars on hover.
     """
 
 
     avatars: list[Any] | None = None
     """
-    List of avatar descriptors. Each item may be a dict with keys ``label`` / ``name``, ``color``, ``text_color``, ``id``, or a plain string used as the label.
+    Ordered list of avatar entries rendered by the stack. Each item can be a plain label string or a mapping with avatar metadata such as label, color, text color, and id.
     """
 
     size: float | None = None
@@ -75,12 +74,12 @@ class AvatarStack(Component):
 
     max_visible: int | None = None
     """
-    Alias for `max`.
+    Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
     """
 
     max_count: int | None = None
     """
-    Alias for `max`.
+    Backward-compatible alias for ``max``. When both fields are provided, ``max`` takes precedence and this alias is kept only for compatibility.
     """
 
     overflow_label: str | None = None

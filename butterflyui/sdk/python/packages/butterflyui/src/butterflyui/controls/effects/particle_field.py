@@ -7,7 +7,7 @@ __all__ = ["ParticleField"]
 
 class ParticleField(Component):
     """Full-featured particle system rendered with a ``CustomPainter``.
-
+    
     The Flutter runtime spawns *count* particles with randomised
     positions, angles, speeds, sizes, and colours drawn from the
     configured ranges.  An ``AnimationController`` advancing
@@ -15,11 +15,11 @@ class ParticleField(Component):
     world-space position via simple ballistic motion.  Particles that
     exit the canvas wrap back to the opposite edge when *loop* is
     ``True``.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         field = bui.ParticleField(
             count=80,
             colors=["#22d3ee", "#a78bfa"],
@@ -28,46 +28,46 @@ class ParticleField(Component):
             opacity=0.5,
             shape="circle",
         )
-
+    
     Args:
-        count: 
+        count:
             Number of particles (``0`` – ``2000``).  Defaults to
             ``40``.
-        colors: 
+        colors:
             List of particle colours.  Falls back to the theme
             accent palette when empty.
-        size: 
+        size:
             Uniform particle diameter; sets both *min_size* and
             *max_size*.
-        min_size: 
+        min_size:
             Minimum particle diameter in logical pixels.
             Defaults to ``2``.
-        max_size: 
+        max_size:
             Maximum particle diameter.  Defaults to ``6``.
-        speed: 
+        speed:
             Uniform speed; sets both *min_speed* and *max_speed*.
-        min_speed: 
+        min_speed:
             Minimum velocity in logical pixels per second.
             Defaults to ``8``.
-        max_speed: 
+        max_speed:
             Maximum velocity.  Defaults to ``32``.
-        direction: 
+        direction:
             Emission direction in **degrees** (0 = right,
             90 = down).  ``None`` emits omnidirectionally.
-        spread: 
+        spread:
             Angular spread in degrees around *direction*.
             Defaults to ``30``.
-        opacity: 
+        opacity:
             Global opacity multiplier (``0.0`` – ``1.0``).
             Defaults to ``0.6``.
-        seed: 
+        seed:
             Integer seed for deterministic layout.
-        loop: 
+        loop:
             When ``True`` (default) particles wrap at canvas
             edges.
-        play: 
+        play:
             When ``True`` (default) the animation runs.
-        shape: 
+        shape:
             ``"circle"`` (default) or ``"square"``.
     """
 

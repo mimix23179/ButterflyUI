@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["Sprite"]
 
 class Sprite(Component):
-    """
-    Sprite-sheet animation player that steps through frames at a given FPS.
-
+    """Sprite-sheet animation player that steps through frames at a given FPS.
+    
     The runtime loads an image sprite sheet from ``src`` and plays it as an
     animation. ``frame_width``/``frame_height`` define the size of each frame
     cell. ``frames`` sets the total number of frames. ``fps`` controls the
@@ -17,10 +16,10 @@ class Sprite(Component):
     describe the sprite-sheet grid. ``fit`` sets the Flutter box-fit mode.
     ``opacity`` controls transparency. ``progress`` seeks to a fractional
     position (0.0--1.0).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Sprite(
         src="assets/explosion.png",
         frame_width=64,
@@ -32,7 +31,7 @@ class Sprite(Component):
         events=["complete"],
     )
     ```
-
+    
     Args:
         src:
             Asset path or URL of the sprite-sheet image.
@@ -61,7 +60,7 @@ class Sprite(Component):
         progress:
             Normalised seek position (0.0 = first frame, 1.0 = last frame).
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -132,7 +131,7 @@ class Sprite(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "sprite"

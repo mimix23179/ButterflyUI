@@ -6,19 +6,18 @@ from .._shared import Component, merge_props
 __all__ = ["AnimatedGradient"]
 
 class AnimatedGradient(Component):
-    """
-    Paints an animated gradient background that continuously transitions its
+    """Paints an animated gradient background that continuously transitions its
     colors over time, optionally wrapping a child control.
-
+    
     The runtime supports linear, radial, and sweep gradient variants. The
     animation controller loops or plays once, with optional ping-pong
     (reverse) behaviour and colour-shift rotation. If fewer than two
     colours are supplied the runtime falls back to a default purple-to-cyan
     pair.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.AnimatedGradient(
         colors=["#7c3aed", "#06b6d4"],
         duration_ms=2400,
@@ -26,51 +25,51 @@ class AnimatedGradient(Component):
         ping_pong=True,
     )
     ```
-
+    
     Args:
-        variant: 
+        variant:
             Gradient variant. One of ``"linear"`` (default), ``"radial"``, or ``"sweep"``/``"conic"``.
-        kind: 
-            Alias for `variant`.
-        gradient: 
-            Alias for `variant`.
-        type: 
-            Alias for `variant`.
-        colors: 
+        kind:
+            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
+        gradient:
+            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
+        type:
+            Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
+        colors:
             List of colour values (hex strings or colour objects). At least two colours are required; the runtime falls back to purple-cyan if fewer are given.
-        stops: 
+        stops:
             Gradient stop positions, each in ``[0.0, 1.0]``. Must match the length of `colors`; ignored if the count differs.
-        duration_ms: 
+        duration_ms:
             Total animation duration in milliseconds. Defaults to ``1800``. Clamped to ``[1, 600000]``.
-        duration: 
-            Alias for `duration_ms`.
-        radius: 
+        duration:
+            Backward-compatible alias for ``duration_ms``. When both fields are provided, ``duration_ms`` takes precedence and this alias is kept only for compatibility.
+        radius:
             Corner radius applied to the decorated box that contains the gradient.
-        begin: 
+        begin:
             Start alignment of a linear gradient (e.g. ``"top_left"`` or ``[x, y]``). Defaults to ``Alignment.topLeft``.
-        end: 
+        end:
             End alignment of a linear gradient. Defaults to ``Alignment.bottomRight``.
-        angle: 
+        angle:
             Initial rotation angle in degrees. The animation rotates a full 360° over one cycle starting from this value.
-        start_angle: 
+        start_angle:
             Start angle for sweep gradients, in degrees. Defaults to ``0``. Also used as the initial rotation angle for linear gradients.
-        end_angle: 
+        end_angle:
             End angle for sweep gradients, in degrees. Defaults to ``360``.
-        opacity: 
+        opacity:
             Overall opacity of the gradient surface, ``0.0``–``1.0``.
-        loop: 
-            If ``True`` (default), the animation repeats indefinitely. When ``False``, it plays once and stops.
-        autoplay: 
-            If ``True`` (default), the animation starts automatically on mount.
-        play: 
-            Alias for `playing`.
-        playing: 
+        loop:
+            Controls whether playback restarts automatically after the media reaches the end of the stream.
+        autoplay:
+            Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
+        play:
+            Backward-compatible alias for ``playing``. When both fields are provided, ``playing`` takes precedence and this alias is kept only for compatibility.
+        playing:
             Controls whether the animation is running. Set ``False`` to pause.
-        ping_pong: 
+        ping_pong:
             If ``True``, the animation reverses direction at each cycle end instead of snapping back.
-        shift: 
+        shift:
             If ``True``, the colour list is cyclically rotated as the animation progresses, producing a "rolling" colour effect.
-        throttle_ms: 
+        throttle_ms:
             Minimum interval in milliseconds between runtime change events.
     """
 
@@ -82,17 +81,17 @@ class AnimatedGradient(Component):
 
     kind: str | None = None
     """
-    Alias for `variant`.
+    Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
     """
 
     gradient: str | None = None
     """
-    Alias for `variant`.
+    Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
     """
 
     type: str | None = None
     """
-    Alias for `variant`.
+    Backward-compatible alias for ``variant``. When both fields are provided, ``variant`` takes precedence and this alias is kept only for compatibility.
     """
 
     colors: list[Any] | None = None
@@ -112,7 +111,7 @@ class AnimatedGradient(Component):
 
     duration: int | None = None
     """
-    Alias for `duration_ms`.
+    Backward-compatible alias for ``duration_ms``. When both fields are provided, ``duration_ms`` takes precedence and this alias is kept only for compatibility.
     """
 
     radius: float | None = None
@@ -152,17 +151,17 @@ class AnimatedGradient(Component):
 
     loop: bool | None = None
     """
-    If ``True`` (default), the animation repeats indefinitely. When ``False``, it plays once and stops.
+    Controls whether playback restarts automatically after the media reaches the end of the stream.
     """
 
     autoplay: bool | None = None
     """
-    If ``True`` (default), the animation starts automatically on mount.
+    Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
     """
 
     play: bool | None = None
     """
-    Alias for `playing`.
+    Backward-compatible alias for ``playing``. When both fields are provided, ``playing`` takes precedence and this alias is kept only for compatibility.
     """
 
     playing: bool | None = None

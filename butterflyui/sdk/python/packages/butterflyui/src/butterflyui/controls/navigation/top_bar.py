@@ -7,20 +7,19 @@ __all__ = ["TopBar"]
 
 
 class TopBar(Component):
-    """
-    Application top bar with optional inline search and trailing actions.
-
+    """Application top bar with optional inline search and trailing actions.
+    
     The runtime renders a top navigation surface composed of ``title`` and
     optional ``subtitle`` plus a search field and trailing ``actions``.
     ``center_title`` controls title alignment.
-
+    
     ``TopBar`` uses the same runtime renderer as ``AppBar`` and supports
     shared layout hints through ``props`` (alignment/position, margin,
     constraints, radius, and clip behavior).
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.TopBar(
         title="Explorer",
         show_search=True,
@@ -29,10 +28,10 @@ class TopBar(Component):
         events=["search", "action"],
     )
     ```
-
+    
     Args:
         title:
-            Primary title text.
+            Primary heading text rendered by the control.
         subtitle:
             Optional secondary text shown below the title.
         center_title:
@@ -40,21 +39,21 @@ class TopBar(Component):
         show_search:
             Shows an inline search field when ``True``.
         search_value:
-            Current search query value.
+            Current text value shown in the control's search input.
         search_placeholder:
             Placeholder text for the search field.
         actions:
-            Trailing action widget specs.
+            Ordered list of action descriptors rendered or triggered by this control. Each entry should match the runtime payload shape expected for the control type.
         events:
-            Runtime event names to emit.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional runtime props, including shared placement/layout hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
     title: str | None = None
     """
-    Primary title text.
+    Primary heading text rendered by the control.
     """
 
     subtitle: str | None = None
@@ -74,7 +73,7 @@ class TopBar(Component):
 
     search_value: str | None = None
     """
-    Current search query value.
+    Current text value shown in the control's search input.
     """
 
     search_placeholder: str | None = None
@@ -84,12 +83,12 @@ class TopBar(Component):
 
     actions: list[Any] | None = None
     """
-    Trailing action widget specs.
+    Ordered list of action descriptors rendered or triggered by this control. Each entry should match the runtime payload shape expected for the control type.
     """
 
     events: list[str] | None = None
     """
-    Runtime event names to emit.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "top_bar"

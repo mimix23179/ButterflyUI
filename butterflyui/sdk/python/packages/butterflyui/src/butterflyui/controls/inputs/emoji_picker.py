@@ -6,32 +6,31 @@ from .._shared import Component, merge_props
 __all__ = ["EmojiPicker"]
 
 class EmojiPicker(Component):
-    """
-    Scrollable emoji grid with category tabs and optional search.
-
+    """Scrollable emoji grid with category tabs and optional search.
+    
     The Flutter runtime renders a paginated emoji panel grouped by
     category (smileys, animals, food, etc.).  A ``show_search`` bar
     lets users filter by keyword.  ``show_recent`` enables a *Recently
     Used* tab.  Selecting an emoji emits a ``pick`` event with the
     Unicode character (and optional metadata when
     ``include_metadata`` is ``True``).
-
+    
     Use :meth:`set_category`, :meth:`search`, and :meth:`set_value` to
     control the panel imperatively.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.EmojiPicker(
         show_search=True,
         show_recent=True,
         columns=8,
     )
     ```
-
+    
     Args:
         value:
-            Pre-selected emoji character.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         categories:
             List of category names to display.  Defaults to all
             standard emoji categories.
@@ -47,7 +46,7 @@ class EmojiPicker(Component):
         show_recent:
             If ``True``, a *Recently Used* category tab is shown.
         category:
-            Initially active category name.
+            Category name or identifier used to group, filter, or preselect the control's current content.
         query:
             Initial search query pre-filled in the search field.
         include_metadata:
@@ -58,16 +57,15 @@ class EmojiPicker(Component):
         columns:
             Number of emoji columns per row in the grid.
         items:
-            Explicit list of emoji characters to display, overriding
-            the default full set.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     value: str | None = None
     """
-    Pre-selected emoji character.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     categories: list[str] | None = None
@@ -101,7 +99,7 @@ class EmojiPicker(Component):
 
     category: str | None = None
     """
-    Initially active category name.
+    Category name or identifier used to group, filter, or preselect the control's current content.
     """
 
     query: str | None = None
@@ -127,13 +125,12 @@ class EmojiPicker(Component):
 
     items: list[str] | None = None
     """
-    Explicit list of emoji characters to display, overriding
-    the default full set.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "emoji_picker"
 

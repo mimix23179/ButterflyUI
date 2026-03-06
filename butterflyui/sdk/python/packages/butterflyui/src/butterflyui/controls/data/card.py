@@ -6,20 +6,19 @@ from .._shared import Component, merge_props
 __all__ = ["Card"]
 
 class Card(Component):
-    """
-    Material-style surface container that wraps a single child control
+    """Material-style surface container that wraps a single child control
     inside a rounded, optionally elevated panel.
-
+    
     The runtime renders a Flutter ``Card`` whose background colour falls
     back to the active Candy ``surface`` token, border colour to the
     ``border`` token, and corner radius to the theme's ``card.radius``
     or ``radii.md`` token.  An optional ``content_padding`` is applied as
     inner ``Padding``, and ``content_alignment`` positions the child
     inside the card via ``Align``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Card(
         bui.Text("Hello from a card!"),
         radius=12,
@@ -27,17 +26,17 @@ class Card(Component):
         content_padding=16,
     )
     ```
-
+    
     Args:
-        title: 
+        title:
             Optional primary title text forwarded as metadata in the control props.
-        subtitle: 
+        subtitle:
             Optional secondary title text forwarded as metadata in the control props.
-        elevated: 
+        elevated:
             If ``True``, applies elevated card styling with a non-zero ``elevation`` value.
-        radius: 
+        radius:
             Corner radius in logical pixels.  Overrides the Candy ``card.radius`` / ``radii.md`` tokens.
-        content_padding: 
+        content_padding:
             Inner padding applied around the card's child content (single number or per-edge spec).
     """
 

@@ -6,17 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["BlobField"]
 
 class BlobField(Component):
-    """
-    Paints a field of random organic blobs on a ``CustomPaint`` canvas.
-
+    """Paints a field of random organic blobs on a ``CustomPaint`` canvas.
+    
     Each blob is a filled circle with a Gaussian blur mask, producing soft,
     lava-lamp-like shapes. The seed and count control the deterministic
     layout; `progress` (``0.0``–``1.0``) controls how much of the field is
     drawn.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.BlobField(
         count=16,
         seed=42,
@@ -24,37 +23,37 @@ class BlobField(Component):
         opacity=0.35,
     )
     ```
-
+    
     Args:
-        count: 
+        count:
             Number of blobs to generate. Defaults to ``12``.
-        seed: 
+        seed:
             Random seed controlling blob positions and sizes. Defaults to ``7``. Change it to produce a new random layout.
-        color: 
+        color:
             Primary colour for the blobs (hex string or colour object). Defaults to ``"#8b5cf6"`` (violet).
-        colors: 
+        colors:
             Optional list of colours. When provided, each blob picks from this palette.
-        background: 
+        background:
             Colour painted behind the blob field.
-        min_radius: 
+        min_radius:
             Minimum blob radius as a fraction of the canvas size. Defaults to ``0.05``.
-        max_radius: 
+        max_radius:
             Maximum blob radius as a fraction of the canvas size. Defaults to ``0.2``.
-        speed: 
+        speed:
             Animation speed multiplier for blob motion.
-        opacity: 
+        opacity:
             Overall opacity of the blobs, ``0.0``–``1.0``. Defaults to ``0.3``.
-        blur_sigma: 
+        blur_sigma:
             Gaussian blur sigma applied to each blob’s mask filter. Higher values produce softer edges.
-        loop: 
+        loop:
             If ``True``, the animation loops continuously.
-        play: 
-            Alias for `playing`.
-        playing: 
+        play:
+            Backward-compatible alias for ``playing``. When both fields are provided, ``playing`` takes precedence and this alias is kept only for compatibility.
+        playing:
             Controls whether any animation is running.
-        autoplay: 
+        autoplay:
             If ``True``, the animation starts automatically on mount.
-        progress: 
+        progress:
             Draw progress from ``0.0`` (nothing) to ``1.0`` (full field). Defaults to ``1.0``.
     """
 
@@ -116,7 +115,7 @@ class BlobField(Component):
 
     play: bool | None = None
     """
-    Alias for `playing`.
+    Backward-compatible alias for ``playing``. When both fields are provided, ``playing`` takes precedence and this alias is kept only for compatibility.
     """
 
     playing: bool | None = None

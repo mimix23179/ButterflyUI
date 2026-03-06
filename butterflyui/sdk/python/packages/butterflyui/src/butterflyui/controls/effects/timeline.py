@@ -8,16 +8,16 @@ __all__ = ["Timeline"]
 class Timeline(Component):
     """Sequenced animation timeline that orchestrates child widgets
     along configurable tracks.
-
+    
     *Timeline* is a container-level orchestrator: it holds one or more
     children together with ``tracks`` definitions that describe
     per-child animation keyframes, delays, and ordering.  Playback
     can be auto-started on mount or toggled via ``set_play()``.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         tl = bui.Timeline(
             bui.Text("Step 1"),
             bui.Text("Step 2"),
@@ -26,29 +26,29 @@ class Timeline(Component):
             direction="vertical",
             autoplay=True,
         )
-
+    
     Args:
-        tracks: 
+        tracks:
             List of track definition mappings describing
             per-child animation configuration.
-        direction: 
+        direction:
             Layout direction — ``"vertical"`` or
             ``"horizontal"``.
-        spacing: 
+        spacing:
             Gap between children in logical pixels.
-        autoplay: 
+        autoplay:
             When ``True`` the timeline starts on mount.
-        play: 
+        play:
             Explicit play toggle.  ``True`` starts, ``False``
             pauses.
-        duration_ms: 
+        duration_ms:
             Total timeline duration in milliseconds.
-        delay_ms: 
+        delay_ms:
             Initial delay before the timeline begins playing.
-        repeat: 
+        repeat:
             When ``True`` the timeline loops after completion.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -97,7 +97,7 @@ class Timeline(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "timeline"
 

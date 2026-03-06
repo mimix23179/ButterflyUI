@@ -7,22 +7,22 @@ __all__ = ["Canvas"]
 
 class Canvas(Component):
     """Drawable canvas surface for simple vector shapes.
-
+    
     Renders a ``Container`` with a ``CustomPaint`` layer that draws
     lines, rectangles, and circles from the ``shapes`` list.  Each
     shape is a dict with a ``"type"`` key (``"line"``, ``"rect"``, or
     ``"circle"``) plus geometry keys such as ``x``, ``y``, ``width``/
     ``height`` or ``radius``, and optional ``color`` and ``stroke``.
-
+    
     Tapping the canvas emits a ``"tap"`` event with ``x``/``y`` local
     coordinates.  Use ``set_shapes`` to replace the shape list,
     ``clear`` to remove all shapes, and ``get_state`` to retrieve
     the current shape count.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         canvas = bui.Canvas(
             shapes=[
                 {"type": "rect", "x": 10, "y": 10, "width": 80, "height": 40, "color": "#2563eb"},
@@ -30,24 +30,24 @@ class Canvas(Component):
             ],
             background="#0f172a",
         )
-
+    
     Args:
-        strokes: 
-            Legacy alias for ``shapes``.
-        shapes: 
+        strokes:
+            Ordered list of stroke descriptors rendered by the canvas surface.
+        shapes:
             List of shape dicts drawn by the ``CustomPainter``. Each dict should contain ``"type"`` plus geometry keys.
-        background: 
+        background:
             Background colour for the canvas container.
-        grid: 
-            If ``True`` a reference grid is drawn behind the shapes.
+        grid:
+            Controls whether a reference grid is drawn behind the shapes. Set it to ``False`` to disable this behavior.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     strokes: list[Mapping[str, Any]] | None = None
     """
-    Legacy alias for ``shapes``.
+    Ordered list of stroke descriptors rendered by the canvas surface.
     """
 
     shapes: list[Mapping[str, Any]] | None = None
@@ -62,12 +62,12 @@ class Canvas(Component):
 
     grid: bool | None = None
     """
-    If ``True`` a reference grid is drawn behind the shapes.
+    Controls whether a reference grid is drawn behind the shapes. Set it to ``False`` to disable this behavior.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "canvas"
 

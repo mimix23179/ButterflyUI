@@ -9,20 +9,19 @@ __all__ = ["ProgressRing"]
 
 
 class ProgressRing(Component):
-    """
-    Circular progress indicator for determinate or indeterminate tasks.
-
+    """Circular progress indicator for determinate or indeterminate tasks.
+    
     ``ProgressRing`` sends the canonical ``progress_ring`` control type and pins
     ``variant="circular"`` / ``circular=True`` so the Flutter side always
     renders a ring. Use ``value`` for determinate progress, or set
     ``indeterminate=True`` for an animated spinner-style state.
-
+    
     ```python
     import butterflyui as bui
-
+    
     ring = bui.ProgressRing(value=0.72, label="Syncing", stroke_width=6)
     ```
-
+    
     Args:
         value:
             Progress value for determinate mode.
@@ -31,13 +30,13 @@ class ProgressRing(Component):
         label:
             Optional text label shown with the indicator.
         stroke_width:
-            Thickness of the ring stroke.
+            Thickness of the rendered stroke in logical pixels.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -58,7 +57,7 @@ class ProgressRing(Component):
 
     stroke_width: float | None = None
     """
-    Thickness of the ring stroke.
+    Thickness of the rendered stroke in logical pixels.
     """
 
     control_type = "progress_ring"
@@ -75,17 +74,18 @@ class ProgressRing(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        value=value,
+                        indeterminate=indeterminate,
+                        label=label,
+                        stroke_width=stroke_width,
+                        variant="circular",
+                        circular=True,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                value=value,
-                indeterminate=indeterminate,
-                label=label,
-                stroke_width=stroke_width,
-                variant="circular",
-                circular=True,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

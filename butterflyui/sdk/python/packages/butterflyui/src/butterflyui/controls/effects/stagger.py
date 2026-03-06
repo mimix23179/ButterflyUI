@@ -8,17 +8,17 @@ __all__ = ["Stagger"]
 class Stagger(Component):
     """Staggered fade-in animation that reveals children one after
     another with cascading delays.
-
+    
     The Flutter runtime wraps each child in a ``FadeTransition`` +
     ``Transform.translate`` controlled by a single
     ``AnimationController``.  Each child's animation starts after a
     configurable per-item delay (``stagger_ms``), producing a
     sequential entrance effect.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         stagger = bui.Stagger(
             bui.Text("Line 1"),
             bui.Text("Line 2"),
@@ -27,29 +27,29 @@ class Stagger(Component):
             duration_ms=500,
             direction="vertical",
         )
-
+    
     Args:
-        stagger_ms: 
+        stagger_ms:
             Per-item delay in milliseconds between successive
             child animations (``0`` – ``4000``).  Defaults to ``40``.
-        stagger: 
-            Alias for *stagger_ms*.
-        direction: 
+        stagger:
+            Backward-compatible alias for ``*stagger_ms*``. When both fields are provided, ``*stagger_ms*`` takes precedence and this alias is kept only for compatibility.
+        direction:
             Layout and slide direction — ``"vertical"``
             (default, slides from below) or ``"horizontal"`` (slides
             from the right).
-        play: 
+        play:
             When ``True`` (default) the stagger starts on mount;
             set to ``False`` to defer.
-        duration_ms: 
+        duration_ms:
             Total animation controller duration in
             milliseconds.  Defaults to ``420``; clamped to
             ``50 – 60 000``.
-        curve: 
+        curve:
             Named easing curve (e.g. ``"ease_out_cubic"``).
             Defaults to ``ease_out_cubic``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +61,7 @@ class Stagger(Component):
 
     stagger: int | None = None
     """
-    Alias for *stagger_ms*.
+    Backward-compatible alias for ``*stagger_ms*``. When both fields are provided, ``*stagger_ms*`` takes precedence and this alias is kept only for compatibility.
     """
 
     direction: str | None = None
@@ -92,7 +92,7 @@ class Stagger(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "stagger"
 

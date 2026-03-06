@@ -9,19 +9,18 @@ __all__ = ["SnackBar"]
 
 
 class SnackBar(Component):
-    """
-    Transient snackbar feedback control with optional action affordance.
-
+    """Transient snackbar feedback control with optional action affordance.
+    
     ``SnackBar`` is the canonical control name replacing legacy ``snackbar``.
     It is designed for short-lived status feedback such as save confirmations,
     warnings, and undo prompts.
-
+    
     Supports icon payloads directly and forwards style pipeline fields via
     ``**kwargs`` for color/transparency and motion/effect customization.
-
+    
     ```python
     import butterflyui as bui
-
+    
     sb = bui.SnackBar(
         message="Project saved",
         action_label="Undo",
@@ -30,25 +29,25 @@ class SnackBar(Component):
         duration_ms=2600,
     )
     ```
-
+    
     Args:
         message:
-            Primary snackbar message text.
+            Main message text rendered inside the control.
         label:
-            Optional secondary label text.
+            Primary label text rendered by the control or its active action.
         open:
             If ``True``, snackbar is visible.
         duration_ms:
             Auto-dismiss timeout in milliseconds.
         action_label:
-            Optional action button label.
+            Label text rendered for the control's inline action when that action is available.
         variant:
             Semantic style hint (for example ``"info"``, ``"success"``,
             ``"warning"``, ``"error"``).
         style_name:
             Renderer style mode, defaults to ``"snackbar"``.
         icon:
-            Optional icon descriptor.
+            Icon value or icon descriptor rendered by the control.
         instant:
             If ``True``, bypasses queued animation behavior when supported.
         priority:
@@ -60,13 +59,13 @@ class SnackBar(Component):
         toast_position:
             Preferred toast/snackbar placement hint.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props forwarded to the shared renderer pipeline.
     """
@@ -82,12 +81,12 @@ class SnackBar(Component):
 
     message: str | None = None
     """
-    Primary snackbar message text.
+    Main message text rendered inside the control.
     """
 
     label: str | None = None
     """
-    Optional secondary label text.
+    Primary label text rendered by the control or its active action.
     """
 
     duration_ms: int | None = None
@@ -97,7 +96,7 @@ class SnackBar(Component):
 
     action_label: str | None = None
     """
-    Optional action button label.
+    Label text rendered for the control's inline action when that action is available.
     """
 
     variant: str | None = None
@@ -113,7 +112,7 @@ class SnackBar(Component):
 
     icon: Any | None = None
     """
-    Optional icon descriptor.
+    Icon value or icon descriptor rendered by the control.
     """
 
     instant: bool | None = None
@@ -143,12 +142,12 @@ class SnackBar(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     style: Mapping[str, Any] | None = None
     """
-    Style map forwarded to the renderer style pipeline.
+    Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
     """
 
     control_type = "snack_bar"
@@ -175,25 +174,26 @@ class SnackBar(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        message=message,
+                        label=label,
+                        open=open,
+                        duration_ms=duration_ms,
+                        action_label=action_label,
+                        variant=variant,
+                        style=style_name,
+                        icon=icon,
+                        instant=instant,
+                        priority=priority,
+                        use_flushbar=use_flushbar,
+                        use_fluttertoast=use_fluttertoast,
+                        toast_position=toast_position,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                message=message,
-                label=label,
-                open=open,
-                duration_ms=duration_ms,
-                action_label=action_label,
-                variant=variant,
-                style=style_name,
-                icon=icon,
-                instant=instant,
-                priority=priority,
-                use_flushbar=use_flushbar,
-                use_fluttertoast=use_fluttertoast,
-                toast_position=toast_position,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

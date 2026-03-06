@@ -6,20 +6,19 @@ from .._shared import Component, merge_props
 __all__ = ["DatePicker"]
 
 class DatePicker(Component):
-    """
-    Date picker supporting single date, range, and span workflows.
-
+    """Date picker supporting single date, range, and span workflows.
+    
     ``DatePicker`` unifies legacy controls into one API via ``mode``:
     - ``"single"`` replaces ``date_select``
     - ``"range"`` replaces ``date_range_picker`` / ``date_range``
     - ``"span"`` replaces ``date_span``
-
+    
     Use :meth:`open` to programmatically open the picker and :meth:`set_value`
     to update single or range selections from server-side handlers.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DatePicker(
         label="Period",
         mode="range",
@@ -27,7 +26,7 @@ class DatePicker(Component):
         max_date="2099-12-31",
     )
     ```
-
+    
     Args:
         value:
             Selected date as ``"YYYY-MM-DD"`` when ``mode="single"``.
@@ -48,13 +47,13 @@ class DatePicker(Component):
         enabled:
             If ``False``, the field is non-interactive.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -100,7 +99,7 @@ class DatePicker(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "date_picker"
 

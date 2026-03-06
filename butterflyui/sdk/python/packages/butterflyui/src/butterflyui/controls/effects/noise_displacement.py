@@ -8,18 +8,18 @@ __all__ = ["NoiseDisplacement"]
 class NoiseDisplacement(Component):
     """Noise-driven translation jitter that randomly displaces the child
     on one or both axes.
-
+    
     The Flutter runtime uses an ``AnimationController`` and a seeded
     ``Random`` to compute per-frame translate offsets.  The
     displacement amplitude is governed by ``strength`` and tapers to
     zero when the animation completes (unless looping via ``play`` /
     ``autoplay``).  The ``axis`` parameter restricts motion to
     ``"x"``, ``"y"``, or ``"both"``.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         shake = bui.NoiseDisplacement(
             bui.Text("Shake"),
             strength=4,
@@ -27,32 +27,32 @@ class NoiseDisplacement(Component):
             axis="x",
             autoplay=True,
         )
-
+    
     Args:
-        strength: 
+        strength:
             Maximum displacement in logical pixels.  Defaults
             to ``3``.
-        speed: 
+        speed:
             Speed multiplier (``0.1`` – ``6.0``).  Higher values
             shorten the animation duration.  Defaults to ``1``.
-        axis: 
+        axis:
             Displacement axis — ``"x"``, ``"y"``, or ``"both"``
             (default).
-        seed: 
+        seed:
             Integer seed for the pseudo-random offset generator.
-        animated: 
+        animated:
             When ``True`` the effect plays automatically.
-        loop: 
+        loop:
             When ``True`` the displacement repeats with reverse.
-        play: 
-            Explicit play toggle.
-        autoplay: 
+        play:
+            Controls whether the effect or animation should currently be playing.
+        autoplay:
             When ``True`` the animation starts on mount.
-        duration_ms: 
+        duration_ms:
             Base animation duration in milliseconds.  Defaults
             to ``350``; actual duration is divided by *speed*.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -91,7 +91,7 @@ class NoiseDisplacement(Component):
 
     play: bool | None = None
     """
-    Explicit play toggle.
+    Controls whether the effect or animation should currently be playing.
     """
 
     autoplay: bool | None = None
@@ -107,7 +107,7 @@ class NoiseDisplacement(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "noise_displacement"
 

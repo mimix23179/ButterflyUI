@@ -8,17 +8,17 @@ __all__ = ["ScanlineOverlay"]
 class ScanlineOverlay(Component):
     """CRT-style horizontal scanline overlay rendered on top of the
     child content.
-
+    
     The Flutter runtime paints evenly-spaced horizontal lines using a
     custom ``ButterflyUIScanlineOverlay`` widget.  Line spacing,
     thickness, opacity, and colour are all configurable at creation
     time and can be updated at runtime via the ``set_style()`` invoke
     method.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         crt = bui.ScanlineOverlay(
             bui.Image(src="retro.png"),
             spacing=6,
@@ -26,21 +26,21 @@ class ScanlineOverlay(Component):
             opacity=0.18,
             color="#00ff00",
         )
-
+    
     Args:
-        spacing: 
+        spacing:
             Vertical distance between scanlines in logical pixels
             (``1`` – ``256``).  Defaults to ``6``.
-        thickness: 
+        thickness:
             Stroke thickness of each scanline (``0.5`` –
             ``32``).  Defaults to ``1``.
-        opacity: 
+        opacity:
             Scanline opacity (``0.0`` – ``1.0``).  Defaults to
             ``0.18``.
-        color: 
+        color:
             Scanline colour.  Defaults to the current theme's
             text colour.
-        enabled: 
+        enabled:
             When ``False`` the overlay is hidden and the child
             is rendered unmodified.
     """

@@ -9,20 +9,19 @@ __all__ = ["Overlay"]
 
 
 class Overlay(Component):
-    """
-    General-purpose overlay and overlay-stack host.
-
+    """General-purpose overlay and overlay-stack host.
+    
     ``Overlay`` now also absorbs legacy ``overlay_host`` capabilities. You can
     render a single floating child (traditional overlay behavior) or provide a
     ``base`` + ``overlays`` stack and select active layers.
-
+    
     Like other core controls, ``Overlay`` forwards universal styling props
     through ``**kwargs`` so icon/color/transparency and motion/effects
     pipelines can be applied consistently.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Overlay(
         bui.Text("Floating content"),
         open=True,
@@ -31,7 +30,7 @@ class Overlay(Component):
         events=["close"],
     )
     ```
-
+    
     Args:
         open:
             When ``True`` the overlay is visible.
@@ -42,15 +41,15 @@ class Overlay(Component):
         scrim_color:
             Color of the background scrim overlay.
         base:
-            Base/background control for overlay-host style composition.
+            Base style map applied in the idle state before any interactive or disabled overrides are merged.
         overlays:
             Overlay layer controls composed above ``base``.
         active_overlay:
             Active overlay ID or list of active IDs.
         active_id:
-            Alias for a single active overlay ID.
+            Backward-compatible alias for ``a single active overlay ID``. When both fields are provided, ``a single active overlay ID`` takes precedence and this alias is kept only for compatibility.
         active_index:
-            Active overlay index.
+            Zero-based index of the currently active item, overlay, or page within the control.
         show_all_overlays:
             If ``True``, all overlays are visible simultaneously.
         show_default_overlay:
@@ -66,13 +65,13 @@ class Overlay(Component):
         clip:
             If ``True``, clip overlay layers to host bounds.
         events:
-            Event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props forwarded to the shared renderer pipeline.
     """
@@ -96,7 +95,7 @@ class Overlay(Component):
 
     base: Any | None = None
     """
-    Base/background control for overlay-host style composition.
+    Base style map applied in the idle state before any interactive or disabled overrides are merged.
     """
 
     overlays: list[Any] | None = None
@@ -111,12 +110,12 @@ class Overlay(Component):
 
     active_id: str | None = None
     """
-    Alias for a single active overlay ID.
+    Backward-compatible alias for ``a single active overlay ID``. When both fields are provided, ``a single active overlay ID`` takes precedence and this alias is kept only for compatibility.
     """
 
     active_index: int | None = None
     """
-    Active overlay index.
+    Zero-based index of the currently active item, overlay, or page within the control.
     """
 
     show_all_overlays: bool | None = None
@@ -156,7 +155,7 @@ class Overlay(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "overlay"

@@ -10,21 +10,20 @@ __all__ = ["FilledButton"]
 
 
 class FilledButton(Button):
-    """
-    Filled emphasis button preset.
-
+    """Filled emphasis button preset.
+    
     ``FilledButton`` forwards all interaction, action dispatch, style, and
     customization behavior from :class:`Button` while forcing
     ``variant="filled"``. Use it for primary call-to-action surfaces where
     stronger visual emphasis is needed.
-
+    
     In addition to typed parameters, runtime keys passed through ``**kwargs``
     are preserved. This includes optional icon/color/transparency props and
     style pipeline fields such as classes, modifiers, motion, and effects.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.FilledButton(
         "Deploy",
         action_id="deploy_release",
@@ -32,7 +31,7 @@ class FilledButton(Button):
         transparency=0.04,
     )
     ```
-
+    
     Args:
         label:
             Button caption text. ``text`` takes precedence when both are set.
@@ -41,7 +40,7 @@ class FilledButton(Button):
         value:
             Arbitrary payload emitted with click events.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         action:
             Declarative action descriptor fired on press.
         action_id:
@@ -53,11 +52,11 @@ class FilledButton(Button):
         actions:
             Action descriptor list executed on press.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
@@ -106,7 +105,7 @@ class FilledButton(Button):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "filled_button"
@@ -128,6 +127,7 @@ class FilledButton(Button):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(props, events=events)
         super().__init__(
             label=label,
             text=text,
@@ -139,7 +139,7 @@ class FilledButton(Button):
             action_event=action_event,
             action_payload=action_payload,
             actions=actions,
-            props=merge_props(props, events=events),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

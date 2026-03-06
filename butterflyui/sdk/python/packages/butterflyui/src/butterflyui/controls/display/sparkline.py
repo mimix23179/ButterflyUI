@@ -7,34 +7,34 @@ __all__ = ["Sparkline"]
 
 class Sparkline(Component):
     """Compact inline line chart for trend visualisation.
-
+    
     Renders a small ``CustomPaint`` polyline (default height 40 px)
     using ``_LineChartPainter``.  Intended for dashboard cells,
     table rows, or anywhere a quick numeric trend is needed.  When
     ``fill`` is ``True`` the area under the line is shaded at
     reduced opacity.
-
+    
     Use ``set_data`` to update the data points at runtime.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         spark = bui.Sparkline(
             values=[3, 7, 4, 8, 2, 6],
             color="#4f46e5",
             fill=True,
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric data points for the sparkline.
-        points: 
-            Alias for ``values``.
-        fill: 
-            If ``True`` the area under the line is shaded.
-        color: 
-            Stroke colour for the polyline.
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        fill:
+            Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
+        color:
+            Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
 
@@ -45,17 +45,17 @@ class Sparkline(Component):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     fill: bool | None = None
     """
-    If ``True`` the area under the line is shaded.
+    Controls whether the area under the line is shaded. Set it to ``False`` to disable this behavior.
     """
 
     color: Any | None = None
     """
-    Stroke colour for the polyline.
+    Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
     control_type = "sparkline"
 

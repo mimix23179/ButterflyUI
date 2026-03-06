@@ -8,16 +8,16 @@ __all__ = ["GlowEffect"]
 class GlowEffect(Component):
     """Coloured glow (outer shadow) applied around a child widget via a
     ``BoxDecoration`` with a single ``BoxShadow``.
-
+    
     The Flutter runtime wraps the child in a ``Container`` whose
     ``BoxDecoration`` contains a single ``BoxShadow`` with the
     configured colour, blur radius, spread, offset, and corner radius.
     The ``intensity`` multiplier scales the effective blur.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         glow = bui.GlowEffect(
             bui.Container(width=120, height=120),
             color="#00ffff88",
@@ -25,32 +25,31 @@ class GlowEffect(Component):
             spread=0,
             radius=12,
         )
-
+    
     Args:
-
-        color: 
+        color:
             Glow colour.  Defaults to ``#8800FFFF`` (semi-transparent cyan).
-        blur: 
+        blur:
             Base blur radius of the ``BoxShadow``.  Defaults to ``16``.
-        spread: 
+        spread:
             Spread radius of the ``BoxShadow``.  Defaults to ``0``.
-        radius: 
+        radius:
             Corner radius of the ``BoxDecoration``.  Defaults to ``12``.
-        offset_x: 
+        offset_x:
             Horizontal shadow offset in logical pixels. Defaults to ``0``.
-        offset_y: 
+        offset_y:
             Vertical shadow offset in logical pixels. Defaults to ``0``.
-        clip: 
+        clip:
             Reserved — whether to clip the glow to the container bounds.
-        intensity: 
-            Multiplier applied to *blur* 
+        intensity:
+            Multiplier applied to *blur*
             (e.g. ``2.0`` doubles the effective blur radius).  Defaults to ``1``.
-        direction: 
-            Alternative offset specified as a two-element list 
+        direction:
+            Alternative offset specified as a two-element list
             ``[x, y]``; overrides *offset_x* / *offset_y* when present.
-        animated: 
+        animated:
             Reserved — enable animated glow pulsing.
-        duration_ms: 
+        duration_ms:
             Animation duration in milliseconds when *animated* is enabled.
     """
 

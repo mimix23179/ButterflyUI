@@ -9,21 +9,20 @@ __all__ = ["Pagination"]
 
 
 class Pagination(Component):
-    """
-    Unified pagination control for page-number and stepper-style navigation.
-
+    """Unified pagination control for page-number and stepper-style navigation.
+    
     ``Pagination`` is the canonical replacement for legacy ``page_nav`` and
     ``page_stepper`` controls. It supports numeric page buttons, previous/next
     actions, optional edge buttons, and computed page counts from total item
     counts.
-
+    
     The Flutter runtime exposes imperative methods (``set_page``,
     ``next_page``, ``prev_page``, ``first_page``, ``last_page``) so server-side
     handlers can drive the active page after initial render.
-
+    
     ```python
     import butterflyui as bui
-
+    
     pager = bui.Pagination(
         page=1,
         total_items=420,
@@ -34,10 +33,10 @@ class Pagination(Component):
         events=["change"],
     )
     ```
-
+    
     Args:
         page:
-            Current page number (1-based).
+            Current page index or page number used by the paginator.
         page_count:
             Total number of pages. If omitted, the renderer can derive it from
             ``total_items`` and ``page_size``.
@@ -54,24 +53,24 @@ class Pagination(Component):
         prev_label:
             Label for the previous-page action.
         next_label:
-            Label for the next-page action.
+            Label text rendered for the control's next-page or next-step action.
         mode:
             Optional display mode hint (for example ``"numbers"`` or
             ``"stepper"``) interpreted by the renderer.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     page: int | None = None
     """
-    Current page number (1-based).
+    Current page index or page number used by the paginator.
     """
 
     page_count: int | None = None
@@ -112,7 +111,7 @@ class Pagination(Component):
 
     next_label: str | None = None
     """
-    Label for the next-page action.
+    Label text rendered for the control's next-page or next-step action.
     """
 
     mode: str | None = None
@@ -123,7 +122,7 @@ class Pagination(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "pagination"
@@ -147,22 +146,23 @@ class Pagination(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        page=page,
+                        page_count=page_count,
+                        page_size=page_size,
+                        total_items=total_items,
+                        max_visible=max_visible,
+                        show_edges=show_edges,
+                        dense=dense,
+                        prev_label=prev_label,
+                        next_label=next_label,
+                        mode=mode,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                page=page,
-                page_count=page_count,
-                page_size=page_size,
-                total_items=total_items,
-                max_visible=max_visible,
-                show_edges=show_edges,
-                dense=dense,
-                prev_label=prev_label,
-                next_label=next_label,
-                mode=mode,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

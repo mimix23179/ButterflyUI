@@ -6,24 +6,23 @@ from .._shared import Component, merge_props
 __all__ = ["ScrollableRow"]
 
 class ScrollableRow(Component):
-    """
-    Horizontally scrollable row of children.
-
+    """Horizontally scrollable row of children.
+    
     The runtime renders a horizontal ``ListView``-backed row. ``spacing`` adds
     a gap between children; ``reverse`` flips the scroll direction.
     ``content_padding`` adds padding around the scrollable area.
     ``initial_offset`` sets the starting scroll position.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ScrollableRow(
         *[bui.Text(f"Tab {i}") for i in range(10)],
         spacing=4,
         events=["scroll"],
     )
     ```
-
+    
     Args:
         spacing:
             Horizontal gap between children in logical pixels.
@@ -34,7 +33,7 @@ class ScrollableRow(Component):
         initial_offset:
             Starting scroll offset in logical pixels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +60,7 @@ class ScrollableRow(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "scrollable_row"

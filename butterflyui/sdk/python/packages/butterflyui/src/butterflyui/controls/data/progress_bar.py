@@ -9,20 +9,19 @@ __all__ = ["ProgressBar"]
 
 
 class ProgressBar(Component):
-    """
-    Linear progress indicator for determinate or indeterminate tasks.
-
+    """Linear progress indicator for determinate or indeterminate tasks.
+    
     ``ProgressBar`` sends the canonical ``progress_bar`` control type and pins
     ``variant="linear"`` / ``circular=False`` so the Flutter side always builds
     a horizontal bar. Use ``value`` for determinate progress (typically ``0`` to
     ``1``), or set ``indeterminate=True`` to show an animated loading state.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bar = bui.ProgressBar(value=0.35, label="Uploading", stroke_width=8)
     ```
-
+    
     Args:
         value:
             Progress value for determinate mode.
@@ -33,11 +32,11 @@ class ProgressBar(Component):
         stroke_width:
             Thickness of the progress track/indicator.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -75,17 +74,18 @@ class ProgressBar(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        value=value,
+                        indeterminate=indeterminate,
+                        label=label,
+                        stroke_width=stroke_width,
+                        variant="linear",
+                        circular=False,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                value=value,
-                indeterminate=indeterminate,
-                label=label,
-                stroke_width=stroke_width,
-                variant="linear",
-                circular=False,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

@@ -9,20 +9,19 @@ __all__ = ["ActionBar"]
 
 
 class ActionBar(Component):
-    """
-    Horizontal command surface for global and context-sensitive actions.
-
+    """Horizontal command surface for global and context-sensitive actions.
+    
     Supports explicit ``items`` payloads and/or child controls. Item payloads
     may include icon descriptors and optional metadata so runtime events can
     carry command context.
-
+    
     The control also participates in shared layout props used across navigation
     and overlay surfaces, including alignment/positioning, margin, size
     constraints, radius, and clip behavior.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ActionBar(
         items=[
             {"id": "new", "icon": "add", "tooltip": "New"},
@@ -32,10 +31,10 @@ class ActionBar(Component):
         events=["action"],
     )
     ```
-
+    
     Args:
         items:
-            List of action item spec mappings to display in the bar.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         dense:
             Reduces item height and padding.
         spacing:
@@ -51,7 +50,7 @@ class ActionBar(Component):
         selection:
             Selection payload (IDs or descriptors) used by contextual actions.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         align / alignment / position:
             Placement hints for wrapper alignment in parent layouts.
         margin:
@@ -63,11 +62,11 @@ class ActionBar(Component):
         clip_behavior:
             Clip strategy for rounded shells and overflow.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Additional runtime props forwarded to the shared style pipeline.
     """
@@ -75,7 +74,7 @@ class ActionBar(Component):
 
     items: list[Mapping[str, Any]] | None = None
     """
-    List of action item spec mappings to display in the bar.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     dense: bool | None = None
@@ -110,7 +109,7 @@ class ActionBar(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "action_bar"

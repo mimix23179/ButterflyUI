@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["TimeSelect"]
 
 class TimeSelect(Component):
-    """
-    Time selection field that opens a Material time-picker dialog.
-
+    """Time selection field that opens a Material time-picker dialog.
+    
     Renders a read-only ``TextField`` showing the current time.  Tapping
     the field (or calling :meth:`open`) shows a Flutter
     ``showTimePicker`` dialog.  The selected time is stored as an
@@ -17,17 +16,17 @@ class TimeSelect(Component):
     picker wheel.  Time changes emit a ``change`` event.  Use
     :meth:`set_value` and :meth:`get_value` to drive the control from
     Python.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.TimeSelect(
         label="Meeting time",
         minute_step=15,
         use_24h=True,
     )
     ```
-
+    
     Args:
         value:
             Currently selected time as ``"HH:MM"``.
@@ -44,7 +43,7 @@ class TimeSelect(Component):
         enabled:
             If ``False``, the field is non-interactive.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -77,7 +76,7 @@ class TimeSelect(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "time_select"
 

@@ -9,18 +9,17 @@ __all__ = ["Motion"]
 
 
 class Motion(Component):
-    """
-    Interaction-aware motion choreography wrapper.
-
+    """Interaction-aware motion choreography wrapper.
+    
     ``Motion`` sits above ``Animation`` and focuses on state-driven micro-interactions:
     hover lift, press sink, focus pulse, enter transitions, and shared-axis style
     screen choreography. Use it to declaratively describe *when* movement should
     happen (hover/press/focus/selected/disabled) and *how* values should animate.
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         cta = bui.Motion(
             bui.Button("Start"),
             preset="hover_lift_glow",
@@ -32,14 +31,14 @@ class Motion(Component):
             curve="emphasized",
         )
         ```
-
+    
     ``Motion`` also maps directly to universal cross-control motion props:
     ``motion`` (primary), ``enter_motion``, ``exit_motion``,
     ``hover_motion``, and ``press_motion``.
-
+    
     Args:
         child:
-            Child control to wrap.
+            Single child control or payload wrapped by this control.
         preset:
             Preset choreography name (for example ``hover_lift``, ``press_sink``,
             ``hover_lift_glow``, ``focus_pulse``, ``enter_fade_up``,
@@ -58,15 +57,15 @@ class Motion(Component):
             State map for ``hover``, ``press``, ``focus``, ``selected``,
             ``disabled``. Each value is a map of animated props.
         hover:
-            Shortcut state map for hover.
+            State-specific style map applied while the pointer hovers the control. Use it to override hover-time visual properties such as background, border, elevation, or text color.
         press:
-            Shortcut state map for press.
+            State-specific motion configuration applied while the control is actively pressed.
         focus:
-            Shortcut state map for focus.
+            State-specific motion configuration applied while the control has keyboard or accessibility focus.
         selected:
             Shortcut state map for selected.
         disabled:
-            Shortcut state map for disabled.
+            State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
         from_:
             Base state map used as animation origin.
         to:
@@ -76,7 +75,7 @@ class Motion(Component):
         duration_ms:
             Explicit duration in milliseconds.
         curve:
-            Easing curve name.
+            Easing curve name or specification used for the motion transition.
         play:
             Enables/disables playback of base from/to transition.
         interactive:
@@ -84,28 +83,27 @@ class Motion(Component):
         axis:
             Axis hint used by some presets (x/y/z).
         opacity:
-            Shortcut target opacity.
+            Opacity value applied while this motion or visual state is active.
         scale:
-            Shortcut target scale.
+            Scale factor applied while the motion or effect state is active.
         x:
-            Shortcut target x translation.
+            Horizontal offset applied by the active motion or effect state.
         y:
-            Shortcut target y translation.
+            Vertical offset applied by the active motion or effect state.
         blur:
-            Shortcut target blur.
+            Blur amount applied by the motion or effect step when this state is active.
         glow:
             Glow descriptor merged into active state.
         shadow:
             Shadow descriptor merged into active state.
         events:
-            Runtime events emitted from motion host (for example
-            ``state_changed``, ``hover``, ``press``, ``focus``).
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed args.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -119,17 +117,17 @@ class Motion(Component):
 
     hover: Mapping[str, Any] | None = None
     """
-    Shortcut state map for hover.
+    State-specific style map applied while the pointer hovers the control. Use it to override hover-time visual properties such as background, border, elevation, or text color.
     """
 
     press: Mapping[str, Any] | None = None
     """
-    Shortcut state map for press.
+    State-specific motion configuration applied while the control is actively pressed.
     """
 
     focus: Mapping[str, Any] | None = None
     """
-    Shortcut state map for focus.
+    State-specific motion configuration applied while the control has keyboard or accessibility focus.
     """
 
     selected: Mapping[str, Any] | None = None
@@ -139,7 +137,7 @@ class Motion(Component):
 
     disabled: Mapping[str, Any] | None = None
     """
-    Shortcut state map for disabled.
+    State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
     """
 
     from_: Mapping[str, Any] | None = None
@@ -202,7 +200,7 @@ class Motion(Component):
 
     curve: str | None = None
     """
-    Easing curve name.
+    Easing curve name or specification used for the motion transition.
     """
 
     play: bool | None = None
@@ -222,27 +220,27 @@ class Motion(Component):
 
     opacity: float | None = None
     """
-    Shortcut target opacity.
+    Opacity value applied while this motion or visual state is active.
     """
 
     scale: float | None = None
     """
-    Shortcut target scale.
+    Scale factor applied while the motion or effect state is active.
     """
 
     x: float | None = None
     """
-    Shortcut target x translation.
+    Horizontal offset applied by the active motion or effect state.
     """
 
     y: float | None = None
     """
-    Shortcut target y translation.
+    Vertical offset applied by the active motion or effect state.
     """
 
     blur: float | None = None
     """
-    Shortcut target blur.
+    Blur amount applied by the motion or effect step when this state is active.
     """
 
     glow: Mapping[str, Any] | None = None
@@ -257,8 +255,7 @@ class Motion(Component):
 
     events: list[str] | None = None
     """
-    Runtime events emitted from motion host (for example
-    ``state_changed``, ``hover``, ``press``, ``focus``).
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "motion"

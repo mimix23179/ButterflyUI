@@ -7,21 +7,20 @@ from .button import Button
 __all__ = ["AsyncActionButton"]
 
 class AsyncActionButton(Button):
-    """
-    Button with built-in asynchronous busy/loading behavior.
-
+    """Button with built-in asynchronous busy/loading behavior.
+    
     ``AsyncActionButton`` extends :class:`Button` by synchronizing ``busy`` and
     ``loading`` state flags and exposing helpers to toggle busy state through
     runtime invocations. This is useful for long-running actions such as remote
     API calls, background jobs, and multi-step workflows.
-
+    
     While busy, the renderer can show a spinner and optional ``busy_label``;
     when ``disabled_while_busy`` is enabled, presses are ignored until the
     operation completes.
-
+    
     ```python
     import butterflyui as bui
-
+    
     save_btn = bui.AsyncActionButton(
         "Save",
         action_id="save_document",
@@ -29,7 +28,7 @@ class AsyncActionButton(Button):
         disabled_while_busy=True,
     )
     ```
-
+    
     Args:
         label:
             Button text. ``text`` takes precedence when both are set.
@@ -40,15 +39,15 @@ class AsyncActionButton(Button):
         variant:
             Optional visual variant (for example ``"filled"`` or ``"outlined"``).
         busy:
-            Busy/loading state flag.
+            Controls whether the control should render its busy or in-progress state instead of its idle presentation.
         loading:
-            Alias for ``busy``.
+            Backward-compatible alias for ``busy``. When both fields are provided, ``busy`` takes precedence and this alias is kept only for compatibility.
         disabled_while_busy:
             If ``True``, disables interaction while busy.
         busy_label:
-            Optional text shown while busy.
+            Replacement label text shown while the control is in its busy state.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         action:
             Declarative action descriptor fired on press.
         action_id:
@@ -60,11 +59,11 @@ class AsyncActionButton(Button):
         actions:
             Action descriptor list executed on press.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
@@ -87,7 +86,7 @@ class AsyncActionButton(Button):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     action: Any | None = None
@@ -118,12 +117,12 @@ class AsyncActionButton(Button):
 
     busy: bool | None = None
     """
-    Busy/loading state flag.
+    Controls whether the control should render its busy or in-progress state instead of its idle presentation.
     """
 
     loading: bool | None = None
     """
-    Alias for ``busy``.
+    Backward-compatible alias for ``busy``. When both fields are provided, ``busy`` takes precedence and this alias is kept only for compatibility.
     """
 
     disabled_while_busy: bool | None = None
@@ -133,7 +132,7 @@ class AsyncActionButton(Button):
 
     busy_label: str | None = None
     """
-    Optional text shown while busy.
+    Replacement label text shown while the control is in its busy state.
     """
     control_type = "async_action_button"
 
@@ -159,6 +158,13 @@ class AsyncActionButton(Button):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        busy=busy if busy is not None else loading,
+                        loading=loading if loading is not None else busy,
+                        disabled_while_busy=disabled_while_busy,
+                        busy_label=busy_label,
+                    )
         super().__init__(
             label=label,
             text=text,
@@ -170,13 +176,7 @@ class AsyncActionButton(Button):
             action_event=action_event,
             action_payload=action_payload,
             actions=actions,
-            props=merge_props(
-                props,
-                busy=busy if busy is not None else loading,
-                loading=loading if loading is not None else busy,
-                disabled_while_busy=disabled_while_busy,
-                busy_label=busy_label,
-            ),
+            props=merged,
             style=style,
             strict=strict,
             **kwargs,

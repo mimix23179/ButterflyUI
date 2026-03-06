@@ -6,33 +6,32 @@ from .._shared import Component, merge_props
 __all__ = ["Dropdown"]
 
 class Dropdown(Component):
-    """
-    Non-editable drop-down select rendered as a ``Combobox``.
-
+    """Non-editable drop-down select rendered as a ``Combobox``.
+    
     Extends :class:`Combobox` but maps to the ``dropdown`` control type
     on the Flutter side, which may render as a pure select-only
     dropdown rather than an editable text field.  Supports the same
     option, grouping, async-source, and imperative methods as
     :class:`Combobox`.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Dropdown(
         options=["Small", "Medium", "Large"],
         label="Size",
         value="Medium",
     )
     ```
-
+    
     Args:
         value:
-            Currently selected value.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         options:
             List of option items (strings or ``{"label", "value"}``
             mappings).
         items:
-            Alias for ``options``.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         groups:
             List of grouped option sections, each with
             ``"label"`` and ``"options"`` keys.
@@ -41,23 +40,23 @@ class Dropdown(Component):
         hint:
             Hint/placeholder text shown when nothing is selected.
         placeholder:
-            Alias for ``hint``.
+            Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
         loading:
             If ``True``, a progress indicator is shown.
         async_source:
-            Enables async filtering mode.
+            Async data source identifier or configuration used to fetch items for this control on demand.
         debounce_ms:
             Debounce delay in milliseconds for async input events.
         enabled:
             If ``False``, the control is non-interactive.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     value: str | None = None
     """
-    Currently selected value.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     options: list[Any] | None = None
@@ -68,7 +67,7 @@ class Dropdown(Component):
 
     items: list[Any] | None = None
     """
-    Alias for ``options``.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     groups: list[Mapping[str, Any]] | None = None
@@ -89,7 +88,7 @@ class Dropdown(Component):
 
     placeholder: str | None = None
     """
-    Alias for ``hint``.
+    Backward-compatible alias for ``hint``. When both fields are provided, ``hint`` takes precedence and this alias is kept only for compatibility.
     """
 
     loading: bool | None = None
@@ -99,7 +98,7 @@ class Dropdown(Component):
 
     async_source: str | None = None
     """
-    Enables async filtering mode.
+    Async data source identifier or configuration used to fetch items for this control on demand.
     """
 
     debounce_ms: int | None = None
@@ -109,7 +108,7 @@ class Dropdown(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "dropdown"
 

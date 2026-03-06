@@ -6,18 +6,17 @@ from .._shared import Component, merge_props
 __all__ = ["Outline"]
 
 class Outline(Component):
-    """
-    Expandable tree outline panel for hierarchical navigation.
-
+    """Expandable tree outline panel for hierarchical navigation.
+    
     The runtime renders a collapsible tree of nodes. ``nodes`` supplies the
     hierarchy, where each node may have a ``children`` list. ``expanded`` is
     a list of node IDs that are currently open. ``selected_id`` highlights
     the active node. ``dense`` reduces row height; ``show_icons`` controls
     icon visibility.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Outline(
         nodes=[
             {"id": "src", "label": "src", "children": [
@@ -28,7 +27,7 @@ class Outline(Component):
         events=["select", "expand"],
     )
     ```
-
+    
     Args:
         nodes:
             List of tree node spec mappings. Nodes may include ``id``,
@@ -42,7 +41,7 @@ class Outline(Component):
         show_icons:
             When ``True`` icon decorations are shown beside node labels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -74,7 +73,7 @@ class Outline(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "outline"

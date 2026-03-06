@@ -7,7 +7,7 @@ __all__ = ["BarChart"]
 
 class BarChart(Component):
     """Vertical bar chart rendered with ``CustomPaint``.
-
+    
     Draws one or more series of vertical bars using a lightweight
     ``CustomPainter``.  Single-series data is passed via ``values``;
     multi-series data uses ``datasets`` (a list of dicts with a
@@ -15,42 +15,42 @@ class BarChart(Component):
     are stacked on top of each other; when ``grouped`` is ``True``
     they sit side-by-side.  Tapping a bar area emits a ``"select"``
     event containing the bar index and value.
-
+    
     Use ``set_data`` to replace the chart data at runtime.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         chart = bui.BarChart(
             values=[12, 25, 18, 30, 22],
             labels=["Mon", "Tue", "Wed", "Thu", "Fri"],
             color="#2563eb",
         )
-
+    
     Args:
-        values: 
+        values:
             Primary list of numeric bar values.
-        points: 
-            Alias for ``values``.
-        labels: 
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        labels:
             Category labels displayed along the x-axis.
-        datasets: 
+        datasets:
             List of dataset mappings, each containing a ``"values"`` key, for multi-series bar charts.
-        grouped: 
-            If ``True`` multiple datasets are drawn side-by-side.
-        stacked: 
-            If ``True`` datasets are stacked vertically.
-        fill: 
+        grouped:
+            Controls whether multiple datasets are drawn side-by-side. Set it to ``False`` to disable this behavior.
+        stacked:
+            Controls whether datasets are stacked vertically. Set it to ``False`` to disable this behavior.
+        fill:
             Whether bars are solid-filled (default ``True``).
-        color: 
+        color:
             Primary bar colour forwarded to the painter.
-        animate: 
-            If ``True`` the runtime animates data transitions.
-        show_tooltip: 
-            If ``True`` a tooltip appears on bar hover.
+        animate:
+            Controls whether the runtime animates data transitions. Set it to ``False`` to disable this behavior.
+        show_tooltip:
+            Controls whether a tooltip appears on bar hover. Set it to ``False`` to disable this behavior.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -61,7 +61,7 @@ class BarChart(Component):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     labels: list[str] | None = None
@@ -76,12 +76,12 @@ class BarChart(Component):
 
     grouped: bool | None = None
     """
-    If ``True`` multiple datasets are drawn side-by-side.
+    Controls whether multiple datasets are drawn side-by-side. Set it to ``False`` to disable this behavior.
     """
 
     stacked: bool | None = None
     """
-    If ``True`` datasets are stacked vertically.
+    Controls whether datasets are stacked vertically. Set it to ``False`` to disable this behavior.
     """
 
     fill: bool | None = None
@@ -96,17 +96,17 @@ class BarChart(Component):
 
     animate: bool | None = None
     """
-    If ``True`` the runtime animates data transitions.
+    Controls whether the runtime animates data transitions. Set it to ``False`` to disable this behavior.
     """
 
     show_tooltip: bool | None = None
     """
-    If ``True`` a tooltip appears on bar hover.
+    Controls whether a tooltip appears on bar hover. Set it to ``False`` to disable this behavior.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "bar_chart"
 

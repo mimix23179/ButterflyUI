@@ -9,16 +9,16 @@ class GlassBlur(Component):
     """Frosted-glass blur panel built from a ``BackdropFilter`` with an
     optional tinted overlay, rounded corners, border glow, and a
     subtle noise texture.
-
+    
     The Flutter runtime clips the child to a ``ClipRRect``, applies a
     Gaussian ``BackdropFilter`` blur, then paints a semi-transparent
     colour fill, optional border, optional glow ``BoxShadow``, and an
     optional noise overlay via a ``CustomPaint`` painter.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         glass = bui.GlassBlur(
             bui.Text("Hello"),
             blur=14,
@@ -26,30 +26,30 @@ class GlassBlur(Component):
             radius=12,
             border_color="#ffffff40",
         )
-
+    
     Args:
-        blur: 
-            Gaussian blur sigma applied to the backdrop.  
+        blur:
+            Gaussian blur sigma applied to the backdrop.
             Defaults to ``14``.
-        opacity: 
-            Opacity of the tinted colour fill (``0.0`` – ``1.0``).  
+        opacity:
+            Opacity of the tinted colour fill (``0.0`` – ``1.0``).
             Defaults to ``0.16``.
-        color: 
-            Fill colour composited on top of the blur.  
+        color:
+            Fill colour composited on top of the blur.
             Defaults to white.
-        radius: 
-            Corner radius of the clipping ``RRect`` and ``BoxDecoration``.  
+        radius:
+            Corner radius of the clipping ``RRect`` and ``BoxDecoration``.
             Defaults to ``12``.
-        border_color: 
+        border_color:
             Optional border colour drawn around the glass panel.
-        border_width: 
-            Stroke width of the border in logical pixels.  
+        border_width:
+            Stroke width of the border in logical pixels.
             Defaults to ``1``.
-        noise_opacity: 
-            Opacity of the random-dot noise texture overlay (``0.0`` – ``1.0``).  
+        noise_opacity:
+            Opacity of the random-dot noise texture overlay (``0.0`` – ``1.0``).
             ``0`` disables the texture.
-        border_glow: 
-            Optional colour for an outer glow 
+        border_glow:
+            Optional colour for an outer glow
             ``BoxShadow`` rendered behind the panel.
     """
 

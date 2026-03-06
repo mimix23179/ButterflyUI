@@ -1,0 +1,9 @@
+{
+  "constructor_style_counts": {
+    "canonical_merge": 180,
+    "delegating_wrapper": 14,
+    "manual_super": 3,
+    "none": 17
+  },
+  "failures": []
+}

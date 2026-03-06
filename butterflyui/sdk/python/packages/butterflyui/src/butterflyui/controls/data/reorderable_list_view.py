@@ -9,17 +9,16 @@ __all__ = ["ReorderableListView"]
 
 
 class ReorderableListView(Component):
-    """
-    Drag-and-drop list surface with runtime reorder state.
-
+    """Drag-and-drop list surface with runtime reorder state.
+    
     ``ReorderableListView`` renders an ordered item collection that users can
     rearrange by dragging. Use :meth:`set_items` when the Python side needs to
     replace the current sequence, and subscribe to reorder-related events to
     persist the new order.
-
+    
     ```python
     import butterflyui as bui
-
+    
     lst = bui.ReorderableListView(
         items=[
             {"id": "a", "label": "Backlog"},
@@ -29,20 +28,20 @@ class ReorderableListView(Component):
         events=["reorder", "change"],
     )
     ```
-
+    
     Args:
         items:
             Ordered item descriptors rendered by the list.
         dense:
             If ``True``, uses compact row spacing.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -58,7 +57,7 @@ class ReorderableListView(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "reorderable_list_view"
@@ -74,14 +73,15 @@ class ReorderableListView(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        items=list(items) if items is not None else None,
+                        dense=dense,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                items=list(items) if items is not None else None,
-                dense=dense,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

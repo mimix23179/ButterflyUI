@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["DataSourceView"]
 
 class DataSourceView(Component):
-    """
-    Searchable, selectable list of data-source entries with live
+    """Searchable, selectable list of data-source entries with live
     filtering and selection state.
-
+    
     The runtime builds a ``Column`` containing an optional search
     ``TextField`` (when ``show_search`` is ``True``) and a ``ListView``
     of ``ListTile`` rows rendered from the ``sources`` list.  Each
@@ -18,10 +17,10 @@ class DataSourceView(Component):
     emits a ``"select"`` event with the source ``id``, ``index``, and
     full ``source`` payload.  Typing in the search field filters by
     title case-insensitively and emits ``"query_change"``.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DataSourceView(
         sources=[
             {"id": "pg", "title": "PostgreSQL", "subtitle": "localhost:5432"},
@@ -32,20 +31,20 @@ class DataSourceView(Component):
         dense=True,
     )
     ```
-
+    
     Args:
-        sources: 
+        sources:
             List of source mapping objects.  Each should contain at least ``"id"``; ``"title"``, ``"label"``, and ``"subtitle"`` keys are used for display.
-        selected_id: 
+        selected_id:
             The ``id`` of the currently highlighted / selected source row.
-        query: 
+        query:
             Initial search-filter text pre-filled in the search field.
-        show_search: 
+        show_search:
             If ``True``, a ``TextField`` with a search icon is rendered above the list for live filtering.
-        dense: 
+        dense:
             If ``True``, list tiles use compact vertical density.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -76,7 +75,7 @@ class DataSourceView(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "data_source_view"

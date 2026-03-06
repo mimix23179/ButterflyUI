@@ -6,20 +6,19 @@ from .._shared import Component, merge_props
 __all__ = ["GlyphButton"]
 
 class GlyphButton(Component):
-    """
-    Unified glyph/icon surface with optional button interaction.
-
+    """Unified glyph/icon surface with optional button interaction.
+    
     ``GlyphButton`` is the merged control for legacy ``glyph`` and
     ``glyph_button`` behavior. It can render as an interactive icon trigger or
     as a passive visual glyph by setting ``interactive=False``.
-
+    
     ``glyph`` and ``icon`` are interchangeable aliases. Event subscriptions are
     forwarded to runtime so this control can participate in action pipelines,
     overlays, and other interaction flows.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.GlyphButton(
         glyph="settings",
         tooltip="Preferences",
@@ -28,30 +27,30 @@ class GlyphButton(Component):
         events=["click"],
     )
     ```
-
+    
     Args:
         glyph:
             Icon name, codepoint, or glyph string payload.
         icon:
-            Alias for ``glyph``.
+            Backward-compatible alias for ``glyph``. When both fields are provided, ``glyph`` takes precedence and this alias is kept only for compatibility.
         tooltip:
-            Assistive tooltip text.
+            Tooltip text shown when the user hovers or long-presses the control.
         size:
-            Glyph size in logical pixels.
+            Requested icon, glyph, or control size in logical pixels or runtime size units.
         color:
-            Foreground color for the glyph.
+            Primary color value used by the control for text, icons, strokes, or accent surfaces.
         enabled:
             If ``False``, the control is disabled.
         interactive:
             If ``False``, renders as a passive glyph without button semantics.
         events:
-            Runtime event names to subscribe to.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional props merged before typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style map for the control host.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            Enables strict schema validation when supported.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra runtime props forwarded to the renderer.
     """
@@ -64,17 +63,17 @@ class GlyphButton(Component):
 
     icon: str | int | None = None
     """
-    Alias for ``glyph``.
+    Backward-compatible alias for ``glyph``. When both fields are provided, ``glyph`` takes precedence and this alias is kept only for compatibility.
     """
 
     size: float | None = None
     """
-    Glyph size in logical pixels.
+    Requested icon, glyph, or control size in logical pixels or runtime size units.
     """
 
     color: Any | None = None
     """
-    Foreground color for the glyph.
+    Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
     interactive: bool | None = None
@@ -84,7 +83,7 @@ class GlyphButton(Component):
 
     events: list[str] | None = None
     """
-    Runtime event names to subscribe to.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "glyph_button"
 

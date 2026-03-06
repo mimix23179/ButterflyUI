@@ -7,23 +7,22 @@ from .emoji_picker import EmojiPicker
 __all__ = ["IconPicker"]
 
 class IconPicker(EmojiPicker):
-    """
-    Icon selection panel — a :class:`EmojiPicker` variant for UI icons.
-
+    """Icon selection panel — a :class:`EmojiPicker` variant for UI icons.
+    
     Inherits the full grid, search, and category behaviour of
     :class:`EmojiPicker` but maps to the ``icon_picker`` control type
     so the Flutter side can render icon glyphs instead of emoji
     characters.  All :class:`EmojiPicker` parameters apply.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.IconPicker(
         show_search=True,
         categories=["interface", "media", "navigation"],
     )
     ```
-
+    
     Args:
         value:
             Pre-selected icon identifier string.
@@ -39,7 +38,7 @@ class IconPicker(EmojiPicker):
         show_recent:
             If ``True``, a *Recently Used* tab is shown.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -76,7 +75,7 @@ class IconPicker(EmojiPicker):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "icon_picker"
 

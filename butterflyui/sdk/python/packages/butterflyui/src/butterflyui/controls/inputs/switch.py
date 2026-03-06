@@ -9,16 +9,15 @@ __all__ = ["Switch"]
 
 
 class Switch(Component):
-    """
-    Boolean switch input with optional segmented presentation.
-
+    """Boolean switch input with optional segmented presentation.
+    
     ``Switch`` now also covers segmented-switch use cases through ``mode`` and
     ``segments``. In default mode it behaves like a standard on/off toggle;
     segmented mode allows richer labels and grouped state presentation.
-
+    
     ```python
     import butterflyui as bui
-
+    
     toggle = bui.Switch(
         value=True,
         label="Notifications",
@@ -26,40 +25,40 @@ class Switch(Component):
         off_label="Off",
     )
     ```
-
+    
     Args:
         value:
-            Current boolean state.
+            Current value rendered or edited by the control. The exact payload shape depends on the control type.
         label:
-            Label shown next to the switch.
+            Primary label text rendered by the control or its active action.
         inline:
             If ``True``, aligns label and switch inline.
         mode:
             Rendering mode (for example ``"toggle"`` or ``"segmented"``
             depending on renderer support).
         on_label:
-            Label for the enabled state.
+            Label text shown when the control is in its on or enabled state.
         off_label:
-            Label for the disabled state.
+            Label text shown when the control is in its off or disabled state.
         segments:
             Segment descriptors for segmented presentation mode.
         props:
-            Raw prop overrides merged after typed arguments.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
     value: bool | None = None
     """
-    Current boolean state.
+    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     label: str | None = None
     """
-    Label shown next to the switch.
+    Primary label text rendered by the control or its active action.
     """
 
     inline: bool | None = None
@@ -75,12 +74,12 @@ class Switch(Component):
 
     on_label: str | None = None
     """
-    Label for the enabled state.
+    Label text shown when the control is in its on or enabled state.
     """
 
     off_label: str | None = None
     """
-    Label for the disabled state.
+    Label text shown when the control is in its off or disabled state.
     """
 
     segments: list[Any] | None = None
@@ -105,18 +104,19 @@ class Switch(Component):
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
+        merged = merge_props(
+                        props,
+                        value=value,
+                        label=label,
+                        inline=inline,
+                        mode=mode,
+                        on_label=on_label,
+                        off_label=off_label,
+                        segments=segments,
+                        **kwargs,
+                    )
         super().__init__(
-            props=merge_props(
-                props,
-                value=value,
-                label=label,
-                inline=inline,
-                mode=mode,
-                on_label=on_label,
-                off_label=off_label,
-                segments=segments,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

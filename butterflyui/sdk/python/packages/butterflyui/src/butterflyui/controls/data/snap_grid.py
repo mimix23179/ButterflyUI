@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["SnapGrid"]
 
 class SnapGrid(Component):
-    """
-    Interactive grid overlay with major/minor lines, optional snapping,
+    """Interactive grid overlay with major/minor lines, optional snapping,
     and pointer-event emission for hover, press, and drag.
-
+    
     The runtime paints a ``CustomPaint`` grid using ``_GridPainter``
     with configurable ``spacing`` (major cell size, clamped 2–200 lp),
     ``subdivisions`` (minor lines per major cell, clamped 1–16),
@@ -19,10 +18,10 @@ class SnapGrid(Component):
     When ``emit_on_hover``, ``emit_on_press``, or ``emit_on_drag`` is
     ``True`` the corresponding pointer coordinates are sent as
     ``"hover"``, ``"press"``, or ``"drag"`` events.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.SnapGrid(
         bui.Text("Canvas content"),
         show_grid=True,
@@ -32,48 +31,48 @@ class SnapGrid(Component):
         emit_on_press=True,
     )
     ```
-
+    
     Args:
-        show_grid: 
-            If ``True`` (default), the visual grid lines are painted.  Set to ``False`` to hide the grid while keeping snapping.
-        spacing: 
+        show_grid:
+            Controls whether (default), the visual grid lines are painted. Set to ``False`` to hide the grid while keeping snapping. Set it to ``False`` to disable this behavior.
+        spacing:
             Major grid-cell spacing in logical pixels (clamped ``2`` – ``200``).  Defaults to ``16``.
-        subdivisions: 
+        subdivisions:
             Number of minor divisions within each major cell (clamped ``1`` – ``16``).  Defaults to ``1``.
-        line_color: 
+        line_color:
             Colour of minor grid lines.  Defaults to ``#22FFFFFF``.
-        major_line_color: 
+        major_line_color:
             Colour of major grid lines.  Defaults to ``#44FFFFFF``.
-        line_width: 
+        line_width:
             Stroke width of minor lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.0``.
-        major_line_width: 
+        major_line_width:
             Stroke width of major lines in logical pixels (clamped ``0.25`` – ``8``).  Defaults to ``1.2``.
-        background: 
+        background:
             Background colour/paint applied behind the grid lines.
-        origin: 
+        origin:
             Grid origin point or offset configuration.
-        snap: 
+        snap:
             If ``True``, pointer coordinates are rounded to the nearest grid intersection.
-        snap_spacing: 
+        snap_spacing:
             Snap interval in logical pixels (overrides ``spacing`` for snapping calculations).
-        snap_mode: 
+        snap_mode:
             Snap strategy hint forwarded to the runtime.
-        enabled: 
+        enabled:
             If ``False``, pointer interaction is disabled.
-        emit_on_hover: 
+        emit_on_hover:
             If ``True``, emits ``"hover"`` events with ``x``/``y`` as the pointer moves over the grid.
-        emit_on_press: 
+        emit_on_press:
             If ``True``, emits ``"press"`` events with ``x``/``y`` on pointer down.
-        emit_on_drag: 
+        emit_on_drag:
             If ``True``, emits ``"drag"`` events with ``x``/``y``/``dx``/``dy`` during drag gestures.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
     show_grid: bool | None = None
     """
-    If ``True`` (default), the visual grid lines are painted.  Set to ``False`` to hide the grid while keeping snapping.
+    Controls whether (default), the visual grid lines are painted. Set to ``False`` to hide the grid while keeping snapping. Set it to ``False`` to disable this behavior.
     """
 
     spacing: float | None = None
@@ -148,7 +147,7 @@ class SnapGrid(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "snap_grid"

@@ -9,19 +9,18 @@ __all__ = ["Sidebar"]
 
 
 class Sidebar(Component):
-    """
-    Configurable navigation sidebar with sections, search, and selection state.
-
+    """Configurable navigation sidebar with sections, search, and selection state.
+    
     ``Sidebar`` is the canonical replacement for legacy ``navigator``. It can
     render either a flat list (``items``) or grouped sections (``sections``),
     optionally with a searchable header and collapsible groups.
-
+    
     Through ``props`` the control also supports shared placement/layout hints
     (alignment/position, margin, constraints, radius/clip behavior).
-
+    
     ```python
     import butterflyui as bui
-
+    
     nav = bui.Sidebar(
         title="Workspace",
         items=[
@@ -33,37 +32,36 @@ class Sidebar(Component):
         events=["select", "search"],
     )
     ```
-
+    
     Args:
         sections:
             Grouped navigation sections, each containing nested ``items``.
         items:
             Flat list of navigation item descriptors.
         selected_id:
-            Selected item ID.
+            Identifier of the currently selected item, tab, route, or navigation destination.
         title:
-            Optional sidebar heading label.
+            Primary heading text rendered by the control.
         show_search:
             Enables a search input at the top of the sidebar.
         query:
-            Initial search query value.
+            Current query string used to filter, search, or narrow the control's content.
         collapsible:
             Enables collapsible section behavior.
         dense:
-            Uses compact row spacing.
+            Enables a denser layout with reduced gaps, padding, or row height.
         emit_on_search_change:
             Emits search events while typing.
         search_debounce_ms:
             Debounce window for incremental search events.
         events:
-            Event names the Flutter side should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides merged after typed arguments, including style
-            and shared layout hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Style map forwarded to the renderer style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, unknown props raise validation errors.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
     """
 
 
@@ -79,12 +77,12 @@ class Sidebar(Component):
 
     selected_id: str | None = None
     """
-    Selected item ID.
+    Identifier of the currently selected item, tab, route, or navigation destination.
     """
 
     title: str | None = None
     """
-    Optional sidebar heading label.
+    Primary heading text rendered by the control.
     """
 
     show_search: bool | None = None
@@ -94,7 +92,7 @@ class Sidebar(Component):
 
     query: str | None = None
     """
-    Initial search query value.
+    Current query string used to filter, search, or narrow the control's content.
     """
 
     collapsible: bool | None = None
@@ -104,7 +102,7 @@ class Sidebar(Component):
 
     dense: bool | None = None
     """
-    Uses compact row spacing.
+    Enables a denser layout with reduced gaps, padding, or row height.
     """
 
     emit_on_search_change: bool | None = None
@@ -119,7 +117,7 @@ class Sidebar(Component):
 
     events: list[str] | None = None
     """
-    Event names the Flutter side should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "sidebar"

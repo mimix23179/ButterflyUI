@@ -8,59 +8,59 @@ __all__ = ["GradientSweep"]
 class GradientSweep(Component):
     """Animated sweep-gradient overlay that rotates through configurable
     colours using a ``ShaderMask``.
-
+    
     The Flutter runtime paints a ``SweepGradient`` via ``ShaderMask``
     (``BlendMode.srcATop``) on top of the child.  An
     ``AnimationController`` continuously advances the rotation angle,
     creating a spinning colour-wheel effect.  Playback can be paused,
     resumed, and the colour list or angle can be updated at runtime
     through invoke methods.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         sweep = bui.GradientSweep(
             bui.Text("Neon"),
             colors=["#22d3ee", "#a78bfa", "#f472b6"],
             duration_ms=2000,
             opacity=0.6,
         )
-
+    
     Args:
-        colors: 
+        colors:
             List of gradient-stop colours.  Defaults to a built-in
             cyan / purple / pink / green palette if empty.
-        stops: 
+        stops:
             Optional list of gradient stop positions (``0.0`` –
             ``1.0``), one per colour.  Length must match *colors*.
-        duration_ms: 
+        duration_ms:
             Full rotation period in milliseconds.  Defaults
             to ``1800``; clamped to ``1 – 600 000``.
-        duration: 
-            Alias for *duration_ms*.
-        angle: 
+        duration:
+            Backward-compatible alias for ``*duration_ms*``. When both fields are provided, ``*duration_ms*`` takes precedence and this alias is kept only for compatibility.
+        angle:
             Static base angle in **degrees** added to the animated
             rotation.
-        start_angle: 
+        start_angle:
             Sweep gradient start angle in degrees.  Defaults
             to ``0``.
-        end_angle: 
+        end_angle:
             Sweep gradient end angle in degrees.  Defaults to
             ``360``.
-        opacity: 
+        opacity:
             Shader mask opacity (``0.0`` – ``1.0``).  Defaults to
             ``0.6``.
-        loop: 
+        loop:
             When ``True`` (default) the rotation repeats
             indefinitely.
-        autoplay: 
+        autoplay:
             When ``True`` (default) the animation starts on
             mount.
-        play: 
+        play:
             Explicit play flag; ``True`` starts, ``False`` pauses.
-        playing: 
-            Alias for *play*.
+        playing:
+            Backward-compatible alias for ``*play*``. When both fields are provided, ``*play*`` takes precedence and this alias is kept only for compatibility.
     """
 
 
@@ -84,7 +84,7 @@ class GradientSweep(Component):
 
     duration: int | None = None
     """
-    Alias for *duration_ms*.
+    Backward-compatible alias for ``*duration_ms*``. When both fields are provided, ``*duration_ms*`` takes precedence and this alias is kept only for compatibility.
     """
 
     angle: float | None = None
@@ -130,7 +130,7 @@ class GradientSweep(Component):
 
     playing: bool | None = None
     """
-    Alias for *play*.
+    Backward-compatible alias for ``*play*``. When both fields are provided, ``*play*`` takes precedence and this alias is kept only for compatibility.
     """
     control_type = "gradient_sweep"
 

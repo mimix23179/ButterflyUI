@@ -9,22 +9,21 @@ __all__ = ["PageView"]
 
 
 class PageView(Component):
-    """
-    Swipeable page container with index control and optional animation.
-
+    """Swipeable page container with index control and optional animation.
+    
     ``PageView`` renders multiple children as horizontally or vertically
     swipeable pages. The active page is controlled by ``index`` and can be
     changed either declaratively (prop updates) or imperatively via invoke
     helpers such as :meth:`set_index`, :meth:`next_page`, and
     :meth:`previous_page`.
-
+    
     Runtime supports both animated and instant page transitions. Layout knobs
     like ``viewport_fraction`` and ``pad_ends`` make it usable for carousel
     layouts in Gallery-like screens.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.PageView(
         bui.Text("Overview"),
         bui.Text("Details"),
@@ -35,7 +34,7 @@ class PageView(Component):
         events=["change"],
     )
     ```
-
+    
     Args:
         index:
             Zero-based index of the visible page.
@@ -60,7 +59,7 @@ class PageView(Component):
         initial_page:
             Alias for ``index``. When both are provided, ``index`` wins.
         events:
-            Runtime event names that should be emitted to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -118,7 +117,7 @@ class PageView(Component):
 
     events: list[str] | None = None
     """
-    Runtime event names that should be emitted to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "page_view"

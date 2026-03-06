@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["SortableHeader"]
 
 class SortableHeader(Component):
-    """
-    Clickable column-header row that tracks the currently sorted column
+    """Clickable column-header row that tracks the currently sorted column
     and direction.
-
+    
     The runtime renders a ``Wrap`` of tappable header chips.  Each
     column mapping should carry a ``key`` (or ``id``/``field``) and a
     ``label`` (or ``title``).  The chip for the active ``sort_column``
@@ -18,10 +17,10 @@ class SortableHeader(Component):
     event with ``column``, ``sort_column``, and ``sort_ascending``
     keys.  Use ``set_sort()`` to change the sort state
     programmatically or ``clear_sort()`` to reset it.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.SortableHeader(
         columns=[
             {"key": "name", "label": "Name"},
@@ -33,18 +32,18 @@ class SortableHeader(Component):
         dense=True,
     )
     ```
-
+    
     Args:
-        columns: 
+        columns:
             Header column definitions — list of mappings with ``"key"`` (or ``"id"``/``"field"``) and ``"label"`` (or ``"title"``) keys.
-        sort_column: 
+        sort_column:
             The ``key`` of the currently sorted column.  ``None`` means no column is sorted.
-        sort_ascending: 
-            If ``True`` (default), the current sort direction is ascending.
-        dense: 
+        sort_ascending:
+            Controls whether (default), the current sort direction is ascending. Set it to ``False`` to disable this behavior.
+        dense:
             If ``True``, header chips use compact padding and smaller icon size.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -60,7 +59,7 @@ class SortableHeader(Component):
 
     sort_ascending: bool | None = None
     """
-    If ``True`` (default), the current sort direction is ascending.
+    Controls whether (default), the current sort direction is ascending. Set it to ``False`` to disable this behavior.
     """
 
     dense: bool | None = None
@@ -70,7 +69,7 @@ class SortableHeader(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "sortable_header"

@@ -9,22 +9,21 @@ __all__ = ["StyleScope", "Style"]
 
 
 class StyleScope(Component):
-    """
-    Subtree style context control for packs, tokens, and component recipes.
-
+    """Subtree style context control for packs, tokens, and component recipes.
+    
     Args:
         child:
             Primary child control placed inside the style scope.
         style_pack:
             Named style pack activated for the subtree.
         pack:
-            Alias for ``style_pack``.
+            Backward-compatible alias for ``style_pack``. When both fields are provided, ``style_pack`` takes precedence and this alias is kept only for compatibility.
         tokens:
             Token overrides applied inside the scope.
         token_overrides:
             Additional token overrides merged into ``tokens``.
         style_tokens:
-            Alternate token override alias.
+            Named style-token overrides scoped to the wrapped subtree.
         recipes:
             Component recipe payloads available inside the scope.
         default_style:
@@ -34,15 +33,15 @@ class StyleScope(Component):
         default_motion:
             Default motion payload applied within the scope.
         state:
-            Active scoped state token.
+            Current state token or state identifier forwarded into styling and runtime behavior.
         variant:
-            Active scoped variant token.
+            Variant token or preset name used to select a specific visual style.
         classes:
             Scoped class tokens used by descendant styling.
         effects:
             Scoped effects payload applied by the runtime.
         events:
-            Runtime events emitted by the style scope.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -53,7 +52,7 @@ class StyleScope(Component):
 
     pack: str | None = None
     """
-    Alias for ``style_pack``.
+    Backward-compatible alias for ``style_pack``. When both fields are provided, ``style_pack`` takes precedence and this alias is kept only for compatibility.
     """
 
     tokens: Mapping[str, Any] | None = None
@@ -68,7 +67,7 @@ class StyleScope(Component):
 
     style_tokens: Mapping[str, Any] | None = None
     """
-    Alternate token override alias.
+    Named style-token overrides scoped to the wrapped subtree.
     """
 
     recipes: Mapping[str, Any] | None = None
@@ -93,12 +92,12 @@ class StyleScope(Component):
 
     state: str | None = None
     """
-    Active scoped state token.
+    Current state token or state identifier forwarded into styling and runtime behavior.
     """
 
     variant: Any | None = None
     """
-    Active scoped variant token.
+    Variant token or preset name used to select a specific visual style.
     """
 
     classes: str | list[str] | None = None
@@ -113,7 +112,7 @@ class StyleScope(Component):
 
     events: list[str] | None = None
     """
-    Runtime events emitted by the style scope.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "style"
@@ -148,27 +147,28 @@ class StyleScope(Component):
         if style_tokens:
             merged_tokens.update(dict(style_tokens))
 
+        merged = merge_props(
+                        props,
+                        style_pack=resolved_pack,
+                        pack=resolved_pack,
+                        tokens=merged_tokens or None,
+                        token_overrides=merged_tokens or None,
+                        style_tokens=merged_tokens or None,
+                        recipes=dict(recipes) if recipes is not None else None,
+                        default_style=dict(default_style) if default_style is not None else None,
+                        default_modifiers=default_modifiers,
+                        default_motion=default_motion,
+                        state=state,
+                        variant=variant,
+                        classes=classes,
+                        effects=effects,
+                        events=events,
+                        **kwargs,
+                    )
         super().__init__(
             *children_args,
             child=child,
-            props=merge_props(
-                props,
-                style_pack=resolved_pack,
-                pack=resolved_pack,
-                tokens=merged_tokens or None,
-                token_overrides=merged_tokens or None,
-                style_tokens=merged_tokens or None,
-                recipes=dict(recipes) if recipes is not None else None,
-                default_style=dict(default_style) if default_style is not None else None,
-                default_modifiers=default_modifiers,
-                default_motion=default_motion,
-                state=state,
-                variant=variant,
-                classes=classes,
-                effects=effects,
-                events=events,
-                **kwargs,
-            ),
+            props=merged,
             style=style,
             strict=strict,
         )

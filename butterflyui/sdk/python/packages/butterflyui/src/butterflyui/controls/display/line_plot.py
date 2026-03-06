@@ -8,32 +8,32 @@ __all__ = ["LinePlot"]
 
 class LinePlot(LineChart):
     """Simplified line-chart alias for quick single-series plots.
-
+    
     Extends ``LineChart`` with an identical parameter surface.  Use
     this when you want a semantic distinction (e.g. a scientific
     "plot" vs. a dashboard "chart") without any behavioural
     difference.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         plot = bui.LinePlot(
             values=[1.2, 3.4, 2.1, 5.6],
             color="#059669",
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric data points for the polyline.
-        points: 
-            Alias for ``values``.
-        fill: 
-            If ``True`` the area under the line is filled.
-        color: 
-            Stroke colour for the line.
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        fill:
+            Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
+        color:
+            Primary color value used by the control for text, icons, strokes, or accent surfaces.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -44,22 +44,22 @@ class LinePlot(LineChart):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     fill: bool | None = None
     """
-    If ``True`` the area under the line is filled.
+    Controls whether the area under the line is filled. Set it to ``False`` to disable this behavior.
     """
 
     color: Any | None = None
     """
-    Stroke colour for the line.
+    Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "line_plot"
 

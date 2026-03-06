@@ -9,20 +9,19 @@ __all__ = ["BreadcrumbBar"]
 
 
 class BreadcrumbBar(Component):
-    """
-    Interactive breadcrumb bar with path parsing and overflow behaviors.
-
+    """Interactive breadcrumb bar with path parsing and overflow behaviors.
+    
     Renders clickable path segments from either a slash-delimited ``path`` or
     explicit ``items`` payloads. ``crumbs`` and ``routes`` remain accepted
     aliases for compatibility with previous payload shapes.
-
+    
     Supports shared placement props via ``props`` (alignment, margin, size
     constraints, radius/clip) so breadcrumb surfaces can be docked in custom
     headers/toolbars.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.BreadcrumbBar(
         path="/home/projects/my-project",
         separator="/",
@@ -30,12 +29,12 @@ class BreadcrumbBar(Component):
         events=["navigate"],
     )
     ```
-
+    
     Args:
         items:
-            Explicit list of segment spec mappings. Overrides ``path``.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         crumbs:
-            Alias for ``items``.
+            Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
         routes:
             Alias for ``items`` used by legacy ``breadcrumbs`` payloads.
         path:
@@ -55,20 +54,20 @@ class BreadcrumbBar(Component):
         compact:
             When ``True`` middle segments are collapsed to an ellipsis.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Raw prop overrides and extended layout hints.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
     """
 
 
     items: list[Mapping[str, Any]] | None = None
     """
-    Explicit list of segment spec mappings. Overrides ``path``.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     crumbs: list[Mapping[str, Any]] | None = None
     """
-    Alias for ``items``.
+    Backward-compatible alias for ``items``. When both fields are provided, ``items`` takes precedence and this alias is kept only for compatibility.
     """
 
     routes: list[Mapping[str, Any]] | None = None
@@ -118,7 +117,7 @@ class BreadcrumbBar(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "breadcrumb_bar"

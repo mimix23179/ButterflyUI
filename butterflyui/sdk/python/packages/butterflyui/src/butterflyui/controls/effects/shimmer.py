@@ -8,42 +8,42 @@ __all__ = ["Shimmer"]
 class Shimmer(Component):
     """Animated shimmer gradient that sweeps across the child using a
     ``ShaderMask``.
-
+    
     The Flutter runtime drives a ``LinearGradient`` highlight band
     across the child via an ``AnimationController`` in repeat mode.
     The gradient transitions from *base_color* through
     *highlight_color* and back, creating a loading-placeholder
     shimmer or a decorative glint effect.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         shim = bui.Shimmer(
             bui.Container(width=200, height=40),
             duration_ms=1200,
             angle=18,
             opacity=0.85,
         )
-
+    
     Args:
-        duration_ms: 
+        duration_ms:
             Full sweep period in milliseconds.  Defaults to
             ``1200``; clamped to ``200 – 600 000``.
-        angle: 
+        angle:
             Gradient rotation angle in **degrees**.  Defaults to
             ``18``.
-        opacity: 
+        opacity:
             Overall shimmer opacity (``0.0`` – ``1.0``).
             Defaults to ``0.85``.
-        base_color: 
+        base_color:
             Gradient base colour.  Defaults to the theme's
             ``surfaceContainerHighest`` at 45 % opacity.
-        highlight_color: 
+        highlight_color:
             Bright highlight band colour.  Defaults to
             the theme's ``surface`` at 75 % opacity.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -79,7 +79,7 @@ class Shimmer(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "shimmer"
 

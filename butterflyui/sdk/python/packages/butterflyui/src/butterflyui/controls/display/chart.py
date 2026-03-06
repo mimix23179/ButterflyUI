@@ -7,38 +7,38 @@ __all__ = ["Chart"]
 
 class Chart(Component):
     """Generic chart base that delegates to line or bar painters.
-
+    
     Renders either a line chart (``_LineChartPainter``) or a bar chart
     (``_BarChartPainter``) depending on the ``chart_type`` value.
     Setting ``chart_type`` to ``"bar"`` or ``"column"`` selects bars;
     any other value (including the default ``"line"``) draws a
     continuous polyline.  When ``fill`` is ``True`` (or chart type is
     ``"area"``) the region under the line is shaded.
-
+    
     Tapping the chart emits a ``"select"`` event with the nearest
     data-point index and value.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         chart = bui.Chart(
             values=[3, 7, 2, 9, 5],
             chart_type="line",
             fill=True,
             color="#4f46e5",
         )
-
+    
     Args:
-        values: 
+        values:
             Numeric data points for the chart.
-        points: 
-            Alias for ``values``.
-        chart_type: 
+        points:
+            Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
+        chart_type:
             ``"line"`` (default), ``"area"``, ``"bar"``, or ``"column"``.
-        fill: 
-            If ``True`` the area under a line chart is shaded.
-        color: 
+        fill:
+            Controls whether the area under a line chart is shaded. Set it to ``False`` to disable this behavior.
+        color:
             Primary colour used by the chart painter.
     """
 
@@ -50,7 +50,7 @@ class Chart(Component):
 
     points: list[Any] | None = None
     """
-    Alias for ``values``.
+    Backward-compatible alias for ``values``. When both fields are provided, ``values`` takes precedence and this alias is kept only for compatibility.
     """
 
     chart_type: str | None = None
@@ -60,7 +60,7 @@ class Chart(Component):
 
     fill: bool | None = None
     """
-    If ``True`` the area under a line chart is shaded.
+    Controls whether the area under a line chart is shaded. Set it to ``False`` to disable this behavior.
     """
 
     color: Any | None = None

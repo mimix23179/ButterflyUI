@@ -6,19 +6,18 @@ from .._shared import Component, merge_props
 __all__ = ["FilePicker"]
 
 class FilePicker(Component):
-    """
-    Native file and directory picker button.
-
+    """Native file and directory picker button.
+    
     Renders a button (or inline trigger widget) that opens the
     platform’s native file-picker dialog when tapped or when
     :meth:`pick` / :meth:`pick_files` is called from Python.  The
     result is returned via an ``"result"`` runtime event and can also
     be fetched imperatively with :meth:`get_files`.  Setting
     ``save_file`` switches the dialog to save mode.
-
+    
     ```python
     import butterflyui as bui
-
+    
     picker = bui.FilePicker(
         label="Choose CSV",
         file_type="any",
@@ -26,7 +25,7 @@ class FilePicker(Component):
         multiple=False,
     )
     ```
-
+    
     Args:
         label:
             Button / field label displayed in the UI.
@@ -37,11 +36,11 @@ class FilePicker(Component):
             List of allowed extensions without the dot
             (e.g. ``["txt", "md"]``).
         allowed_extensions:
-            Alias for ``extensions``.
+            Backward-compatible alias for ``extensions``. When both fields are provided, ``extensions`` takes precedence and this alias is kept only for compatibility.
         multiple:
             If ``True``, the user can select multiple files.
         allow_multiple:
-            Alias for ``multiple``.
+            Backward-compatible alias for ``multiple``. When both fields are provided, ``multiple`` takes precedence and this alias is kept only for compatibility.
         with_data:
             If ``True``, file bytes are included in the result payload.
         with_path:
@@ -87,7 +86,7 @@ class FilePicker(Component):
 
     allowed_extensions: list[str] | None = None
     """
-    Alias for ``extensions``.
+    Backward-compatible alias for ``extensions``. When both fields are provided, ``extensions`` takes precedence and this alias is kept only for compatibility.
     """
 
     multiple: bool | None = None
@@ -97,7 +96,7 @@ class FilePicker(Component):
 
     allow_multiple: bool | None = None
     """
-    Alias for ``multiple``.
+    Backward-compatible alias for ``multiple``. When both fields are provided, ``multiple`` takes precedence and this alias is kept only for compatibility.
     """
 
     with_data: bool | None = None

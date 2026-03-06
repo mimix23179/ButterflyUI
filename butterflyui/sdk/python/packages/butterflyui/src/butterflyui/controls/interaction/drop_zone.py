@@ -6,9 +6,8 @@ from .._shared import Component, merge_props
 __all__ = ["DropZone"]
 
 class DropZone(Component):
-    """
-    Rectangular drop target that accepts drags from :class:`DragPayload`.
-
+    """Rectangular drop target that accepts drags from :class:`DragPayload`.
+    
     Renders a ``DragTarget`` container with a visual highlight that
     changes colour depending on hover / accept / reject state (green
     border when hovering an accepted type, red border for a rejected
@@ -18,22 +17,22 @@ class DropZone(Component):
     receive; an empty list accepts anything.  Setting
     ``use_desktop_drop`` enables system-level file-drop support on
     desktop platforms.
-
+    
     Emitted events:
     - ``enter`` — a compatible drag entered the zone.
     - ``leave`` — the drag left without dropping.
     - ``drop``  — a drag was released inside the zone.
     - ``reject`` — an incompatible drag type hovered the zone.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.DropZone(
         title="Drop tasks here",
         accepts=["task"],
     )
     ```
-
+    
     Args:
         enabled:
             If ``False``, the zone does not accept any drops.
@@ -41,7 +40,7 @@ class DropZone(Component):
             List of ``drag_type`` strings this zone will accept.
             Alias ``accept_types`` is kept in sync.
         accept_types:
-            Alias for ``accepts``.
+            Backward-compatible alias for ``accepts``. When both fields are provided, ``accepts`` takes precedence and this alias is kept only for compatibility.
         accept_mimes:
             List of MIME type strings accepted for desktop file drops.
         title:
@@ -53,7 +52,7 @@ class DropZone(Component):
             If ``True``, the zone also listens for system-level
             file-drop events (desktop only).
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -65,7 +64,7 @@ class DropZone(Component):
 
     accept_types: list[str] | None = None
     """
-    Alias for ``accepts``.
+    Backward-compatible alias for ``accepts``. When both fields are provided, ``accepts`` takes precedence and this alias is kept only for compatibility.
     """
 
     accept_mimes: list[str] | None = None
@@ -92,7 +91,7 @@ class DropZone(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "drop_zone"
 

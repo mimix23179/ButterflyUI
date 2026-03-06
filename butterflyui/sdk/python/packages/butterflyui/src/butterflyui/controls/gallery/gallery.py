@@ -289,24 +289,81 @@ class GalleryItem:
     """
 
     id: str
+    """
+    Stable identifier used to reference this item or control instance.
+    """
     name: str | None = None
+    """
+    Human-readable name used to identify this item, style pack, or preset.
+    """
     path: str | None = None
+    """
+    Filesystem path associated with the item or local resource.
+    """
     url: str | None = None
+    """
+    Remote or local URL used to load the item's content.
+    """
     thumbnail_url: str | None = None
+    """
+    Preview image URL used when rendering a thumbnail for the item.
+    """
     type: str = "image"
+    """
+    Type identifier that tells the runtime what kind of item or content this payload represents.
+    """
     metadata: dict[str, Any] | None = None
+    """
+    Arbitrary metadata mapping associated with this item and forwarded to the runtime payload.
+    """
     is_selected: bool = False
+    """
+    Reflects whether the item is currently selected in the rendered gallery or picker state.
+    """
     is_loading: bool = False
+    """
+    Reflects whether the item is currently loading and should render a placeholder or pending state.
+    """
     subtitle: str | None = None
+    """
+    Secondary text rendered beneath or beside the primary title.
+    """
     description: str | None = None
+    """
+    Longer descriptive text rendered beneath or alongside the control's primary label.
+    """
     author_name: str | None = None
+    """
+    Display name of the author or owner associated with the item.
+    """
     author_avatar: str | None = None
+    """
+    Avatar image URL rendered for the item's author or owner metadata.
+    """
     like_count: int | None = None
+    """
+    Total number of likes associated with the item.
+    """
     view_count: int | None = None
+    """
+    Total number of views associated with the item.
+    """
     created_at: str | None = None
+    """
+    Creation timestamp associated with the item, typically serialized as an ISO-8601 string.
+    """
     aspect_ratio: float | None = None
+    """
+    Preferred aspect ratio used when sizing the item's media preview.
+    """
     tags: list[str] | None = None
+    """
+    List of tag labels associated with the rendered item or record.
+    """
     status: str | None = None
+    """
+    Status label or status identifier associated with the rendered item.
+    """
 
     def to_json(self) -> dict[str, Any]:
         result: dict[str, Any] = {"id": self.id}
@@ -850,48 +907,47 @@ class GalleryScope(Component):
 
 
 class Gallery(Component):
-    """
-    Umbrella Gallery control for asset browsing and selection.
-
+    """Umbrella Gallery control for asset browsing and selection.
+    
     ``Gallery`` renders a collection of ``GalleryItem`` entries using a selected
     layout and optional module-specific behavior.
-
+    
     Core behavior:
     - accepts ``GalleryItem`` instances or raw mappings in ``items``
     - normalizes module/layout aliases before serialization
     - bridges umbrella module names to practical runtime defaults
     - forwards unknown ``**kwargs`` so new runtime props remain usable
-
+    
     Gallery also participates in the same universal style/motion/effects
     contract used by Candy, Skins, and Style controls, including slot-based
     styling for toolbar/panels/item surfaces.
-
+    
     Examples of bridged module behavior:
     - ``filter`` -> ``filter_bar`` and auto-add filter toolbar action
     - ``apply_font`` sets ``type_filter="font"`` and injects an apply action
     - ``select_all`` enables multi-selection defaults and action wiring
-
+    
     Use convenience helpers ``gallery_grid``, ``gallery_masonry``,
     ``gallery_list``, ``gallery_carousel``, ``gallery_virtual_grid``, and
     ``gallery_virtual_list`` for common layout presets.
-
+    
     Args:
         items:
-            Iterable of ``GalleryItem`` or mapping objects.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         module:
             Optional umbrella module selector.
         layout:
-            Layout mode string.
+            Layout mode or layout identifier that controls how the control arranges its content.
         type_filter:
             Optional media type filter such as ``"image"`` or ``"font"``.
         columns:
-            Grid/virtual-grid column count.
+            Number of columns used when the control lays out content in a grid.
         spacing:
-            Base item spacing.
+            Base spacing value used between items or structural regions inside the control.
         main_axis_spacing:
-            Main-axis spacing override.
+            Spacing inserted between items on the primary layout axis.
         cross_axis_spacing:
-            Cross-axis spacing override.
+            Spacing inserted between items on the grid or layout cross axis.
         carousel_height:
             Fixed pixel height for carousel mode. Use when gallery is placed
             in shrink-wrapped or unconstrained parents.
@@ -915,10 +971,9 @@ class Gallery(Component):
         carousel_vertical_inset:
             Vertical margin around each carousel tile.
         events:
-            Runtime event names to emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
         style:
-            Optional container style for the gallery shell (supports gradient,
-            shadow, radius, clip, and glass keys like ``backdrop_blur``).
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         **kwargs:
             Additional runtime props forwarded as-is, including universal
             pipeline props such as ``classes``, ``modifiers``, ``motion``,
@@ -928,7 +983,7 @@ class Gallery(Component):
 
     items: Iterable[GalleryItem | Mapping[str, Any]] | None = None
     """
-    Iterable of ``GalleryItem`` or mapping objects.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     module: str | None = None
@@ -938,7 +993,7 @@ class Gallery(Component):
 
     layout: str | None = None
     """
-    Layout mode string.
+    Layout mode or layout identifier that controls how the control arranges its content.
     """
 
     type_filter: str | None = None
@@ -948,22 +1003,22 @@ class Gallery(Component):
 
     columns: int | None = None
     """
-    Grid/virtual-grid column count.
+    Number of columns used when the control lays out content in a grid.
     """
 
     spacing: float | None = None
     """
-    Base item spacing.
+    Base spacing value used between items or structural regions inside the control.
     """
 
     main_axis_spacing: float | None = None
     """
-    Main-axis spacing override.
+    Spacing inserted between items on the primary layout axis.
     """
 
     cross_axis_spacing: float | None = None
     """
-    Cross-axis spacing override.
+    Spacing inserted between items on the grid or layout cross axis.
     """
 
     carousel_height: float | None = None
@@ -1017,7 +1072,7 @@ class Gallery(Component):
 
     events: list[str] | None = None
     """
-    Runtime event names to emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 

@@ -9,24 +9,23 @@ __all__ = ["NavigationRing"]
 
 
 class NavigationRing(Component):
-    """
-    Compact ring-style navigation selector with icon-first destinations.
-
+    """Compact ring-style navigation selector with icon-first destinations.
+    
     Renders a rounded destination cluster for compact mode switching and
     dashboard navigation shells. Keeps selected state, emits ``select`` and
     ``change`` events, and supports runtime state mutation methods.
-
+    
     Item entries accept rich metadata:
     ``id``/``value`` identity, ``label`` text, ``icon`` descriptors, optional
     ``badge`` text, and ``enabled`` boolean state.
-
+    
     Shared frame/layout hints are accepted through ``props`` to control ring
     placement and clipping (alignment, margin, constraints, radius, clip).
-
+    
     Example:
         ```python
         import butterflyui as bui
-
+    
         bui.NavigationRing(
             items=[
                 {"id": "home", "label": "Home", "icon": "home"},
@@ -39,25 +38,24 @@ class NavigationRing(Component):
             events=["select", "change"],
         )
         ```
-
+    
     Args:
         items:
-            Destination mappings rendered by the ring.
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
         selected_id:
-            Active destination ``id``.
+            Identifier of the currently selected item, tab, route, or navigation destination.
         policy:
             Label visibility policy: ``"always"``, ``"selected_only"``, ``"never"``.
         dense:
             Enables compact spacing and icon sizing.
         events:
-            Runtime event whitelist emitted by the Flutter renderer.
+            List of runtime event names that should be emitted back to Python for this control instance.
         props:
-            Additional raw props merged after typed arguments, including layout
-            hints and visual configuration.
+            Raw prop overrides merged into the payload sent to Flutter. Use this when the Python wrapper does not yet expose a runtime key as a first-class argument.
         style:
-            Optional style token map forwarded to the style pipeline.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
         strict:
-            When ``True``, schema validation errors are raised for unknown props.
+            Enables strict validation for unsupported or unknown props when schema checks are available. This is useful while developing wrappers or debugging payload mismatches.
         **kwargs:
             Extra passthrough props for advanced renderer customization.
     """
@@ -65,12 +63,12 @@ class NavigationRing(Component):
 
     items: list[Mapping[str, Any]] | None = None
     """
-    Destination mappings rendered by the ring.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     selected_id: str | None = None
     """
-    Active destination ``id``.
+    Identifier of the currently selected item, tab, route, or navigation destination.
     """
 
     policy: str | None = None
@@ -85,7 +83,7 @@ class NavigationRing(Component):
 
     events: list[str] | None = None
     """
-    Runtime event whitelist emitted by the Flutter renderer.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "navigation_ring"

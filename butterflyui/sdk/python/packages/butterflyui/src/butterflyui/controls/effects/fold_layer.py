@@ -8,44 +8,44 @@ __all__ = ["FoldLayer"]
 class FoldLayer(Component):
     """Paper-fold stripe-overlay effect that simulates a sheet being
     folded into parallel pleats.
-
+    
     The Flutter runtime divides the child into a configurable number of
     vertical or horizontal stripes.  Odd-numbered stripes are darkened
     by a semi-transparent black overlay whose alpha scales with
     ``progress``, while the overall widget is slightly scaled down to
     reinforce the 3-D illusion.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         fold = bui.FoldLayer(
             bui.Image(src="card.png"),
             folds=6,
             progress=0.5,
             axis="vertical",
         )
-
+    
     Args:
-        folds: 
-            Number of alternating stripes (``1`` – ``24``). 
+        folds:
+            Number of alternating stripes (``1`` – ``24``).
             Defaults to ``4``.
-        progress: 
-            Fold intensity (``0.0`` flat – ``1.0`` fully folded). 
+        progress:
+            Fold intensity (``0.0`` flat – ``1.0`` fully folded).
             Controls both stripe darkness and the subtle scale-down.
-        axis: 
-            ``"vertical"`` (default) for left-right pleats or 
+        axis:
+            ``"vertical"`` (default) for left-right pleats or
             ``"horizontal"`` for top-bottom pleats.
-        perspective: 
+        perspective:
             Reserved — perspective depth factor.
-        shadow: 
-            Maximum shadow alpha on darkened stripes (``0.0`` – ``1.0``). 
+        shadow:
+            Maximum shadow alpha on darkened stripes (``0.0`` – ``1.0``).
             Defaults to ``0.15``.
-        enabled: 
-            When ``False`` the fold overlay is skipped and 
+        enabled:
+            When ``False`` the fold overlay is skipped and
             the child is rendered unmodified.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -80,7 +80,7 @@ class FoldLayer(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "fold_layer"
 

@@ -6,18 +6,17 @@ from .._shared import Component, merge_props
 __all__ = ["ListView"]
 
 class ListView(Component):
-    """
-    Vertical scrollable list container for child controls or data-item
+    """Vertical scrollable list container for child controls or data-item
     payloads with optional separator dividers.
-
+    
     When explicit ``children`` are passed they are rendered directly as
     list rows.  Alternatively an ``items`` payload list lets the runtime
     build rows from data.  Setting ``separator`` to ``True`` inserts
     ``Divider`` widgets between rows.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.ListView(
         bui.ListTile(title="Item 1"),
         bui.ListTile(title="Item 2"),
@@ -25,18 +24,18 @@ class ListView(Component):
         separator=True,
     )
     ```
-
+    
     Args:
-        items: 
-            Data-item payloads used to build rows when no explicit children are given.
-        separator: 
+        items:
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
+        separator:
             If ``True``, a ``Divider`` is inserted between each row.
     """
 
 
     items: list[Any] | None = None
     """
-    Data-item payloads used to build rows when no explicit children are given.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     separator: bool | None = None

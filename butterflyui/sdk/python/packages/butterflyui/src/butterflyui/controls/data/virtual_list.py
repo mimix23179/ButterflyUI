@@ -6,10 +6,9 @@ from .._shared import Component, merge_props
 __all__ = ["VirtualList"]
 
 class VirtualList(Component):
-    """
-    Virtualized scrollable list for large datasets with fixed item
+    """Virtualized scrollable list for large datasets with fixed item
     extent, separator support, and prefetch-near-end loading.
-
+    
     When ``item_extent`` is set every row is given the same fixed height,
     enabling the scroll view to skip layout for off-screen items
     (significant performance gain for large lists).  ``cache_extent``
@@ -19,10 +18,10 @@ class VirtualList(Component):
     (within ``prefetch_threshold`` items), a ``"prefetch"`` event is
     emitted so the app can append more data.  Setting ``loading`` to
     ``True`` shows a loading indicator at the list’s tail.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.VirtualList(
         items=[{"label": f"Row {i}"} for i in range(1000)],
         item_extent=48,
@@ -31,28 +30,28 @@ class VirtualList(Component):
         prefetch_threshold=20,
     )
     ```
-
+    
     Args:
-        items: 
-            Item payload list used to build rows when no explicit children are given.
-        item_extent: 
+        items:
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
+        item_extent:
             Fixed row height in logical pixels.  Enables constant-time scroll-offset calculations for large lists.
-        cache_extent: 
+        cache_extent:
             Cache extent in logical pixels — controls how far off-screen the viewport pre-builds items.
-        separator: 
+        separator:
             If ``True``, a ``Divider`` is inserted between each row.
-        has_more: 
+        has_more:
             If ``True``, signals that more data can be requested when nearing the end.
-        loading: 
+        loading:
             If ``True``, a loading indicator is displayed at the tail of the list.
-        prefetch_threshold: 
+        prefetch_threshold:
             Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
 
     items: list[Any] | None = None
     """
-    Item payload list used to build rows when no explicit children are given.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     item_extent: float | None = None

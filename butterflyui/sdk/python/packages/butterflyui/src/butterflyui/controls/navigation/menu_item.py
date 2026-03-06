@@ -6,17 +6,16 @@ from .._shared import Component, merge_props
 __all__ = ["MenuItem"]
 
 class MenuItem(Component):
-    """
-    Single item entry for use inside a menu or context menu.
-
+    """Single item entry for use inside a menu or context menu.
+    
     Declares one menu row with a ``label``, optional ``icon``, keyboard
     ``shortcut`` display string, enabled/disabled state, and checked
     ``selected`` state. ``item_id`` is the identifier emitted in selection
     events.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.MenuItem(
         label="Undo",
         item_id="undo",
@@ -24,10 +23,10 @@ class MenuItem(Component):
         shortcut="Ctrl+Z",
     )
     ```
-
+    
     Args:
         label:
-            Display text for the menu item.
+            Primary label text rendered by the control or its active action.
         item_id:
             Identifier emitted when the item is selected.
         icon:
@@ -45,7 +44,7 @@ class MenuItem(Component):
 
     label: str | None = None
     """
-    Display text for the menu item.
+    Primary label text rendered by the control or its active action.
     """
 
     item_id: str | None = None

@@ -329,10 +329,10 @@ def collect_children(
 
 class Component(LayoutControl):
     """Base class for all Python-side ButterflyUI controls.
-
+    
     Besides regular control props, ``Component`` also carries the universal
     styling pipeline contract used by Candy/Skins/Style/Modifier/Gallery:
-
+    
     - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
       ``style``, ``style_slots``.
     - modifier layer: ``modifiers``, ``on_hover_modifiers``,
@@ -341,10 +341,10 @@ class Component(LayoutControl):
       ``hover_motion``, ``press_motion``.
     - effect layer: ``effects``, ``effect_order``, ``effect_clip``,
       ``effect_target``.
-
+    
     Any non-``None`` keyword arguments are merged into the outgoing ``props``
     payload, which keeps Python wrappers and Dart runtime props loosely coupled.
-
+    
     Args:
         child:
             Single convenience child appended to the control tree.
@@ -373,9 +373,9 @@ class Component(LayoutControl):
         exit_motion:
             Motion played when the control exits.
         hover_motion:
-            Motion played during hover.
+            Motion played while the pointer hovers the control, such as lift, opacity, or highlight feedback.
         press_motion:
-            Motion played during press.
+            Motion played while the control is being pressed, such as scale, opacity, or elevation feedback.
         effects:
             Visual effects applied by the shared renderer pipeline.
         effect_order:
@@ -389,7 +389,7 @@ class Component(LayoutControl):
         state:
             Active state token forwarded into styling and motion resolution.
         style:
-            Local style map merged into the outgoing control payload.
+            Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
     """
     control_type: str = ""
 
@@ -460,12 +460,12 @@ class Component(LayoutControl):
 
     hover_motion: Any | None = None
     """
-    Motion played during hover.
+    Motion played while the pointer hovers the control, such as lift, opacity, or highlight feedback.
     """
 
     press_motion: Any | None = None
     """
-    Motion played during press.
+    Motion played while the control is being pressed, such as scale, opacity, or elevation feedback.
     """
 
     effects: Any | None = None
@@ -500,7 +500,7 @@ class Component(LayoutControl):
 
     style: Mapping[str, Any] | None = None
     """
-    Local style map merged into the outgoing control payload.
+    Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
     """
 
     def __init__(

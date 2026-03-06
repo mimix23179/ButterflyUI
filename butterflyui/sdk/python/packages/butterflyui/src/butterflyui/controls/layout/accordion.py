@@ -6,25 +6,24 @@ from .._shared import Component, merge_props
 __all__ = ["Accordion"]
 
 class Accordion(Component):
-    """
-    Collapsible accordion that shows or hides sections of content.
-
+    """Collapsible accordion that shows or hides sections of content.
+    
     The runtime renders an expandable list where each section can be opened and
     closed independently. ``sections`` supplies inline content specs; children
     may also be passed as positional arguments. ``index`` (alias ``expanded``)
     controls which section(s) are open. ``multiple`` allows several sections to
     be expanded simultaneously.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Accordion(
         sections=[{"title": "Section A", "body": "Content A"}],
         multiple=False,
         events=["change"],
     )
     ```
-
+    
     Args:
         sections:
             List of section spec mappings, each with a ``title`` and content.
@@ -34,7 +33,7 @@ class Accordion(Component):
             Index or list of indices of the currently expanded section(s).
             Alias for ``expanded``.
         expanded:
-            Alias for ``index``.
+            Backward-compatible alias for ``index``. When both fields are provided, ``index`` takes precedence and this alias is kept only for compatibility.
         multiple:
             When ``True`` more than one section may be open at the same time.
         allow_empty:
@@ -46,7 +45,7 @@ class Accordion(Component):
         spacing:
             Vertical gap between sections in logical pixels.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -68,7 +67,7 @@ class Accordion(Component):
 
     expanded: int | list[int] | None = None
     """
-    Alias for ``index``.
+    Backward-compatible alias for ``index``. When both fields are provided, ``index`` takes precedence and this alias is kept only for compatibility.
     """
 
     multiple: bool | None = None
@@ -98,7 +97,7 @@ class Accordion(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
 
     control_type = "accordion"

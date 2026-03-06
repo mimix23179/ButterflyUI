@@ -8,16 +8,16 @@ __all__ = ["ShadowStack"]
 class ShadowStack(Component):
     """Multi-layer box-shadow stack applied to a child via a
     ``Container`` with a rounded ``BoxDecoration``.
-
+    
     The Flutter runtime parses the *shadows* list into multiple
     ``BoxShadow`` entries (each with colour, blur, spread, and offset)
     and renders them as a single ``Container`` decoration.  If no
     shadows are provided a sensible two-layer default is used.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         stack = bui.ShadowStack(
             bui.Text("Elevated"),
             shadows=[
@@ -26,16 +26,16 @@ class ShadowStack(Component):
             ],
             radius=12,
         )
-
+    
     Args:
-        shadows: 
+        shadows:
             List of shadow definition mappings.  Each may contain ``color``, ``blur``, ``spread``, ``offset_x``,
             and ``offset_y``.  Defaults to a two-layer elevation preset.
-        radius: 
+        radius:
             Corner radius of the ``BoxDecoration``.  Defaults to
             ``12``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -53,7 +53,7 @@ class ShadowStack(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "shadow_stack"
 

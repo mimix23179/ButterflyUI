@@ -8,16 +8,16 @@ __all__ = ["NeonEdge"]
 class NeonEdge(Component):
     """Neon-glow border effect rendered as a ``BoxDecoration`` with a
     coloured ``Border.all`` stroke and a matching ``BoxShadow``.
-
+    
     The Flutter runtime wraps the child in either a plain ``Container``
     or an ``AnimatedContainer`` (when ``animated`` is ``True``), whose
     ``BoxDecoration`` combines a coloured border, a glow shadow, and a
     corner radius.
-
+    
     Example::
-
+    
         import butterflyui as bui
-
+    
         neon = bui.NeonEdge(
             bui.Text("Glow"),
             color="#22d3ee",
@@ -26,29 +26,29 @@ class NeonEdge(Component):
             radius=12,
             animated=True,
         )
-
+    
     Args:
-        color: 
+        color:
             Border and glow colour.  Defaults to ``#22D3EE``.
-        width: 
+        width:
             Border stroke width in logical pixels.  Defaults to
             ``1.6``.
-        glow: 
+        glow:
             Blur radius of the outer glow ``BoxShadow``.  Defaults
             to ``10``.
-        spread: 
+        spread:
             Spread radius of the glow shadow.  Defaults to ``0``.
-        radius: 
+        radius:
             Corner radius of the ``BoxDecoration``.  Defaults to
             ``12``.
-        animated: 
+        animated:
             When ``True`` the container uses
             ``AnimatedContainer`` for smooth property transitions.
-        duration_ms: 
+        duration_ms:
             Animation duration in milliseconds when
             *animated* is ``True``.  Defaults to ``300``.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -88,7 +88,7 @@ class NeonEdge(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "neon_edge"
 

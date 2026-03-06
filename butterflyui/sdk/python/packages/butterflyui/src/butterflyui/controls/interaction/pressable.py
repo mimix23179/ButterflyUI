@@ -6,14 +6,13 @@ from .._shared import Component, merge_props
 __all__ = ["Pressable"]
 
 class Pressable(Component):
-    """
-    Adds press, hover, and focus interaction states to its child.
-
+    """Adds press, hover, and focus interaction states to its child.
+    
     Wraps the child in a Flutter ``GestureDetector`` + ``MouseRegion``
     + ``Focus`` combination.  The interaction state (``pressed``,
     ``hovered``, ``focused``) is tracked and re-broadcast to the
     child so it can apply visual feedback.  Emitted events:
-
+    
     - ``press``        — pointer-down inside the bounds.
     - ``release``      — pointer-up after a press.
     - ``tap``          — completed tap (press + release).
@@ -21,17 +20,17 @@ class Pressable(Component):
     - ``hover_exit``   — pointer left the bounds.
     - ``focus_gained`` — focus node received keyboard focus.
     - ``focus_lost``   — focus node lost keyboard focus.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.Pressable(
         bui.Container(bui.Text("Press me")),
         hover_enabled=True,
         focus_enabled=True,
     )
     ```
-
+    
     Args:
         enabled:
             Master switch.  If ``False``, no interaction events are
@@ -45,7 +44,7 @@ class Pressable(Component):
             If ``True``, ``focus_gained`` and ``focus_lost`` events are
             fired.
         events:
-            List of event names the Flutter runtime should emit to Python.
+            List of runtime event names that should be emitted back to Python for this control instance.
     """
 
 
@@ -68,7 +67,7 @@ class Pressable(Component):
 
     events: list[str] | None = None
     """
-    List of event names the Flutter runtime should emit to Python.
+    List of runtime event names that should be emitted back to Python for this control instance.
     """
     control_type = "pressable"
 

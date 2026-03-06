@@ -6,42 +6,41 @@ from .._shared import Component, merge_props
 __all__ = ["BlendModePicker"]
 
 class BlendModePicker(Component):
-    """
-    Dropdown selector for choosing a compositing blend mode.
-
+    """Dropdown selector for choosing a compositing blend mode.
+    
     Renders a ``DropdownButtonFormField`` in the runtime with an optional
     live preview that demonstrates the selected mode by blending a pair of
     sample colours.
-
+    
     The default options list is ``srcOver``, ``multiply``, ``screen``,
     ``overlay``, and ``plus``. Override with `options`.
-
+    
     ```python
     import butterflyui as bui
-
+    
     bui.BlendModePicker(
         value="multiply",
         preview=True,
         sample={"base": "#ff0000", "overlay": "#0000ff"},
     )
     ```
-
+    
     Args:
-        value: 
+        value:
             Currently selected blend mode string, e.g. ``"multiply"`` or ``"screen"``. Emitted in ``"change"`` events.
-        options: 
+        options:
             List of blend-mode strings offered in the dropdown. Defaults to ``["srcOver", "multiply", "screen", "overlay", "plus"]``.
-        items: 
-            Alias for `options`.
-        label: 
+        items:
+            Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
+        label:
             Label text displayed above the dropdown field. Defaults to ``"Blend Mode"``.
-        preview: 
+        preview:
             If ``True``, a small colour swatch preview of the selected blend mode is rendered below the dropdown.
-        sample: 
+        sample:
             Dict with ``"base"`` and ``"overlay"`` colour strings used by the blend-mode preview swatch.
-        dense: 
+        dense:
             If ``True``, renders the dropdown in a compact, dense layout.
-        enabled: 
+        enabled:
             If ``False``, the dropdown is disabled and non-interactive.
     """
 
@@ -58,7 +57,7 @@ class BlendModePicker(Component):
 
     items: list[Any] | None = None
     """
-    Alias for `options`.
+    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
     label: str | None = None
