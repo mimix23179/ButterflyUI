@@ -2,26 +2,27 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Display"]
 
-
-class Display(Component):
+@butterfly_control('display')
+class Display(LayoutControl):
     """
     Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
-    
+
     ``Display`` replaces several narrow widgets with a role-driven API:
     ``identity``, ``status``, ``rating``, ``reactions``, ``check``, and
     ``ownership``. Legacy variants are still accepted and mapped by the
     runtime for backward compatibility.
-    
+
     Display now uses the shared universal renderer pipeline too, so the same
     ``classes``/``style_slots``/``modifiers``/``motion``/``effects`` props
     can style identity/status/rating/reaction/check/ownership roles
     consistently with Candy/Skins/Gallery.
-    
+
     Example:
     ```python
     import butterflyui as bui
@@ -39,17 +40,11 @@ class Display(Component):
     ```
     """
 
-
     role: str | None = None
     """
     Role/variant selector. Recommended values:
     ``"identity"``, ``"status"``, ``"rating"``, ``"reactions"``,
     ``"check"``, ``"ownership"``.
-    """
-
-    variant: str | None = None
-    """
-    Variant token or preset name used to select a specific visual style.
     """
 
     title: str | None = None
@@ -75,21 +70,6 @@ class Display(Component):
     name: str | None = None
     """
     Human-readable name used to identify this item, style pack, or preset.
-    """
-
-    tone: str | None = None
-    """
-    Semantic tone (``neutral/info/success/warn/danger``).
-    """
-
-    size: str | None = None
-    """
-    Size token (for example ``sm``, ``md``, ``lg``).
-    """
-
-    interactive: bool | None = None
-    """
-    Enables hover/focus affordances and tap emission.
     """
 
     icon: Any | None = None
@@ -217,114 +197,175 @@ class Display(Component):
     Enables a denser layout with reduced gaps, padding, or row height.
     """
 
-    aria_label: str | None = None
+    bgcolor: Any | None = None
     """
-    Accessibility label announced to assistive technologies when the control does not expose enough visible text on its own.
-    """
-
-    events: list[str] | None = None
-    """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Background color painted behind the control.
     """
 
-    control_type = "display"
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
 
-    def __init__(
-        self,
-        *children_args: Any,
-        role: str | None = None,
-        variant: str | None = None,
-        title: str | None = None,
-        subtitle: str | None = None,
-        caption: str | None = None,
-        description: str | None = None,
-        name: str | None = None,
-        tone: str | None = None,
-        size: str | None = None,
-        interactive: bool | None = None,
-        status: str | None = None,
-        badge: str | None = None,
-        color: Any | None = None,
-        avatar: Any | None = None,
-        initials: str | None = None,
-        icon: Any | None = None,
-        leading: Any | None = None,
-        trailing: Any | None = None,
-        tags: list[Any] | None = None,
-        value: Any | None = None,
-        max: int | None = None,
-        allow_half: bool | None = None,
-        count: int | None = None,
-        items: list[Any] | None = None,
-        selected: list[Any] | None = None,
-        checked: list[Any] | None = None,
-        checked_value: bool | None = None,
-        dot_count: int | None = None,
-        document_id: str | None = None,
-        ranges: list[Mapping[str, Any]] | None = None,
-        owners: list[Mapping[str, Any]] | None = None,
-        owner: Mapping[str, Any] | None = None,
-        show_avatars: bool | None = None,
-        compact: bool | None = None,
-        dense: bool | None = None,
-        aria_label: str | None = None,
-        events: list[str] | None = None,
-        child: Any | None = None,
-        children: list[Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        role=role if role is not None else variant,
-                        variant=variant if variant is not None else role,
-                        title=title,
-                        subtitle=subtitle,
-                        caption=caption,
-                        description=description,
-                        name=name,
-                        tone=tone,
-                        size=size,
-                        interactive=interactive,
-                        status=status,
-                        badge=badge,
-                        color=color,
-                        avatar=avatar,
-                        initials=initials,
-                        icon=icon,
-                        leading=leading,
-                        trailing=trailing,
-                        tags=tags,
-                        value=value,
-                        max=max,
-                        allow_half=allow_half,
-                        count=count,
-                        items=items,
-                        selected=selected,
-                        checked=checked,
-                        checked_value=checked_value,
-                        dot_count=dot_count,
-                        document_id=document_id,
-                        ranges=ranges,
-                        owners=owners if owners is not None else ([dict(owner)] if owner else None),
-                        owner=dict(owner) if owner else None,
-                        show_avatars=show_avatars,
-                        compact=compact,
-                        dense=dense,
-                        aria_label=aria_label,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            *children_args,
-            child=child,
-            children=children,
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    border_width: Any | None = None
+    """
+    Border width in logical pixels.
+    """
+
+    label: Any | None = None
+    """
+    Primary label rendered by the control.
+    """
+
+    src: Any | None = None
+    """
+    Source value consumed by the runtime, such as a file path or URL.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `display` runtime control.
+    """
+
+    rating: Any | None = None
+    """
+    Rating value forwarded to the `display` runtime control.
+    """
+
+    max_rating: Any | None = None
+    """
+    Max rating value forwarded to the `display` runtime control.
+    """
+
+    show_count: Any | None = None
+    """
+    Show count value forwarded to the `display` runtime control.
+    """
+
+    inactive_color: Any | None = None
+    """
+    Inactive color value forwarded to the `display` runtime control.
+    """
+
+    dot_size: Any | None = None
+    """
+    Dot size value forwarded to the `display` runtime control.
+    """
+
+    text: Any | None = None
+    """
+    Text value rendered by the control.
+    """
+
+    indices: Any | None = None
+    """
+    Indices value forwarded to the `display` runtime control.
+    """
+
+    options: Any | None = None
+    """
+    Option descriptors rendered by the control.
+    """
+
+    spacing: Any | None = None
+    """
+    Spacing between repeated child elements.
+    """
+
+    values: Any | None = None
+    """
+    Values value forwarded to the `display` runtime control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `display` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `display` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `display` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `display` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `display` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `display` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `display` runtime control.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `display` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `display` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `display` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `display` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `display` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `display` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `display` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `display` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `display` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `display` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `display` runtime control.
+    """
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", props)

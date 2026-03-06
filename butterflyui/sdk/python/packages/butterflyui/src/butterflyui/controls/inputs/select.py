@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..selection_control import SelectionControl
 
 __all__ = ["Select"]
 
-class Select(Component):
+@butterfly_control('select')
+class Select(SelectionControl):
     """
     Drop-down select control for choosing one item from a list.
 
@@ -27,55 +29,127 @@ class Select(Component):
     ```
     """
 
-
-    options: list[Any] | None = None
-    """
-    List of option items.  Each entry may be a plain string
-    or a mapping with ``"label"`` and optional ``"value"``
-    keys.
-    """
-
     index: int | None = None
     """
     Zero-based index of the initially selected option.
-    """
-
-    value: Any | None = None
-    """
-    Value of the initially selected option.
-    """
-
-    label: str | None = None
-    """
-    Floating label text above the drop-down field.
     """
 
     hint: str | None = None
     """
     Hint text shown when no option is selected.
     """
-    control_type = "select"
 
-    def __init__(
-        self,
-        *,
-        options: list[Any] | None = None,
-        index: int | None = None,
-        value: Any | None = None,
-        label: str | None = None,
-        hint: str | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            options=options,
-            index=index,
-            value=value,
-            label=label,
-            hint=hint,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `select` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `select` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `select` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `select` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `select` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `select` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `select` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `select` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `select` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `select` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `select` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `select` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `select` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `select` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `select` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `select` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `select` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `select` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `select` runtime control.
+    """

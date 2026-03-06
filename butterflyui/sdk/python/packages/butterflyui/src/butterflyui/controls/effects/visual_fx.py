@@ -2,29 +2,30 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["VisualFx"]
 
-
-class VisualFx(Component):
+@butterfly_control('visual_fx')
+class VisualFx(EffectControl):
     """
     Composite visual-effects pipeline for staged post-processing around one child.
-    
+
     ``VisualFx`` wraps a single child control and applies optional visual
     processing stages such as glow, glass blur, chromatic shift, and gradient
     sweep. Each stage accepts a mapping so advanced parameters can be forwarded
     directly to the Flutter renderer without changing this Python API.
-    
+
     Stages are merged into outgoing ``props`` as plain JSON-like objects:
     ``glow``, ``glass_blur``, ``chromatic_shift``, and ``gradient_sweep``.
     Corresponding ``enable_*`` flags can be used to toggle stages on/off at
     runtime while retaining the stage configuration payload.
-    
+
     ```python
     import butterflyui as bui
-    
+
     fx = bui.VisualFx(
         child=bui.Container(
             bui.Text("Neon Card"),
@@ -43,7 +44,6 @@ class VisualFx(Component):
     )
     ```
     """
-
 
     glow: Mapping[str, Any] | None = None
     """
@@ -87,35 +87,117 @@ class VisualFx(Component):
     Enables or disables the gradient sweep stage.
     """
 
-    control_type = "visual_fx"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        glow: Mapping[str, Any] | None = None,
-        glass_blur: Mapping[str, Any] | None = None,
-        chromatic_shift: Mapping[str, Any] | None = None,
-        gradient_sweep: Mapping[str, Any] | None = None,
-        enable_glow: bool | None = None,
-        enable_glass_blur: bool | None = None,
-        enable_chromatic_shift: bool | None = None,
-        enable_gradient_sweep: bool | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            glow=dict(glow) if glow is not None else None,
-            glass_blur=dict(glass_blur) if glass_blur is not None else None,
-            chromatic_shift=dict(chromatic_shift) if chromatic_shift is not None else None,
-            gradient_sweep=dict(gradient_sweep) if gradient_sweep is not None else None,
-            enable_glow=enable_glow,
-            enable_glass_blur=enable_glass_blur,
-            enable_chromatic_shift=enable_chromatic_shift,
-            enable_gradient_sweep=enable_gradient_sweep,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `visual_fx` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `visual_fx` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `visual_fx` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `visual_fx` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `visual_fx` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `visual_fx` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `visual_fx` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `visual_fx` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `visual_fx` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `visual_fx` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `visual_fx` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `visual_fx` runtime control.
+    """

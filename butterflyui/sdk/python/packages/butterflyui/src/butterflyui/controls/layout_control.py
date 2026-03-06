@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from .control import Control
+from ._shared import Component
 
 __all__ = ["LayoutControl"]
 
 
-class LayoutControl(Control):
+class LayoutControl(Component):
     """
     Shared layout behavior for visual ButterflyUI controls.
     """
@@ -87,6 +87,11 @@ class LayoutControl(Control):
     Implicit animation configuration used for layout or style changes.
     """
 
+    opacity: float | None = None
+    """
+    Opacity multiplier applied to the rendered control.
+    """
+
     flex: int | None = None
     """
     Flex factor used by flex-based parent layouts.
@@ -95,6 +100,31 @@ class LayoutControl(Control):
     expand: bool = False
     """
     Whether the control should expand to fill available space.
+    """
+
+    x: float | None = None
+    """
+    Horizontal position alias used by positioned or freeform layouts.
+    """
+
+    y: float | None = None
+    """
+    Vertical position alias used by positioned or freeform layouts.
+    """
+
+    z: float | None = None
+    """
+    Depth or z-position token used by layered renderers.
+    """
+
+    z_index: int | None = None
+    """
+    Paint ordering override for layered layouts.
+    """
+
+    anchor: Any | None = None
+    """
+    Anchor or alignment point used when positioning this control.
     """
 
     def frame(self, **kwargs: Any) -> "LayoutControl":

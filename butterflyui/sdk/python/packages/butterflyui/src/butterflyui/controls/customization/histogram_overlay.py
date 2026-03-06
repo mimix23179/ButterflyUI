@@ -1,21 +1,23 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["HistogramOverlay"]
 
-class HistogramOverlay(Component):
+@butterfly_control('histogram_overlay')
+class HistogramOverlay(LayoutControl):
     """
     Renders a histogram chart layered on top of a child control.
-    
+
     The runtime stacks the child beneath an ``IgnorePointer`` histogram
     (delegated to the ``HistogramView`` painter) at reduced opacity, so
     the histogram floats over the content without intercepting input.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.HistogramOverlay(
         my_image,
         bins=[0.1, 0.4, 0.9, 0.6, 0.2],
@@ -23,7 +25,6 @@ class HistogramOverlay(Component):
     )
     ```
     """
-
 
     bins: list[float] | None = None
     """
@@ -33,11 +34,6 @@ class HistogramOverlay(Component):
     channels: list[Mapping[str, Any]] | None = None
     """
     Per-channel histogram data. Each item is a dict with keys like ``"bins"`` and ``"color"``.
-    """
-
-    opacity: float | None = None
-    """
-    Opacity of the histogram overlay, ``0.0``–``1.0``. Defaults to ``0.45``.
     """
 
     blend_mode: str | None = None
@@ -55,40 +51,120 @@ class HistogramOverlay(Component):
     If ``True``, a background reference grid is drawn behind the bars.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "histogram_overlay"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        bins: list[float] | None = None,
-        channels: list[Mapping[str, Any]] | None = None,
-        opacity: float | None = None,
-        blend_mode: str | None = None,
-        compact: bool | None = None,
-        show_grid: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            bins=bins,
-            channels=[dict(channel) for channel in (channels or [])],
-            opacity=opacity,
-            blend_mode=blend_mode,
-            compact=compact,
-            show_grid=show_grid,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `histogram_overlay` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `histogram_overlay` runtime control.
+    """
 
     def set_bins(self, session: Any, bins: list[float]) -> dict[str, Any]:
         return self.invoke(session, "set_bins", {"bins": [float(v) for v in bins]})

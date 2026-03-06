@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Grid"]
 
-class Grid(Component):
+@butterfly_control('grid', field_aliases={'controls': 'children'})
+class Grid(LayoutControl):
     """
     Grid layout that arranges children into a fixed number of columns.
-    
+
     The runtime renders a Flutter ``GridView.count``. ``columns`` sets the
     cross-axis count; ``spacing`` and ``run_spacing`` add gaps between cells.
     ``child_aspect_ratio`` fixes each cell's width-to-height ratio.
@@ -16,10 +18,10 @@ class Grid(Component):
     ``shrink_wrap`` sizes the grid to its content instead of filling the parent.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Grid(
         items=[{"label": "A"}, {"label": "B"}, {"label": "C"}],
         columns=3,
@@ -30,6 +32,10 @@ class Grid(Component):
     ```
     """
 
+    controls: list[Any] | None = None
+    """
+    Child controls rendered in order by this control.
+    """
 
     items: list[Any] | None = None
     """
@@ -71,41 +77,142 @@ class Grid(Component):
     When ``True`` the grid sizes itself to its content.
     """
 
-    events: list[str] | None = None
+    layout: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Layout value forwarded to the `grid` runtime control.
     """
 
-    control_type = "grid"
+    masonry: Any | None = None
+    """
+    Masonry value forwarded to the `grid` runtime control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        items: list[Any] | None = None,
-        columns: int | None = None,
-        spacing: float | None = None,
-        run_spacing: float | None = None,
-        child_aspect_ratio: float | None = None,
-        direction: str | None = None,
-        reverse: bool | None = None,
-        shrink_wrap: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            items=items,
-            columns=columns,
-            spacing=spacing,
-            run_spacing=run_spacing,
-            child_aspect_ratio=child_aspect_ratio,
-            direction=direction,
-            reverse=reverse,
-            shrink_wrap=shrink_wrap,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    scrollable: Any | None = None
+    """
+    Whether the control should render inside a scrollable viewport.
+    """
+
+    virtual: Any | None = None
+    """
+    Virtual value forwarded to the `grid` runtime control.
+    """
+
+    virtualized: Any | None = None
+    """
+    Virtualized value forwarded to the `grid` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `grid` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `grid` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `grid` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `grid` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `grid` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `grid` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `grid` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `grid` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `grid` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `grid` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `grid` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `grid` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `grid` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `grid` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `grid` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `grid` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `grid` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `grid` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `grid` runtime control.
+    """

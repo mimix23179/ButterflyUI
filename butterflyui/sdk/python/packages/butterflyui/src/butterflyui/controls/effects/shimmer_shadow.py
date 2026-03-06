@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["ShimmerShadow"]
 
-
-class ShimmerShadow(Component):
+@butterfly_control('shimmer_shadow')
+class ShimmerShadow(EffectControl):
     """
     Combined shimmer + layered shadow effect wrapper.
-    
+
     This control applies a shadow stack and then overlays shimmer animation
     around the same child.
     """
-
 
     shimmer: Mapping[str, Any] | None = None
     """
@@ -37,11 +37,6 @@ class ShimmerShadow(Component):
     Angle value used by the effect, shadow, or shimmer renderer.
     """
 
-    opacity: float | None = None
-    """
-    Overall opacity of the wrapper effect.
-    """
-
     shadows: list[Mapping[str, Any]] | None = None
     """
     Layered shadow definitions applied under the child.
@@ -52,34 +47,117 @@ class ShimmerShadow(Component):
     Corner radius shared by the shimmer and shadow layers.
     """
 
-    control_type = "shimmer_shadow"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        shimmer: Mapping[str, Any] | None = None,
-        shadow: Mapping[str, Any] | None = None,
-        duration_ms: int | None = None,
-        angle: float | None = None,
-        opacity: float | None = None,
-        shadows: list[Mapping[str, Any]] | None = None,
-        radius: float | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            shimmer=dict(shimmer) if shimmer is not None else None,
-            shadow=dict(shadow) if shadow is not None else None,
-            duration_ms=duration_ms,
-            angle=angle,
-            opacity=opacity,
-            shadows=[dict(v) for v in shadows] if shadows is not None else None,
-            radius=radius,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `shimmer_shadow` runtime control.
+    """
 
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `shimmer_shadow` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `shimmer_shadow` runtime control.
+    """

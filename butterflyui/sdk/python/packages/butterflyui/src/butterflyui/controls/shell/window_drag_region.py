@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["WindowDragRegion"]
 
-class WindowDragRegion(Component):
+@butterfly_control('window_drag_region')
+class WindowDragRegion(LayoutControl):
     """
     Native window-drag hit area typically placed in a custom title bar.
 
@@ -29,7 +31,6 @@ class WindowDragRegion(Component):
     )
     ```
     """
-
 
     draggable: bool | None = None
     """
@@ -57,32 +58,120 @@ class WindowDragRegion(Component):
     is used.
     """
 
-    control_type = "window_drag_region"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        draggable: bool | None = None,
-        maximize_on_double_tap: bool | None = None,
-        emit_move: bool | None = None,
-        native_drag: bool | None = None,
-        native_maximize_action: bool | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            draggable=draggable,
-            maximize_on_double_tap=maximize_on_double_tap,
-            emit_move=emit_move,
-            native_drag=native_drag,
-            native_maximize_action=native_maximize_action,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `window_drag_region` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `window_drag_region` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `window_drag_region` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `window_drag_region` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `window_drag_region` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `window_drag_region` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `window_drag_region` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `window_drag_region` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `window_drag_region` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `window_drag_region` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `window_drag_region` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `window_drag_region` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

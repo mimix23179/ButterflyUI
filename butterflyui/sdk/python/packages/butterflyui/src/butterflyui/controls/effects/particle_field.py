@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["ParticleField"]
 
-class ParticleField(Component):
+@butterfly_control('particle_field')
+class ParticleField(EffectControl):
     """
     Full-featured particle system rendered with a ``CustomPainter``.
-    
+
     The Flutter runtime spawns *count* particles with randomised
     positions, angles, speeds, sizes, and colours drawn from the
     configured ranges.  An ``AnimationController`` advancing
@@ -16,10 +18,10 @@ class ParticleField(Component):
     world-space position via simple ballistic motion.  Particles that
     exit the canvas wrap back to the opposite edge when *loop* is
     ``True``.
-    
+
     Example:
-    
-    ```python    
+
+    ```python
     import butterflyui as bui
 
     field = bui.ParticleField(
@@ -33,7 +35,6 @@ class ParticleField(Component):
     ```
     """
 
-
     count: int | None = None
     """
     Number of particles (``0`` – ``2000``).  Defaults to
@@ -44,12 +45,6 @@ class ParticleField(Component):
     """
     List of particle colours.  Falls back to the theme
     accent palette when empty.
-    """
-
-    size: float | None = None
-    """
-    Uniform particle diameter; sets both *min_size* and
-    *max_size*.
     """
 
     min_size: float | None = None
@@ -91,12 +86,6 @@ class ParticleField(Component):
     Defaults to ``30``.
     """
 
-    opacity: float | None = None
-    """
-    Global opacity multiplier (``0.0`` – ``1.0``).
-    Defaults to ``0.6``.
-    """
-
     seed: int | None = None
     """
     Integer seed for deterministic layout.
@@ -117,51 +106,146 @@ class ParticleField(Component):
     """
     ``"circle"`` (default) or ``"square"``.
     """
-    control_type = "particle_field"
 
-    def __init__(
-        self,
-        *,
-        count: int | None = None,
-        colors: list[Any] | None = None,
-        size: float | None = None,
-        min_size: float | None = None,
-        max_size: float | None = None,
-        speed: float | None = None,
-        min_speed: float | None = None,
-        max_speed: float | None = None,
-        direction: float | None = None,
-        spread: float | None = None,
-        opacity: float | None = None,
-        seed: int | None = None,
-        loop: bool | None = None,
-        play: bool | None = None,
-        shape: str | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            count=count,
-            colors=colors,
-            size=size,
-            min_size=min_size,
-            max_size=max_size,
-            speed=speed,
-            min_speed=min_speed,
-            max_speed=max_speed,
-            direction=direction,
-            spread=spread,
-            opacity=opacity,
-            seed=seed,
-            loop=loop,
-            play=play,
-            shape=shape,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    gravity: Any | None = None
+    """
+    Gravity value forwarded to the `particle_field` runtime control.
+    """
+
+    drift: Any | None = None
+    """
+    Drift value forwarded to the `particle_field` runtime control.
+    """
+
+    link_distance: Any | None = None
+    """
+    Link distance value forwarded to the `particle_field` runtime control.
+    """
+
+    line_color: Any | None = None
+    """
+    Line color value forwarded to the `particle_field` runtime control.
+    """
+
+    line_opacity: Any | None = None
+    """
+    Line opacity value forwarded to the `particle_field` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `particle_field` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `particle_field` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `particle_field` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `particle_field` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `particle_field` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `particle_field` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `particle_field` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `particle_field` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `particle_field` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `particle_field` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `particle_field` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `particle_field` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `particle_field` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

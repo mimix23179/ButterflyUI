@@ -203,6 +203,32 @@ def _collect_control_field_names(
     return frozenset(names)
 
 
+def _collect_control_field_order(
+    cls: type["Control"],
+    *,
+    doc_only_fields: frozenset[str] | None = None,
+    include_doc_only: bool = False,
+) -> tuple[str, ...]:
+    names: list[str] = []
+    seen: set[str] = set()
+    excluded = set(doc_only_fields or ())
+    for base in reversed(cls.__mro__):
+        annotations = getattr(base, "__annotations__", {})
+        if not isinstance(annotations, dict):
+            continue
+        for name in annotations:
+            if not isinstance(name, str):
+                continue
+            if name.startswith("_") or name in _CONTROL_FIELD_EXCLUDE_NAMES:
+                continue
+            if not include_doc_only and name in excluded:
+                continue
+            if name not in seen:
+                names.append(name)
+                seen.add(name)
+    return tuple(names)
+
+
 def _control_field_default(cls: type["Control"], name: str) -> Any:
     for base in cls.__mro__:
         if name in getattr(base, "__dict__", {}):
@@ -219,6 +245,152 @@ def _control_field_prop_name(cls: type["Control"], name: str) -> str:
     if name.endswith("_") and len(name) > 1:
         return name[:-1]
     return name
+
+
+def _signature_default(value: Any) -> Any:
+    if value is _CONTROL_FIELD_DEFAULT_MISSING:
+        return None
+    if isinstance(value, (list, dict, set)):
+        return None
+    return value
+
+
+def _build_control_class_signature(cls: type["Control"]) -> inspect.Signature | None:
+    params: list[inspect.Parameter] = []
+    positional_fields = tuple(getattr(cls, "_butterflyui_positional_fields", ()))
+    field_order = getattr(cls, "_butterflyui_control_field_order", ())
+    ordered_names = [
+        *[name for name in field_order if name in positional_fields],
+        *[name for name in field_order if name not in positional_fields],
+    ]
+    for name in ordered_names:
+        default = _signature_default(_control_field_default(cls, name))
+        annotation = Any
+        for base in cls.__mro__:
+            annotations = getattr(base, "__annotations__", {})
+            if isinstance(annotations, dict) and name in annotations:
+                annotation = annotations[name]
+                break
+        params.append(
+            inspect.Parameter(
+                name,
+                kind=(
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD
+                    if name in positional_fields
+                    else inspect.Parameter.KEYWORD_ONLY
+                ),
+                default=default,
+                annotation=annotation,
+            )
+        )
+
+    param_names = {param.name for param in params}
+    if "props" not in param_names:
+        params.append(
+            inspect.Parameter(
+                "props",
+                kind=inspect.Parameter.KEYWORD_ONLY,
+                default=None,
+                annotation=Mapping[str, Any] | None,
+            )
+        )
+    if "style" not in param_names:
+        params.append(
+            inspect.Parameter(
+                "style",
+                kind=inspect.Parameter.KEYWORD_ONLY,
+                default=None,
+                annotation=Any | None,
+            )
+        )
+    if "strict" not in param_names:
+        params.append(
+            inspect.Parameter(
+                "strict",
+                kind=inspect.Parameter.KEYWORD_ONLY,
+                default=False,
+                annotation=bool,
+            )
+        )
+    return inspect.Signature(parameters=params)
+
+
+def _build_declarative_control_init(cls: type["Control"]):
+    positional_fields = tuple(getattr(cls, "_butterflyui_positional_fields", ()))
+    doc_only_fields = frozenset(getattr(cls, "_butterflyui_doc_only_fields", ()))
+    field_order = tuple(getattr(cls, "_butterflyui_control_field_order", ()))
+
+    @wraps(Control.__init__)
+    def generated(
+        self: "Control",
+        *args: Any,
+        props: Mapping[str, Any] | None = None,
+        style: Any | None = None,
+        strict: bool = False,
+        child: Any | None = None,
+        children: Any | None = None,
+        **kwargs: Any,
+    ) -> None:
+        field_values: dict[str, Any] = {}
+        extra_children: list[Any] = []
+
+        for index, value in enumerate(args):
+            if index < len(positional_fields):
+                field_values[positional_fields[index]] = value
+            else:
+                extra_children.append(value)
+
+        for name in field_order:
+            if name in kwargs and name not in field_values:
+                field_values[name] = kwargs.pop(name)
+
+        doc_values: dict[str, Any] = {}
+        translated_kwargs: dict[str, Any] = {}
+        for name, value in field_values.items():
+            if name in doc_only_fields:
+                doc_values[name] = value
+                continue
+            prop_name = _control_field_prop_name(cls, name)
+            if prop_name == "child":
+                if value is not None and child is None:
+                    child = value
+                continue
+            if prop_name == "children":
+                if value is not None and children is None:
+                    children = value
+                continue
+            translated_kwargs[prop_name] = value
+
+        super(cls, self).__init__(
+            *extra_children,
+            child=child,
+            children=children,
+            props=props,
+            style=style,
+            strict=strict,
+            **translated_kwargs,
+            **kwargs,
+        )
+
+        for name, value in doc_values.items():
+            object.__setattr__(self, name, value)
+
+        init_hook = getattr(self, "init", None)
+        if callable(init_hook):
+            init_hook()
+
+        try:
+            _register_control(self)
+        except Exception:
+            pass
+        try:
+            self.clear_dirty()
+        except Exception:
+            pass
+
+    generated._butterflyui_wrapped = True  # type: ignore[attr-defined]
+    generated._butterflyui_generated = True  # type: ignore[attr-defined]
+    return generated
 
 
 def _coerce_int(value: Any) -> Any:
@@ -516,6 +688,139 @@ def _build_schema_signature(signature: inspect.Signature, control_type: str) -> 
     return signature.replace(parameters=params)
 
 
+def prepare_control_class(cls: type["Control"]) -> type["Control"]:
+    cls._butterflyui_doc_only_fields = _collect_doc_only_field_names(cls)
+    cls._butterflyui_field_aliases = _collect_control_field_aliases(cls)
+    cls._butterflyui_control_fields = _collect_control_field_names(
+        cls, doc_only_fields=cls._butterflyui_doc_only_fields
+    )
+    cls._butterflyui_control_field_order = _collect_control_field_order(
+        cls,
+        doc_only_fields=cls._butterflyui_doc_only_fields,
+        include_doc_only=True,
+    )
+    if "__init__" not in cls.__dict__:
+        cls.__init__ = _build_declarative_control_init(cls)  # type: ignore[assignment]
+        try:
+            cls.__signature__ = _build_control_class_signature(cls)
+        except Exception:
+            pass
+        return cls
+    init = cls.__init__
+    if getattr(init, "_butterflyui_generated", False):
+        cls.__init__ = _build_declarative_control_init(cls)  # type: ignore[assignment]
+        try:
+            cls.__signature__ = _build_control_class_signature(cls)
+        except Exception:
+            pass
+        return cls
+    if getattr(init, "_butterflyui_wrapped", False):
+        try:
+            cls.__signature__ = _build_control_class_signature(cls)
+        except Exception:
+            pass
+        return cls
+    signature = inspect.signature(init)
+    param_names = {param.name for param in signature.parameters.values()}
+    has_var_kw = any(
+        param.kind == inspect.Parameter.VAR_KEYWORD
+        for param in signature.parameters.values()
+    )
+
+    @wraps(init)
+    def wrapped(self: "Control", *args: Any, **kwargs: Any) -> None:
+        init_args = args
+        init_kwargs = dict(kwargs)
+        extra_props = None
+        if "props" not in param_names:
+            extra_props = kwargs.pop("props", None)
+
+        style = None
+        if "style" not in param_names:
+            style = kwargs.pop("style", None)
+
+        strict = (
+            bool(kwargs.pop("strict", False)) if "strict" not in param_names else False
+        )
+
+        layout_kwargs: dict[str, Any] = {}
+        for key in _LAYOUT_KEYS:
+            if key in kwargs and key not in param_names:
+                layout_kwargs[key] = kwargs.pop(key)
+
+        extra_kwargs: dict[str, Any] = {}
+        if not has_var_kw:
+            for key in list(kwargs):
+                if key not in param_names:
+                    extra_kwargs[key] = kwargs.pop(key)
+
+        init(self, *args, **kwargs)
+
+        style_payload = _coerce_style_payload(style)
+        if style_payload is not None:
+            _merge_local_style(self.props, style_payload, override=False)
+            _merge_props(self.props, style_payload, override=False)
+
+        if extra_props:
+            if isinstance(extra_props, Mapping):
+                _merge_props(self.props, extra_props, override=False)
+        if extra_kwargs:
+            _merge_props(self.props, extra_kwargs, override=False)
+        if layout_kwargs:
+            _apply_layout_props(self.props, layout_kwargs)
+        try:
+            bound = signature.bind_partial(self, *init_args, **init_kwargs)
+        except Exception:
+            bound = None
+        if bound is not None:
+            _backfill_bound_init_props(
+                self.props,
+                signature,
+                bound.arguments,
+            )
+
+        if strict:
+            from .schema import ensure_valid_props
+
+            ensure_valid_props(self.control_type, self.props, strict=True)
+
+        try:
+            meta = self.meta if isinstance(self.meta, dict) else {}
+            if meta is not self.meta:
+                self.meta = meta
+            if "source" not in meta:
+                source = _capture_source()
+                if source:
+                    meta["source"] = source
+        except Exception:
+            pass
+
+        try:
+            cls.__signature__ = _build_control_class_signature(cls)
+        except Exception:
+            schema_sig = _build_schema_signature(signature, self.control_type)
+            if schema_sig is not None:
+                wrapped.__signature__ = schema_sig
+        cls._butterflyui_signature_ready = True
+
+        try:
+            _register_control(self)
+        except Exception:
+            pass
+        try:
+            self.clear_dirty()
+        except Exception:
+            pass
+
+    wrapped._butterflyui_wrapped = True  # type: ignore[attr-defined]
+    cls.__init__ = wrapped  # type: ignore[assignment]
+    try:
+        cls.__signature__ = _build_control_class_signature(cls)
+    except Exception:
+        pass
+    return cls
+
+
 @dataclass(slots=True, init=False)
 class Control:
     """Base runtime control node serialized to the Flutter client.
@@ -685,103 +990,7 @@ class Control:
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super(Control, cls).__init_subclass__(**kwargs)
-        cls._butterflyui_doc_only_fields = _collect_doc_only_field_names(cls)
-        cls._butterflyui_field_aliases = _collect_control_field_aliases(cls)
-        cls._butterflyui_control_fields = _collect_control_field_names(
-            cls, doc_only_fields=cls._butterflyui_doc_only_fields
-        )
-        if "__init__" not in cls.__dict__:
-            return
-        init = cls.__init__
-        if getattr(init, "_butterflyui_wrapped", False):
-            return
-        signature = inspect.signature(init)
-        param_names = {param.name for param in signature.parameters.values()}
-        has_var_kw = any(param.kind == inspect.Parameter.VAR_KEYWORD for param in signature.parameters.values())
-
-        @wraps(init)
-        def wrapped(self: "Control", *args: Any, **kwargs: Any) -> None:
-            init_args = args
-            init_kwargs = dict(kwargs)
-            extra_props = None
-            if "props" not in param_names:
-                extra_props = kwargs.pop("props", None)
-            
-            style = None
-            if "style" not in param_names:
-                style = kwargs.pop("style", None)
-            
-            strict = bool(kwargs.pop("strict", False)) if "strict" not in param_names else False
-
-            layout_kwargs: dict[str, Any] = {}
-            for key in _LAYOUT_KEYS:
-                if key in kwargs and key not in param_names:
-                    layout_kwargs[key] = kwargs.pop(key)
-
-            extra_kwargs: dict[str, Any] = {}
-            if not has_var_kw:
-                for key in list(kwargs):
-                    if key not in param_names:
-                        extra_kwargs[key] = kwargs.pop(key)
-
-            init(self, *args, **kwargs)
-
-            style_payload = _coerce_style_payload(style)
-            if style_payload is not None:
-                _merge_local_style(self.props, style_payload, override=False)
-                _merge_props(self.props, style_payload, override=False)
-
-            if extra_props:
-                if isinstance(extra_props, Mapping):
-                    _merge_props(self.props, extra_props, override=False)
-            if extra_kwargs:
-                _merge_props(self.props, extra_kwargs, override=False)
-            if layout_kwargs:
-                _apply_layout_props(self.props, layout_kwargs)
-            try:
-                bound = signature.bind_partial(self, *init_args, **init_kwargs)
-            except Exception:
-                bound = None
-            if bound is not None:
-                _backfill_bound_init_props(
-                    self.props,
-                    signature,
-                    bound.arguments,
-                )
-
-            if strict:
-                from .schema import ensure_valid_props
-
-                ensure_valid_props(self.control_type, self.props, strict=True)
-
-            try:
-                meta = self.meta if isinstance(self.meta, dict) else {}
-                if meta is not self.meta:
-                    self.meta = meta
-                if "source" not in meta:
-                    source = _capture_source()
-                    if source:
-                        meta["source"] = source
-            except Exception:
-                pass
-
-            if not getattr(cls, "_butterflyui_signature_ready", False):
-                schema_sig = _build_schema_signature(signature, self.control_type)
-                if schema_sig is not None:
-                    wrapped.__signature__ = schema_sig
-                cls._butterflyui_signature_ready = True
-
-            try:
-                _register_control(self)
-            except Exception:
-                pass
-            try:
-                self.clear_dirty()
-            except Exception:
-                pass
-
-        wrapped._butterflyui_wrapped = True  # type: ignore[attr-defined]
-        cls.__init__ = wrapped  # type: ignore[assignment]
+        prepare_control_class(cls)
 
     def __getattribute__(self, name: str) -> Any:
         if name.startswith("_") or name in _CONTROL_RUNTIME_ATTRS:
@@ -798,6 +1007,8 @@ class Control:
                 children = object.__getattribute__(self, "children")
                 if children:
                     return children[0]
+            if prop_name == "children":
+                return object.__getattribute__(self, "children")
             if prop_name in props:
                 return props.get(prop_name)
             default = _control_field_default(cls, name)
@@ -825,6 +1036,17 @@ class Control:
                     children[0] = value
                 elif value is None:
                     props.pop("child", None)
+                else:
+                    children.append(value)
+                return
+            if prop_name == "children":
+                children = object.__getattribute__(self, "children")
+                children.clear()
+                if value is None:
+                    props.pop("children", None)
+                    return
+                if isinstance(value, (list, tuple)):
+                    children.extend(value)
                 else:
                     children.append(value)
                 return

@@ -1,13 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..overlay_control import OverlayControl
 
 __all__ = ["Splash"]
 
-class Splash(Component):
-    """Full-screen splash or loading overlay shown during app startup or transitions.
-    
+@butterfly_control('splash')
+class Splash(OverlayControl):
+    """
+    Full-screen splash or loading overlay shown during app startup or transitions.
+
     The runtime renders a full-screen overlay with optional branding,
     loading indicator, and progress tracking. ``active`` shows or hides the
     splash. ``color`` sets the background fill. ``title``/``subtitle``/
@@ -18,10 +21,10 @@ class Splash(Component):
     ``effect`` selects a visual transition effect.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Splash(
         active=True,
         title="My App",
@@ -32,7 +35,6 @@ class Splash(Component):
     )
     ```
     """
-
 
     active: bool | None = None
     """
@@ -120,63 +122,110 @@ class Splash(Component):
     Named visual transition effect applied to the splash.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `splash` runtime control.
     """
 
-    control_type = "splash"
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `splash` runtime control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        active: bool | None = None,
-        color: Any | None = None,
-        duration_ms: int | None = None,
-        radius: float | None = None,
-        centered: bool | None = None,
-        title: str | None = None,
-        subtitle: str | None = None,
-        message: str | None = None,
-        loading: bool | None = None,
-        progress: float | None = None,
-        show_progress: bool | None = None,
-        skip_enabled: bool | None = None,
-        auto_start: bool | None = None,
-        hide_on_complete: bool | None = None,
-        min_duration_ms: int | None = None,
-        background: Any | None = None,
-        effect: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            active=active,
-            color=color,
-            duration_ms=duration_ms,
-            radius=radius,
-            centered=centered,
-            title=title,
-            subtitle=subtitle,
-            message=message,
-            loading=loading,
-            progress=progress,
-            show_progress=show_progress,
-            skip_enabled=skip_enabled,
-            auto_start=auto_start,
-            hide_on_complete=hide_on_complete,
-            min_duration_ms=min_duration_ms,
-            background=background,
-            effect=effect,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `splash` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `splash` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `splash` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `splash` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `splash` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `splash` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `splash` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `splash` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `splash` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `splash` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `splash` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `splash` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `splash` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `splash` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `splash` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `splash` runtime control.
+    """
 
     def trigger(self, session: Any, x: float | None = None, y: float | None = None) -> dict[str, Any]:
         payload: dict[str, Any] = {}

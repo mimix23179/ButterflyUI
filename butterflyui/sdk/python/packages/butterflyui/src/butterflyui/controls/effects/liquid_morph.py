@@ -1,22 +1,24 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["LiquidMorph"]
 
-class LiquidMorph(Component):
+@butterfly_control('liquid_morph')
+class LiquidMorph(EffectControl):
     """
     Animated border-radius morph that transitions between a minimum
     and maximum corner radius using ``AnimatedContainer``.
-    
+
     The Flutter runtime wraps the child in an ``AnimatedContainer``
     with ``Clip.antiAlias`` and a ``BoxDecoration`` whose
     ``borderRadius`` animates between *min_radius* and *max_radius*.
     When ``animate`` is ``False`` the radius snaps to *min_radius*.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -28,7 +30,6 @@ class LiquidMorph(Component):
     )
     ```
     """
-
 
     min_radius: float | None = None
     """
@@ -54,36 +55,120 @@ class LiquidMorph(Component):
     *max_radius*; when ``False`` it stays at *min_radius*.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "liquid_morph"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        min_radius: float | None = None,
-        max_radius: float | None = None,
-        duration_ms: int | None = None,
-        animate: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            min_radius=min_radius,
-            max_radius=max_radius,
-            duration_ms=duration_ms,
-            animate=animate,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `liquid_morph` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `liquid_morph` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `liquid_morph` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `liquid_morph` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `liquid_morph` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `liquid_morph` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `liquid_morph` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `liquid_morph` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `liquid_morph` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `liquid_morph` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `liquid_morph` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `liquid_morph` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

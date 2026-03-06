@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..overlay_control import OverlayControl
 
 __all__ = ["Portal"]
 
-class Portal(Component):
+@butterfly_control('portal', field_aliases={'content': 'child'}, positional_fields=('portal',))
+class Portal(OverlayControl):
     """
     Renders portal content into a separate overlay layer above the widget tree.
 
@@ -30,22 +32,10 @@ class Portal(Component):
     ```
     """
 
-
-    open: bool | None = None
+    content: Any | None = None
     """
-    When ``True`` the portal overlay is visible.
+    Primary child control rendered inside this control.
     """
-
-    dismissible: bool | None = None
-    """
-    When ``True`` tapping outside closes the portal.
-    """
-
-    offset: Any | None = None
-    """
-    Offset of the portal content from the alignment position.
-    """
-
 
     portal: Any | None = None
     """
@@ -57,32 +47,117 @@ class Portal(Component):
     When ``True`` pointer events pass through to widgets below.
     """
 
-    control_type = "portal"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        portal: Any | None = None,
-        *,
-        open: bool | None = None,
-        dismissible: bool | None = None,
-        passthrough: bool | None = None,
-        alignment: Any | None = None,
-        offset: Any | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            child=child,
-            portal=portal,
-            open=open,
-            dismissible=dismissible,
-            passthrough=passthrough,
-            alignment=alignment,
-            offset=offset,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `portal` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `portal` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `portal` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `portal` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `portal` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `portal` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `portal` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `portal` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `portal` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `portal` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `portal` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `portal` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `portal` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `portal` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `portal` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `portal` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `portal` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `portal` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `portal` runtime control.
+    """

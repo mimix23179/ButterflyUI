@@ -1,15 +1,17 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..scrollable_control import ScrollableControl
 
 __all__ = ["VirtualGrid"]
 
-class VirtualGrid(Component):
+@butterfly_control('virtual_grid', field_aliases={'controls': 'children'})
+class VirtualGrid(ScrollableControl):
     """
     Virtualized grid view for large datasets with prefetch-near-end
     and loading-state support.
-    
+
     Items are arranged into ``columns`` columns.  ``spacing`` and
     ``run_spacing`` control the gap between tiles along the main and
     cross axes respectively, while ``child_aspect_ratio`` sets the
@@ -18,10 +20,10 @@ class VirtualGrid(Component):
     a ``"prefetch"`` event is emitted so the app can append more data.
     Setting ``loading`` to ``True`` displays a loading indicator at the
     grid’s tail.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.VirtualGrid(
         items=[{"label": f"Tile {i}"} for i in range(100)],
         columns=3,
@@ -33,6 +35,10 @@ class VirtualGrid(Component):
     ```
     """
 
+    controls: list[Any] | None = None
+    """
+    Child controls rendered in order by this control.
+    """
 
     items: list[Any] | None = None
     """
@@ -74,34 +80,117 @@ class VirtualGrid(Component):
     Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
-    control_type = "virtual_grid"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        items: list[Any] | None = None,
-        columns: int | None = None,
-        spacing: float | None = None,
-        run_spacing: float | None = None,
-        child_aspect_ratio: float | None = None,
-        has_more: bool | None = None,
-        loading: bool | None = None,
-        prefetch_threshold: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            items=items,
-            columns=columns,
-            spacing=spacing,
-            run_spacing=run_spacing,
-            child_aspect_ratio=child_aspect_ratio,
-            has_more=has_more,
-            loading=loading,
-            prefetch_threshold=prefetch_threshold,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `virtual_grid` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `virtual_grid` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `virtual_grid` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `virtual_grid` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `virtual_grid` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `virtual_grid` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `virtual_grid` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `virtual_grid` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `virtual_grid` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `virtual_grid` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `virtual_grid` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `virtual_grid` runtime control.
+    """

@@ -2,35 +2,36 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Drawer"]
 
-
-class Drawer(Component):
+@butterfly_control('drawer')
+class Drawer(LayoutControl):
     """
     Standalone drawer overlay control with optional built-in navigation content.
-    
+
     ``Drawer`` is backed by its own Dart control implementation (not an alias
     of ``slide_panel``). It supports both:
     - custom content mode via ``child`` / ``children``, and
     - data-driven menu mode via ``items`` or grouped ``sections``.
-    
+
     The built-in menu mode includes selection, optional search, optional
     collapsible sections, and runtime events for open/close/dismiss/select.
     Drawer presentation is edge-anchored through ``side`` and can be sized
     with ``size`` (or width/height aliases passed through ``props``).
-    
+
     Layout and placement props are supported through the shared runtime contract
     (for example ``margin``, ``radius``, ``clip_behavior``, ``align`` /
     ``alignment`` / ``position``, and sizing constraints).
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     drawer = bui.Drawer(
         side="left",
         size=280,
@@ -46,7 +47,6 @@ class Drawer(Component):
     ```
     """
 
-
     open: bool | None = None
     """
     If ``True``, the drawer is shown.
@@ -57,15 +57,9 @@ class Drawer(Component):
     If ``True``, tapping the scrim dismisses the drawer.
     """
 
-
     side: str | None = None
     """
     Drawer edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
-    """
-
-    size: float | None = None
-    """
-    Width for left/right drawers, or height for top/bottom drawers.
     """
 
     scrim_color: Any | None = None
@@ -113,55 +107,210 @@ class Drawer(Component):
     Enables collapsible sections in sectioned mode.
     """
 
-    events: list[str] | None = None
+    selected: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Selected value forwarded to the `drawer` runtime control.
     """
 
-    control_type = "drawer"
+    value: Any | None = None
+    """
+    Current value held by the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        open: bool | None = None,
-        side: str | None = None,
-        size: float | None = None,
-        dismissible: bool | None = None,
-        scrim_color: Any | None = None,
-        modal: bool | None = None,
-        persistent: bool | None = None,
-        items: list[Any] | None = None,
-        sections: list[Mapping[str, Any]] | None = None,
-        selected_id: str | None = None,
-        show_search: bool | None = None,
-        query: str | None = None,
-        collapsible: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            open=open,
-            side=side,
-            size=size,
-            dismissible=dismissible,
-            scrim_color=scrim_color,
-            modal=modal,
-            persistent=persistent,
-            items=items,
-            sections=sections,
-            selected_id=selected_id,
-            show_search=show_search,
-            query=query,
-            collapsible=collapsible,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    search_placeholder: Any | None = None
+    """
+    Search placeholder value forwarded to the `drawer` runtime control.
+    """
+
+    emit_on_search_change: Any | None = None
+    """
+    Emit on search change value forwarded to the `drawer` runtime control.
+    """
+
+    search_debounce_ms: Any | None = None
+    """
+    Search debounce ms value forwarded to the `drawer` runtime control.
+    """
+
+    dense: Any | None = None
+    """
+    Whether the runtime should use a more compact visual density.
+    """
+
+    title: Any | None = None
+    """
+    Title text or node rendered by the control.
+    """
+
+    subtitle: Any | None = None
+    """
+    Secondary text rendered by the control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `drawer` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `drawer` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `drawer` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `drawer` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `drawer` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `drawer` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `drawer` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `drawer` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `drawer` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `drawer` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `drawer` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `drawer` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `drawer` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `drawer` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `drawer` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `drawer` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `drawer` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `drawer` runtime control.
+    """
+
+    align: Any | None = None
+    """
+    Align value forwarded to the `drawer` runtime control.
+    """
+
+    position: Any | None = None
+    """
+    Position value forwarded to the `drawer` runtime control.
+    """
+
+    panel_margin: Any | None = None
+    """
+    Panel margin value forwarded to the `drawer` runtime control.
+    """
+
+    panel_alignment: Any | None = None
+    """
+    Panel alignment value forwarded to the `drawer` runtime control.
+    """
+
+    panel_width: Any | None = None
+    """
+    Panel width value forwarded to the `drawer` runtime control.
+    """
+
+    panel_min_width: Any | None = None
+    """
+    Panel min width value forwarded to the `drawer` runtime control.
+    """
+
+    panel_max_width: Any | None = None
+    """
+    Panel max width value forwarded to the `drawer` runtime control.
+    """
+
+    offset: Any | None = None
+    """
+    Offset applied by the runtime when positioning this control.
+    """
+
+    translate: Any | None = None
+    """
+    Translate value forwarded to the `drawer` runtime control.
+    """
+
+    radius: Any | None = None
+    """
+    Corner radius used when painting the control.
+    """
+
+    clip_behavior: Any | None = None
+    """
+    Clip behavior value forwarded to the `drawer` runtime control.
+    """
 
     def set_open(self, session: Any, open: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"open": open})

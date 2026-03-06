@@ -1,15 +1,17 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["DataSourceView"]
 
-class DataSourceView(Component):
+@butterfly_control('data_source_view')
+class DataSourceView(LayoutControl):
     """
     Searchable, selectable list of data-source entries with live
     filtering and selection state.
-    
+
     The runtime builds a ``Column`` containing an optional search
     ``TextField`` (when ``show_search`` is ``True``) and a ``ListView``
     of ``ListTile`` rows rendered from the ``sources`` list.  Each
@@ -18,10 +20,10 @@ class DataSourceView(Component):
     emits a ``"select"`` event with the source ``id``, ``index``, and
     full ``source`` payload.  Typing in the search field filters by
     title case-insensitively and emits ``"query_change"``.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.DataSourceView(
         sources=[
             {"id": "pg", "title": "PostgreSQL", "subtitle": "localhost:5432"},
@@ -33,7 +35,6 @@ class DataSourceView(Component):
     )
     ```
     """
-
 
     sources: list[Mapping[str, Any]] | None = None
     """
@@ -60,38 +61,185 @@ class DataSourceView(Component):
     If ``True``, list tiles use compact vertical density.
     """
 
-    events: list[str] | None = None
+    loading: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Loading value forwarded to the `data_source_view` runtime control.
     """
 
-    control_type = "data_source_view"
+    page: Any | None = None
+    """
+    Page value forwarded to the `data_source_view` runtime control.
+    """
 
-    def __init__(
-        self,
-        *,
-        sources: list[Mapping[str, Any]] | None = None,
-        selected_id: str | None = None,
-        query: str | None = None,
-        show_search: bool | None = None,
-        dense: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            sources=sources,
-            selected_id=selected_id,
-            query=query,
-            show_search=show_search,
-            dense=dense,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    page_size: Any | None = None
+    """
+    Page size value forwarded to the `data_source_view` runtime control.
+    """
+
+    has_more: Any | None = None
+    """
+    Has more value forwarded to the `data_source_view` runtime control.
+    """
+
+    refreshable: Any | None = None
+    """
+    Refreshable value forwarded to the `data_source_view` runtime control.
+    """
+
+    prefetch_threshold: Any | None = None
+    """
+    Prefetch threshold value forwarded to the `data_source_view` runtime control.
+    """
+
+    cache_key: Any | None = None
+    """
+    Cache key value forwarded to the `data_source_view` runtime control.
+    """
+
+    show_content_on_loading: Any | None = None
+    """
+    Show content on loading value forwarded to the `data_source_view` runtime control.
+    """
+
+    overlay_loading: Any | None = None
+    """
+    Overlay loading value forwarded to the `data_source_view` runtime control.
+    """
+
+    empty_view: Any | None = None
+    """
+    Empty view value forwarded to the `data_source_view` runtime control.
+    """
+
+    error_view: Any | None = None
+    """
+    Error view value forwarded to the `data_source_view` runtime control.
+    """
+
+    offline_view: Any | None = None
+    """
+    Offline view value forwarded to the `data_source_view` runtime control.
+    """
+
+    loading_view: Any | None = None
+    """
+    Loading view value forwarded to the `data_source_view` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `data_source_view` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `data_source_view` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `data_source_view` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `data_source_view` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `data_source_view` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `data_source_view` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `data_source_view` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `data_source_view` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `data_source_view` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `data_source_view` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `data_source_view` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `data_source_view` runtime control.
+    """
 
     def set_sources(self, session: Any, sources: list[Mapping[str, Any]]) -> dict[str, Any]:
         return self.invoke(session, "set_sources", {"sources": [dict(source) for source in sources]})

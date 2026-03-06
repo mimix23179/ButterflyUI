@@ -2,28 +2,29 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..overlay_control import OverlayControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["SnackBar"]
 
-
-class SnackBar(Component):
+@butterfly_control('snack_bar', field_aliases={'style_name': 'style'}, positional_fields=('message',))
+class SnackBar(OverlayControl):
     """
     Transient snackbar feedback control with optional action affordance.
-    
+
     ``SnackBar`` is the canonical control name replacing legacy ``snackbar``.
     It is designed for short-lived status feedback such as save confirmations,
     warnings, and undo prompts.
-    
+
     Supports icon payloads directly and forwards style pipeline fields via
     ``**kwargs`` for color/transparency and motion/effect customization.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     sb = bui.SnackBar(
         message="Project saved",
         action_label="Undo",
@@ -33,15 +34,6 @@ class SnackBar(Component):
     )
     ```
     """
-
-
-    _butterflyui_field_aliases = {"style_name": "style"}
-
-    open: bool | None = None
-    """
-    If ``True``, snackbar is visible.
-    """
-
 
     message: str | None = None
     """
@@ -61,17 +53,6 @@ class SnackBar(Component):
     action_label: str | None = None
     """
     Label text rendered for the control's inline action when that action is available.
-    """
-
-    variant: str | None = None
-    """
-    Semantic style hint (for example ``"info"``, ``"success"``,
-    ``"warning"``, ``"error"``).
-    """
-
-    style_name: str | None = None
-    """
-    Renderer style mode, defaults to ``"snackbar"``.
     """
 
     icon: Any | None = None
@@ -104,63 +85,120 @@ class SnackBar(Component):
     Preferred toast/snackbar placement hint.
     """
 
-    events: list[str] | None = None
+    style_name: str | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
-    """
-
-    style: Mapping[str, Any] | None = None
-    """
-    Local style map merged into the rendered control payload. Use it for per-instance styling without changing shared tokens, variants, or recipe classes.
+    Style name value forwarded to the `snack_bar` runtime control.
     """
 
-    control_type = "snack_bar"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        message: str | None = None,
-        *,
-        label: str | None = None,
-        open: bool | None = None,
-        duration_ms: int | None = None,
-        action_label: str | None = None,
-        variant: str | None = None,
-        style_name: str | None = None,
-        icon: Any | None = None,
-        instant: bool | None = None,
-        priority: int | None = None,
-        use_flushbar: bool | None = None,
-        use_fluttertoast: bool | None = None,
-        toast_position: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        message=message,
-                        label=label,
-                        open=open,
-                        duration_ms=duration_ms,
-                        action_label=action_label,
-                        variant=variant,
-                        style=style_name,
-                        icon=icon,
-                        instant=instant,
-                        priority=priority,
-                        use_flushbar=use_flushbar,
-                        use_fluttertoast=use_fluttertoast,
-                        toast_position=toast_position,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `snack_bar` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `snack_bar` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `snack_bar` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `snack_bar` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `snack_bar` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `snack_bar` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `snack_bar` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `snack_bar` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `snack_bar` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `snack_bar` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `snack_bar` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `snack_bar` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `snack_bar` runtime control.
+    """
 
     def set_open(self, session: Any, value: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"value": value})
@@ -185,4 +223,3 @@ class SnackBar(Component):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
-

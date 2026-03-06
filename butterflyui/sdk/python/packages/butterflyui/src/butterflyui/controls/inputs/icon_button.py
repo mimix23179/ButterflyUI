@@ -1,28 +1,30 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
 from .button import Button
+from ..base_control import butterfly_control
+from ..button_control import ButtonControl
 
 __all__ = ["IconButton"]
 
-class IconButton(Button):
+@butterfly_control('icon_button', positional_fields=('icon',))
+class IconButton(ButtonControl):
     """
     Tappable icon-only button control.
-    
+
     ``IconButton`` is the icon-focused member of the button family. It keeps
     the full action/event behavior of :class:`Button` while prioritizing icon
     payloads over text captions. The runtime can resolve icon name strings,
     integer code points, and compatible icon payload objects.
-    
+
     Use this for toolbar buttons, compact overlay actions, or quick actions
     where a label would add unnecessary visual weight.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.IconButton(
         icon="delete",
         tooltip="Delete item",
@@ -32,99 +34,112 @@ class IconButton(Button):
     ```
     """
 
-
-    events: list[str] | None = None
-    """
-    List of runtime event names that should be emitted back to Python for this control instance.
-    """
-
-    action: Any | None = None
-    """
-    Declarative action descriptor fired on press.
-    """
-
-    action_id: str | None = None
-    """
-    Registered action ID to dispatch on press.
-    """
-
-    action_event: str | None = None
-    """
-    Event name forwarded to the action dispatcher.
-    """
-
-    action_payload: Mapping[str, Any] | None = None
-    """
-    Extra payload mapping for action dispatch.
-    """
-
-    actions: list[Any] | None = None
-    """
-    Action descriptor list executed on press.
-    """
-
-
-    icon: str | int | None = None
-    """
-    Material icon name, codepoint integer, or runtime icon payload.
-    """
-
-    size: float | None = None
-    """
-    Requested icon, glyph, or control size in logical pixels or runtime size units.
-    """
-
     color: Any | None = None
     """
     Icon color value accepted by runtime.
     """
 
-    value: Any | None = None
+    glyph: Any | None = None
     """
-    Arbitrary payload emitted with click events.
+    Glyph value forwarded to the `icon_button` runtime control.
     """
-    control_type = "icon_button"
 
-    def __init__(
-        self,
-        icon: str | int | None = None,
-        *,
-        tooltip: str | None = None,
-        size: float | None = None,
-        color: Any | None = None,
-        enabled: bool | None = None,
-        value: Any | None = None,
-        events: list[str] | None = None,
-        action: Any | None = None,
-        action_id: str | None = None,
-        action_event: str | None = None,
-        action_payload: Mapping[str, Any] | None = None,
-        actions: list[Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        icon=icon,
-                        tooltip=tooltip,
-                        size=size,
-                        color=color,
-                        enabled=enabled,
-                        value=value,
-                    )
-        super().__init__(
-            label=None,
-            props=merged,
-            events=events,
-            action=action,
-            action_id=action_id,
-            action_event=action_event,
-            action_payload=action_payload,
-            actions=actions,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `icon_button` runtime control.
+    """
 
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `icon_button` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `icon_button` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `icon_button` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `icon_button` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `icon_button` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_size: float | None = None
+    """
+    Icon size value forwarded to the `icon_button` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `icon_button` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `icon_button` runtime control.
+    """
+
+    transparency: float | None = None
+    """
+    Transparency value forwarded to the `icon_button` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `icon_button` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `icon_button` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `icon_button` runtime control.
+    """

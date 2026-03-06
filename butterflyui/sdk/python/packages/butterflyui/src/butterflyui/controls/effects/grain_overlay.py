@@ -1,22 +1,24 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["GrainOverlay"]
 
-class GrainOverlay(Component):
+@butterfly_control('grain_overlay', field_aliases={'content': 'child'})
+class GrainOverlay(EffectControl):
     """
     Film-grain noise texture overlay rendered with a ``CustomPainter``.
-    
+
     The Flutter runtime paints randomly positioned single-pixel
     rectangles over the child using a seeded ``Random`` instance.  The
     dot count is derived from the widget area multiplied by ``density``.
     An optional ``animated`` flag increments the seed each frame for a
     flickering grain effect.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -29,11 +31,9 @@ class GrainOverlay(Component):
     ```
     """
 
-
-    opacity: float | None = None
+    content: Any | None = None
     """
-    Opacity of each grain dot (``0.0`` – ``1.0``).
-    Defaults to ``0.08``.
+    Primary child control rendered inside this control.
     """
 
     seed: int | None = None
@@ -59,39 +59,112 @@ class GrainOverlay(Component):
     refresh.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `grain_overlay` runtime control.
     """
-    control_type = "grain_overlay"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        opacity: float | None = None,
-        density: float | None = None,
-        seed: int | None = None,
-        color: Any | None = None,
-        animated: bool | None = None,
-        fps: int | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            child=child,
-            events=events,
-            props=props,
-            style=style,
-            strict=strict,
-            opacity=opacity,
-            density=density,
-            seed=seed,
-            color=color,
-            animated=animated,
-            fps=fps,
-            **kwargs,
-        )
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `grain_overlay` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `grain_overlay` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `grain_overlay` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `grain_overlay` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `grain_overlay` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `grain_overlay` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `grain_overlay` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `grain_overlay` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `grain_overlay` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `grain_overlay` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `grain_overlay` runtime control.
+    """

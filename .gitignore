@@ -13,6 +13,7 @@ docs/
 plans/
 tools/
 flet/
+scripts/
 controls_reference.txt
 list.md
 release-0.1.0-alpha.md

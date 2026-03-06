@@ -1,15 +1,17 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..scrollable_control import ScrollableControl
 
 __all__ = ["VirtualList"]
 
-class VirtualList(Component):
+@butterfly_control('virtual_list', field_aliases={'controls': 'children'})
+class VirtualList(ScrollableControl):
     """
     Virtualized scrollable list for large datasets with fixed item
     extent, separator support, and prefetch-near-end loading.
-    
+
     When ``item_extent`` is set every row is given the same fixed height,
     enabling the scroll view to skip layout for off-screen items
     (significant performance gain for large lists).  ``cache_extent``
@@ -19,10 +21,10 @@ class VirtualList(Component):
     (within ``prefetch_threshold`` items), a ``"prefetch"`` event is
     emitted so the app can append more data.  Setting ``loading`` to
     ``True`` shows a loading indicator at the list’s tail.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.VirtualList(
         items=[{"label": f"Row {i}"} for i in range(1000)],
         item_extent=48,
@@ -33,6 +35,10 @@ class VirtualList(Component):
     ```
     """
 
+    controls: list[Any] | None = None
+    """
+    Child controls rendered in order by this control.
+    """
 
     items: list[Any] | None = None
     """
@@ -69,32 +75,152 @@ class VirtualList(Component):
     Number of remaining items at which a ``"prefetch"`` event is emitted.
     """
 
-    control_type = "virtual_list"
+    header: Any | None = None
+    """
+    Header value forwarded to the `virtual_list` runtime control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        items: list[Any] | None = None,
-        item_extent: float | None = None,
-        cache_extent: float | None = None,
-        separator: bool | None = None,
-        has_more: bool | None = None,
-        loading: bool | None = None,
-        prefetch_threshold: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            items=items,
-            item_extent=item_extent,
-            cache_extent=cache_extent,
-            separator=separator,
-            has_more=has_more,
-            loading=loading,
-            prefetch_threshold=prefetch_threshold,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    footer: Any | None = None
+    """
+    Footer value forwarded to the `virtual_list` runtime control.
+    """
+
+    spacing: Any | None = None
+    """
+    Spacing between repeated child elements.
+    """
+
+    reverse: Any | None = None
+    """
+    Reverse value forwarded to the `virtual_list` runtime control.
+    """
+
+    skeleton_count: Any | None = None
+    """
+    Skeleton count value forwarded to the `virtual_list` runtime control.
+    """
+
+    use_positioned_list: Any | None = None
+    """
+    Use positioned list value forwarded to the `virtual_list` runtime control.
+    """
+
+    initial_index: Any | None = None
+    """
+    Initial index value forwarded to the `virtual_list` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `virtual_list` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `virtual_list` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `virtual_list` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `virtual_list` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `virtual_list` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `virtual_list` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `virtual_list` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `virtual_list` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `virtual_list` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `virtual_list` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `virtual_list` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `virtual_list` runtime control.
+    """

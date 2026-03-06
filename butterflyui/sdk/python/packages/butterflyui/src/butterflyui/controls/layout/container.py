@@ -1,19 +1,21 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Container"]
 
-class Container(Component):
+@butterfly_control('container', field_aliases={'content': 'child'})
+class Container(LayoutControl):
     """
     Decorated layout container combining sizing, spacing, and visual decoration.
-    
+
     Maps to Flutter's ``Container`` widget. Combines ``width``/``height``
     constraints, ``padding`` and ``margin`` spacing, background and border
     decoration (``bgcolor``, ``border_color``, ``border_width``, ``radius``),
     and child ``alignment`` in one component.
-    
+
     ``Container`` also supports the universal ButterflyUI styling pipeline via
     forwarded ``**kwargs``:
     - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
@@ -27,10 +29,10 @@ class Container(Component):
     - visual tokens: ``icon``, ``color``, and ``transparency``.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Container(
         bui.Text("Hello"),
         width=300,
@@ -42,6 +44,10 @@ class Container(Component):
     ```
     """
 
+    content: Any | None = None
+    """
+    Primary child control rendered inside this control.
+    """
 
     bgcolor: Any | None = None
     """
@@ -63,46 +69,110 @@ class Container(Component):
     Corner radius in logical pixels.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "container"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `container` runtime control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        width: Any | None = None,
-        height: Any | None = None,
-        padding: Any | None = None,
-        margin: Any | None = None,
-        alignment: Any | None = None,
-        bgcolor: Any | None = None,
-        border_color: Any | None = None,
-        border_width: float | None = None,
-        radius: float | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            width=width,
-            height=height,
-            padding=padding,
-            margin=margin,
-            alignment=alignment,
-            bgcolor=bgcolor,
-            border_color=border_color,
-            border_width=border_width,
-            radius=radius,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `container` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `container` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `container` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `container` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `container` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `container` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `container` runtime control.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `container` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `container` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `container` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `container` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `container` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `container` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `container` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `container` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `container` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `container` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `container` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

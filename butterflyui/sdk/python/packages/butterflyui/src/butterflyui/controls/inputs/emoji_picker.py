@@ -1,41 +1,37 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
 __all__ = ["EmojiPicker"]
 
-class EmojiPicker(Component):
+@butterfly_control('emoji_picker', positional_fields=('value',))
+class EmojiPicker(FormFieldControl):
     """
     Scrollable emoji grid with category tabs and optional search.
-    
+
     The Flutter runtime renders a paginated emoji panel grouped by
     category (smileys, animals, food, etc.).  A ``show_search`` bar
     lets users filter by keyword.  ``show_recent`` enables a *Recently
     Used* tab.  Selecting an emoji emits a ``pick`` event with the
     Unicode character (and optional metadata when
     ``include_metadata`` is ``True``).
-    
+
     Use :meth:`set_category`, :meth:`search`, and :meth:`set_value` to
     control the panel imperatively.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.EmojiPicker(
         show_search=True,
         show_recent=True,
         columns=8,
     )
     ```
-    """
-
-
-    value: str | None = None
-    """
-    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     categories: list[str] | None = None
@@ -98,51 +94,120 @@ class EmojiPicker(Component):
     Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "emoji_picker"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        categories: list[str] | None = None,
-        recent: list[str] | None = None,
-        skin_tone: str | None = None,
-        show_search: bool | None = None,
-        show_recent: bool | None = None,
-        category: str | None = None,
-        query: str | None = None,
-        include_metadata: bool | None = None,
-        recent_limit: int | None = None,
-        columns: int | None = None,
-        items: list[str] | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            categories=categories,
-            recent=recent,
-            skin_tone=skin_tone,
-            show_search=show_search,
-            show_recent=show_recent,
-            category=category,
-            query=query,
-            include_metadata=include_metadata,
-            recent_limit=recent_limit,
-            columns=columns,
-            items=items,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `emoji_picker` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `emoji_picker` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `emoji_picker` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `emoji_picker` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `emoji_picker` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `emoji_picker` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `emoji_picker` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `emoji_picker` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `emoji_picker` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `emoji_picker` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `emoji_picker` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `emoji_picker` runtime control.
+    """
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

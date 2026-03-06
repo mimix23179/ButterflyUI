@@ -1,28 +1,30 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Frame"]
 
-class Frame(Component):
+@butterfly_control('frame', field_aliases={'content': 'child'})
+class Frame(LayoutControl):
     """
     Sized and decorated frame with constraints, spacing, and visual styling.
-    
+
     The runtime renders a container that applies combined width/height
     constraints (including min/max bounds), padding/margin spacing, background
     color, border, corner radius, and clip behaviour. ``alignment`` positions
     the child within the frame.
-    
+
     ``Frame`` forwards additional style pipeline props through ``**kwargs``,
     including classes/modifiers/motion/effects plus optional ``icon``,
     ``color``, and ``transparency`` hints.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Frame(
         bui.Text("Content"),
         width=400,
@@ -35,6 +37,10 @@ class Frame(Component):
     ```
     """
 
+    content: Any | None = None
+    """
+    Primary child control rendered inside this control.
+    """
 
     bgcolor: Any | None = None
     """
@@ -62,56 +68,110 @@ class Frame(Component):
     ``"antiAliasWithSaveLayer"``.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "frame"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `frame` runtime control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        width: float | None = None,
-        height: float | None = None,
-        min_width: float | None = None,
-        min_height: float | None = None,
-        max_width: float | None = None,
-        max_height: float | None = None,
-        padding: Any | None = None,
-        margin: Any | None = None,
-        alignment: Any | None = None,
-        bgcolor: Any | None = None,
-        border_color: Any | None = None,
-        border_width: float | None = None,
-        radius: float | None = None,
-        clip_behavior: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            width=width,
-            height=height,
-            min_width=min_width,
-            min_height=min_height,
-            max_width=max_width,
-            max_height=max_height,
-            padding=padding,
-            margin=margin,
-            alignment=alignment,
-            bgcolor=bgcolor,
-            border_color=border_color,
-            border_width=border_width,
-            radius=radius,
-            clip_behavior=clip_behavior,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `frame` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `frame` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `frame` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `frame` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `frame` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `frame` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `frame` runtime control.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `frame` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `frame` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `frame` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `frame` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `frame` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `frame` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `frame` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `frame` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `frame` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `frame` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `frame` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

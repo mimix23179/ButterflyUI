@@ -1,28 +1,30 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
 from .button import Button
+from ..base_control import butterfly_control
+from ..button_control import ButtonControl
 
 __all__ = ["ElevatedButton"]
 
-class ElevatedButton(Button):
+@butterfly_control('elevated_button', positional_fields=('label',))
+class ElevatedButton(ButtonControl):
     """
     Raised button preset with ``variant="elevated"``.
-    
+
     ``ElevatedButton`` forwards the standard :class:`Button` interaction and
     action pipeline while enforcing the elevated visual variant. Use this for
     actions that need stronger depth or separation from surrounding surfaces.
-    
+
     As with other button wrappers, extra runtime keys passed via ``**kwargs``
     are forwarded unchanged, including icon/color/transparency and style
     pipeline fields.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.ElevatedButton(
         "Confirm",
         value="confirm",
@@ -32,85 +34,107 @@ class ElevatedButton(Button):
     ```
     """
 
-
-    label: str | None = None
+    color: Any | None = None
     """
-    Button caption text. ``text`` takes precedence when both are set.
-    """
-
-    text: str | None = None
-    """
-    Caption text alias for ``label``.
+    Primary color value applied to the control.
     """
 
-    value: Any | None = None
+    foreground: Any | None = None
     """
-    Arbitrary payload emitted with click events.
-    """
-
-    action: Any | None = None
-    """
-    Declarative action descriptor fired on press.
+    Foreground value forwarded to the `elevated_button` runtime control.
     """
 
-    action_id: str | None = None
+    text_color: Any | None = None
     """
-    Registered action ID to dispatch on press.
-    """
-
-    action_event: str | None = None
-    """
-    Event name forwarded to the action dispatcher.
+    Text color value forwarded to the `elevated_button` runtime control.
     """
 
-    action_payload: Mapping[str, Any] | None = None
+    icon_background: Any | None = None
     """
-    Extra payload mapping for action dispatch.
-    """
-
-    actions: list[Any] | None = None
-    """
-    Action descriptor list executed on press.
+    Icon background value forwarded to the `elevated_button` runtime control.
     """
 
-
-    events: list[str] | None = None
+    icon_foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Icon foreground value forwarded to the `elevated_button` runtime control.
     """
-    control_type = "elevated_button"
 
-    def __init__(
-        self,
-        label: str | None = None,
-        *,
-        text: str | None = None,
-        value: Any | None = None,
-        events: list[str] | None = None,
-        action: Any | None = None,
-        action_id: str | None = None,
-        action_event: str | None = None,
-        action_payload: Mapping[str, Any] | None = None,
-        actions: list[Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(props, events=events)
-        super().__init__(
-            label=label,
-            text=text,
-            value=value,
-            variant="elevated",
-            events=events,
-            action=action,
-            action_id=action_id,
-            action_event=action_event,
-            action_payload=action_payload,
-            actions=actions,
-            props=merged,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `elevated_button` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `elevated_button` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `elevated_button` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `elevated_button` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `elevated_button` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `elevated_button` runtime control.
+    """
+
+    icon_position: str | None = None
+    """
+    Icon position value forwarded to the `elevated_button` runtime control.
+    """
+
+    icon_size: float | None = None
+    """
+    Icon size value forwarded to the `elevated_button` runtime control.
+    """
+
+    icon_spacing: float | None = None
+    """
+    Icon spacing value forwarded to the `elevated_button` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `elevated_button` runtime control.
+    """
+
+    transparency: float | None = None
+    """
+    Transparency value forwarded to the `elevated_button` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `elevated_button` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `elevated_button` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `elevated_button` runtime control.
+    """

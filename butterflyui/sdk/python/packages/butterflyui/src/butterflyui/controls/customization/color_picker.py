@@ -1,24 +1,26 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["ColorPicker"]
 
-class ColorPicker(Component):
+@butterfly_control('color_picker', positional_fields=('value',))
+class ColorPicker(LayoutControl):
     """
     Interactive colour selector with hex text input, optional alpha slider,
     and a preset-swatches grid.
-    
+
     The runtime renders a colour swatch preview, a hex ``TextField``, an
     optional ``Slider`` for the alpha channel, and an optional ``GridView``
     of preset colour circles. On change the control emits ``"change"``
     events carrying the hex string plus decomposed ``r``, ``g``, ``b``,
     and ``alpha`` components.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.ColorPicker(
         value="#7c3aed",
         show_alpha=True,
@@ -26,7 +28,6 @@ class ColorPicker(Component):
     )
     ```
     """
-
 
     value: Any | None = None
     """
@@ -122,61 +123,111 @@ class ColorPicker(Component):
     """
     Label for the cancel action button.
     """
-    control_type = "color_picker"
 
-    def __init__(
-        self,
-        value: Any | None = None,
-        *,
-        color: Any | None = None,
-        mode: str | None = None,
-        picker_mode: str | None = None,
-        show_alpha: bool | None = None,
-        alpha: bool | None = None,
-        presets: list[Any] | None = None,
-        emit_on_change: bool | None = None,
-        show_actions: bool | None = None,
-        show_input: bool | None = None,
-        show_hex: bool | None = None,
-        show_presets: bool | None = None,
-        preset_size: float | None = None,
-        preset_spacing: float | None = None,
-        preview_height: float | None = None,
-        input_label: str | None = None,
-        input_placeholder: str | None = None,
-        commit_text: str | None = None,
-        cancel_text: str | None = None,
-        enabled: bool | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            color=color,
-            mode=mode,
-            picker_mode=picker_mode,
-            show_alpha=show_alpha,
-            alpha=alpha,
-            presets=presets,
-            emit_on_change=emit_on_change,
-            show_actions=show_actions,
-            show_input=show_input,
-            show_hex=show_hex,
-            show_presets=show_presets,
-            preset_size=preset_size,
-            preset_spacing=preset_spacing,
-            preview_height=preview_height,
-            input_label=input_label,
-            input_placeholder=input_placeholder,
-            commit_text=commit_text,
-            cancel_text=cancel_text,
-            enabled=enabled,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `color_picker` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `color_picker` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `color_picker` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `color_picker` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `color_picker` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `color_picker` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `color_picker` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `color_picker` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `color_picker` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `color_picker` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `color_picker` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `color_picker` runtime control.
+    """
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

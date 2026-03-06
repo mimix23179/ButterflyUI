@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
 __all__ = ["TimeSelect"]
 
-class TimeSelect(Component):
+@butterfly_control('time_select', positional_fields=('value',))
+class TimeSelect(FormFieldControl):
     """
     Time selection field that opens a Material time-picker dialog.
-    
+
     Renders a read-only ``TextField`` showing the current time.  Tapping
     the field (or calling :meth:`open`) shows a Flutter
     ``showTimePicker`` dialog.  The selected time is stored as an
@@ -19,32 +21,16 @@ class TimeSelect(Component):
     Python.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.TimeSelect(
         label="Meeting time",
         minute_step=15,
         use_24h=True,
     )
     ```
-    """
-
-
-    value: str | None = None
-    """
-    Currently selected time as ``"HH:MM"``.
-    """
-
-    label: str | None = None
-    """
-    Floating label text shown above the field.
-    """
-
-    placeholder: str | None = None
-    """
-    Hint text shown when no time is selected.
     """
 
     minute_step: int | None = None
@@ -59,39 +45,120 @@ class TimeSelect(Component):
     If ``False`` (default), 12-hour AM/PM format is used.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "time_select"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        label: str | None = None,
-        placeholder: str | None = None,
-        minute_step: int | None = None,
-        use_24h: bool | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            label=label,
-            placeholder=placeholder,
-            minute_step=minute_step,
-            use_24h=use_24h,
-            enabled=enabled,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `time_select` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `time_select` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `time_select` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `time_select` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `time_select` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `time_select` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `time_select` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `time_select` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `time_select` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `time_select` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `time_select` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `time_select` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `time_select` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `time_select` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `time_select` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `time_select` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `time_select` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `time_select` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `time_select` runtime control.
+    """
 
     def open(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "open", {})

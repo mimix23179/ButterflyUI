@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from .layout_control import LayoutControl
+from .control import Control
 
 
 def _normalize_token(value: str) -> str:
@@ -327,7 +327,7 @@ def collect_children(
     return out
 
 
-class Component(LayoutControl):
+class Component(Control):
     """Base class for all Python-side ButterflyUI controls.
     
     Besides regular control props, ``Component`` also carries the universal

@@ -1,25 +1,27 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..button_control import ButtonControl
 
 __all__ = ["GlyphButton"]
 
-class GlyphButton(Component):
+@butterfly_control('glyph_button', positional_fields=('glyph',))
+class GlyphButton(ButtonControl):
     """
     Unified glyph/icon surface with optional button interaction.
-    
+
     ``GlyphButton`` is the merged control for legacy ``glyph`` and
     ``glyph_button`` behavior. It can render as an interactive icon trigger or
     as a passive visual glyph by setting ``interactive=False``.
-    
+
     ``glyph`` and ``icon`` are interchangeable aliases. Event subscriptions are
     forwarded to runtime so this control can participate in action pipelines,
     overlays, and other interaction flows.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.GlyphButton(
         glyph="settings",
         tooltip="Preferences",
@@ -30,20 +32,9 @@ class GlyphButton(Component):
     ```
     """
 
-
     glyph: str | int | None = None
     """
     Icon name, codepoint, or glyph string payload.
-    """
-
-    icon: str | int | None = None
-    """
-    Backward-compatible alias for ``glyph``. When both fields are provided, ``glyph`` takes precedence and this alias is kept only for compatibility.
-    """
-
-    size: float | None = None
-    """
-    Requested icon, glyph, or control size in logical pixels or runtime size units.
     """
 
     color: Any | None = None
@@ -51,47 +42,105 @@ class GlyphButton(Component):
     Primary color value used by the control for text, icons, strokes, or accent surfaces.
     """
 
-    interactive: bool | None = None
+    bgcolor: Any | None = None
     """
-    If ``False``, renders as a passive glyph without button semantics.
+    Background color painted behind the control.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `glyph_button` runtime control.
     """
-    control_type = "glyph_button"
 
-    def __init__(
-        self,
-        glyph: str | int | None = None,
-        *,
-        icon: str | int | None = None,
-        tooltip: str | None = None,
-        size: float | None = None,
-        color: Any | None = None,
-        enabled: bool | None = None,
-        interactive: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            glyph=glyph if glyph is not None else icon,
-            icon=icon if icon is not None else glyph,
-            tooltip=tooltip,
-            size=size,
-            color=color,
-            enabled=enabled,
-            interactive=interactive,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `glyph_button` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `glyph_button` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `glyph_button` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `glyph_button` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `glyph_button` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `glyph_button` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `glyph_button` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `glyph_button` runtime control.
+    """
+
+    transparency: float | None = None
+    """
+    Transparency value forwarded to the `glyph_button` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `glyph_button` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `glyph_button` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `glyph_button` runtime control.
+    """
 
     def emit(self, session: Any, event: str = "click", payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
-

@@ -2,34 +2,35 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Modifier"]
 
-
-class Modifier(Component):
+@butterfly_control('modifier')
+class Modifier(EffectControl):
     """
     Composable modifier host that injects layout/visual/interaction effects into descendants.
-    
+
     ``Modifier`` is the glue control for reusable visual behavior. Instead of creating
     many one-off controls, you can wrap a subtree and apply:
     - layout constraints (padding/margin/alignment/constrain),
     - visual effects (background/border/shadow/glow/glass),
     - interaction affordances (cursor/focus ring/hover/press state lists),
     - motion defaults for descendants.
-    
+
     The runtime merges these modifier definitions into each child control's
     ``modifiers`` list and style props, but only for controls that advertise
     modifier/style/motion capabilities through the shared manifest.
-    
+
     State-specific modifier keys are available in both short and explicit form:
     - ``on_hover`` and ``on_hover_modifiers``
     - ``on_pressed`` and ``on_pressed_modifiers``
     - ``on_focus`` and ``on_focus_modifiers``
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -47,25 +48,9 @@ class Modifier(Component):
     ```
     """
 
-
-    modifiers: list[Any] | None = None
-    """
-    Base modifier descriptors merged into descendants.
-    """
-
-    motion: Any | None = None
-    """
-    Default motion spec for descendants.
-    """
-
     on_hover: list[Any] | None = None
     """
     Modifier descriptors activated on hover state.
-    """
-
-    on_hover_modifiers: list[Any] | None = None
-    """
-    Modifiers activated while the pointer is hovering the control.
     """
 
     on_pressed: list[Any] | None = None
@@ -73,24 +58,9 @@ class Modifier(Component):
     Modifier descriptors activated on pressed state.
     """
 
-    on_pressed_modifiers: list[Any] | None = None
-    """
-    Explicit alias of ``on_pressed``.
-    """
-
     on_focus: list[Any] | None = None
     """
     Modifier descriptors activated on focus state.
-    """
-
-    on_focus_modifiers: list[Any] | None = None
-    """
-    Modifiers activated while the control or wrapped child currently has focus.
-    """
-
-    cursor: str | None = None
-    """
-    Cursor override for descendants.
     """
 
     align: Any | None = None
@@ -133,87 +103,115 @@ class Modifier(Component):
     Hit-test behavior that determines how this control participates in pointer targeting.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "modifier"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `modifier` runtime control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *children_args: Any,
-        modifiers: list[Any] | None = None,
-        motion: Any | None = None,
-        on_hover: list[Any] | None = None,
-        on_hover_modifiers: list[Any] | None = None,
-        on_pressed: list[Any] | None = None,
-        on_pressed_modifiers: list[Any] | None = None,
-        on_focus: list[Any] | None = None,
-        on_focus_modifiers: list[Any] | None = None,
-        cursor: str | None = None,
-        padding: Any | None = None,
-        margin: Any | None = None,
-        align: Any | None = None,
-        max_width: Any | None = None,
-        max_height: Any | None = None,
-        min_width: Any | None = None,
-        min_height: Any | None = None,
-        border: Any | None = None,
-        background: Any | None = None,
-        shadow: Any | None = None,
-        glow: Any | None = None,
-        glass: Any | None = None,
-        focus_ring: Any | None = None,
-        hit_test: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        modifiers=modifiers,
-                        motion=motion,
-                        on_hover=on_hover if on_hover is not None else on_hover_modifiers,
-                        on_hover_modifiers=on_hover_modifiers
-                        if on_hover_modifiers is not None
-                        else on_hover,
-                        on_pressed=on_pressed if on_pressed is not None else on_pressed_modifiers,
-                        on_pressed_modifiers=on_pressed_modifiers
-                        if on_pressed_modifiers is not None
-                        else on_pressed,
-                        on_focus=on_focus if on_focus is not None else on_focus_modifiers,
-                        on_focus_modifiers=on_focus_modifiers
-                        if on_focus_modifiers is not None
-                        else on_focus,
-                        cursor=cursor,
-                        padding=padding,
-                        margin=margin,
-                        align=align,
-                        max_width=max_width,
-                        max_height=max_height,
-                        min_width=min_width,
-                        min_height=min_height,
-                        border=border,
-                        background=background,
-                        shadow=shadow,
-                        glow=glow,
-                        glass=glass,
-                        focus_ring=focus_ring,
-                        hit_test=hit_test,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            *children_args,
-            child=child,
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `modifier` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `modifier` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `modifier` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `modifier` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `modifier` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `modifier` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `modifier` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `modifier` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `modifier` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `modifier` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `modifier` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `modifier` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `modifier` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `modifier` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `modifier` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `modifier` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `modifier` runtime control.
+    """
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", props)

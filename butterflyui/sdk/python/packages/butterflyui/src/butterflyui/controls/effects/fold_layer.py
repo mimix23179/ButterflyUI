@@ -1,23 +1,25 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["FoldLayer"]
 
-class FoldLayer(Component):
+@butterfly_control('fold_layer')
+class FoldLayer(EffectControl):
     """
     Paper-fold stripe-overlay effect that simulates a sheet being
     folded into parallel pleats.
-    
+
     The Flutter runtime divides the child into a configurable number of
     vertical or horizontal stripes.  Odd-numbered stripes are darkened
     by a semi-transparent black overlay whose alpha scales with
     ``progress``, while the overall widget is slightly scaled down to
     reinforce the 3-D illusion.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -29,7 +31,6 @@ class FoldLayer(Component):
     )
     ```
     """
-
 
     folds: int | None = None
     """
@@ -60,40 +61,120 @@ class FoldLayer(Component):
     Defaults to ``0.15``.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "fold_layer"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        folds: int | None = None,
-        progress: float | None = None,
-        axis: str | None = None,
-        perspective: float | None = None,
-        shadow: float | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            folds=folds,
-            progress=progress,
-            axis=axis,
-            perspective=perspective,
-            shadow=shadow,
-            enabled=enabled,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `fold_layer` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `fold_layer` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `fold_layer` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `fold_layer` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `fold_layer` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `fold_layer` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `fold_layer` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `fold_layer` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `fold_layer` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `fold_layer` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `fold_layer` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `fold_layer` runtime control.
+    """
 
     def set_progress(self, session: Any, progress: float) -> dict[str, Any]:
         return self.invoke(session, "set_progress", {"progress": float(progress)})

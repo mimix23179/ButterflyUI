@@ -2,30 +2,31 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Pagination"]
 
-
-class Pagination(Component):
+@butterfly_control('pagination')
+class Pagination(LayoutControl):
     """
     Unified pagination control for page-number and stepper-style navigation.
-    
+
     ``Pagination`` is the canonical replacement for legacy ``page_nav`` and
     ``page_stepper`` controls. It supports numeric page buttons, previous/next
     actions, optional edge buttons, and computed page counts from total item
     counts.
-    
+
     The Flutter runtime exposes imperative methods (``set_page``,
     ``next_page``, ``prev_page``, ``first_page``, ``last_page``) so server-side
     handlers can drive the active page after initial render.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     pager = bui.Pagination(
         page=1,
         total_items=420,
@@ -37,7 +38,6 @@ class Pagination(Component):
     )
     ```
     """
-
 
     page: int | None = None
     """
@@ -91,52 +91,120 @@ class Pagination(Component):
     ``"stepper"``) interpreted by the renderer.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "pagination"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `pagination` runtime control.
+    """
 
-    def __init__(
-        self,
-        *,
-        page: int | None = None,
-        page_count: int | None = None,
-        page_size: int | None = None,
-        total_items: int | None = None,
-        max_visible: int | None = None,
-        show_edges: bool | None = None,
-        dense: bool | None = None,
-        prev_label: str | None = None,
-        next_label: str | None = None,
-        mode: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        page=page,
-                        page_count=page_count,
-                        page_size=page_size,
-                        total_items=total_items,
-                        max_visible=max_visible,
-                        show_edges=show_edges,
-                        dense=dense,
-                        prev_label=prev_label,
-                        next_label=next_label,
-                        mode=mode,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `pagination` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `pagination` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `pagination` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `pagination` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `pagination` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `pagination` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `pagination` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `pagination` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `pagination` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `pagination` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `pagination` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `pagination` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `pagination` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `pagination` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `pagination` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `pagination` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `pagination` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `pagination` runtime control.
+    """
 
     def set_page(self, session: Any, page: int) -> dict[str, Any]:
         return self.invoke(session, "set_page", {"page": int(page)})
@@ -167,4 +235,3 @@ class Pagination(Component):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
-

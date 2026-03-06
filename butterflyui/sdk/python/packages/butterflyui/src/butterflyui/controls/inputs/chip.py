@@ -2,29 +2,31 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Chip"]
 
+@butterfly_control('chip', positional_fields=('label',))
+class Chip(FormFieldControl):
+    """
+    Unified chip surface for single chips and grouped chip sets.
 
-class Chip(Component):
-    """Unified chip surface for single chips and grouped chip sets.
-    
     ``Chip`` replaces the old ``chip_group`` API. It can represent one
     dismissible/interactive chip, or render a collection of selectable chips via
     ``options``/``items``. In grouped mode, use ``multi_select`` with
     ``values`` to support multi-selection workflows.
-    
+
     ``Chip`` also forwards universal style pipeline fields through ``**kwargs``
     so color accents, transparency, and effect/motion styling remain
     consistent with Candy/Skins contracts.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     filters = bui.Chip(
         options=[
             {"label": "Images", "value": "image"},
@@ -37,21 +39,9 @@ class Chip(Component):
     ```
     """
 
-
     dismissible: bool | None = None
     """
     If ``True``, the chip can be dismissed.
-    """
-
-
-    label: str | None = None
-    """
-    Label text for single-chip mode.
-    """
-
-    value: Any | None = None
-    """
-    Current value rendered or edited by the control. The exact payload shape depends on the control type.
     """
 
     options: list[Any] | None = None
@@ -84,11 +74,6 @@ class Chip(Component):
     Color override for chip background/accent treatment.
     """
 
-    dense: bool | None = None
-    """
-    Enables a denser layout with reduced gaps, padding, or row height.
-    """
-
     spacing: float | None = None
     """
     Horizontal spacing between chips in grouped mode.
@@ -99,58 +84,115 @@ class Chip(Component):
     Vertical spacing between chip rows in wrapped layouts.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `chip` runtime control.
     """
 
-    control_type = "chip"
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `chip` runtime control.
+    """
 
-    def __init__(
-        self,
-        label: str | None = None,
-        *,
-        value: Any | None = None,
-        options: list[Any] | None = None,
-        items: list[Any] | None = None,
-        values: list[Any] | None = None,
-        multi_select: bool | None = None,
-        selected: bool | None = None,
-        enabled: bool | None = None,
-        dismissible: bool | None = None,
-        color: Any | None = None,
-        dense: bool | None = None,
-        spacing: float | None = None,
-        run_spacing: float | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        label=label,
-                        value=value,
-                        options=options if options is not None else items,
-                        items=items if items is not None else options,
-                        values=values,
-                        multi_select=multi_select,
-                        selected=selected,
-                        enabled=enabled,
-                        dismissible=dismissible,
-                        color=color,
-                        dense=dense,
-                        spacing=spacing,
-                        run_spacing=run_spacing,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `chip` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `chip` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `chip` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `chip` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `chip` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `chip` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `chip` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `chip` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `chip` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `chip` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `chip` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `chip` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `chip` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `chip` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `chip` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `chip` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `chip` runtime control.
+    """
 
     def set_selected(self, session: Any, value: bool) -> dict[str, Any]:
         return self.invoke(session, "set_selected", {"value": value})

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["WebView"]
 
@@ -14,28 +15,29 @@ def _normalize_webview_engine(value: str | None) -> str:
         return "windows"
     return "windows"
 
+@butterfly_control('webview', field_aliases={'content': 'child'})
+class WebView(LayoutControl):
+    """
+    Embedded browser window powered by a platform WebView engine.
 
-class WebView(Component):
-    """Embedded browser window powered by a platform WebView engine.
-    
     The runtime embeds a native webview (WebView2 on Windows, etc.) that
     loads ``url`` or inline ``html``. ``engine`` / ``webview_engine`` selects
     the rendering backend — currently normalised to ``"windows"`` on desktop.
     ``base_url`` sets the origin for local HTML content. ``prevent_links``
     intercepts navigation to matching URL patterns before they load.
-    
+
     Full browser-capability flags control JavaScript, DOM storage, cookies,
     caching, incognito mode, media playback, file access, and popup
     behaviour. ``init_timeout_ms`` caps the engine startup wait.
-    
+
     Programmatic methods (``reload``, ``go_back``, ``load_url``,
     ``run_javascript``, *etc.*) are invoked via a session handle.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     view = bui.WebView(
         url="https://example.com",
         javascript_enabled=True,
@@ -45,6 +47,10 @@ class WebView(Component):
     ```
     """
 
+    content: Any | None = None
+    """
+    Primary child control rendered inside this control.
+    """
 
     url: str | None = None
     """
@@ -157,66 +163,135 @@ class WebView(Component):
     initialise. Defaults to ``15000``.
     """
 
-    control_type = "webview"
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
 
-    def __init__(
-        self,
-        *,
-        url: str | None = None,
-        html: str | None = None,
-        base_url: str | None = None,
-        engine: str | None = None,
-        webview_engine: str | None = None,
-        fallback_engine: str | None = None,
-        prevent_links: list[str] | None = None,
-        request_headers: Mapping[str, Any] | None = None,
-        user_agent: str | None = None,
-        javascript_enabled: bool | None = None,
-        dom_storage_enabled: bool | None = None,
-        third_party_cookies_enabled: bool | None = None,
-        cache_enabled: bool | None = None,
-        clear_cache_on_start: bool | None = None,
-        incognito: bool | None = None,
-        media_playback_requires_user_gesture: bool | None = None,
-        allows_inline_media_playback: bool | None = None,
-        allow_file_access: bool | None = None,
-        allow_universal_access_from_file_urls: bool | None = None,
-        allow_popups: bool | None = None,
-        open_external_links: bool | None = None,
-        init_timeout_ms: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        resolved_engine = _normalize_webview_engine(engine or webview_engine)
-        merged = merge_props(
-            props,
-            url=url,
-            html=html,
-            base_url=base_url,
-            engine=resolved_engine,
-            webview_engine=resolved_engine,
-            fallback_engine="",
-            prevent_links=prevent_links,
-            request_headers=dict(request_headers) if request_headers is not None else None,
-            user_agent=user_agent,
-            javascript_enabled=javascript_enabled,
-            dom_storage_enabled=dom_storage_enabled,
-            third_party_cookies_enabled=third_party_cookies_enabled,
-            cache_enabled=cache_enabled,
-            clear_cache_on_start=clear_cache_on_start,
-            incognito=incognito,
-            media_playback_requires_user_gesture=media_playback_requires_user_gesture,
-            allows_inline_media_playback=allows_inline_media_playback,
-            allow_file_access=allow_file_access,
-            allow_universal_access_from_file_urls=allow_universal_access_from_file_urls,
-            allow_popups=allow_popups,
-            open_external_links=open_external_links,
-            init_timeout_ms=init_timeout_ms,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    use_inapp: Any | None = None
+    """
+    Use inapp value forwarded to the `webview` runtime control.
+    """
+
+    headers: Any | None = None
+    """
+    Headers value forwarded to the `webview` runtime control.
+    """
+
+    js_enabled: Any | None = None
+    """
+    Js enabled value forwarded to the `webview` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `webview` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `webview` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `webview` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `webview` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `webview` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `webview` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `webview` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `webview` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `webview` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `webview` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `webview` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `webview` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `webview` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `webview` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `webview` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `webview` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `webview` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `webview` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `webview` runtime control.
+    """
 
     def reload(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "reload", {})
@@ -293,5 +368,3 @@ class WebView(Component):
 
     def open_devtools(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "open_devtools", {})
-
-

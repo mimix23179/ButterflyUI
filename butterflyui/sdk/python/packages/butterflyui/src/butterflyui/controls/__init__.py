@@ -1,14 +1,20 @@
 from ._shared import Component
 from .base_control import BaseControl
+from .base_control import butterfly_control
+from .adaptive_control import AdaptiveControl
+from .button_control import ButtonControl
 from .control import Component as ControlComponent
 from .effect_control import EffectControl
+from .form_field_control import FormFieldControl
 from .forms import *  # noqa: F401,F403
 from .forms import __all__ as _forms_all
 from .input_control import InputControl
 from .layout_control import LayoutControl
 from .overlay_control import OverlayControl
+from .selection_control import SelectionControl
 from .scope_control import ScopeControl
 from .scrollable_control import ScrollableControl
+from .toggle_control import ToggleControl
 from .scopes import *  # noqa: F401,F403
 from .scopes import __all__ as _scopes_all
 from .tools import *  # noqa: F401,F403
@@ -49,10 +55,16 @@ from .webview import __all__ as _webview_all
 __all__ = [
     "Component",
     "BaseControl",
+    "butterfly_control",
+    "AdaptiveControl",
     "ControlComponent",
     "LayoutControl",
     "ScrollableControl",
     "InputControl",
+    "FormFieldControl",
+    "ButtonControl",
+    "ToggleControl",
+    "SelectionControl",
     "OverlayControl",
     "ScopeControl",
     "EffectControl",

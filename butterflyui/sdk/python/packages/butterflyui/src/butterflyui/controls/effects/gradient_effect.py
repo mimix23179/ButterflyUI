@@ -2,21 +2,16 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["GradientEffect", "Gradient"]
 
-
-class GradientEffect(Component):
+@butterfly_control('gradient')
+class GradientEffect(LayoutControl):
     """
     Apply a gradient fill or mesh gradient to a child wrapper.
-    """
-
-
-    variant: str | None = None
-    """
-    Gradient variant name such as linear, radial, sweep, or mesh.
     """
 
     colors: list[Any] | None = None
@@ -99,11 +94,6 @@ class GradientEffect(Component):
     Alternate background color alias.
     """
 
-    opacity: float | None = None
-    """
-    Overall opacity applied to the gradient wrapper.
-    """
-
     mesh: list[Any] | None = None
     """
     Mesh gradient definition payload.
@@ -119,63 +109,110 @@ class GradientEffect(Component):
     Alternate mesh point payload alias.
     """
 
-    control_type = "gradient"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        variant: str | None = None,
-        colors: list[Any] | None = None,
-        stops: list[float] | None = None,
-        tile_mode: str | None = None,
-        begin: Any | None = None,
-        end: Any | None = None,
-        center: Any | None = None,
-        radius: float | None = None,
-        focal: Any | None = None,
-        focal_radius: float | None = None,
-        start_angle: float | None = None,
-        end_angle: float | None = None,
-        start_degrees: float | None = None,
-        end_degrees: float | None = None,
-        bgcolor: Any | None = None,
-        background: Any | None = None,
-        background_color: Any | None = None,
-        opacity: float | None = None,
-        mesh: list[Any] | None = None,
-        mesh_points: list[Any] | None = None,
-        points: list[Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            variant=variant,
-            colors=colors,
-            stops=stops,
-            tile_mode=tile_mode,
-            begin=begin,
-            end=end,
-            center=center,
-            radius=radius,
-            focal=focal,
-            focal_radius=focal_radius,
-            start_angle=start_angle,
-            end_angle=end_angle,
-            start_degrees=start_degrees,
-            end_degrees=end_degrees,
-            bgcolor=bgcolor,
-            background=background,
-            background_color=background_color,
-            opacity=opacity,
-            mesh=mesh,
-            mesh_points=mesh_points,
-            points=points,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `gradient` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `gradient` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `gradient` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `gradient` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `gradient` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `gradient` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `gradient` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `gradient` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `gradient` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `gradient` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `gradient` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `gradient` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `gradient` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `gradient` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `gradient` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `gradient` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `gradient` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `gradient` runtime control.
+    """
 
     def set_colors(self, session: Any, colors: list[Any]) -> dict[str, Any]:
         return self.invoke(session, "set_colors", {"colors": colors})
@@ -185,6 +222,5 @@ class GradientEffect(Component):
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
-
 
 Gradient = GradientEffect

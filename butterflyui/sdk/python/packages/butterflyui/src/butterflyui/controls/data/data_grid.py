@@ -2,29 +2,30 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from typing import Any
+from ..base_control import butterfly_control
+from ..scrollable_control import ScrollableControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["DataGrid"]
 
-
-class DataGrid(Component):
+@butterfly_control('data_grid', field_aliases={'controls': 'children'})
+class DataGrid(ScrollableControl):
     """
     Structured data grid with sorting, filtering, paging, and selection.
-    
+
     ``DataGrid`` is the high-density tabular surface intended for data-heavy
     experiences such as inventory editors, admin dashboards, and asset browsers.
     Compared to lightweight table wrappers, it keeps all table behavior in one
     payload: sorting, filter query state, selectable rows, striped styling, and
     optional header/footer chrome.
-    
+
     Runtime methods such as :meth:`set_sort`, :meth:`set_filter`, and
     :meth:`clear_selection` let Python handlers update the live widget after it
     has already been rendered.
-    
+
     ```python
     import butterflyui as bui
-    
+
     grid = bui.DataGrid(
         columns=[
             {"key": "name", "label": "Name"},
@@ -43,6 +44,10 @@ class DataGrid(Component):
     ```
     """
 
+    controls: list[Any] | None = None
+    """
+    Child controls rendered in order by this control.
+    """
 
     columns: Sequence[Any] | None = None
     """
@@ -109,58 +114,150 @@ class DataGrid(Component):
     Initial query string applied by the renderer.
     """
 
-    events: list[str] | None = None
+    multi_select: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Multi select value forwarded to the `data_grid` runtime control.
     """
 
-    control_type = "data_grid"
+    pagination: Any | None = None
+    """
+    Pagination value forwarded to the `data_grid` runtime control.
+    """
 
-    def __init__(
-        self,
-        *,
-        columns: Sequence[Any] | None = None,
-        rows: Sequence[Any] | None = None,
-        sortable: bool | None = None,
-        filterable: bool | None = None,
-        selectable: bool | None = None,
-        dense: bool | None = None,
-        striped: bool | None = None,
-        show_header: bool | None = None,
-        show_footer: bool | None = None,
-        page_size: int | None = None,
-        sort_column: str | None = None,
-        sort_ascending: bool | None = None,
-        filter_query: str | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-                        props,
-                        columns=list(columns) if columns is not None else None,
-                        rows=list(rows) if rows is not None else None,
-                        sortable=sortable,
-                        filterable=filterable,
-                        selectable=selectable,
-                        dense=dense,
-                        striped=striped,
-                        show_header=show_header,
-                        show_footer=show_footer,
-                        page_size=page_size,
-                        sort_column=sort_column,
-                        sort_ascending=sort_ascending,
-                        filter_query=filter_query,
-                        events=events,
-                        **kwargs,
-                    )
-        super().__init__(
-            props=merged,
-            style=style,
-            strict=strict,
-        )
+    auto_sort: Any | None = None
+    """
+    Auto sort value forwarded to the `data_grid` runtime control.
+    """
+
+    selected_index: Any | None = None
+    """
+    Currently selected item index.
+    """
+
+    filter_column: Any | None = None
+    """
+    Filter column value forwarded to the `data_grid` runtime control.
+    """
+
+    filter_case_sensitive: Any | None = None
+    """
+    Filter case sensitive value forwarded to the `data_grid` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `data_grid` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `data_grid` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `data_grid` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `data_grid` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `data_grid` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `data_grid` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `data_grid` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `data_grid` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `data_grid` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `data_grid` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `data_grid` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `data_grid` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `data_grid` runtime control.
+    """
 
     def set_sort(self, session: Any, column: str, ascending: bool = True) -> dict[str, Any]:
         return self.invoke(session, "set_sort", {"column": column, "ascending": ascending})

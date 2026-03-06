@@ -2,27 +2,28 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
-from .._shared import Component, merge_props
 
 __all__ = ["Color"]
 
-
-class Color(Component):
+@butterfly_control('color', positional_fields=('value',))
+class Color(LayoutControl):
     """
     Renderable color-value control for swatches and live UI diagnostics.
-    
+
     ``Color`` serializes color payloads into a visible swatch surface with
     optional labels and metadata. It can be used as a standalone display
     control or embedded in larger layout/overlay UIs to preview runtime tokens,
     theme slots, and dynamic color choices.
-    
+
     The control accepts string colors, numeric color payloads, and mapping
     payloads, making it compatible with both simple and structured color flows.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Color(
         value={"value": "#4F8BFF", "opacity": 0.9},
         label="Primary",
@@ -31,7 +32,6 @@ class Color(Component):
     )
     ```
     """
-
 
     value: Any | None = None
     """
@@ -56,11 +56,6 @@ class Color(Component):
     show_hex: bool | None = None
     """
     Whether to render resolved hex metadata.
-    """
-
-    size: float | None = None
-    """
-    Base swatch size used when width/height are omitted.
     """
 
     radius: float | None = None
@@ -98,61 +93,95 @@ class Color(Component):
     Minimum target contrast when ``auto_contrast`` is enabled.
     """
 
-    events: list[str] | None = None
+    bgcolor: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Background color painted behind the control.
     """
 
-    control_type = "color"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `color` runtime control.
+    """
 
-    def __init__(
-        self,
-        value: Any | None = None,
-        *,
-        color: Any | None = None,
-        label: str | None = None,
-        show_label: bool | None = None,
-        show_hex: bool | None = None,
-        size: float | None = None,
-        width: float | None = None,
-        height: float | None = None,
-        radius: float | None = None,
-        shape: str | None = None,
-        border_color: Any | None = None,
-        border_width: float | None = None,
-        background: Any | None = None,
-        auto_contrast: bool | None = None,
-        min_contrast: float | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        resolved_value = color if color is not None else value
-        merged = merge_props(
-            props,
-            value=resolved_value,
-            color=resolved_value,
-            label=label,
-            show_label=show_label,
-            show_hex=show_hex,
-            size=size,
-            width=width,
-            height=height,
-            radius=radius,
-            shape=shape,
-            border_color=border_color,
-            border_width=border_width,
-            background=background,
-            auto_contrast=auto_contrast,
-            min_contrast=min_contrast,
-            enabled=enabled,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `color` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `color` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `color` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `color` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `color` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `color` runtime control.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `color` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `color` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `color` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `color` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `color` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `color` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `color` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `color` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `color` runtime control.
+    """
 
     def set_value(self, session: Any, value: Any) -> dict[str, Any]:
         return self.invoke(session, "set_value", {"value": value})
@@ -162,4 +191,3 @@ class Color(Component):
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
-

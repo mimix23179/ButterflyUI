@@ -26,3 +26,28 @@ class InputControl(LayoutControl):
     """
     Hint text shown when the input value is empty.
     """
+
+    helper_text: str | None = None
+    """
+    Supporting helper text rendered with the field.
+    """
+
+    error_text: str | None = None
+    """
+    Error message rendered when the field is invalid.
+    """
+
+    read_only: bool | None = None
+    """
+    Whether the current value can be viewed but not edited.
+    """
+
+    autofocus: bool | None = None
+    """
+    Whether the control should request focus when first built.
+    """
+
+    dense: bool | None = None
+    """
+    Whether the control should use a more compact visual density.
+    """

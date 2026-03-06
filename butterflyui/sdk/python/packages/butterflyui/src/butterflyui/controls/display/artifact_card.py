@@ -1,25 +1,27 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["ArtifactCard"]
 
-class ArtifactCard(Component):
+@butterfly_control('artifact_card')
+class ArtifactCard(LayoutControl):
     """
     Structured output card for displaying generated artifacts.
-    
+
     Renders a Material ``Card`` with a bold title, body message, and optional
     action button.  When ``clickable`` is enabled the entire card is wrapped
     in an ``InkWell`` that emits a ``"tap"`` event.  The action button is a
     ``TextButton`` that emits ``"action"`` when pressed.  Child controls
     are placed below the message text inside the card body.
-    
+
     Use ``set_content`` to update the title and message programmatically
     after the card is created, and ``emit`` to fire arbitrary custom events.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -32,7 +34,6 @@ class ArtifactCard(Component):
     ```
     """
 
-
     title: str | None = None
     """
     Bold heading text displayed at the top of the card.
@@ -41,11 +42,6 @@ class ArtifactCard(Component):
     message: str | None = None
     """
     Body text rendered beneath the title.
-    """
-
-    variant: str | None = None
-    """
-    Visual variant key forwarded to the runtime theme.
     """
 
     label: str | None = None
@@ -63,39 +59,120 @@ class ArtifactCard(Component):
     Controls whether the whole card is wrapped in an ``InkWell`` that emits ``"tap"`` on press. Set it to ``False`` to disable this behavior.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "artifact_card"
 
-    def __init__(
-        self,
-        *children: Any,
-        title: str | None = None,
-        message: str | None = None,
-        variant: str | None = None,
-        label: str | None = None,
-        action_label: str | None = None,
-        clickable: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            title=title,
-            message=message,
-            variant=variant,
-            label=label,
-            action_label=action_label,
-            clickable=clickable,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `artifact_card` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `artifact_card` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `artifact_card` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `artifact_card` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `artifact_card` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `artifact_card` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `artifact_card` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `artifact_card` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `artifact_card` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `artifact_card` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `artifact_card` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `artifact_card` runtime control.
+    """
 
     def set_content(self, session: Any, *, title: str | None = None, message: str | None = None) -> dict[str, Any]:
         payload: dict[str, Any] = {}

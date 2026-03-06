@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
 __all__ = ["TextArea"]
 
-class TextArea(Component):
+@butterfly_control('text_area', positional_fields=('value',))
+class TextArea(FormFieldControl):
     """
     Multi-line text input with auto-grow and debounced change events.
-    
+
     Renders a Flutter ``TextField`` with ``maxLines: null`` so the
     widget grows vertically as the user types.  The minimum visible
     height can be set via ``min_lines``.  When ``emit_on_change`` is
@@ -19,10 +21,10 @@ class TextArea(Component):
     :meth:`get_value` to drive the field from Python.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.TextArea(
         placeholder="Write a description…",
         min_lines=4,
@@ -31,22 +33,6 @@ class TextArea(Component):
         debounce_ms=300,
     )
     ```
-    """
-
-
-    value: str | None = None
-    """
-    Initial text content of the field.
-    """
-
-    placeholder: str | None = None
-    """
-    Hint text shown when the field is empty.
-    """
-
-    label: str | None = None
-    """
-    Floating label text shown above the field.
     """
 
     min_lines: int | None = None
@@ -59,63 +45,126 @@ class TextArea(Component):
     Maximum number of visible lines before scrolling.
     """
 
-    read_only: bool | None = None
-    """
-    If ``True``, the content is visible but not editable.
-    """
-
     emit_on_change: bool | None = None
     """
     If ``True``, ``change`` events are fired on every
     keystroke.
     """
 
-    debounce_ms: int | None = None
+    color: Any | None = None
     """
-    Milliseconds to debounce ``change`` events when
-    ``emit_on_change`` is ``True``.
+    Primary color value applied to the control.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `text_area` runtime control.
     """
-    control_type = "text_area"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        placeholder: str | None = None,
-        label: str | None = None,
-        min_lines: int | None = None,
-        max_lines: int | None = None,
-        enabled: bool | None = None,
-        read_only: bool | None = None,
-        emit_on_change: bool | None = None,
-        debounce_ms: int | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            placeholder=placeholder,
-            label=label,
-            multiline=True,
-            min_lines=min_lines,
-            max_lines=max_lines,
-            enabled=enabled,
-            read_only=read_only,
-            emit_on_change=emit_on_change,
-            debounce_ms=debounce_ms,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `text_area` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `text_area` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `text_area` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `text_area` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `text_area` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `text_area` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `text_area` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `text_area` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `text_area` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `text_area` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `text_area` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `text_area` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `text_area` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `text_area` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `text_area` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `text_area` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `text_area` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `text_area` runtime control.
+    """
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

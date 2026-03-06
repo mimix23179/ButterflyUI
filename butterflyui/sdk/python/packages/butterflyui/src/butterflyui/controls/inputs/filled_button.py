@@ -3,30 +3,31 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from .._shared import merge_props
 from .button import Button
+from ..base_control import butterfly_control
+from ..button_control import ButtonControl
 
 __all__ = ["FilledButton"]
 
-
-class FilledButton(Button):
+@butterfly_control('filled_button', positional_fields=('label',))
+class FilledButton(ButtonControl):
     """
     Filled emphasis button preset.
-    
+
     ``FilledButton`` forwards all interaction, action dispatch, style, and
     customization behavior from :class:`Button` while forcing
     ``variant="filled"``. Use it for primary call-to-action surfaces where
     stronger visual emphasis is needed.
-    
+
     In addition to typed parameters, runtime keys passed through ``**kwargs``
     are preserved. This includes optional icon/color/transparency props and
     style pipeline fields such as classes, modifiers, motion, and effects.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.FilledButton(
         "Deploy",
         action_id="deploy_release",
@@ -36,86 +37,107 @@ class FilledButton(Button):
     ```
     """
 
-
-    label: str | None = None
+    color: Any | None = None
     """
-    Button caption text. ``text`` takes precedence when both are set.
-    """
-
-    text: str | None = None
-    """
-    Caption text alias for ``label``.
+    Primary color value applied to the control.
     """
 
-    value: Any | None = None
+    foreground: Any | None = None
     """
-    Arbitrary payload emitted with click events.
-    """
-
-    action: Any | None = None
-    """
-    Declarative action descriptor fired on press.
+    Foreground value forwarded to the `filled_button` runtime control.
     """
 
-    action_id: str | None = None
+    text_color: Any | None = None
     """
-    Registered action ID to dispatch on press.
-    """
-
-    action_event: str | None = None
-    """
-    Event name forwarded to the action dispatcher.
+    Text color value forwarded to the `filled_button` runtime control.
     """
 
-    action_payload: Mapping[str, Any] | None = None
+    icon_background: Any | None = None
     """
-    Extra payload mapping for action dispatch.
-    """
-
-    actions: list[Any] | None = None
-    """
-    Action descriptor list executed on press.
+    Icon background value forwarded to the `filled_button` runtime control.
     """
 
-
-    events: list[str] | None = None
+    icon_foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Icon foreground value forwarded to the `filled_button` runtime control.
     """
 
-    control_type = "filled_button"
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `filled_button` runtime control.
+    """
 
-    def __init__(
-        self,
-        label: str | None = None,
-        *,
-        text: str | None = None,
-        value: Any | None = None,
-        events: list[str] | None = None,
-        action: Any | None = None,
-        action_id: str | None = None,
-        action_event: str | None = None,
-        action_payload: Mapping[str, Any] | None = None,
-        actions: list[Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(props, events=events)
-        super().__init__(
-            label=label,
-            text=text,
-            value=value,
-            variant="filled",
-            events=events,
-            action=action,
-            action_id=action_id,
-            action_event=action_event,
-            action_payload=action_payload,
-            actions=actions,
-            props=merged,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
+    background: Any | None = None
+    """
+    Background value forwarded to the `filled_button` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `filled_button` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `filled_button` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `filled_button` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `filled_button` runtime control.
+    """
+
+    icon_position: str | None = None
+    """
+    Icon position value forwarded to the `filled_button` runtime control.
+    """
+
+    icon_size: float | None = None
+    """
+    Icon size value forwarded to the `filled_button` runtime control.
+    """
+
+    icon_spacing: float | None = None
+    """
+    Icon spacing value forwarded to the `filled_button` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `filled_button` runtime control.
+    """
+
+    transparency: float | None = None
+    """
+    Transparency value forwarded to the `filled_button` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `filled_button` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `filled_button` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `filled_button` runtime control.
+    """

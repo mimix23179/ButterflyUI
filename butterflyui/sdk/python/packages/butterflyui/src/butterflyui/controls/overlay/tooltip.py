@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..overlay_control import OverlayControl
 
 __all__ = ["Tooltip"]
 
-class Tooltip(Component):
+@butterfly_control('tooltip', field_aliases={'content': 'child'})
+class Tooltip(OverlayControl):
     """
     Hover tooltip that displays a short message near its child widget.
 
@@ -28,6 +30,10 @@ class Tooltip(Component):
     ```
     """
 
+    content: Any | None = None
+    """
+    Primary child control rendered inside this control.
+    """
 
     message: str | None = None
     """
@@ -44,25 +50,122 @@ class Tooltip(Component):
     Hover delay in milliseconds before the tooltip is shown.
     """
 
-    control_type = "tooltip"
+    text: Any | None = None
+    """
+    Text value rendered by the control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        message: str | None = None,
-        prefer_below: bool | None = None,
-        wait_ms: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            message=message,
-            prefer_below=prefer_below,
-            wait_ms=wait_ms,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `tooltip` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `tooltip` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `tooltip` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `tooltip` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `tooltip` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `tooltip` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `tooltip` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `tooltip` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `tooltip` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `tooltip` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `tooltip` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `tooltip` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `tooltip` runtime control.
+    """

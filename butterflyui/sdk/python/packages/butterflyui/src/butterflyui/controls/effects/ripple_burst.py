@@ -1,24 +1,26 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["RippleBurst"]
 
-class RippleBurst(Component):
+@butterfly_control('ripple_burst')
+class RippleBurst(EffectControl):
     """
     Expanding concentric ripple rings triggered by tap or
     programmatic ``burst()`` call.
-    
+
     The Flutter runtime paints *count* concentric circles on a
     ``CustomPaint`` foreground canvas.  An ``AnimationController``
     drives the expansion; each ring is staggered, fading out and
     thinning as it grows toward ``max_radius``.  A ``GestureDetector``
     fires a burst on tap; the ``burst()`` invoke method triggers the
     same animation from Python.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -31,7 +33,6 @@ class RippleBurst(Component):
     )
     ```
     """
-
 
     color: Any | None = None
     """
@@ -61,34 +62,116 @@ class RippleBurst(Component):
     """
     Reserved — custom ripple origin point.
     """
-    control_type = "ripple_burst"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        color: Any | None = None,
-        count: int | None = None,
-        duration_ms: int | None = None,
-        max_radius: float | None = None,
-        center: Any | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            color=color,
-            count=count,
-            duration_ms=duration_ms,
-            max_radius=max_radius,
-            center=center,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `ripple_burst` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `ripple_burst` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `ripple_burst` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `ripple_burst` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `ripple_burst` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `ripple_burst` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `ripple_burst` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `ripple_burst` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `ripple_burst` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `ripple_burst` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `ripple_burst` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `ripple_burst` runtime control.
+    """
 
     def burst(self, session: Any, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "burst", {"payload": dict(payload or {})})

@@ -1,22 +1,24 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["BlobField"]
 
-class BlobField(Component):
+@butterfly_control('blob_field')
+class BlobField(LayoutControl):
     """
     Paints a field of random organic blobs on a ``CustomPaint`` canvas.
-    
+
     Each blob is a filled circle with a Gaussian blur mask, producing soft,
     lava-lamp-like shapes. The seed and count control the deterministic
     layout; `progress` (``0.0``–``1.0``) controls how much of the field is
     drawn.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.BlobField(
         count=16,
         seed=42,
@@ -25,7 +27,6 @@ class BlobField(Component):
     )
     ```
     """
-
 
     count: int | None = None
     """
@@ -67,11 +68,6 @@ class BlobField(Component):
     Animation speed multiplier for blob motion.
     """
 
-    opacity: float | None = None
-    """
-    Overall opacity of the blobs, ``0.0``–``1.0``. Defaults to ``0.3``.
-    """
-
     blur_sigma: float | None = None
     """
     Gaussian blur sigma applied to each blob’s mask filter. Higher values produce softer edges.
@@ -101,51 +97,111 @@ class BlobField(Component):
     """
     Draw progress from ``0.0`` (nothing) to ``1.0`` (full field). Defaults to ``1.0``.
     """
-    control_type = "blob_field"
 
-    def __init__(
-        self,
-        *,
-        count: int | None = None,
-        seed: int | None = None,
-        color: Any | None = None,
-        colors: list[Any] | None = None,
-        background: Any | None = None,
-        min_radius: float | None = None,
-        max_radius: float | None = None,
-        speed: float | None = None,
-        opacity: float | None = None,
-        blur_sigma: float | None = None,
-        loop: bool | None = None,
-        play: bool | None = None,
-        playing: bool | None = None,
-        autoplay: bool | None = None,
-        progress: float | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            count=count,
-            seed=seed,
-            color=color,
-            colors=colors,
-            background=background,
-            min_radius=min_radius,
-            max_radius=max_radius,
-            speed=speed,
-            opacity=opacity,
-            blur_sigma=blur_sigma,
-            loop=loop,
-            play=play,
-            playing=playing,
-            autoplay=autoplay,
-            progress=progress,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `blob_field` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `blob_field` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `blob_field` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `blob_field` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `blob_field` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `blob_field` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `blob_field` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `blob_field` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `blob_field` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `blob_field` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `blob_field` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `blob_field` runtime control.
+    """
 
     def regenerate(self, session: Any, seed: int | None = None) -> dict[str, Any]:
         payload: dict[str, Any] = {}

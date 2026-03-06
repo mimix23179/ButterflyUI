@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Accordion"]
 
-class Accordion(Component):
+@butterfly_control('accordion', field_aliases={'controls': 'children'})
+class Accordion(LayoutControl):
     """
     Collapsible accordion that shows or hides sections of content.
-    
+
     The runtime renders an expandable list where each section can be opened and
     closed independently. ``sections`` supplies inline content specs; children
     may also be passed as positional arguments. ``index`` (alias ``expanded``)
@@ -16,10 +18,10 @@ class Accordion(Component):
     be expanded simultaneously.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Accordion(
         sections=[{"title": "Section A", "body": "Content A"}],
         multiple=False,
@@ -28,6 +30,10 @@ class Accordion(Component):
     ```
     """
 
+    controls: list[Any] | None = None
+    """
+    Child controls rendered in order by this control.
+    """
 
     sections: list[Mapping[str, Any]] | None = None
     """
@@ -75,46 +81,185 @@ class Accordion(Component):
     Vertical gap between sections in logical pixels.
     """
 
-    events: list[str] | None = None
+    accent_color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Accent color value forwarded to the `accordion` runtime control.
     """
 
-    control_type = "accordion"
+    allowEmpty: Any | None = None
+    """
+    Allowempty value forwarded to the `accordion` runtime control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        sections: list[Mapping[str, Any]] | None = None,
-        labels: list[str] | None = None,
-        index: int | list[int] | None = None,
-        expanded: int | list[int] | None = None,
-        multiple: bool | None = None,
-        allow_empty: bool | None = None,
-        dense: bool | None = None,
-        show_dividers: bool | None = None,
-        spacing: float | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            sections=sections,
-            labels=labels,
-            index=index if index is not None else expanded,
-            expanded=expanded if expanded is not None else index,
-            multiple=multiple,
-            allow_empty=allow_empty,
-            dense=dense,
-            show_dividers=show_dividers,
-            spacing=spacing,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    body_color: Any | None = None
+    """
+    Body color value forwarded to the `accordion` runtime control.
+    """
+
+    body_padding: Any | None = None
+    """
+    Body padding value forwarded to the `accordion` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    content_padding: Any | None = None
+    """
+    Content padding value forwarded to the `accordion` runtime control.
+    """
+
+    divider_color: Any | None = None
+    """
+    Divider color value forwarded to the `accordion` runtime control.
+    """
+
+    elevation: Any | None = None
+    """
+    Elevation value forwarded to the `accordion` runtime control.
+    """
+
+    glass_blur: Any | None = None
+    """
+    Glass blur value forwarded to the `accordion` runtime control.
+    """
+
+    glass_opacity: Any | None = None
+    """
+    Glass opacity value forwarded to the `accordion` runtime control.
+    """
+
+    header_bg: Any | None = None
+    """
+    Header bg value forwarded to the `accordion` runtime control.
+    """
+
+    header_color: Any | None = None
+    """
+    Header color value forwarded to the `accordion` runtime control.
+    """
+
+    header_padding: Any | None = None
+    """
+    Header padding value forwarded to the `accordion` runtime control.
+    """
+
+    radius: Any | None = None
+    """
+    Corner radius used when painting the control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `accordion` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `accordion` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `accordion` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `accordion` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `accordion` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `accordion` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `accordion` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `accordion` runtime control.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `accordion` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `accordion` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `accordion` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `accordion` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `accordion` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `accordion` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `accordion` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `accordion` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `accordion` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `accordion` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `accordion` runtime control.
+    """
 
     def set_expanded(self, session: Any, index: int | list[int]) -> dict[str, Any]:
         return self.invoke(session, "set_expanded", {"index": index, "expanded": index})

@@ -1,15 +1,17 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["SnapGrid"]
 
-class SnapGrid(Component):
+@butterfly_control('snap_grid')
+class SnapGrid(LayoutControl):
     """
     Interactive grid overlay with major/minor lines, optional snapping,
     and pointer-event emission for hover, press, and drag.
-    
+
     The runtime paints a ``CustomPaint`` grid using ``_GridPainter``
     with configurable ``spacing`` (major cell size, clamped 2–200 lp),
     ``subdivisions`` (minor lines per major cell, clamped 1–16),
@@ -19,10 +21,10 @@ class SnapGrid(Component):
     When ``emit_on_hover``, ``emit_on_press``, or ``emit_on_drag`` is
     ``True`` the corresponding pointer coordinates are sent as
     ``"hover"``, ``"press"``, or ``"drag"`` events.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.SnapGrid(
         bui.Text("Canvas content"),
         show_grid=True,
@@ -33,7 +35,6 @@ class SnapGrid(Component):
     )
     ```
     """
-
 
     show_grid: bool | None = None
     """
@@ -110,60 +111,125 @@ class SnapGrid(Component):
     If ``True``, emits ``"drag"`` events with ``x``/``y``/``dx``/``dy`` during drag gestures.
     """
 
-    events: list[str] | None = None
+    background_color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Background color value forwarded to the `snap_grid` runtime control.
     """
 
-    control_type = "snap_grid"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        *children: Any,
-        show_grid: bool | None = None,
-        spacing: float | None = None,
-        subdivisions: int | None = None,
-        line_color: Any | None = None,
-        major_line_color: Any | None = None,
-        line_width: float | None = None,
-        major_line_width: float | None = None,
-        background: Any | None = None,
-        origin: Any | None = None,
-        snap: bool | None = None,
-        snap_spacing: float | None = None,
-        snap_mode: str | None = None,
-        enabled: bool | None = None,
-        emit_on_hover: bool | None = None,
-        emit_on_press: bool | None = None,
-        emit_on_drag: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            show_grid=show_grid,
-            spacing=spacing,
-            subdivisions=subdivisions,
-            line_color=line_color,
-            major_line_color=major_line_color,
-            line_width=line_width,
-            major_line_width=major_line_width,
-            background=background,
-            origin=origin,
-            snap=snap,
-            snap_spacing=snap_spacing,
-            snap_mode=snap_mode,
-            enabled=enabled,
-            emit_on_hover=emit_on_hover,
-            emit_on_press=emit_on_press,
-            emit_on_drag=emit_on_drag,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(*children, props=merged, style=style, strict=strict)
+    offset: Any | None = None
+    """
+    Offset applied by the runtime when positioning this control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `snap_grid` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `snap_grid` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `snap_grid` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `snap_grid` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `snap_grid` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `snap_grid` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `snap_grid` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `snap_grid` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `snap_grid` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `snap_grid` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `snap_grid` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["WindowControls"]
 
-class WindowControls(Component):
+@butterfly_control('window_controls')
+class WindowControls(LayoutControl):
     """
     Custom window control buttons (minimize, maximize, close) for desktop apps.
 
@@ -28,7 +30,6 @@ class WindowControls(Component):
     )
     ```
     """
-
 
     show_minimize: bool | None = None
     """
@@ -65,32 +66,117 @@ class WindowControls(Component):
     Corner radius applied to each control button surface.
     """
 
-    control_type = "window_controls"
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
 
-    def __init__(
-        self,
-        *,
-        show_minimize: bool | None = None,
-        show_maximize: bool | None = None,
-        show_close: bool | None = None,
-        spacing: float | None = None,
-        button_width: float | None = None,
-        button_height: float | None = None,
-        radius: float | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            show_minimize=show_minimize,
-            show_maximize=show_maximize,
-            show_close=show_close,
-            spacing=spacing,
-            button_width=button_width,
-            button_height=button_height,
-            radius=radius,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `window_controls` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `window_controls` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `window_controls` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `window_controls` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `window_controls` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `window_controls` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `window_controls` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `window_controls` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `window_controls` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `window_controls` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `window_controls` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `window_controls` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `window_controls` runtime control.
+    """

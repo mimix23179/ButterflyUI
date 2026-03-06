@@ -1,36 +1,32 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
 from .emoji_picker import EmojiPicker
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
 __all__ = ["IconPicker"]
 
-class IconPicker(EmojiPicker):
+@butterfly_control('icon_picker', positional_fields=('value',))
+class IconPicker(FormFieldControl):
     """
     Icon selection panel — a :class:`EmojiPicker` variant for UI icons.
-    
+
     Inherits the full grid, search, and category behaviour of
     :class:`EmojiPicker` but maps to the ``icon_picker`` control type
     so the Flutter side can render icon glyphs instead of emoji
     characters.  All :class:`EmojiPicker` parameters apply.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.IconPicker(
         show_search=True,
         categories=["interface", "media", "navigation"],
     )
     ```
-    """
-
-
-    value: str | None = None
-    """
-    Pre-selected icon identifier string.
     """
 
     categories: list[str] | None = None
@@ -59,37 +55,117 @@ class IconPicker(EmojiPicker):
     If ``True``, a *Recently Used* tab is shown.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "icon_picker"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        categories: list[str] | None = None,
-        recent: list[str] | None = None,
-        skin_tone: str | None = None,
-        show_search: bool | None = None,
-        show_recent: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            value=value,
-            categories=categories,
-            recent=recent,
-            skin_tone=skin_tone,
-            show_search=show_search,
-            show_recent=show_recent,
-            events=events,
-            props=props,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `icon_picker` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `icon_picker` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `icon_picker` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `icon_picker` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `icon_picker` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `icon_picker` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `icon_picker` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `icon_picker` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `icon_picker` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `icon_picker` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `icon_picker` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `icon_picker` runtime control.
+    """

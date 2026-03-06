@@ -1,24 +1,26 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..effect_control import EffectControl
 
 __all__ = ["Parallax"]
 
-class Parallax(Component):
+@butterfly_control('parallax', field_aliases={'content': 'child'})
+class Parallax(EffectControl):
     """
     Mouse-tracked parallax offset effect that shifts the child in
     response to pointer position.
-    
+
     The Flutter runtime wraps the child in a ``MouseRegion`` and
     computes a normalised − 1…+1 offset from the pointer position
     relative to the widget centre.  An ``AnimatedContainer`` smoothly
     translates the child by up to ``max_offset`` logical pixels in
     each direction.  On pointer exit the offset resets to zero (unless
     ``reset_on_exit`` is ``False``).
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -30,6 +32,10 @@ class Parallax(Component):
     ```
     """
 
+    content: Any | None = None
+    """
+    Primary child control rendered inside this control.
+    """
 
     max_offset: float | None = None
     """
@@ -49,34 +55,120 @@ class Parallax(Component):
     parallax.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "parallax"
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        max_offset: float | None = None,
-        reset_on_exit: bool | None = None,
-        depths: list[float] | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            max_offset=max_offset,
-            reset_on_exit=reset_on_exit,
-            depths=depths,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `parallax` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `parallax` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `parallax` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `parallax` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `parallax` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `parallax` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `parallax` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `parallax` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `parallax` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `parallax` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `parallax` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `parallax` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `parallax` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `parallax` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `parallax` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `parallax` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `parallax` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `parallax` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `parallax` runtime control.
+    """
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

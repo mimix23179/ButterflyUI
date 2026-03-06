@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["WindowFrame"]
 
-class WindowFrame(Component):
+@butterfly_control('window_frame')
+class WindowFrame(LayoutControl):
     """
     Custom window chrome frame with title bar, controls, and optional acrylic.
 
@@ -37,7 +39,6 @@ class WindowFrame(Component):
     )
     ```
     """
-
 
     title: str | None = None
     """
@@ -119,51 +120,152 @@ class WindowFrame(Component):
     Widget placed at the trailing (right) end of the title bar.
     """
 
-    control_type = "window_frame"
+    content_padding: Any | None = None
+    """
+    Content padding value forwarded to the `window_frame` runtime control.
+    """
 
-    def __init__(
-        self,
-        child: Any | None = None,
-        *,
-        title: str | None = None,
-        show_close: bool | None = None,
-        show_maximize: bool | None = None,
-        show_minimize: bool | None = None,
-        draggable: bool | None = None,
-        acrylic_effect: bool | None = None,
-        acrylic_opacity: float | None = None,
-        custom_frame: bool | None = None,
-        use_native_title_bar: bool | None = None,
-        native_window_actions: bool | None = None,
-        show_default_controls: bool | None = None,
-        emit_move_events: bool | None = None,
-        move_event_throttle_ms: int | None = None,
-        title_leading: Any | None = None,
-        title_content: Any | None = None,
-        title_trailing: Any | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            title=title,
-            show_close=show_close,
-            show_maximize=show_maximize,
-            show_minimize=show_minimize,
-            draggable=draggable,
-            acrylic_effect=acrylic_effect,
-            acrylic_opacity=acrylic_opacity,
-            custom_frame=custom_frame,
-            use_native_title_bar=use_native_title_bar,
-            native_window_actions=native_window_actions,
-            show_default_controls=show_default_controls,
-            emit_move_events=emit_move_events,
-            move_event_throttle_ms=move_event_throttle_ms,
-            title_leading=title_leading,
-            title_content=title_content,
-            title_trailing=title_trailing,
-            **kwargs,
-        )
-        super().__init__(child=child, props=merged, style=style, strict=strict)
+    title_height: Any | None = None
+    """
+    Title height value forwarded to the `window_frame` runtime control.
+    """
+
+    native_title_bar: Any | None = None
+    """
+    Native title bar value forwarded to the `window_frame` runtime control.
+    """
+
+    system_title_bar: Any | None = None
+    """
+    System title bar value forwarded to the `window_frame` runtime control.
+    """
+
+    window_actions: Any | None = None
+    """
+    Window actions value forwarded to the `window_frame` runtime control.
+    """
+
+    title_widget: Any | None = None
+    """
+    Title widget value forwarded to the `window_frame` runtime control.
+    """
+
+    window_controls: Any | None = None
+    """
+    Window controls value forwarded to the `window_frame` runtime control.
+    """
+
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `window_frame` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `window_frame` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `window_frame` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `window_frame` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `window_frame` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `window_frame` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `window_frame` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `window_frame` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `window_frame` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `window_frame` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `window_frame` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `window_frame` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `window_frame` runtime control.
+    """

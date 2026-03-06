@@ -1,27 +1,29 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["AppBar"]
 
-class AppBar(Component):
+@butterfly_control('app_bar')
+class AppBar(LayoutControl):
     """
     Application top bar with title block, optional search, and trailing actions.
-    
+
     ``AppBar`` and ``TopBar`` share the same runtime renderer. ``leading``
     places a widget at the start edge, ``actions`` supplies trailing widgets,
     and ``title``/``subtitle`` populate the label block.
-    
+
     The control accepts shared frame/layout props through ``props`` (alignment,
     margin, sizing constraints, radius, clip behavior) for consistent placement
     in custom shells.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.AppBar(
         title="My App",
         subtitle="Dashboard",
@@ -30,7 +32,6 @@ class AppBar(Component):
     )
     ```
     """
-
 
     title: str | None = None
     """
@@ -52,36 +53,175 @@ class AppBar(Component):
     List of trailing action widget specs shown at the end of the bar.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "app_bar"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `app_bar` runtime control.
+    """
 
-    def __init__(
-        self,
-        *,
-        title: str | None = None,
-        subtitle: str | None = None,
-        leading: Any | None = None,
-        actions: list[Any] | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            title=title,
-            subtitle=subtitle,
-            leading=leading,
-            actions=actions,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `app_bar` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `app_bar` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `app_bar` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `app_bar` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `app_bar` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `app_bar` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `app_bar` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `app_bar` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `app_bar` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `app_bar` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `app_bar` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `app_bar` runtime control.
+    """
+
+    align: Any | None = None
+    """
+    Align value forwarded to the `app_bar` runtime control.
+    """
+
+    position: Any | None = None
+    """
+    Position value forwarded to the `app_bar` runtime control.
+    """
+
+    panel_margin: Any | None = None
+    """
+    Panel margin value forwarded to the `app_bar` runtime control.
+    """
+
+    panel_alignment: Any | None = None
+    """
+    Panel alignment value forwarded to the `app_bar` runtime control.
+    """
+
+    panel_width: Any | None = None
+    """
+    Panel width value forwarded to the `app_bar` runtime control.
+    """
+
+    panel_min_width: Any | None = None
+    """
+    Panel min width value forwarded to the `app_bar` runtime control.
+    """
+
+    panel_max_width: Any | None = None
+    """
+    Panel max width value forwarded to the `app_bar` runtime control.
+    """
+
+    offset: Any | None = None
+    """
+    Offset applied by the runtime when positioning this control.
+    """
+
+    translate: Any | None = None
+    """
+    Translate value forwarded to the `app_bar` runtime control.
+    """
+
+    radius: Any | None = None
+    """
+    Corner radius used when painting the control.
+    """
+
+    clip_behavior: Any | None = None
+    """
+    Clip behavior value forwarded to the `app_bar` runtime control.
+    """
 
     def set_title(self, session: Any, title: str, subtitle: str | None = None) -> dict[str, Any]:
         payload: dict[str, Any] = {"title": title}

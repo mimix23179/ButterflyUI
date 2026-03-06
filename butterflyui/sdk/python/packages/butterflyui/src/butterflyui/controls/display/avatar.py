@@ -1,28 +1,30 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Avatar"]
 
-class Avatar(Component):
+@butterfly_control('avatar', positional_fields=('src',))
+class Avatar(LayoutControl):
     """
     Circular avatar with image, initials, or icon fallback.
-    
+
     Renders a ``CircleAvatar`` that resolves its content in priority
     order: a network/asset image from ``src`` or ``image``, then
     ``initials`` (or auto-derived initials from ``name``), then an
     ``icon`` fallback.  An optional coloured status dot (``"online"``,
     ``"away"``, ``"busy"``, ``"offline"``) is overlaid at the bottom-right
     corner.
-    
+
     When ``enabled`` is ``True`` (default) the avatar is wrapped in an
     ``InkWell`` that emits ``"click"`` on tap.  Use ``set_src`` to swap
     the image at runtime and ``get_state`` to retrieve the resolved
     display values.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -34,7 +36,6 @@ class Avatar(Component):
     )
     ```
     """
-
 
     src: str | None = None
     """
@@ -59,11 +60,6 @@ class Avatar(Component):
     icon: str | None = None
     """
     Fallback Material icon name rendered when neither an image nor initials are present.
-    """
-
-    size: float | None = None
-    """
-    Diameter of the avatar circle in logical pixels.
     """
 
     radius: float | None = None
@@ -91,51 +87,105 @@ class Avatar(Component):
     Arbitrary badge content overlaid on the avatar.
     """
 
-    events: list[str] | None = None
+    foreground: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Foreground value forwarded to the `avatar` runtime control.
     """
-    control_type = "avatar"
 
-    def __init__(
-        self,
-        src: str | None = None,
-        *,
-        image: str | None = None,
-        name: str | None = None,
-        initials: str | None = None,
-        icon: str | None = None,
-        size: float | None = None,
-        radius: float | None = None,
-        color: Any | None = None,
-        bgcolor: Any | None = None,
-        status: str | None = None,
-        badge: Any | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            src=src if src is not None else image,
-            image=image if image is not None else src,
-            name=name,
-            initials=initials,
-            icon=icon,
-            size=size,
-            radius=radius,
-            color=color,
-            bgcolor=bgcolor,
-            status=status,
-            badge=badge,
-            enabled=enabled,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `avatar` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `avatar` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `avatar` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `avatar` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `avatar` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `avatar` runtime control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `avatar` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `avatar` runtime control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `avatar` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `avatar` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `avatar` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `avatar` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `avatar` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `avatar` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `avatar` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `avatar` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `avatar` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `avatar` runtime control.
+    """
 
     def set_src(self, session: Any, src: str) -> dict[str, Any]:
         return self.invoke(session, "set_src", {"src": src})

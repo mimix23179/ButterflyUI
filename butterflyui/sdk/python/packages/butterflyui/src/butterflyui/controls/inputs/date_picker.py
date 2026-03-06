@@ -1,27 +1,29 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..form_field_control import FormFieldControl
 
 __all__ = ["DatePicker"]
 
-class DatePicker(Component):
+@butterfly_control('date_picker', positional_fields=('value',))
+class DatePicker(FormFieldControl):
     """
     Date picker supporting single date, range, and span workflows.
-    
+
     ``DatePicker`` unifies legacy controls into one API via ``mode``:
     - ``"single"`` replaces ``date_select``
     - ``"range"`` replaces ``date_range_picker`` / ``date_range``
     - ``"span"`` replaces ``date_span``
-    
+
     Use :meth:`open` to programmatically open the picker and :meth:`set_value`
     to update single or range selections from server-side handlers.
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.DatePicker(
         label="Period",
         mode="range",
@@ -29,12 +31,6 @@ class DatePicker(Component):
         max_date="2099-12-31",
     )
     ```
-    """
-
-
-    value: str | None = None
-    """
-    Selected date as ``"YYYY-MM-DD"`` when ``mode="single"``.
     """
 
     start: str | None = None
@@ -52,16 +48,6 @@ class DatePicker(Component):
     ``"single"`` (default), ``"range"``, or ``"span"``.
     """
 
-    label: str | None = None
-    """
-    Floating label text shown above the field.
-    """
-
-    placeholder: str | None = None
-    """
-    Hint text shown when no date is selected.
-    """
-
     min_date: str | None = None
     """
     Earliest selectable date as ``"YYYY-MM-DD"``.
@@ -72,45 +58,120 @@ class DatePicker(Component):
     Latest selectable date as ``"YYYY-MM-DD"``.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "date_picker"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        start: str | None = None,
-        end: str | None = None,
-        mode: str | None = None,
-        label: str | None = None,
-        placeholder: str | None = None,
-        min_date: str | None = None,
-        max_date: str | None = None,
-        enabled: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            start=start,
-            end=end,
-            mode=mode,
-            label=label,
-            placeholder=placeholder,
-            min_date=min_date,
-            max_date=max_date,
-            enabled=enabled,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `date_picker` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `date_picker` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `date_picker` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `date_picker` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `date_picker` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `date_picker` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `date_picker` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `date_picker` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `date_picker` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `date_picker` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `date_picker` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `date_picker` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `date_picker` runtime control.
+    """
 
     def open(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "open", {})

@@ -1,22 +1,24 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
 from .bar_chart import BarChart
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["BarPlot"]
 
-class BarPlot(BarChart):
+@butterfly_control('bar_plot')
+class BarPlot(LayoutControl):
     """
     Simplified bar-chart alias for quick single-series plots.
-    
+
     Extends ``BarChart`` with a reduced parameter set tailored for
     single-series data.  Multi-series features (``datasets``,
     ``grouped``, ``stacked``) are omitted — pass ``values`` and an
     optional ``color`` for a one-liner bar plot.
-    
+
     Example:
-    
+
     ```python
     import butterflyui as bui
 
@@ -26,7 +28,6 @@ class BarPlot(BarChart):
     )
     ```
     """
-
 
     values: list[Any] | None = None
     """
@@ -53,35 +54,132 @@ class BarPlot(BarChart):
     Bar colour applied to every bar.
     """
 
-    events: list[str] | None = None
+    colors: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Colors value forwarded to the `bar_plot` runtime control.
     """
-    control_type = "bar_plot"
 
-    def __init__(
-        self,
-        *,
-        values: list[Any] | None = None,
-        points: list[Any] | None = None,
-        labels: list[str] | None = None,
-        fill: bool | None = None,
-        color: Any | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            values=values,
-            points=points,
-            labels=labels,
-            fill=fill,
-            color=color,
-            events=events,
-            props=props,
-            style=style,
-            strict=strict,
-            **kwargs,
-        )
+    max: Any | None = None
+    """
+    Maximum value or count accepted by the control.
+    """
+
+    min: Any | None = None
+    """
+    Minimum value or count accepted by the control.
+    """
+
+    spacing: Any | None = None
+    """
+    Spacing between repeated child elements.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `bar_plot` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `bar_plot` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `bar_plot` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `bar_plot` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `bar_plot` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `bar_plot` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `bar_plot` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `bar_plot` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `bar_plot` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `bar_plot` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `bar_plot` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `bar_plot` runtime control.
+    """

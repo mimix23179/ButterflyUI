@@ -1,26 +1,27 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["BorderSide"]
 
-class BorderSide(Component):
+@butterfly_control('border_side')
+class BorderSide(LayoutControl):
     """
     Renders a single border line on one or more sides of the parent.
-    
+
     Unlike :class:`Border`, which wraps a child, ``BorderSide`` draws a
     standalone line (a thin ``SizedBox`` with a side decoration). It is
     useful for separator-style borders. It also accepts per-side maps via
     `top`, `right`, `bottom`, and `left` for individual configuration.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.BorderSide(side="bottom", color="#64748b", width=1)
     ```
     """
-
 
     side: str | None = None
     """
@@ -46,41 +47,116 @@ class BorderSide(Component):
     """
     Animation duration in milliseconds. Defaults to ``180``.
     """
-    control_type = "border_side"
 
-    def __init__(
-        self,
-        *,
-        side: str | None = None,
-        color: Any | None = None,
-        width: float | None = None,
-        length: float | None = None,
-        top: Mapping[str, Any] | None = None,
-        right: Mapping[str, Any] | None = None,
-        bottom: Mapping[str, Any] | None = None,
-        left: Mapping[str, Any] | None = None,
-        animated: bool | None = None,
-        duration_ms: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            side=side,
-            color=color,
-            width=width,
-            length=length,
-            top=dict(top) if top is not None else None,
-            right=dict(right) if right is not None else None,
-            bottom=dict(bottom) if bottom is not None else None,
-            left=dict(left) if left is not None else None,
-            animated=animated,
-            duration_ms=duration_ms,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `border_side` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `border_side` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `border_side` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `border_side` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `border_side` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `border_side` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `border_side` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `border_side` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `border_side` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `border_side` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `border_side` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `border_side` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `border_side` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `border_side` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `border_side` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `border_side` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `border_side` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `border_side` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `border_side` runtime control.
+    """
 
     def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_style", style_props)

@@ -1,22 +1,24 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["ButtonStyle"]
 
-class ButtonStyle(Component):
+@butterfly_control('button_style', positional_fields=('value',))
+class ButtonStyle(LayoutControl):
     """
     Style-preset picker rendered as a row of ``ChoiceChip`` widgets.
-    
+
     The default presets are ``"solid"``, ``"outline"``, and ``"ghost"``.
     Selecting a chip emits a ``"change"`` event with the chosen preset's
     ``id``. The control also supports per-state style overrides (base,
     hover, pressed) and a full action/event dispatch system.
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.ButtonStyle(
         value="solid",
         options=[
@@ -27,7 +29,6 @@ class ButtonStyle(Component):
     )
     ```
     """
-
 
     value: str | None = None
     """
@@ -57,11 +58,6 @@ class ButtonStyle(Component):
     pressed: Mapping[str, Any] | None = None
     """
     State-specific style map applied while the control is actively pressed. Use it for press-time feedback such as scale, elevation, tint, or shadow changes.
-    """
-
-    disabled: Mapping[str, Any] | None = None
-    """
-    State-specific style map applied when the control is disabled. Use it to tone down interactive styling or replace it with a non-interactive appearance.
     """
 
     focus_ring: Mapping[str, Any] | None = None
@@ -98,49 +94,121 @@ class ButtonStyle(Component):
     """
     Additional payload merged into the action dispatch.
     """
-    control_type = "button_style"
 
-    def __init__(
-        self,
-        value: str | None = None,
-        *,
-        options: list[Any] | None = None,
-        items: list[Any] | None = None,
-        base: Mapping[str, Any] | None = None,
-        hover: Mapping[str, Any] | None = None,
-        pressed: Mapping[str, Any] | None = None,
-        disabled: Mapping[str, Any] | None = None,
-        focus_ring: Mapping[str, Any] | None = None,
-        motion_behavior: Mapping[str, Any] | None = None,
-        action: Any | None = None,
-        actions: list[Any] | None = None,
-        action_id: str | None = None,
-        action_event: str | None = None,
-        action_payload: Mapping[str, Any] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            value=value,
-            options=options if options is not None else items,
-            items=items,
-            base=dict(base) if base is not None else None,
-            hover=dict(hover) if hover is not None else None,
-            pressed=dict(pressed) if pressed is not None else None,
-            disabled=dict(disabled) if disabled is not None else None,
-            focus_ring=dict(focus_ring) if focus_ring is not None else None,
-            motion_behavior=dict(motion_behavior) if motion_behavior is not None else None,
-            action=action,
-            actions=actions,
-            action_id=action_id,
-            action_event=action_event,
-            action_payload=dict(action_payload) if action_payload is not None else None,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `button_style` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `button_style` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `button_style` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `button_style` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `button_style` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `button_style` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `button_style` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `button_style` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `button_style` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `button_style` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `button_style` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `button_style` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `button_style` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `button_style` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `button_style` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `button_style` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `button_style` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `button_style` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `button_style` runtime control.
+    """
 
     def get_value(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_value", {})

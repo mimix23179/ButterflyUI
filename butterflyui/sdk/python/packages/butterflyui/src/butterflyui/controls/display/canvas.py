@@ -1,25 +1,27 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Canvas"]
 
-class Canvas(Component):
+@butterfly_control('canvas')
+class Canvas(LayoutControl):
     """
     Drawable canvas surface for simple vector shapes.
-    
+
     Renders a ``Container`` with a ``CustomPaint`` layer that draws
     lines, rectangles, and circles from the ``shapes`` list.  Each
     shape is a dict with a ``"type"`` key (``"line"``, ``"rect"``, or
     ``"circle"``) plus geometry keys such as ``x``, ``y``, ``width``/
     ``height`` or ``radius``, and optional ``color`` and ``stroke``.
-    
+
     Tapping the canvas emits a ``"tap"`` event with ``x``/``y`` local
     coordinates.  Use ``set_shapes`` to replace the shape list,
     ``clear`` to remove all shapes, and ``get_state`` to retrieve
     the current shape count.
-    
+
     Example:
 
     ```python
@@ -34,7 +36,6 @@ class Canvas(Component):
     )
     ```
     """
-
 
     strokes: list[Mapping[str, Any]] | None = None
     """
@@ -56,35 +57,115 @@ class Canvas(Component):
     Controls whether a reference grid is drawn behind the shapes. Set it to ``False`` to disable this behavior.
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
-    control_type = "canvas"
 
-    def __init__(
-        self,
-        *,
-        strokes: list[Mapping[str, Any]] | None = None,
-        shapes: list[Mapping[str, Any]] | None = None,
-        background: Any | None = None,
-        grid: bool | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            strokes=strokes,
-            shapes=shapes,
-            background=background,
-            grid=grid,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `canvas` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `canvas` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `canvas` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `canvas` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `canvas` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `canvas` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `canvas` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `canvas` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `canvas` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `canvas` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `canvas` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `canvas` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `canvas` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `canvas` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `canvas` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `canvas` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `canvas` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `canvas` runtime control.
+    """
 
     def set_shapes(self, session: Any, shapes: list[Mapping[str, Any]]) -> dict[str, Any]:
         return self.invoke(session, "set_shapes", {"shapes": [dict(shape) for shape in shapes]})

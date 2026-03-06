@@ -1,14 +1,16 @@
 from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..layout_control import LayoutControl
 
 __all__ = ["Sprite"]
 
-class Sprite(Component):
+@butterfly_control('sprite')
+class Sprite(LayoutControl):
     """
     Sprite-sheet animation player that steps through frames at a given FPS.
-    
+
     The runtime loads an image sprite sheet from ``src`` and plays it as an
     animation. ``frame_width``/``frame_height`` define the size of each frame
     cell. ``frames`` sets the total number of frames. ``fps`` controls the
@@ -19,10 +21,10 @@ class Sprite(Component):
     position (0.0--1.0).
 
     Example:
-    
+
     ```python
     import butterflyui as bui
-    
+
     bui.Sprite(
         src="assets/explosion.png",
         frame_width=64,
@@ -35,7 +37,6 @@ class Sprite(Component):
     )
     ```
     """
-
 
     src: str | None = None
     """
@@ -92,65 +93,125 @@ class Sprite(Component):
     Flutter ``BoxFit`` mode for rendering the sprite.
     """
 
-    opacity: float | None = None
-    """
-    Opacity value in the range 0.0--1.0.
-    """
-
     progress: float | None = None
     """
     Normalised seek position (0.0 = first frame, 1.0 = last frame).
     """
 
-    events: list[str] | None = None
+    color: Any | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Primary color value applied to the control.
     """
 
-    control_type = "sprite"
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `sprite` runtime control.
+    """
 
-    def __init__(
-        self,
-        *,
-        src: str | None = None,
-        frame_width: float | None = None,
-        frame_height: float | None = None,
-        frames: int | None = None,
-        fps: float | None = None,
-        loop: bool | None = None,
-        autoplay: bool | None = None,
-        play: bool | None = None,
-        columns: int | None = None,
-        rows: int | None = None,
-        fit: str | None = None,
-        opacity: float | None = None,
-        progress: float | None = None,
-        events: list[str] | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            src=src,
-            kind="sprite",
-            frame_width=frame_width,
-            frame_height=frame_height,
-            frames=frames,
-            fps=fps,
-            loop=loop,
-            autoplay=autoplay,
-            play=play,
-            columns=columns,
-            rows=rows,
-            fit=fit,
-            opacity=opacity,
-            progress=progress,
-            events=events,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `sprite` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `sprite` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `sprite` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `sprite` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `sprite` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `sprite` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `sprite` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `sprite` runtime control.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `sprite` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `sprite` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `sprite` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `sprite` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `sprite` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `sprite` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `sprite` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `sprite` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `sprite` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `sprite` runtime control.
+    """
 
     def set_play(self, session: Any, play: bool) -> dict[str, Any]:
         return self.invoke(session, "set_play", {"play": play})

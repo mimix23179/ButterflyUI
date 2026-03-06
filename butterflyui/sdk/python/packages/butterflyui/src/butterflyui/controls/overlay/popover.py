@@ -1,11 +1,13 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
-from .._shared import Component, merge_props
+from ..base_control import butterfly_control
+from ..overlay_control import OverlayControl
 
 __all__ = ["Popover"]
 
-class Popover(Component):
+@butterfly_control('popover', positional_fields=('anchor', 'content',))
+class Popover(OverlayControl):
     """
     Anchored floating popover panel positioned relative to a target widget.
 
@@ -28,28 +30,6 @@ class Popover(Component):
         position="bottom",
     )
     ```
-    """
-
-
-    open: bool | None = None
-    """
-    When ``True`` the popover is visible.
-    """
-
-    offset: Any | None = None
-    """
-    Additional displacement from the anchor edge in logical pixels.
-    """
-
-    dismissible: bool | None = None
-    """
-    When ``True`` tapping outside the popover closes it.
-    """
-
-
-    anchor: Any | None = None
-    """
-    The widget that the popover is visually attached to.
     """
 
     content: Any | None = None
@@ -78,36 +58,117 @@ class Popover(Component):
     Duration of the show/hide animation in milliseconds.
     """
 
-    control_type = "popover"
+    scrim_color: Any | None = None
+    """
+    Scrim color value forwarded to the `popover` runtime control.
+    """
 
-    def __init__(
-        self,
-        anchor: Any | None = None,
-        content: Any | None = None,
-        *,
-        open: bool | None = None,
-        position: str | None = None,
-        offset: Any | None = None,
-        dismissible: bool | None = None,
-        transition: Mapping[str, Any] | None = None,
-        transition_type: str | None = None,
-        duration_ms: int | None = None,
-        props: Mapping[str, Any] | None = None,
-        style: Mapping[str, Any] | None = None,
-        strict: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        merged = merge_props(
-            props,
-            anchor=anchor,
-            content=content,
-            open=open,
-            position=position,
-            offset=offset,
-            dismissible=dismissible,
-            transition=transition,
-            transition_type=transition_type,
-            duration_ms=duration_ms,
-            **kwargs,
-        )
-        super().__init__(props=merged, style=style, strict=strict)
+    color: Any | None = None
+    """
+    Primary color value applied to the control.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground value forwarded to the `popover` runtime control.
+    """
+
+    text_color: Any | None = None
+    """
+    Text color value forwarded to the `popover` runtime control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Icon color value forwarded to the `popover` runtime control.
+    """
+
+    icon_background: Any | None = None
+    """
+    Icon background value forwarded to the `popover` runtime control.
+    """
+
+    icon_foreground: Any | None = None
+    """
+    Icon foreground value forwarded to the `popover` runtime control.
+    """
+
+    icon_opacity: Any | None = None
+    """
+    Icon opacity value forwarded to the `popover` runtime control.
+    """
+
+    background: Any | None = None
+    """
+    Background value forwarded to the `popover` runtime control.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Background color painted behind the control.
+    """
+
+    surface_color: Any | None = None
+    """
+    Surface color value forwarded to the `popover` runtime control.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color used by the runtime.
+    """
+
+    icon: Any | None = None
+    """
+    Icon descriptor rendered by the control.
+    """
+
+    leading_icon: Any | None = None
+    """
+    Leading icon value forwarded to the `popover` runtime control.
+    """
+
+    trailing_icon: Any | None = None
+    """
+    Trailing icon value forwarded to the `popover` runtime control.
+    """
+
+    icon_position: Any | None = None
+    """
+    Icon position value forwarded to the `popover` runtime control.
+    """
+
+    icon_size: Any | None = None
+    """
+    Icon size value forwarded to the `popover` runtime control.
+    """
+
+    icon_spacing: Any | None = None
+    """
+    Icon spacing value forwarded to the `popover` runtime control.
+    """
+
+    decorate_icon: Any | None = None
+    """
+    Decorate icon value forwarded to the `popover` runtime control.
+    """
+
+    transparency: Any | None = None
+    """
+    Transparency value forwarded to the `popover` runtime control.
+    """
+
+    alpha: Any | None = None
+    """
+    Alpha value forwarded to the `popover` runtime control.
+    """
+
+    auto_contrast: Any | None = None
+    """
+    Auto contrast value forwarded to the `popover` runtime control.
+    """
+
+    min_contrast: Any | None = None
+    """
+    Min contrast value forwarded to the `popover` runtime control.
+    """
