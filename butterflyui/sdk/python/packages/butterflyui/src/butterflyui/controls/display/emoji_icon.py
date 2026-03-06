@@ -44,34 +44,14 @@ class EmojiIcon(LayoutControl):
     Accessible tooltip shown on hover.
     """
 
-    color: Any | None = None
-    """
-    Foreground colour applied to the emoji text.
-    """
-
     fallback: str | None = None
     """
     Fallback emoji used when ``emoji`` is empty (defaults to ``"😀"``).
     """
 
-    background: Any | None = None
-    """
-    Background fill colour drawn behind the emoji.
-    """
-
-    radius: float | None = None
-    """
-    Corner radius for the background shape.
-    """
-
     text: Any | None = None
     """
     Text value rendered by the control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `emoji_icon` runtime control.
     """
 
     fgcolor: Any | None = None
@@ -99,11 +79,6 @@ class EmojiIcon(LayoutControl):
     Stroke color value forwarded to the `emoji_icon` runtime control.
     """
 
-    shadow_color: Any | None = None
-    """
-    Shadow color value forwarded to the `emoji_icon` runtime control.
-    """
-
     glow_color: Any | None = None
     """
     Glow color value forwarded to the `emoji_icon` runtime control.
@@ -129,24 +104,9 @@ class EmojiIcon(LayoutControl):
     Shadow dy value forwarded to the `emoji_icon` runtime control.
     """
 
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
     bg_color: Any | None = None
     """
     Bg color value forwarded to the `emoji_icon` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    border_width: Any | None = None
-    """
-    Border width in logical pixels.
     """
 
     content_padding: Any | None = None
@@ -162,101 +122,6 @@ class EmojiIcon(LayoutControl):
     icon_padding: Any | None = None
     """
     Icon padding value forwarded to the `emoji_icon` runtime control.
-    """
-
-    shape: Any | None = None
-    """
-    Shape value forwarded to the `emoji_icon` runtime control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `emoji_icon` runtime control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `emoji_icon` runtime control.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `emoji_icon` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `emoji_icon` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `emoji_icon` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `emoji_icon` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `emoji_icon` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `emoji_icon` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `emoji_icon` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `emoji_icon` runtime control.
     """
 
     def set_emoji(self, session: Any, emoji: str) -> dict[str, Any]:

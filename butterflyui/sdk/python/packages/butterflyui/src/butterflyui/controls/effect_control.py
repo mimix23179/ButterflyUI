@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-from typing import Any
-
+from .child_control import ChildControl
 from .scope_control import ScopeControl
 
 __all__ = ["EffectControl"]
 
 
-class EffectControl(ScopeControl):
+class EffectControl(ScopeControl, ChildControl):
     """
     Shared child-wrapping behavior for effect and decorator controls.
-    """
-
-    child: Any = None
-    """
-    Primary child control wrapped by the effect.
     """

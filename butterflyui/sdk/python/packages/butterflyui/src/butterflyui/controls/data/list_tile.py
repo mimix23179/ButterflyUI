@@ -4,10 +4,12 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
+from ..title_control import TitleControl
+from ..subtitle_control import SubtitleControl
 __all__ = ["ListTile"]
 
 @butterfly_control('list_tile')
-class ListTile(LayoutControl):
+class ListTile(LayoutControl, TitleControl, SubtitleControl):
     """
     Data-oriented list tile with selectable and disabled states, leading/
     trailing icons, and tap-to-select behaviour.
@@ -31,26 +33,6 @@ class ListTile(LayoutControl):
         trailing_icon="chevron_right",
     )
     ```
-    """
-
-    title: str | None = None
-    """
-    Primary title text.  Falls back to ``label`` or ``text`` props in the runtime.
-    """
-
-    subtitle: str | None = None
-    """
-    Secondary supporting text rendered beneath the title.
-    """
-
-    leading_icon: str | None = None
-    """
-    Icon name/data rendered at the leading edge (18 px).  The runtime also accepts ``icon`` or ``leading_text``.
-    """
-
-    trailing_icon: str | None = None
-    """
-    Icon name/data rendered at the trailing edge (18 px).
     """
 
     meta: str | None = None
@@ -91,109 +73,4 @@ class ListTile(LayoutControl):
     trailing_text: Any | None = None
     """
     Trailing text value forwarded to the `list_tile` runtime control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `list_tile` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `list_tile` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `list_tile` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `list_tile` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `list_tile` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `list_tile` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `list_tile` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `list_tile` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `list_tile` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `list_tile` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `list_tile` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `list_tile` runtime control.
     """

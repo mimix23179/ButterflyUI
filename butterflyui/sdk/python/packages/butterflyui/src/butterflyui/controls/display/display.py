@@ -5,11 +5,15 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-
+from ..title_control import TitleControl
+from ..subtitle_control import SubtitleControl
+from ..leading_control import LeadingControl
+from ..trailing_control import TrailingControl
+from ..items_control import ItemsControl
 __all__ = ["Display"]
 
 @butterfly_control('display')
-class Display(LayoutControl):
+class Display(LayoutControl, TitleControl, SubtitleControl, LeadingControl, TrailingControl, ItemsControl):
     """
     Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
 
@@ -47,16 +51,6 @@ class Display(LayoutControl):
     ``"check"``, ``"ownership"``.
     """
 
-    title: str | None = None
-    """
-    Primary heading text rendered by the control.
-    """
-
-    subtitle: str | None = None
-    """
-    Secondary text rendered beneath or beside the primary title.
-    """
-
     caption: str | None = None
     """
     Tertiary/supporting caption line.
@@ -70,21 +64,6 @@ class Display(LayoutControl):
     name: str | None = None
     """
     Human-readable name used to identify this item, style pack, or preset.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor for role surfaces.
-    """
-
-    leading: Any | None = None
-    """
-    Leading slot descriptor (control map/string/icon).
-    """
-
-    trailing: Any | None = None
-    """
-    Trailing content or descriptor rendered after the control's primary body.
     """
 
     avatar: Any | None = None
@@ -112,11 +91,6 @@ class Display(LayoutControl):
     Badge value or descriptor rendered as a compact status marker near the control's main content.
     """
 
-    color: Any | None = None
-    """
-    Primary color value used by the control for text, icons, strokes, or accent surfaces.
-    """
-
     value: Any | None = None
     """
     Numeric/text value for rating/status/metric roles.
@@ -135,11 +109,6 @@ class Display(LayoutControl):
     count: int | None = None
     """
     Count label for rating/reaction roles.
-    """
-
-    items: list[Any] | None = None
-    """
-    Item descriptors for reactions/check roles.
     """
 
     selected: list[Any] | None = None
@@ -197,21 +166,6 @@ class Display(LayoutControl):
     Enables a denser layout with reduced gaps, padding, or row height.
     """
 
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    border_width: Any | None = None
-    """
-    Border width in logical pixels.
-    """
-
     label: Any | None = None
     """
     Primary label rendered by the control.
@@ -220,11 +174,6 @@ class Display(LayoutControl):
     src: Any | None = None
     """
     Source value consumed by the runtime, such as a file path or URL.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `display` runtime control.
     """
 
     rating: Any | None = None
@@ -275,96 +224,6 @@ class Display(LayoutControl):
     values: Any | None = None
     """
     Values value forwarded to the `display` runtime control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `display` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `display` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `display` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `display` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `display` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `display` runtime control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `display` runtime control.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `display` runtime control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `display` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `display` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `display` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `display` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `display` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `display` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `display` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `display` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `display` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `display` runtime control.
     """
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:

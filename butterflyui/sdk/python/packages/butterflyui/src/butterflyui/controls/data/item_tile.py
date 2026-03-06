@@ -5,10 +5,12 @@ from .list_tile import ListTile
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
+from ..title_control import TitleControl
+from ..subtitle_control import SubtitleControl
 __all__ = ["ItemTile"]
 
 @butterfly_control('item_tile')
-class ItemTile(LayoutControl):
+class ItemTile(LayoutControl, TitleControl, SubtitleControl):
     """
     Selectable list tile tailored for data-oriented item rows, extending
     ``ListTile`` with an ``events`` convenience parameter and invoke
@@ -33,26 +35,6 @@ class ItemTile(LayoutControl):
         selected=False,
     )
     ```
-    """
-
-    title: str | None = None
-    """
-    Primary title text displayed on the tile.
-    """
-
-    subtitle: str | None = None
-    """
-    Secondary supporting text rendered beneath the title.
-    """
-
-    leading_icon: str | None = None
-    """
-    Icon name or data rendered at the leading edge of the tile.
-    """
-
-    trailing_icon: str | None = None
-    """
-    Icon name or data rendered at the trailing edge.
     """
 
     meta: str | None = None
@@ -93,111 +75,6 @@ class ItemTile(LayoutControl):
     trailing_text: Any | None = None
     """
     Trailing text value forwarded to the `item_tile` runtime control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `item_tile` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `item_tile` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `item_tile` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `item_tile` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `item_tile` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `item_tile` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `item_tile` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `item_tile` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `item_tile` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `item_tile` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `item_tile` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `item_tile` runtime control.
     """
 
     def set_selected(self, session: Any, value: bool) -> dict[str, Any]:

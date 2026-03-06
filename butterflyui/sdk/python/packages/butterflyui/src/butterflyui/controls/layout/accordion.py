@@ -4,10 +4,11 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
+from ..multi_child_control import MultiChildControl
 __all__ = ["Accordion"]
 
 @butterfly_control('accordion', field_aliases={'controls': 'children'})
-class Accordion(LayoutControl):
+class Accordion(LayoutControl, MultiChildControl):
     """
     Collapsible accordion that shows or hides sections of content.
 
@@ -28,11 +29,6 @@ class Accordion(LayoutControl):
         events=["change"],
     )
     ```
-    """
-
-    controls: list[Any] | None = None
-    """
-    Child controls rendered in order by this control.
     """
 
     sections: list[Mapping[str, Any]] | None = None
@@ -101,11 +97,6 @@ class Accordion(LayoutControl):
     Body padding value forwarded to the `accordion` runtime control.
     """
 
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
     content_padding: Any | None = None
     """
     Content padding value forwarded to the `accordion` runtime control.
@@ -114,11 +105,6 @@ class Accordion(LayoutControl):
     divider_color: Any | None = None
     """
     Divider color value forwarded to the `accordion` runtime control.
-    """
-
-    elevation: Any | None = None
-    """
-    Elevation value forwarded to the `accordion` runtime control.
     """
 
     glass_blur: Any | None = None
@@ -144,121 +130,6 @@ class Accordion(LayoutControl):
     header_padding: Any | None = None
     """
     Header padding value forwarded to the `accordion` runtime control.
-    """
-
-    radius: Any | None = None
-    """
-    Corner radius used when painting the control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `accordion` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `accordion` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `accordion` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `accordion` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `accordion` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `accordion` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `accordion` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `accordion` runtime control.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `accordion` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `accordion` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `accordion` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `accordion` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `accordion` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `accordion` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `accordion` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `accordion` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `accordion` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `accordion` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `accordion` runtime control.
     """
 
     def set_expanded(self, session: Any, index: int | list[int]) -> dict[str, Any]:

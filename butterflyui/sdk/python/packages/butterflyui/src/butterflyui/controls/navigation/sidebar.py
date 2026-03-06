@@ -5,11 +5,12 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-
+from ..title_control import TitleControl
+from ..items_control import ItemsControl
 __all__ = ["Sidebar"]
 
 @butterfly_control('sidebar')
-class Sidebar(LayoutControl):
+class Sidebar(LayoutControl, TitleControl, ItemsControl):
     """
     Configurable navigation sidebar with sections, search, and selection state.
 
@@ -43,19 +44,9 @@ class Sidebar(LayoutControl):
     Grouped navigation sections, each containing nested ``items``.
     """
 
-    items: list[Any] | None = None
-    """
-    Flat list of navigation item descriptors.
-    """
-
     selected_id: str | None = None
     """
     Identifier of the currently selected item, tab, route, or navigation destination.
-    """
-
-    title: str | None = None
-    """
-    Primary heading text rendered by the control.
     """
 
     show_search: bool | None = None
@@ -86,121 +77,6 @@ class Sidebar(LayoutControl):
     search_debounce_ms: int | None = None
     """
     Debounce window for incremental search events.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `sidebar` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `sidebar` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `sidebar` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `sidebar` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `sidebar` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `sidebar` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `sidebar` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `sidebar` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `sidebar` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `sidebar` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `sidebar` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `sidebar` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `sidebar` runtime control.
     """
 
     align: Any | None = None
@@ -246,16 +122,6 @@ class Sidebar(LayoutControl):
     translate: Any | None = None
     """
     Translate value forwarded to the `sidebar` runtime control.
-    """
-
-    radius: Any | None = None
-    """
-    Corner radius used when painting the control.
-    """
-
-    clip_behavior: Any | None = None
-    """
-    Clip behavior value forwarded to the `sidebar` runtime control.
     """
 
     def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:

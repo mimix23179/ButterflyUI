@@ -5,11 +5,16 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-
+from ..single_child_control import SingleChildControl
+from ..title_control import TitleControl
+from ..subtitle_control import SubtitleControl
+from ..leading_control import LeadingControl
+from ..trailing_control import TrailingControl
+from ..items_control import ItemsControl
 __all__ = ["Bubble"]
 
 @butterfly_control('bubble', positional_fields=('text',))
-class Bubble(LayoutControl):
+class Bubble(LayoutControl, SingleChildControl, TitleControl, SubtitleControl, LeadingControl, TrailingControl, ItemsControl):
     """
     Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
 
@@ -115,16 +120,6 @@ class Bubble(LayoutControl):
     role_badge: str | None = None
     """
     Optional badge shown next to sender metadata.
-    """
-
-    title: str | None = None
-    """
-    Primary heading text rendered by the control.
-    """
-
-    subtitle: str | None = None
-    """
-    Secondary text rendered beneath or beside the primary title.
     """
 
     text: str | None = None
@@ -242,11 +237,6 @@ class Bubble(LayoutControl):
     Message list for thread/chat variant.
     """
 
-    items: list[Any] | None = None
-    """
-    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-    """
-
     pinned_messages: list[Any] | None = None
     """
     Pinned message descriptors rendered above timeline.
@@ -352,16 +342,6 @@ class Bubble(LayoutControl):
     If ``True``, composer grows between min/max lines.
     """
 
-    leading: Any | None = None
-    """
-    Leading composer slot descriptor.
-    """
-
-    trailing: Any | None = None
-    """
-    Trailing composer slot descriptor.
-    """
-
     show_attach: bool | None = None
     """
     Controls whether the control should display its attachment action or attachment slot.
@@ -407,11 +387,6 @@ class Bubble(LayoutControl):
     Line color value forwarded to the `bubble` runtime control.
     """
 
-    content: Any | None = None
-    """
-    Primary child control rendered inside this control.
-    """
-
     use_flutter_chat_ui: Any | None = None
     """
     Use flutter chat ui value forwarded to the `bubble` runtime control.
@@ -435,121 +410,6 @@ class Bubble(LayoutControl):
     show_send: Any | None = None
     """
     Show send value forwarded to the `bubble` runtime control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `bubble` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `bubble` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `bubble` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `bubble` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `bubble` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `bubble` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `bubble` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `bubble` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `bubble` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `bubble` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `bubble` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `bubble` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `bubble` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `bubble` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `bubble` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `bubble` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `bubble` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `bubble` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `bubble` runtime control.
     """
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:

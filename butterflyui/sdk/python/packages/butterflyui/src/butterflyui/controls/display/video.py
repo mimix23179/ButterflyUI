@@ -4,10 +4,11 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
+from ..single_child_control import SingleChildControl
 __all__ = ["Video"]
 
 @butterfly_control('video', field_aliases={'content': 'child'})
-class Video(LayoutControl):
+class Video(LayoutControl, SingleChildControl):
     """
     Video player control with playback management.
 
@@ -31,11 +32,6 @@ class Video(LayoutControl):
         controls=True,
     )
     ```
-    """
-
-    content: Any | None = None
-    """
-    Primary child control rendered inside this control.
     """
 
     src: str | None = None
@@ -76,121 +72,6 @@ class Video(LayoutControl):
     volume: float | None = None
     """
     Initial volume level from ``0.0`` to ``1.0``.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `video` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `video` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `video` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `video` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `video` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `video` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `video` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `video` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `video` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `video` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `video` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `video` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `video` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `video` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `video` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `video` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `video` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `video` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `video` runtime control.
     """
 
     def play(self, session: Any) -> dict[str, Any]:

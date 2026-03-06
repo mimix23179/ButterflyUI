@@ -5,11 +5,13 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-
+from ..title_control import TitleControl
+from ..subtitle_control import SubtitleControl
+from ..items_control import ItemsControl
 __all__ = ["Drawer"]
 
 @butterfly_control('drawer')
-class Drawer(LayoutControl):
+class Drawer(LayoutControl, TitleControl, SubtitleControl, ItemsControl):
     """
     Standalone drawer overlay control with optional built-in navigation content.
 
@@ -62,11 +64,6 @@ class Drawer(LayoutControl):
     Drawer edge: ``"left"``, ``"right"``, ``"top"``, or ``"bottom"``.
     """
 
-    scrim_color: Any | None = None
-    """
-    Scrim color shown behind the drawer while open.
-    """
-
     modal: bool | None = None
     """
     Modal behavior hint for host runtimes.
@@ -75,11 +72,6 @@ class Drawer(LayoutControl):
     persistent: bool | None = None
     """
     Persistent layout hint for host runtimes.
-    """
-
-    items: list[Any] | None = None
-    """
-    Flat list of menu item descriptors for built-in menu rendering.
     """
 
     sections: list[Mapping[str, Any]] | None = None
@@ -137,126 +129,6 @@ class Drawer(LayoutControl):
     Whether the runtime should use a more compact visual density.
     """
 
-    title: Any | None = None
-    """
-    Title text or node rendered by the control.
-    """
-
-    subtitle: Any | None = None
-    """
-    Secondary text rendered by the control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `drawer` runtime control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `drawer` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `drawer` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `drawer` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `drawer` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `drawer` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `drawer` runtime control.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `drawer` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `drawer` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `drawer` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `drawer` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `drawer` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `drawer` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `drawer` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `drawer` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `drawer` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `drawer` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `drawer` runtime control.
-    """
-
     align: Any | None = None
     """
     Align value forwarded to the `drawer` runtime control.
@@ -300,16 +172,6 @@ class Drawer(LayoutControl):
     translate: Any | None = None
     """
     Translate value forwarded to the `drawer` runtime control.
-    """
-
-    radius: Any | None = None
-    """
-    Corner radius used when painting the control.
-    """
-
-    clip_behavior: Any | None = None
-    """
-    Clip behavior value forwarded to the `drawer` runtime control.
     """
 
     def set_open(self, session: Any, open: bool) -> dict[str, Any]:

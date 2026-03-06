@@ -4,10 +4,12 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..overlay_control import OverlayControl
 
+from ..single_child_control import SingleChildControl
+from ..items_control import ItemsControl
 __all__ = ["ContextMenu"]
 
 @butterfly_control('context_menu', field_aliases={'content': 'child'})
-class ContextMenu(OverlayControl):
+class ContextMenu(OverlayControl, SingleChildControl, ItemsControl):
     """
     Popup context menu bound to a child trigger surface.
 
@@ -35,16 +37,6 @@ class ContextMenu(OverlayControl):
     ```
     """
 
-    content: Any | None = None
-    """
-    Primary child control rendered inside this control.
-    """
-
-    items: list[Any] | None = None
-    """
-    Ordered list of items rendered by the control. Each entry may be a strongly typed helper instance or a raw mapping matching the runtime payload shape.
-    """
-
     trigger: str | None = None
     """
     Gesture that opens the menu. Values: ``"secondary_tap"``,
@@ -54,21 +46,6 @@ class ContextMenu(OverlayControl):
     open_on_tap: bool | None = None
     """
     When ``True`` a primary tap also opens the context menu.
-    """
-
-    bgcolor: Any | None = None
-    """
-    Background color painted behind the control.
-    """
-
-    text_color: Any | None = None
-    """
-    Text color value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_color: Any | None = None
-    """
-    Icon color value forwarded to the `context_menu` runtime control.
     """
 
     item_bgcolor: Any | None = None
@@ -94,106 +71,6 @@ class ContextMenu(OverlayControl):
     use_contextmenu: Any | None = None
     """
     Use contextmenu value forwarded to the `context_menu` runtime control.
-    """
-
-    color: Any | None = None
-    """
-    Primary color value applied to the control.
-    """
-
-    foreground: Any | None = None
-    """
-    Foreground value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_background: Any | None = None
-    """
-    Icon background value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_foreground: Any | None = None
-    """
-    Icon foreground value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_opacity: Any | None = None
-    """
-    Icon opacity value forwarded to the `context_menu` runtime control.
-    """
-
-    background: Any | None = None
-    """
-    Background value forwarded to the `context_menu` runtime control.
-    """
-
-    surface_color: Any | None = None
-    """
-    Surface color value forwarded to the `context_menu` runtime control.
-    """
-
-    border_color: Any | None = None
-    """
-    Border color used by the runtime.
-    """
-
-    scrim_color: Any | None = None
-    """
-    Scrim color value forwarded to the `context_menu` runtime control.
-    """
-
-    icon: Any | None = None
-    """
-    Icon descriptor rendered by the control.
-    """
-
-    leading_icon: Any | None = None
-    """
-    Leading icon value forwarded to the `context_menu` runtime control.
-    """
-
-    trailing_icon: Any | None = None
-    """
-    Trailing icon value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_position: Any | None = None
-    """
-    Icon position value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_size: Any | None = None
-    """
-    Icon size value forwarded to the `context_menu` runtime control.
-    """
-
-    icon_spacing: Any | None = None
-    """
-    Icon spacing value forwarded to the `context_menu` runtime control.
-    """
-
-    decorate_icon: Any | None = None
-    """
-    Decorate icon value forwarded to the `context_menu` runtime control.
-    """
-
-    transparency: Any | None = None
-    """
-    Transparency value forwarded to the `context_menu` runtime control.
-    """
-
-    alpha: Any | None = None
-    """
-    Alpha value forwarded to the `context_menu` runtime control.
-    """
-
-    auto_contrast: Any | None = None
-    """
-    Auto contrast value forwarded to the `context_menu` runtime control.
-    """
-
-    min_contrast: Any | None = None
-    """
-    Min contrast value forwarded to the `context_menu` runtime control.
     """
 
     align: Any | None = None
@@ -234,16 +111,6 @@ class ContextMenu(OverlayControl):
     translate: Any | None = None
     """
     Translate value forwarded to the `context_menu` runtime control.
-    """
-
-    radius: Any | None = None
-    """
-    Corner radius used when painting the control.
-    """
-
-    clip_behavior: Any | None = None
-    """
-    Clip behavior value forwarded to the `context_menu` runtime control.
     """
 
     def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:

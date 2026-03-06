@@ -1,0 +1,38 @@
+from __future__ import annotations
+
+STYLE_PROPS = (
+    "style_pack",
+    "pack",
+    "token_overrides",
+    "style_tokens",
+    "style_slots",
+    "classes",
+    "state",
+    "variant",
+    "tone",
+    "size",
+    "density",
+    "color",
+    "foreground",
+    "text_color",
+    "icon",
+    "icon_color",
+    "icon_background",
+    "icon_foreground",
+    "icon_opacity",
+    "background",
+    "surface_color",
+    "scrim_color",
+    "leading_icon",
+    "trailing_icon",
+    "icon_position",
+    "icon_size",
+    "icon_spacing",
+    "decorate_icon",
+    "transparency",
+    "alpha",
+    "auto_contrast",
+    "min_contrast",
+)
+
+__all__ = ["STYLE_PROPS"]

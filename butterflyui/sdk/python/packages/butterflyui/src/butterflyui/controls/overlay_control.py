@@ -1,31 +1,14 @@
 from __future__ import annotations
 
-from typing import Any
-
+from .capabilities.overlay import OverlayProps
 from .layout_control import LayoutControl
 
 __all__ = ["OverlayControl"]
 
 
-class OverlayControl(LayoutControl):
+class OverlayControl(LayoutControl, OverlayProps):
     """
     Shared overlay behavior for dismissible or positioned popup controls.
-    """
-
-    open: bool = False
-    """
-    Whether the overlay is currently visible.
-    """
-
-    dismissible: bool | None = None
-    """
-    Whether clicking outside or performing a dismiss action should close the
-    overlay.
-    """
-
-    offset: Any = None
-    """
-    Placement offset applied by the runtime when positioning the overlay.
     """
 
     def show(self) -> "OverlayControl":

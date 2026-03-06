@@ -361,10 +361,18 @@ def _build_declarative_control_init(cls: type["Control"]):
                 continue
             translated_kwargs[prop_name] = value
 
+        resolved_children = children
+        if extra_children:
+            if resolved_children is None:
+                resolved_children = list(extra_children)
+            else:
+                merged_children = list(resolved_children)
+                merged_children.extend(extra_children)
+                resolved_children = merged_children
+
         super(cls, self).__init__(
-            *extra_children,
             child=child,
-            children=children,
+            children=resolved_children,
             props=props,
             style=style,
             strict=strict,

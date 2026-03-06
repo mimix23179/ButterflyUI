@@ -4,6 +4,13 @@ from collections.abc import Iterable, Mapping
 from typing import Any
 
 from .control import Control
+from .effects_control import EffectsControl
+from .modifier_control import ModifierControl
+from .motion_control import MotionControl
+from .overlay_control import OverlayControl
+from .single_child_control import SingleChildControl
+from .style_control import StyleControl
+from .surface_control import SurfaceControl
 
 
 def _normalize_token(value: str) -> str:
@@ -116,6 +123,7 @@ _STYLE_CONTROLS = set(_INTERACTIVE_CONTROLS) | set(_GLASS_CONTROLS) | set(
     "page_view",
 }
 
+_MODIFIER_CONTROLS = set(_STYLE_CONTROLS)
 _MOTION_CONTROLS = set(_STYLE_CONTROLS) - {
     "spacer",
     "flex_spacer",
@@ -237,7 +245,7 @@ _TRANSITION_MODIFIERS = {
     "transition",
 }
 
-_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 4
+_MODIFIER_CAPABILITIES_MANIFEST_VERSION = 5
 
 
 def modifier_capabilities_manifest() -> dict[str, Any]:
@@ -248,6 +256,7 @@ def modifier_capabilities_manifest() -> dict[str, Any]:
             "glass": sorted(_GLASS_CONTROLS),
             "transition": sorted(_TRANSITION_CONTROLS),
             "style": sorted(_STYLE_CONTROLS),
+            "modifiers": sorted(_MODIFIER_CONTROLS),
             "motion": sorted(_MOTION_CONTROLS),
             "effects": sorted(_EFFECT_CONTROLS),
             "slots": {key: list(values) for key, values in _SLOT_MANIFEST.items()},
@@ -327,7 +336,15 @@ def collect_children(
     return out
 
 
-class Component(Control):
+class Component(
+    OverlayControl,
+    SingleChildControl,
+    SurfaceControl,
+    StyleControl,
+    MotionControl,
+    ModifierControl,
+    EffectsControl,
+):
     """Base class for all Python-side ButterflyUI controls.
     
     Besides regular control props, ``Component`` also carries the universal
@@ -346,18 +363,6 @@ class Component(Control):
     payload, which keeps Python wrappers and Dart runtime props loosely coupled.
     """
     control_type: str = ""
-
-    child: Any = None
-    """
-    Single convenience child appended to the control tree.
-    """
-
-    variant: Any = None
-    """
-    Variant token forwarded into the shared style pipeline.
-    """
-
-    tone: str | None = None
     """
     Tone token forwarded into the shared style pipeline.
     """

@@ -5,6 +5,15 @@ from pathlib import Path
 from typing import Any, Callable
 
 from ..core.schema import CONTROL_SCHEMAS
+from .capabilities import (
+    CAPABILITY_PROP_NAMES,
+    EFFECT_CAPABLE_CONTROLS,
+    MODIFIER_CAPABLE_CONTROLS,
+    MOTION_CAPABLE_CONTROLS,
+    PROP_CAPABILITY_OWNERS,
+    STYLE_CAPABLE_CONTROLS,
+    slots_for_control,
+)
 from .common_events import COMMON_EVENT_NAMES
 from .common_props import COMMON_CORE_PROPS, COMMON_LAYOUT_PROPS, COMMON_STYLE_PROPS
 
@@ -43,6 +52,7 @@ class EventSpec:
 class ControlSpec:
     type_name: str
     category: str
+    capabilities: tuple[str, ...] = ()
     props: tuple[PropSpec, ...] = ()
     events: tuple[EventSpec, ...] = ()
     child_mode: str = "multiple"
@@ -111,6 +121,9 @@ def _affects_flags(name: str) -> frozenset[str]:
         flags.add("layout")
     if name in COMMON_STYLE_PROPS:
         flags.add("style")
+    owner = PROP_CAPABILITY_OWNERS.get(name)
+    if owner:
+        flags.add(owner)
     if name in {"color", "bgcolor", "background", "foreground", "border_color", "gradient"}:
         flags.add("paint")
     if name in {"events"}:
@@ -149,8 +162,74 @@ def _child_mode(control_type: str, props: dict[str, Any]) -> str:
     return "multiple"
 
 
+_CAPABILITY_PREFERENCE = (
+    "core",
+    "layout",
+    "surface",
+    "style",
+    "motion",
+    "modifiers",
+    "effects",
+    "content",
+    "focus",
+    "input",
+    "form_field",
+    "selection",
+    "toggle",
+    "scroll",
+    "overlay",
+    "actions",
+    "button",
+)
+
+
+_BUTTON_CONTROL_TYPES = {
+    "async_action_button",
+    "button",
+    "elevated_button",
+    "filled_button",
+    "glyph_button",
+    "icon_button",
+    "outlined_button",
+    "text_button",
+}
+
+
+def _control_capabilities(
+    control_type: str,
+    props: dict[str, Any],
+    child_mode: str,
+) -> tuple[str, ...]:
+    prop_names = set(props)
+    capabilities: list[str] = []
+    for capability in _CAPABILITY_PREFERENCE:
+        if capability == "button" and control_type not in _BUTTON_CONTROL_TYPES:
+            continue
+        if capability in {"input", "form_field", "selection", "toggle"} and control_type in _BUTTON_CONTROL_TYPES:
+            continue
+        if capability == "style" and control_type in STYLE_CAPABLE_CONTROLS:
+            capabilities.append(capability)
+            continue
+        if capability == "modifiers" and control_type in MODIFIER_CAPABLE_CONTROLS:
+            capabilities.append(capability)
+            continue
+        if capability == "motion" and control_type in MOTION_CAPABLE_CONTROLS:
+            capabilities.append(capability)
+            continue
+        if capability == "effects" and control_type in EFFECT_CAPABLE_CONTROLS:
+            capabilities.append(capability)
+            continue
+        owned = set(CAPABILITY_PROP_NAMES.get(capability, ()))
+        if prop_names & owned:
+            capabilities.append(capability)
+    if child_mode in {"single", "multiple"} and "content" not in capabilities:
+        capabilities.append("content")
+    return tuple(capabilities)
+
+
 def _control_spec(control_type: str, schema: dict[str, Any]) -> ControlSpec:
     properties = schema.get("properties", {}) if isinstance(schema, dict) else {}
+    child_mode = _child_mode(control_type, properties)
     prop_specs = tuple(
         PropSpec(
             name=name,
@@ -176,9 +255,11 @@ def _control_spec(control_type: str, schema: dict[str, Any]) -> ControlSpec:
     return ControlSpec(
         type_name=control_type,
         category=category,
+        capabilities=_control_capabilities(control_type, properties, child_mode),
         props=prop_specs,
         events=common_events,
-        child_mode=_child_mode(control_type, properties),
+        child_mode=child_mode,
+        slots=slots_for_control(control_type),
         tags=tuple(tags),
         schema=dict(schema),
     )
