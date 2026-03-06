@@ -14,9 +14,14 @@ Widget buildDecoratedBoxControl(
     child = Padding(padding: padding, child: child);
   }
 
-  final color = coerceColor(props['color'] ?? props['bgcolor']);
-  final gradient = coerceGradient(props['gradient']);
   final image = coerceDecorationImage(props['image']);
+  final suppressSurfaceFill = _shouldSuppressSurfaceFill(props, image: image);
+  final color = suppressSurfaceFill
+      ? null
+      : coerceColor(props['color'] ?? props['bgcolor']);
+  final gradient = suppressSurfaceFill
+      ? null
+      : coerceGradient(props['gradient']);
   final shadow = coerceBoxShadow(props['shadow']);
   final borderColor = coerceColor(props['border_color']);
   final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
@@ -101,6 +106,41 @@ Clip? _parseClip(Object? value) {
     case 'antialiaswithsavelayer':
     case 'anti_alias_with_save_layer':
       return Clip.antiAliasWithSaveLayer;
+  }
+  return null;
+}
+
+bool _shouldSuppressSurfaceFill(
+  Map<String, Object?> props, {
+  required DecorationImage? image,
+}) {
+  final preserveSurface =
+      _coerceBool(
+        props['preserve_surface'] ??
+            props['preserve_fill'] ??
+            props['preserve_background'],
+      ) ==
+      true;
+  if (preserveSurface) {
+    return false;
+  }
+  return _coerceBool(props['__image_backdrop_inherited']) == true ||
+      image != null;
+}
+
+bool? _coerceBool(Object? value) {
+  if (value is bool) {
+    return value;
+  }
+  final normalized = value?.toString().trim().toLowerCase();
+  if (normalized == null || normalized.isEmpty) {
+    return null;
+  }
+  if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+    return true;
+  }
+  if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+    return false;
   }
   return null;
 }

@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..form_field_control import FormFieldControl
 
-from ..items_control import ItemsControl
 __all__ = ["Chip"]
 
 @butterfly_control('chip', positional_fields=('label',))
-class Chip(FormFieldControl, ItemsControl):
+class Chip(FormFieldControl):
     """
     Unified chip surface for single chips and grouped chip sets.
 

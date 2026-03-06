@@ -5,15 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
-from ..leading_control import LeadingControl
-from ..trailing_control import TrailingControl
-from ..items_control import ItemsControl
 __all__ = ["Display"]
 
 @butterfly_control('display')
-class Display(LayoutControl, TitleControl, SubtitleControl, LeadingControl, TrailingControl, ItemsControl):
+class Display(LayoutControl):
     """
     Unified presentational control for identity, status, ratings, reactions, checks, and ownership.
 

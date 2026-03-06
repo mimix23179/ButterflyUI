@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..scrollable_control import ScrollableControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["ListView"]
 
 @butterfly_control('list_view', field_aliases={'controls': 'children'})
-class ListView(ScrollableControl, MultiChildControl, ItemsControl):
+class ListView(ScrollableControl, MultiChildControl):
     """
     Vertical scrollable list container for child controls or data-item
     payloads with optional separator dividers.

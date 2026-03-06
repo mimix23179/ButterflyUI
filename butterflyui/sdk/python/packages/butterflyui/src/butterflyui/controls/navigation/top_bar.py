@@ -4,12 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["TopBar"]
 
 @butterfly_control('top_bar')
-class TopBar(LayoutControl, TitleControl, SubtitleControl):
+class TopBar(LayoutControl):
     """
     Application top bar with optional inline search and trailing actions.
 

@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["Grid"]
 
 @butterfly_control('grid', field_aliases={'controls': 'children'})
-class Grid(LayoutControl, MultiChildControl, ItemsControl):
+class Grid(LayoutControl, MultiChildControl):
     """
     Grid layout that arranges children into a fixed number of columns.
 

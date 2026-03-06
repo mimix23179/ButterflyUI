@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["ButtonStyle"]
 
 @butterfly_control('button_style', positional_fields=('value',))
-class ButtonStyle(LayoutControl, ItemsControl):
+class ButtonStyle(LayoutControl):
     """
     Style-preset picker rendered as a row of ``ChoiceChip`` widgets.
 

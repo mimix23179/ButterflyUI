@@ -5,12 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..items_control import ItemsControl
 __all__ = ["Sidebar"]
 
 @butterfly_control('sidebar')
-class Sidebar(LayoutControl, TitleControl, ItemsControl):
+class Sidebar(LayoutControl):
     """
     Configurable navigation sidebar with sections, search, and selection state.
 

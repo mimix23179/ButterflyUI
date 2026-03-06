@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["MenuBar"]
 
 @butterfly_control('menu_bar', field_aliases={'controls': 'children'})
-class MenuBar(LayoutControl, MultiChildControl, ItemsControl):
+class MenuBar(LayoutControl, MultiChildControl):
     """
     Application-level horizontal menu bar with dropdown menu groups.
 

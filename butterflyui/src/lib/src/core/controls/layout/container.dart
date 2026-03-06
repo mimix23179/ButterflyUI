@@ -143,13 +143,21 @@ class _ContainerControlState extends State<_ContainerControl> {
     final contentAlignment = parseLayoutAlignment(
       _liveProps['content_alignment'],
     );
-    final bgColor = coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']);
+    final image = coerceDecorationImage(_liveProps['image']);
+    final suppressSurfaceFill = _shouldSuppressSurfaceFill(
+      _liveProps,
+      image: image,
+    );
+    final bgColor = suppressSurfaceFill
+        ? null
+        : coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']);
     final borderColor = coerceColor(_liveProps['border_color']);
     final borderWidth = coerceDouble(_liveProps['border_width']) ?? 0.0;
     final radius = coerceDouble(_liveProps['radius']);
     final boxShadow = coerceBoxShadow(_liveProps['shadow']);
-    final gradient = coerceGradient(_liveProps['gradient']);
-    final image = coerceDecorationImage(_liveProps['image']);
+    final gradient = suppressSurfaceFill
+        ? null
+        : coerceGradient(_liveProps['gradient']);
     final shapeStr = _liveProps['shape']?.toString().toLowerCase();
     final shape = shapeStr == 'circle' ? BoxShape.circle : BoxShape.rectangle;
     final blur = _effectiveBlur(coerceDouble(_liveProps['blur']));
@@ -306,4 +314,39 @@ double _effectiveBlur(double? value) {
     blur = blur.clamp(0.0, 6.0);
   }
   return blur.toDouble();
+}
+
+bool _shouldSuppressSurfaceFill(
+  Map<String, Object?> props, {
+  required DecorationImage? image,
+}) {
+  final preserveSurface =
+      _coerceBool(
+        props['preserve_surface'] ??
+            props['preserve_fill'] ??
+            props['preserve_background'],
+      ) ==
+      true;
+  if (preserveSurface) {
+    return false;
+  }
+  return _coerceBool(props['__image_backdrop_inherited']) == true ||
+      image != null;
+}
+
+bool? _coerceBool(Object? value) {
+  if (value is bool) {
+    return value;
+  }
+  final normalized = value?.toString().trim().toLowerCase();
+  if (normalized == null || normalized.isEmpty) {
+    return null;
+  }
+  if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+    return true;
+  }
+  if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+    return false;
+  }
+  return null;
 }

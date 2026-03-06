@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..scrollable_control import ScrollableControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["VirtualList"]
 
 @butterfly_control('virtual_list', field_aliases={'controls': 'children'})
-class VirtualList(ScrollableControl, MultiChildControl, ItemsControl):
+class VirtualList(ScrollableControl, MultiChildControl):
     """
     Virtualized scrollable list for large datasets with fixed item
     extent, separator support, and prefetch-near-end loading.

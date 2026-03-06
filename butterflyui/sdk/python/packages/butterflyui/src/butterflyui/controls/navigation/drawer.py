@@ -5,13 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
-from ..items_control import ItemsControl
 __all__ = ["Drawer"]
 
 @butterfly_control('drawer')
-class Drawer(LayoutControl, TitleControl, SubtitleControl, ItemsControl):
+class Drawer(LayoutControl):
     """
     Standalone drawer overlay control with optional built-in navigation content.
 

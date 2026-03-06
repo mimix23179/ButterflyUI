@@ -171,6 +171,7 @@ _CAPABILITY_PREFERENCE = (
     "modifiers",
     "effects",
     "content",
+    "items",
     "focus",
     "input",
     "form_field",

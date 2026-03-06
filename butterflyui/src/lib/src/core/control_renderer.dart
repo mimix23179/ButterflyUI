@@ -36,11 +36,16 @@ import 'controls/customization/color_tools.dart';
 import 'controls/skins/skins.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
+import 'controls/display/bar_chart.dart';
+import 'controls/display/bar_plot.dart';
 import 'controls/display/bubble.dart';
+import 'controls/display/canvas.dart';
 import 'controls/display/display.dart';
+import 'controls/display/emoji_icon.dart';
 import 'controls/display/avatar.dart';
 import 'controls/display/canvas_control.dart';
 import 'controls/display/glyph_button.dart';
+import 'controls/display/line_chart.dart';
 import 'controls/display/line_plot.dart';
 import 'controls/display/outline.dart';
 import 'controls/display/pie_plot.dart';
@@ -48,6 +53,9 @@ import 'controls/display/html_view.dart';
 import 'controls/display/icon.dart';
 import 'controls/display/color.dart';
 import 'controls/display/markdown_view.dart';
+import 'controls/display/spark_plot.dart';
+import 'controls/display/sparkline.dart';
+import 'controls/display/text.dart';
 import 'controls/effects/animated_background.dart';
 import 'controls/effects/animation.dart';
 import 'controls/effects/effects.dart';
@@ -81,9 +89,11 @@ import 'controls/inputs/chip.dart';
 import 'controls/inputs/async_action_button.dart';
 import 'controls/inputs/combo_box.dart';
 import 'controls/inputs/date_picker.dart';
+import 'controls/inputs/dropdown.dart';
 import 'controls/inputs/file_picker.dart';
 import 'controls/inputs/emoji_picker.dart';
 import 'controls/inputs/form.dart';
+import 'controls/inputs/form_field.dart';
 import 'controls/inputs/field_group.dart';
 import 'controls/inputs/icon_picker.dart';
 import 'controls/inputs/keybind_recorder.dart';
@@ -92,6 +102,7 @@ import 'controls/inputs/radio.dart';
 import 'controls/inputs/select.dart';
 import 'controls/inputs/slider.dart';
 import 'controls/inputs/switch.dart';
+import 'controls/inputs/text_area.dart';
 import 'controls/inputs/text_field.dart';
 import 'controls/inputs/time_select.dart';
 import 'controls/interaction/key_listener.dart';
@@ -104,12 +115,17 @@ import 'controls/layout/card.dart';
 import 'controls/layout/accordion.dart';
 import 'controls/layout/align_control.dart';
 import 'controls/layout/aspect_ratio.dart';
+import 'controls/layout/box.dart';
+import 'controls/layout/center.dart';
 import 'controls/layout/clip.dart';
 import 'controls/layout/column.dart';
 import 'controls/layout/container.dart';
 import 'controls/layout/decorated_box.dart';
 import 'controls/layout/divider.dart';
+import 'controls/layout/expanded.dart';
 import 'controls/layout/fitted_box.dart';
+import 'controls/layout/grid_view.dart';
+import 'controls/layout/pane.dart';
 import 'controls/layout/page_view.dart';
 import 'controls/layout/row.dart';
 import 'controls/layout/safe_area.dart';
@@ -117,11 +133,14 @@ import 'controls/layout/scene_view.dart';
 import 'controls/layout/scroll_view.dart';
 import 'controls/layout/scrollable_column.dart';
 import 'controls/layout/scrollable_row.dart';
+import 'controls/layout/spacer.dart';
+import 'controls/layout/split_pane.dart';
 import 'controls/layout/split_view.dart';
 import 'controls/layout/stack.dart';
 import 'controls/layout/flex_spacer.dart';
 import 'controls/layout/frame.dart';
 import 'controls/layout/grid.dart';
+import 'controls/layout/surface.dart';
 import 'controls/layout/vertical_divider.dart';
 import 'controls/layout/window_frame.dart';
 import 'controls/layout/window_drag_region.dart';
@@ -141,6 +160,7 @@ import 'controls/lists/virtual_grid.dart';
 import 'controls/lists/virtual_list.dart';
 import 'controls/media/audio.dart';
 import 'controls/media/image.dart';
+import 'controls/media/sprite.dart';
 import 'controls/media/video.dart';
 import 'controls/navigation/app_bar.dart';
 import 'controls/navigation/action_bar.dart';
@@ -330,6 +350,7 @@ class ControlRenderer {
     wrapWithControlBox,
     StylePack? inheritedPack,
     Map<String, Object?>? inheritedTokenOverrides,
+    bool inheritedImageBackdrop = false,
   }) {
     final sourceType = control['type'];
     final type = (sourceType?.toString() ?? '').trim().toLowerCase();
@@ -362,6 +383,12 @@ class ControlRenderer {
       props: baseProps,
       resolvedStyle: resolvedStyle,
     );
+    if (inheritedImageBackdrop) {
+      rawProps['__image_backdrop_inherited'] = true;
+    }
+    final imageBackdropActive =
+        inheritedImageBackdrop ||
+        coerceDecorationImage(rawProps['image']) != null;
 
     Widget buildChild(Map<String, Object?> child) {
       return buildFromControl(
@@ -369,6 +396,7 @@ class ControlRenderer {
         wrapWithControlBox: wrapWithControlBox,
         inheritedPack: resolvedPack,
         inheritedTokenOverrides: resolvedTokenOverrides,
+        inheritedImageBackdrop: imageBackdropActive,
       );
     }
 
@@ -649,7 +677,27 @@ class ControlRenderer {
         );
 
       case 'surface':
+        return buildSurfaceControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'box':
+        return buildBoxControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'container':
         return buildContainerControl(
           controlId,
@@ -687,9 +735,9 @@ class ControlRenderer {
         );
 
       case 'center':
-        return buildAlignControl(
+        return buildCenterControl(
           controlId,
-          <String, Object?>{'alignment': 'center', ...props},
+          props,
           rawChildren,
           context.buildChild,
           context.registerInvokeHandler,
@@ -813,8 +861,18 @@ class ControlRenderer {
         );
 
       case 'split_view':
-      case 'split_pane':
         return buildSplitViewControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'split_pane':
+        return buildSplitPaneControl(
           controlId,
           props,
           rawChildren,
@@ -836,7 +894,7 @@ class ControlRenderer {
         );
 
       case 'pane':
-        return buildContainerControl(
+        return buildPaneControl(
           controlId,
           props,
           rawChildren,
@@ -847,20 +905,33 @@ class ControlRenderer {
         );
 
       case 'expanded':
-        {
-          final flex = coerceOptionalInt(props['flex']) ?? 1;
-          final fitRaw = props['fit']?.toString().toLowerCase();
-          final fit = fitRaw == 'loose' ? FlexFit.loose : FlexFit.tight;
-          final child = firstChildOrEmpty();
-          if (fit == FlexFit.loose) {
-            return Flexible(flex: flex, fit: fit, child: child);
-          }
-          return Expanded(flex: flex, child: child);
-        }
+        return buildExpandedControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'flex_spacer':
+        return buildFlexSpacerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'spacer':
-        return buildFlexSpacerControl(props);
+        return buildSpacerControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'scroll_view':
         return buildScrollViewControl(
@@ -972,62 +1043,7 @@ class ControlRenderer {
         );
 
       case 'text':
-        {
-          final textValue = (props['text'] ?? props['value'] ?? '').toString();
-          final size = coerceDouble(props['size'] ?? props['font_size']);
-          final weight = _parseFontWeight(
-            props['weight'] ?? props['font_weight'],
-          );
-          final textBackground = resolveColorValue(
-            props['background'] ??
-                props['bgcolor'] ??
-                props['surface'] ??
-                props['surface_color'],
-          );
-          final autoContrast = _coerceBool(
-            props['auto_contrast'],
-            fallback: true,
-          );
-          final minContrast = coerceDouble(props['min_contrast']) ?? 4.5;
-          final color =
-              resolveColorValue(
-                props['color'] ?? props['text_color'] ?? props['foreground'],
-                fallback: defaultText,
-                background: textBackground,
-                autoContrast: autoContrast,
-                minContrast: minContrast,
-              ) ??
-              defaultText;
-          final align = _parseTextAlign(props['align']);
-          final maxLines = coerceOptionalInt(props['max_lines']);
-          final overflow =
-              _parseTextOverflow(props['overflow']) ??
-              (maxLines != null ? TextOverflow.ellipsis : null);
-          final style = TextStyle(
-            color: color,
-            fontSize: size,
-            fontWeight: weight,
-            fontFamily: props['font_family']?.toString(),
-            fontStyle: props['italic'] == true ? FontStyle.italic : null,
-            letterSpacing: coerceDouble(props['letter_spacing']),
-            wordSpacing: coerceDouble(props['word_spacing']),
-          );
-          if (props['selectable'] == true) {
-            return SelectableText(
-              textValue,
-              style: style,
-              textAlign: align,
-              maxLines: maxLines,
-            );
-          }
-          return Text(
-            textValue,
-            style: style,
-            textAlign: align,
-            maxLines: maxLines,
-            overflow: overflow,
-          );
-        }
+        return buildTextControl(props, defaultText: defaultText);
 
       case 'markdown_view':
         return buildMarkdownViewControl(
@@ -1039,20 +1055,43 @@ class ControlRenderer {
         );
 
       case 'chart':
-      case 'line_chart':
-      case 'line_plot':
-      case 'bar_chart':
-      case 'bar_plot':
-        if ((type == 'line_plot')) {
-          return buildLinePlotControl(
-            controlId,
-            props,
-            context.registerInvokeHandler,
-            context.unregisterInvokeHandler,
-            context.sendEvent,
-          );
-        }
         return buildChartControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'line_chart':
+        return buildLineChartControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'line_plot':
+        return buildLinePlotControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'bar_chart':
+        return buildBarChartControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'bar_plot':
+        return buildBarPlotControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1072,7 +1111,7 @@ class ControlRenderer {
         );
 
       case 'canvas':
-        return buildCanvasControl(
+        return buildRuntimeCanvasControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1081,8 +1120,16 @@ class ControlRenderer {
         );
 
       case 'sparkline':
+        return buildRuntimeSparklineControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
       case 'spark_plot':
-        return buildSparklineControl(
+        return buildSparkPlotControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1112,7 +1159,11 @@ class ControlRenderer {
         return buildColorControl(controlId, props, context.sendEvent);
 
       case 'emoji_icon':
-        return buildEmojiIconControl(controlId, props, context.sendEvent);
+        return buildRuntimeEmojiIconControl(
+          controlId,
+          props,
+          context.sendEvent,
+        );
 
       case 'avatar':
         return buildAvatarControl(controlId, props, context.sendEvent);
@@ -1216,29 +1267,12 @@ class ControlRenderer {
         );
 
       case 'text_area':
-        return ButterflyUITextField(
-          controlId: controlId,
-          value: props['value']?.toString() ?? '',
-          placeholder: props['placeholder']?.toString(),
-          label: props['label']?.toString(),
-          helperText: props['helper_text']?.toString(),
-          errorText: props['error_text']?.toString(),
-          multiline: true,
-          minLines: coerceOptionalInt(props['min_lines']) ?? 3,
-          maxLines: coerceOptionalInt(props['max_lines']),
-          password: false,
-          enabled: props['enabled'] == null ? true : (props['enabled'] == true),
-          readOnly: props['read_only'] == true,
-          autofocus: props['autofocus'] == true,
-          dense: props['dense'] == true,
-          emitOnChange: props['emit_on_change'] == null
-              ? true
-              : (props['emit_on_change'] == true),
-          debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
-          events: props['events'],
-          registerInvokeHandler: context.registerInvokeHandler,
-          unregisterInvokeHandler: context.unregisterInvokeHandler,
-          sendEvent: context.sendEvent,
+        return buildTextAreaControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'checkbox':
@@ -1329,8 +1363,16 @@ class ControlRenderer {
         return buildOptionControl(controlId, props, context.sendEvent);
 
       case 'combo_box':
-      case 'dropdown':
         return buildComboboxControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
+
+      case 'dropdown':
+        return buildDropdownControl(
           controlId,
           props,
           context.registerInvokeHandler,
@@ -1406,7 +1448,11 @@ class ControlRenderer {
         return buildFormControl(props, rawChildren, context.buildChild);
 
       case 'form_field':
-        return buildFormFieldControl(props, rawChildren, context.buildChild);
+        return buildRuntimeFormFieldControl(
+          props,
+          rawChildren,
+          context.buildChild,
+        );
 
       case 'alert_dialog':
         return buildAlertDialogControl(
@@ -1976,6 +2022,14 @@ class ControlRenderer {
         }
 
       case 'grid_view':
+        return buildGridViewControl(
+          controlId,
+          props,
+          rawChildren,
+          context.buildChild,
+          context.sendEvent,
+        );
+
       case 'grid':
         {
           return buildGridControl(
@@ -2082,7 +2136,13 @@ class ControlRenderer {
         );
 
       case 'sprite':
-        return buildImageControl(props, rawChildren, context.buildChild);
+        return buildSpriteControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'key_listener':
         return ButterflyUIKeyListener(
@@ -2117,6 +2177,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -2700,6 +2762,7 @@ class ControlRenderer {
     final capabilities = ControlModifierCapabilities.forControl(controlType);
 
     final surfaceStyle = resolvedStyle.slot('surface');
+    final suppressSurfaceFill = _shouldSuppressSurfaceFill(props, surfaceStyle);
 
     final visible = (props['visible'] ?? surfaceStyle['visible']) == null
         ? true
@@ -2783,11 +2846,13 @@ class ControlRenderer {
           : const <String, Object?>{};
 
       final bg = coerceColor(
-        props['bgcolor'] ??
-            props['background'] ??
-            surfaceStyle['bgcolor'] ??
-            surfaceStyle['background'] ??
-            surfaceStyle['color'],
+        suppressSurfaceFill
+            ? null
+            : props['bgcolor'] ??
+                  props['background'] ??
+                  surfaceStyle['bgcolor'] ??
+                  surfaceStyle['background'] ??
+                  surfaceStyle['color'],
       );
       final borderColor = coerceColor(
         props['border_color'] ??
@@ -2809,7 +2874,9 @@ class ControlRenderer {
       );
       final shape = _parseBoxShape(props['shape'] ?? surfaceStyle['shape']);
       final gradient = coerceGradient(
-        props['gradient'] ?? surfaceStyle['gradient'],
+        suppressSurfaceFill
+            ? null
+            : props['gradient'] ?? surfaceStyle['gradient'],
       );
       final image = coerceDecorationImage(
         props['image'] ?? surfaceStyle['image'],
@@ -2831,12 +2898,14 @@ class ControlRenderer {
             surfaceStyle['glass_blur'],
       );
       final backdropColor = coerceColor(
-        props['backdrop_color'] ??
-            props['backdropColor'] ??
-            props['frost_color'] ??
-            surfaceStyle['backdrop_color'] ??
-            surfaceStyle['backdropColor'] ??
-            surfaceStyle['frost_color'],
+        suppressSurfaceFill
+            ? null
+            : props['backdrop_color'] ??
+                  props['backdropColor'] ??
+                  props['frost_color'] ??
+                  surfaceStyle['backdrop_color'] ??
+                  surfaceStyle['backdropColor'] ??
+                  surfaceStyle['frost_color'],
       );
       final blur = coerceDouble(props['blur'] ?? surfaceStyle['blur']);
       final elevation = coerceDouble(
@@ -2971,14 +3040,16 @@ class ControlRenderer {
     }
 
     final surfaceLayers = _resolveControlLayers(
-      props['surface_layers'] ??
-          props['background_layers'] ??
-          props['background_layer'] ??
-          props['surface'] ??
-          surfaceStyle['surface_layers'] ??
-          surfaceStyle['background_layers'] ??
-          surfaceStyle['background_layer'] ??
-          surfaceStyle['surface'],
+      suppressSurfaceFill
+          ? null
+          : props['surface_layers'] ??
+                props['background_layers'] ??
+                props['background_layer'] ??
+                props['surface'] ??
+                surfaceStyle['surface_layers'] ??
+                surfaceStyle['background_layers'] ??
+                surfaceStyle['background_layer'] ??
+                surfaceStyle['surface'],
       context,
     );
     final foregroundLayers = _resolveControlLayers(
@@ -2991,10 +3062,12 @@ class ControlRenderer {
       context,
     );
     final hoverSurfaceLayers = _resolveControlLayers(
-      props['hover_surface_layers'] ??
-          props['hover_background_layers'] ??
-          surfaceStyle['hover_surface_layers'] ??
-          surfaceStyle['hover_background_layers'],
+      suppressSurfaceFill
+          ? null
+          : props['hover_surface_layers'] ??
+                props['hover_background_layers'] ??
+                surfaceStyle['hover_surface_layers'] ??
+                surfaceStyle['hover_background_layers'],
       context,
     );
     if (surfaceLayers.isNotEmpty ||
@@ -4265,6 +4338,29 @@ class ControlRenderer {
     if (s == 'true' || s == '1' || s == 'yes' || s == 'on') return true;
     if (s == 'false' || s == '0' || s == 'no' || s == 'off') return false;
     return fallback;
+  }
+
+  bool _shouldSuppressSurfaceFill(
+    Map<String, Object?> props,
+    Map<String, Object?> surfaceStyle,
+  ) {
+    final preserveSurface = _coerceBool(
+      props['preserve_surface'] ??
+          props['preserve_fill'] ??
+          props['preserve_background'] ??
+          surfaceStyle['preserve_surface'] ??
+          surfaceStyle['preserve_fill'] ??
+          surfaceStyle['preserve_background'],
+      fallback: false,
+    );
+    if (preserveSurface) {
+      return false;
+    }
+    if (_coerceBool(props['__image_backdrop_inherited'], fallback: false)) {
+      return true;
+    }
+    return coerceDecorationImage(props['image'] ?? surfaceStyle['image']) !=
+        null;
   }
 
   bool? _coerceBoolOrNull(Object? value) {

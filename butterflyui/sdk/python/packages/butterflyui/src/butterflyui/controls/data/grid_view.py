@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..scrollable_control import ScrollableControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["GridView"]
 
 @butterfly_control('grid_view', field_aliases={'controls': 'children'})
-class GridView(ScrollableControl, MultiChildControl, ItemsControl):
+class GridView(ScrollableControl, MultiChildControl):
     """
     Multi-column grid layout that arranges child controls or item
     payloads into a configurable number of columns.

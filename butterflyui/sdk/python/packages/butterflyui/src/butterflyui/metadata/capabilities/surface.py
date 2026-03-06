@@ -10,6 +10,7 @@ SURFACE_PROPS = (
     "shadow_color",
     "elevation",
     "gradient",
+    "image",
     "shape",
     "clip_behavior",
 )

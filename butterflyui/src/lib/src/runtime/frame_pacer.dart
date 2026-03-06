@@ -35,6 +35,7 @@ class FramePacer {
 
   bool _isInitialized = false;
   bool _isRunning = false;
+  bool _timingsCallbackRegistered = false;
 
   /// Initialize the frame pacer and lock to 60 FPS
   void _initialize() {
@@ -45,6 +46,7 @@ class FramePacer {
 
     // Add frame timing callback for monitoring
     WidgetsBinding.instance.addTimingsCallback(_onFrameTimings);
+    _timingsCallbackRegistered = true;
 
     // Start frame pacing ticker
     _startFramePacing();
@@ -185,7 +187,11 @@ class FramePacer {
     stop();
     _frameTimer?.cancel();
     _performanceTimer?.cancel();
-    WidgetsBinding.instance.removeTimingsCallback(_onFrameTimings);
+    if (_timingsCallbackRegistered) {
+      WidgetsBinding.instance.removeTimingsCallback(_onFrameTimings);
+      _timingsCallbackRegistered = false;
+    }
+    _isInitialized = false;
     _instance = null;
   }
 }

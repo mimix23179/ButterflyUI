@@ -5,12 +5,10 @@ from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
 from ..single_child_control import SingleChildControl
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["Card"]
 
 @butterfly_control('card', field_aliases={'content': 'child'})
-class Card(LayoutControl, SingleChildControl, TitleControl, SubtitleControl):
+class Card(LayoutControl, SingleChildControl):
     """
     Material-style surface container that wraps a single child control
     inside a rounded, optionally elevated panel.

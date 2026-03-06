@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
 __all__ = ["Route"]
 
 @butterfly_control('route')
-class Route(LayoutControl, TitleControl):
+class Route(LayoutControl):
     """
     Route node describing one navigable view inside a router.
 

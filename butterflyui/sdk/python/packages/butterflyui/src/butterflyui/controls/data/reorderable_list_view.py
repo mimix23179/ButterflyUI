@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..scrollable_control import ScrollableControl
 
-from ..items_control import ItemsControl
 __all__ = ["ReorderableListView"]
 
 @butterfly_control('reorderable_list_view')
-class ReorderableListView(ScrollableControl, ItemsControl):
+class ReorderableListView(ScrollableControl):
     """
     Drag-and-drop list surface with runtime reorder state.
 

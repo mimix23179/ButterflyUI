@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
 __all__ = ["Audio"]
 
 @butterfly_control('audio')
-class Audio(LayoutControl, TitleControl):
+class Audio(LayoutControl):
     """
     Audio player control with playback and volume management.
 

@@ -1,4 +1,4 @@
 # Ignore build artifacts and installed runtimes.
-/build/
-/scripts/
-/butterflyui.egg-info/
+build/
+scripts/
+butterflyui.egg-info/

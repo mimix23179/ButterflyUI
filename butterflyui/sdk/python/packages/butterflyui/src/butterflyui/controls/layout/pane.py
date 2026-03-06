@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
 from ..single_child_control import SingleChildControl
-from ..title_control import TitleControl
 __all__ = ["Pane"]
 
 @butterfly_control('pane', field_aliases={'content': 'child'})
-class Pane(LayoutControl, SingleChildControl, TitleControl):
+class Pane(LayoutControl, SingleChildControl):
     """
     Named pane for use inside a slot-based layout such as ``DockLayout``.
 

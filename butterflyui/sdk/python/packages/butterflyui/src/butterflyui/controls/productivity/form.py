@@ -6,11 +6,10 @@ from ..base_control import butterfly_control
 from ..input_control import InputControl
 
 from ..multi_child_control import MultiChildControl
-from ..title_control import TitleControl
 __all__ = ["Form"]
 
 @butterfly_control('form', field_aliases={'controls': 'children'})
-class Form(InputControl, MultiChildControl, TitleControl):
+class Form(InputControl, MultiChildControl):
     """
     Layout container that groups form fields with an optional title and spacing.
 

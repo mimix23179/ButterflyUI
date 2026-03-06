@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["BlendModePicker"]
 
 @butterfly_control('blend_mode_picker', positional_fields=('value',))
-class BlendModePicker(LayoutControl, ItemsControl):
+class BlendModePicker(LayoutControl):
     """
     Dropdown selector for choosing a compositing blend mode.
 

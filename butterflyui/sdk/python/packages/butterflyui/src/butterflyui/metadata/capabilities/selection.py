@@ -2,7 +2,6 @@ from __future__ import annotations
 
 SELECTION_PROPS = (
     "options",
-    "items",
     "multiple",
     "selected_index",
     "selected_value",

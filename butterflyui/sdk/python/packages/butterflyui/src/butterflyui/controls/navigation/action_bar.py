@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["ActionBar"]
 
 @butterfly_control('action_bar')
-class ActionBar(LayoutControl, ItemsControl):
+class ActionBar(LayoutControl):
     """
     Horizontal command surface for global and context-sensitive actions.
 

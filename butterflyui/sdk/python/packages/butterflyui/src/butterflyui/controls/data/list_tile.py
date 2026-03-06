@@ -4,12 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["ListTile"]
 
 @butterfly_control('list_tile')
-class ListTile(LayoutControl, TitleControl, SubtitleControl):
+class ListTile(LayoutControl):
     """
     Data-oriented list tile with selectable and disabled states, leading/
     trailing icons, and tap-to-select behaviour.

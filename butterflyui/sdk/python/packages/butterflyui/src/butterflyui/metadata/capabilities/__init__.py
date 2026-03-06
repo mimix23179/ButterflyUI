@@ -8,6 +8,7 @@ from .effects import EFFECT_PROPS
 from .events import EVENT_NAMES
 from .focus import FOCUS_PROPS
 from .input import FORM_FIELD_PROPS, INPUT_PROPS
+from .items import ITEMS_PROPS
 from .layout import LAYOUT_PROPS
 from .modifiers import MODIFIER_PROPS
 from .motion import MOTION_PROPS
@@ -63,6 +64,7 @@ CAPABILITY_PROP_NAMES = {
     "focus": FOCUS_PROPS,
     "input": INPUT_PROPS,
     "form_field": FORM_FIELD_PROPS,
+    "items": ITEMS_PROPS,
     "selection": SELECTION_PROPS,
     "toggle": TOGGLE_PROPS,
     "scroll": SCROLL_PROPS,
@@ -100,6 +102,7 @@ __all__ = [
     "FOCUS_PROPS",
     "FORM_FIELD_PROPS",
     "INPUT_PROPS",
+    "ITEMS_PROPS",
     "LAYOUT_PROPS",
     "MODIFIER_PROPS",
     "MODIFIER_CAPABLE_CONTROLS",

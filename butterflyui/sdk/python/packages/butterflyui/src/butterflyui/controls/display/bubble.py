@@ -2,19 +2,15 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+
+from .._shared import merge_props
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..single_child_control import SingleChildControl
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
-from ..leading_control import LeadingControl
-from ..trailing_control import TrailingControl
-from ..items_control import ItemsControl
 __all__ = ["Bubble"]
 
 @butterfly_control('bubble', positional_fields=('text',))
-class Bubble(LayoutControl, SingleChildControl, TitleControl, SubtitleControl, LeadingControl, TrailingControl, ItemsControl):
+class Bubble(LayoutControl):
     """
     Unified conversation surface with ``message``, ``thread/chat``, and ``composer`` variants.
 

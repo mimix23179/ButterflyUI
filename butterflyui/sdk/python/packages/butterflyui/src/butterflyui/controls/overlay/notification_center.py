@@ -4,12 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..overlay_control import OverlayControl
 
-from ..title_control import TitleControl
-from ..items_control import ItemsControl
 __all__ = ["NotificationCenter"]
 
 @butterfly_control('notification_center')
-class NotificationCenter(OverlayControl, TitleControl, ItemsControl):
+class NotificationCenter(OverlayControl):
     """
     Scrollable panel listing persistent in-app notifications.
 

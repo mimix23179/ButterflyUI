@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["NavigationRing"]
 
 @butterfly_control('navigation_ring')
-class NavigationRing(LayoutControl, ItemsControl):
+class NavigationRing(LayoutControl):
     """
     Compact ring-style navigation selector with icon-first destinations.
 

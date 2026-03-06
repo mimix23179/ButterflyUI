@@ -8,6 +8,7 @@ import '../screens/bootup_screen.dart';
 import '../screens/error_handler_screen.dart';
 import '../renderer/app_renderer.dart';
 import '../transport/websocket_transport.dart';
+import '../transport/transport.dart';
 import '../../platform/runtime_env.dart';
 
 enum RuntimePhase { booting, problem, ready }
@@ -15,11 +16,15 @@ enum RuntimePhase { booting, problem, ready }
 class RuntimeHost extends StatefulWidget {
   final List<String> runtimeArgs;
   final ValueChanged<ThemeData?> onThemeChanged;
+  final RuntimeTransport Function(Uri uri)? transportFactory;
+  final RuntimeClient Function(RuntimeTransport transport)? clientFactory;
 
   const RuntimeHost({
     super.key,
     required this.runtimeArgs,
     required this.onThemeChanged,
+    this.transportFactory,
+    this.clientFactory,
   });
 
   @override
@@ -78,8 +83,11 @@ class _RuntimeHostState extends State<RuntimeHost> {
         _extractArg(widget.runtimeArgs, '--token=') ?? runtimeSessionToken();
 
     final uri = _normalizeWsUri(wsArg);
-    final transport = WebSocketRuntimeTransport(uri);
-    final client = RuntimeClient(transport: transport);
+    final transport =
+        widget.transportFactory?.call(uri) ?? WebSocketRuntimeTransport(uri);
+    final client =
+        widget.clientFactory?.call(transport) ??
+        RuntimeClient(transport: transport);
     _client = client;
     if (mounted) {
       setState(() {});
@@ -131,7 +139,9 @@ class _RuntimeHostState extends State<RuntimeHost> {
           _problem = null;
         });
         if (kDebugMode) {
-          debugPrint('ButterflyUI runtime.ready received; awaiting first render.');
+          debugPrint(
+            'ButterflyUI runtime.ready received; awaiting first render.',
+          );
         }
         return;
       case 'runtime.problem':

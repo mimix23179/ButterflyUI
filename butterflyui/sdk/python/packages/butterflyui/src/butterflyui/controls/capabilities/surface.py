@@ -53,6 +53,11 @@ class SurfaceProps:
     Gradient descriptor used to paint the control background.
     """
 
+    image: Any | None = None
+    """
+    Background image descriptor painted as part of the control decoration.
+    """
+
     shape: Any | None = None
     """
     Shape descriptor used by the runtime when painting the surface.

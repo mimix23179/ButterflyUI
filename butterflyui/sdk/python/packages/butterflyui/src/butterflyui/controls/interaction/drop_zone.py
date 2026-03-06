@@ -4,12 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["DropZone"]
 
 @butterfly_control('drop_zone')
-class DropZone(LayoutControl, TitleControl, SubtitleControl):
+class DropZone(LayoutControl):
     """
     Rectangular drop target that accepts drags from :class:`DragPayload`.
 

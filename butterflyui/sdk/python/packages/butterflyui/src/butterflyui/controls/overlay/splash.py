@@ -4,12 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..overlay_control import OverlayControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["Splash"]
 
 @butterfly_control('splash')
-class Splash(OverlayControl, TitleControl, SubtitleControl):
+class Splash(OverlayControl):
     """
     Full-screen splash or loading overlay shown during app startup or transitions.
 

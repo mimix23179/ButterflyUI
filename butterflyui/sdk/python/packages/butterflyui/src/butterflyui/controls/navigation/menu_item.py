@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
 __all__ = ["MenuItem"]
 
 @butterfly_control('menu_item', field_aliases={'item_id': 'id'})
-class MenuItem(LayoutControl, TitleControl):
+class MenuItem(LayoutControl):
     """
     Single item entry for use inside a menu or context menu.
 

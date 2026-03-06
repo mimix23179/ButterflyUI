@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
 __all__ = ["WindowFrame"]
 
 @butterfly_control('window_frame')
-class WindowFrame(LayoutControl, TitleControl):
+class WindowFrame(LayoutControl):
     """
     Custom window chrome frame with title bar, controls, and optional acrylic.
 

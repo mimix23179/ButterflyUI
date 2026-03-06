@@ -5,12 +5,10 @@ from .list_tile import ListTile
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["ItemTile"]
 
 @butterfly_control('item_tile')
-class ItemTile(LayoutControl, TitleControl, SubtitleControl):
+class ItemTile(LayoutControl):
     """
     Selectable list tile tailored for data-oriented item rows, extending
     ``ListTile`` with an ``events`` convenience parameter and invoke

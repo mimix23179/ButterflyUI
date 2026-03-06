@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..scrollable_control import ScrollableControl
 
 from ..multi_child_control import MultiChildControl
-from ..items_control import ItemsControl
 __all__ = ["VirtualGrid"]
 
 @butterfly_control('virtual_grid', field_aliases={'controls': 'children'})
-class VirtualGrid(ScrollableControl, MultiChildControl, ItemsControl):
+class VirtualGrid(ScrollableControl, MultiChildControl):
     """
     Virtualized grid view for large datasets with prefetch-near-end
     and loading-state support.

@@ -5,12 +5,10 @@ from ..base_control import butterfly_control
 from ..overlay_control import OverlayControl
 
 from ..single_child_control import SingleChildControl
-from ..title_control import TitleControl
-from ..subtitle_control import SubtitleControl
 __all__ = ["PreviewSurface"]
 
 @butterfly_control('preview_surface', field_aliases={'content': 'child'})
-class PreviewSurface(OverlayControl, SingleChildControl, TitleControl, SubtitleControl):
+class PreviewSurface(OverlayControl, SingleChildControl):
     """
     Overlay surface for displaying a live or static content preview.
 

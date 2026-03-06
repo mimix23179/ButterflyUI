@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["StatusBar"]
 
 @butterfly_control('status_bar')
-class StatusBar(LayoutControl, ItemsControl):
+class StatusBar(LayoutControl):
     """
     Horizontal status bar displayed at the bottom of an application window.
 

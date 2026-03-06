@@ -13,11 +13,6 @@ class SelectionProps:
     Option descriptors rendered by the control.
     """
 
-    items: list[Any] | None = None
-    """
-    Structured item descriptors consumed by the control.
-    """
-
     multiple: bool | None = None
     """
     Whether multiple values may be selected.

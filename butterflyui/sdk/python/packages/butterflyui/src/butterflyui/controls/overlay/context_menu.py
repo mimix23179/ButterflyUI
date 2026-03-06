@@ -5,11 +5,10 @@ from ..base_control import butterfly_control
 from ..overlay_control import OverlayControl
 
 from ..single_child_control import SingleChildControl
-from ..items_control import ItemsControl
 __all__ = ["ContextMenu"]
 
 @butterfly_control('context_menu', field_aliases={'content': 'child'})
-class ContextMenu(OverlayControl, SingleChildControl, ItemsControl):
+class ContextMenu(OverlayControl, SingleChildControl):
     """
     Popup context menu bound to a child trigger surface.
 

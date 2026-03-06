@@ -5,11 +5,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
 
-from ..items_control import ItemsControl
 __all__ = ["BreadcrumbBar"]
 
 @butterfly_control('breadcrumb_bar')
-class BreadcrumbBar(LayoutControl, ItemsControl):
+class BreadcrumbBar(LayoutControl):
     """
     Interactive breadcrumb bar with path parsing and overflow behaviors.
 

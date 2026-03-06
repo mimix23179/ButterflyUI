@@ -4,11 +4,10 @@ from typing import Any
 from ..base_control import butterfly_control
 from ..form_field_control import FormFieldControl
 
-from ..items_control import ItemsControl
 __all__ = ["EmojiPicker"]
 
 @butterfly_control('emoji_picker', positional_fields=('value',))
-class EmojiPicker(FormFieldControl, ItemsControl):
+class EmojiPicker(FormFieldControl):
     """
     Scrollable emoji grid with category tabs and optional search.
 
