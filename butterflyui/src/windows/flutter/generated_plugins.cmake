@@ -3,21 +3,16 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  desktop_drop
-  hotkey_manager_windows
-  irondash_engine_context
   media_kit_libs_windows_audio
   media_kit_libs_windows_video
   media_kit_video
   native_preview_host
-  super_native_extensions
-  url_launcher_windows
+  rive_native
   volume_controller
   webview_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  flutter_pty
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

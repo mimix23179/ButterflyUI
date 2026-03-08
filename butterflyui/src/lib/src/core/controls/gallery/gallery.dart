@@ -1,15 +1,22 @@
-// Unified Gallery umbrella control
-// Using existing ButterflyUI controls from list.md
-// This replaces the separate engine/host/registry/renderer files
+// Unified Gallery browser and showcase system
+// Gallery presents collections of media, presets, skins, demos, and assets
+// through the shared ButterflyUI runtime pipeline.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:mime/mime.dart';
+import 'package:palette_generator_master/palette_generator_master.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart'
-    show coerceDouble, coerceOptionalInt, coerceObjectMap, coerceColor;
+    show
+        coerceDouble,
+        coerceOptionalInt,
+        coerceObjectMap,
+        coerceColor,
+        resolveImageProvider;
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/container.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/card.dart';
@@ -533,6 +540,394 @@ bool coerceBoolValue(Object? value, {bool fallback = false}) {
   return value.toString().toLowerCase() == 'true';
 }
 
+List<String> _coerceGalleryStringList(Object? value) {
+  if (value == null) return const <String>[];
+  if (value is String) return <String>[value];
+  if (value is List) {
+    return value
+        .where((item) => item != null)
+        .map((item) => item.toString())
+        .toList();
+  }
+  return <String>[value.toString()];
+}
+
+Widget _buildGalleryHeader({
+  required String title,
+  String? subtitle,
+  required int itemCount,
+  required bool showcase,
+}) {
+  return Container(
+    padding: EdgeInsets.fromLTRB(16, showcase ? 18 : 8, 16, 8),
+    decoration: showcase
+        ? BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          )
+        : null,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (subtitle != null && subtitle.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(subtitle, style: const TextStyle(color: Colors.white70)),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            '$itemCount items',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _GalleryRuntimeConfig {
+  const _GalleryRuntimeConfig({
+    required this.lazyPreview,
+    required this.visibilityThreshold,
+    required this.autoplayVisibleMedia,
+    required this.paletteAccents,
+    required this.paletteStrength,
+  });
+
+  final bool lazyPreview;
+  final double visibilityThreshold;
+  final bool autoplayVisibleMedia;
+  final bool paletteAccents;
+  final double paletteStrength;
+}
+
+class _GalleryConfigScope extends InheritedWidget {
+  const _GalleryConfigScope({required this.config, required super.child});
+
+  final _GalleryRuntimeConfig config;
+
+  static _GalleryRuntimeConfig of(BuildContext context) {
+    return context
+            .dependOnInheritedWidgetOfExactType<_GalleryConfigScope>()
+            ?.config ??
+        const _GalleryRuntimeConfig(
+          lazyPreview: true,
+          visibilityThreshold: 0.18,
+          autoplayVisibleMedia: true,
+          paletteAccents: false,
+          paletteStrength: 0.85,
+        );
+  }
+
+  @override
+  bool updateShouldNotify(_GalleryConfigScope oldWidget) {
+    return config != oldWidget.config;
+  }
+}
+
+class _GalleryPaletteAccent {
+  const _GalleryPaletteAccent({
+    required this.accent,
+    required this.accentAlt,
+    required this.border,
+    required this.glow,
+    required this.tint,
+  });
+
+  final Color accent;
+  final Color accentAlt;
+  final Color border;
+  final Color glow;
+  final Color tint;
+}
+
+ImageProvider? _resolveGalleryPaletteProvider(
+  Object? explicitSource,
+  List<GalleryItem> items,
+) {
+  if (explicitSource is String) {
+    return resolveImageProvider(explicitSource);
+  }
+  if (explicitSource is Map) {
+    final source = coerceObjectMap(explicitSource);
+    for (final key in const <String>[
+      'src',
+      'url',
+      'thumbnail',
+      'thumbnail_url',
+      'image',
+      'asset',
+    ]) {
+      final value = source[key]?.toString();
+      if (value != null && value.trim().isNotEmpty) {
+        final provider = resolveImageProvider(value);
+        if (provider != null) return provider;
+      }
+    }
+  }
+
+  for (final item in items) {
+    final imageSource = item.thumbnailUrl ?? item.url ?? item.path;
+    if (imageSource == null || imageSource.isEmpty) continue;
+    final provider = resolveImageProvider(imageSource);
+    if (provider != null) return provider;
+  }
+  return null;
+}
+
+_GalleryPaletteAccent _buildGalleryPaletteAccent(
+  PaletteGeneratorMaster palette,
+  double strength,
+) {
+  final dominant =
+      palette.dominantColor?.color ??
+      palette.vibrantColor?.color ??
+      const Color(0xFF39C6FF);
+  final accent =
+      palette.vibrantColor?.color ??
+      palette.lightVibrantColor?.color ??
+      dominant;
+  final accentAlt =
+      palette.darkVibrantColor?.color ??
+      palette.mutedColor?.color ??
+      Color.lerp(accent, dominant, 0.40)!;
+  final tint = Color.lerp(
+    const Color(0xFF091326),
+    dominant,
+    (0.14 * strength).clamp(0.0, 1.0),
+  )!.withValues(alpha: 0.92);
+  return _GalleryPaletteAccent(
+    accent: accent,
+    accentAlt: accentAlt,
+    border: Color.lerp(accent, accentAlt, 0.35)!.withValues(alpha: 0.58),
+    glow: accent.withValues(alpha: 0.22),
+    tint: tint,
+  );
+}
+
+class _GalleryShowcasePaletteFrame extends StatefulWidget {
+  const _GalleryShowcasePaletteFrame({
+    required this.controlId,
+    required this.child,
+    required this.items,
+    required this.explicitSource,
+    required this.enabled,
+    required this.paletteStrength,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Widget child;
+  final List<GalleryItem> items;
+  final Object? explicitSource;
+  final bool enabled;
+  final double paletteStrength;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_GalleryShowcasePaletteFrame> createState() =>
+      _GalleryShowcasePaletteFrameState();
+}
+
+class _GalleryShowcasePaletteFrameState
+    extends State<_GalleryShowcasePaletteFrame> {
+  _GalleryPaletteAccent? _accent;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshPalette();
+  }
+
+  @override
+  void didUpdateWidget(covariant _GalleryShowcasePaletteFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled != widget.enabled ||
+        oldWidget.explicitSource != widget.explicitSource ||
+        oldWidget.items != widget.items ||
+        oldWidget.paletteStrength != widget.paletteStrength) {
+      _refreshPalette();
+    }
+  }
+
+  Future<void> _refreshPalette() async {
+    if (!widget.enabled) {
+      if (mounted) setState(() => _accent = null);
+      return;
+    }
+    final provider = _resolveGalleryPaletteProvider(
+      widget.explicitSource,
+      widget.items,
+    );
+    if (provider == null) {
+      if (mounted) setState(() => _accent = null);
+      return;
+    }
+    try {
+      widget.sendEvent(
+        widget.controlId,
+        'palette_sync_started',
+        <String, Object?>{'strength': widget.paletteStrength},
+      );
+      final palette = await PaletteGeneratorMaster.fromImageProvider(
+        provider,
+        maximumColorCount: 12,
+      );
+      if (!mounted) return;
+      final accent = _buildGalleryPaletteAccent(
+        palette,
+        widget.paletteStrength,
+      );
+      setState(() => _accent = accent);
+      widget.sendEvent(widget.controlId, 'palette_ready', <String, Object?>{
+        'accent': accent.accent.toARGB32(),
+        'accent_alt': accent.accentAlt.toARGB32(),
+        'border': accent.border.toARGB32(),
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _accent = null);
+      widget.sendEvent(widget.controlId, 'palette_error', <String, Object?>{
+        'message': error.toString(),
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = _accent;
+    if (accent == null) return widget.child;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.tint,
+            Color.lerp(
+              accent.tint,
+              accent.accentAlt,
+              0.22,
+            )!.withValues(alpha: 0.90),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: accent.border, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: accent.glow,
+            blurRadius: 26,
+            spreadRadius: 1.2,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+class _GalleryVisibilityPreview extends StatefulWidget {
+  const _GalleryVisibilityPreview({
+    required this.controlId,
+    required this.item,
+    required this.sendEvent,
+    required this.builder,
+    required this.placeholder,
+  });
+
+  final String controlId;
+  final GalleryItem item;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final Widget Function(bool autoplay) builder;
+  final Widget placeholder;
+
+  @override
+  State<_GalleryVisibilityPreview> createState() =>
+      _GalleryVisibilityPreviewState();
+}
+
+class _GalleryVisibilityPreviewState extends State<_GalleryVisibilityPreview> {
+  double _visibleFraction = 0.0;
+  bool _revealed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.sendEvent(
+        widget.controlId,
+        'preview_visibility',
+        <String, Object?>{
+          'item_id': widget.item.id,
+          'visible_fraction': 0.0,
+          'revealed': false,
+        },
+      );
+    });
+  }
+
+  void _handleVisibility(VisibilityInfo info) {
+    if (!mounted) return;
+    final config = _GalleryConfigScope.of(context);
+    final nextFraction = info.visibleFraction.clamp(0.0, 1.0);
+    final shouldReveal =
+        _revealed || nextFraction >= config.visibilityThreshold;
+    if (nextFraction == _visibleFraction && shouldReveal == _revealed) {
+      return;
+    }
+    setState(() {
+      _visibleFraction = nextFraction;
+      _revealed = shouldReveal;
+    });
+    widget.sendEvent(widget.controlId, 'preview_visibility', <String, Object?>{
+      'item_id': widget.item.id,
+      'visible_fraction': nextFraction,
+      'revealed': shouldReveal,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final config = _GalleryConfigScope.of(context);
+    final autoplay =
+        config.autoplayVisibleMedia &&
+        _visibleFraction >= config.visibilityThreshold;
+    final content = !_revealed && config.lazyPreview
+        ? widget.placeholder
+        : widget.builder(autoplay);
+
+    return VisibilityDetector(
+      key: ValueKey('gallery_visibility_${widget.controlId}_${widget.item.id}'),
+      onVisibilityChanged: _handleVisibility,
+      child: content,
+    );
+  }
+}
+
 class _GalleryCarouselPager extends StatefulWidget {
   const _GalleryCarouselPager({
     required this.itemCount,
@@ -688,6 +1083,47 @@ Widget buildGalleryControl(
         .where((item) => item.type.toLowerCase() == typeFilter)
         .toList();
   }
+  final filterTags = _coerceGalleryStringList(effectiveProps['filter_tags']);
+  if (filterTags.isNotEmpty) {
+    final normalizedTags = filterTags
+        .map((tag) => tag.trim().toLowerCase())
+        .where((tag) => tag.isNotEmpty)
+        .toSet();
+    items = items.where((item) {
+      final tags = item.tags;
+      if (tags == null || tags.isEmpty) return false;
+      return tags.any(
+        (tag) => normalizedTags.contains(tag.trim().toLowerCase()),
+      );
+    }).toList();
+  }
+  final collectionName =
+      effectiveProps['collection_name']?.toString() ??
+      effectiveProps['title']?.toString();
+  final collectionSubtitle =
+      effectiveProps['collection_subtitle']?.toString() ??
+      effectiveProps['subtitle']?.toString();
+  final showcase = coerceBoolValue(
+    effectiveProps['showcase'],
+    fallback:
+        (collectionName != null && collectionName.trim().isNotEmpty) ||
+        (collectionSubtitle != null && collectionSubtitle.trim().isNotEmpty),
+  );
+  final previewMode = effectiveProps['preview_mode']
+      ?.toString()
+      .trim()
+      .toLowerCase();
+  final lazyPreview = coerceBoolValue(
+    effectiveProps['lazy_preview'] ?? effectiveProps['defer_preview'],
+    fallback: true,
+  );
+  final visibilityThreshold =
+      (coerceDouble(
+                effectiveProps['preview_visibility_threshold'] ??
+                    effectiveProps['visibility_threshold'],
+              ) ??
+              0.18)
+          .clamp(0.0, 1.0);
   final crossAxisCount =
       coerceOptionalInt(
         effectiveProps['cross_axis_count'] ??
@@ -828,6 +1264,11 @@ Widget buildGalleryControl(
         effectiveProps['use_control_widgets'],
     fallback: false,
   );
+  final autoplayVisibleMedia = coerceBoolValue(
+    effectiveProps['autoplay_visible_media'] ??
+        effectiveProps['autoplay_preview_media'],
+    fallback: layout == GalleryLayoutType.carousel || previewMode == 'detail',
+  );
   final rawActions =
       effectiveProps['actions'] ?? effectiveProps['toolbar_actions'];
   final toolbarActions = rawActions is List
@@ -836,6 +1277,41 @@ Widget buildGalleryControl(
             .map((action) => coerceObjectMap(action))
             .toList()
       : <Map<String, Object?>>[];
+
+  final effectiveShowMeta = switch (previewMode) {
+    'minimal' || 'media_only' => false,
+    'detail' || 'detail_pane' => true,
+    _ => showMeta,
+  };
+  final effectiveShowActions = switch (previewMode) {
+    'minimal' || 'media_only' => false,
+    'picker' => true,
+    _ => showActions,
+  };
+  final emptyTitle =
+      effectiveProps['empty_title']?.toString() ??
+      (filterTags.isNotEmpty ? 'No matching items' : 'No items in gallery');
+  final emptyMessage =
+      effectiveProps['empty_message']?.toString() ??
+      (filterTags.isNotEmpty
+          ? 'Try different tags or remove the current filter.'
+          : 'Add some items to get started');
+  final paletteAccents = coerceBoolValue(
+    effectiveProps['palette_accents'] ?? effectiveProps['extract_palette'],
+    fallback: showcase,
+  );
+  final paletteStrength =
+      (coerceDouble(effectiveProps['palette_strength']) ?? 0.85).clamp(
+        0.0,
+        1.0,
+      );
+  final runtimeConfig = _GalleryRuntimeConfig(
+    lazyPreview: lazyPreview,
+    visibilityThreshold: visibilityThreshold,
+    autoplayVisibleMedia: autoplayVisibleMedia,
+    paletteAccents: paletteAccents,
+    paletteStrength: paletteStrength,
+  );
 
   final layoutWidget = _buildGalleryLayout(
     controlId: controlId,
@@ -851,8 +1327,8 @@ Widget buildGalleryControl(
     crossAxisSpacing: crossAxisSpacing,
     itemBorderRadius: itemBorderRadius,
     showSelections: showSelections,
-    showActions: showActions,
-    showMeta: showMeta,
+    showActions: effectiveShowActions,
+    showMeta: effectiveShowMeta,
     selectionMode: selectionMode,
     itemStyle: itemStyle,
     enableReorder: enableReorder,
@@ -882,30 +1358,45 @@ Widget buildGalleryControl(
           unregisterInvokeHandler: unregisterInvokeHandler,
           sendEvent: sendEvent,
         );
-  final content = toolbarWidget == null
-      ? layoutWidget
-      : buildColumnControl(
-          _galleryControlId(controlId, 'content_column'),
-          {'spacing': mainAxisSpacing},
-          [
-            {'type': '__gallery_toolbar', 'props': {}},
-            {'type': '__gallery_layout', 'props': {}},
-          ],
-          tokens,
-          (child) {
-            final type = child['type']?.toString();
-            if (type == '__gallery_toolbar') {
-              return toolbarWidget;
-            }
-            if (type == '__gallery_layout') {
-              return layoutWidget;
-            }
-            return buildChild(child);
-          },
-          registerInvokeHandler,
-          unregisterInvokeHandler,
-          sendEvent,
+  final contentChildren = <Map<String, Object?>>[];
+  final hasHeader =
+      (collectionName != null && collectionName.trim().isNotEmpty) ||
+      (collectionSubtitle != null && collectionSubtitle.trim().isNotEmpty);
+  if (hasHeader) {
+    contentChildren.add({'type': '__gallery_header', 'props': {}});
+  }
+  if (toolbarWidget != null) {
+    contentChildren.add({'type': '__gallery_toolbar', 'props': {}});
+  }
+  contentChildren.add({'type': '__gallery_layout', 'props': {}});
+
+  final content = buildColumnControl(
+    _galleryControlId(controlId, 'content_column'),
+    {'spacing': mainAxisSpacing},
+    contentChildren,
+    tokens,
+    (child) {
+      final type = child['type']?.toString();
+      if (type == '__gallery_header') {
+        return _buildGalleryHeader(
+          title: collectionName ?? 'Gallery',
+          subtitle: collectionSubtitle,
+          itemCount: items.length,
+          showcase: showcase,
         );
+      }
+      if (type == '__gallery_toolbar') {
+        return toolbarWidget ?? const SizedBox.shrink();
+      }
+      if (type == '__gallery_layout') {
+        return layoutWidget;
+      }
+      return buildChild(child);
+    },
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
+  );
 
   final containerChildren = rawChildren.isEmpty
       ? [
@@ -913,7 +1404,7 @@ Widget buildGalleryControl(
         ]
       : rawChildren;
 
-  return buildContainerControl(
+  final galleryContainer = buildContainerControl(
     controlId,
     effectiveProps,
     containerChildren,
@@ -928,8 +1419,8 @@ Widget buildGalleryControl(
       if (items.isEmpty) {
         return _buildGalleryEmptyState(
           icon: 'photo_library',
-          title: 'No items in gallery',
-          message: 'Add some items to get started',
+          title: emptyTitle,
+          message: emptyMessage,
         );
       }
       return content;
@@ -937,6 +1428,18 @@ Widget buildGalleryControl(
     registerInvokeHandler,
     unregisterInvokeHandler,
     sendEvent,
+  );
+  return _GalleryConfigScope(
+    config: runtimeConfig,
+    child: _GalleryShowcasePaletteFrame(
+      controlId: controlId,
+      items: items,
+      explicitSource: effectiveProps['palette_source'],
+      enabled: paletteAccents,
+      paletteStrength: paletteStrength,
+      sendEvent: sendEvent,
+      child: galleryContainer,
+    ),
   );
 }
 
@@ -2862,6 +3365,34 @@ Widget _buildPreview({
   required ButterflyUISendRuntimeEvent sendEvent,
   required bool useControlWidgets,
 }) {
+  return _GalleryVisibilityPreview(
+    controlId: controlId,
+    item: item,
+    sendEvent: sendEvent,
+    placeholder: _buildGalleryDeferredPlaceholder(item),
+    builder: (autoplay) => _buildPreviewBody(
+      controlId: controlId,
+      item: item,
+      buildChild: buildChild,
+      registerInvokeHandler: registerInvokeHandler,
+      unregisterInvokeHandler: unregisterInvokeHandler,
+      sendEvent: sendEvent,
+      useControlWidgets: useControlWidgets,
+      autoplayVisibleMedia: autoplay,
+    ),
+  );
+}
+
+Widget _buildPreviewBody({
+  required String controlId,
+  required GalleryItem item,
+  required Widget Function(Map<String, Object?> control) buildChild,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  required ButterflyUISendRuntimeEvent sendEvent,
+  required bool useControlWidgets,
+  required bool autoplayVisibleMedia,
+}) {
   if (item.isLoading) {
     return _buildGalleryProgressIndicator(size: 28);
   }
@@ -2875,7 +3406,7 @@ Widget _buildPreview({
       _galleryControlId(controlId, 'video_${item.id}'),
       {
         'source': mediaSource,
-        'autoplay': false,
+        'autoplay': autoplayVisibleMedia,
         'controls': true,
         'fit': 'cover',
       },
@@ -2890,7 +3421,7 @@ Widget _buildPreview({
       _galleryControlId(controlId, 'audio_${item.id}'),
       {
         'src': mediaSource,
-        'autoplay': false,
+        'autoplay': autoplayVisibleMedia,
         'controls': true,
         'title': item.name,
         'artist': item.authorName,
@@ -2944,6 +3475,32 @@ Widget _buildPreview({
   }
 
   return _buildFallback(item, useControlWidgets);
+}
+
+Widget _buildGalleryDeferredPlaceholder(GalleryItem item) {
+  final icon = _getIconForType(item.type);
+  final label = item.name ?? item.subtitle ?? 'Preview';
+  return Container(
+    color: const Color(0x12000000),
+    alignment: Alignment.center,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white70, size: 28),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 Widget _buildFontPreview(GalleryItem item) {

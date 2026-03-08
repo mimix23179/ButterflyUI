@@ -1,8 +1,9 @@
-// Unified Skins umbrella control
-// This replaces the separate engine/host/registry/renderer files
-// It allows users to create custom skins for their programs using existing components
+// Unified Skins identity system
+// Skins packages coordinated visual identities and can optionally link Candy
+// polish into the same shared runtime pipeline.
 
 import 'package:flutter/material.dart';
+import 'package:palette_generator_master/palette_generator_master.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
@@ -23,6 +24,12 @@ import 'package:butterflyui_runtime/src/core/controls/customization/color_tools.
 import 'package:butterflyui_runtime/src/core/controls/effects/shimmer_shadow.dart';
 import 'package:butterflyui_runtime/src/core/controls/effects/particle_field.dart';
 import 'package:butterflyui_runtime/src/core/controls/effects/motion.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/scanline_overlay.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/vignette.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/animated_background.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/liquid_morph.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/parallax.dart';
+import 'package:butterflyui_runtime/src/core/controls/effects/visual_fx.dart';
 import 'package:butterflyui_runtime/src/core/controls/display/canvas_control.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -639,6 +646,306 @@ Map<String, Object?> _bridgeSkinsModuleProps(
   }
 
   return bridged;
+}
+
+List<String> _coerceSkinsStringList(Object? value) {
+  if (value == null) return const <String>[];
+  if (value is String) return <String>[value];
+  if (value is List) {
+    return value
+        .where((item) => item != null)
+        .map((item) => item.toString())
+        .toList();
+  }
+  return <String>[value.toString()];
+}
+
+String _normalizeSkinsCandyToken(Object? value) {
+  return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+}
+
+void _applySkinsCandyToken(Map<String, Object?> props, String token) {
+  switch (_normalizeSkinsCandyToken(token)) {
+    case 'glow':
+    case 'fire':
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'cyber':
+    case 'matrix_rain':
+      props.putIfAbsent('scanline', () => true);
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'galaxy':
+      props.putIfAbsent('animated_background', () => true);
+      props.putIfAbsent('vignette', () => true);
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'leaf_drift':
+    case 'earth':
+    case 'particles':
+      props.putIfAbsent('particles', () => true);
+      break;
+    case 'flowing_water':
+    case 'water':
+      props.putIfAbsent('animated_background', () => true);
+      props.putIfAbsent('liquid_morph', () => true);
+      break;
+    case 'hover_tilt':
+    case 'magnetic':
+    case 'parallax':
+      props.putIfAbsent('parallax', () => true);
+      break;
+    case 'shimmer':
+    case 'shimmer_glow':
+      props.putIfAbsent('shimmer', () => true);
+      if (_normalizeSkinsCandyToken(token) == 'shimmer_glow') {
+        props.putIfAbsent('glow', () => true);
+      }
+      break;
+    case 'shadow':
+      props.putIfAbsent('vignette', () => true);
+      break;
+    default:
+      break;
+  }
+}
+
+ImageProvider? _resolveSkinsPaletteProvider(Object? value) {
+  if (value == null) return null;
+  if (value is String) {
+    return resolveImageProvider(value);
+  }
+  if (value is Map) {
+    final map = coerceObjectMap(value);
+    for (final key in const <String>[
+      'src',
+      'url',
+      'thumbnail',
+      'thumbnail_url',
+      'image',
+      'asset',
+      'background',
+    ]) {
+      final candidate = map[key]?.toString();
+      if (candidate != null && candidate.trim().isNotEmpty) {
+        final provider = resolveImageProvider(candidate);
+        if (provider != null) return provider;
+      }
+    }
+  }
+  return null;
+}
+
+Color _blendSkinsColor(Color base, Color accent, double amount) {
+  return Color.lerp(base, accent, amount.clamp(0.0, 1.0)) ?? accent;
+}
+
+Color _skinsWithLightness(
+  Color color,
+  double lightness, {
+  double saturationDelta = 0.0,
+}) {
+  final hsl = HSLColor.fromColor(color);
+  return hsl
+      .withLightness(lightness.clamp(0.0, 1.0))
+      .withSaturation((hsl.saturation + saturationDelta).clamp(0.0, 1.0))
+      .toColor();
+}
+
+Map<String, Object?> _buildSkinsPaletteOverrides(
+  PaletteGeneratorMaster palette, {
+  required bool isDark,
+  required double strength,
+}) {
+  final dominant =
+      palette.dominantColor?.color ??
+      palette.vibrantColor?.color ??
+      const Color(0xFF6366F1);
+  final primary =
+      palette.vibrantColor?.color ??
+      palette.lightVibrantColor?.color ??
+      dominant;
+  final secondary =
+      palette.darkVibrantColor?.color ??
+      palette.mutedColor?.color ??
+      _blendSkinsColor(primary, dominant, 0.35);
+
+  final background = isDark
+      ? _skinsWithLightness(dominant, 0.08, saturationDelta: 0.08)
+      : _skinsWithLightness(dominant, 0.97, saturationDelta: -0.08);
+  final surface = isDark
+      ? _blendSkinsColor(background, primary, 0.16 * strength)
+      : _blendSkinsColor(background, primary, 0.08 * strength);
+  final surfaceAlt = isDark
+      ? _blendSkinsColor(surface, secondary, 0.24 * strength)
+      : _blendSkinsColor(surface, secondary, 0.12 * strength);
+  final text = palette.getBestTextColorFor(surface);
+  final mutedText = _blendSkinsColor(text, surface, isDark ? 0.40 : 0.52);
+  final border = _blendSkinsColor(
+    surfaceAlt,
+    primary,
+    0.36 * strength,
+  ).withValues(alpha: isDark ? 0.75 : 0.42);
+
+  return <String, Object?>{
+    'background': background,
+    'surface': surface,
+    'surfaceAlt': surfaceAlt,
+    'text': text,
+    'mutedText': mutedText,
+    'border': border,
+    'primary': primary,
+    'secondary': secondary,
+  };
+}
+
+SkinsTokens _mergeSkinsTokens(
+  SkinsTokens base,
+  Map<String, Object?> overrides,
+) {
+  final baseMap = base._data.map(
+    (key, value) => MapEntry(key.toString(), value as Object?),
+  );
+  return SkinsTokens.fromMap(CandyTokens.mergeMaps(baseMap, overrides));
+}
+
+Map<String, Object?> _expandSkinsLinkedCandyProps(
+  Map<String, Object?> rawProps,
+  SkinsTokens tokens,
+) {
+  final expanded = Map<String, Object?>.from(rawProps);
+  final linkedCandy = expanded['linked_candy'] ?? expanded['candy'];
+  for (final token in _coerceSkinsStringList(linkedCandy)) {
+    _applySkinsCandyToken(expanded, token);
+  }
+
+  final effectsBucket = tokens._data['effects'];
+  if (effectsBucket is Map) {
+    for (final entry in effectsBucket.entries) {
+      if (entry.value == true || entry.value is String) {
+        _applySkinsCandyToken(expanded, entry.key.toString());
+      }
+    }
+  }
+
+  return expanded;
+}
+
+Widget _applySkinsLinkedCandyLayers({
+  required Widget child,
+  required Map<String, Object?> props,
+  required bool isDark,
+  required String controlId,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  required ButterflyUISendRuntimeEvent sendEvent,
+}) {
+  var childWidget = child;
+
+  if (props['particles'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildParticleFieldControl(
+            '$controlId::particles',
+            props,
+            registerInvokeHandler,
+            unregisterInvokeHandler,
+            sendEvent,
+          ),
+        ),
+      ],
+    );
+  }
+
+  if (props['scanline'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildScanlineOverlayControl(
+            '$controlId::scanline',
+            props,
+            childWidget,
+            defaultText: isDark ? Colors.white : Colors.black,
+            registerInvokeHandler: registerInvokeHandler,
+            unregisterInvokeHandler: unregisterInvokeHandler,
+          ),
+        ),
+      ],
+    );
+  }
+
+  if (props['shimmer'] == true) {
+    childWidget = buildShimmerControl(
+      '$controlId::effects',
+      props,
+      childWidget,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+    );
+  }
+
+  if (props['vignette'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildVignetteControl(
+            '$controlId::vignette',
+            props,
+            childWidget,
+            defaultColor: isDark ? Colors.black : Colors.white,
+            registerInvokeHandler: registerInvokeHandler,
+            unregisterInvokeHandler: unregisterInvokeHandler,
+          ),
+        ),
+      ],
+    );
+  }
+
+  if (props['animated_background'] == true) {
+    childWidget = Stack(
+      fit: StackFit.loose,
+      children: [
+        Positioned.fill(
+          child: buildAnimatedBackgroundControl(
+            props,
+            const [],
+            (_) => const SizedBox.shrink(),
+          ),
+        ),
+        childWidget,
+      ],
+    );
+  }
+
+  if (props['liquid_morph'] == true) {
+    childWidget = buildLiquidMorphControl(props, const [
+      {"placeholder": true},
+    ], (_) => childWidget);
+  }
+
+  if (props['parallax'] == true) {
+    childWidget = buildParallaxControl(props, const [
+      {"placeholder": true},
+    ], (_) => childWidget);
+  }
+
+  if (props['glow'] == true) {
+    childWidget = buildGlowEffectControl(props, childWidget);
+  }
+
+  return childWidget;
 }
 
 // ============================================================================
@@ -1355,24 +1662,152 @@ Widget _buildSkinsScope(
     };
   }
 
-  final theme = tokens.buildTheme(isDark: isDark);
-
   // Get the child
   final childMaps = context.childMapsOf(control);
   final childWidget = childMaps.isNotEmpty
       ? context.buildChild(childMaps.first)
       : const SizedBox.shrink();
+  final controlId = control['id']?.toString() ?? 'skins_scope';
 
-  return _SkinsScopeWidget(
-    tokens: tokens,
+  return _PaletteDrivenSkinsScope(
+    controlId: controlId,
+    props: props,
+    baseTokens: tokens,
     isDark: isDark,
-    child: AnimatedTheme(
-      data: theme,
-      duration: tokens.transitionSpeed,
-      curve: tokens.motionCurve,
-      child: childWidget,
-    ),
+    registerInvokeHandler: context.registerInvokeHandler,
+    unregisterInvokeHandler: context.unregisterInvokeHandler,
+    sendEvent: context.sendEvent,
+    child: childWidget,
   );
+}
+
+class _PaletteDrivenSkinsScope extends StatefulWidget {
+  const _PaletteDrivenSkinsScope({
+    required this.controlId,
+    required this.props,
+    required this.baseTokens,
+    required this.isDark,
+    required this.child,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final SkinsTokens baseTokens;
+  final bool isDark;
+  final Widget child;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_PaletteDrivenSkinsScope> createState() =>
+      _PaletteDrivenSkinsScopeState();
+}
+
+class _PaletteDrivenSkinsScopeState extends State<_PaletteDrivenSkinsScope> {
+  late SkinsTokens _resolvedTokens;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolvedTokens = widget.baseTokens;
+    _syncPalette();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PaletteDrivenSkinsScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.baseTokens != widget.baseTokens ||
+        oldWidget.isDark != widget.isDark ||
+        oldWidget.props['auto_palette'] != widget.props['auto_palette'] ||
+        oldWidget.props['palette_strength'] !=
+            widget.props['palette_strength'] ||
+        oldWidget.props['palette_source'] != widget.props['palette_source']) {
+      _resolvedTokens = widget.baseTokens;
+      _syncPalette();
+    }
+  }
+
+  Future<void> _syncPalette() async {
+    final autoPalette = widget.props['auto_palette'] != false;
+    final provider = _resolveSkinsPaletteProvider(
+      widget.props['palette_source'],
+    );
+    if (!autoPalette || provider == null) {
+      if (mounted) {
+        setState(() => _resolvedTokens = widget.baseTokens);
+      }
+      return;
+    }
+
+    try {
+      widget.sendEvent(
+        widget.controlId,
+        'palette_sync_started',
+        <String, Object?>{
+          'strength': coerceDouble(widget.props['palette_strength']) ?? 0.9,
+        },
+      );
+      final palette = await PaletteGeneratorMaster.fromImageProvider(
+        provider,
+        maximumColorCount: 12,
+      );
+      if (!mounted) return;
+      final strength = (coerceDouble(widget.props['palette_strength']) ?? 0.9)
+          .clamp(0.0, 1.0);
+      final overrides = _buildSkinsPaletteOverrides(
+        palette,
+        isDark: widget.isDark,
+        strength: strength,
+      );
+      final merged = _mergeSkinsTokens(widget.baseTokens, overrides);
+      setState(() => _resolvedTokens = merged);
+      widget.sendEvent(widget.controlId, 'palette_ready', <String, Object?>{
+        'primary': (overrides['primary'] as Color).toARGB32(),
+        'secondary': (overrides['secondary'] as Color).toARGB32(),
+        'background': (overrides['background'] as Color).toARGB32(),
+        'surface': (overrides['surface'] as Color).toARGB32(),
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _resolvedTokens = widget.baseTokens);
+      widget.sendEvent(widget.controlId, 'palette_error', <String, Object?>{
+        'message': error.toString(),
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final linkedCandyProps = _expandSkinsLinkedCandyProps(
+      widget.props,
+      _resolvedTokens,
+    );
+    final themedChild = _applySkinsLinkedCandyLayers(
+      child: widget.child,
+      props: linkedCandyProps,
+      isDark: widget.isDark,
+      controlId: widget.controlId,
+      registerInvokeHandler: widget.registerInvokeHandler,
+      unregisterInvokeHandler: widget.unregisterInvokeHandler,
+      sendEvent: widget.sendEvent,
+    );
+    final theme = _resolvedTokens.buildTheme(isDark: widget.isDark);
+
+    return _SkinsScopeWidget(
+      tokens: _resolvedTokens,
+      isDark: widget.isDark,
+      child: AnimatedTheme(
+        data: theme,
+        duration: _resolvedTokens.transitionSpeed,
+        curve: _resolvedTokens.motionCurve,
+        child: themedChild,
+      ),
+    );
+  }
 }
 
 class _SkinsScopeWidget extends InheritedWidget {

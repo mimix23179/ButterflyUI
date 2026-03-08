@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -24,11 +25,12 @@ class _AnimatedGradientControl extends StatefulWidget {
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
 
   @override
-  State<_AnimatedGradientControl> createState() => _AnimatedGradientControlState();
+  State<_AnimatedGradientControl> createState() =>
+      _AnimatedGradientControlState();
 }
 
 class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
-  with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   late List<Color> _colors;
   List<double>? _stops;
@@ -66,7 +68,10 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
     super.dispose();
   }
 
-  void _syncFromProps(Map<String, Object?> props, {bool resetController = false}) {
+  void _syncFromProps(
+    Map<String, Object?> props, {
+    bool resetController = false,
+  }) {
     _colors = _coerceColors(props['colors']);
     _stops = _coerceStops(props['stops'], _colors.length);
     _durationMs =
@@ -74,7 +79,10 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
     _radius = coerceDouble(props['radius']) ?? 0;
     _angle = coerceDouble(props['angle'] ?? props['start_angle']) ?? 0;
     _loop = props['loop'] != false;
-    _playing = props['playing'] == true || props['play'] == true || props['autoplay'] != false;
+    _playing =
+        props['playing'] == true ||
+        props['play'] == true ||
+        props['autoplay'] != false;
     _pingPong = props['ping_pong'] == true;
     _shift = props['shift'] == true;
 
@@ -93,11 +101,19 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
     }
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'get_state':
         return {
-          'colors': _colors.map((color) => '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}').toList(growable: false),
+          'colors': _colors
+              .map(
+                (color) =>
+                    '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+              )
+              .toList(growable: false),
           'stops': _stops,
           'duration_ms': _durationMs,
           'radius': _radius,
@@ -110,7 +126,12 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
           _stops = _coerceStops(args['stops'], _colors.length) ?? _stops;
         });
         widget.sendEvent(widget.controlId, 'change', {
-          'colors': _colors.map((color) => '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}').toList(growable: false),
+          'colors': _colors
+              .map(
+                (color) =>
+                    '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+              )
+              .toList(growable: false),
         });
         return null;
       case 'set_stops':
@@ -146,12 +167,17 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
     final begin = _alignmentFrom(widget.props['begin']) ?? Alignment.topLeft;
     final end = _alignmentFrom(widget.props['end']) ?? Alignment.bottomRight;
     final center = _alignmentFrom(widget.props['center']) ?? Alignment.center;
-    final variant = (widget.props['variant'] ?? widget.props['kind'] ?? widget.props['type'])
-        ?.toString()
-        .toLowerCase();
+    final variant =
+        (widget.props['variant'] ??
+                widget.props['kind'] ??
+                widget.props['type'])
+            ?.toString()
+            .toLowerCase();
     Widget child = const SizedBox.expand();
     if (widget.rawChildren.isNotEmpty && widget.rawChildren.first is Map) {
-      child = widget.buildChild(coerceObjectMap(widget.rawChildren.first as Map));
+      child = widget.buildChild(
+        coerceObjectMap(widget.rawChildren.first as Map),
+      );
     }
 
     return AnimatedBuilder(
@@ -159,43 +185,58 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
       child: child,
       builder: (context, renderedChild) {
         final progress = _controller.value;
-        final rotation = ((_angle * math.pi) / 180.0) + (progress * 2 * math.pi);
-        final shiftedColors = _shift ? _rotateColors(_colors, progress) : _colors;
+        final rotation =
+            ((_angle * math.pi) / 180.0) + (progress * 2 * math.pi);
+        final shiftedColors = _shift
+            ? _rotateColors(_colors, progress)
+            : _colors;
         final stops = _coerceStops(_stops, shiftedColors.length);
         final gradient = switch (variant) {
           'radial' || 'radial_gradient' => RadialGradient(
-              colors: shiftedColors,
-              stops: stops,
-              center: center,
-              radius: coerceDouble(widget.props['radius']) ?? 0.8,
-              tileMode: _tileMode(widget.props['tile_mode']),
-            ),
+            colors: shiftedColors,
+            stops: stops,
+            center: center,
+            radius: coerceDouble(widget.props['radius']) ?? 0.8,
+            tileMode: _tileMode(widget.props['tile_mode']),
+          ),
           'sweep' || 'conic' || 'sweep_gradient' => SweepGradient(
-              colors: shiftedColors,
-              stops: stops,
-              center: center,
-              startAngle: (coerceDouble(widget.props['start_angle']) ?? 0) * math.pi / 180,
-              endAngle: (coerceDouble(widget.props['end_angle']) ?? 360) * math.pi / 180,
-              transform: GradientRotation(rotation),
-              tileMode: _tileMode(widget.props['tile_mode']),
-            ),
+            colors: shiftedColors,
+            stops: stops,
+            center: center,
+            startAngle:
+                (coerceDouble(widget.props['start_angle']) ?? 0) *
+                math.pi /
+                180,
+            endAngle:
+                (coerceDouble(widget.props['end_angle']) ?? 360) *
+                math.pi /
+                180,
+            transform: GradientRotation(rotation),
+            tileMode: _tileMode(widget.props['tile_mode']),
+          ),
           _ => LinearGradient(
-              colors: shiftedColors,
-              stops: stops,
-              begin: begin,
-              end: end,
-              transform: GradientRotation(rotation),
-              tileMode: _tileMode(widget.props['tile_mode']),
-            ),
+            colors: shiftedColors,
+            stops: stops,
+            begin: begin,
+            end: end,
+            transform: GradientRotation(rotation),
+            tileMode: _tileMode(widget.props['tile_mode']),
+          ),
         };
 
-        return DecoratedBox(
+        Widget built = DecoratedBox(
           decoration: BoxDecoration(
             gradient: gradient,
             borderRadius: BorderRadius.circular(_radius),
           ),
           child: renderedChild,
         );
+        built = wrapWithCandyRenderLayers(
+          controlId: '${widget.controlId}::layers',
+          props: widget.props,
+          child: built,
+        );
+        return built;
       },
     );
   }
@@ -236,10 +277,7 @@ List<Color> _rotateColors(List<Color> colors, double progress) {
   if (colors.length < 2) return colors;
   final offset = ((progress * colors.length).floor()) % colors.length;
   if (offset == 0) return colors;
-  return [
-    ...colors.sublist(offset),
-    ...colors.sublist(0, offset),
-  ];
+  return [...colors.sublist(offset), ...colors.sublist(0, offset)];
 }
 
 TileMode _tileMode(Object? raw) {

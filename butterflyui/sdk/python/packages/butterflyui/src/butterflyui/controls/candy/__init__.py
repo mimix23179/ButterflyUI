@@ -3,6 +3,8 @@ from __future__ import annotations
 from .candy import (
     Candy,
     CandyScope,
+    CandyLayer,
+    CandyScene,
     CandyTheme,
     CandyTokens,
     CandyStylePack,
@@ -15,6 +17,8 @@ from .candy import (
 __all__ = [
     "Candy",
     "CandyScope",
+    "CandyLayer",
+    "CandyScene",
     "CandyTheme",
     "CandyTokens",
     "CandyStylePack",

@@ -13,75 +13,27 @@ dependencies:
   webview_windows:
   native_preview_host:
     path: packages/native_preview_host
-  collection:
-  path:
-  archive:
-  crypto:
-  uuid:
-  mime:
-  logging:
-  vector_math:
-  dotted_border:
   animations:
   file_picker:
-  flutter_colorpicker:
   flutter_markdown_plus:
-  markdown:
   flutter_svg:
   media_kit:
   media_kit_libs_windows_audio:
   media_kit_libs_windows_video:
   media_kit_video:
   material_color_utilities:
-  shared_preferences:
-  undo:
-  photo_view:
   flutter_staggered_grid_view:
-  flutter_monaco:
   highlight:
-  diff_match_patch:
-  json_schema:
-  animated_tree_view:
-  data_table_2:
-  multi_split_view:
-  scrollable_positioned_list:
-  linked_scroll_controller:
-  reorderables:
-  super_drag_and_drop:
-  flutter_box_transform:
-  flutter_portal:
   google_fonts:
-  xterm:
-  flutter_glow:
-  flutter_neumorphic_plus:
-  nes_ui:
-  phosphor_flutter:
   flutter_animate:
-  flutter_pty:
-  process_run:
-  menu_bar:
-  mac_menu_bar:
-  dio:
-  flutter_download_manager_dio4:
-  flutter_chat_ui:
-  flutter_chat_types:
-  flutter_highlight:
-  syntax_highlight:
   cached_network_image:
-  go_router:
-  flutter_riverpod:
-  path_provider:
-  isar:
-  fuzzywuzzy:
-  fuse:
-  hotkey_manager:
-  ansicolor:
   another_flushbar:
   fluttertoast:
-  contextmenu:
-  desktop_drop:
-  cross_file:
-  split_view:
+  mime:
+  rive:
+  lottie:
+  visibility_detector:
+  palette_generator_master:
 
 dev_dependencies:
   flutter_test:

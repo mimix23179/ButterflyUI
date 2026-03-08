@@ -76,6 +76,17 @@ def _normalize_gallery_token(value: Any | None) -> str:
     return str(value).strip().lower().replace("-", "_").replace(" ", "_")
 
 
+def _coerce_string_list(value: Any | None) -> list[str] | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Iterable) and not isinstance(value, (str, bytes, Mapping)):
+        values = [str(item) for item in value if item is not None]
+        return values or None
+    return [str(value)]
+
+
 def _normalize_gallery_layout(value: Any | None) -> str | None:
     token = _normalize_gallery_token(value)
     if not token:
@@ -879,15 +890,61 @@ def gallery_local_fonts(
 
 class GalleryScope(Component):
     """
-    Scope wrapper for gallery-level configuration.
+    Scope wrapper for gallery browsing and showcase defaults.
 
-    ``GalleryScope`` is a lightweight container for wrapping one or more
-    ``Gallery`` nodes with shared props. It currently behaves as a pass-through
-    container and keeps room for future scoped gallery state.
+    ``GalleryScope`` is used when a subtree should share gallery browsing
+    semantics like collection metadata, preview mode, filtering defaults, or
+    showcase framing. It keeps gallery-related presentation context explicit
+    without turning ``Gallery`` into a catch-all asset dump.
 
     Scope props can include universal styling keys (``classes``,
     ``style_slots``, ``modifiers``, ``motion``, ``effects``) that descendants
     consume through the shared renderer pipeline.
+    """
+
+    collection_name: str | None = None
+    """
+    Human-readable collection or showcase title rendered above the scoped gallery.
+    """
+    collection_subtitle: str | None = None
+    """
+    Secondary description rendered beneath the scoped collection title.
+    """
+    showcase: bool | None = None
+    """
+    Enables showcase-style framing for the scoped gallery subtree.
+    """
+    preview_mode: str | None = None
+    """
+    High-level preview behavior such as ``"minimal"``, ``"detail"``, or ``"picker"``.
+    """
+    group_by: str | None = None
+    """
+    Logical grouping hint such as ``"type"``, ``"tag"``, or ``"author"``.
+    """
+    filter_tags: Iterable[str] | None = None
+    """
+    Optional tag filters applied before rendering items.
+    """
+    empty_title: str | None = None
+    """
+    Empty-state title shown when the gallery has no visible items.
+    """
+    empty_message: str | None = None
+    """
+    Empty-state message shown when the gallery has no visible items.
+    """
+    palette_source: Any | None = None
+    """
+    Optional image source used to derive showcase tinting for the scoped gallery surface.
+    """
+    palette_accents: bool | None = None
+    """
+    Enables palette-driven showcase tinting based on ``palette_source`` or the first available preview item.
+    """
+    palette_strength: float | None = None
+    """
+    Strength of palette-driven showcase tinting, from ``0.0`` to ``1.0``.
     """
 
 
@@ -897,17 +954,42 @@ class GalleryScope(Component):
         self,
         child: Any | None = None,
         *children: Any,
+        collection_name: str | None = None,
+        collection_subtitle: str | None = None,
+        showcase: bool | None = None,
+        preview_mode: str | None = None,
+        group_by: str | None = None,
+        filter_tags: Iterable[str] | None = None,
+        empty_title: str | None = None,
+        empty_message: str | None = None,
+        palette_source: Any | None = None,
+        palette_accents: bool | None = None,
+        palette_strength: float | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
         strict: bool = False,
         **kwargs: Any,
     ) -> None:
-        merged = merge_props(props, **kwargs)
+        merged = merge_props(
+            props,
+            collection_name=collection_name,
+            collection_subtitle=collection_subtitle,
+            showcase=showcase,
+            preview_mode=preview_mode,
+            group_by=group_by,
+            filter_tags=_coerce_string_list(filter_tags),
+            empty_title=empty_title,
+            empty_message=empty_message,
+            palette_source=palette_source,
+            palette_accents=palette_accents,
+            palette_strength=palette_strength,
+            **kwargs,
+        )
         super().__init__(*children, child=child, props=merged, style=style, strict=strict)
 
 
 class Gallery(Component):
-    """Umbrella Gallery control for asset browsing and selection.
+    """Rich browser and showcase control for collections.
     
     ``Gallery`` renders a collection of ``GalleryItem`` entries using a selected
     layout and optional module-specific behavior.
@@ -918,6 +1000,9 @@ class Gallery(Component):
     - bridges umbrella module names to practical runtime defaults
     - forwards unknown ``**kwargs`` so new runtime props remain usable
     
+    Gallery is not just an image grid. It is a browsing and presentation
+    surface for media, templates, skins, presets, demos, assets, and cards.
+
     Gallery also participates in the same universal style/motion/effects
     contract used by Candy, Skins, and Style controls, including slot-based
     styling for toolbar/panels/item surfaces.
@@ -951,6 +1036,62 @@ class Gallery(Component):
     type_filter: str | None = None
     """
     Optional media type filter such as ``"image"`` or ``"font"``.
+    """
+    collection_name: str | None = None
+    """
+    Human-readable collection or showcase title rendered above the gallery when provided.
+    """
+    collection_subtitle: str | None = None
+    """
+    Secondary description rendered beneath the collection title when showcase framing is enabled.
+    """
+    showcase: bool | None = None
+    """
+    Enables showcase-style framing so the gallery behaves more like a curated browser surface than a bare grid.
+    """
+    preview_mode: str | None = None
+    """
+    High-level preview behavior such as ``"minimal"``, ``"detail"``, or ``"picker"``.
+    """
+    group_by: str | None = None
+    """
+    Logical grouping hint such as ``"type"``, ``"tag"``, or ``"author"`` used by higher-level gallery presentations.
+    """
+    filter_tags: Iterable[str] | None = None
+    """
+    Optional tag filters applied before rendering items.
+    """
+    empty_title: str | None = None
+    """
+    Empty-state title shown when the gallery has no visible items.
+    """
+    empty_message: str | None = None
+    """
+    Empty-state message shown when the gallery has no visible items.
+    """
+    palette_source: Any | None = None
+    """
+    Optional image source used to derive showcase tinting for the gallery surface.
+    """
+    palette_accents: bool | None = None
+    """
+    Enables palette-driven showcase tinting based on ``palette_source`` or the first available preview item.
+    """
+    palette_strength: float | None = None
+    """
+    Strength of palette-driven showcase tinting, from ``0.0`` to ``1.0``.
+    """
+    lazy_preview: bool | None = None
+    """
+    Defers heavy preview construction until the preview enters the viewport.
+    """
+    autoplay_visible_media: bool | None = None
+    """
+    Allows video and audio previews to autoplay only when they are visible in the viewport.
+    """
+    preview_visibility_threshold: float | None = None
+    """
+    Minimum visible fraction required before deferred previews activate and visible-media autoplay is allowed.
     """
 
     columns: int | None = None
@@ -1037,6 +1178,20 @@ class Gallery(Component):
         module: str | None = None,
         layout: str | None = None,
         type_filter: str | None = None,
+        collection_name: str | None = None,
+        collection_subtitle: str | None = None,
+        showcase: bool | None = None,
+        preview_mode: str | None = None,
+        group_by: str | None = None,
+        filter_tags: Iterable[str] | None = None,
+        empty_title: str | None = None,
+        empty_message: str | None = None,
+        palette_source: Any | None = None,
+        palette_accents: bool | None = None,
+        palette_strength: float | None = None,
+        lazy_preview: bool | None = None,
+        autoplay_visible_media: bool | None = None,
+        preview_visibility_threshold: float | None = None,
         columns: int | None = None,
         spacing: float | None = None,
         main_axis_spacing: float | None = None,
@@ -1095,6 +1250,20 @@ class Gallery(Component):
             module=resolved_module,
             layout=resolved_layout,
             type_filter=resolved_type_filter,
+            collection_name=collection_name,
+            collection_subtitle=collection_subtitle,
+            showcase=showcase,
+            preview_mode=preview_mode,
+            group_by=group_by,
+            filter_tags=_coerce_string_list(filter_tags),
+            empty_title=empty_title,
+            empty_message=empty_message,
+            palette_source=palette_source,
+            palette_accents=palette_accents,
+            palette_strength=palette_strength,
+            lazy_preview=lazy_preview,
+            autoplay_visible_media=autoplay_visible_media,
+            preview_visibility_threshold=preview_visibility_threshold,
             columns=columns,
             spacing=spacing,
             main_axis_spacing=main_axis_spacing,

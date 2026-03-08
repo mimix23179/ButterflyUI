@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -55,6 +56,12 @@ Widget buildEffectsControl(
       if (opacity != null && opacity >= 0 && opacity < 1) {
         built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
       }
+
+      built = wrapWithCandyRenderLayers(
+        controlId: controlId.isEmpty ? 'effects' : controlId,
+        props: liveProps,
+        child: built,
+      );
 
       return built;
     },

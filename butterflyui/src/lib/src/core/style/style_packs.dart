@@ -3,11 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_glow/flutter_glow.dart';
-import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart' as neu;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nes_ui/nes_ui.dart' as nes;
-import 'package:xterm/xterm.dart' as xterm;
 
 import '../candy/theme.dart';
 import '../../core/control_registry.dart';
@@ -572,13 +568,15 @@ final StylePack _terminalPack = StylePack(
     return _AnimatedGlowBackground(
       colors: [
         bg,
-        (tokens.color('primary') ?? const Color(0xff00ff7a)).withOpacity(0.12),
+        (tokens.color('primary') ?? const Color(0xff00ff7a)).withValues(
+          alpha: 0.12,
+        ),
         bg,
       ],
       scanlines: true,
     );
   },
-  overrides: {'terminal_raw_view': _buildXtermOverride},
+  overrides: {'terminal_raw_view': _buildTerminalPlaintextOverride},
 );
 
 final StylePack _windsurfPack = StylePack(
@@ -600,11 +598,9 @@ final StylePack _retroPack = StylePack(
   defaultTokens: _retroTokens,
   themeBuilder: (base, tokens) {
     final textTheme = GoogleFonts.pressStart2pTextTheme(base.textTheme);
-    final extensions = [...base.extensions.values, const nes.NesTheme(pixelSize: 2)];
     return base.copyWith(
       textTheme: textTheme,
       primaryTextTheme: textTheme,
-      extensions: extensions,
     );
   },
   background: (context, tokens) => _CheckerBackground(
@@ -624,8 +620,8 @@ final StylePack _scifiPack = StylePack(
   },
   background: (context, tokens) => _GridBackground(
     baseColor: tokens.color('background') ?? const Color(0xff050a14),
-    lineColor: (tokens.color('primary') ?? const Color(0xff00f5ff)).withOpacity(
-      0.12,
+    lineColor: (tokens.color('primary') ?? const Color(0xff00f5ff)).withValues(
+      alpha: 0.12,
     ),
   ),
 );
@@ -637,19 +633,7 @@ final StylePack _comfyPack = StylePack(
     final textTheme = GoogleFonts.nunitoTextTheme(base.textTheme);
     return base.copyWith(textTheme: textTheme, primaryTextTheme: textTheme);
   },
-  wrapRoot: (context, tokens, child) {
-    final baseColor = tokens.color('surface') ?? const Color(0xffffffff);
-    return neu.NeumorphicTheme(
-      theme: neu.NeumorphicThemeData(
-        baseColor: baseColor,
-        accentColor: tokens.color('primary') ?? baseColor,
-        variantColor: tokens.color('surface_alt') ?? baseColor.withOpacity(0.9),
-        depth: 4,
-        intensity: 0.8,
-      ),
-      child: neu.NeumorphicBackground(child: child),
-    );
-  },
+  wrapRoot: _wrapComfyRoot,
   background: _softGradientBackground(const [
     Color(0xfffff7f9),
     Color(0xfffbe8ee),
@@ -696,7 +680,9 @@ final StylePack _glassPack = StylePack(
   background: (context, tokens) => _AnimatedGlowBackground(
     colors: [
       tokens.color('background') ?? const Color(0xff0b1020),
-      (tokens.color('primary') ?? const Color(0xff7dd3fc)).withOpacity(0.12),
+      (tokens.color('primary') ?? const Color(0xff7dd3fc)).withValues(
+        alpha: 0.12,
+      ),
       tokens.color('background') ?? const Color(0xff0b1020),
     ],
     scanlines: false,
@@ -796,17 +782,56 @@ Widget _buildComfyButton(
   final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
   final onPressed = _buttonHandler(context, control, enabled);
   final radius = coerceDouble(props['radius']) ?? 24;
-  final color = coerceColor(props['bgcolor'] ?? props['color']);
-  return neu.NeumorphicButton(
-    onPressed: onPressed,
-    style: neu.NeumorphicStyle(
-      color: color,
-      depth: enabled ? 6 : -2,
-      intensity: 0.85,
-      boxShape: neu.NeumorphicBoxShape.roundRect(BorderRadius.circular(radius)),
+  final surface =
+      coerceColor(props['bgcolor'] ?? props['color']) ??
+      const Color(0xfffff7f9);
+  final foreground =
+      coerceColor(props['text_color']) ??
+      context.tokens.color('text') ??
+      const Color(0xff5c4b51);
+  final lightEdge = Colors.white.withValues(alpha: enabled ? 0.82 : 0.45);
+  final darkEdge = const Color(0xffd8b9c4).withValues(
+    alpha: enabled ? 0.48 : 0.22,
+  );
+  return AnimatedContainer(
+    duration: const Duration(milliseconds: 140),
+    decoration: BoxDecoration(
+      color: surface,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: surface.withValues(alpha: enabled ? 0.96 : 0.72),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: lightEdge,
+          offset: const Offset(-4, -4),
+          blurRadius: enabled ? 10 : 6,
+        ),
+        BoxShadow(
+          color: darkEdge,
+          offset: const Offset(8, 8),
+          blurRadius: enabled ? 18 : 10,
+        ),
+      ],
     ),
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-    child: Text(label),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(radius),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: foreground.withValues(alpha: enabled ? 1.0 : 0.58),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.15,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -822,21 +847,38 @@ Widget _buildNeonButton(
   final radius = coerceDouble(props['radius']) ?? 10;
   final accent = coerceColor(props['color']) ?? const Color(0xff39ff14);
   final bg = coerceColor(props['bgcolor']) ?? const Color(0xff0c0f16);
-  return GlowContainer(
-    glowColor: accent.withOpacity(0.8),
-    borderRadius: BorderRadius.circular(radius),
-    color: bg,
-    child: InkWell(
-      onTap: onPressed,
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      color: bg,
       borderRadius: BorderRadius.circular(radius),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: accent,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
+      border: Border.all(color: accent.withValues(alpha: 0.78), width: 1.2),
+      boxShadow: [
+        BoxShadow(
+          color: accent.withValues(alpha: enabled ? 0.34 : 0.12),
+          blurRadius: enabled ? 24 : 10,
+          spreadRadius: enabled ? 1.6 : 0,
+        ),
+        BoxShadow(
+          color: accent.withValues(alpha: enabled ? 0.18 : 0.08),
+          blurRadius: enabled ? 42 : 18,
+          spreadRadius: enabled ? 3.4 : 0,
+        ),
+      ],
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(radius),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: accent.withValues(alpha: enabled ? 1.0 : 0.58),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+            ),
           ),
         ),
       ),
@@ -856,7 +898,7 @@ Widget _buildGlassContainer(
   return _GlassSurface(radius: radius, blur: blur, child: built);
 }
 
-Widget _buildXtermOverride(
+Widget _buildTerminalPlaintextOverride(
   ButterflyUIControlContext context,
   Map<String, Object?> control,
   ButterflyUIControlBuilder buildDefault,
@@ -866,7 +908,7 @@ Widget _buildXtermOverride(
       ? List<dynamic>.from(props['events'] as List)
       : const [];
   final rawText = props['raw_text']?.toString() ?? props['text']?.toString();
-  return _TerminalXtermPanel(
+  return _TerminalPlaintextPanel(
     events: events,
     rawText: rawText,
     fontFamily: props['font_family']?.toString(),
@@ -874,6 +916,48 @@ Widget _buildXtermOverride(
     lineHeight: coerceDouble(props['line_height']),
     backgroundColor: coerceColor(props['bgcolor'] ?? props['background']),
     textColor: coerceColor(props['text_color']),
+  );
+}
+
+Widget _wrapComfyRoot(BuildContext context, CandyTokens tokens, Widget child) {
+  final surface = tokens.color('surface') ?? const Color(0xffffffff);
+  final surfaceAlt = tokens.color('surface_alt') ?? const Color(0xfffbe8ee);
+  final primary = tokens.color('primary') ?? const Color(0xffff9aa2);
+  return Stack(
+    fit: StackFit.expand,
+    children: [
+      DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [surface, surfaceAlt, surface],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      IgnorePointer(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Align(
+              alignment: const Alignment(-0.82, -0.76),
+              child: _SoftGlowOrb(
+                color: primary.withValues(alpha: 0.16),
+                size: 180,
+              ),
+            ),
+            Align(
+              alignment: const Alignment(0.88, 0.84),
+              child: _SoftGlowOrb(
+                color: surfaceAlt.withValues(alpha: 0.56),
+                size: 220,
+              ),
+            ),
+          ],
+        ),
+      ),
+      child,
+    ],
   );
 }
 
@@ -1100,7 +1184,7 @@ class _ScanlinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.black.withOpacity(0.15)
+      ..color = Colors.black.withValues(alpha: 0.15)
       ..strokeWidth = 1;
     for (double y = 0; y < size.height; y += 4) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
@@ -1160,7 +1244,7 @@ class _CheckerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size canvasSize) {
     final paintA = Paint()..color = colorA;
-    final paintB = Paint()..color = colorB.withOpacity(0.6);
+    final paintB = Paint()..color = colorB.withValues(alpha: 0.6);
     canvas.drawRect(Offset.zero & canvasSize, paintA);
     for (double y = 0; y < canvasSize.height; y += size) {
       for (double x = 0; x < canvasSize.width; x += size) {
@@ -1220,9 +1304,9 @@ class _GlassSurface extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: child,
         ),
@@ -1231,7 +1315,32 @@ class _GlassSurface extends StatelessWidget {
   }
 }
 
-class _TerminalXtermPanel extends StatefulWidget {
+class _SoftGlowOrb extends StatelessWidget {
+  final Color color;
+  final double size;
+
+  const _SoftGlowOrb({required this.color, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color,
+            color.withValues(alpha: color.a * 0.34),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TerminalPlaintextPanel extends StatelessWidget {
   final List<dynamic> events;
   final String? rawText;
   final String? fontFamily;
@@ -1240,7 +1349,7 @@ class _TerminalXtermPanel extends StatefulWidget {
   final Color? backgroundColor;
   final Color? textColor;
 
-  const _TerminalXtermPanel({
+  const _TerminalPlaintextPanel({
     required this.events,
     required this.rawText,
     required this.fontFamily,
@@ -1250,107 +1359,67 @@ class _TerminalXtermPanel extends StatefulWidget {
     required this.textColor,
   });
 
-  @override
-  State<_TerminalXtermPanel> createState() => _TerminalXtermPanelState();
-}
-
-class _TerminalXtermPanelState extends State<_TerminalXtermPanel> {
-  late final xterm.Terminal _terminal = xterm.Terminal(maxLines: 2000);
-
-  @override
-  void initState() {
-    super.initState();
-    _writeContent();
-  }
-
-  @override
-  void didUpdateWidget(covariant _TerminalXtermPanel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.rawText != widget.rawText ||
-        oldWidget.events != widget.events) {
-      _terminal.write('\x1b[2J\x1b[H');
-      _writeContent();
-    }
-  }
-
-  void _writeContent() {
-    final raw = widget.rawText?.trim();
+  String _buildContent() {
+    final raw = rawText?.trim();
     if (raw != null && raw.isNotEmpty) {
-      _terminal.write(raw);
-      return;
+      return raw;
     }
     final buffer = StringBuffer();
-    for (final event in widget.events) {
+    for (final event in events) {
       if (event is Map) {
         final text = event['text']?.toString();
-        if (text != null) buffer.writeln(text);
+        if (text != null && text.isNotEmpty) {
+          buffer.writeln(text);
+        }
       } else if (event != null) {
         buffer.writeln(event.toString());
       }
     }
-    _terminal.write(buffer.toString());
+    final resolved = buffer.toString().trimRight();
+    if (resolved.isNotEmpty) {
+      return resolved;
+    }
+    return r'$ boot butterflyui-terminal --preview'
+        '\n[ok] native terminal dependency removed'
+        '\n[ok] style pack now uses built-in Flutter rendering'
+        '\n[hint] send raw_text or event lines to populate this panel';
   }
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.backgroundColor ?? const Color(0xff050a06);
-    final fg = widget.textColor ?? const Color(0xffd1ffd6);
-    final theme = _buildTerminalTheme(bg, fg);
-    return Container(
+    final bg = backgroundColor ?? const Color(0xff050a06);
+    final fg = textColor ?? const Color(0xffd1ffd6);
+    final border = fg.withValues(alpha: 0.34);
+    final content = _buildContent();
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: bg,
-        border: Border.all(color: fg.withOpacity(0.4)),
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: fg.withValues(alpha: 0.08),
+            blurRadius: 18,
+            spreadRadius: 0.4,
+          ),
+        ],
       ),
-      child: xterm.TerminalView(
-        _terminal,
-        theme: theme,
-        textStyle: xterm.TerminalStyle(
-          fontFamily: widget.fontFamily ?? 'JetBrains Mono',
-          fontSize: widget.fontSize ?? 12,
-          height: widget.lineHeight ?? 1.4,
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(12),
+          child: SelectableText(
+            content,
+            style: TextStyle(
+              color: fg,
+              fontFamily: fontFamily ?? 'JetBrains Mono',
+              fontSize: fontSize ?? 12,
+              height: lineHeight ?? 1.4,
+            ),
+          ),
         ),
       ),
     );
   }
-}
-
-Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t) ?? a;
-
-xterm.TerminalTheme _buildTerminalTheme(Color bg, Color fg) {
-  final black = bg;
-  final white = fg;
-  final red = const Color(0xffef4444);
-  final green = const Color(0xff22c55e);
-  final yellow = const Color(0xfff59e0b);
-  final blue = const Color(0xff3b82f6);
-  final magenta = const Color(0xffa855f7);
-  final cyan = const Color(0xff22d3ee);
-
-  return xterm.TerminalTheme(
-    background: bg,
-    foreground: fg,
-    cursor: fg,
-    selection: fg.withOpacity(0.3),
-    black: black,
-    red: red,
-    green: green,
-    yellow: yellow,
-    blue: blue,
-    magenta: magenta,
-    cyan: cyan,
-    white: white,
-    brightBlack: _mix(black, Colors.white, 0.35),
-    brightRed: _mix(red, Colors.white, 0.25),
-    brightGreen: _mix(green, Colors.white, 0.25),
-    brightYellow: _mix(yellow, Colors.white, 0.25),
-    brightBlue: _mix(blue, Colors.white, 0.25),
-    brightMagenta: _mix(magenta, Colors.white, 0.25),
-    brightCyan: _mix(cyan, Colors.white, 0.25),
-    brightWhite: _mix(white, Colors.white, 0.15),
-    searchHitBackground: _mix(blue, bg, 0.6),
-    searchHitBackgroundCurrent: _mix(magenta, bg, 0.5),
-    searchHitForeground: fg,
-  );
 }
 
 final Map<String, StyleControlOverride> styleOverrideRegistry = {
@@ -1358,6 +1427,6 @@ final Map<String, StyleControlOverride> styleOverrideRegistry = {
   'comfy_button': _buildComfyButton,
   'neon_button': _buildNeonButton,
   'glass_container': _buildGlassContainer,
-  'terminal_xterm': _buildXtermOverride,
-  'xterm_terminal': _buildXtermOverride,
+  'terminal_xterm': _buildTerminalPlaintextOverride,
+  'xterm_terminal': _buildTerminalPlaintextOverride,
 };

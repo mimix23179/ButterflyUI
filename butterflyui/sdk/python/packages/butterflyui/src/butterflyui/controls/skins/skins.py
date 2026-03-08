@@ -66,6 +66,17 @@ def _coerce_tokens_map(tokens: SkinsTokens | Mapping[str, Any] | Any | None) -> 
     return {}
 
 
+def _coerce_string_list(value: Any | None) -> list[str] | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Iterable) and not isinstance(value, (str, bytes, Mapping)):
+        values = [str(item) for item in value if item is not None]
+        return values or None
+    return [str(value)]
+
+
 def _merge_dicts(
     left: Mapping[str, Any] | None,
     right: Mapping[str, Any] | None,
@@ -709,11 +720,12 @@ def skins_component(
 
 class SkinsScope(Component):
     """
-    Scope wrapper that provides active skin tokens to descendants.
+    Scope wrapper that provides packaged visual identity to descendants.
 
-    ``SkinsScope`` selects and injects the current skin context for nested
-    ``Skins`` nodes. You can choose a preset with ``skin=...`` and optionally
-    override with ``tokens=...``.
+    ``SkinsScope`` is the high-level way to apply a curated look and feel to a
+    subtree. A skin is more than a color override: it can package colors,
+    typography, spacing tendencies, radii, elevation, surface mood, and even
+    linked Candy polish.
 
     ``brightness`` controls whether the runtime should treat the scoped skin
     as light or dark for theme-derived defaults.
@@ -753,6 +765,22 @@ class SkinsScope(Component):
     """
     Color mode override. Values: ``"light"``, ``"dark"``.
     """
+    linked_candy: Iterable[str] | None = None
+    """
+    Optional linked Candy preset or enhancement names that should ride along with the visual identity, for example ``"glow"``, ``"cyber"``, or ``"galaxy"``.
+    """
+    auto_palette: bool | None = None
+    """
+    When true, the runtime derives identity colors from ``palette_source`` and merges them into the resolved skin tokens before theming descendants.
+    """
+    palette_source: Any | None = None
+    """
+    Image source used to derive palette-driven identity colors. Accepts a string source or a mapping like ``{"src": "..."} `` or ``{"thumbnail": "..."}``.
+    """
+    palette_strength: float | None = None
+    """
+    Strength of palette-derived overrides in the resolved skin identity, from ``0.0`` to ``1.0``.
+    """
 
 
     control_type = "skins_scope"
@@ -763,6 +791,10 @@ class SkinsScope(Component):
         skin: str | None = None,
         tokens: SkinsTokens | Mapping[str, Any] | None = None,
         brightness: str | None = None,
+        linked_candy: Iterable[str] | str | None = None,
+        auto_palette: bool | None = None,
+        palette_source: Any | None = None,
+        palette_strength: float | None = None,
         child: Any | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -786,16 +818,22 @@ class SkinsScope(Component):
             skin=normalized_skin,
             tokens=resolved_tokens,
             brightness=brightness,
+            linked_candy=_coerce_string_list(linked_candy),
+            auto_palette=auto_palette,
+            palette_source=palette_source,
+            palette_strength=palette_strength,
             **kwargs,
         )
         super().__init__(*children, child=child, props=merged, style=style, strict=strict)
 
 
 class Skins(Component):
-    """Umbrella Skins control that renders skin modules.
+    """Low-level Skins module bridge for packaged visual identity.
     
     ``Skins`` dispatches to one module at a time and is the runtime-facing
-    entry point for skin-aware UI composition.
+    entry point for skin-aware UI composition. The primary idea is not that
+    Skins replaces the core controls, but that it packages a coherent
+    appearance identity that can be applied across them.
     
     Common module groups:
     - layout: ``row``, ``column``, ``stack``, ``wrap``, ``container``, ``card``
@@ -810,6 +848,10 @@ class Skins(Component):
     - ``label`` -> ``text`` for button-like modules
     - ``background`` -> ``bgcolor`` for decorated modules
     
+    Use ``SkinsScope`` when you want to apply identity at the subtree level.
+    Use ``Skins(...)`` directly when you need a lower-level runtime module
+    bridge for skin-aware composition.
+
     Skins modules use the same universal decorator contract as the rest of the
     runtime: ``modifiers`` + state modifier keys, ``motion`` + enter/hover/
     press motion keys, and ``effects`` + effect ordering/clipping keys.

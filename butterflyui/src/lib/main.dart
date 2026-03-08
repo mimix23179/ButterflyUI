@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/runtime/runtime_ui.dart';
 import 'src/runtime/frame_pacer.dart';
@@ -12,7 +10,7 @@ Future<void> main(List<String> args) async {
 
   // Frame pacer automatically initializes and locks to 60 FPS
   // This happens immediately when the frame_pacer.dart is imported
-  print('Frame pacer initialized: ${framePacer.getStats()}');
+  debugPrint('Frame pacer initialized: ${framePacer.getStats()}');
 
   try {
     MediaKit.ensureInitialized();
@@ -20,7 +18,7 @@ Future<void> main(List<String> args) async {
     // Allow the runtime to start even if media_kit native deps are missing.
   }
 
-  runApp(ProviderScope(child: MainApp(runtimeArgs: args)));
+  runApp(MainApp(runtimeArgs: args));
 }
 
 class MainApp extends StatefulWidget {
@@ -34,19 +32,6 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   ThemeData _theme = ThemeData(useMaterial3: true);
-  late final GoRouter _router = GoRouter(
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => NotificationRoot(
-          child: ButterflyUIRuntimeView(
-            runtimeArgs: widget.runtimeArgs,
-            onThemeChanged: _applyTheme,
-          ),
-        ),
-      ),
-    ],
-  );
 
   void _applyTheme(ThemeData? theme) {
     setState(() {
@@ -56,6 +41,14 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(theme: _theme, routerConfig: _router);
+    return MaterialApp(
+      theme: _theme,
+      home: NotificationRoot(
+        child: ButterflyUIRuntimeView(
+          runtimeArgs: widget.runtimeArgs,
+          onThemeChanged: _applyTheme,
+        ),
+      ),
+    );
   }
 }

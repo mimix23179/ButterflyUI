@@ -1,9 +1,11 @@
-// Unified Candy umbrella control
-// This replaces the separate engine/host/registry/renderer files
-// It registers candy controls directly into the global registry
+// Unified Candy enhancement system
+// Candy adds cinematic visual polish and reactive decorative layers on top of
+// existing controls through the shared runtime pipeline.
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
+import 'package:butterflyui_runtime/src/core/candy/scene/candy_preset_registry.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_registry.dart';
@@ -375,6 +377,377 @@ Map<String, Object?> _bridgeCandyModuleProps(
   }
 
   return bridged;
+}
+
+List<String> _coerceCandyStringList(Object? value) {
+  if (value == null) return const <String>[];
+  if (value is String) return <String>[value];
+  if (value is List) {
+    return value
+        .where((item) => item != null)
+        .map((item) => item.toString())
+        .toList();
+  }
+  return <String>[value.toString()];
+}
+
+String _normalizeCandyEffectToken(Object? value) {
+  return value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+}
+
+void _applyCandySemanticToken(Map<String, Object?> props, String token) {
+  switch (_normalizeCandyEffectToken(token)) {
+    case 'galaxy':
+      props.putIfAbsent('vignette', () => true);
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'matrix_rain':
+    case 'cyber':
+      props.putIfAbsent('scanline', () => true);
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'leaf_drift':
+    case 'leaves':
+    case 'particles':
+      props.putIfAbsent('particles', () => true);
+      break;
+    case 'flowing_water':
+    case 'water_flow':
+    case 'water':
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'hover_tilt':
+    case 'magnetic_pull':
+    case 'magnetic':
+    case 'parallax':
+      props.putIfAbsent('parallax', () => true);
+      break;
+    case 'rainbow_border':
+    case 'shimmer_glow':
+      props.putIfAbsent('glow', () => true);
+      break;
+    case 'scanline':
+      props.putIfAbsent('scanline', () => true);
+      break;
+    case 'vignette':
+      props.putIfAbsent('vignette', () => true);
+      break;
+    case 'shimmer':
+      props.putIfAbsent('shimmer', () => true);
+      break;
+    case 'glow':
+      props.putIfAbsent('glow', () => true);
+      break;
+    default:
+      break;
+  }
+}
+
+Map<String, Object?> _expandCandySemanticProps(Map<String, Object?> rawProps) {
+  final expanded = Map<String, Object?>.from(rawProps);
+  final preset = expanded['preset'] ?? expanded['profile'];
+  if (preset != null) {
+    _applyCandySemanticToken(expanded, preset.toString());
+  }
+
+  for (final token in _coerceCandyStringList(expanded['ambient'])) {
+    _applyCandySemanticToken(expanded, token);
+  }
+  for (final token in _coerceCandyStringList(expanded['reactive'])) {
+    _applyCandySemanticToken(expanded, token);
+  }
+  for (final token in _coerceCandyStringList(expanded['decor'])) {
+    _applyCandySemanticToken(expanded, token);
+  }
+
+  final hasNativeScene =
+      expanded['scene'] != null ||
+      expanded['scene_layers'] != null ||
+      expanded['background_layers'] != null ||
+      expanded['overlay_layers'] != null ||
+      expanded['lottie_asset'] != null ||
+      expanded['lottie_url'] != null ||
+      expanded['lottie_data'] != null ||
+      expanded['lottie_json'] != null ||
+      expanded['rive_asset'] != null ||
+      expanded['rive_url'] != null;
+  if (hasNativeScene) {
+    if (!rawProps.containsKey('animated_background')) {
+      expanded.remove('animated_background');
+    }
+    if (!rawProps.containsKey('liquid_morph')) {
+      expanded.remove('liquid_morph');
+    }
+  }
+
+  if (expanded['apply_to'] != null && expanded['target'] == null) {
+    expanded['target'] = expanded['apply_to'];
+  }
+  if (expanded['target'] != null && expanded['mode'] == null) {
+    expanded['mode'] = 'enhance';
+  }
+
+  return expanded;
+}
+
+Map<String, Object?>? _resolveCandyActor(Object? value) {
+  if (value is Map) return coerceObjectMap(value);
+  if (value is List) {
+    for (final item in value) {
+      if (item is Map) return coerceObjectMap(item);
+    }
+  }
+  return null;
+}
+
+Widget _buildCandyActorChip(
+  Map<String, Object?> actor,
+  bool isDark, {
+  required String? label,
+  required String? icon,
+}) {
+  final background =
+      coerceColor(actor['bgcolor'] ?? actor['background']) ??
+      (isDark ? const Color(0xCC0F172A) : const Color(0xCCFFFFFF));
+  final foreground =
+      coerceColor(actor['color']) ?? (isDark ? Colors.white : Colors.black87);
+  final radius = coerceDouble(actor['radius']) ?? 999.0;
+  final padding =
+      candyCoercePadding(actor['padding']) ??
+      const EdgeInsets.symmetric(horizontal: 10, vertical: 6);
+
+  return Container(
+    padding: padding,
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x22000000),
+          blurRadius: 12,
+          offset: Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null && icon.isNotEmpty)
+          Icon(
+            candyParseIcon(icon) ?? Icons.auto_awesome,
+            size: 16,
+            color: foreground,
+          ),
+        if (icon != null &&
+            icon.isNotEmpty &&
+            label != null &&
+            label.isNotEmpty)
+          const SizedBox(width: 6),
+        if (label != null && label.isNotEmpty)
+          Text(
+            label,
+            style: TextStyle(
+              color: foreground,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+Widget? _buildCandyActorOverlay(Object? rawActor, bool isDark) {
+  final actor = _resolveCandyActor(rawActor);
+  if (actor == null || actor.isEmpty) return null;
+  final visible = actor['visible'];
+  if (visible == false) return null;
+
+  final label =
+      actor['label']?.toString() ??
+      actor['name']?.toString() ??
+      actor['text']?.toString();
+  final icon = actor['icon']?.toString();
+  final alignment = candyParseAlignment(
+    actor['alignment'] ?? actor['position'] ?? 'top_right',
+  );
+  final animatedActor = buildCandyAnimatedLayer(
+    actor,
+    fallbackAlignment: alignment,
+    fallbackFit: BoxFit.contain,
+  );
+  if (animatedActor != null) {
+    if ((label == null || label.isEmpty) && (icon == null || icon.isEmpty)) {
+      return IgnorePointer(
+        child: RepaintBoundary(
+          child: SizedBox.expand(child: Stack(children: [animatedActor])),
+        ),
+      );
+    }
+    final width =
+        coerceDouble(actor['width']) ??
+        coerceDouble(actor['size']) ??
+        coerceDouble(actor['diameter']) ??
+        110.0;
+    final height =
+        coerceDouble(actor['height']) ??
+        coerceDouble(actor['size']) ??
+        coerceDouble(actor['diameter']) ??
+        width;
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: Align(
+          alignment: alignment,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: width,
+                height: height,
+                child: Stack(children: [animatedActor]),
+              ),
+              const SizedBox(height: 8),
+              _buildCandyActorChip(actor, isDark, label: label, icon: icon),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  if ((label == null || label.isEmpty) && (icon == null || icon.isEmpty)) {
+    return null;
+  }
+
+  return IgnorePointer(
+    child: RepaintBoundary(
+      child: Align(
+        alignment: alignment,
+        child: _buildCandyActorChip(actor, isDark, label: label, icon: icon),
+      ),
+    ),
+  );
+}
+
+Widget _applyCandyEnhancementLayers({
+  required Widget child,
+  required Map<String, Object?> props,
+  required bool isDark,
+  required String controlId,
+  required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  required ButterflyUISendRuntimeEvent sendEvent,
+}) {
+  var childWidget = child;
+  if (!resolveCandySceneFromProps(props).isEmpty) {
+    childWidget = wrapWithCandyRenderLayers(
+      controlId: '$controlId::scene',
+      props: props,
+      child: childWidget,
+    );
+  }
+
+  if (props['particles'] == true) {
+    childWidget = Stack(
+      fit: StackFit.passthrough,
+      children: [
+        childWidget,
+        IgnorePointer(
+          child: buildParticleFieldControl(
+            '$controlId::particles',
+            props,
+            registerInvokeHandler,
+            unregisterInvokeHandler,
+            sendEvent,
+          ),
+        ),
+      ],
+    );
+  }
+
+  if (props['scanline'] == true) {
+    childWidget = buildScanlineOverlayControl(
+      '$controlId::scanline',
+      props,
+      childWidget,
+      defaultText: isDark ? Colors.white : Colors.black,
+      registerInvokeHandler: registerInvokeHandler,
+      unregisterInvokeHandler: unregisterInvokeHandler,
+    );
+  }
+
+  if (props['shimmer'] == true) {
+    childWidget = buildShimmerControl(
+      '$controlId::effects',
+      props,
+      childWidget,
+      registerInvokeHandler,
+      unregisterInvokeHandler,
+    );
+  }
+
+  if (props['vignette'] == true) {
+    childWidget = buildVignetteControl(
+      '$controlId::vignette',
+      props,
+      childWidget,
+      defaultColor: isDark ? Colors.black : Colors.white,
+      registerInvokeHandler: registerInvokeHandler,
+      unregisterInvokeHandler: unregisterInvokeHandler,
+    );
+  }
+
+  if (props['animated_background'] == true) {
+    childWidget = Stack(
+      fit: StackFit.passthrough,
+      children: [
+        Positioned.fill(
+          child: buildAnimatedBackgroundControl(
+            props,
+            const [],
+            (_) => const SizedBox.shrink(),
+          ),
+        ),
+        childWidget,
+      ],
+    );
+  }
+
+  if (props['liquid_morph'] == true) {
+    final baseChild = childWidget;
+    childWidget = buildLiquidMorphControl(props, const [
+      {"placeholder": true},
+    ], (_) => baseChild);
+  }
+
+  if (props['parallax'] == true) {
+    final baseChild = childWidget;
+    childWidget = buildParallaxControl(props, const [
+      {"placeholder": true},
+    ], (_) => baseChild);
+  }
+
+  if (props['glow'] == true) {
+    childWidget = buildGlowEffectControl(props, childWidget);
+  }
+
+  final actorOverlay = _buildCandyActorOverlay(
+    props['actor'] ?? props['actors'],
+    isDark,
+  );
+  if (actorOverlay != null) {
+    childWidget = Stack(
+      fit: StackFit.passthrough,
+      children: [childWidget, actorOverlay],
+    );
+  }
+
+  return childWidget;
 }
 
 // ============================================================================
@@ -1028,11 +1401,12 @@ Widget? buildCandyControl(
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   Widget Function(Map<String, Object?> control) buildChild,
 ) {
-  final rawModule = merged['module'] ?? merged['layout'];
+  final semanticProps = _expandCandySemanticProps(merged);
+  final rawModule = semanticProps['module'] ?? semanticProps['layout'];
   final resolvedModule = _normalizeCandyModule(rawModule);
   final effectiveModule = resolvedModule.isEmpty ? 'container' : resolvedModule;
 
-  final normalized = Map<String, Object?>.from(merged);
+  final normalized = Map<String, Object?>.from(semanticProps);
   normalized['module'] = effectiveModule;
   if (normalized['main_axis'] == null && normalized['main'] != null) {
     normalized['main_axis'] = normalized['main'];
@@ -1103,7 +1477,7 @@ Widget _buildCandyScope(
   ButterflyUIControlContext context,
   Map<String, Object?> control,
 ) {
-  final props = context.propsOf(control);
+  final props = _expandCandySemanticProps(context.propsOf(control));
   final brightness = props['brightness'] as String? ?? 'light';
   final isDark = brightness.toLowerCase().startsWith('dark');
 
@@ -1119,120 +1493,21 @@ Widget _buildCandyScope(
       ? context.buildChild(childMaps.first)
       : const SizedBox.shrink();
 
-  // 1. Effects wrapper pipeline: seamlessly inject requested Dart Controls
   final controlId = control['id']?.toString() ?? 'candy_scope';
   final registerInvokeHandler = context.registerInvokeHandler;
   final unregisterInvokeHandler = context.unregisterInvokeHandler;
   final sendEvent = context.sendEvent;
 
-  // Particles
-  if (props['particles'] == true) {
-    childWidget = Stack(
-      fit: StackFit.loose,
-      children: [
-        childWidget,
-        IgnorePointer(
-          child: buildParticleFieldControl(
-            '$controlId::particles',
-            props,
-            registerInvokeHandler,
-            unregisterInvokeHandler,
-            sendEvent,
-          ),
-        ),
-      ],
-    );
-  }
+  childWidget = _applyCandyEnhancementLayers(
+    child: childWidget,
+    props: props,
+    isDark: isDark,
+    controlId: controlId,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+  );
 
-  // Scanline
-  // Scanline
-  if (props['scanline'] == true) {
-    childWidget = Stack(
-      fit: StackFit.loose,
-      children: [
-        childWidget,
-        IgnorePointer(
-          child: buildScanlineOverlayControl(
-            '$controlId::scanline',
-            props,
-            childWidget,
-            defaultText: isDark ? Colors.white : Colors.black,
-            registerInvokeHandler: registerInvokeHandler,
-            unregisterInvokeHandler: unregisterInvokeHandler,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Shimmer
-  if (props['shimmer'] == true) {
-    childWidget = buildShimmerControl(
-      '$controlId::effects',
-      props,
-      childWidget,
-      registerInvokeHandler,
-      unregisterInvokeHandler,
-    );
-  }
-
-  // Vignette
-  if (props['vignette'] == true) {
-    childWidget = Stack(
-      fit: StackFit.loose,
-      children: [
-        childWidget,
-        IgnorePointer(
-          child: buildVignetteControl(
-            '$controlId::vignette',
-            props,
-            childWidget,
-            defaultColor: isDark ? Colors.black : Colors.white,
-            registerInvokeHandler: registerInvokeHandler,
-            unregisterInvokeHandler: unregisterInvokeHandler,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Animated Background
-  if (props['animated_background'] == true) {
-    childWidget = Stack(
-      fit: StackFit.loose,
-      children: [
-        Positioned.fill(
-          child: buildAnimatedBackgroundControl(
-            props,
-            const [],
-            (_) => const SizedBox.shrink(),
-          ),
-        ),
-        childWidget,
-      ],
-    );
-  }
-
-  // Liquid Morph
-  if (props['liquid_morph'] == true) {
-    childWidget = buildLiquidMorphControl(props, const [
-      {"placeholder": true},
-    ], (_) => childWidget);
-  }
-
-  // Parallax
-  if (props['parallax'] == true) {
-    childWidget = buildParallaxControl(props, const [
-      {"placeholder": true},
-    ], (_) => childWidget);
-  }
-
-  // Visual FX (Glow)
-  if (props['glow'] == true) {
-    childWidget = buildGlowEffectControl(props, childWidget);
-  }
-
-  // 2. Page logic
   final module = props['module']?.toString();
   if (module == 'page') {
     childWidget = Scaffold(
