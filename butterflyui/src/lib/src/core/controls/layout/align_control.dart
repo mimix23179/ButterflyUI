@@ -48,11 +48,13 @@ class _AlignControl extends StatefulWidget {
 
 class _AlignControlState extends State<_AlignControl> {
   late Alignment _alignment;
+  double? _widthFactor;
+  double? _heightFactor;
 
   @override
   void initState() {
     super.initState();
-    _alignment = _parseAlignment(widget.props['alignment']) ?? Alignment.center;
+    _syncFromProps(widget.props);
     if (widget.controlId.isNotEmpty) {
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
@@ -70,7 +72,7 @@ class _AlignControlState extends State<_AlignControl> {
       }
     }
     if (oldWidget.props != widget.props) {
-      _alignment = _parseAlignment(widget.props['alignment']) ?? Alignment.center;
+      _syncFromProps(widget.props);
     }
   }
 
@@ -82,7 +84,10 @@ class _AlignControlState extends State<_AlignControl> {
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_alignment':
         final next = _parseAlignment(args['alignment']);
@@ -90,6 +95,19 @@ class _AlignControlState extends State<_AlignControl> {
           setState(() => _alignment = next);
           _emit('change', _statePayload());
         }
+        return _statePayload();
+      case 'set_props':
+        final nextProps = args['props'] is Map
+            ? coerceObjectMap(args['props'] as Map)
+            : args;
+        setState(() {
+          _syncFromProps(<String, Object?>{
+            'alignment': _alignment,
+            'width_factor': _widthFactor,
+            'height_factor': _heightFactor,
+            ...nextProps,
+          });
+        });
         return _statePayload();
       case 'get_state':
         return _statePayload();
@@ -106,7 +124,11 @@ class _AlignControlState extends State<_AlignControl> {
   }
 
   Map<String, Object?> _statePayload() {
-    return <String, Object?>{'alignment': <String, Object?>{'x': _alignment.x, 'y': _alignment.y}};
+    return <String, Object?>{
+      'alignment': <String, Object?>{'x': _alignment.x, 'y': _alignment.y},
+      if (_widthFactor != null) 'width_factor': _widthFactor,
+      if (_heightFactor != null) 'height_factor': _heightFactor,
+    };
   }
 
   void _emit(String event, Map<String, Object?> payload) {
@@ -126,10 +148,16 @@ class _AlignControlState extends State<_AlignControl> {
 
     return Align(
       alignment: _alignment,
-      widthFactor: coerceDouble(widget.props['width_factor']),
-      heightFactor: coerceDouble(widget.props['height_factor']),
+      widthFactor: _widthFactor,
+      heightFactor: _heightFactor,
       child: child,
     );
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _alignment = _parseAlignment(props['alignment']) ?? Alignment.center;
+    _widthFactor = coerceDouble(props['width_factor']);
+    _heightFactor = coerceDouble(props['height_factor']);
   }
 }
 

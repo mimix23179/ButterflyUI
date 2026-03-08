@@ -122,7 +122,6 @@ class _StyleControlState extends State<_StyleControl> {
     }
 
     final tokenMap = _tokenOverrides();
-    final stylePack = (_state['style_pack'] ?? _state['pack'] ?? '').toString();
     final cardBg = coerceColor(
       _state['bgcolor'] ??
           _state['background'] ??
@@ -156,27 +155,6 @@ class _StyleControlState extends State<_StyleControl> {
           borderRadius: radius == null ? null : BorderRadius.circular(radius),
         ),
         child: body,
-      );
-    }
-
-    if (stylePack.isNotEmpty) {
-      final labelColor = coerceColor(tokenMap['primary']) ?? Colors.white54;
-      body = Stack(
-        children: [
-          body,
-          Positioned(
-            right: 8,
-            top: 6,
-            child: Text(
-              stylePack,
-              style: TextStyle(
-                color: labelColor.withValues(alpha: 0.75),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       );
     }
 

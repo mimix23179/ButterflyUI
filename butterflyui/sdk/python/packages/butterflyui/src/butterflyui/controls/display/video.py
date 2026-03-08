@@ -7,7 +7,7 @@ from ..layout_control import LayoutControl
 from ..single_child_control import SingleChildControl
 __all__ = ["Video"]
 
-@butterfly_control('video', field_aliases={'content': 'child'})
+@butterfly_control('video', field_aliases={'content': 'child', 'source': 'src'})
 class Video(LayoutControl, SingleChildControl):
     """
     Video player control with playback management.
@@ -37,6 +37,11 @@ class Video(LayoutControl, SingleChildControl):
     src: str | None = None
     """
     URI or file path of the video source.
+    """
+
+    title: str | None = None
+    """
+    Primary title shown by the player chrome.
     """
 
     poster: str | None = None
@@ -74,6 +79,16 @@ class Video(LayoutControl, SingleChildControl):
     Initial volume level from ``0.0`` to ``1.0``.
     """
 
+    position: float | None = None
+    """
+    Initial playback position, in seconds.
+    """
+
+    aspect_ratio: float | None = None
+    """
+    Preferred display aspect ratio when the runtime cannot derive it from the media stream yet.
+    """
+
     def play(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "play", {})
 
@@ -82,6 +97,12 @@ class Video(LayoutControl, SingleChildControl):
 
     def set_position(self, session: Any, seconds: float) -> dict[str, Any]:
         return self.invoke(session, "set_position", {"seconds": float(seconds)})
+
+    def set_volume(self, session: Any, volume: float) -> dict[str, Any]:
+        return self.invoke(session, "set_volume", {"volume": float(volume)})
+
+    def set_muted(self, session: Any, muted: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_muted", {"muted": bool(muted)})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

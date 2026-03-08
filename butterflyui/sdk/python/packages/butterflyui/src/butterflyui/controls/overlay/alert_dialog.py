@@ -142,18 +142,18 @@ class AlertDialog(Component):
             resolved_dismissible = not bool(modal)
 
         merged = merge_props(
-                        props,
-                        open=open,
-                        dismissible=resolved_dismissible,
-                        close_on_escape=close_on_escape,
-                        trap_focus=trap_focus,
-                        duration_ms=duration_ms,
-                        transition=transition,
-                        transition_type=transition_type,
-                        source_rect=source_rect,
-                        scrim_color=scrim_color,
-                        **kwargs,
-                    )
+            props,
+            open=open,
+            dismissible=resolved_dismissible,
+            close_on_escape=close_on_escape,
+            trap_focus=trap_focus,
+            duration_ms=duration_ms,
+            transition=transition,
+            transition_type=transition_type,
+            source_rect=source_rect,
+            scrim_color=scrim_color,
+            **kwargs,
+        )
         super().__init__(
             child=resolved_child,
             props=merged,
@@ -173,7 +173,7 @@ class AlertDialog(Component):
         actions: Sequence[Any] | None,
     ) -> Any | None:
         from ..display import Text
-        from ..inputs import TextButton
+        from ..inputs import ElevatedButton, FilledButton, OutlinedButton, TextButton
         from ..layout import Column, Row
 
         def as_control(value: Any, *, is_title: bool = False) -> Any:
@@ -195,21 +195,77 @@ class AlertDialog(Component):
         if content_control is not None:
             dialog_children.append(content_control)
 
-        if actions:
+        if actions and any(AlertDialog._requires_composed_action(action) for action in actions):
             action_controls: list[Any] = []
             for action in actions:
-                if isinstance(action, (str, int, float)):
-                    action_controls.append(TextButton(str(action)))
-                else:
-                    action_controls.append(action)
+                resolved_action = AlertDialog._coerce_action_control(
+                    action,
+                    text_button=TextButton,
+                    outlined_button=OutlinedButton,
+                    elevated_button=ElevatedButton,
+                    filled_button=FilledButton,
+                )
+                if resolved_action is not None:
+                    action_controls.append(resolved_action)
             dialog_children.append(Row(*action_controls, main_axis="end", spacing=8))
 
         if not dialog_children:
             return None
         return Column(*dialog_children, spacing=12)
 
+    @staticmethod
+    def _requires_composed_action(action: Any) -> bool:
+        if isinstance(action, (str, int, float)):
+            return False
+        if isinstance(action, Mapping):
+            return "type" in action or "control_type" in action
+        return action is not None
+
+    @staticmethod
+    def _coerce_action_control(
+        action: Any,
+        *,
+        text_button: Any,
+        outlined_button: Any,
+        elevated_button: Any,
+        filled_button: Any,
+    ) -> Any | None:
+        if action is None:
+            return None
+        if isinstance(action, (str, int, float)):
+            return text_button(str(action))
+        if isinstance(action, Mapping):
+            action_map = dict(action)
+            if "type" in action_map or "control_type" in action_map:
+                return action
+
+            label = action_map.get("label", action_map.get("text"))
+            if label is None:
+                return None
+
+            variant = str(action_map.get("variant", "text")).strip().lower()
+            button_cls = text_button
+            if variant in {"filled", "primary"}:
+                button_cls = filled_button
+            elif variant in {"elevated", "raised"}:
+                button_cls = elevated_button
+            elif variant == "outlined":
+                button_cls = outlined_button
+
+            return button_cls(
+                str(label),
+                icon=action_map.get("icon"),
+                disabled=action_map.get("enabled") is False,
+                action_id=action_map.get("id"),
+                value=action_map.get("value"),
+            )
+        return action
+
     def set_open(self, session: Any, value: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"value": value})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
@@ -225,4 +281,7 @@ class AlertDialog(Component):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)
 

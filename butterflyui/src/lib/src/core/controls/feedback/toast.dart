@@ -2,9 +2,187 @@ import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 import 'package:butterflyui_runtime/src/core/notifications/notification_manager.dart';
 import 'package:butterflyui_runtime/src/core/notifications/notification.dart';
+import 'package:butterflyui_runtime/src/core/control_utils.dart';
+
+Widget buildToastOverlayControl(
+  String controlId,
+  Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent sendEvent, {
+  String? defaultStyle,
+}) {
+  return _ButterflyUIToastControl(
+    controlId: controlId,
+    props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+    defaultStyle: defaultStyle,
+  );
+}
+
+class _ButterflyUIToastControl extends StatefulWidget {
+  const _ButterflyUIToastControl({
+    required this.controlId,
+    required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+    this.defaultStyle,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+  final String? defaultStyle;
+
+  @override
+  State<_ButterflyUIToastControl> createState() =>
+      _ButterflyUIToastControlState();
+}
+
+class _ButterflyUIToastControlState extends State<_ButterflyUIToastControl> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _liveProps = <String, Object?>{...widget.props};
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ButterflyUIToastControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    if (oldWidget.props != widget.props) {
+      setState(() {
+        _liveProps = <String, Object?>{...widget.props};
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_open':
+        {
+          setState(() {
+            _liveProps = <String, Object?>{
+              ..._liveProps,
+              'open': args['value'] == true || args['open'] == true,
+            };
+          });
+          return _statePayload();
+        }
+      case 'show':
+        {
+          setState(() {
+            _liveProps = <String, Object?>{..._liveProps, 'open': true};
+          });
+          return _statePayload();
+        }
+      case 'hide':
+        {
+          setState(() {
+            _liveProps = <String, Object?>{..._liveProps, 'open': false};
+          });
+          return _statePayload();
+        }
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            setState(() {
+              _liveProps = <String, Object?>{
+                ..._liveProps,
+                ...coerceObjectMap(incoming),
+              };
+            });
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'action' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          if (widget.controlId.isNotEmpty) {
+            widget.sendEvent(widget.controlId, event, payload);
+          }
+          return true;
+        }
+      default:
+        throw UnsupportedError('Unknown toast method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'open': _liveProps['open'] == true,
+      'message': (_liveProps['message'] ?? _liveProps['text'] ?? '').toString(),
+      'label': _liveProps['label']?.toString(),
+      'style': (_liveProps['style'] ?? widget.defaultStyle)?.toString(),
+      'variant': _liveProps['variant']?.toString(),
+      'duration_ms': coerceOptionalInt(_liveProps['duration_ms']) ?? 2400,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ButterflyUIToastWidget(
+      controlId: widget.controlId,
+      message: (_liveProps['message'] ?? _liveProps['text'] ?? '').toString(),
+      label: _liveProps['label']?.toString(),
+      open: _liveProps['open'] == true,
+      durationMs: coerceOptionalInt(_liveProps['duration_ms']) ?? 2400,
+      actionLabel: _liveProps['action_label']?.toString(),
+      variant: _liveProps['variant']?.toString(),
+      style: (_liveProps['style'] ?? widget.defaultStyle)?.toString(),
+      icon: parseIconDataLoose(_liveProps['icon']),
+      animation: _liveProps['animation'] is Map
+          ? coerceObjectMap(_liveProps['animation'] as Map)
+          : null,
+      instant: _liveProps['instant'] == true,
+      priority: coerceOptionalInt(_liveProps['priority']) ?? 0,
+      useFlushbar: _liveProps['use_flushbar'] == true,
+      useFlutterToast: _liveProps['use_fluttertoast'] == true,
+      toastPosition: _liveProps['toast_position']?.toString(),
+      sendEvent: widget.sendEvent,
+    );
+  }
+}
 
 class ButterflyUIToastWidget extends StatefulWidget {
   final String controlId;
@@ -49,7 +227,6 @@ class ButterflyUIToastWidget extends StatefulWidget {
 }
 
 class _ButterflyUIToastWidgetState extends State<ButterflyUIToastWidget> {
-
   String _lastMessage = '';
 
   @override
@@ -70,14 +247,22 @@ class _ButterflyUIToastWidgetState extends State<ButterflyUIToastWidget> {
       }
     } else if (oldWidget.open) {
       // Dismiss via NotificationManager and emit close event to python
-      NotificationManager.instance.dismiss(widget.controlId, reason: 'dismiss', emitClose: true);
+      NotificationManager.instance.dismiss(
+        widget.controlId,
+        reason: 'dismiss',
+        emitClose: true,
+      );
     }
   }
 
   @override
   void dispose() {
     // Ensure dismissal without emitting close (widget is being disposed)
-    NotificationManager.instance.dismiss(widget.controlId, reason: 'dispose', emitClose: false);
+    NotificationManager.instance.dismiss(
+      widget.controlId,
+      reason: 'dispose',
+      emitClose: false,
+    );
     super.dispose();
   }
 
@@ -133,4 +318,3 @@ class _ButterflyUIToastWidgetState extends State<ButterflyUIToastWidget> {
     return const SizedBox.shrink();
   }
 }
-

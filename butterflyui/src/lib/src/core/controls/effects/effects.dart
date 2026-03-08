@@ -2,41 +2,63 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
-Widget buildEffectsControl(Map<String, Object?> props, Widget child) {
-  if (props['enabled'] == false) return child;
+Widget buildEffectsControl(
+  Map<String, Object?> props,
+  Widget child, {
+  String controlId = '',
+  ButterflyUIRegisterInvokeHandler? registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent? sendEvent,
+}) {
+  return buildRuntimePropsControl(
+    props: props,
+    controlId: controlId,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+    builder: (liveProps) {
+      if (liveProps['enabled'] == false) return child;
 
-  Widget built = child;
+      Widget built = child;
 
-  final blur = coerceDouble(props['blur']) ?? 0.0;
-  if (blur > 0) {
-    built = ImageFiltered(
-      imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-      child: built,
-    );
-  }
+      final blur = coerceDouble(liveProps['blur']) ?? 0.0;
+      if (blur > 0) {
+        built = ImageFiltered(
+          imageFilter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: built,
+        );
+      }
 
-  final color = coerceColor(props['color']);
-  final blendMode = _parseBlendMode(props['blend_mode']) ?? BlendMode.srcATop;
-  if (color != null) {
-    built = ColorFiltered(
-      colorFilter: ColorFilter.mode(color, blendMode),
-      child: built,
-    );
-  }
+      final color = coerceColor(liveProps['color']);
+      final blendMode =
+          _parseBlendMode(liveProps['blend_mode']) ?? BlendMode.srcATop;
+      if (color != null) {
+        built = ColorFiltered(
+          colorFilter: ColorFilter.mode(color, blendMode),
+          child: built,
+        );
+      }
 
-  final matrix = _buildColorMatrix(props);
-  if (matrix != null) {
-    built = ColorFiltered(colorFilter: ColorFilter.matrix(matrix), child: built);
-  }
+      final matrix = _buildColorMatrix(liveProps);
+      if (matrix != null) {
+        built = ColorFiltered(
+          colorFilter: ColorFilter.matrix(matrix),
+          child: built,
+        );
+      }
 
-  final opacity = coerceDouble(props['opacity']);
-  if (opacity != null && opacity >= 0 && opacity < 1) {
-    built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
-  }
+      final opacity = coerceDouble(liveProps['opacity']);
+      if (opacity != null && opacity >= 0 && opacity < 1) {
+        built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
+      }
 
-  return built;
+      return built;
+    },
+  );
 }
 
 BlendMode? _parseBlendMode(Object? value) {
@@ -79,7 +101,10 @@ List<double>? _buildColorMatrix(Map<String, Object?> props) {
   final grayscale = coerceDouble(props['grayscale']) ?? 0.0;
 
   final changed =
-      brightness != 1.0 || contrast != 1.0 || saturation != 1.0 || grayscale > 0;
+      brightness != 1.0 ||
+      contrast != 1.0 ||
+      saturation != 1.0 ||
+      grayscale > 0;
   if (!changed) return null;
 
   final s = saturation;
@@ -116,9 +141,25 @@ List<double>? _buildColorMatrix(Map<String, Object?> props) {
   final bShift = (brightness - 1.0) * 255;
 
   return <double>[
-    r0 * c, r1 * c, r2 * c, 0, t + bShift,
-    g0 * c, g1 * c, g2 * c, 0, t + bShift,
-    b0 * c, b1 * c, b2 * c, 0, t + bShift,
-    0, 0, 0, 1, 0,
+    r0 * c,
+    r1 * c,
+    r2 * c,
+    0,
+    t + bShift,
+    g0 * c,
+    g1 * c,
+    g2 * c,
+    0,
+    t + bShift,
+    b0 * c,
+    b1 * c,
+    b2 * c,
+    0,
+    t + bShift,
+    0,
+    0,
+    0,
+    1,
+    0,
   ];
 }

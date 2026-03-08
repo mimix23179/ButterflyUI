@@ -18,6 +18,9 @@ class ButterflyUISlider extends StatefulWidget {
     required this.labels,
     required this.enabled,
     this.autofocus = false,
+    this.helper,
+    this.helperText,
+    this.buildChild,
     this.events,
     required this.registerInvokeHandler,
     required this.unregisterInvokeHandler,
@@ -35,6 +38,9 @@ class ButterflyUISlider extends StatefulWidget {
   final bool labels;
   final bool enabled;
   final bool autofocus;
+  final Object? helper;
+  final String? helperText;
+  final Widget Function(Map<String, Object?> child)? buildChild;
   final Object? events;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
@@ -224,7 +230,7 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
 
   @override
   Widget build(BuildContext context) {
-    final child = _isRange
+    final slider = _isRange
         ? RangeSlider(
             values: RangeValues(_start, _end),
             min: _rangeMin,
@@ -293,6 +299,14 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
                   }, stage: 'change_end')
                 : null,
           );
+    final helper = _buildHelper(context);
+    final child = helper == null
+        ? slider
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [slider, const SizedBox(height: 4), helper],
+          );
 
     return wrapFocusableFormField(
       focusNode: _focusNode,
@@ -307,6 +321,30 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
         );
       },
       child: child,
+    );
+  }
+
+  Widget? _buildHelper(BuildContext context) {
+    final helper = widget.helper;
+    if (helper is Map && widget.buildChild != null) {
+      return widget.buildChild!(
+        Map<String, Object?>.fromEntries(
+          helper.entries.map(
+            (entry) => MapEntry(entry.key.toString(), entry.value),
+          ),
+        ),
+      );
+    }
+    final helperText = widget.helperText?.trim();
+    if (helperText == null || helperText.isEmpty) {
+      return null;
+    }
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Text(helperText, style: style),
     );
   }
 }

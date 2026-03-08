@@ -60,6 +60,8 @@ class _WrapControlState extends State<_WrapControl> {
   late WrapAlignment _runAlignment;
   late WrapCrossAlignment _crossAxis;
   late Axis _direction;
+  late VerticalDirection _verticalDirection;
+  late Clip _clipBehavior;
 
   @override
   void initState() {
@@ -108,10 +110,17 @@ class _WrapControlState extends State<_WrapControl> {
     _runAlignment =
         parseLayoutWrapAlignment(widget.props['run_alignment']) ??
         WrapAlignment.start;
-    _crossAxis =
-        parseLayoutWrapCrossAlignment(widget.props['cross_axis']) ??
-        WrapCrossAlignment.start;
     _direction = parseLayoutAxis(widget.props['direction']) ?? Axis.horizontal;
+    _crossAxis =
+        parseLayoutWrapCrossAlignment(
+          widget.props['cross_axis'] ?? widget.props['cross_alignment'],
+          axis: _direction,
+        ) ??
+        WrapCrossAlignment.start;
+    _verticalDirection =
+        _parseVerticalDirection(widget.props['vertical_direction']) ??
+        VerticalDirection.down;
+    _clipBehavior = parseLayoutClip(widget.props['clip_behavior']) ?? Clip.none;
   }
 
   Future<Object?> _handleInvoke(
@@ -121,6 +130,8 @@ class _WrapControlState extends State<_WrapControl> {
     switch (method) {
       case 'set_layout':
         setState(() {
+          final nextDirection =
+              parseLayoutAxis(args['direction']) ?? _direction;
           _spacing = coerceDouble(args['spacing']) ?? _spacing;
           _runSpacing = coerceDouble(args['run_spacing']) ?? _runSpacing;
           _alignment =
@@ -128,8 +139,21 @@ class _WrapControlState extends State<_WrapControl> {
           _runAlignment =
               parseLayoutWrapAlignment(args['run_alignment']) ?? _runAlignment;
           _crossAxis =
-              parseLayoutWrapCrossAlignment(args['cross_axis']) ?? _crossAxis;
-          _direction = parseLayoutAxis(args['direction']) ?? _direction;
+              parseLayoutWrapCrossAlignment(
+                args['cross_axis'] ?? args['cross_alignment'],
+                axis: nextDirection,
+              ) ??
+              _crossAxis;
+          _direction = nextDirection;
+          if (args.containsKey('vertical_direction')) {
+            _verticalDirection =
+                _parseVerticalDirection(args['vertical_direction']) ??
+                _verticalDirection;
+          }
+          if (args.containsKey('clip_behavior')) {
+            _clipBehavior =
+                parseLayoutClip(args['clip_behavior']) ?? _clipBehavior;
+          }
         });
         return _statePayload();
       case 'get_state':
@@ -148,6 +172,8 @@ class _WrapControlState extends State<_WrapControl> {
       'run_alignment': _runAlignment.name,
       'cross_axis': _crossAxis.name,
       'direction': _direction == Axis.horizontal ? 'horizontal' : 'vertical',
+      'vertical_direction': _verticalDirection.name,
+      if (_clipBehavior != Clip.none) 'clip_behavior': _clipBehavior.name,
     };
   }
 
@@ -160,10 +186,22 @@ class _WrapControlState extends State<_WrapControl> {
       runAlignment: _runAlignment,
       crossAxisAlignment: _crossAxis,
       direction: _direction,
+      verticalDirection: _verticalDirection,
+      clipBehavior: _clipBehavior,
       children: resolveControlChildMaps(
         widget.rawChildren,
         widget.props,
       ).map(widget.buildFromControl).toList(),
     );
   }
+}
+
+VerticalDirection? _parseVerticalDirection(Object? value) {
+  switch (value?.toString().toLowerCase()) {
+    case 'up':
+      return VerticalDirection.up;
+    case 'down':
+      return VerticalDirection.down;
+  }
+  return null;
 }

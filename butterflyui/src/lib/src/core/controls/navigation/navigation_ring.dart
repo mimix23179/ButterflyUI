@@ -58,6 +58,7 @@ class _ButterflyUINavigationRing extends StatefulWidget {
 
 class _ButterflyUINavigationRingState
     extends State<_ButterflyUINavigationRing> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<_RingItem> _items = const <_RingItem>[];
   String? _selectedId;
 
@@ -94,12 +95,13 @@ class _ButterflyUINavigationRingState
     super.dispose();
   }
 
-  void _syncFromProps() {
-    _items = _parseItems(widget.props['items']);
+  void _syncFromProps([Map<String, Object?>? props]) {
+    _liveProps = <String, Object?>{...(props ?? widget.props)};
+    _items = _parseItems(_liveProps['items']);
     _selectedId =
-        widget.props['selected_id']?.toString() ??
-        widget.props['selected']?.toString() ??
-        widget.props['value']?.toString();
+        _liveProps['selected_id']?.toString() ??
+        _liveProps['selected']?.toString() ??
+        _liveProps['value']?.toString();
     if ((_selectedId == null || _selectedId!.isEmpty) && _items.isNotEmpty) {
       _selectedId = _items.first.id;
     }
@@ -129,17 +131,7 @@ class _ButterflyUINavigationRingState
           if (incoming is Map) {
             final props = coerceObjectMap(incoming);
             setState(() {
-              if (props.containsKey('items')) {
-                _items = _parseItems(props['items']);
-              }
-              if (props.containsKey('selected_id') ||
-                  props.containsKey('selected') ||
-                  props.containsKey('value')) {
-                _selectedId =
-                    props['selected_id']?.toString() ??
-                    props['selected']?.toString() ??
-                    props['value']?.toString();
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...props});
             });
           }
           return _statePayload();
@@ -230,34 +222,34 @@ class _ButterflyUINavigationRingState
   Widget build(BuildContext context) {
     if (_items.isEmpty) return const SizedBox.shrink();
 
-    final dense = widget.props['dense'] == true;
-    final policy = (widget.props['policy'] ?? 'selected_only')
+    final dense = _liveProps['dense'] == true;
+    final policy = (_liveProps['policy'] ?? 'selected_only')
         .toString()
         .toLowerCase()
         .replaceAll('-', '_');
-    final spacing = coerceDouble(widget.props['spacing']) ?? (dense ? 6 : 10);
+    final spacing = coerceDouble(_liveProps['spacing']) ?? (dense ? 6 : 10);
     final padding =
-        coercePadding(widget.props['padding']) ??
+        coercePadding(_liveProps['padding']) ??
         EdgeInsets.symmetric(
           horizontal: dense ? 8 : 12,
           vertical: dense ? 6 : 8,
         );
-    final radius = coerceDouble(widget.props['radius']) ?? 999;
+    final radius = coerceDouble(_liveProps['radius']) ?? 999;
 
     final bgColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface.withValues(alpha: 0.75);
     final borderColor =
-        coerceColor(widget.props['border_color']) ??
+        coerceColor(_liveProps['border_color']) ??
         Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
     final selectedColor =
-        coerceColor(widget.props['selected_color']) ??
+        coerceColor(_liveProps['selected_color']) ??
         Theme.of(context).colorScheme.primaryContainer;
     final selectedTextColor =
-        coerceColor(widget.props['selected_text_color']) ??
+        coerceColor(_liveProps['selected_text_color']) ??
         Theme.of(context).colorScheme.onPrimaryContainer;
     final textColor =
-        coerceColor(widget.props['text_color']) ??
+        coerceColor(_liveProps['text_color']) ??
         Theme.of(context).colorScheme.onSurface;
 
     final ring = Container(
@@ -288,7 +280,7 @@ class _ButterflyUINavigationRingState
       ),
     );
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: ring,
       clipToRadius: true,
       defaultRadius: radius,
@@ -341,7 +333,7 @@ class _ButterflyUINavigationRingState
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) icon,
+              ...?(icon == null ? null : <Widget>[icon]),
               if (showLabel) ...[
                 if (icon != null) const SizedBox(width: 8),
                 Text(

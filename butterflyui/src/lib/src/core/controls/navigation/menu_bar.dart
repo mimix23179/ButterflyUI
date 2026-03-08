@@ -23,39 +23,16 @@ Widget buildMenuBarControl(
 Widget buildMenuItemControl(
   String controlId,
   Map<String, Object?> props,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final label =
-      (props['label'] ?? props['text'] ?? props['title'] ?? 'Menu item')
-          .toString();
-  final subtitle = props['subtitle']?.toString();
-  final iconWidget = buildIconValue(
-    props['icon'] ?? props['leading_icon'],
-    size: 18,
-  );
-  final trailingText =
-      (props['shortcut'] ?? props['trailing_text'] ?? props['meta'])
-          ?.toString();
-  final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
-
-  void emitSelect() {
-    if (controlId.isEmpty) return;
-    sendEvent(controlId, 'select', {
-      'id': props['id']?.toString() ?? label,
-      'label': label,
-      if (props['value'] != null) 'value': props['value'],
-    });
-  }
-
-  return ListTile(
-    dense: props['dense'] == true,
-    enabled: enabled,
-    selected: props['selected'] == true,
-    leading: iconWidget,
-    title: Text(label),
-    subtitle: subtitle == null ? null : Text(subtitle),
-    trailing: trailingText == null ? null : Text(trailingText),
-    onTap: enabled ? emitSelect : null,
+  return _ButterflyUIMenuItem(
+    controlId: controlId,
+    props: props,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
   );
 }
 
@@ -116,6 +93,7 @@ class ButterflyUIMenuBar extends StatefulWidget {
 }
 
 class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<_MenuGroupData> _groups = const <_MenuGroupData>[];
   bool _dense = false;
 
@@ -153,8 +131,9 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
   }
 
   void _syncFromProps(Map<String, Object?> props) {
-    _groups = _parseMenuGroups(props);
-    _dense = props['dense'] == true;
+    _liveProps = <String, Object?>{...props};
+    _groups = _parseMenuGroups(_liveProps);
+    _dense = _liveProps['dense'] == true;
   }
 
   Future<Object?> _handleInvoke(
@@ -167,11 +146,11 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
         {
           setState(() {
             final payload = <String, Object?>{
-              ...widget.props,
+              ..._liveProps,
               if (args.containsKey('menus')) 'menus': args['menus'],
               if (args.containsKey('items')) 'items': args['items'],
             };
-            _groups = _parseMenuGroups(payload);
+            _syncFromProps(payload);
           });
           return _statePayload();
         }
@@ -181,11 +160,7 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
           if (incoming is Map) {
             final props = coerceObjectMap(incoming);
             setState(() {
-              final merged = <String, Object?>{...widget.props, ...props};
-              _groups = _parseMenuGroups(merged);
-              if (props.containsKey('dense')) {
-                _dense = props['dense'] == true;
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...props});
             });
           }
           return _statePayload();
@@ -227,17 +202,17 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
 
   @override
   Widget build(BuildContext context) {
-    final height = coerceDouble(widget.props['height']) ?? (_dense ? 34 : 40);
+    final height = coerceDouble(_liveProps['height']) ?? (_dense ? 34 : 40);
     final padding =
-        coercePadding(widget.props['padding']) ??
+        coercePadding(_liveProps['padding']) ??
         EdgeInsets.symmetric(horizontal: _dense ? 8 : 12, vertical: 4);
 
     final bgColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
     final borderColor =
         coerceColor(
-          widget.props['divider_color'] ?? widget.props['border_color'],
+          _liveProps['divider_color'] ?? _liveProps['border_color'],
         ) ??
         Theme.of(context).colorScheme.outlineVariant;
 
@@ -253,15 +228,15 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
           ),
         ),
         child: Text(
-          widget.props['title']?.toString() ?? 'Menu',
+          _liveProps['title']?.toString() ?? 'Menu',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
       return applyControlFrameLayout(
-        props: widget.props,
+        props: _liveProps,
         child: bar,
         clipToRadius: true,
-        defaultRadius: coerceDouble(widget.props['radius']),
+        defaultRadius: coerceDouble(_liveProps['radius']),
       );
     }
 
@@ -290,10 +265,195 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
       ),
     );
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: bar,
       clipToRadius: true,
-      defaultRadius: coerceDouble(widget.props['radius']),
+      defaultRadius: coerceDouble(_liveProps['radius']),
+    );
+  }
+}
+
+class _ButterflyUIMenuItem extends StatefulWidget {
+  const _ButterflyUIMenuItem({
+    required this.controlId,
+    required this.props,
+    required this.registerInvokeHandler,
+    required this.unregisterInvokeHandler,
+    required this.sendEvent,
+  });
+
+  final String controlId;
+  final Map<String, Object?> props;
+  final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
+  final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
+  final ButterflyUISendRuntimeEvent sendEvent;
+
+  @override
+  State<_ButterflyUIMenuItem> createState() => _ButterflyUIMenuItemState();
+}
+
+class _ButterflyUIMenuItemState extends State<_ButterflyUIMenuItem> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _liveProps = <String, Object?>{...widget.props};
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ButterflyUIMenuItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlId != widget.controlId) {
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
+    }
+    if (oldWidget.props != widget.props) {
+      setState(() {
+        _liveProps = <String, Object?>{...widget.props};
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
+    super.dispose();
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
+    switch (method) {
+      case 'set_selected':
+        {
+          setState(() {
+            _liveProps = <String, Object?>{
+              ..._liveProps,
+              'selected': args['selected'] ?? args['value'] ?? true,
+            };
+          });
+          return _statePayload();
+        }
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            setState(() {
+              _liveProps = <String, Object?>{
+                ..._liveProps,
+                ...coerceObjectMap(incoming),
+              };
+            });
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'select' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          _emit(event, payload);
+          return true;
+        }
+      default:
+        throw UnsupportedError('Unknown menu_item method: $method');
+    }
+  }
+
+  Map<String, Object?> _statePayload() {
+    final label =
+        (_liveProps['label'] ??
+                _liveProps['text'] ??
+                _liveProps['title'] ??
+                'Menu item')
+            .toString();
+    return <String, Object?>{
+      'id': _liveProps['id']?.toString() ?? label,
+      'label': label,
+      'selected': _liveProps['selected'] == true,
+      'enabled': _liveProps['enabled'] == null
+          ? true
+          : (_liveProps['enabled'] == true),
+    };
+  }
+
+  void _emit(String event, Map<String, Object?> payload) {
+    if (widget.controlId.isEmpty) {
+      return;
+    }
+    widget.sendEvent(widget.controlId, event, payload);
+  }
+
+  void _emitSelect() {
+    final label =
+        (_liveProps['label'] ??
+                _liveProps['text'] ??
+                _liveProps['title'] ??
+                'Menu item')
+            .toString();
+    final payload = <String, Object?>{
+      'id': _liveProps['id']?.toString() ?? label,
+      'label': label,
+      if (_liveProps['value'] != null) 'value': _liveProps['value'],
+    };
+    _emit('select', payload);
+    _emit('change', payload);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label =
+        (_liveProps['label'] ??
+                _liveProps['text'] ??
+                _liveProps['title'] ??
+                'Menu item')
+            .toString();
+    final subtitle = _liveProps['subtitle']?.toString();
+    final iconWidget = buildIconValue(
+      _liveProps['icon'] ?? _liveProps['leading_icon'],
+      size: 18,
+    );
+    final trailingText =
+        (_liveProps['shortcut'] ??
+                _liveProps['trailing_text'] ??
+                _liveProps['meta'])
+            ?.toString();
+    final enabled = _liveProps['enabled'] == null
+        ? true
+        : (_liveProps['enabled'] == true);
+    final selected = _liveProps['selected'] == true;
+
+    final tile = ListTile(
+      dense: _liveProps['dense'] == true,
+      enabled: enabled,
+      selected: selected,
+      leading: iconWidget,
+      title: Text(label),
+      subtitle: subtitle == null ? null : Text(subtitle),
+      trailing: trailingText == null ? null : Text(trailingText),
+      onTap: enabled ? _emitSelect : null,
+    );
+    return applyControlFrameLayout(
+      props: _liveProps,
+      child: tile,
+      clipToRadius: true,
+      defaultRadius: coerceDouble(_liveProps['radius']),
     );
   }
 }

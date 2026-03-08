@@ -79,15 +79,21 @@ class _SidebarSection {
 class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
   late TextEditingController _controller;
   Timer? _searchDebounce;
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   String _query = '';
   String? _selectedId;
+  bool _showSearch = false;
+  bool _collapsible = false;
+  bool _dense = false;
+  bool _emitOnSearchChange = true;
+  int _searchDebounceMs = 180;
+  List<Map<String, Object?>> _sections = const <Map<String, Object?>>[];
 
   @override
   void initState() {
     super.initState();
-    _query = widget.query;
-    _selectedId = widget.selectedId;
-    _controller = TextEditingController(text: _query);
+    _controller = TextEditingController();
+    _syncFromProps(widget.props);
     if (widget.controlId.isNotEmpty) {
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
@@ -104,12 +110,8 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
         widget.registerInvokeHandler(widget.controlId, _handleInvoke);
       }
     }
-    if (widget.query != oldWidget.query && widget.query != _query) {
-      _query = widget.query;
-      _controller.text = widget.query;
-    }
-    if (widget.selectedId != oldWidget.selectedId) {
-      _selectedId = widget.selectedId;
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
     }
   }
 
@@ -121,6 +123,45 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
     _searchDebounce?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _syncFromProps(Map<String, Object?> props) {
+    _liveProps = <String, Object?>{...props};
+    _query = _liveProps['query']?.toString() ?? widget.query;
+    _selectedId =
+        _liveProps['selected_id']?.toString() ??
+        _liveProps['selected']?.toString() ??
+        _liveProps['value']?.toString() ??
+        widget.selectedId;
+    _showSearch = _liveProps['show_search'] == true || widget.showSearch;
+    _collapsible = _liveProps['collapsible'] == true || widget.collapsible;
+    _dense = _liveProps['dense'] == true || widget.dense;
+    _emitOnSearchChange = _liveProps['emit_on_search_change'] == null
+        ? widget.emitOnSearchChange
+        : (_liveProps['emit_on_search_change'] == true);
+    _searchDebounceMs =
+        coerceOptionalInt(_liveProps['search_debounce_ms']) ??
+        widget.searchDebounceMs;
+    final rawSections = _liveProps['sections'];
+    if (rawSections is List) {
+      _sections = rawSections
+          .whereType<Map>()
+          .map(coerceObjectMap)
+          .toList(growable: false);
+    } else if (_liveProps['items'] is List) {
+      _sections = <Map<String, Object?>>[
+        <String, Object?>{
+          'id': 'items',
+          'title': _liveProps['title'] ?? 'Items',
+          'items': _liveProps['items'],
+        },
+      ];
+    } else {
+      _sections = widget.sections;
+    }
+    if (_controller.text != _query) {
+      _controller.text = _query;
+    }
   }
 
   Future<Object?> _handleInvoke(
@@ -141,18 +182,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
         if (incoming is Map) {
           final props = coerceObjectMap(incoming);
           setState(() {
-            if (props.containsKey('query')) {
-              _query = props['query']?.toString() ?? '';
-              _controller.text = _query;
-            }
-            if (props.containsKey('selected_id') ||
-                props.containsKey('selected') ||
-                props.containsKey('value')) {
-              _selectedId =
-                  props['selected_id']?.toString() ??
-                  props['selected']?.toString() ??
-                  props['value']?.toString();
-            }
+            _syncFromProps(<String, Object?>{..._liveProps, ...props});
           });
         }
         return _statePayload();
@@ -191,9 +221,9 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
 
   void _onSearchChanged(String value) {
     setState(() => _query = value);
-    if (!widget.emitOnSearchChange) return;
+    if (!_emitOnSearchChange) return;
     _searchDebounce?.cancel();
-    final delay = widget.searchDebounceMs < 0 ? 0 : widget.searchDebounceMs;
+    final delay = _searchDebounceMs < 0 ? 0 : _searchDebounceMs;
     if (delay == 0) {
       _emit('search', {'query': value});
       return;
@@ -205,8 +235,8 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
 
   List<_SidebarSection> _parseSections() {
     final out = <_SidebarSection>[];
-    for (var s = 0; s < widget.sections.length; s += 1) {
-      final section = widget.sections[s];
+    for (var s = 0; s < _sections.length; s += 1) {
+      final section = _sections[s];
       final sectionId = (section['id'] ?? section['title'] ?? s).toString();
       final title = section['title']?.toString() ?? 'Section';
       final collapsed = section['collapsed'] == true;
@@ -343,34 +373,34 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
   @override
   Widget build(BuildContext context) {
     final sections = _parseSections();
-    final dense = widget.dense;
+    final dense = _dense;
     final bgColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
     final borderColor =
-        coerceColor(widget.props['border_color']) ??
+        coerceColor(_liveProps['border_color']) ??
         Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
     final selectedColor =
-        coerceColor(widget.props['selected_color']) ??
+        coerceColor(_liveProps['selected_color']) ??
         Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.7);
     final selectedTextColor =
-        coerceColor(widget.props['selected_text_color']) ??
+        coerceColor(_liveProps['selected_text_color']) ??
         Theme.of(context).colorScheme.onPrimaryContainer;
     final textColor =
-        coerceColor(widget.props['text_color']) ??
+        coerceColor(_liveProps['text_color']) ??
         Theme.of(context).colorScheme.onSurface;
     final iconColor =
-        coerceColor(widget.props['icon_color']) ??
+        coerceColor(_liveProps['icon_color']) ??
         Theme.of(context).colorScheme.onSurfaceVariant;
     final padding =
-        coercePadding(widget.props['padding']) ?? const EdgeInsets.all(8);
-    final radius = coerceDouble(widget.props['radius']) ?? 14;
+        coercePadding(_liveProps['padding']) ?? const EdgeInsets.all(8);
+    final radius = coerceDouble(_liveProps['radius']) ?? 14;
 
     final listChildren = <Widget>[];
     for (final section in sections) {
       final visibleItems = section.items.where(_matchesQuery).toList();
       if (visibleItems.isEmpty) continue;
-      if (widget.collapsible) {
+      if (_collapsible) {
         listChildren.add(
           ExpansionTile(
             title: Text(
@@ -428,7 +458,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.showSearch)
+        if (_showSearch)
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
             child: TextField(
@@ -461,7 +491,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
       child: body,
     );
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: sidebar,
       clipToRadius: true,
       defaultRadius: radius,

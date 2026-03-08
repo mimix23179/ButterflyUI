@@ -39,12 +39,15 @@ class _ToastHostControl extends StatefulWidget {
 }
 
 class _ToastHostControlState extends State<_ToastHostControl> {
-  late List<Map<String, Object?>> _items =
-      _coerceItems(widget.props['items'] ?? widget.props['toasts']);
+  Map<String, Object?> _liveProps = const <String, Object?>{};
+  late List<Map<String, Object?>> _items = _coerceItems(
+    widget.props['items'] ?? widget.props['toasts'],
+  );
 
   @override
   void initState() {
     super.initState();
+    _liveProps = <String, Object?>{...widget.props};
     if (widget.controlId.isNotEmpty) {
       widget.registerInvokeHandler(widget.controlId, _handleInvoke);
     }
@@ -62,7 +65,8 @@ class _ToastHostControlState extends State<_ToastHostControl> {
       }
     }
     if (oldWidget.props != widget.props) {
-      _items = _coerceItems(widget.props['items'] ?? widget.props['toasts']);
+      _liveProps = <String, Object?>{...widget.props};
+      _items = _coerceItems(_liveProps['items'] ?? _liveProps['toasts']);
     }
   }
 
@@ -75,13 +79,21 @@ class _ToastHostControlState extends State<_ToastHostControl> {
   }
 
   int get _maxItems =>
-      (coerceOptionalInt(widget.props['max_items']) ?? 4).clamp(1, 32);
+      (coerceOptionalInt(_liveProps['max_items']) ?? 4).clamp(1, 32);
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_items':
         setState(() {
           _items = _coerceItems(args['items'] ?? args['toasts']);
+          _liveProps = <String, Object?>{
+            ..._liveProps,
+            'items': args['items'] ?? args['toasts'],
+            'toasts': args['items'] ?? args['toasts'],
+          };
         });
         return null;
       case 'push':
@@ -106,7 +118,8 @@ class _ToastHostControlState extends State<_ToastHostControl> {
           setState(() {
             _items.removeWhere(
               (item) =>
-                  (item['id']?.toString() ?? item['key']?.toString() ?? '') == id,
+                  (item['id']?.toString() ?? item['key']?.toString() ?? '') ==
+                  id,
             );
           });
           return null;
@@ -117,6 +130,24 @@ class _ToastHostControlState extends State<_ToastHostControl> {
           _items = const <Map<String, Object?>>[];
         });
         return null;
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            final props = coerceObjectMap(incoming);
+            setState(() {
+              _liveProps = <String, Object?>{..._liveProps, ...props};
+              if (props.containsKey('items') || props.containsKey('toasts')) {
+                _items = _coerceItems(
+                  _liveProps['items'] ?? _liveProps['toasts'],
+                );
+              }
+            });
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
       case 'get_items':
         return List<Map<String, Object?>>.from(_items, growable: false);
       case 'emit':
@@ -134,15 +165,29 @@ class _ToastHostControlState extends State<_ToastHostControl> {
     }
   }
 
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'count': _items.length,
+      'max_items': _maxItems,
+      'position': (_liveProps['position'] ?? 'bottom_right').toString(),
+      'latest_on_top': _liveProps['latest_on_top'] == null
+          ? true
+          : (_liveProps['latest_on_top'] == true),
+      'dismissible': _liveProps['dismissible'] == null
+          ? true
+          : (_liveProps['dismissible'] == true),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final spacing = coerceDouble(widget.props['spacing']) ?? 8.0;
-    final showLatestOnTop = widget.props['latest_on_top'] == null
+    final spacing = coerceDouble(_liveProps['spacing']) ?? 8.0;
+    final showLatestOnTop = _liveProps['latest_on_top'] == null
         ? true
-        : (widget.props['latest_on_top'] == true);
-    final dismissible = widget.props['dismissible'] == null
+        : (_liveProps['latest_on_top'] == true);
+    final dismissible = _liveProps['dismissible'] == null
         ? true
-        : (widget.props['dismissible'] == true);
+        : (_liveProps['dismissible'] == true);
 
     var toRender = List<Map<String, Object?>>.from(_items);
     if (showLatestOnTop) {
@@ -152,9 +197,9 @@ class _ToastHostControlState extends State<_ToastHostControl> {
       toRender.removeRange(_maxItems, toRender.length);
     }
 
-    final alignment = _resolveAlignment(widget.props['position']?.toString());
+    final alignment = _resolveAlignment(_liveProps['position']?.toString());
     final padding =
-        coercePadding(widget.props['padding']) ??
+        coercePadding(_liveProps['padding']) ??
         const EdgeInsets.symmetric(horizontal: 12, vertical: 12);
 
     return IgnorePointer(

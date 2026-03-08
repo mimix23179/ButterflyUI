@@ -89,6 +89,9 @@ class AppBar(LayoutControl):
             payload["subtitle"] = subtitle
         return self.invoke(session, "set_title", payload)
 
+    def set_search(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_search", {"value": value})
+
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
 

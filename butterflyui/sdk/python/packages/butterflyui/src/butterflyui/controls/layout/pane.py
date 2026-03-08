@@ -34,3 +34,34 @@ class Pane(LayoutControl, SingleChildControl):
     """
     Slot identifier that controls placement within the parent layout.
     """
+
+    title: Any | None = None
+    """
+    Optional pane title used by parent layouts that render pane headers.
+    """
+
+    size: float | str | None = None
+    """
+    Preferred pane size hint used by split and dock-style parents.
+    """
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_style", style_props)
+
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "emit",
+            {"event": event, "payload": dict(payload or {})},
+        )

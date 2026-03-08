@@ -40,6 +40,7 @@ class _ButterflyUIStatusBar extends StatefulWidget {
 }
 
 class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<Map<String, Object?>> _items = const <Map<String, Object?>>[];
   String _text = '';
 
@@ -76,9 +77,10 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
     super.dispose();
   }
 
-  void _syncFromProps() {
-    _items = _coerceItems(widget.props['items']);
-    _text = widget.props['text']?.toString() ?? '';
+  void _syncFromProps([Map<String, Object?>? props]) {
+    _liveProps = <String, Object?>{...(props ?? widget.props)};
+    _items = _coerceItems(_liveProps['items']);
+    _text = _liveProps['text']?.toString() ?? '';
   }
 
   List<Map<String, Object?>> _coerceItems(Object? rawItems) {
@@ -112,12 +114,7 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
         if (rawProps is Map) {
           final props = coerceObjectMap(rawProps);
           setState(() {
-            if (props.containsKey('items')) {
-              _items = _coerceItems(props['items']);
-            }
-            if (props.containsKey('text')) {
-              _text = props['text']?.toString() ?? '';
-            }
+            _syncFromProps(<String, Object?>{..._liveProps, ...props});
           });
         }
         return _statePayload();
@@ -259,20 +256,20 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
               : <Map<String, Object?>>[
                   {'id': _text, 'label': _text},
                 ]);
-    final dense = widget.props['dense'] == true;
+    final dense = _liveProps['dense'] == true;
     final padding =
-        coercePadding(widget.props['padding']) ??
+        coercePadding(_liveProps['padding']) ??
         EdgeInsets.symmetric(
           horizontal: dense ? 8 : 12,
           vertical: dense ? 4 : 6,
         );
     final bgcolor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
     final borderColor =
-        coerceColor(widget.props['border_color']) ??
+        coerceColor(_liveProps['border_color']) ??
         Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.65);
-    final radius = coerceDouble(widget.props['radius']) ?? 0;
+    final radius = coerceDouble(_liveProps['radius']) ?? 0;
 
     final left = <Widget>[];
     final right = <Widget>[];
@@ -308,7 +305,7 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
       ),
     );
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: bar,
       clipToRadius: radius > 0,
       defaultRadius: radius > 0 ? radius : null,

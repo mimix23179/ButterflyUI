@@ -434,6 +434,12 @@ class _ModifierHostState extends State<_ModifierHost>
   );
 
   @override
+  void initState() {
+    super.initState();
+    _burstController;
+  }
+
+  @override
   void didUpdateWidget(covariant _ModifierHost oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.bundle.burstDurationMs != widget.bundle.burstDurationMs) {

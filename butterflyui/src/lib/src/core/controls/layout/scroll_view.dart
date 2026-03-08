@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/scrollable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -116,22 +117,33 @@ class _ButterflyUIScrollViewState extends State<ButterflyUIScrollView> {
 
   @override
   Widget build(BuildContext context) {
-    final childMap = _firstChildMap(widget.children);
+    final childMaps = resolveControlChildMaps(widget.children, widget.props);
     final direction =
         parseScrollableAxis(widget.props['direction']) ?? Axis.vertical;
     final contentPadding = coercePadding(widget.props['content_padding']);
     final reverse = widget.props['reverse'] == true;
+    final spacing =
+        coerceDouble(
+          widget.props['content_gap'] ??
+              widget.props['spacing'] ??
+              widget.props['gap'],
+        ) ??
+        0.0;
 
     final events = coerceScrollableEvents(widget.props['events']);
+    final content = _buildScrollableContent(
+      childMaps: childMaps,
+      direction: direction,
+      spacing: spacing,
+      buildFromControl: widget.buildFromControl,
+    );
 
     Widget scrollable = SingleChildScrollView(
       controller: _controller,
       scrollDirection: direction,
       reverse: reverse,
       padding: contentPadding,
-      child: childMap == null
-          ? const SizedBox.shrink()
-          : widget.buildFromControl(childMap),
+      child: content,
     );
 
     return wrapScrollableNotifications(
@@ -144,11 +156,31 @@ class _ButterflyUIScrollViewState extends State<ButterflyUIScrollView> {
   }
 }
 
-Map<String, Object?>? _firstChildMap(List children) {
-  for (final child in children) {
-    if (child is Map) {
-      return coerceObjectMap(child);
-    }
+Widget _buildScrollableContent({
+  required List<Map<String, Object?>> childMaps,
+  required Axis direction,
+  required double spacing,
+  required Widget Function(Map<String, Object?> child) buildFromControl,
+}) {
+  if (childMaps.isEmpty) {
+    return const SizedBox.shrink();
   }
-  return null;
+
+  if (childMaps.length == 1) {
+    return buildFromControl(childMaps.first);
+  }
+
+  final children = childMaps.map(buildFromControl).toList();
+  if (direction == Axis.horizontal) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: buildSpacedChildren(children, Axis.horizontal, spacing),
+    );
+  }
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: buildSpacedChildren(children, Axis.vertical, spacing),
+  );
 }

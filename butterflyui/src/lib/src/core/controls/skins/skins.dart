@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_registry.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/align_control.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/card.dart';
@@ -339,29 +340,20 @@ Widget skinsFirstChildOrEmpty(
 // Parse helper functions
 // ============================================================================
 
-MainAxisAlignment skinsParseMainAxis(Object? value) {
-  final v = skinsNorm(value?.toString() ?? '');
-  return switch (v) {
-    'start' || 'min' => MainAxisAlignment.start,
-    'end' || 'max' => MainAxisAlignment.end,
-    'center' => MainAxisAlignment.center,
-    'space_between' || 'spacebetween' => MainAxisAlignment.spaceBetween,
-    'space_around' || 'spacearound' => MainAxisAlignment.spaceAround,
-    'space_evenly' || 'spaceevenly' => MainAxisAlignment.spaceEvenly,
-    _ => MainAxisAlignment.start,
-  };
+MainAxisAlignment skinsParseMainAxis(
+  Object? value, {
+  required Axis axis,
+  MainAxisAlignment fallback = MainAxisAlignment.start,
+}) {
+  return parseLayoutMainAxisAlignment(value, fallback, axis: axis);
 }
 
-CrossAxisAlignment skinsParseCrossAxis(Object? value) {
-  final v = skinsNorm(value?.toString() ?? '');
-  return switch (v) {
-    'start' || 'min' => CrossAxisAlignment.start,
-    'end' || 'max' => CrossAxisAlignment.end,
-    'center' => CrossAxisAlignment.center,
-    'stretch' => CrossAxisAlignment.stretch,
-    'baseline' => CrossAxisAlignment.baseline,
-    _ => CrossAxisAlignment.start,
-  };
+CrossAxisAlignment skinsParseCrossAxis(
+  Object? value, {
+  required Axis axis,
+  CrossAxisAlignment fallback = CrossAxisAlignment.start,
+}) {
+  return parseLayoutCrossAxisAlignment(value, fallback, axis: axis);
 }
 
 MainAxisSize skinsParseMainAxisSize(Object? value) {

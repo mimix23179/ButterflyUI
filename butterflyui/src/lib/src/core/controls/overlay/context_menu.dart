@@ -63,6 +63,7 @@ class ButterflyUIContextMenu extends StatefulWidget {
 }
 
 class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<_ContextAction> _actions = const <_ContextAction>[];
   String _trigger = 'secondary';
   bool _openOnTap = false;
@@ -102,10 +103,13 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
   }
 
   void _syncFromProps(Map<String, Object?> props) {
-    _actions = _parseActions(props['items']);
-    _trigger = (props['trigger']?.toString().toLowerCase() ?? 'secondary');
-    _openOnTap = props['open_on_tap'] == true;
-    _enabled = props['enabled'] == null ? true : (props['enabled'] == true);
+    _liveProps = <String, Object?>{...props};
+    _actions = _parseActions(_liveProps['items']);
+    _trigger = (_liveProps['trigger']?.toString().toLowerCase() ?? 'secondary');
+    _openOnTap = _liveProps['open_on_tap'] == true;
+    _enabled = _liveProps['enabled'] == null
+        ? true
+        : (_liveProps['enabled'] == true);
   }
 
   Future<Object?> _handleInvoke(
@@ -124,19 +128,7 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
           if (rawProps is Map) {
             final props = coerceObjectMap(rawProps);
             setState(() {
-              if (props.containsKey('items')) {
-                _actions = _parseActions(props['items']);
-              }
-              if (props.containsKey('trigger')) {
-                _trigger =
-                    props['trigger']?.toString().toLowerCase() ?? _trigger;
-              }
-              if (props.containsKey('open_on_tap')) {
-                _openOnTap = props['open_on_tap'] == true;
-              }
-              if (props.containsKey('enabled')) {
-                _enabled = props['enabled'] == true;
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...props});
             });
           }
           return _statePayload();
@@ -207,11 +199,11 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
 
     final selected = await showMenu<_ContextAction>(
       context: context,
-      color: coerceColor(widget.props['bgcolor']),
-      elevation: coerceDouble(widget.props['elevation']),
+      color: coerceColor(_liveProps['bgcolor']),
+      elevation: coerceDouble(_liveProps['elevation']),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
-          coerceDouble(widget.props['radius']) ?? 12,
+          coerceDouble(_liveProps['radius']) ?? 12,
         ),
       ),
       position: RelativeRect.fromRect(
@@ -272,17 +264,17 @@ class _ButterflyUIContextMenuState extends State<ButterflyUIContextMenu> {
     final showOnTap = _trigger == 'tap' || _openOnTap;
 
     Widget child = widget.child;
-    if (child is SizedBox && widget.props['label'] != null) {
+    if (child is SizedBox && _liveProps['label'] != null) {
       child = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Text(widget.props['label']!.toString()),
+        child: Text(_liveProps['label']!.toString()),
       );
     }
     child = applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: child,
       clipToRadius: true,
-      defaultRadius: coerceDouble(widget.props['radius']),
+      defaultRadius: coerceDouble(_liveProps['radius']),
     );
 
     return GestureDetector(

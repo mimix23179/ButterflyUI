@@ -96,13 +96,26 @@ class _ContainerControlState extends State<_ContainerControl> {
     switch (method) {
       case 'set_layout':
       case 'set_style':
+      case 'set_props':
         setState(() {
-          _liveProps = <String, Object?>{..._liveProps, ...args};
+          _liveProps = <String, Object?>{
+            ..._liveProps,
+            ..._extractPropUpdates(args),
+          };
         });
         return _statePayload();
       case 'get_state':
       case 'get_layout':
         return _statePayload();
+      case 'emit':
+        final event = (args['event'] ?? 'change').toString();
+        final payload = args['payload'] is Map
+            ? coerceObjectMap(args['payload'] as Map)
+            : <String, Object?>{};
+        if (widget.controlId.isNotEmpty) {
+          widget.sendEvent(widget.controlId, event, payload);
+        }
+        return null;
       default:
         throw UnsupportedError('Unknown container method: $method');
     }
@@ -121,6 +134,10 @@ class _ContainerControlState extends State<_ContainerControl> {
       if (_liveProps['bgcolor'] != null || _liveProps['color'] != null)
         'bgcolor': _liveProps['bgcolor'] ?? _liveProps['color'],
       if (_liveProps['radius'] != null) 'radius': _liveProps['radius'],
+      if (_liveProps['alignment'] != null) 'alignment': _liveProps['alignment'],
+      if (_liveProps['slot'] != null) 'slot': _liveProps['slot'],
+      if (_liveProps['title'] != null) 'title': _liveProps['title'],
+      if (_liveProps['size'] != null) 'size': _liveProps['size'],
       if (_liveProps['content_layout'] != null)
         'content_layout': _liveProps['content_layout'],
       if (_liveProps['content_gap'] != null)
@@ -148,14 +165,27 @@ class _ContainerControlState extends State<_ContainerControl> {
       _liveProps,
       image: image,
     );
+    final inheritedSurfaceTint = coerceColor(
+      _liveProps['__surface_tint_color'],
+    );
+    final hasExplicitSurfaceFill =
+        _coerceBool(_liveProps['__has_explicit_surface_fill']) == true;
     final bgColor = suppressSurfaceFill
         ? null
+        : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
+        ? deriveInheritedSurfaceFill(inheritedSurfaceTint)
         : coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']);
-    final borderColor = coerceColor(_liveProps['border_color']);
+    final borderColor =
+        coerceColor(_liveProps['border_color']) ??
+        (!hasExplicitSurfaceFill && inheritedSurfaceTint != null
+            ? deriveInheritedSurfaceBorder(inheritedSurfaceTint)
+            : null);
     final borderWidth = coerceDouble(_liveProps['border_width']) ?? 0.0;
     final radius = coerceDouble(_liveProps['radius']);
     final boxShadow = coerceBoxShadow(_liveProps['shadow']);
     final gradient = suppressSurfaceFill
+        ? null
+        : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
         ? null
         : coerceGradient(_liveProps['gradient']);
     final shapeStr = _liveProps['shape']?.toString().toLowerCase();
@@ -349,4 +379,12 @@ bool? _coerceBool(Object? value) {
     return false;
   }
   return null;
+}
+
+Map<String, Object?> _extractPropUpdates(Map<String, Object?> args) {
+  final props = args['props'];
+  if (props is Map) {
+    return coerceObjectMap(props);
+  }
+  return args;
 }

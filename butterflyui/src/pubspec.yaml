@@ -26,6 +26,7 @@ dependencies:
   file_picker:
   flutter_colorpicker:
   flutter_markdown_plus:
+  markdown:
   flutter_svg:
   media_kit:
   media_kit_libs_windows_audio:

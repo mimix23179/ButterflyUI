@@ -860,7 +860,6 @@ class _AppRendererState extends State<AppRenderer> {
       if (_stylePackHash != null && _stylePackHash!.isNotEmpty) {
         payload['style_pack_hash'] = _stylePackHash;
       }
-      payload['style_pack'] = _stylePack.name;
     }
     widget.client.send(RuntimeMessage(type: 'ui.applied', payload: payload));
   }

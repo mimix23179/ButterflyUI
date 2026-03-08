@@ -567,6 +567,11 @@ def coerce_json_value(value: Any) -> Any:
         return None
     if isinstance(value, Control):
         return value.to_json()
+    if hasattr(value, "to_json"):
+        try:
+            return coerce_json_value(value.to_json())
+        except Exception:
+            pass
     if isinstance(value, Mapping):
         if "type" in value:
             return coerce_control_map(value)

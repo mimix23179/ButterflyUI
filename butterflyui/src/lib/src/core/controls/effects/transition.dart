@@ -1,50 +1,72 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildTransitionControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
-  Widget Function(Map<String, Object?> child) buildChild,
-) {
-  final enabled = props['enabled'] == null ? true : (props['enabled'] == true);
-  final child = _resolveChild(props, rawChildren, buildChild);
-  if (!enabled) return child;
+  Widget Function(Map<String, Object?> child) buildChild, {
+  String controlId = '',
+  ButterflyUIRegisterInvokeHandler? registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent? sendEvent,
+}) {
+  return buildRuntimePropsControl(
+    props: props,
+    controlId: controlId,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+    builder: (liveProps) {
+      final enabled = liveProps['enabled'] == null
+          ? true
+          : (liveProps['enabled'] == true);
+      final child = _resolveChild(liveProps, rawChildren, buildChild);
+      if (!enabled) return child;
 
-  final durationMs = (coerceOptionalInt(props['duration_ms']) ?? 220).clamp(
-    1,
-    600000,
-  );
-  final curve = _parseCurve(props['curve']) ?? Curves.easeOutCubic;
-  final rawType = (props['transition_type'] ?? props['transition'] ?? props['preset'])
-      ?.toString()
-      .toLowerCase();
-  final transitionType = (rawType == null || rawType.isEmpty) ? 'fade' : rawType;
-  final stateKey =
-      props['state']?.toString() ?? props['value']?.toString() ?? transitionType;
+      final durationMs = (coerceOptionalInt(liveProps['duration_ms']) ?? 220)
+          .clamp(1, 600000);
+      final curve = _parseCurve(liveProps['curve']) ?? Curves.easeOutCubic;
+      final rawType =
+          (liveProps['transition_type'] ??
+                  liveProps['transition'] ??
+                  liveProps['preset'])
+              ?.toString()
+              .toLowerCase();
+      final transitionType = (rawType == null || rawType.isEmpty)
+          ? 'fade'
+          : rawType;
+      final stateKey =
+          liveProps['state']?.toString() ??
+          liveProps['value']?.toString() ??
+          transitionType;
 
-  return AnimatedSwitcher(
-    duration: Duration(milliseconds: durationMs),
-    switchInCurve: curve,
-    switchOutCurve: curve,
-    transitionBuilder: (child, animation) {
-      switch (transitionType) {
-        case 'scale':
-          return ScaleTransition(scale: animation, child: child);
-        case 'slide':
-        case 'slide_and_fade':
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.08, 0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        default:
-          return FadeTransition(opacity: animation, child: child);
-      }
+      return AnimatedSwitcher(
+        duration: Duration(milliseconds: durationMs),
+        switchInCurve: curve,
+        switchOutCurve: curve,
+        transitionBuilder: (child, animation) {
+          switch (transitionType) {
+            case 'scale':
+              return ScaleTransition(scale: animation, child: child);
+            case 'slide':
+            case 'slide_and_fade':
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.08, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
+              );
+            default:
+              return FadeTransition(opacity: animation, child: child);
+          }
+        },
+        child: KeyedSubtree(key: ValueKey<String>(stateKey), child: child),
+      );
     },
-    child: KeyedSubtree(key: ValueKey<String>(stateKey), child: child),
   );
 }
 

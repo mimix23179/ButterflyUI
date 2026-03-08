@@ -9,6 +9,8 @@ Widget buildGridViewControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
+  ButterflyUIRegisterInvokeHandler registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
   final children = <Map<String, Object?>>[];
@@ -17,5 +19,13 @@ Widget buildGridViewControl(
       children.add(coerceObjectMap(child));
     }
   }
-  return buildGridControl(controlId, props, children, buildChild, sendEvent);
+  return buildGridControl(
+    controlId,
+    props,
+    children,
+    buildChild,
+    registerInvokeHandler,
+    unregisterInvokeHandler,
+    sendEvent,
+  );
 }

@@ -50,6 +50,7 @@ class _ButterflyUISlidePanelControl extends StatefulWidget {
 
 class _ButterflyUISlidePanelControlState
     extends State<_ButterflyUISlidePanelControl> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   bool _open = false;
   String _side = 'left';
   double _size = 280;
@@ -90,17 +91,20 @@ class _ButterflyUISlidePanelControlState
   }
 
   void _syncFromProps(Map<String, Object?> props) {
-    _open = props['open'] == true;
+    _liveProps = <String, Object?>{...props};
+    _open = _liveProps['open'] == true;
     _side = _normalizeSide(
-      props['side']?.toString() ?? props['position']?.toString(),
+      _liveProps['side']?.toString() ?? _liveProps['position']?.toString(),
     );
     _size =
-        coerceDouble(props['size'] ?? props['width'] ?? props['height']) ??
+        coerceDouble(
+          _liveProps['size'] ?? _liveProps['width'] ?? _liveProps['height'],
+        ) ??
         280.0;
-    _dismissible = props['dismissible'] == null
+    _dismissible = _liveProps['dismissible'] == null
         ? true
-        : (props['dismissible'] == true);
-    _scrimColor = coerceColor(props['scrim_color']);
+        : (_liveProps['dismissible'] == true);
+    _scrimColor = coerceColor(_liveProps['scrim_color']);
   }
 
   Future<Object?> _handleInvoke(
@@ -120,29 +124,7 @@ class _ButterflyUISlidePanelControlState
           if (incoming is Map) {
             final map = coerceObjectMap(incoming);
             setState(() {
-              if (map.containsKey('open')) {
-                _open = map['open'] == true;
-              }
-              if (map.containsKey('side') || map.containsKey('position')) {
-                _side = _normalizeSide(
-                  map['side']?.toString() ?? map['position']?.toString(),
-                );
-              }
-              if (map.containsKey('size') ||
-                  map.containsKey('width') ||
-                  map.containsKey('height')) {
-                _size =
-                    coerceDouble(
-                      map['size'] ?? map['width'] ?? map['height'],
-                    ) ??
-                    _size;
-              }
-              if (map.containsKey('dismissible')) {
-                _dismissible = map['dismissible'] == true;
-              }
-              if (map.containsKey('scrim_color')) {
-                _scrimColor = coerceColor(map['scrim_color']);
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...map});
             });
             _emit('state', _statePayload());
           }
@@ -222,16 +204,16 @@ class _ButterflyUISlidePanelControlState
         break;
       }
     }
-    if (child is SizedBox && widget.props['child'] is Map) {
-      child = widget.buildChild(coerceObjectMap(widget.props['child'] as Map));
+    if (child is SizedBox && _liveProps['child'] is Map) {
+      child = widget.buildChild(coerceObjectMap(_liveProps['child'] as Map));
     }
 
     final durationMs =
         coerceOptionalInt(
-          widget.props['duration_ms'] ?? widget.props['duration'],
+          _liveProps['duration_ms'] ?? _liveProps['duration'],
         ) ??
         220;
-    final curve = _curveFrom(widget.props['curve']?.toString());
+    final curve = _curveFrom(_liveProps['curve']?.toString());
 
     final size = MediaQuery.of(context).size;
     final horizontal = _side == 'left' || _side == 'right';
@@ -240,15 +222,15 @@ class _ButterflyUISlidePanelControlState
         : _size;
 
     final panelColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
-    final elevation = coerceDouble(widget.props['elevation']) ?? 4.0;
-    final radius = coerceDouble(widget.props['radius']) ?? 0.0;
+    final elevation = coerceDouble(_liveProps['elevation']) ?? 4.0;
+    final radius = coerceDouble(_liveProps['radius']) ?? 0.0;
     final panelMargin =
-        coercePadding(widget.props['margin'] ?? widget.props['panel_margin']) ??
+        coercePadding(_liveProps['margin'] ?? _liveProps['panel_margin']) ??
         EdgeInsets.zero;
     final panelClip =
-        coerceClipBehavior(widget.props['clip_behavior']) ?? Clip.antiAlias;
+        coerceClipBehavior(_liveProps['clip_behavior']) ?? Clip.antiAlias;
 
     double left = 0;
     double top = 0;

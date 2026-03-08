@@ -96,6 +96,9 @@ class SnackBar(OverlayControl):
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
     def emit(
         self,
         session: Any,
@@ -107,3 +110,6 @@ class SnackBar(OverlayControl):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
+
+    def trigger(self, session: Any, event: str = "action", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

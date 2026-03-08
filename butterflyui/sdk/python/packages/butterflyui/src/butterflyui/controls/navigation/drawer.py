@@ -174,6 +174,12 @@ class Drawer(LayoutControl):
     def set_open(self, session: Any, open: bool) -> dict[str, Any]:
         return self.invoke(session, "set_open", {"open": open})
 
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def set_query(self, session: Any, query: str) -> dict[str, Any]:
+        return self.invoke(session, "set_query", {"query": query})
+
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
 

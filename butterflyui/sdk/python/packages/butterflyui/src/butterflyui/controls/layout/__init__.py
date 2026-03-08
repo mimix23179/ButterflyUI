@@ -23,6 +23,7 @@ from .accordion import Accordion
 from .pane import Pane
 from .frame import Frame
 from .grid import Grid
+from .grid_view import GridView
 from .flex_spacer import FlexSpacer
 from .spacer import Spacer
 
@@ -52,6 +53,7 @@ __all__ = [
     "Pane",
     "Frame",
     "Grid",
+    "GridView",
     "FlexSpacer",
     "Spacer"
 ]

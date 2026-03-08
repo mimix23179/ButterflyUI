@@ -49,6 +49,7 @@ class ButterflyUIActionBar extends StatefulWidget {
 }
 
 class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<Map<String, Object?>> _items = const <Map<String, Object?>>[];
   String? _activeId;
 
@@ -85,12 +86,13 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     super.dispose();
   }
 
-  void _syncFromProps() {
-    _items = _coerceItems(widget.props['items']);
+  void _syncFromProps([Map<String, Object?>? props]) {
+    _liveProps = <String, Object?>{...(props ?? widget.props)};
+    _items = _coerceItems(_liveProps['items']);
     _activeId =
-        widget.props['active_id']?.toString() ??
-        widget.props['selected_id']?.toString() ??
-        widget.props['selected']?.toString();
+        _liveProps['active_id']?.toString() ??
+        _liveProps['selected_id']?.toString() ??
+        _liveProps['selected']?.toString();
   }
 
   Future<Object?> _handleInvoke(
@@ -116,17 +118,7 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
         if (rawProps is Map) {
           final props = coerceObjectMap(rawProps);
           setState(() {
-            if (props.containsKey('items')) {
-              _items = _coerceItems(props['items']);
-            }
-            if (props.containsKey('active_id') ||
-                props.containsKey('selected_id') ||
-                props.containsKey('selected')) {
-              _activeId =
-                  props['active_id']?.toString() ??
-                  props['selected_id']?.toString() ??
-                  props['selected']?.toString();
-            }
+            _syncFromProps(<String, Object?>{..._liveProps, ...props});
           });
         }
         return _statePayload();
@@ -282,7 +274,7 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
       children: [
         if (icon != null) ...[icon, const SizedBox(width: 8)],
         Flexible(child: labelWidget),
-        if (trailingWidget != null) trailingWidget,
+        ...?(trailingWidget == null ? null : <Widget>[trailingWidget]),
       ],
     );
 
@@ -340,38 +332,38 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
 
   @override
   Widget build(BuildContext context) {
-    final dense = widget.props['dense'] == true;
-    final enabled = widget.props['enabled'] == null
+    final dense = _liveProps['dense'] == true;
+    final enabled = _liveProps['enabled'] == null
         ? true
-        : (widget.props['enabled'] == true);
-    final wrap = widget.props['wrap'] == true;
-    final scrollable = widget.props['scrollable'] == true;
-    final spacing = coerceDouble(widget.props['spacing']) ?? (dense ? 6 : 8);
-    final runSpacing = coerceDouble(widget.props['run_spacing']) ?? spacing;
+        : (_liveProps['enabled'] == true);
+    final wrap = _liveProps['wrap'] == true;
+    final scrollable = _liveProps['scrollable'] == true;
+    final spacing = coerceDouble(_liveProps['spacing']) ?? (dense ? 6 : 8);
+    final runSpacing = coerceDouble(_liveProps['run_spacing']) ?? spacing;
     final bgColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface.withValues(alpha: 0.75);
     final borderColor =
-        coerceColor(widget.props['border_color']) ??
+        coerceColor(_liveProps['border_color']) ??
         Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
-    final radius = coerceDouble(widget.props['radius']) ?? 14;
+    final radius = coerceDouble(_liveProps['radius']) ?? 14;
     final padding =
-        coercePadding(widget.props['padding']) ??
+        coercePadding(_liveProps['padding']) ??
         EdgeInsets.symmetric(
           horizontal: dense ? 8 : 10,
           vertical: dense ? 6 : 8,
         );
     final alignment = _mainAxisAlignment(
-      (widget.props['alignment'] ?? widget.props['main_axis'] ?? 'start')
+      (_liveProps['alignment'] ?? _liveProps['main_axis'] ?? 'start')
           .toString()
           .toLowerCase()
           .replaceAll('-', '_'),
     );
 
-    final title = widget.props['title']?.toString();
-    final subtitle = widget.props['subtitle']?.toString();
+    final title = _liveProps['title']?.toString();
+    final subtitle = _liveProps['subtitle']?.toString();
     final maxVisible =
-        coerceOptionalInt(widget.props['max_visible']) ?? _items.length;
+        coerceOptionalInt(_liveProps['max_visible']) ?? _items.length;
     final visibleItems = _items.take(maxVisible).toList(growable: false);
 
     final actionWidgets = <Widget>[
@@ -453,7 +445,7 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     );
 
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: bar,
       clipToRadius: true,
       defaultRadius: radius,

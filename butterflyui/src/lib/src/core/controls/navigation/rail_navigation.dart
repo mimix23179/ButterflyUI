@@ -58,6 +58,7 @@ class _ButterflyUIRailNavigation extends StatefulWidget {
 
 class _ButterflyUIRailNavigationState
     extends State<_ButterflyUIRailNavigation> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   List<_RailItem> _items = const <_RailItem>[];
   String? _selectedId;
 
@@ -94,12 +95,13 @@ class _ButterflyUIRailNavigationState
     super.dispose();
   }
 
-  void _syncFromProps() {
-    _items = _parseItems(widget.props['items']);
+  void _syncFromProps([Map<String, Object?>? props]) {
+    _liveProps = <String, Object?>{...(props ?? widget.props)};
+    _items = _parseItems(_liveProps['items']);
     _selectedId =
-        widget.props['selected_id']?.toString() ??
-        widget.props['selected']?.toString() ??
-        widget.props['value']?.toString();
+        _liveProps['selected_id']?.toString() ??
+        _liveProps['selected']?.toString() ??
+        _liveProps['value']?.toString();
     if ((_selectedId == null || _selectedId!.isEmpty) && _items.isNotEmpty) {
       _selectedId = _items.first.id;
     }
@@ -129,17 +131,7 @@ class _ButterflyUIRailNavigationState
           if (incoming is Map) {
             final map = coerceObjectMap(incoming);
             setState(() {
-              if (map.containsKey('items')) {
-                _items = _parseItems(map['items']);
-              }
-              if (map.containsKey('selected_id') ||
-                  map.containsKey('selected') ||
-                  map.containsKey('value')) {
-                _selectedId =
-                    map['selected_id']?.toString() ??
-                    map['selected']?.toString() ??
-                    map['value']?.toString();
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...map});
             });
           }
           return _statePayload();
@@ -203,8 +195,8 @@ class _ButterflyUIRailNavigationState
   Widget build(BuildContext context) {
     if (_items.isEmpty) return const SizedBox.shrink();
 
-    final dense = widget.props['dense'] == true;
-    final extended = widget.props['extended'] == true;
+    final dense = _liveProps['dense'] == true;
+    final extended = _liveProps['extended'] == true;
     final selectedId = _selectedId;
 
     var selectedIndex = 0;
@@ -214,26 +206,26 @@ class _ButterflyUIRailNavigationState
     }
 
     final bgColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
     final indicatorColor =
-        coerceColor(widget.props['indicator_color']) ??
+        coerceColor(_liveProps['indicator_color']) ??
         Theme.of(context).colorScheme.primaryContainer;
     final selectedIconColor =
-        coerceColor(widget.props['selected_icon_color']) ??
+        coerceColor(_liveProps['selected_icon_color']) ??
         Theme.of(context).colorScheme.onPrimaryContainer;
     final unselectedIconColor =
-        coerceColor(widget.props['icon_color']) ??
+        coerceColor(_liveProps['icon_color']) ??
         Theme.of(context).colorScheme.onSurfaceVariant;
     final selectedLabelColor =
-        coerceColor(widget.props['selected_text_color']) ??
+        coerceColor(_liveProps['selected_text_color']) ??
         Theme.of(context).colorScheme.onPrimaryContainer;
     final unselectedLabelColor =
-        coerceColor(widget.props['text_color']) ??
+        coerceColor(_liveProps['text_color']) ??
         Theme.of(context).colorScheme.onSurfaceVariant;
 
     final labelTypeToken =
-        (widget.props['label_type'] ?? widget.props['policy'] ?? 'selected')
+        (_liveProps['label_type'] ?? _liveProps['policy'] ?? 'selected')
             .toString()
             .toLowerCase();
     final labelType = switch (labelTypeToken) {
@@ -242,10 +234,9 @@ class _ButterflyUIRailNavigationState
       _ => NavigationRailLabelType.selected,
     };
 
-    final minWidth =
-        coerceDouble(widget.props['min_width']) ?? (dense ? 60 : 72);
+    final minWidth = coerceDouble(_liveProps['min_width']) ?? (dense ? 60 : 72);
     final minExtendedWidth =
-        coerceDouble(widget.props['min_extended_width']) ?? 220;
+        coerceDouble(_liveProps['min_extended_width']) ?? 220;
 
     final rail = Container(
       decoration: BoxDecoration(
@@ -313,10 +304,10 @@ class _ButterflyUIRailNavigationState
       ),
     );
     return applyControlFrameLayout(
-      props: widget.props,
+      props: _liveProps,
       child: rail,
       clipToRadius: true,
-      defaultRadius: coerceDouble(widget.props['radius']),
+      defaultRadius: coerceDouble(_liveProps['radius']),
     );
   }
 }

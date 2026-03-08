@@ -32,8 +32,9 @@ List<ButterflyUINotificationItem> _parseNotificationItems(
     if (item is! Map) continue;
     final map = coerceObjectMap(item);
     final id = (map['id'] ?? map['key'] ?? 'n_$i').toString();
-    final title = (map['title'] ?? map['label'] ?? map['variant'] ?? 'Notification')
-        .toString();
+    final title =
+        (map['title'] ?? map['label'] ?? map['variant'] ?? 'Notification')
+            .toString();
     final message = (map['message'] ?? map['text'] ?? '').toString();
     out.add(
       ButterflyUINotificationItem(
@@ -78,14 +79,18 @@ class ButterflyUINotificationCenter extends StatefulWidget {
 
 class _ButterflyUINotificationCenterState
     extends State<ButterflyUINotificationCenter> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   late List<ButterflyUINotificationItem> _items =
-      List<ButterflyUINotificationItem>.from(
-    widget.initialItems,
-  );
+      List<ButterflyUINotificationItem>.from(widget.initialItems);
 
   @override
   void initState() {
     super.initState();
+    _liveProps = <String, Object?>{
+      'title': widget.title,
+      'show_clear_all': widget.showClearAll,
+      'max_items': widget.maxItems,
+    };
     widget.registerInvokeHandler(widget.controlId, _handleInvoke);
   }
 
@@ -107,7 +112,10 @@ class _ButterflyUINotificationCenterState
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'clear':
       case 'clear_all':
@@ -123,9 +131,13 @@ class _ButterflyUINotificationCenterState
           if (itemArgs is Map) {
             final map = coerceObjectMap(itemArgs);
             final item = ButterflyUINotificationItem(
-              id: (map['id'] ?? map['key'] ?? DateTime.now().microsecondsSinceEpoch.toString())
+              id:
+                  (map['id'] ??
+                          map['key'] ??
+                          DateTime.now().microsecondsSinceEpoch.toString())
+                      .toString(),
+              title: (map['title'] ?? map['label'] ?? 'Notification')
                   .toString(),
-              title: (map['title'] ?? map['label'] ?? 'Notification').toString(),
               message: (map['message'] ?? map['text'] ?? '').toString(),
               variant: map['variant']?.toString(),
               read: map['read'] == true,
@@ -163,9 +175,49 @@ class _ButterflyUINotificationCenterState
               },
             )
             .toList(growable: false);
+      case 'set_props':
+        {
+          final incoming = args['props'];
+          if (incoming is Map) {
+            final props = coerceObjectMap(incoming);
+            setState(() {
+              _liveProps = <String, Object?>{..._liveProps, ...props};
+              if (props.containsKey('items') ||
+                  props.containsKey('notifications')) {
+                _items = _parseNotificationItems(_liveProps);
+              }
+            });
+          }
+          return _statePayload();
+        }
+      case 'get_state':
+        return _statePayload();
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          widget.sendEvent(widget.controlId, event, payload);
+          return true;
+        }
       default:
         throw UnsupportedError('Unknown notification_center method: $method');
     }
+  }
+
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'count': _items.length,
+      'title': _liveProps['title'] ?? widget.title,
+      'show_clear_all': _liveProps['show_clear_all'] == null
+          ? widget.showClearAll
+          : (_liveProps['show_clear_all'] == true),
+      'max_items':
+          coerceOptionalInt(_liveProps['max_items']) ?? widget.maxItems,
+    };
   }
 
   void _dismiss(ButterflyUINotificationItem item) {
@@ -191,15 +243,21 @@ class _ButterflyUINotificationCenterState
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final card = Card(
       margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ListTile(
             dense: true,
-            title: Text(widget.title ?? 'Notifications'),
-            trailing: widget.showClearAll
+            title: Text(
+              (_liveProps['title'] ?? widget.title ?? 'Notifications')
+                  .toString(),
+            ),
+            trailing:
+                (_liveProps['show_clear_all'] == null
+                    ? widget.showClearAll
+                    : (_liveProps['show_clear_all'] == true))
                 ? TextButton(
                     onPressed: _items.isEmpty
                         ? null
@@ -232,7 +290,11 @@ class _ButterflyUINotificationCenterState
                     title: Text(item.title),
                     subtitle: item.message.isEmpty
                         ? null
-                        : Text(item.message, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        : Text(
+                            item.message,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                     trailing: IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: () => _dismiss(item),
@@ -244,6 +306,12 @@ class _ButterflyUINotificationCenterState
             ),
         ],
       ),
+    );
+    return applyControlFrameLayout(
+      props: _liveProps,
+      child: card,
+      clipToRadius: true,
+      defaultRadius: coerceDouble(_liveProps['radius']),
     );
   }
 }

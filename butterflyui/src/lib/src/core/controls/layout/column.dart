@@ -59,6 +59,7 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
   late CrossAxisAlignment _crossAxis;
   late MainAxisSize _mainAxisSize;
   late Clip? _clipBehavior;
+  late bool _reverse;
 
   @override
   void initState() {
@@ -102,16 +103,22 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
         widget.tokens.number('spacing', 'md') ??
         6.0;
     _mainAxis = parseLayoutMainAxisAlignment(
-      widget.props['main_axis'],
+      widget.props['main_axis'] ??
+          widget.props['alignment'] ??
+          widget.props['vertical_alignment'],
       MainAxisAlignment.start,
+      axis: Axis.vertical,
     );
     _crossAxis = parseLayoutCrossAxisAlignment(
-      widget.props['cross_axis'],
+      widget.props['cross_axis'] ??
+          widget.props['alignment'] ??
+          widget.props['horizontal_alignment'],
       CrossAxisAlignment.start,
       axis: Axis.vertical,
     );
     _mainAxisSize = parseLayoutMainAxisSize(widget.props['main_axis_size']);
     _clipBehavior = parseLayoutClip(widget.props['clip_behavior']);
+    _reverse = widget.props['reverse'] == true;
   }
 
   Future<Object?> _handleInvoke(
@@ -123,11 +130,16 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
         setState(() {
           _spacing = coerceDouble(args['spacing'] ?? args['gap']) ?? _spacing;
           _mainAxis = parseLayoutMainAxisAlignment(
-            args['main_axis'],
+            args['main_axis'] ??
+                args['alignment'] ??
+                args['vertical_alignment'],
             _mainAxis,
+            axis: Axis.vertical,
           );
           _crossAxis = parseLayoutCrossAxisAlignment(
-            args['cross_axis'],
+            args['cross_axis'] ??
+                args['alignment'] ??
+                args['horizontal_alignment'],
             _crossAxis,
             axis: Axis.vertical,
           );
@@ -136,6 +148,9 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
           }
           if (args.containsKey('clip_behavior')) {
             _clipBehavior = parseLayoutClip(args['clip_behavior']);
+          }
+          if (args.containsKey('reverse')) {
+            _reverse = args['reverse'] == true;
           }
         });
         return _statePayload();
@@ -153,6 +168,7 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
       'main_axis': _mainAxis.name,
       'cross_axis': _crossAxis.name,
       'main_axis_size': _mainAxisSize.name,
+      'reverse': _reverse,
       if (_clipBehavior != null) 'clip_behavior': _clipBehavior!.name,
     };
   }
@@ -172,6 +188,7 @@ class _FlexColumnControlState extends State<_FlexColumnControl> {
         spacing: _spacing,
         parentMainAxisSize: _mainAxisSize,
         buildChild: widget.buildFromControl,
+        reverse: _reverse,
       ),
     );
     if (_clipBehavior != null) {

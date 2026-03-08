@@ -134,8 +134,17 @@ class ActionBar(LayoutControl):
     def set_items(self, session: Any, items: list[Mapping[str, Any]]) -> dict[str, Any]:
         return self.invoke(session, "set_items", {"items": items})
 
+    def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
+        return self.invoke(session, "set_selected", {"selected_id": selected_id})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})
+
+    def trigger(self, session: Any, event: str = "action", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

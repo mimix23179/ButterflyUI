@@ -650,6 +650,14 @@ Color? parseColor(Object? value) {
   return coerceColor(value);
 }
 
+Color deriveInheritedSurfaceFill(Color color, {double alpha = 0.22}) {
+  return color.withValues(alpha: alpha.clamp(0.0, 1.0));
+}
+
+Color deriveInheritedSurfaceBorder(Color color, {double alpha = 0.42}) {
+  return color.withValues(alpha: alpha.clamp(0.0, 1.0));
+}
+
 Map<String, Object?> coerceObjectMap(Map value) {
   return value.map((k, v) => MapEntry(k.toString(), v));
 }

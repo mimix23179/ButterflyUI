@@ -40,6 +40,7 @@ class ButterflyUIPagination extends StatefulWidget {
 }
 
 class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   int _page = 1;
   int _pageCount = 1;
 
@@ -78,15 +79,15 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
 
   @override
   Widget build(BuildContext context) {
-    final dense = widget.props['dense'] == true;
-    final enabled = widget.props['enabled'] == null
+    final dense = _liveProps['dense'] == true;
+    final enabled = _liveProps['enabled'] == null
         ? true
-        : (widget.props['enabled'] == true);
-    final showEdges = widget.props['show_edges'] == true;
-    final maxVisible = (coerceOptionalInt(widget.props['max_visible']) ?? 7)
+        : (_liveProps['enabled'] == true);
+    final showEdges = _liveProps['show_edges'] == true;
+    final maxVisible = (coerceOptionalInt(_liveProps['max_visible']) ?? 7)
         .clamp(3, 15);
-    final previousLabel = (widget.props['prev_label'] ?? 'Prev').toString();
-    final nextLabel = (widget.props['next_label'] ?? 'Next').toString();
+    final previousLabel = (_liveProps['prev_label'] ?? 'Prev').toString();
+    final nextLabel = (_liveProps['next_label'] ?? 'Next').toString();
 
     final pageButtons = _buildPageButtonModels(maxVisible, showEdges);
     final spacing = dense ? 4.0 : 6.0;
@@ -132,8 +133,9 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
   }
 
   void _syncFromProps() {
-    final pageCount = _resolvePageCount(widget.props);
-    final page = (coerceOptionalInt(widget.props['page']) ?? 1).clamp(
+    _liveProps = <String, Object?>{...widget.props};
+    final pageCount = _resolvePageCount(_liveProps);
+    final page = (coerceOptionalInt(_liveProps['page']) ?? 1).clamp(
       1,
       pageCount,
     );
@@ -167,6 +169,21 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
         _setPage(_pageCount);
         return _statePayload();
       case 'get_state':
+        return _statePayload();
+      case 'set_props':
+        final incoming = args['props'];
+        if (incoming is Map) {
+          final props = coerceObjectMap(incoming);
+          setState(() {
+            _liveProps = <String, Object?>{..._liveProps, ...props};
+            final pageCount = _resolvePageCount(_liveProps);
+            _pageCount = pageCount;
+            _page = (coerceOptionalInt(_liveProps['page']) ?? _page).clamp(
+              1,
+              pageCount,
+            );
+          });
+        }
         return _statePayload();
       case 'emit':
         final event = (args['event'] ?? 'change').toString();

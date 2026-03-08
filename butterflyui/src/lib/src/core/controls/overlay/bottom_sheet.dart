@@ -49,6 +49,7 @@ class _BottomSheetControl extends StatefulWidget {
 
 class _BottomSheetControlState extends State<_BottomSheetControl>
     with SingleTickerProviderStateMixin {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   late bool _open;
   late double _height;
   double? _maxHeight;
@@ -90,14 +91,15 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
   }
 
   void _syncFromProps(Map<String, Object?> props) {
-    _open = props['open'] == true;
-    _height = coerceDouble(props['height']) ?? 320.0;
-    _maxHeight = coerceDouble(props['max_height']);
-    _minHeight = coerceDouble(props['min_height']);
-    _dismissible = props['dismissible'] == null
+    _liveProps = <String, Object?>{...props};
+    _open = _liveProps['open'] == true;
+    _height = coerceDouble(_liveProps['height']) ?? 320.0;
+    _maxHeight = coerceDouble(_liveProps['max_height']);
+    _minHeight = coerceDouble(_liveProps['min_height']);
+    _dismissible = _liveProps['dismissible'] == null
         ? true
-        : (props['dismissible'] == true);
-    _scrimColor = coerceColor(props['scrim_color']);
+        : (_liveProps['dismissible'] == true);
+    _scrimColor = coerceColor(_liveProps['scrim_color']);
   }
 
   Future<Object?> _handleInvoke(
@@ -117,24 +119,7 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
           if (rawProps is Map) {
             final props = coerceObjectMap(rawProps);
             setState(() {
-              if (props.containsKey('open')) {
-                _open = props['open'] == true;
-              }
-              if (props.containsKey('height')) {
-                _height = coerceDouble(props['height']) ?? _height;
-              }
-              if (props.containsKey('max_height')) {
-                _maxHeight = coerceDouble(props['max_height']);
-              }
-              if (props.containsKey('min_height')) {
-                _minHeight = coerceDouble(props['min_height']);
-              }
-              if (props.containsKey('dismissible')) {
-                _dismissible = props['dismissible'] == true;
-              }
-              if (props.containsKey('scrim_color')) {
-                _scrimColor = coerceColor(props['scrim_color']);
-              }
+              _syncFromProps(<String, Object?>{..._liveProps, ...props});
             });
             _emit('state', _statePayload());
           }
@@ -199,6 +184,10 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
       }
     }
     final nested = widget.props['child'];
+    final nestedOverride = _liveProps['child'];
+    if (nestedOverride is Map) {
+      return widget.buildChild(coerceObjectMap(nestedOverride));
+    }
     if (nested is Map) {
       return widget.buildChild(coerceObjectMap(nested));
     }
@@ -210,10 +199,10 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
     final viewSize = MediaQuery.of(context).size;
     final durationMs =
         coerceOptionalInt(
-          widget.props['duration_ms'] ?? widget.props['duration'],
+          _liveProps['duration_ms'] ?? _liveProps['duration'],
         ) ??
         220;
-    final curve = _curveFrom(widget.props['curve']?.toString());
+    final curve = _curveFrom(_liveProps['curve']?.toString());
 
     var targetHeight = _height;
     if (_maxHeight != null) {
@@ -226,35 +215,34 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
       targetHeight = viewSize.height * 0.35;
     }
 
-    final radius = coerceDouble(widget.props['radius']) ?? 16.0;
-    final elevation = coerceDouble(widget.props['elevation']) ?? 8.0;
+    final radius = coerceDouble(_liveProps['radius']) ?? 16.0;
+    final elevation = coerceDouble(_liveProps['elevation']) ?? 8.0;
     final background =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
+        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
         Theme.of(context).colorScheme.surface;
     final panelAlignment =
         coerceAlignmentGeometry(
-          widget.props['alignment'] ??
-              widget.props['align'] ??
-              widget.props['panel_alignment'],
+          _liveProps['alignment'] ??
+              _liveProps['align'] ??
+              _liveProps['panel_alignment'],
         ) ??
         Alignment.bottomCenter;
     final panelMargin =
-        coercePadding(widget.props['margin'] ?? widget.props['panel_margin']) ??
+        coercePadding(_liveProps['margin'] ?? _liveProps['panel_margin']) ??
         EdgeInsets.zero;
     final panelWidth = coerceDouble(
-      widget.props['width'] ?? widget.props['panel_width'],
+      _liveProps['width'] ?? _liveProps['panel_width'],
     );
     final panelMinWidth = coerceDouble(
-      widget.props['min_width'] ?? widget.props['panel_min_width'],
+      _liveProps['min_width'] ?? _liveProps['panel_min_width'],
     );
     final panelMaxWidth = coerceDouble(
-      widget.props['max_width'] ?? widget.props['panel_max_width'],
+      _liveProps['max_width'] ?? _liveProps['panel_max_width'],
     );
     final panelClip =
-        coerceClipBehavior(widget.props['clip_behavior']) ?? Clip.antiAlias;
+        coerceClipBehavior(_liveProps['clip_behavior']) ?? Clip.antiAlias;
     final showHandle =
-        widget.props['show_handle'] == null ||
-        widget.props['show_handle'] == true;
+        _liveProps['show_handle'] == null || _liveProps['show_handle'] == true;
 
     Widget panel = Material(
       color: background,

@@ -351,6 +351,7 @@ class ControlRenderer {
     StylePack? inheritedPack,
     Map<String, Object?>? inheritedTokenOverrides,
     bool inheritedImageBackdrop = false,
+    int? inheritedSurfaceTintArgb,
   }) {
     final sourceType = control['type'];
     final type = (sourceType?.toString() ?? '').trim().toLowerCase();
@@ -383,8 +384,23 @@ class ControlRenderer {
       props: baseProps,
       resolvedStyle: resolvedStyle,
     );
+    final hasExplicitSurfaceFill =
+        baseProps.containsKey('bgcolor') ||
+        baseProps.containsKey('background') ||
+        baseProps.containsKey('color') ||
+        baseProps.containsKey('gradient') ||
+        baseProps.containsKey('image');
+    rawProps['__has_explicit_surface_fill'] = hasExplicitSurfaceFill;
     if (inheritedImageBackdrop) {
       rawProps['__image_backdrop_inherited'] = true;
+    }
+    final explicitSurfaceTint = coerceColor(
+      baseProps['bgcolor'] ?? baseProps['background'] ?? baseProps['color'],
+    );
+    final effectiveSurfaceTintArgb =
+        explicitSurfaceTint?.toARGB32() ?? inheritedSurfaceTintArgb;
+    if (effectiveSurfaceTintArgb != null) {
+      rawProps['__surface_tint_color'] = effectiveSurfaceTintArgb;
     }
     final imageBackdropActive =
         inheritedImageBackdrop ||
@@ -397,6 +413,7 @@ class ControlRenderer {
         inheritedPack: resolvedPack,
         inheritedTokenOverrides: resolvedTokenOverrides,
         inheritedImageBackdrop: imageBackdropActive,
+        inheritedSurfaceTintArgb: effectiveSurfaceTintArgb,
       );
     }
 
@@ -1336,6 +1353,9 @@ class ControlRenderer {
           labels: props['labels'] == true,
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
           autofocus: props['autofocus'] == true,
+          helper: props['helper'],
+          helperText: props['helper_text']?.toString(),
+          buildChild: context.buildChild,
           events: props['events'],
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
@@ -1471,6 +1491,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -1497,9 +1519,6 @@ class ControlRenderer {
 
       case 'popover':
         {
-          final transition = props['transition'] is Map
-              ? coerceObjectMap(props['transition'] as Map)
-              : const <String, Object?>{};
           Widget anchor = const SizedBox.shrink();
           Widget content = const SizedBox.shrink();
           if (children.isNotEmpty) {
@@ -1516,34 +1535,14 @@ class ControlRenderer {
               coerceObjectMap(props['content'] as Map),
             );
           }
-          return ButterflyUIPopover(
-            controlId: controlId,
-            anchor: anchor,
-            content: content,
-            open: props['open'] == true,
-            position: props['position']?.toString() ?? 'bottom',
-            offset: _parseOffset(props['offset']) ?? Offset.zero,
-            dismissible: props['dismissible'] == null
-                ? true
-                : (props['dismissible'] == true),
-            duration: Duration(
-              milliseconds:
-                  (coerceOptionalInt(
-                            props['duration_ms'] ?? transition['duration_ms'],
-                          ) ??
-                          180)
-                      .clamp(0, 2000),
-            ),
-            transitionType:
-                (props['transition_type']?.toString() ??
-                        transition['type']?.toString() ??
-                        'fade')
-                    .toLowerCase(),
-            transitionCurve: _curveFromName(
-              transition['curve']?.toString() ?? 'ease_out_cubic',
-            ),
-            scrimColor: coerceColor(props['scrim_color']),
-            sendEvent: context.sendEvent,
+          return buildPopoverControl(
+            controlId,
+            props,
+            anchor,
+            content,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
+            context.sendEvent,
           );
         }
 
@@ -1553,6 +1552,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -1575,40 +1576,33 @@ class ControlRenderer {
         {
           final message = (props['message'] ?? props['text'] ?? '').toString();
           if (message.isEmpty) return firstChildOrEmpty();
-          return ButterflyUITooltipWidget(
-            message: message,
-            preferBelow: props['prefer_below'] == null
-                ? true
-                : (props['prefer_below'] == true),
-            waitMs: coerceOptionalInt(props['wait_ms']) ?? 0,
-            child: firstChildOrEmpty(),
+          return buildTooltipControl(
+            controlId,
+            props,
+            firstChildOrEmpty(),
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
+            context.sendEvent,
           );
         }
 
       case 'toast':
-        return ButterflyUIToastWidget(
-          controlId: controlId,
-          message: (props['message'] ?? props['text'] ?? '').toString(),
-          label: props['label']?.toString(),
-          open: props['open'] == true,
-          durationMs: coerceOptionalInt(props['duration_ms']) ?? 2400,
-          actionLabel: props['action_label']?.toString(),
-          variant: props['variant']?.toString(),
-          style: props['style']?.toString(),
-          icon: parseIconDataLoose(props['icon']),
-          animation: props['animation'] is Map
-              ? coerceObjectMap(props['animation'] as Map)
-              : null,
-          instant: props['instant'] == true,
-          priority: coerceOptionalInt(props['priority']) ?? 0,
-          useFlushbar: props['use_flushbar'] == true,
-          useFlutterToast: props['use_fluttertoast'] == true,
-          toastPosition: props['toast_position']?.toString(),
-          sendEvent: context.sendEvent,
+        return buildToastOverlayControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
         );
 
       case 'snack_bar':
-        return buildSnackBarControl(controlId, props, context.sendEvent);
+        return buildSnackBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'toast_host':
         return buildToastHostControl(
@@ -1634,6 +1628,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -1657,16 +1653,13 @@ class ControlRenderer {
 
       case 'tabs':
         {
-          final labels = _coerceStringList(props['labels']);
-          final tabChildren = children.map(context.buildChild).toList();
           return ButterflyUITabsWidget(
             controlId: controlId,
-            labels: labels,
-            children: tabChildren,
-            index: coerceOptionalInt(props['index']) ?? 0,
-            scrollable: props['scrollable'] == true,
-            closable: props['closable'] == true,
-            showAdd: props['show_add'] == true,
+            props: props,
+            rawChildren: children,
+            buildChild: context.buildChild,
+            registerInvokeHandler: context.registerInvokeHandler,
+            unregisterInvokeHandler: context.unregisterInvokeHandler,
             sendEvent: context.sendEvent,
           );
         }
@@ -1692,10 +1685,22 @@ class ControlRenderer {
         );
 
       case 'menu_item':
-        return buildMenuItemControl(controlId, props, context.sendEvent);
+        return buildMenuItemControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'breadcrumb_bar':
-        return buildBreadcrumbBarControl(controlId, props, context.sendEvent);
+        return buildBreadcrumbBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'status_bar':
         return buildStatusBarControl(
@@ -1725,7 +1730,13 @@ class ControlRenderer {
         );
 
       case 'notice_bar':
-        return buildNoticeBarControl(controlId, props, context.sendEvent);
+        return buildNoticeBarControl(
+          controlId,
+          props,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
+          context.sendEvent,
+        );
 
       case 'pagination':
         return buildPaginationControl(
@@ -1762,61 +1773,15 @@ class ControlRenderer {
 
       case 'app_bar':
       case 'top_bar':
-        {
-          final hasLeadingProp = props['leading'] is Map;
-          final hasActionsProp =
-              props['actions'] is List && (props['actions'] as List).isNotEmpty;
-          final hasSlotProps = hasLeadingProp || hasActionsProp;
-
-          final leading = hasLeadingProp
-              ? context.buildChild(coerceObjectMap(props['leading'] as Map))
-              : (!hasSlotProps && children.isNotEmpty
-                    ? context.buildChild(children.first)
-                    : null);
-          final actions = <Widget>[];
-          if (props['actions'] is List) {
-            for (final item in props['actions'] as List) {
-              if (item is Map) {
-                actions.add(context.buildChild(coerceObjectMap(item)));
-              }
-            }
-          }
-          if (!hasSlotProps) {
-            for (var i = leading == null ? 0 : 1; i < children.length; i += 1) {
-              actions.add(context.buildChild(children[i]));
-            }
-          }
-          return ButterflyUIAppBar(
-            controlId: controlId,
-            props: props,
-            title: props['title']?.toString(),
-            subtitle: props['subtitle']?.toString(),
-            centerTitle: props['center_title'] == true,
-            height: coerceDouble(props['height']) ?? kToolbarHeight,
-            bgcolor: coerceColor(props['bgcolor']),
-            elevation: coerceDouble(props['elevation']) ?? 0.0,
-            padding:
-                coercePadding(props['padding']) ??
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            leading: leading,
-            actions: actions,
-            showSearch: props['show_search'] == true,
-            searchValue: props['search_value']?.toString() ?? '',
-            searchPlaceholder: props['search_placeholder']?.toString(),
-            searchEnabled: props['search_enabled'] == null
-                ? true
-                : (props['search_enabled'] == true),
-            emitOnSearchChange: props['emit_on_search_change'] == null
-                ? true
-                : (props['emit_on_search_change'] == true),
-            searchDebounceMs:
-                coerceOptionalInt(props['search_debounce_ms']) ?? 180,
-            events: _coerceStringList(props['events']).toSet(),
-            registerInvokeHandler: context.registerInvokeHandler,
-            unregisterInvokeHandler: context.unregisterInvokeHandler,
-            sendEvent: context.sendEvent,
-          );
-        }
+        return ButterflyUIAppBar(
+          controlId: controlId,
+          props: props,
+          rawChildren: children,
+          buildChild: context.buildChild,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'drawer':
         {
@@ -1923,6 +1888,8 @@ class ControlRenderer {
           rawChildren,
           context.buildChild,
           context.sendEvent,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
         );
 
       case 'sticky_list':
@@ -1932,6 +1899,8 @@ class ControlRenderer {
           rawChildren,
           context.buildChild,
           context.sendEvent,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
         );
 
       case 'list_view':
@@ -2027,6 +1996,8 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          context.registerInvokeHandler,
+          context.unregisterInvokeHandler,
           context.sendEvent,
         );
 
@@ -2037,6 +2008,8 @@ class ControlRenderer {
             props,
             children,
             context.buildChild,
+            context.registerInvokeHandler,
+            context.unregisterInvokeHandler,
             context.sendEvent,
           );
         }
@@ -2187,6 +2160,10 @@ class ControlRenderer {
           props,
           rawChildren,
           context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
         );
 
       case 'fold_layer':
@@ -2201,13 +2178,25 @@ class ControlRenderer {
         );
 
       case 'liquid_morph':
-        return buildLiquidMorphControl(props, rawChildren, context.buildChild);
+        return buildLiquidMorphControl(
+          props,
+          rawChildren,
+          context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'morphing_border':
         return buildMorphingBorderControl(
           props,
           rawChildren,
           context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
         );
 
       case 'style':
@@ -2244,10 +2233,26 @@ class ControlRenderer {
         );
 
       case 'animation':
-        return buildAnimationControl(props, rawChildren, context.buildChild);
+        return buildAnimationControl(
+          props,
+          rawChildren,
+          context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'transition':
-        return buildTransitionControl(props, rawChildren, context.buildChild);
+        return buildTransitionControl(
+          props,
+          rawChildren,
+          context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'stagger':
         return buildStaggerControl(
@@ -2261,7 +2266,15 @@ class ControlRenderer {
         );
 
       case 'parallax':
-        return buildParallaxControl(props, rawChildren, context.buildChild);
+        return buildParallaxControl(
+          props,
+          rawChildren,
+          context.buildChild,
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'flow_field':
         return buildFlowFieldControl(
@@ -2459,7 +2472,14 @@ class ControlRenderer {
         );
 
       case 'pixelate':
-        return buildPixelateControl(controlId, props, firstChildOrEmpty());
+        return buildPixelateControl(
+          controlId,
+          props,
+          firstChildOrEmpty(),
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'vignette':
         return buildVignetteControl(
@@ -2558,10 +2578,24 @@ class ControlRenderer {
         return buildShadowStackControl(props, firstChildOrEmpty());
 
       case 'shadow':
-        return buildShadowControl(props, firstChildOrEmpty());
+        return buildShadowControl(
+          props,
+          firstChildOrEmpty(),
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'effects':
-        return buildEffectsControl(props, firstChildOrEmpty());
+        return buildEffectsControl(
+          props,
+          firstChildOrEmpty(),
+          controlId: controlId,
+          registerInvokeHandler: context.registerInvokeHandler,
+          unregisterInvokeHandler: context.unregisterInvokeHandler,
+          sendEvent: context.sendEvent,
+        );
 
       case 'visual_fx':
         return buildVisualFxControl(
@@ -2599,6 +2633,8 @@ class ControlRenderer {
           context.registerInvokeHandler,
           context.unregisterInvokeHandler,
           context.sendEvent,
+          rawChildren: rawChildren,
+          buildChild: context.buildChild,
         );
 
       case 'webview':
@@ -2762,6 +2798,11 @@ class ControlRenderer {
     final capabilities = ControlModifierCapabilities.forControl(controlType);
 
     final surfaceStyle = resolvedStyle.slot('surface');
+    final inheritedSurfaceTint = coerceColor(props['__surface_tint_color']);
+    final hasExplicitSurfaceFill = _coerceBool(
+      props['__has_explicit_surface_fill'],
+      fallback: false,
+    );
     final suppressSurfaceFill = _shouldSuppressSurfaceFill(props, surfaceStyle);
 
     final visible = (props['visible'] ?? surfaceStyle['visible']) == null
@@ -2848,6 +2889,8 @@ class ControlRenderer {
       final bg = coerceColor(
         suppressSurfaceFill
             ? null
+            : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
+            ? deriveInheritedSurfaceFill(inheritedSurfaceTint).toARGB32()
             : props['bgcolor'] ??
                   props['background'] ??
                   surfaceStyle['bgcolor'] ??
@@ -2858,7 +2901,10 @@ class ControlRenderer {
         props['border_color'] ??
             borderSpec['color'] ??
             borderSpec['border_color'] ??
-            surfaceStyle['border_color'],
+            surfaceStyle['border_color'] ??
+            (!hasExplicitSurfaceFill && inheritedSurfaceTint != null
+                ? deriveInheritedSurfaceBorder(inheritedSurfaceTint).toARGB32()
+                : null),
       );
       final borderWidth = coerceDouble(
         props['border_width'] ??
@@ -2875,6 +2921,8 @@ class ControlRenderer {
       final shape = _parseBoxShape(props['shape'] ?? surfaceStyle['shape']);
       final gradient = coerceGradient(
         suppressSurfaceFill
+            ? null
+            : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
             ? null
             : props['gradient'] ?? surfaceStyle['gradient'],
       );
@@ -2899,6 +2947,8 @@ class ControlRenderer {
       );
       final backdropColor = coerceColor(
         suppressSurfaceFill
+            ? null
+            : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
             ? null
             : props['backdrop_color'] ??
                   props['backdropColor'] ??
@@ -3040,7 +3090,8 @@ class ControlRenderer {
     }
 
     final surfaceLayers = _resolveControlLayers(
-      suppressSurfaceFill
+      suppressSurfaceFill ||
+              (!hasExplicitSurfaceFill && inheritedSurfaceTint != null)
           ? null
           : props['surface_layers'] ??
                 props['background_layers'] ??
@@ -3062,7 +3113,8 @@ class ControlRenderer {
       context,
     );
     final hoverSurfaceLayers = _resolveControlLayers(
-      suppressSurfaceFill
+      suppressSurfaceFill ||
+              (!hasExplicitSurfaceFill && inheritedSurfaceTint != null)
           ? null
           : props['hover_surface_layers'] ??
                 props['hover_background_layers'] ??

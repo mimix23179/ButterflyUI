@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import Any
 from ..base_control import butterfly_control
 from ..layout_control import LayoutControl
@@ -39,9 +38,65 @@ class ProgressBar(LayoutControl):
     Optional text label shown with the indicator.
     """
 
+    helper: str | None = None
+    """
+    Helper text rendered below the progress bar.
+    """
+
+    variant: str | None = None
+    """
+    Progress style variant such as ``solid``, ``soft``, ``striped``,
+    ``gradient``, ``glow``, or ``segmented``.
+    """
+
+    show_value: bool | None = None
+    """
+    If ``True``, renders a formatted progress value next to the label.
+    """
+
+    value_template: str | None = None
+    """
+    Optional template used to format the displayed progress value.
+    """
+
     stroke_width: float | None = None
     """
     Thickness of the progress track/indicator.
+    """
+
+    track_height: float | None = None
+    """
+    Explicit logical height for the rendered progress track.
+    """
+
+    segments: int | None = None
+    """
+    Number of visible segments when ``variant="segmented"``.
+    """
+
+    segment_gap: float | None = None
+    """
+    Gap between segments for segmented progress bars.
+    """
+
+    glow: bool | None = None
+    """
+    Enables a glow treatment around the active progress fill.
+    """
+
+    glow_color: str | None = None
+    """
+    Optional glow color override.
+    """
+
+    gradient: dict[str, Any] | None = None
+    """
+    Gradient definition used by gradient-based variants.
+    """
+
+    animation_duration_ms: int | None = None
+    """
+    Duration of the indeterminate or animated progress cycle in milliseconds.
     """
 
     circular: bool | None = None

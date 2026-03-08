@@ -3,7 +3,11 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from ..core.control import Control as CoreControl, prepare_control_class
+from ..core.control import (
+    Control as CoreControl,
+    coerce_json_value,
+    prepare_control_class,
+)
 
 __all__ = ["BaseControl", "butterfly_control"]
 
@@ -33,6 +37,53 @@ class BaseControl(CoreControl):
         self.children.clear()
         self.children.extend(children)
         return self
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_props(
+        self,
+        session: Any,
+        props: Mapping[str, Any] | None = None,
+        /,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if props:
+            payload.update(dict(props))
+        if kwargs:
+            payload.update(kwargs)
+        return self.invoke(session, "set_props", {"props": coerce_json_value(payload)})
+
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> Any:
+        return self.invoke(
+            session,
+            "emit",
+            {
+                "event": str(event),
+                "payload": coerce_json_value(dict(payload or {})),
+            },
+        )
+
+    def trigger(
+        self,
+        session: Any,
+        event: str = "change",
+        payload: Mapping[str, Any] | None = None,
+    ) -> Any:
+        return self.invoke(
+            session,
+            "trigger",
+            {
+                "event": str(event),
+                "payload": coerce_json_value(dict(payload or {})),
+            },
+        )
 
 
 def butterfly_control(

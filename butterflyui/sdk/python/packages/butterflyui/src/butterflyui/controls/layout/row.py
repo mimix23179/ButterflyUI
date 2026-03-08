@@ -16,8 +16,11 @@ class Row(LayoutControl, MultiChildControl):
     out horizontally with configurable ``spacing`` (alias ``gap``) between
     them.  ``main_axis`` controls horizontal alignment (start, center, end,
     space_between, etc.) and ``cross_axis`` controls vertical alignment
-    (start, center, end, stretch).  Child controls may use ``expanded``
-    or set ``flex`` in their props to fill available space.
+    (start, center, end, stretch).  Compound position aliases such as
+    ``top_left``, ``middle_center``, and ``bottom_right`` are also accepted;
+    on a row the horizontal part drives ``main_axis`` and the vertical part
+    drives ``cross_axis``.  Child controls may use ``expanded`` or set
+    ``flex`` in their props to fill available space.
 
     Example:
 
@@ -43,12 +46,18 @@ class Row(LayoutControl, MultiChildControl):
     """
     Main-axis alignment for the row.  Values: ``start``, ``center``,
     ``end``, ``space_between``, ``space_around``, ``space_evenly``.
+    Compound aliases such as ``top_left``, ``top_center``, ``top_right``,
+    ``middle_left``, ``middle_center``, ``middle_right``, ``bottom_left``,
+    ``bottom_center``, and ``bottom_right`` are also accepted; the row uses
+    the horizontal component of those values.
     """
 
     cross_axis: str | None = None
     """
     Cross-axis alignment for children.  Values: ``start``, ``center``,
-    ``end``, ``stretch``, ``baseline``.
+    ``end``, ``stretch``, ``baseline``.  Compound position aliases such as
+    ``top_left`` through ``bottom_right`` are also accepted; the row uses
+    the vertical component of those values.
     """
 
     horizontal_alignment: Any | None = None

@@ -2,36 +2,52 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildMorphingBorderControl(
   Map<String, Object?> props,
   List<dynamic> rawChildren,
-  Widget Function(Map<String, Object?> child) buildChild,
-) {
-  Widget child = const SizedBox.shrink();
-  for (final raw in rawChildren) {
-    if (raw is Map) {
-      child = buildChild(coerceObjectMap(raw));
-      break;
-    }
-  }
+  Widget Function(Map<String, Object?> child) buildChild, {
+  String controlId = '',
+  ButterflyUIRegisterInvokeHandler? registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent? sendEvent,
+}) {
+  return buildRuntimePropsControl(
+    props: props,
+    controlId: controlId,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+    builder: (liveProps) {
+      Widget child = const SizedBox.shrink();
+      for (final raw in rawChildren) {
+        if (raw is Map) {
+          child = buildChild(coerceObjectMap(raw));
+          break;
+        }
+      }
 
-  final minRadius = coerceDouble(props['min_radius']) ?? 8;
-  final maxRadius = coerceDouble(props['max_radius']) ?? 24;
-  final animate = props['animate'] != false;
-  final durationMs = (coerceOptionalInt(props['duration_ms']) ?? 1200).clamp(1, 600000);
-  final color = coerceColor(props['color']) ?? const Color(0xff60a5fa);
-  final width = coerceDouble(props['width']) ?? 1.5;
-  final targetRadius = animate ? maxRadius : minRadius;
+      final minRadius = coerceDouble(liveProps['min_radius']) ?? 8;
+      final maxRadius = coerceDouble(liveProps['max_radius']) ?? 24;
+      final animate = liveProps['animate'] != false;
+      final durationMs = (coerceOptionalInt(liveProps['duration_ms']) ?? 1200)
+          .clamp(1, 600000);
+      final color = coerceColor(liveProps['color']) ?? const Color(0xff60a5fa);
+      final width = coerceDouble(liveProps['width']) ?? 1.5;
+      final targetRadius = animate ? maxRadius : minRadius;
 
-  return AnimatedContainer(
-    duration: Duration(milliseconds: durationMs),
-    curve: Curves.easeInOut,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(math.max(0, targetRadius)),
-      border: Border.all(color: color, width: width),
-    ),
-    child: child,
+      return AnimatedContainer(
+        duration: Duration(milliseconds: durationMs),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(math.max(0, targetRadius)),
+          border: Border.all(color: color, width: width),
+        ),
+        child: child,
+      );
+    },
   );
 }

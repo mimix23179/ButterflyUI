@@ -117,6 +117,26 @@ Gallery connects assets to tools in a clean, type-aware way.
 
 ---
 
+## Alignment:
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/screenshots/Alignment.png?raw=true)
+
+---
+
+## Flex Layouts:
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/screenshots/FlexLayouts.png?raw=true)
+
+---
+
+## Scrollable And Split:
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/screenshots/ScrollableAndSplit.png?raw=true)
+
+---
+
+## Surfaces & Effects:
+![Alt text](https://github.com/mimix23179/ButterflyUI/blob/main/assets/screenshots/Surfaces.png?raw=true)
+
+---
+
 # 🧩 Modular Architecture
 
 Every umbrella control follows the same pattern:

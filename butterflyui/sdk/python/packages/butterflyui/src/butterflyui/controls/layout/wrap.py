@@ -17,6 +17,9 @@ class Wrap(LayoutControl, MultiChildControl):
     when ``direction`` is ``"vertical"``). ``alignment`` controls positioning
     within each run; ``run_alignment`` places the runs along the cross axis.
     ``cross_axis`` sets alignment of children within a single run.
+    Compound position aliases such as ``top_left`` and ``bottom_right`` are
+    accepted for ``cross_axis``; horizontal wraps use the vertical component,
+    while vertical wraps use the horizontal component.
     ``direction`` switches the main axis to horizontal (default) or vertical.
 
     Example:
@@ -50,7 +53,10 @@ class Wrap(LayoutControl, MultiChildControl):
 
     cross_axis: str | None = None
     """
-    Alignment of children within a run along the cross axis.
+    Alignment of children within a run along the cross axis.  Compound
+    aliases such as ``top_left`` through ``bottom_right`` are also accepted;
+    horizontal wraps use the vertical component and vertical wraps use the
+    horizontal component.
     """
 
     direction: str | None = None

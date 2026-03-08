@@ -6,7 +6,7 @@ from ..layout_control import LayoutControl
 
 __all__ = ["Audio"]
 
-@butterfly_control('audio')
+@butterfly_control('audio', field_aliases={'source': 'src'})
 class Audio(LayoutControl):
     """
     Audio player control with playback and volume management.
@@ -39,6 +39,11 @@ class Audio(LayoutControl):
     URI or file path of the audio source.
     """
 
+    title: str | None = None
+    """
+    Primary title shown by the player chrome.
+    """
+
     autoplay: bool | None = None
     """
     Controls whether playback starts automatically as soon as the media is ready. Leave it disabled when playback should begin only after an explicit user action.
@@ -59,6 +64,16 @@ class Audio(LayoutControl):
     Controls whether audio starts muted. The media can still render visually while sound remains off until changed by the runtime or user.
     """
 
+    position: float | None = None
+    """
+    Initial playback position, in seconds.
+    """
+
+    duration: float | None = None
+    """
+    Optional expected duration in seconds used before metadata is available.
+    """
+
     artist: str | None = None
     """
     Artist name shown alongside the title.
@@ -75,6 +90,9 @@ class Audio(LayoutControl):
 
     def set_volume(self, session: Any, volume: float) -> dict[str, Any]:
         return self.invoke(session, "set_volume", {"volume": float(volume)})
+
+    def set_muted(self, session: Any, muted: bool) -> dict[str, Any]:
+        return self.invoke(session, "set_muted", {"muted": bool(muted)})
 
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

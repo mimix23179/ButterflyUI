@@ -16,14 +16,25 @@ Widget buildDecoratedBoxControl(
 
   final image = coerceDecorationImage(props['image']);
   final suppressSurfaceFill = _shouldSuppressSurfaceFill(props, image: image);
+  final inheritedSurfaceTint = coerceColor(props['__surface_tint_color']);
+  final hasExplicitSurfaceFill =
+      _coerceBool(props['__has_explicit_surface_fill']) == true;
   final color = suppressSurfaceFill
       ? null
+      : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
+      ? deriveInheritedSurfaceFill(inheritedSurfaceTint)
       : coerceColor(props['color'] ?? props['bgcolor']);
   final gradient = suppressSurfaceFill
       ? null
+      : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
+      ? null
       : coerceGradient(props['gradient']);
   final shadow = coerceBoxShadow(props['shadow']);
-  final borderColor = coerceColor(props['border_color']);
+  final borderColor =
+      coerceColor(props['border_color']) ??
+      (!hasExplicitSurfaceFill && inheritedSurfaceTint != null
+          ? deriveInheritedSurfaceBorder(inheritedSurfaceTint)
+          : null);
   final borderWidth = coerceDouble(props['border_width']) ?? 0.0;
   final radius = coerceDouble(props['radius'] ?? props['border_radius']);
   final shape = _parseShape(props['shape']) ?? BoxShape.rectangle;

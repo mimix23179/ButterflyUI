@@ -57,9 +57,11 @@ List<Widget> buildFlexChildren({
   required double spacing,
   required MainAxisSize parentMainAxisSize,
   required Widget Function(Map<String, Object?> child) buildChild,
+  bool reverse = false,
 }) {
   final built = <Widget>[];
-  for (final child in rawChildren) {
+  final sourceChildren = reverse ? rawChildren.reversed : rawChildren;
+  for (final child in sourceChildren) {
     if (child is! Map) continue;
     final childMap = coerceObjectMap(child);
     final childType = childMap['type']?.toString() ?? '';
@@ -187,20 +189,21 @@ Alignment? parseLayoutAlignment(Object? value) {
 
 MainAxisAlignment parseLayoutMainAxisAlignment(
   Object? value,
-  MainAxisAlignment fallback,
-) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
+  MainAxisAlignment fallback, {
+  required Axis axis,
+}) {
+  final s = _normalizeLayoutKeyword(value);
+  switch (_resolveMainAxisAnchor(s, axis: axis)) {
     case 'start':
-    case 'top':
-    case 'left':
       return MainAxisAlignment.start;
     case 'center':
       return MainAxisAlignment.center;
     case 'end':
-    case 'bottom':
-    case 'right':
       return MainAxisAlignment.end;
+    case null:
+      break;
+  }
+  switch (s) {
     case 'spacebetween':
     case 'space_between':
       return MainAxisAlignment.spaceBetween;
@@ -219,14 +222,18 @@ CrossAxisAlignment parseLayoutCrossAxisAlignment(
   CrossAxisAlignment fallback, {
   required Axis axis,
 }) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
+  final s = _normalizeLayoutKeyword(value);
+  switch (_resolveCrossAxisAnchor(s, axis: axis)) {
     case 'start':
       return CrossAxisAlignment.start;
     case 'center':
       return CrossAxisAlignment.center;
     case 'end':
       return CrossAxisAlignment.end;
+    case null:
+      break;
+  }
+  switch (s) {
     case 'stretch':
       return CrossAxisAlignment.stretch;
     case 'baseline':
@@ -275,15 +282,74 @@ WrapAlignment? parseLayoutWrapAlignment(Object? value) {
   return null;
 }
 
-WrapCrossAlignment? parseLayoutWrapCrossAlignment(Object? value) {
-  final s = value?.toString().toLowerCase();
-  switch (s) {
+WrapCrossAlignment? parseLayoutWrapCrossAlignment(
+  Object? value, {
+  required Axis axis,
+}) {
+  final s = _normalizeLayoutKeyword(value);
+  switch (_resolveCrossAxisAnchor(s, axis: axis)) {
     case 'start':
       return WrapCrossAlignment.start;
     case 'center':
       return WrapCrossAlignment.center;
     case 'end':
       return WrapCrossAlignment.end;
+    case null:
+      return null;
+  }
+  return null;
+}
+
+String _normalizeLayoutKeyword(Object? value) {
+  return value
+          ?.toString()
+          .toLowerCase()
+          .replaceAll('-', '_')
+          .replaceAll(' ', '_') ??
+      '';
+}
+
+String? _resolveMainAxisAnchor(String value, {required Axis axis}) {
+  if (value.isEmpty) return null;
+  return _resolveAxisAnchor(value, axis: axis) ?? _resolveGenericAnchor(value);
+}
+
+String? _resolveCrossAxisAnchor(String value, {required Axis axis}) {
+  if (value.isEmpty) return null;
+  final crossAxis = axis == Axis.horizontal ? Axis.vertical : Axis.horizontal;
+  return _resolveAxisAnchor(value, axis: crossAxis) ??
+      _resolveGenericAnchor(value);
+}
+
+String? _resolveAxisAnchor(String value, {required Axis axis}) {
+  final parts = value.split('_');
+  if (axis == Axis.horizontal) {
+    if (parts.contains('left')) return 'start';
+    if (parts.contains('right')) return 'end';
+    if (parts.contains('center')) return 'center';
+    return null;
+  }
+  if (parts.contains('top')) return 'start';
+  if (parts.contains('bottom')) return 'end';
+  if (parts.contains('middle') || parts.contains('center')) return 'center';
+  return null;
+}
+
+String? _resolveGenericAnchor(String value) {
+  switch (value) {
+    case 'start':
+    case 'min':
+    case 'top':
+    case 'left':
+      return 'start';
+    case 'center':
+    case 'middle':
+      return 'center';
+    case 'end':
+    case 'max':
+    case 'bottom':
+    case 'right':
+      return 'end';
   }
   return null;
 }

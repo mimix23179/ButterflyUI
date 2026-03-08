@@ -104,6 +104,9 @@ class NoticeBar(LayoutControl):
     def set_text(self, session: Any, text: str) -> dict[str, Any]:
         return self.invoke(session, "set_text", {"text": text})
 
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 
@@ -118,3 +121,6 @@ class NoticeBar(LayoutControl):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
+
+    def trigger(self, session: Any, event: str = "action", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

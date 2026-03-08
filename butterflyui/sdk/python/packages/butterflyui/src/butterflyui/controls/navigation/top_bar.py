@@ -107,6 +107,9 @@ class TopBar(LayoutControl):
     def set_title(self, session: Any, title: str) -> dict[str, Any]:
         return self.invoke(session, "set_title", {"title": title})
 
+    def set_search(self, session: Any, value: str) -> dict[str, Any]:
+        return self.invoke(session, "set_search", {"value": value})
+
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
 

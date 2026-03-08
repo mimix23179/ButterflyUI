@@ -1,26 +1,47 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildAnimatedBackgroundControl(
   Map<String, Object?> props,
   List children,
-  Widget Function(Map<String, Object?> child) buildFromControl,
-) {
-  final colors = _coerceColorList(props['colors']);
-  if (colors.isEmpty) return const SizedBox.shrink();
+  Widget Function(Map<String, Object?> child) buildFromControl, {
+  String controlId = '',
+  ButterflyUIRegisterInvokeHandler? registerInvokeHandler,
+  ButterflyUIUnregisterInvokeHandler? unregisterInvokeHandler,
+  ButterflyUISendRuntimeEvent? sendEvent,
+}) {
+  return buildRuntimePropsControl(
+    props: props,
+    controlId: controlId,
+    registerInvokeHandler: registerInvokeHandler,
+    unregisterInvokeHandler: unregisterInvokeHandler,
+    sendEvent: sendEvent,
+    builder: (liveProps) {
+      final colors = _coerceColorList(liveProps['colors']);
+      if (colors.isEmpty) return const SizedBox.shrink();
 
-  final durationMs = coerceOptionalInt(props['duration_ms'] ?? props['duration']) ?? 2400;
-  final loop = props['loop'] == null ? true : (props['loop'] == true);
-  final curve = _parseCurve(props['curve']);
-  final childMap = _firstChildMap(children);
+      final durationMs =
+          coerceOptionalInt(
+            liveProps['duration_ms'] ?? liveProps['duration'],
+          ) ??
+          2400;
+      final loop = liveProps['loop'] == null
+          ? true
+          : (liveProps['loop'] == true);
+      final curve = _parseCurve(liveProps['curve']);
+      final childMap = _firstChildMap(children);
 
-  return ButterflyUIAnimatedBackground(
-    colors: colors,
-    duration: Duration(milliseconds: durationMs.clamp(1, 600000)),
-    curve: curve,
-    loop: loop,
-    child: childMap == null ? null : buildFromControl(childMap),
+      return ButterflyUIAnimatedBackground(
+        colors: colors,
+        duration: Duration(milliseconds: durationMs.clamp(1, 600000)),
+        curve: curve,
+        loop: loop,
+        child: childMap == null ? null : buildFromControl(childMap),
+      );
+    },
   );
 }
 
@@ -48,16 +69,21 @@ class ButterflyUIAnimatedBackground extends StatefulWidget {
   });
 
   @override
-  State<ButterflyUIAnimatedBackground> createState() => _ButterflyUIAnimatedBackgroundState();
+  State<ButterflyUIAnimatedBackground> createState() =>
+      _ButterflyUIAnimatedBackgroundState();
 }
 
-class _ButterflyUIAnimatedBackgroundState extends State<ButterflyUIAnimatedBackground>
+class _ButterflyUIAnimatedBackgroundState
+    extends State<ButterflyUIAnimatedBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: widget.duration,
   );
-  late CurvedAnimation _curve = CurvedAnimation(parent: _controller, curve: widget.curve);
+  late CurvedAnimation _curve = CurvedAnimation(
+    parent: _controller,
+    curve: widget.curve,
+  );
 
   @override
   void initState() {
@@ -143,7 +169,11 @@ double _layerOpacity(double t, int index, int count) {
 }
 
 Curve _parseCurve(Object? value) {
-  final key = value?.toString().toLowerCase().replaceAll(' ', '').replaceAll('_', '');
+  final key = value
+      ?.toString()
+      .toLowerCase()
+      .replaceAll(' ', '')
+      .replaceAll('_', '');
   switch (key) {
     case 'linear':
       return Curves.linear;

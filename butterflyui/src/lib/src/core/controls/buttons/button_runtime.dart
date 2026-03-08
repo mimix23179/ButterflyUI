@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/focusable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -176,6 +178,7 @@ class ButterflyUIButtonVisualSpec {
   final Color? iconBackground;
   final bool autoContrast;
   final double minContrast;
+  final bool surfaceWrapped;
 
   const ButterflyUIButtonVisualSpec({
     required this.label,
@@ -189,6 +192,7 @@ class ButterflyUIButtonVisualSpec {
     required this.iconBackground,
     required this.autoContrast,
     required this.minContrast,
+    required this.surfaceWrapped,
   });
 }
 
@@ -197,10 +201,19 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   required CandyTokens tokens,
   required String variant,
   required String fallbackLabel,
+  Color? themePrimary,
+  Color? themeOnPrimary,
+  Color? themeText,
+  Color? inheritedTint,
+  bool surfaceWrapped = false,
 }) {
   final label = (props['text'] ?? props['label'])?.toString() ?? fallbackLabel;
-  final candyPrimary = tokens.color('primary');
-  final candyOnPrimary = tokens.color('on_primary') ?? tokens.color('text');
+  final candyPrimary = tokens.color('primary') ?? inheritedTint ?? themePrimary;
+  final candyOnPrimary =
+      tokens.color('on_primary') ??
+      themeOnPrimary ??
+      tokens.color('text') ??
+      themeText;
   final bgColor = resolveColorValue(
     props['color'] ?? props['bgcolor'] ?? props['background'],
     fallback: (variant == 'text' || variant == 'outlined')
@@ -271,7 +284,9 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       shadowColor != null ||
       overlayColor != null) {
     style = ButtonStyle(
-      backgroundColor: bgColor == null
+      backgroundColor: surfaceWrapped
+          ? WidgetStateProperty.all(Colors.transparent)
+          : bgColor == null
           ? null
           : WidgetStateProperty.all(bgColor),
       foregroundColor: fgColor == null
@@ -325,6 +340,7 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
     iconBackground: iconBackground,
     autoContrast: autoContrast,
     minContrast: minContrast,
+    surfaceWrapped: surfaceWrapped,
   );
 }
 
@@ -562,13 +578,26 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
   }
 
   ButterflyUIButtonVisualSpec _currentSpec(
-    Map<String, Object?> effectiveProps,
-  ) {
+    BuildContext context,
+    Map<String, Object?> effectiveProps, {
+    required bool surfaceWrapped,
+  }) {
+    final theme = Theme.of(context);
+    final themeTokens = theme.extension<ButterflyUIThemeTokens>();
+    final inheritedTint = coerceColor(
+      effectiveProps['surface_tint_color'] ??
+          effectiveProps['__surface_tint_color'],
+    );
     return buildButtonVisualSpec(
       props: effectiveProps,
       tokens: widget.tokens,
       variant: widget.variant,
       fallbackLabel: widget.variant == 'icon_button' ? '' : 'Button',
+      themePrimary: themeTokens?.primary ?? theme.colorScheme.primary,
+      themeOnPrimary: theme.colorScheme.onPrimary,
+      themeText: themeTokens?.text ?? theme.colorScheme.onSurface,
+      inheritedTint: inheritedTint,
+      surfaceWrapped: surfaceWrapped,
     );
   }
 
@@ -577,7 +606,13 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
     Map<String, Object?>? effectiveProps,
   }) {
     final resolvedProps = effectiveProps ?? _effectiveProps();
-    final resolvedSpec = spec ?? _currentSpec(resolvedProps);
+    final resolvedSpec =
+        spec ??
+        _currentSpec(
+          context,
+          resolvedProps,
+          surfaceWrapped: _usesDecoratedButtonSurface(resolvedProps),
+        );
     return <String, Object?>{
       'label': resolvedSpec.label,
       'variant': widget.variant,
@@ -594,7 +629,13 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
     Map<String, Object?>? effectiveProps,
   }) {
     final resolvedProps = effectiveProps ?? _effectiveProps();
-    final resolvedSpec = spec ?? _currentSpec(resolvedProps);
+    final resolvedSpec =
+        spec ??
+        _currentSpec(
+          context,
+          resolvedProps,
+          surfaceWrapped: _usesDecoratedButtonSurface(resolvedProps),
+        );
     if (!_canPress) return;
     unawaited(maybeDispatchWindowAction(resolvedProps));
     emitControlPressEvents(
@@ -690,7 +731,11 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
 
   Widget _buildBusyContent(Widget child) {
     final spinnerColor =
-        _currentSpec(_effectiveProps()).iconColor ??
+        _currentSpec(
+          context,
+          _effectiveProps(),
+          surfaceWrapped: _usesDecoratedButtonSurface(_effectiveProps()),
+        ).iconColor ??
         Theme.of(context).colorScheme.onPrimary;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -723,6 +768,7 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
       autoContrast: spec.autoContrast,
       minContrast: spec.minContrast,
     );
+    final iconBackground = spec.surfaceWrapped ? null : background;
     final iconWidget = _busy
         ? SizedBox(
             width: 16,
@@ -739,7 +785,7 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
                     effectiveProps['icon_color'] ??
                     spec.iconColor,
                 color: spec.iconColor,
-                background: background,
+                background: iconBackground,
                 size: spec.iconSize,
                 autoContrast: spec.autoContrast,
                 minContrast: spec.minContrast,
@@ -764,7 +810,9 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
               effectiveProps['padding'] != null ||
               effectiveProps['shape'] != null)
           ? ButtonStyle(
-              backgroundColor: background == null
+              backgroundColor: spec.surfaceWrapped
+                  ? WidgetStateProperty.all(Colors.transparent)
+                  : background == null
                   ? null
                   : WidgetStateProperty.all(background),
               padding: padding == null
@@ -834,7 +882,12 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
   @override
   Widget build(BuildContext context) {
     final effectiveProps = _effectiveProps();
-    final spec = _currentSpec(effectiveProps);
+    final surfaceWrapped = _usesDecoratedButtonSurface(effectiveProps);
+    final spec = _currentSpec(
+      context,
+      effectiveProps,
+      surfaceWrapped: surfaceWrapped,
+    );
     Widget button = _buildVariantButton(effectiveProps, spec);
     button = FocusableActionDetector(
       focusNode: _focusNode,
@@ -847,6 +900,150 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
       onFocusChange: _handleFocusChange,
       child: button,
     );
+    if (surfaceWrapped) {
+      button = _decorateButtonSurface(context, button, effectiveProps);
+    }
     return applyControlTransparency(child: button, props: effectiveProps);
   }
+}
+
+bool _usesDecoratedButtonSurface(Map<String, Object?> props) {
+  if (coerceShellBool(
+    props['button_surface'] ??
+        props['decorated'] ??
+        props['glass'] ??
+        props['surface'],
+    fallback: false,
+  )) {
+    return true;
+  }
+  return props['gradient'] != null ||
+      props['shadow'] != null ||
+      props['image'] != null ||
+      props['backdrop_color'] != null ||
+      coerceDouble(props['backdrop_blur'] ?? props['blur']) != null ||
+      props['glow'] == true;
+}
+
+Widget _decorateButtonSurface(
+  BuildContext context,
+  Widget child,
+  Map<String, Object?> props,
+) {
+  final theme = Theme.of(context);
+  final tokens = theme.extension<ButterflyUIThemeTokens>();
+  final inheritedTint = coerceColor(
+    props['surface_tint_color'] ?? props['__surface_tint_color'],
+  );
+  final explicitSurfaceFill =
+      props.containsKey('color') ||
+      props.containsKey('bgcolor') ||
+      props.containsKey('background') ||
+      props.containsKey('gradient');
+  final variant = (props['variant'] ?? 'button')
+      .toString()
+      .trim()
+      .toLowerCase();
+  final variantAlpha = variant == 'text' || variant == 'text_button'
+      ? 0.10
+      : variant == 'outlined' || variant == 'outlined_button'
+      ? 0.12
+      : variant == 'icon_button'
+      ? 0.14
+      : 0.18;
+  final baseTint =
+      inheritedTint ?? tokens?.primary ?? theme.colorScheme.primary;
+  final backgroundColor =
+      coerceColor(props['bgcolor'] ?? props['background'] ?? props['color']) ??
+      (!explicitSurfaceFill
+          ? deriveInheritedSurfaceFill(baseTint, alpha: variantAlpha)
+          : null);
+  final gradient = coerceGradient(props['gradient']);
+  final image = coerceDecorationImage(props['image']);
+  final borderColor =
+      coerceColor(props['border_color']) ??
+      (!explicitSurfaceFill
+          ? deriveInheritedSurfaceBorder(baseTint)
+          : tokens?.border ?? theme.colorScheme.outlineVariant);
+  final borderWidth =
+      coerceDouble(props['border_width']) ??
+      ((variant == 'outlined' || variant == 'outlined_button') ? 1.0 : 0.0);
+  final radius =
+      coerceDouble(props['radius']) ??
+      coerceDouble(props['border_radius']) ??
+      tokens?.radiusMd ??
+      14.0;
+  final shadow =
+      coerceBoxShadow(props['shadow']) ??
+      (props['glow'] == true
+          ? <BoxShadow>[
+              BoxShadow(
+                color: baseTint.withValues(alpha: 0.30),
+                blurRadius: 24,
+                spreadRadius: 0.5,
+                offset: const Offset(0, 8),
+              ),
+            ]
+          : null);
+  final backdropBlur =
+      (coerceDouble(props['backdrop_blur'] ?? props['blur']) ?? 0.0).clamp(
+        0.0,
+        30.0,
+      );
+  final backdropColor = coerceColor(props['backdrop_color']);
+  final margin = coercePadding(props['margin']);
+  final shape = props['shape']?.toString().trim().toLowerCase() == 'circle'
+      ? BoxShape.circle
+      : BoxShape.rectangle;
+
+  Widget surface = DecoratedBox(
+    decoration: BoxDecoration(
+      color: gradient == null ? backgroundColor : null,
+      gradient: gradient,
+      image: image,
+      shape: shape,
+      border: borderWidth <= 0
+          ? null
+          : Border.all(color: borderColor, width: borderWidth),
+      borderRadius: shape == BoxShape.circle
+          ? null
+          : BorderRadius.circular(radius),
+      boxShadow: shadow,
+    ),
+    child: child,
+  );
+
+  if (backdropBlur > 0 || backdropColor != null) {
+    final filter = ImageFilter.blur(sigmaX: backdropBlur, sigmaY: backdropBlur);
+    final decoratedBackdrop = DecoratedBox(
+      decoration: BoxDecoration(
+        color: backdropColor,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle
+            ? null
+            : BorderRadius.circular(radius),
+      ),
+      child: surface,
+    );
+    surface = shape == BoxShape.circle
+        ? ClipOval(
+            child: BackdropFilter(filter: filter, child: decoratedBackdrop),
+          )
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: BackdropFilter(filter: filter, child: decoratedBackdrop),
+          );
+  } else if (shape == BoxShape.circle) {
+    surface = ClipOval(child: surface);
+  } else {
+    surface = ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: surface,
+    );
+  }
+
+  if (margin != null) {
+    surface = Padding(padding: margin, child: surface);
+  }
+  return surface;
 }

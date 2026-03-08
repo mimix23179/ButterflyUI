@@ -43,16 +43,18 @@ class _SplashControl extends StatefulWidget {
 }
 
 class _SplashControlState extends State<_SplashControl> {
+  Map<String, Object?> _liveProps = const <String, Object?>{};
   bool _active = false;
   double _progress = 0;
 
   @override
   void initState() {
     super.initState();
-    _active = widget.props['active'] == true;
-    _progress = (coerceDouble(widget.props['progress']) ?? 0).clamp(0, 1).toDouble();
-    widget.registerInvokeHandler(widget.controlId, _handleInvoke);
-    if (!_active && widget.props['auto_start'] == true) {
+    _syncFromProps(widget.props);
+    if (widget.controlId.isNotEmpty) {
+      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+    }
+    if (!_active && _liveProps['auto_start'] == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _trigger();
       });
@@ -63,24 +65,38 @@ class _SplashControlState extends State<_SplashControl> {
   void didUpdateWidget(covariant _SplashControl oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controlId != widget.controlId) {
-      oldWidget.unregisterInvokeHandler(oldWidget.controlId);
-      widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      if (oldWidget.controlId.isNotEmpty) {
+        oldWidget.unregisterInvokeHandler(oldWidget.controlId);
+      }
+      if (widget.controlId.isNotEmpty) {
+        widget.registerInvokeHandler(widget.controlId, _handleInvoke);
+      }
     }
-    if (oldWidget.props['active'] != widget.props['active']) {
-      _active = widget.props['active'] == true;
-    }
-    if (oldWidget.props['progress'] != widget.props['progress']) {
-      _progress = (coerceDouble(widget.props['progress']) ?? _progress).clamp(0, 1).toDouble();
+    if (oldWidget.props != widget.props) {
+      _syncFromProps(widget.props);
     }
   }
 
   @override
   void dispose() {
-    widget.unregisterInvokeHandler(widget.controlId);
+    if (widget.controlId.isNotEmpty) {
+      widget.unregisterInvokeHandler(widget.controlId);
+    }
     super.dispose();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  void _syncFromProps(Map<String, Object?> props) {
+    _liveProps = <String, Object?>{...props};
+    _active = _liveProps['active'] == true;
+    _progress = (coerceDouble(_liveProps['progress']) ?? _progress)
+        .clamp(0, 1)
+        .toDouble();
+  }
+
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'trigger':
         _trigger();
@@ -90,8 +106,24 @@ class _SplashControlState extends State<_SplashControl> {
         return true;
       case 'stop':
         setState(() => _active = false);
-        widget.sendEvent(widget.controlId, 'complete', {'skipped': false, 'progress': _progress});
+        widget.sendEvent(widget.controlId, 'complete', {
+          'skipped': false,
+          'progress': _progress,
+        });
         return true;
+      case 'set_props':
+        final incoming = args['props'];
+        if (incoming is Map) {
+          setState(() {
+            _syncFromProps(<String, Object?>{
+              ..._liveProps,
+              ...coerceObjectMap(incoming),
+            });
+          });
+        }
+        return _statePayload();
+      case 'get_state':
+        return _statePayload();
       case 'set_progress':
         final value = coerceDouble(args['value']);
         if (value != null) {
@@ -119,18 +151,33 @@ class _SplashControlState extends State<_SplashControl> {
     }
   }
 
+  Map<String, Object?> _statePayload() {
+    return <String, Object?>{
+      'active': _active,
+      'progress': _progress,
+      'show_progress': _liveProps['show_progress'] == true,
+      'loading': _liveProps['loading'] == true,
+      'skip_enabled': _liveProps['skip_enabled'] == true,
+    };
+  }
+
   void _trigger() {
     setState(() => _active = true);
     widget.sendEvent(widget.controlId, 'splash', {'active': true});
-    final durationMs = (coerceOptionalInt(widget.props['duration_ms']) ?? 900).clamp(50, 10000);
-    final minDuration = (coerceOptionalInt(widget.props['min_duration_ms']) ?? 0).clamp(0, 10000);
+    final durationMs = (coerceOptionalInt(_liveProps['duration_ms']) ?? 900)
+        .clamp(50, 10000);
+    final minDuration = (coerceOptionalInt(_liveProps['min_duration_ms']) ?? 0)
+        .clamp(0, 10000);
     final totalMs = durationMs > minDuration ? durationMs : minDuration;
     Future<void>.delayed(Duration(milliseconds: durationMs), () {
       if (!mounted) return;
-      if (widget.props['hide_on_complete'] != false) {
+      if (_liveProps['hide_on_complete'] != false) {
         setState(() => _active = false);
       }
-      widget.sendEvent(widget.controlId, 'complete', {'skipped': false, 'progress': _progress});
+      widget.sendEvent(widget.controlId, 'complete', {
+        'skipped': false,
+        'progress': _progress,
+      });
     });
     if (totalMs > 0) {
       Future<void>.delayed(Duration(milliseconds: totalMs), () {
@@ -144,13 +191,18 @@ class _SplashControlState extends State<_SplashControl> {
 
   @override
   Widget build(BuildContext context) {
-    final radius = coerceDouble(widget.props['radius']) ?? 20;
-    final splashColor = coerceColor(widget.props['color']) ?? Theme.of(context).colorScheme.primary.withOpacity(0.22);
-    final background = coerceColor(widget.props['background']) ?? Colors.transparent;
-    final showProgress = widget.props['show_progress'] == true || widget.props['loading'] == true;
-    final title = widget.props['title']?.toString();
-    final subtitle = widget.props['subtitle']?.toString() ?? widget.props['message']?.toString();
-    final skipEnabled = widget.props['skip_enabled'] == true;
+    final radius = coerceDouble(_liveProps['radius']) ?? 20;
+    final splashColor =
+        coerceColor(_liveProps['color']) ??
+        Theme.of(context).colorScheme.primary.withValues(alpha: 0.22);
+    final background =
+        coerceColor(_liveProps['background']) ?? Colors.transparent;
+    final showProgress =
+        _liveProps['show_progress'] == true || _liveProps['loading'] == true;
+    final title = _liveProps['title']?.toString();
+    final subtitle =
+        _liveProps['subtitle']?.toString() ?? _liveProps['message']?.toString();
+    final skipEnabled = _liveProps['skip_enabled'] == true;
 
     return Material(
       color: Colors.transparent,
@@ -181,25 +233,35 @@ class _SplashControlState extends State<_SplashControl> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (title != null && title.isNotEmpty)
-                          Text(title, style: Theme.of(context).textTheme.titleMedium),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         if (subtitle != null && subtitle.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                            child: Text(
+                              subtitle,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         if (showProgress)
                           Padding(
                             padding: const EdgeInsets.only(top: 12),
                             child: SizedBox(
                               width: 220,
-                              child: LinearProgressIndicator(value: _progress <= 0 ? null : _progress),
+                              child: LinearProgressIndicator(
+                                value: _progress <= 0 ? null : _progress,
+                              ),
                             ),
                           ),
                         if (skipEnabled)
                           TextButton(
                             onPressed: () {
                               setState(() => _active = false);
-                              widget.sendEvent(widget.controlId, 'skip', {'progress': _progress});
+                              widget.sendEvent(widget.controlId, 'skip', {
+                                'progress': _progress,
+                              });
                             },
                             child: const Text('Skip'),
                           ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme.dart';
 import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_registry.dart';
+import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/align_control.dart';
 import 'package:butterflyui_runtime/src/core/controls/layout/card.dart';
@@ -80,29 +81,20 @@ Widget candyFirstChildOrEmpty(
 }
 
 // Parse helper functions
-MainAxisAlignment candyParseMainAxis(Object? value) {
-  final v = candyNorm(value?.toString() ?? '');
-  return switch (v) {
-    'start' || 'min' => MainAxisAlignment.start,
-    'end' || 'max' => MainAxisAlignment.end,
-    'center' => MainAxisAlignment.center,
-    'space_between' || 'spaceBetween' => MainAxisAlignment.spaceBetween,
-    'space_around' || 'spaceAround' => MainAxisAlignment.spaceAround,
-    'space_evenly' || 'spaceEvenly' => MainAxisAlignment.spaceEvenly,
-    _ => MainAxisAlignment.start,
-  };
+MainAxisAlignment candyParseMainAxis(
+  Object? value, {
+  required Axis axis,
+  MainAxisAlignment fallback = MainAxisAlignment.start,
+}) {
+  return parseLayoutMainAxisAlignment(value, fallback, axis: axis);
 }
 
-CrossAxisAlignment candyParseCrossAxis(Object? value) {
-  final v = candyNorm(value?.toString() ?? '');
-  return switch (v) {
-    'start' || 'min' => CrossAxisAlignment.start,
-    'end' || 'max' => CrossAxisAlignment.end,
-    'center' => CrossAxisAlignment.center,
-    'stretch' => CrossAxisAlignment.stretch,
-    'baseline' => CrossAxisAlignment.baseline,
-    _ => CrossAxisAlignment.start,
-  };
+CrossAxisAlignment candyParseCrossAxis(
+  Object? value, {
+  required Axis axis,
+  CrossAxisAlignment fallback = CrossAxisAlignment.start,
+}) {
+  return parseLayoutCrossAxisAlignment(value, fallback, axis: axis);
 }
 
 MainAxisSize candyParseMainAxisSize(Object? value) {
@@ -134,13 +126,8 @@ WrapAlignment candyParseWrapAlignment(Object? value) {
 }
 
 WrapCrossAlignment candyParseWrapCrossAxis(Object? value) {
-  final v = candyNorm(value?.toString() ?? '');
-  return switch (v) {
-    'start' => WrapCrossAlignment.start,
-    'end' => WrapCrossAlignment.end,
-    'center' => WrapCrossAlignment.center,
-    _ => WrapCrossAlignment.start,
-  };
+  return parseLayoutWrapCrossAlignment(value, axis: Axis.horizontal) ??
+      WrapCrossAlignment.start;
 }
 
 Clip candyParseClip(Object? value) {
@@ -436,8 +423,15 @@ Widget _buildRow(CandyContext ctx) {
       if (i < children.length - 1) spaced.add(SizedBox(width: spacing));
     }
     return Row(
-      mainAxisAlignment: candyParseMainAxis(m['main_axis'] ?? m['alignment']),
-      crossAxisAlignment: candyParseCrossAxis(m['cross_axis']),
+      mainAxisAlignment: candyParseMainAxis(
+        m['main_axis'] ?? m['alignment'],
+        axis: Axis.horizontal,
+      ),
+      crossAxisAlignment: candyParseCrossAxis(
+        m['cross_axis'],
+        axis: Axis.horizontal,
+        fallback: CrossAxisAlignment.center,
+      ),
       mainAxisSize: candyParseMainAxisSize(m['main_axis_size']),
       children: spaced,
     );
@@ -467,8 +461,14 @@ Widget _buildColumn(CandyContext ctx) {
       if (i < children.length - 1) spaced.add(SizedBox(height: spacing));
     }
     return Column(
-      mainAxisAlignment: candyParseMainAxis(m['main_axis'] ?? m['alignment']),
-      crossAxisAlignment: candyParseCrossAxis(m['cross_axis']),
+      mainAxisAlignment: candyParseMainAxis(
+        m['main_axis'] ?? m['alignment'],
+        axis: Axis.vertical,
+      ),
+      crossAxisAlignment: candyParseCrossAxis(
+        m['cross_axis'],
+        axis: Axis.vertical,
+      ),
       mainAxisSize: candyParseMainAxisSize(m['main_axis_size']),
       children: spaced,
     );

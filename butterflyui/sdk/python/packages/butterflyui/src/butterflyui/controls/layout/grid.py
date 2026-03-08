@@ -2,13 +2,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 from ..base_control import butterfly_control
+from ..items_control import ItemsControl
 from ..layout_control import LayoutControl
 
 from ..multi_child_control import MultiChildControl
 __all__ = ["Grid"]
 
 @butterfly_control('grid', field_aliases={'controls': 'children'})
-class Grid(LayoutControl, MultiChildControl):
+class Grid(LayoutControl, MultiChildControl, ItemsControl):
     """
     Grid layout that arranges children into a fixed number of columns.
 
@@ -92,3 +93,36 @@ class Grid(LayoutControl, MultiChildControl):
     """
     Virtualized value forwarded to the `grid` runtime control.
     """
+
+    primary: bool | None = None
+    """
+    Whether this grid should use the primary scroll controller when vertical.
+    """
+
+    content_padding: Any | None = None
+    """
+    Padding applied inside the scrollable grid viewport.
+    """
+
+    events: list[str] | None = None
+    """
+    Runtime events emitted by the grid, such as ``"select"``.
+    """
+
+    def get_state(self, session: Any) -> dict[str, Any]:
+        return self.invoke(session, "get_state", {})
+
+    def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": props})
+
+    def emit(
+        self,
+        session: Any,
+        event: str,
+        payload: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return self.invoke(
+            session,
+            "emit",
+            {"event": event, "payload": dict(payload or {})},
+        )

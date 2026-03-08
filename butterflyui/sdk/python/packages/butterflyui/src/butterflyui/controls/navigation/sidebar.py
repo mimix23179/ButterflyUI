@@ -125,6 +125,9 @@ class Sidebar(LayoutControl):
     def set_selected(self, session: Any, selected_id: str) -> dict[str, Any]:
         return self.invoke(session, "set_selected", {"selected_id": selected_id})
 
+    def set_query(self, session: Any, query: str) -> dict[str, Any]:
+        return self.invoke(session, "set_props", {"props": {"query": query}})
+
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
 
@@ -142,3 +145,6 @@ class Sidebar(LayoutControl):
             "emit",
             {"event": event, "payload": dict(payload or {})},
         )
+
+    def trigger(self, session: Any, event: str = "change", **payload: Any) -> dict[str, Any]:
+        return self.emit(session, event, payload)

@@ -269,6 +269,10 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
   late bool _open = widget.initialOpen;
   bool _present = false;
   bool _dismissSent = false;
+  late bool _dismissible = widget.dismissible;
+  late bool _closeOnEscape = widget.closeOnEscape;
+  late bool _trapFocus = widget.trapFocus;
+  late Color? _scrimColor = widget.scrimColor;
 
   @override
   void initState() {
@@ -298,6 +302,10 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
       _controller.duration = widget.duration;
       _controller.reverseDuration = widget.duration;
     }
+    _dismissible = widget.dismissible;
+    _closeOnEscape = widget.closeOnEscape;
+    _trapFocus = widget.trapFocus;
+    _scrimColor = widget.scrimColor;
     if (_open) {
       _dismissSent = false;
       if (!_present) {
@@ -343,6 +351,52 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
           }
         });
         return null;
+      case 'set_props':
+        final incoming = args['props'];
+        if (incoming is Map) {
+          final props = coerceObjectMap(incoming);
+          setState(() {
+            if (props.containsKey('open')) {
+              _open = props['open'] == true;
+              if (_open) {
+                _dismissSent = false;
+                _present = true;
+                _controller.forward();
+              } else {
+                _controller.reverse().whenComplete(() {
+                  if (!mounted || _open) return;
+                  setState(() => _present = false);
+                });
+              }
+            }
+            if (props.containsKey('dismissible')) {
+              _dismissible = props['dismissible'] == true;
+            }
+            if (props.containsKey('close_on_escape')) {
+              _closeOnEscape = props['close_on_escape'] == true;
+            }
+            if (props.containsKey('trap_focus')) {
+              _trapFocus = props['trap_focus'] != false;
+            }
+            if (props.containsKey('scrim_color')) {
+              _scrimColor = coerceColor(props['scrim_color']);
+            }
+          });
+        }
+        return {'open': _open, 'present': _present};
+      case 'emit':
+      case 'trigger':
+        {
+          final fallback = method == 'trigger' ? 'change' : method;
+          final event = (args['event'] ?? args['name'] ?? fallback).toString();
+          final payload = args['payload'] is Map
+              ? coerceObjectMap(args['payload'] as Map)
+              : <String, Object?>{};
+          if (widget.controlId.isNotEmpty) {
+            widget.sendEvent(widget.controlId, event, payload);
+          }
+          return true;
+        }
       case 'get_state':
         return {'open': _open, 'present': _present};
       default:
@@ -351,10 +405,18 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
   }
 
   void _dismiss() {
-    if (_dismissSent || !widget.dismissible) return;
+    if (_dismissSent || !_dismissible) return;
     _dismissSent = true;
+    setState(() {
+      _open = false;
+    });
+    _controller.reverse().whenComplete(() {
+      if (!mounted || _open) return;
+      setState(() => _present = false);
+    });
     if (widget.controlId.isNotEmpty) {
       widget.sendEvent(widget.controlId, 'dismiss', const {});
+      widget.sendEvent(widget.controlId, 'close', const {});
     }
   }
 
@@ -370,17 +432,17 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
         policy: OrderedTraversalPolicy(),
         child: FocusScope(
           autofocus: _open,
-          canRequestFocus: widget.trapFocus,
+          canRequestFocus: _trapFocus,
           child: Stack(
             children: [
               Positioned.fill(
                 child: GestureDetector(
-                  onTap: widget.dismissible ? _dismiss : null,
+                  onTap: _dismissible ? _dismiss : null,
                   child: FadeTransition(
                     opacity: _opacity,
                     child: Container(
                       color:
-                          widget.scrimColor ??
+                          _scrimColor ??
                           butterflyuiScrim(context, opacity: 0.54),
                     ),
                   ),
@@ -393,7 +455,7 @@ class _AlertDialogModalState extends State<_AlertDialogModal>
       ),
     );
 
-    if (!widget.closeOnEscape) return scope;
+    if (!_closeOnEscape) return scope;
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.escape): ActivateIntent(),

@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -88,7 +91,10 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
     _message = (widget.props['message'] ?? '').toString();
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'set_content':
         setState(() {
@@ -122,8 +128,68 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
 
   @override
   Widget build(BuildContext context) {
-    final actionLabel = widget.props['action_label']?.toString();
-    final clickable = widget.props['clickable'] == true;
+    final theme = Theme.of(context);
+    final tokens = theme.extension<ButterflyUIThemeTokens>();
+    final props = widget.props;
+    final explicitSurfaceFill =
+        props.containsKey('bgcolor') ||
+        props.containsKey('background') ||
+        props.containsKey('gradient');
+    final inheritedTint = coerceColor(
+      props['surface_tint_color'] ??
+          props['__surface_tint_color'] ??
+          props['color'],
+    );
+    final accent =
+        coerceColor(props['action_color'] ?? props['color']) ??
+        inheritedTint ??
+        tokens?.primary ??
+        theme.colorScheme.primary;
+    final backgroundColor =
+        coerceColor(props['bgcolor'] ?? props['background']) ??
+        (!explicitSurfaceFill && inheritedTint != null
+            ? deriveInheritedSurfaceFill(inheritedTint, alpha: 0.18)
+            : tokens?.surface ?? theme.cardColor);
+    final borderColor =
+        coerceColor(props['border_color']) ??
+        (!explicitSurfaceFill && inheritedTint != null
+            ? deriveInheritedSurfaceBorder(inheritedTint)
+            : tokens?.border ?? theme.colorScheme.outlineVariant);
+    final borderWidth =
+        coerceDouble(props['border_width']) ??
+        (!explicitSurfaceFill && inheritedTint != null ? 1.0 : 0.0);
+    final radius = coerceDouble(props['radius']) ?? tokens?.radiusLg ?? 18.0;
+    final gradient = coerceGradient(props['gradient']);
+    final shadow =
+        coerceBoxShadow(props['shadow']) ??
+        (props['glow'] == true
+            ? <BoxShadow>[
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.28),
+                  blurRadius: 24,
+                  spreadRadius: 0.5,
+                  offset: const Offset(0, 10),
+                ),
+              ]
+            : null);
+    final titleColor =
+        coerceColor(
+          props['title_color'] ?? props['text_color'] ?? props['foreground'],
+        ) ??
+        tokens?.text ??
+        theme.colorScheme.onSurface;
+    final messageColor =
+        coerceColor(
+          props['message_color'] ??
+              props['subtitle_color'] ??
+              props['muted_text_color'],
+        ) ??
+        tokens?.mutedText ??
+        theme.colorScheme.onSurfaceVariant;
+    final contentPadding =
+        coercePadding(props['content_padding']) ??
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 14);
+
     Widget? child;
     for (final raw in widget.rawChildren) {
       if (raw is Map) {
@@ -132,41 +198,145 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
       }
     }
 
-    final card = Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_title.isNotEmpty) Text(_title, style: Theme.of(context).textTheme.titleMedium),
-            if (_message.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(_message),
-            ],
-            if (child != null) ...[
-              const SizedBox(height: 8),
-              child,
-            ],
-            if (actionLabel != null && actionLabel.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => _emit('action', _statePayload()),
-                  child: Text(actionLabel),
-                ),
-              ),
-            ],
-          ],
+    final actionLabel = props['action_label']?.toString();
+    final actionVariant = (props['action_variant'] ?? 'soft')
+        .toString()
+        .trim()
+        .toLowerCase();
+    final actionTextColor =
+        coerceColor(props['action_text_color']) ??
+        (actionVariant == 'filled'
+            ? _resolveReadableForeground(accent)
+            : accent);
+    final actionBackground = switch (actionVariant) {
+      'filled' => accent,
+      'outlined' || 'text' => Colors.transparent,
+      _ => accent.withValues(alpha: 0.12),
+    };
+    final actionStyle = TextButton.styleFrom(
+      foregroundColor: actionTextColor,
+      backgroundColor: actionBackground,
+      side: actionVariant == 'outlined'
+          ? BorderSide(color: accent.withValues(alpha: 0.5), width: 1)
+          : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          coerceDouble(props['action_radius']) ?? 12,
         ),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     );
 
-    if (!clickable) return card;
-    return InkWell(
-      onTap: () => _emit('tap', _statePayload()),
-      child: card,
+    Widget body = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_title.isNotEmpty)
+          Text(
+            _title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: titleColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        if (_message.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            _message,
+            style: theme.textTheme.bodyMedium?.copyWith(color: messageColor),
+          ),
+        ],
+        if (child != null) ...[const SizedBox(height: 12), child],
+        if (actionLabel != null && actionLabel.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _emit('action', _statePayload()),
+              style: actionStyle,
+              child: Text(actionLabel),
+            ),
+          ),
+        ],
+      ],
     );
+
+    final clickable = props['clickable'] == true;
+    if (clickable) {
+      body = Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radius),
+          onTap: () => _emit('tap', _statePayload()),
+          child: Padding(padding: contentPadding, child: body),
+        ),
+      );
+    } else {
+      body = Padding(padding: contentPadding, child: body);
+    }
+
+    Widget surface = DecoratedBox(
+      decoration: BoxDecoration(
+        color: gradient == null ? backgroundColor : null,
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(radius),
+        border: borderWidth <= 0
+            ? null
+            : Border.all(color: borderColor, width: borderWidth),
+        boxShadow: shadow,
+      ),
+      child: body,
+    );
+
+    final blur = (coerceDouble(props['backdrop_blur'] ?? props['blur']) ?? 0.0)
+        .clamp(0.0, 30.0);
+    final backdropColor = coerceColor(props['backdrop_color']);
+    if (blur > 0 || backdropColor != null) {
+      surface = ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: backdropColor,
+              borderRadius: BorderRadius.circular(radius),
+            ),
+            child: surface,
+          ),
+        ),
+      );
+    }
+
+    return _applyArtifactTransparency(child: surface, props: props);
   }
+}
+
+Color _resolveReadableForeground(Color background) {
+  return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
+}
+
+Widget _applyArtifactTransparency({
+  required Widget child,
+  required Map<String, Object?> props,
+}) {
+  final explicitOpacity = coerceDouble(props['opacity']);
+  final transparency = coerceDouble(
+    props['transparency'] ?? props['alpha'] ?? props['translucency'],
+  );
+  double? resolvedOpacity = explicitOpacity;
+  if (transparency != null) {
+    final normalized = transparency > 1
+        ? (transparency / 100.0).clamp(0.0, 1.0)
+        : transparency.clamp(0.0, 1.0);
+    final transparencyOpacity = 1.0 - normalized;
+    resolvedOpacity = resolvedOpacity == null
+        ? transparencyOpacity
+        : (resolvedOpacity * transparencyOpacity).clamp(0.0, 1.0);
+  }
+  if (resolvedOpacity == null || resolvedOpacity >= 1.0) {
+    return child;
+  }
+  return Opacity(opacity: resolvedOpacity.clamp(0.0, 1.0), child: child);
 }

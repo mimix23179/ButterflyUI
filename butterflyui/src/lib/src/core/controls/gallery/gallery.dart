@@ -1263,6 +1263,8 @@ Widget _buildGalleryLayout({
             enableDrag: enableDrag,
             useControlWidgets: useControlWidgets,
           ),
+          registerInvokeHandler,
+          unregisterInvokeHandler,
           sendEvent,
         );
       }
