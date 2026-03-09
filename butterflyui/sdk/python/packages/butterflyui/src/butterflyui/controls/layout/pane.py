@@ -51,9 +51,6 @@ class Pane(LayoutControl, SingleChildControl):
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
 
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
-
     def emit(
         self,
         session: Any,

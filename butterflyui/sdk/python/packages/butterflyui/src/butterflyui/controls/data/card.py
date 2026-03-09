@@ -13,12 +13,10 @@ class Card(LayoutControl, SingleChildControl):
     Material-style surface container that wraps a single child control
     inside a rounded, optionally elevated panel.
 
-    The runtime renders a Flutter ``Card`` whose background colour falls
-    back to the active Candy ``surface`` token, border colour to the
-    ``border`` token, and corner radius to the theme's ``card.radius``
-    or ``radii.md`` token.  An optional ``content_padding`` is applied as
-    inner ``Padding``, and ``content_alignment`` positions the child
-    inside the card via ``Align``.
+    The runtime renders a Flutter ``Card`` with background colour, border,
+    radius, and optional elevation. An optional ``content_padding`` is applied
+    as inner ``Padding``, and ``content_alignment`` positions the child inside
+    the card via ``Align``.
 
     ```python
     import butterflyui as bui

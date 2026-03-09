@@ -17,9 +17,9 @@ class Chip(FormFieldControl):
     ``options``/``items``. In grouped mode, use ``multi_select`` with
     ``values`` to support multi-selection workflows.
 
-    ``Chip`` also forwards universal style pipeline fields through ``**kwargs``
-    so color accents, transparency, and effect/motion styling remain
-    consistent with Candy/Skins contracts.
+    ``Chip`` also accepts shared visual props through ``**kwargs`` so color
+    accents, transparency, motion, and effect settings can still be forwarded
+    to the runtime.
 
     Example:
 

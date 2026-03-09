@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'candy/theme.dart';
-import 'style/style_pack.dart';
+import 'styling/theme.dart';
+import 'styling/style_pack.dart';
 import 'webview/webview_api.dart';
 import 'runtime_control_node.dart';
 
@@ -12,7 +12,7 @@ typedef ButterflyUIControlBuilder =
     );
 
 class ButterflyUIControlContext {
-  final CandyTokens tokens;
+  final StylingTokens tokens;
   final StylePack stylePack;
   final ButterflyUISendRuntimeEvent sendEvent;
   final ButterflyUISendRuntimeSystemEvent sendSystemEvent;

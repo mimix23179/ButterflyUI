@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/buttons/button_runtime.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
@@ -134,7 +134,7 @@ class _AsyncActionButtonControlState extends State<_AsyncActionButtonControl> {
         .trim();
     final visual = buildButtonVisualSpec(
       props: <String, Object?>{'variant': variant, ...props},
-      tokens: CandyTokens(),
+      tokens: StylingTokens(),
       variant: variant,
       fallbackLabel: label,
     );

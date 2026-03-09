@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'runtime_splash_frame.dart';
 import 'traceback_logger.dart';
-import '../../core/candy/theme_extension.dart';
+import '../../core/styling/theme_extension.dart';
 
 class ErrorHandlerScreen extends StatelessWidget {
   final Map<String, Object?>? payload;

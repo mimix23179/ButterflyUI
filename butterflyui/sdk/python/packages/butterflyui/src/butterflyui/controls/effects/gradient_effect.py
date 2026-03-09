@@ -96,9 +96,6 @@ class GradientEffect(LayoutControl):
     def set_colors(self, session: Any, colors: list[Any]) -> dict[str, Any]:
         return self.invoke(session, "set_colors", {"colors": colors})
 
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
-
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})
 

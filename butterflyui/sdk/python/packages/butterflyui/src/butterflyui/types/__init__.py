@@ -19,7 +19,17 @@ from .image import DecorationImage
 from .semantics import SemanticsProps
 from .shadow import BoxShadow
 from .spacing import EdgeInsets
-from .style import Style, StyleValue
+from .style import (
+    GradientWash,
+    LineField,
+    NoiseField,
+    OrbitField,
+    ParticleField,
+    SceneLayer,
+    ShaderLayer,
+    Style,
+    StyleValue,
+)
 from .text import TextStyle
 
 __all__ = [
@@ -31,10 +41,15 @@ __all__ = [
     "ColorRGBA",
     "DecorationImage",
     "EdgeInsets",
-    "Style",
-    "StyleValue",
     "LinearGradient",
     "RadialGradient",
+    "SceneLayer",
+    "ParticleField",
+    "GradientWash",
+    "LineField",
+    "OrbitField",
+    "NoiseField",
+    "ShaderLayer",
     "SweepGradient",
     "IconData",
     "ICON_NAMES",
@@ -45,6 +60,8 @@ __all__ = [
     "normalize_icon_value",
     "suggest_icon_names",
     "SemanticsProps",
+    "Style",
+    "StyleValue",
     "TextStyle",
     "normalize_color_value",
 ]

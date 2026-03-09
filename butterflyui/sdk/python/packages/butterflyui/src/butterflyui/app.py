@@ -38,8 +38,7 @@ from .runtime import set_current_session
 from .runtime.runner import RunTarget, RuntimePlan, build_runtime_plan
 from .core.control import Control, coerce_json_value
 from .core.performance import PerformanceConfig
-from .controls.candy import CandyTheme
-from .controls._shared import modifier_capabilities_manifest
+from .stylesheet import StyleSheet, parse_stylesheet
 
 import butterflyui_desktop
 import butterflyui_web
@@ -105,8 +104,6 @@ class ButterflyUISession:
 		self._last_screen: dict[str, Any] | None = None
 		self._last_overlay: dict[str, Any] | None = None
 		self._last_splash: dict[str, Any] | None = None
-		self._style_pack_revision_applied: int | None = None
-		self._style_pack_hash_applied: str | None = None
 		self._first_render_event = asyncio.Event()
 		self._stall_task: asyncio.Task[Any] | None = None
 		self._stall_timeout_s: float | None = (
@@ -192,12 +189,6 @@ class ButterflyUISession:
 		self._stall_task = loop.create_task(self._watch_first_render(timeout))
 
 	def _handle_applied(self, payload: dict[str, Any]) -> None:
-		revision = payload.get("style_pack_revision")
-		if isinstance(revision, int):
-			self._style_pack_revision_applied = revision
-		hash_value = payload.get("style_pack_hash")
-		if isinstance(hash_value, str) and hash_value:
-			self._style_pack_hash_applied = hash_value
 		if payload.get("first_render") or payload.get("has_root"):
 			self._mark_first_render()
 
@@ -826,24 +817,12 @@ class RuntimeApp(BaseApp):
 					extra["splash"] = splash_payload
 			if page.title:
 				extra["title"] = page.title
-			if page.style_pack:
-				extra["style_pack"] = page.style_pack
-			if page._style_packs:
-				extra["style_packs"] = list(page._style_packs.values())
 			if page.bgcolor:
 				extra["bgcolor"] = page.bgcolor
 			if page.background is not None:
 				extra["background"] = coerce_json_value(page.background)
-			if page.candy is not None:
-				if isinstance(page.candy, CandyTheme):
-					tokens_payload = page.candy.to_json()
-				elif isinstance(page.candy, dict):
-					tokens_payload = dict(page.candy)
-				else:
-					tokens_payload = None
-				if tokens_payload is not None:
-					extra["candy"] = tokens_payload
-					extra["tokens"] = tokens_payload
+			if page.stylesheet is not None:
+				extra["stylesheet"] = page._coerce_stylesheet(page.stylesheet)
 			if page.devtools is not None:
 				extra["devtools"] = bool(page.devtools)
 			if page.devtools_prefs:
@@ -941,7 +920,7 @@ class Page:
 	"""Mutable page container passed to user `main` callbacks.
 
 	`Page` holds references to the root tree and optional screen/overlay/splash
-	controls, plus metadata like title and styling. Calling `page.update()` pushes
+	controls, plus metadata like title and stylesheet state. Calling `page.update()` pushes
 	the current state to the runtime.
 	"""
 
@@ -956,15 +935,10 @@ class Page:
 		self.bgcolor: str | None = None
 		self.padding: Any = None
 		self.background: Any = None
-		self.style_pack: str | None = None
-		# Theme/accessory for Candy; can be a CandyTheme or a plain dict
-		self.candy: CandyTheme | dict[str, Any] | None = None
+		self.stylesheet: StyleSheet | str | dict[str, Any] | None = None
 		# Devtools visibility / prefs used by some demos
 		self.devtools: bool | None = None
 		self.devtools_prefs: dict[str, Any] = {}
-		# Custom style pack specs to register with the runtime
-		self._style_packs: dict[str, dict[str, Any]] = {}
-		self._style_pack_revision: int = 0
 		# Track pending update tasks to ensure they complete before runtime.ready
 		self._pending_updates: list[asyncio.Task[Any]] = []
 		self._pending_update_task: asyncio.Task[Any] | None = None
@@ -1008,7 +982,7 @@ class Page:
 		"""Send the current page state to the runtime.
 
 		Sends a payload that may include root, screen, overlay, splash, title,
-		and candy/devtools metadata when available.
+		and runtime metadata when available.
 		"""
 		if not self._has_payload():
 			return
@@ -1039,26 +1013,14 @@ class Page:
 				payload["splash"] = splash_payload
 		if self.title:
 			payload["title"] = self.title
-		if self.style_pack:
-			payload["style_pack"] = self.style_pack
-		if self._style_packs:
-			payload["style_packs"] = list(self._style_packs.values())
 		if self.bgcolor:
 			payload["bgcolor"] = self.bgcolor
 		if self.padding is not None:
 			payload["padding"] = coerce_json_value(self.padding)
 		if self.background is not None:
 			payload["background"] = coerce_json_value(self.background)
-		if self.candy is not None:
-			if isinstance(self.candy, CandyTheme):
-				tokens_payload = self.candy.to_json()
-			elif isinstance(self.candy, dict):
-				tokens_payload = dict(self.candy)
-			else:
-				tokens_payload = None
-			if tokens_payload is not None:
-				payload["candy"] = tokens_payload
-				payload["tokens"] = tokens_payload
+		if self.stylesheet is not None:
+			payload["stylesheet"] = self._coerce_stylesheet(self.stylesheet)
 		if self.devtools is not None:
 			payload["devtools"] = bool(self.devtools)
 		if self.devtools_prefs:
@@ -1120,42 +1082,6 @@ class Page:
 		"""Set the screen layer (separate from root/overlay)."""
 		self.screen = screen
 
-	def set_style_pack(self, name: str | None) -> None:
-		"""Set the style pack name to use on the runtime."""
-		next_name = name or None
-		if self.style_pack != next_name:
-			self.style_pack = next_name
-			self._mark_style_pack_changed()
-
-	def register_style_pack(
-		self,
-		name: str,
-		*,
-		tokens: Any | None = None,
-		base: str | None = None,
-		background: Any | None = None,
-		overrides: dict[str, Any] | None = None,
-		components: dict[str, Any] | None = None,
-		motion: dict[str, Any] | None = None,
-		effects: dict[str, Any] | None = None,
-	) -> dict[str, Any]:
-		"""Register a custom style pack with the runtime."""
-		from .style_packs import register_style_pack as _register_style_pack
-
-		spec = _register_style_pack(
-			name,
-			tokens=tokens,
-			base=base,
-			background=coerce_json_value(background) if background is not None else None,
-			overrides=overrides,
-			components=components,
-			motion=motion,
-			effects=effects,
-		)
-		self._style_packs[str(spec.get("name") or name)] = dict(spec)
-		self._mark_style_pack_changed()
-		return spec
-
 	def set_background(self, background: Any) -> None:
 		"""Set a background spec for the runtime (color/gradient/image)."""
 		self.background = background
@@ -1163,6 +1089,10 @@ class Page:
 	def set_bgcolor(self, color: str | None) -> None:
 		"""Set a plain background color string for the runtime."""
 		self.bgcolor = color
+
+	def set_stylesheet(self, stylesheet: StyleSheet | str | dict[str, Any] | None) -> None:
+		"""Set a stylesheet used to customize controls with CSS-like selectors."""
+		self.stylesheet = stylesheet
 
 	def add(self, *children: Any) -> None:
 		"""Add child(ren) into the page root. If no root exists the first
@@ -1223,43 +1153,23 @@ class Page:
 			return True
 		if self.title:
 			return True
-		if self.style_pack:
-			return True
-		if self._style_packs:
-			return True
 		if self.bgcolor:
 			return True
 		if self.background is not None:
 			return True
-		if self.candy is not None:
+		if self.stylesheet is not None:
 			return True
 		if self.devtools is not None:
 			return True
 		if self.devtools_prefs:
 			return True
-		if self._style_pack_revision > 0:
-			return True
 		return False
-
-	def _mark_style_pack_changed(self) -> None:
-		self._style_pack_revision += 1
-
-	def _style_pack_sync_hash(self) -> str:
-		payload = {
-			"style_pack": self.style_pack,
-			"style_packs": self._style_packs,
-		}
-		raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
-		return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 	def _runtime_metadata_payload(self) -> dict[str, Any]:
 		protocol = int(getattr(getattr(self.session, "_config", None), "protocol", 1) or 1)
 		return {
 			"protocol_version": protocol,
 			"contract_version": "whatwedid_v1",
-			"modifier_capabilities": modifier_capabilities_manifest(),
-			"style_pack_revision": self._style_pack_revision,
-			"style_pack_hash": self._style_pack_sync_hash(),
 		}
 
 	def _coerce_root(self, value: Any) -> dict[str, Any] | None:
@@ -1275,6 +1185,15 @@ class Page:
 		if isinstance(value, dict):
 			return value
 		return None
+
+	def _coerce_stylesheet(self, value: StyleSheet | str | dict[str, Any]) -> dict[str, Any]:
+		if isinstance(value, StyleSheet):
+			return value.to_json()
+		if isinstance(value, str):
+			return parse_stylesheet(value).to_json()
+		if isinstance(value, dict):
+			return value
+		raise TypeError(f"unsupported stylesheet type: {type(value).__name__}")
 
 
 def _build_plan_for_app(

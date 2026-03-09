@@ -3,13 +3,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'animation/animation_spec.dart';
-import 'candy/theme.dart';
+import 'styling/theme.dart';
 import 'butterflyui_event_box.dart';
 import 'control_registry.dart';
 import 'control_utils.dart';
 import 'motion/motion_pack.dart';
-import 'modifiers/control_capabilities.dart';
-import 'modifiers/modifier_chain.dart';
+import 'styling/effects/interaction/control_interaction_capabilities.dart';
+import 'styling/effects/interaction/interaction_chain.dart';
 import 'controls/buttons/button.dart';
 import 'controls/buttons/elevated_button.dart';
 import 'controls/buttons/icon_button.dart';
@@ -27,13 +27,10 @@ import 'controls/customization/blob_field.dart';
 import 'controls/customization/border.dart';
 import 'controls/customization/border_side.dart';
 import 'controls/customization/button_style.dart';
-import 'controls/gallery/gallery.dart';
-import 'controls/candy/candy.dart';
 import 'controls/customization/crop_box.dart';
 import 'controls/customization/histogram_overlay.dart';
 import 'controls/customization/histogram_view.dart';
 import 'controls/customization/color_tools.dart';
-import 'controls/skins/skins.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
 import 'controls/display/bar_chart.dart';
@@ -43,7 +40,6 @@ import 'controls/display/canvas.dart';
 import 'controls/display/display.dart';
 import 'controls/display/emoji_icon.dart';
 import 'controls/display/avatar.dart';
-import 'controls/display/canvas_control.dart';
 import 'controls/display/glyph_button.dart';
 import 'controls/display/line_chart.dart';
 import 'controls/display/line_plot.dart';
@@ -62,7 +58,6 @@ import 'controls/effects/effects.dart';
 import 'controls/effects/fold_layer.dart';
 import 'controls/effects/flow_field.dart';
 import 'controls/effects/liquid_morph.dart';
-import 'controls/effects/modifier.dart';
 import 'controls/effects/morphing_border.dart';
 import 'controls/effects/motion.dart';
 import 'controls/effects/parallax.dart';
@@ -75,7 +70,6 @@ import 'controls/effects/scanline_overlay.dart';
 import 'controls/effects/shadow.dart';
 import 'controls/effects/shimmer_shadow.dart';
 import 'controls/effects/stagger.dart';
-import 'controls/effects/style.dart';
 import 'controls/effects/transition.dart';
 import 'controls/effects/visual_fx.dart';
 import 'controls/effects/vignette.dart';
@@ -187,13 +181,17 @@ import 'controls/overlay/snack_bar.dart';
 import 'controls/overlay/slide_panel.dart';
 import 'controls/overlay/splash.dart';
 import 'controls/overlay/toast_host.dart';
-import 'style/style_pack.dart';
-import 'style/control_style_resolver.dart';
-import 'style/style_packs.dart';
+import 'styling/style_pack.dart';
+import 'styling/control_style_resolver.dart';
+import 'styling/style_packs.dart';
+import 'styling/stylesheet.dart';
+import 'styling/utility_classes.dart';
+import 'styling/effects/visuals/renderers/render_layers.dart';
+import 'styling/effects/visuals/scene/layer.dart';
 import 'controls/webview/webview.dart';
 import 'webview/webview_api.dart';
 
-Color _textToken(CandyTokens tokens) {
+Color _textToken(StylingTokens tokens) {
   final explicit = tokens.color('text');
   if (explicit != null) return explicit;
   final surface =
@@ -203,13 +201,13 @@ Color _textToken(CandyTokens tokens) {
   return bestForegroundFor(surface, minContrast: 4.5);
 }
 
-Color _surfaceToken(CandyTokens tokens) {
+Color _surfaceToken(StylingTokens tokens) {
   return tokens.color('surface') ??
       tokens.color('background') ??
       const Color(0xffffffff);
 }
 
-Color _borderToken(CandyTokens tokens) {
+Color _borderToken(StylingTokens tokens) {
   return tokens.color('border') ?? _textToken(tokens).withValues(alpha: 0.2);
 }
 
@@ -286,6 +284,9 @@ Map<String, Object?> _normalizeIncomingProps(Map<String, Object?> source) {
     'transparent': 'transparency',
     'translucent': 'transparency',
     'translucency': 'transparency',
+    'class_name': 'classes',
+    'classname': 'classes',
+    'theme': 'style_pack',
   };
   for (final entry in aliasMap.entries) {
     final from = entry.key;
@@ -317,8 +318,31 @@ Map<String, Object?> _extractLocalTokenOverrides(Map<String, Object?> props) {
   return out;
 }
 
+Map<String, Object?> _mergeStylesheetProps(
+  Map<String, Object?> stylesheetProps,
+  Map<String, Object?> explicitProps,
+) {
+  final merged = <String, Object?>{...stylesheetProps};
+  explicitProps.forEach((key, value) {
+    final existing = merged[key];
+    if (existing is Map && value is Map) {
+      merged[key] = StylingTokens.mergeMaps(
+        coerceObjectMap(existing),
+        coerceObjectMap(value),
+      );
+      return;
+    }
+    if (existing is List && value is List) {
+      merged[key] = <Object?>[...existing, ...value];
+      return;
+    }
+    merged[key] = value;
+  });
+  return merged;
+}
+
 class ControlRenderer {
-  final CandyTokens tokens;
+  final StylingTokens tokens;
   final ButterflyUIControlRegistry registry;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
@@ -326,6 +350,9 @@ class ControlRenderer {
   final ButterflyUISendRuntimeSystemEvent sendSystemEvent;
   final StylePack stylePack;
   final Map<String, Object?> styleTokens;
+  final RuntimeStyleSheet stylesheet;
+  final double viewportWidth;
+  final double viewportHeight;
 
   ControlRenderer({
     required this.tokens,
@@ -336,13 +363,15 @@ class ControlRenderer {
     required this.sendSystemEvent,
     StylePack? stylePack,
     Map<String, Object?>? styleTokens,
+    RuntimeStyleSheet? stylesheet,
+    double viewportWidth = 1280,
+    double viewportHeight = 800,
   }) : registry = registry ?? ButterflyUIControlRegistry(),
        stylePack = stylePack ?? stylePackRegistry.defaultPack,
-       styleTokens = styleTokens ?? const <String, Object?>{} {
-    // Register candy controls into the registry
-    registerCandyControls(this.registry);
-    registerSkinsControls(this.registry);
-  }
+       styleTokens = styleTokens ?? const <String, Object?>{},
+       stylesheet = stylesheet ?? RuntimeStyleSheet.empty,
+       viewportWidth = viewportWidth,
+       viewportHeight = viewportHeight {}
 
   Widget buildFromControl(
     Map<String, Object?> control, {
@@ -359,7 +388,17 @@ class ControlRenderer {
     final incomingProps = (control['props'] is Map)
         ? _normalizeIncomingProps(coerceObjectMap(control['props'] as Map))
         : <String, Object?>{};
-    final baseProps = incomingProps;
+    final stylesheetProps = stylesheet.resolveProps(
+      controlType: type,
+      props: incomingProps,
+      viewportWidth: viewportWidth,
+    );
+    final baseProps = _mergeStylesheetProps(stylesheetProps, incomingProps);
+    final normalizedProps = applyUtilityClassStyles(
+      baseProps,
+      viewportWidth: viewportWidth,
+      viewportHeight: viewportHeight,
+    );
 
     final basePack = inheritedPack ?? stylePack;
     final parentTokenOverrides = inheritedTokenOverrides ?? styleTokens;
@@ -368,20 +407,20 @@ class ControlRenderer {
         ? basePack
         : stylePackRegistry.resolve(packName);
     final localTokenOverrides = _extractLocalTokenOverrides(baseProps);
-    final resolvedTokenOverrides = CandyTokens.mergeMaps(
+    final resolvedTokenOverrides = StylingTokens.mergeMaps(
       parentTokenOverrides,
       localTokenOverrides,
     );
     final effectiveTokens = resolvedPack.buildTokens(resolvedTokenOverrides);
     final resolvedStyle = ControlStyleResolver.resolve(
       controlType: type,
-      props: baseProps,
+      props: normalizedProps,
       tokens: effectiveTokens,
       stylePack: resolvedPack,
     );
     final rawProps = _mergeResolvedStyleProps(
       controlType: type,
-      props: baseProps,
+      props: normalizedProps,
       resolvedStyle: resolvedStyle,
     );
     final hasExplicitSurfaceFill =
@@ -631,29 +670,6 @@ class ControlRenderer {
       return const SizedBox.shrink();
     }
 
-    // Candy umbrella - check registry for candy builder
-    final candyBuilder = registry.builderFor('candy');
-    if (candyBuilder != null) {
-      final candyResult = candyBuilder(
-        ButterflyUIControlContext(
-          tokens: tokens,
-          stylePack: stylePack,
-          sendEvent: sendEvent,
-          sendSystemEvent: sendSystemEvent,
-          registerInvokeHandler: registerInvokeHandler,
-          unregisterInvokeHandler: unregisterInvokeHandler,
-          buildChild: context.buildChild,
-        ),
-        {
-          'id': controlId,
-          'type': 'candy',
-          'props': props,
-          'children': rawChildren,
-        },
-      );
-      return candyResult;
-    }
-
     switch (type) {
       case 'page':
         {
@@ -778,55 +794,6 @@ class ControlRenderer {
 
       case 'clip':
         return buildClipControl(props, rawChildren, context.buildChild);
-
-      case 'candy':
-        final candyControl = buildCandyControl(
-          controlId,
-          props,
-          rawChildren,
-          tokens,
-          sendEvent,
-          registerInvokeHandler,
-          unregisterInvokeHandler,
-          context.buildChild,
-        );
-        return candyControl ?? const SizedBox.shrink();
-
-      case 'gallery':
-        return buildGalleryControl(
-          controlId,
-          props,
-          rawChildren,
-          context.tokens,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'gallery_scope':
-        return buildGalleryScopeControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-        );
-
-      case 'skins':
-        {
-          final skinsTokens = SkinsTokens.fromCandyTokens(context.tokens);
-          return buildSkinsControl(
-                controlId,
-                props,
-                rawChildren,
-                skinsTokens,
-                context.sendEvent,
-                context.registerInvokeHandler,
-                context.unregisterInvokeHandler,
-                context.buildChild,
-              ) ??
-              const SizedBox.shrink();
-        }
 
       case 'row':
         return buildRowControl(
@@ -1278,6 +1245,7 @@ class ControlRenderer {
               : (props['emit_on_change'] == true),
           debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
           events: props['events'],
+          props: props,
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
@@ -2199,28 +2167,6 @@ class ControlRenderer {
           sendEvent: context.sendEvent,
         );
 
-      case 'style':
-        return buildStyleControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
-      case 'modifier':
-        return buildModifierControl(
-          controlId,
-          props,
-          rawChildren,
-          context.buildChild,
-          context.registerInvokeHandler,
-          context.unregisterInvokeHandler,
-          context.sendEvent,
-        );
-
       case 'motion':
         return buildMotionControl(
           controlId,
@@ -2658,7 +2604,7 @@ class ControlRenderer {
     required Map<String, Object?> props,
     required ResolvedControlStyle resolvedStyle,
   }) {
-    final capabilities = ControlModifierCapabilities.forControl(controlType);
+    final capabilities = ControlInteractionCapabilities.forControl(controlType);
     bool supportsSlot(String name) =>
         capabilities.supportedSlots.contains(name);
     final merged = <String, Object?>{...props};
@@ -2698,6 +2644,18 @@ class ControlRenderer {
         merged,
         _iconSlotDefaults(controlType, resolvedStyle.slot('icon')),
       );
+    }
+    final slotStyles = <String, Object?>{};
+    for (final slotName in capabilities.supportedSlots) {
+      final slotStyle = resolvedStyle.slot(slotName);
+      if (slotStyle.isEmpty) continue;
+      slotStyles[slotName] = slotStyle;
+    }
+    if (slotStyles.isNotEmpty) {
+      final existing = merged['__slot_styles'] is Map
+          ? coerceObjectMap(merged['__slot_styles'] as Map)
+          : <String, Object?>{};
+      merged['__slot_styles'] = StylingTokens.mergeMaps(existing, slotStyles);
     }
     return merged;
   }
@@ -2795,7 +2753,7 @@ class ControlRenderer {
         controlType == 'spacer') {
       return built;
     }
-    final capabilities = ControlModifierCapabilities.forControl(controlType);
+    final capabilities = ControlInteractionCapabilities.forControl(controlType);
 
     final surfaceStyle = resolvedStyle.slot('surface');
     final inheritedSurfaceTint = coerceColor(props['__surface_tint_color']);
@@ -3087,6 +3045,46 @@ class ControlRenderer {
       if (opacity != null && opacity >= 0 && opacity < 1) {
         built = Opacity(opacity: opacity.clamp(0.0, 1.0), child: built);
       }
+
+      final overflow =
+          props['overflow'] ?? surfaceStyle['overflow'] ?? props['clip_behavior'];
+      final overflowClip = _parseOverflowClip(overflow);
+      if (overflowClip != null) {
+        built = ClipRect(clipBehavior: overflowClip, child: built);
+      }
+
+      final translate = _coerceOffset(
+        props['translate'] ?? surfaceStyle['translate'],
+      );
+      final translateX = coerceDouble(
+        props['translate_x'] ?? surfaceStyle['translate_x'],
+      );
+      final translateY = coerceDouble(
+        props['translate_y'] ?? surfaceStyle['translate_y'],
+      );
+      final resolvedTranslate = Offset(
+        translateX ?? translate?.dx ?? 0.0,
+        translateY ?? translate?.dy ?? 0.0,
+      );
+      if (resolvedTranslate.dx != 0 || resolvedTranslate.dy != 0) {
+        built = Transform.translate(offset: resolvedTranslate, child: built);
+      }
+
+      final scale = _coerceScaleValue(props['scale'] ?? surfaceStyle['scale']);
+      if (scale != null && (scale.dx != 1.0 || scale.dy != 1.0)) {
+        built = Transform.scale(
+          scaleX: scale.dx,
+          scaleY: scale.dy,
+          alignment: Alignment.center,
+          child: built,
+        );
+      }
+
+      built = wrapWithEffectRenderLayers(
+        controlId: controlId.isEmpty ? controlType : controlId,
+        props: props,
+        child: built,
+      );
     }
 
     final surfaceLayers = _resolveControlLayers(
@@ -3202,7 +3200,7 @@ class ControlRenderer {
             capabilities.supportsInteractiveModifiers ||
             capabilities.supportsGlassModifiers ||
             capabilities.supportsTransitionModifiers)) {
-      built = applyControlModifierChain(
+      built = applyControlInteractionChain(
         child: built,
         controlType: controlType,
         controlId: controlId,
@@ -3295,6 +3293,9 @@ class ControlRenderer {
       }
       if (value is! Map) return;
       final map = coerceObjectMap(value);
+      if (EffectLayer.fromValue(map) != null) {
+        return;
+      }
       if (map['type'] != null) {
         out.add(context.buildChild(map));
         return;
@@ -3731,13 +3732,6 @@ class ControlRenderer {
     return single.isEmpty ? const [] : [single];
   }
 
-  List<Map<String, Object?>> _coerceMapList(Object? value) {
-    if (value is List) {
-      return value.whereType<Map>().map((m) => coerceObjectMap(m)).toList();
-    }
-    return const [];
-  }
-
   List<String> _coerceTableColumns(Object? value) {
     if (value is List) {
       final cols = <String>[];
@@ -4151,34 +4145,61 @@ class ControlRenderer {
     }
   }
 
-  TextAlign? _parseTextAlign(Object? value) {
-    final s = value?.toString().toLowerCase();
-    switch (s) {
-      case 'left':
-      case 'start':
-        return TextAlign.start;
-      case 'right':
-      case 'end':
-        return TextAlign.end;
-      case 'center':
-        return TextAlign.center;
-      case 'justify':
-        return TextAlign.justify;
+  Clip? _parseOverflowClip(Object? value) {
+    final normalized = value
+        ?.toString()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    switch (normalized) {
+      case null:
+      case '':
+      case 'visible':
+      case 'unset':
+        return null;
+      case 'hidden':
+      case 'clip':
+        return Clip.hardEdge;
+      default:
+        return null;
+    }
+  }
+
+  Offset? _coerceOffset(Object? value) {
+    if (value is List && value.length >= 2) {
+      return Offset(
+        coerceDouble(value[0]) ?? 0.0,
+        coerceDouble(value[1]) ?? 0.0,
+      );
+    }
+    if (value is Map) {
+      final map = coerceObjectMap(value);
+      return Offset(
+        coerceDouble(map['x'] ?? map['dx']) ?? 0.0,
+        coerceDouble(map['y'] ?? map['dy']) ?? 0.0,
+      );
     }
     return null;
   }
 
-  TextOverflow? _parseTextOverflow(Object? value) {
-    final s = value?.toString().toLowerCase();
-    switch (s) {
-      case 'clip':
-        return TextOverflow.clip;
-      case 'fade':
-        return TextOverflow.fade;
-      case 'visible':
-        return TextOverflow.visible;
-      case 'ellipsis':
-        return TextOverflow.ellipsis;
+  Offset? _coerceScaleValue(Object? value) {
+    if (value == null) return null;
+    if (value is num) {
+      final factor = value.toDouble();
+      return Offset(factor, factor);
+    }
+    if (value is List && value.length >= 2) {
+      return Offset(
+        coerceDouble(value[0]) ?? 1.0,
+        coerceDouble(value[1]) ?? 1.0,
+      );
+    }
+    if (value is Map) {
+      final map = coerceObjectMap(value);
+      return Offset(
+        coerceDouble(map['x'] ?? map['scale_x']) ?? 1.0,
+        coerceDouble(map['y'] ?? map['scale_y']) ?? 1.0,
+      );
     }
     return null;
   }
@@ -4287,40 +4308,6 @@ class ControlRenderer {
     return null;
   }
 
-  Offset? _parseOffset(Object? value) {
-    if (value is List && value.length >= 2) {
-      final x = coerceDouble(value[0]) ?? 0.0;
-      final y = coerceDouble(value[1]) ?? 0.0;
-      return Offset(x, y);
-    }
-    if (value is Map) {
-      final map = coerceObjectMap(value);
-      final x = coerceDouble(map['x']) ?? 0.0;
-      final y = coerceDouble(map['y']) ?? 0.0;
-      return Offset(x, y);
-    }
-    return null;
-  }
-
-  Rect? _coerceRect(Object? value) {
-    if (value is List && value.length >= 4) {
-      final x = coerceDouble(value[0]) ?? 0.0;
-      final y = coerceDouble(value[1]) ?? 0.0;
-      final w = coerceDouble(value[2]) ?? 0.0;
-      final h = coerceDouble(value[3]) ?? 0.0;
-      return Rect.fromLTWH(x, y, w, h);
-    }
-    if (value is Map) {
-      final map = coerceObjectMap(value);
-      final x = coerceDouble(map['x'] ?? map['left']) ?? 0.0;
-      final y = coerceDouble(map['y'] ?? map['top']) ?? 0.0;
-      final width = coerceDouble(map['width']) ?? 0.0;
-      final height = coerceDouble(map['height']) ?? 0.0;
-      return Rect.fromLTWH(x, y, width, height);
-    }
-    return null;
-  }
-
   Curve _curveFromName(String? name) {
     final normalized = (name ?? '')
         .toLowerCase()
@@ -4424,18 +4411,6 @@ class ControlRenderer {
     if (s == 'false' || s == '0' || s == 'no' || s == 'off') return false;
     if (s == 'null' || s == 'none') return null;
     return null;
-  }
-
-  String _normalizePanelSide(String? value) {
-    switch ((value ?? '').toLowerCase()) {
-      case 'left':
-      case 'right':
-      case 'top':
-      case 'bottom':
-        return (value ?? '').toLowerCase();
-      default:
-        return 'left';
-    }
   }
 }
 

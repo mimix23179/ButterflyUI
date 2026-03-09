@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'svg_picture_resolver_stub.dart'
     if (dart.library.io) 'svg_picture_resolver_io.dart';

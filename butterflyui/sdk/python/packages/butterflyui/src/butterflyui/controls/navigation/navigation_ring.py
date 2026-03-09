@@ -31,7 +31,7 @@ class NavigationRing(LayoutControl):
     bui.NavigationRing(
         items=[
             {"id": "home", "label": "Home", "icon": "home"},
-            {"id": "gallery", "label": "Gallery", "icon": "image", "badge": "3"},
+        {"id": "library", "label": "Library", "icon": "image", "badge": "3"},
             {"id": "search", "label": "Search", "icon": "search"},
         ],
         selected_id="home",

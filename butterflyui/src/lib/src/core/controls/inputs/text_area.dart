@@ -31,6 +31,7 @@ Widget buildTextAreaControl(
         : (props['emit_on_change'] == true),
     debounceMs: coerceOptionalInt(props['debounce_ms']) ?? 250,
     events: props['events'],
+    props: props,
     registerInvokeHandler: registerInvokeHandler,
     unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,

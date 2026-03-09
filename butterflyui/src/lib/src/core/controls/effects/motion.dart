@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -219,7 +219,7 @@ class _MotionControlState extends State<_MotionControl>
       if (_state['glow'] != null) 'glow': _state['glow'],
       if (_state['shadow'] != null) 'shadow': _state['shadow'],
     };
-    final toMap = CandyTokens.mergeMaps(_coerceMap(_state['to']), scalarTo);
+    final toMap = StylingTokens.mergeMaps(_coerceMap(_state['to']), scalarTo);
 
     return AnimatedBuilder(
       animation: _entryProgress,
@@ -227,31 +227,31 @@ class _MotionControlState extends State<_MotionControl>
         final base = _interpolateMaps(fromMap, toMap, _entryProgress.value);
         var active = <String, Object?>{...base};
         if (disabled) {
-          active = CandyTokens.mergeMaps(
+          active = StylingTokens.mergeMaps(
             active,
             mergedStates['disabled'] ?? const {},
           );
         }
         if (selected) {
-          active = CandyTokens.mergeMaps(
+          active = StylingTokens.mergeMaps(
             active,
             mergedStates['selected'] ?? const {},
           );
         }
         if (_focused) {
-          active = CandyTokens.mergeMaps(
+          active = StylingTokens.mergeMaps(
             active,
             mergedStates['focus'] ?? const {},
           );
         }
         if (_hovered) {
-          active = CandyTokens.mergeMaps(
+          active = StylingTokens.mergeMaps(
             active,
             mergedStates['hover'] ?? const {},
           );
         }
         if (_pressed) {
-          active = CandyTokens.mergeMaps(
+          active = StylingTokens.mergeMaps(
             active,
             mergedStates['press'] ?? const {},
           );

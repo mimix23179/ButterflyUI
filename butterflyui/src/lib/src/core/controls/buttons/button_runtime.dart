@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
-import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/focusable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -179,6 +179,12 @@ class ButterflyUIButtonVisualSpec {
   final bool autoContrast;
   final double minContrast;
   final bool surfaceWrapped;
+  final EdgeInsetsGeometry? contentPadding;
+  final String? labelTransform;
+  final TextDecoration? labelDecoration;
+  final TextDecorationStyle? labelDecorationStyle;
+  final Color? labelDecorationColor;
+  final FontStyle? labelFontStyle;
 
   const ButterflyUIButtonVisualSpec({
     required this.label,
@@ -193,12 +199,18 @@ class ButterflyUIButtonVisualSpec {
     required this.autoContrast,
     required this.minContrast,
     required this.surfaceWrapped,
+    required this.contentPadding,
+    required this.labelTransform,
+    required this.labelDecoration,
+    required this.labelDecorationStyle,
+    required this.labelDecorationColor,
+    required this.labelFontStyle,
   });
 }
 
 ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   required Map<String, Object?> props,
-  required CandyTokens tokens,
+  required StylingTokens tokens,
   required String variant,
   required String fallbackLabel,
   Color? themePrimary,
@@ -207,6 +219,18 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   Color? inheritedTint,
   bool surfaceWrapped = false,
 }) {
+  final slotStyles = props['__slot_styles'] is Map
+      ? coerceObjectMap(props['__slot_styles'] as Map)
+      : <String, Object?>{};
+  final labelSlot = slotStyles['label'] is Map
+      ? coerceObjectMap(slotStyles['label'] as Map)
+      : <String, Object?>{};
+  final iconSlot = slotStyles['icon'] is Map
+      ? coerceObjectMap(slotStyles['icon'] as Map)
+      : <String, Object?>{};
+  final contentSlot = slotStyles['content'] is Map
+      ? coerceObjectMap(slotStyles['content'] as Map)
+      : <String, Object?>{};
   final label = (props['text'] ?? props['label'])?.toString() ?? fallbackLabel;
   final candyPrimary = tokens.color('primary') ?? inheritedTint ?? themePrimary;
   final candyOnPrimary =
@@ -223,7 +247,12 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
     minContrast: coerceDouble(props['min_contrast']) ?? 4.5,
   );
   final fgColor = resolveColorValue(
-    props['text_color'] ?? props['fgcolor'] ?? props['foreground'],
+    props['text_color'] ??
+        props['fgcolor'] ??
+        props['foreground'] ??
+        labelSlot['text_color'] ??
+        labelSlot['foreground'] ??
+        labelSlot['color'],
     fallback: (variant == 'text' || variant == 'outlined')
         ? candyPrimary
         : candyOnPrimary,
@@ -236,7 +265,10 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       tokens.number('button', 'radius') ??
       tokens.number('radii', 'md');
   final padding = coercePadding(
-    props['content_padding'] ?? tokens.padding('button', 'padding'),
+    props['content_padding'] ??
+        contentSlot['padding'] ??
+        contentSlot['content_padding'] ??
+        tokens.padding('button', 'padding'),
   );
   final outlineColor = resolveColorValue(
     props['border_color'],
@@ -248,12 +280,43 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   final overlayColor = resolveColorValue(
     props['overlay_color'] ?? props['splash_color'],
   );
-  final fontSize = coerceDouble(props['font_size']);
-  final fontFamily = props['font_family']?.toString();
-  final fontWeight = parseButtonFontWeight(
-    props['font_weight'] ?? props['weight'],
+  final fontSize = coerceDouble(
+    props['font_size'] ?? labelSlot['font_size'] ?? labelSlot['size'],
   );
-  final letterSpacing = coerceDouble(props['letter_spacing']);
+  final fontFamily =
+      props['font_family']?.toString() ?? labelSlot['font_family']?.toString();
+  final fontWeight = parseButtonFontWeight(
+    props['font_weight'] ??
+        props['weight'] ??
+        labelSlot['font_weight'] ??
+        labelSlot['weight'],
+  );
+  final letterSpacing = coerceDouble(
+    props['letter_spacing'] ?? labelSlot['letter_spacing'],
+  );
+  final labelTransform =
+      (props['text_transform'] ?? labelSlot['text_transform'])
+          ?.toString()
+          .toLowerCase()
+          .trim();
+  final labelDecoration = _parseTextDecoration(
+    props['text_decoration'] ??
+        props['decoration'] ??
+        labelSlot['text_decoration'] ??
+        labelSlot['decoration'],
+  );
+  final labelDecorationStyle = _parseTextDecorationStyle(
+    props['decoration_style'] ?? labelSlot['decoration_style'],
+  );
+  final labelDecorationColor = resolveColorValue(
+    props['decoration_color'] ?? labelSlot['decoration_color'],
+  );
+  final labelFontStyle = _coerceFontStyle(
+    props['italic'] ??
+        props['font_style'] ??
+        labelSlot['italic'] ??
+        labelSlot['font_style'],
+  );
   final textStyle =
       (fontSize != null ||
           fontFamily != null ||
@@ -265,6 +328,10 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
           fontWeight: fontWeight,
           letterSpacing: letterSpacing,
           color: fgColor,
+          decoration: labelDecoration,
+          decorationStyle: labelDecorationStyle,
+          decorationColor: labelDecorationColor,
+          fontStyle: labelFontStyle,
         )
       : null;
 
@@ -316,15 +383,25 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       ? (props['trailing_icon'] ?? rawIcon)
       : props['trailing_icon'];
   final iconColor = resolveColorValue(
-    props['icon_color'] ?? props['icon_foreground'] ?? fgColor,
+    props['icon_color'] ??
+        props['icon_foreground'] ??
+        iconSlot['icon_color'] ??
+        iconSlot['foreground'] ??
+        iconSlot['color'] ??
+        fgColor,
     background: bgColor,
     autoContrast: coerceBool(props['auto_contrast']) ?? true,
     minContrast: coerceDouble(props['min_contrast']) ?? 4.5,
   );
-  final iconBackground = resolveColorValue(props['icon_background']);
+  final iconBackground = resolveColorValue(
+    props['icon_background'] ?? iconSlot['icon_background'] ?? iconSlot['background'],
+  );
   final iconSize =
-      coerceDouble(props['icon_size']) ?? coerceDouble(props['size']);
-  final iconSpacing = coerceDouble(props['icon_spacing']) ?? 8.0;
+      coerceDouble(props['icon_size']) ??
+      coerceDouble(iconSlot['icon_size'] ?? iconSlot['size']) ??
+      coerceDouble(props['size']);
+  final iconSpacing =
+      coerceDouble(props['icon_spacing'] ?? contentSlot['icon_spacing']) ?? 8.0;
   final autoContrast = coerceBool(props['auto_contrast']) ?? true;
   final minContrast = coerceDouble(props['min_contrast']) ?? 4.5;
 
@@ -341,6 +418,12 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
     autoContrast: autoContrast,
     minContrast: minContrast,
     surfaceWrapped: surfaceWrapped,
+    contentPadding: padding,
+    labelTransform: labelTransform,
+    labelDecoration: labelDecoration,
+    labelDecorationStyle: labelDecorationStyle,
+    labelDecorationColor: labelDecorationColor,
+    labelFontStyle: labelFontStyle,
   );
 }
 
@@ -348,7 +431,10 @@ Widget buildButtonContent({
   required ButterflyUIButtonVisualSpec spec,
   required String fallbackLabel,
 }) {
-  final label = spec.label.isEmpty ? fallbackLabel : spec.label;
+  final label = _applyTextTransform(
+    spec.label.isEmpty ? fallbackLabel : spec.label,
+    spec.labelTransform,
+  );
   final text = Text(label, style: spec.textStyle);
 
   Widget? iconFor(Object? value) {
@@ -369,12 +455,17 @@ Widget buildButtonContent({
   final trailing = iconFor(spec.trailingIcon);
 
   if (leading == null && trailing == null) {
-    return text;
+    return spec.contentPadding == null
+        ? text
+        : Padding(padding: spec.contentPadding!, child: text);
   }
   if (label.isEmpty) {
-    return leading ?? trailing ?? text;
+    final iconOnly = leading ?? trailing ?? text;
+    return spec.contentPadding == null
+        ? iconOnly
+        : Padding(padding: spec.contentPadding!, child: iconOnly);
   }
-  return Row(
+  final row = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
       if (leading != null) ...[leading, SizedBox(width: spec.iconSpacing)],
@@ -382,6 +473,9 @@ Widget buildButtonContent({
       if (trailing != null) ...[SizedBox(width: spec.iconSpacing), trailing],
     ],
   );
+  return spec.contentPadding == null
+      ? row
+      : Padding(padding: spec.contentPadding!, child: row);
 }
 
 Widget applyControlTransparency({
@@ -472,7 +566,7 @@ FontWeight? parseButtonFontWeight(Object? value) {
 Widget buildButtonVariantControl({
   required String controlId,
   required Map<String, Object?> props,
-  required CandyTokens tokens,
+  required StylingTokens tokens,
   required String variant,
   required ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   required ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
@@ -502,7 +596,7 @@ class _ButterflyUIButtonControl extends StatefulWidget {
 
   final String controlId;
   final Map<String, Object?> props;
-  final CandyTokens tokens;
+  final StylingTokens tokens;
   final String variant;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;
@@ -940,6 +1034,14 @@ Widget _decorateButtonSurface(
       props.containsKey('bgcolor') ||
       props.containsKey('background') ||
       props.containsKey('gradient');
+  final hasSceneBackdrop =
+      props['background_layers'] != null ||
+      props['background_layer'] != null ||
+      props['surface_layers'] != null ||
+      props['surface'] != null;
+  final sceneAwareSurface =
+      hasSceneBackdrop &&
+      coerceShellBool(props['preserve_scene_fill'], fallback: false) == false;
   final variant = (props['variant'] ?? 'button')
       .toString()
       .trim()
@@ -954,11 +1056,17 @@ Widget _decorateButtonSurface(
   final baseTint =
       inheritedTint ?? tokens?.primary ?? theme.colorScheme.primary;
   final backgroundColor =
-      coerceColor(props['bgcolor'] ?? props['background'] ?? props['color']) ??
+      _sceneAwareColor(
+        coerceColor(props['bgcolor'] ?? props['background'] ?? props['color']),
+        enabled: sceneAwareSurface,
+      ) ??
       (!explicitSurfaceFill
           ? deriveInheritedSurfaceFill(baseTint, alpha: variantAlpha)
           : null);
-  final gradient = coerceGradient(props['gradient']);
+  final gradient = _sceneAwareGradient(
+    coerceGradient(props['gradient']),
+    enabled: sceneAwareSurface,
+  );
   final image = coerceDecorationImage(props['image']);
   final borderColor =
       coerceColor(props['border_color']) ??
@@ -1046,4 +1154,110 @@ Widget _decorateButtonSurface(
     surface = Padding(padding: margin, child: surface);
   }
   return surface;
+}
+
+TextDecoration? _parseTextDecoration(Object? value) {
+  final normalized = value?.toString().trim().toLowerCase();
+  switch (normalized) {
+    case 'underline':
+      return TextDecoration.underline;
+    case 'line_through':
+    case 'strikethrough':
+    case 'strike':
+      return TextDecoration.lineThrough;
+    case 'overline':
+      return TextDecoration.overline;
+    case 'none':
+      return TextDecoration.none;
+  }
+  return null;
+}
+
+TextDecorationStyle? _parseTextDecorationStyle(Object? value) {
+  final normalized = value?.toString().trim().toLowerCase();
+  switch (normalized) {
+    case 'dashed':
+      return TextDecorationStyle.dashed;
+    case 'dotted':
+      return TextDecorationStyle.dotted;
+    case 'double':
+      return TextDecorationStyle.double;
+    case 'wavy':
+      return TextDecorationStyle.wavy;
+    case 'solid':
+      return TextDecorationStyle.solid;
+  }
+  return null;
+}
+
+FontStyle? _coerceFontStyle(Object? value) {
+  final normalized = value?.toString().trim().toLowerCase();
+  if (value == true || normalized == 'italic') return FontStyle.italic;
+  if (value == false || normalized == 'normal') return FontStyle.normal;
+  return null;
+}
+
+String _applyTextTransform(String value, String? transform) {
+  switch (transform) {
+    case 'uppercase':
+      return value.toUpperCase();
+    case 'lowercase':
+      return value.toLowerCase();
+    case 'capitalize':
+      return value
+          .split(RegExp(r'(\s+)'))
+          .map((part) {
+            if (part.trim().isEmpty) return part;
+            return '${part[0].toUpperCase()}${part.substring(1)}';
+          })
+          .join();
+    default:
+      return value;
+  }
+}
+
+Color? _sceneAwareColor(Color? color, {required bool enabled}) {
+  if (!enabled || color == null) return color;
+  return color.withValues(alpha: color.a.clamp(0.0, 0.52));
+}
+
+Gradient? _sceneAwareGradient(Gradient? gradient, {required bool enabled}) {
+  if (!enabled || gradient == null) return gradient;
+  List<Color> toneDown(List<Color> colors) => colors
+      .map((color) => color.withValues(alpha: color.a.clamp(0.0, 0.38)))
+      .toList(growable: false);
+  if (gradient is LinearGradient) {
+    return LinearGradient(
+      begin: gradient.begin,
+      end: gradient.end,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  }
+  if (gradient is RadialGradient) {
+    return RadialGradient(
+      center: gradient.center,
+      radius: gradient.radius,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      focal: gradient.focal,
+      focalRadius: gradient.focalRadius,
+      transform: gradient.transform,
+    );
+  }
+  if (gradient is SweepGradient) {
+    return SweepGradient(
+      center: gradient.center,
+      startAngle: gradient.startAngle,
+      endAngle: gradient.endAngle,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  }
+  return gradient;
 }

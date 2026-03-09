@@ -477,6 +477,17 @@ def _merge_local_style(
         props["style"] = style_map
 
 
+def _normalize_universal_prop_aliases(props: Mapping[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(props, Mapping):
+        return {}
+    normalized = dict(props)
+    if "classes" not in normalized and "class_name" in normalized:
+        normalized["classes"] = normalized.pop("class_name")
+    if "style_pack" not in normalized and "theme" in normalized:
+        normalized["style_pack"] = normalized.pop("theme")
+    return normalized
+
+
 def _backfill_bound_init_props(
     target: dict[str, Any],
     signature: inspect.Signature,
@@ -878,10 +889,18 @@ class Control:
         self._inline_event_bound_sessions: set[str] = set()
 
         if isinstance(props, Mapping):
-            _merge_props(self.props, props, override=True)
+            _merge_props(
+                self.props,
+                _normalize_universal_prop_aliases(props),
+                override=True,
+            )
 
         layout_kwargs: dict[str, Any] = {}
         if extra_props:
+            if "classes" not in extra_props and "class_name" in extra_props:
+                extra_props["classes"] = extra_props.pop("class_name")
+            if "style_pack" not in extra_props and "theme" in extra_props:
+                extra_props["style_pack"] = extra_props.pop("theme")
             for key in list(extra_props):
                 if key in _LAYOUT_KEYS:
                     layout_kwargs[key] = extra_props.pop(key)

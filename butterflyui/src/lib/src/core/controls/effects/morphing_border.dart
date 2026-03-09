@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/renderers/render_layers.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -32,7 +32,7 @@ Widget buildMorphingBorderControl(
         }
       }
 
-      child = wrapWithCandyRenderLayers(
+      child = wrapWithEffectRenderLayers(
         controlId: controlId.isEmpty ? 'morphing_border' : '$controlId::layers',
         props: liveProps,
         child: child,

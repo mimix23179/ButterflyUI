@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/layout_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -10,7 +10,7 @@ Widget buildRowControl(
   String controlId,
   Map<String, Object?> props,
   List<dynamic> rawChildren,
-  CandyTokens tokens,
+  StylingTokens tokens,
   Widget Function(Map<String, Object?> child) buildFromControl,
   ButterflyUIRegisterInvokeHandler registerInvokeHandler,
   ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler,
@@ -43,7 +43,7 @@ class _FlexRowControl extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
   final List<dynamic> rawChildren;
-  final CandyTokens tokens;
+  final StylingTokens tokens;
   final Widget Function(Map<String, Object?> child) buildFromControl;
   final ButterflyUIRegisterInvokeHandler registerInvokeHandler;
   final ButterflyUIUnregisterInvokeHandler unregisterInvokeHandler;

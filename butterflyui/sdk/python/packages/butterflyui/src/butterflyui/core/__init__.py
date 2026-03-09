@@ -18,12 +18,10 @@ from ..types import (
     DecorationImage,
     LinearGradient,
     RadialGradient,
-    Style,
     SweepGradient,
 )
 from .control import Component, Control
 from .performance import PerformanceConfig, enable_60fps, performance_config
-from .presets import COMFY_STYLE, GLASS_STYLE, RETRO_STYLE, SCIFI_STYLE, TERMINAL_STYLE
 from .responsive import Breakpoints
 from .schema import (
     CONTROL_SCHEMAS,
@@ -76,15 +74,9 @@ __all__ = [
     "normalize_padding",
     "normalize_scale",
     "normalize_skew",
-    "Style",
     "BoxShadow",
     "LinearGradient",
     "RadialGradient",
     "SweepGradient",
     "DecorationImage",
-    "TERMINAL_STYLE",
-    "SCIFI_STYLE",
-    "RETRO_STYLE",
-    "COMFY_STYLE",
-    "GLASS_STYLE",
 ]

@@ -30,6 +30,7 @@ dependencies:
   another_flushbar:
   fluttertoast:
   mime:
+  csslib:
   rive:
   lottie:
   visibility_detector:
@@ -44,3 +45,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  shaders:
+    - shaders/matrix_rain.frag
+    - shaders/galaxy.frag
+    - shaders/rainstorm.frag
+    - shaders/liquid_glow.frag

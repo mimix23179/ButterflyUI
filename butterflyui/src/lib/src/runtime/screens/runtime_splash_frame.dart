@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../core/candy/theme_extension.dart';
+import '../../core/styling/theme_extension.dart';
 
 class RuntimeSplashFrame extends StatefulWidget {
   final Widget child;

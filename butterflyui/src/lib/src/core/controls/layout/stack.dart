@@ -27,11 +27,25 @@ Widget buildStackControl(
               : <String, Object?>{};
           final frameFromChild = childMap['frame'];
           final frameFromProps = childProps['frame'];
-          final frame = frameFromChild is Map
-              ? coerceObjectMap(frameFromChild)
-              : (frameFromProps is Map
-                    ? coerceObjectMap(frameFromProps)
-                    : <String, Object?>{});
+          final frame = <String, Object?>{
+            if (frameFromChild is Map) ...coerceObjectMap(frameFromChild),
+            if (frameFromProps is Map) ...coerceObjectMap(frameFromProps),
+            for (final key in const <String>[
+              'left',
+              'top',
+              'right',
+              'bottom',
+              'width',
+              'height',
+              'x',
+              'y',
+              'anchor',
+              'alignment',
+              'z',
+              'z_index',
+            ])
+              if (childProps[key] != null) key: childProps[key],
+          };
           final z = _extractZ(childMap, childProps, frame);
           final built = _buildStackChild(
             childMap,

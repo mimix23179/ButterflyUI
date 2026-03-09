@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
-import 'package:butterflyui_runtime/src/core/candy/scene/candy_preset_registry.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/renderers/render_layers.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/scene/preset_registry.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -23,14 +23,14 @@ Widget buildAnimatedBackgroundControl(
     sendEvent: sendEvent,
     builder: (liveProps) {
       final colors = _coerceColorList(liveProps['colors']);
-      final hasCandyScene = !resolveCandySceneFromProps(liveProps).isEmpty;
+      final hasEffectScene = !resolveEffectSceneFromProps(liveProps).isEmpty;
       final childMap = _firstChildMap(children);
       final baseChild = childMap == null
           ? const SizedBox.expand()
           : buildFromControl(childMap);
 
-      if (colors.isEmpty && hasCandyScene) {
-        return wrapWithCandyRenderLayers(
+      if (colors.isEmpty && hasEffectScene) {
+        return wrapWithEffectRenderLayers(
           controlId: controlId.isEmpty ? 'animated_background' : controlId,
           props: liveProps,
           child: baseChild,
@@ -55,8 +55,8 @@ Widget buildAnimatedBackgroundControl(
         loop: loop,
         child: baseChild,
       );
-      if (hasCandyScene) {
-        built = wrapWithCandyRenderLayers(
+      if (hasEffectScene) {
+        built = wrapWithEffectRenderLayers(
           controlId: controlId.isEmpty ? 'animated_background' : controlId,
           props: liveProps,
           child: built,

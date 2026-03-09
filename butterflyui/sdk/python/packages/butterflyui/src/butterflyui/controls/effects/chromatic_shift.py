@@ -57,8 +57,5 @@ class ChromaticShift(EffectControl):
     def set_shift(self, session: Any, value: float) -> dict[str, Any]:
         return self.invoke(session, "set_shift", {"value": float(value)})
 
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
-
     def get_state(self, session: Any) -> dict[str, Any]:
         return self.invoke(session, "get_state", {})

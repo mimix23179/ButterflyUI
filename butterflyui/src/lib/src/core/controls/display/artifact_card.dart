@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 

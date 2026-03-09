@@ -161,6 +161,11 @@ class _ContainerControlState extends State<_ContainerControl> {
       _liveProps['content_alignment'],
     );
     final image = coerceDecorationImage(_liveProps['image']);
+    final hasSceneBackdrop =
+        _liveProps['background_layers'] != null ||
+        _liveProps['background_layer'] != null ||
+        _liveProps['surface_layers'] != null ||
+        _liveProps['surface'] != null;
     final suppressSurfaceFill = _shouldSuppressSurfaceFill(
       _liveProps,
       image: image,
@@ -174,7 +179,12 @@ class _ContainerControlState extends State<_ContainerControl> {
         ? null
         : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
         ? deriveInheritedSurfaceFill(inheritedSurfaceTint)
-        : coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']);
+        : _sceneAwareColor(
+            coerceColor(_liveProps['bgcolor'] ?? _liveProps['color']),
+            enabled:
+                hasSceneBackdrop &&
+                _coerceBool(_liveProps['preserve_scene_fill']) != true,
+          );
     final borderColor =
         coerceColor(_liveProps['border_color']) ??
         (!hasExplicitSurfaceFill && inheritedSurfaceTint != null
@@ -187,7 +197,12 @@ class _ContainerControlState extends State<_ContainerControl> {
         ? null
         : !hasExplicitSurfaceFill && inheritedSurfaceTint != null
         ? null
-        : coerceGradient(_liveProps['gradient']);
+        : _sceneAwareGradient(
+            coerceGradient(_liveProps['gradient']),
+            enabled:
+                hasSceneBackdrop &&
+                _coerceBool(_liveProps['preserve_scene_fill']) != true,
+          );
     final shapeStr = _liveProps['shape']?.toString().toLowerCase();
     final shape = shapeStr == 'circle' ? BoxShape.circle : BoxShape.rectangle;
     final blur = _effectiveBlur(coerceDouble(_liveProps['blur']));
@@ -301,6 +316,53 @@ class _ContainerControlState extends State<_ContainerControl> {
     }
     return container;
   }
+}
+
+Color? _sceneAwareColor(Color? color, {required bool enabled}) {
+  if (!enabled || color == null) return color;
+  final alpha = color.a.clamp(0.0, 0.58);
+  return color.withValues(alpha: alpha);
+}
+
+Gradient? _sceneAwareGradient(Gradient? gradient, {required bool enabled}) {
+  if (!enabled || gradient == null) return gradient;
+  List<Color> toneDown(List<Color> colors) => colors
+      .map((color) => color.withValues(alpha: color.a.clamp(0.0, 0.42)))
+      .toList(growable: false);
+  if (gradient is LinearGradient) {
+    return LinearGradient(
+      begin: gradient.begin,
+      end: gradient.end,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  }
+  if (gradient is RadialGradient) {
+    return RadialGradient(
+      center: gradient.center,
+      radius: gradient.radius,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      focal: gradient.focal,
+      focalRadius: gradient.focalRadius,
+      transform: gradient.transform,
+    );
+  }
+  if (gradient is SweepGradient) {
+    return SweepGradient(
+      center: gradient.center,
+      startAngle: gradient.startAngle,
+      endAngle: gradient.endAngle,
+      colors: toneDown(gradient.colors),
+      stops: gradient.stops,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  }
+  return gradient;
 }
 
 BoxDecoration? _buildBoxDecoration({

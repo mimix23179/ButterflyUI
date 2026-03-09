@@ -8,6 +8,11 @@ __all__ = ["CoreProps"]
 class CoreProps:
     """Framework-level control identity, visibility, and event props."""
 
+    _butterflyui_field_aliases = {
+        "class_name": "classes",
+        "theme": "style_pack",
+    }
+
     id: str | None = None
     """
     Optional runtime prop identifier forwarded alongside the generated control id.
@@ -66,4 +71,24 @@ class CoreProps:
     data: Any = None
     """
     Arbitrary application data attached to the control instance.
+    """
+
+    classes: str | list[str] | None = None
+    """
+    Space-separated or list-based utility/class tokens applied to this control.
+    """
+
+    class_name: str | list[str] | None = None
+    """
+    Alias for ``classes`` for CSS/Tailwind-like styling ergonomics.
+    """
+
+    theme: str | None = None
+    """
+    Alias for ``style_pack`` when selecting a named visual theme for this control.
+    """
+
+    style_pack: str | None = None
+    """
+    Named style pack applied to this control subtree.
     """

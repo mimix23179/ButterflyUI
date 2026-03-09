@@ -17,17 +17,8 @@ class Container(LayoutControl, SingleChildControl):
     decoration (``bgcolor``, ``border_color``, ``border_width``, ``radius``),
     and child ``alignment`` in one component.
 
-    ``Container`` also supports the universal ButterflyUI styling pipeline via
-    forwarded ``**kwargs``:
-    - style layer: ``variant``, ``tone``, ``size``, ``density``, ``classes``,
-      ``style``, ``style_slots``.
-    - modifier layer: ``modifiers``, ``on_hover_modifiers``,
-      ``on_pressed_modifiers``, ``on_focus_modifiers``.
-    - motion layer: ``motion``, ``enter_motion``, ``exit_motion``,
-      ``hover_motion``, ``press_motion``.
-    - effects layer: ``effects``, ``effect_order``, ``effect_clip``,
-      ``effect_target``.
-    - visual tokens: ``icon``, ``color``, and ``transparency``.
+    Additional visual props such as motion, effects, color, and transparency
+    can still be passed through ``**kwargs`` when the runtime supports them.
 
     Example:
 
@@ -50,9 +41,6 @@ class Container(LayoutControl, SingleChildControl):
 
     def set_props(self, session: Any, **props: Any) -> dict[str, Any]:
         return self.invoke(session, "set_props", {"props": props})
-
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
 
     def emit(self, session: Any, event: str, payload: Mapping[str, Any] | None = None) -> dict[str, Any]:
         return self.invoke(session, "emit", {"event": event, "payload": dict(payload or {})})

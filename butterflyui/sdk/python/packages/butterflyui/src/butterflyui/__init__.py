@@ -35,7 +35,6 @@ from .core import (
     Component,
     Control,
 )
-from .controls import Animation, AnimationEffect, Border, BorderEffect, Gradient, GradientEffect, Style, StyleScope, Transition, TransitionEffect
 from .icons import (
     ICON_NAMES,
     ICON_SET,
@@ -49,6 +48,7 @@ from .icons import (
     suggest_icon_names,
 )
 from .metadata import CONTROL_SPECS, get_control_spec, iter_control_specs
+from .stylesheet import StyleRule, StyleSelector, StyleSheet, parse_stylesheet
 from .types import (
     Alignment,
     AnimationSpec,
@@ -57,11 +57,19 @@ from .types import (
     BoxShadow,
     ColorRGBA,
     DecorationImage,
+    GradientWash,
     EdgeInsets,
+    LineField,
     LinearGradient,
+    NoiseField,
+    OrbitField,
+    ParticleField,
     RadialGradient,
+    SceneLayer,
+    ShaderLayer,
     SemanticsProps,
-    Style as StyleValue,
+    Style,
+    StyleValue,
     SweepGradient,
     TextStyle,
 )
@@ -71,13 +79,6 @@ from .controls import __all__ as _controls_all
 from .state import Computed, DerivedState, Signal, State, effect
 from .callbacks import Update, update, NO_UPDATE, TaskQueue, Progress as ProgressHandle, bind_event
 from .assets import AssetServer, data_uri_from_base64, file_payload_to_src, files_payload_to_srcs
-from .style_packs import (
-    STYLE_PACKS,
-    DEFAULT_STYLE_PACK,
-    list_style_packs,
-    register_style_pack,
-    list_custom_style_packs,
-)
 
 __all__ = [
     "get_version",
@@ -110,33 +111,35 @@ __all__ = [
     "normalize_icon_name",
     "normalize_icon_value",
     "suggest_icon_names",
-    "Animation",
-    "AnimationEffect",
     "Alignment",
     "AnimationSpec",
-    "Border",
-    "BorderEffect",
     "BorderSpec",
     "BorderSideSpec",
     "BoxShadow",
     "ColorRGBA",
     "DecorationImage",
     "EdgeInsets",
-    "Gradient",
-    "GradientEffect",
+    "GradientWash",
     "LinearGradient",
+    "LineField",
+    "NoiseField",
+    "OrbitField",
+    "ParticleField",
     "RadialGradient",
+    "SceneLayer",
+    "ShaderLayer",
     "SemanticsProps",
+    "Style",
+    "StyleValue",
     "PerformanceConfig",
     "performance_config",
     "enable_60fps",
-    "Style",
-    "StyleScope",
-    "StyleValue",
     "SweepGradient",
     "TextStyle",
-    "Transition",
-    "TransitionEffect",
+    "StyleSelector",
+    "StyleRule",
+    "StyleSheet",
+    "parse_stylesheet",
     "CONTROL_SPECS",
     "get_control_spec",
     "iter_control_specs",
@@ -155,11 +158,6 @@ __all__ = [
     "data_uri_from_base64",
     "file_payload_to_src",
     "files_payload_to_srcs",
-    "STYLE_PACKS",
-    "DEFAULT_STYLE_PACK",
-    "list_style_packs",
-    "register_style_pack",
-    "list_custom_style_packs",
 ]
 
 for _name in _controls_all:

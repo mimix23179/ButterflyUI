@@ -139,7 +139,7 @@ Required:
 - clipping rules
 - safe fallbacks
 - performance limits
-- integration with `Style`, `Modifier`, `Candy`, and `Skins`
+- integration with the current motion and effects controls
 
 ## Immediate Milestone
 

@@ -7,11 +7,7 @@ from typing import Any, Callable
 from ..core.schema import CONTROL_SCHEMAS
 from .capabilities import (
     CAPABILITY_PROP_NAMES,
-    EFFECT_CAPABLE_CONTROLS,
-    MODIFIER_CAPABLE_CONTROLS,
-    MOTION_CAPABLE_CONTROLS,
     PROP_CAPABILITY_OWNERS,
-    STYLE_CAPABLE_CONTROLS,
     slots_for_control,
 )
 from .common_events import COMMON_EVENT_NAMES
@@ -27,6 +23,8 @@ __all__ = [
     "control_specs_for_category",
     "control_category_map",
 ]
+
+_HIDDEN_PUBLIC_CATEGORIES = {"effects", "customization"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,9 +83,6 @@ _CATEGORY_PREFERENCE = {
             "tools",
             "productivity",
             "webview",
-            "candy",
-            "gallery",
-            "skins",
             "customization",
         )
     )
@@ -166,9 +161,7 @@ _CAPABILITY_PREFERENCE = (
     "core",
     "layout",
     "surface",
-    "style",
     "motion",
-    "modifiers",
     "effects",
     "content",
     "items",
@@ -207,18 +200,6 @@ def _control_capabilities(
         if capability == "button" and control_type not in _BUTTON_CONTROL_TYPES:
             continue
         if capability in {"input", "form_field", "selection", "toggle"} and control_type in _BUTTON_CONTROL_TYPES:
-            continue
-        if capability == "style" and control_type in STYLE_CAPABLE_CONTROLS:
-            capabilities.append(capability)
-            continue
-        if capability == "modifiers" and control_type in MODIFIER_CAPABLE_CONTROLS:
-            capabilities.append(capability)
-            continue
-        if capability == "motion" and control_type in MOTION_CAPABLE_CONTROLS:
-            capabilities.append(capability)
-            continue
-        if capability == "effects" and control_type in EFFECT_CAPABLE_CONTROLS:
-            capabilities.append(capability)
             continue
         owned = set(CAPABILITY_PROP_NAMES.get(capability, ()))
         if prop_names & owned:
@@ -269,6 +250,7 @@ def _control_spec(control_type: str, schema: dict[str, Any]) -> ControlSpec:
 CONTROL_SPECS: dict[str, ControlSpec] = {
     control_type: _control_spec(control_type, schema)
     for control_type, schema in sorted(CONTROL_SCHEMAS.items())
+    if _CATEGORY_MAP.get(control_type) not in _HIDDEN_PUBLIC_CATEGORIES
 }
 
 

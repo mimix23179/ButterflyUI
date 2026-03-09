@@ -21,7 +21,7 @@ class PageView(ScrollableControl, MultiChildControl):
 
     Runtime supports both animated and instant page transitions. Layout knobs
     like ``viewport_fraction`` and ``pad_ends`` make it usable for carousel
-    layouts in Gallery-like screens.
+    and preview-heavy layouts.
 
     Example:
 

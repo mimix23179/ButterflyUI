@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/effects.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/visual_effects.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -51,7 +51,7 @@ class _VignetteControlState extends State<_VignetteControl> {
   @override
   void initState() {
     super.initState();
-    _intensity = (coerceDouble(widget.props['intensity'] ?? widget.props['opacity']) ?? 0.45)
+    _intensity = (coerceDouble(widget.props['intensity'] ?? widget.props['opacity']) ?? 0.22)
         .clamp(0.0, 1.0);
     _color = coerceColor(widget.props['color']) ?? widget.defaultColor;
     _enabled = widget.props['enabled'] == null ? true : (widget.props['enabled'] == true);

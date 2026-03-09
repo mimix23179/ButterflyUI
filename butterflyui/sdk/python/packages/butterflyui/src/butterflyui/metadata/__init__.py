@@ -13,17 +13,14 @@ from .capabilities import (
     FORM_FIELD_PROPS,
     INPUT_PROPS,
     LAYOUT_PROPS,
-    MODIFIER_PROPS,
     MOTION_PROPS,
     OVERLAY_PROPS,
     PROP_CAPABILITY_OWNERS,
     SCROLL_PROPS,
     SELECTION_PROPS,
-    STYLE_PROPS,
     SURFACE_PROPS,
     TOGGLE_PROPS,
     VISUAL_CAPABILITY_PROPS,
-    modifier_capabilities_manifest,
 )
 from .common_events import COMMON_EVENT_NAMES
 from .common_props import COMMON_CORE_PROPS, COMMON_LAYOUT_PROPS, COMMON_STYLE_PROPS
@@ -46,9 +43,7 @@ __all__ = [
     "CORE_PROPS",
     "LAYOUT_PROPS",
     "SURFACE_PROPS",
-    "STYLE_PROPS",
     "MOTION_PROPS",
-    "MODIFIER_PROPS",
     "EFFECT_PROPS",
     "CHILD_PROPS",
     "FOCUS_PROPS",
@@ -73,5 +68,4 @@ __all__ = [
     "iter_control_specs",
     "control_specs_for_category",
     "control_category_map",
-    "modifier_capabilities_manifest",
 ]

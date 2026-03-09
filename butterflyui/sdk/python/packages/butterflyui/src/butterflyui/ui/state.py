@@ -174,7 +174,6 @@ _DEFAULT_PROP: dict[str, str] = {
     "tabs": "index",
     "page_view": "index",
     "image": "src",
-    "gallery": "images",
     "audio": "src",
     "video": "src",
     "table": "rows",

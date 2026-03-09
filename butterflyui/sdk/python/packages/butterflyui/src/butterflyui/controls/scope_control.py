@@ -7,5 +7,5 @@ __all__ = ["ScopeControl"]
 
 class ScopeControl(LayoutControl):
     """
-    Shared subtree scope behavior for style and umbrella controls.
+    Shared subtree scope behavior for controls that wrap a child subtree.
     """

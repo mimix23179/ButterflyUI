@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/effects.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/visual_effects.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 

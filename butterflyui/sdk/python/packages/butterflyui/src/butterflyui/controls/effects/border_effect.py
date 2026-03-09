@@ -33,7 +33,4 @@ class BorderEffect(LayoutControl):
     Duration of the border animation in milliseconds.
     """
 
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
-
 Border = BorderEffect

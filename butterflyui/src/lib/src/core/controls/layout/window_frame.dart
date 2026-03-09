@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 import 'package:butterflyui_runtime/src/core/window/window_api.dart';
@@ -11,7 +11,7 @@ import 'package:butterflyui_runtime/src/core/window/window_api.dart';
 Widget buildWindowFrameControl(
   String controlId,
   Map<String, Object?> props,
-  CandyTokens tokens,
+  StylingTokens tokens,
   List<dynamic> rawChildren,
   Widget Function(Map<String, Object?> child) buildChild,
   ButterflyUISendRuntimeEvent sendEvent,
@@ -78,7 +78,7 @@ Map<String, Object?>? _secondControl(List<dynamic> rawChildren) {
 class _ButterflyUIWindowFrame extends StatefulWidget {
   final String controlId;
   final Map<String, Object?> props;
-  final CandyTokens tokens;
+  final StylingTokens tokens;
   final Widget child;
   final Widget? titleLeading;
   final Widget? titleContent;

@@ -32,9 +32,11 @@ class NotificationManager {
     final overlay = overlayKey.currentState;
     if (overlay == null) return;
     if (_hostEntry != null) return;
-    _hostEntry = OverlayEntry(builder: (context) {
-      return _NotificationHost(manager: this);
-    });
+    _hostEntry = OverlayEntry(
+      builder: (context) {
+        return _NotificationHost(manager: this);
+      },
+    );
     overlay.insert(_hostEntry!);
   }
 
@@ -75,11 +77,17 @@ class NotificationManager {
     _timers.remove(oldest.payload.controlId)?.cancel();
     _hostState?._refreshItems(_items);
     try {
-      oldest.payload.sendEvent(oldest.payload.controlId, 'close', {'reason': reason});
+      oldest.payload.sendEvent(oldest.payload.controlId, 'close', {
+        'reason': reason,
+      });
     } catch (_) {}
   }
 
-  void dismiss(String controlId, {required String reason, bool emitClose = true}) {
+  void dismiss(
+    String controlId, {
+    required String reason,
+    bool emitClose = true,
+  }) {
     // Ask host to play exit animation; it will call back to _finalizeRemoval when done.
     final idx = _items.indexWhere((i) => i.payload.controlId == controlId);
     if (idx == -1) return;
@@ -87,14 +95,20 @@ class NotificationManager {
     _hostState?._hideById(controlId, reason: reason, emitClose: emitClose);
   }
 
-  void _finalizeRemoval(String controlId, {required String reason, required bool emitClose}) {
+  void _finalizeRemoval(
+    String controlId, {
+    required String reason,
+    required bool emitClose,
+  }) {
     final idx = _items.indexWhere((i) => i.payload.controlId == controlId);
     if (idx == -1) return;
     final removed = _items.removeAt(idx);
     _hostState?._refreshItems(_items);
     if (emitClose) {
       try {
-        removed.payload.sendEvent(removed.payload.controlId, 'close', {'reason': reason});
+        removed.payload.sendEvent(removed.payload.controlId, 'close', {
+          'reason': reason,
+        });
       } catch (_) {}
     }
   }
@@ -126,7 +140,6 @@ class _NotificationHost extends StatefulWidget {
 
 class _NotificationHostState extends State<_NotificationHost> {
   List<_HostItem> _items = [];
-  static const double _itemHeight = 76.0;
   static const double _topInset = 12.0;
 
   @override
@@ -170,7 +183,10 @@ class _NotificationHostState extends State<_NotificationHost> {
               mainAxisSize: MainAxisSize.min,
               children: List.generate(_items.length, (index) {
                 final item = _items[index];
-                final key = _itemKeys.putIfAbsent(item.payload.controlId, () => GlobalKey<_NotificationItemState>());
+                final key = _itemKeys.putIfAbsent(
+                  item.payload.controlId,
+                  () => GlobalKey<_NotificationItemState>(),
+                );
                 return Padding(
                   key: ValueKey(item.payload.controlId),
                   padding: const EdgeInsets.only(bottom: 8.0),
@@ -178,12 +194,24 @@ class _NotificationHostState extends State<_NotificationHost> {
                     key: key,
                     payload: item.payload,
                     onAction: () {
-                      item.payload.sendEvent(item.payload.controlId, 'action', {});
+                      item.payload.sendEvent(
+                        item.payload.controlId,
+                        'action',
+                        {},
+                      );
                       // Dismiss on action
-                      playItemExit(item.payload.controlId, reason: 'action', emitClose: true);
+                      playItemExit(
+                        item.payload.controlId,
+                        reason: 'action',
+                        emitClose: true,
+                      );
                     },
                     onExited: (reason, emitClose) {
-                      widget.manager._finalizeRemoval(item.payload.controlId, reason: reason, emitClose: emitClose);
+                      widget.manager._finalizeRemoval(
+                        item.payload.controlId,
+                        reason: reason,
+                        emitClose: emitClose,
+                      );
                       // cleanup key
                       _itemKeys.remove(item.payload.controlId);
                     },
@@ -197,7 +225,11 @@ class _NotificationHostState extends State<_NotificationHost> {
     );
   }
 
-  void playItemExit(String id, {required String reason, required bool emitClose}) {
+  void playItemExit(
+    String id, {
+    required String reason,
+    required bool emitClose,
+  }) {
     final key = _itemKeys[id];
     key?.currentState?.playExit(reason: reason, emitClose: emitClose);
   }
@@ -208,7 +240,12 @@ class _NotificationItem extends StatefulWidget {
   final VoidCallback onAction;
   final void Function(String reason, bool emitClose) onExited;
 
-  const _NotificationItem({super.key, required this.payload, required this.onAction, required this.onExited});
+  const _NotificationItem({
+    super.key,
+    required this.payload,
+    required this.onAction,
+    required this.onExited,
+  });
 
   @override
   _NotificationItemState createState() => _NotificationItemState();
@@ -228,7 +265,6 @@ class _NotificationItemState extends State<_NotificationItem> {
 
   @override
   Widget build(BuildContext context) {
-    final instant = widget.payload.instant ?? false;
     final animSpec = widget.payload.animation;
     final content = ToastNotificationWidget(
       data: widget.payload,
@@ -243,7 +279,10 @@ class _NotificationItemState extends State<_NotificationItem> {
           content,
           visible: _visible,
           onExitCompleted: () {
-            widget.onExited(_pendingExitReason ?? 'dismiss', _pendingEmitClose ?? true);
+            widget.onExited(
+              _pendingExitReason ?? 'dismiss',
+              _pendingEmitClose ?? true,
+            );
           },
         ),
       ),

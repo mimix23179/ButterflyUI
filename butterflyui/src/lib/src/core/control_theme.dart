@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'candy/theme_extension.dart';
+import 'styling/theme_extension.dart';
 
 ButterflyUIThemeTokens? butterflyuiTokens(BuildContext context) {
   return Theme.of(context).extension<ButterflyUIThemeTokens>();
@@ -91,4 +91,3 @@ List<Color> butterflyuiAccentPalette(BuildContext context) {
     tokens?.error ?? theme.colorScheme.error,
   ];
 }
-

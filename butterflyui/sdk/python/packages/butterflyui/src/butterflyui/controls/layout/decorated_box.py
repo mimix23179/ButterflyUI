@@ -15,9 +15,8 @@ class DecoratedBox(Component):
     ``DecorationImage``. ``shadow`` accepts a list of box-shadow specs.
     ``shape`` can be ``"rectangle"`` (default) or ``"circle"``.
     
-    Through ``**kwargs`` this control also supports universal style pipeline
-    fields (classes/modifiers/motion/effects) and optional icon/color/
-    transparency hints used by Candy/Skins styling flows.
+    Through ``**kwargs`` this control also accepts shared visual props such as
+    motion, effects, color, and transparency when the runtime supports them.
 
     Example:
     

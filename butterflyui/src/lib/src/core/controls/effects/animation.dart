@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/theme.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/runtime_props_control.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -240,7 +240,7 @@ List<_FramePoint> _buildTrack(Map<String, Object?> props) {
     if (props['blur'] != null) 'blur': props['blur'],
     if (props['color'] != null) 'color': props['color'],
   };
-  final mergedTo = CandyTokens.mergeMaps(to, scalarTo);
+  final mergedTo = StylingTokens.mergeMaps(to, scalarTo);
 
   final points = <_FramePoint>[
     _FramePoint(t: 0.0, props: from),

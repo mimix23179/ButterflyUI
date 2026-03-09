@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildTimeSelectControl(
@@ -92,11 +91,16 @@ class _TimeSelectControlState extends State<_TimeSelectControl> {
       _value = selected;
     });
     if (widget.controlId.isNotEmpty) {
-      widget.sendEvent(widget.controlId, 'change', {'value': _format(selected)});
+      widget.sendEvent(widget.controlId, 'change', {
+        'value': _format(selected),
+      });
     }
   }
 
-  Future<Object?> _handleInvoke(String method, Map<String, Object?> args) async {
+  Future<Object?> _handleInvoke(
+    String method,
+    Map<String, Object?> args,
+  ) async {
     switch (method) {
       case 'open':
         await _openPicker();
@@ -115,8 +119,11 @@ class _TimeSelectControlState extends State<_TimeSelectControl> {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = widget.props['enabled'] == null || widget.props['enabled'] == true;
-    final text = _format(_value) ?? (widget.props['placeholder']?.toString() ?? 'Select time');
+    final enabled =
+        widget.props['enabled'] == null || widget.props['enabled'] == true;
+    final text =
+        _format(_value) ??
+        (widget.props['placeholder']?.toString() ?? 'Select time');
     return InkWell(
       onTap: enabled ? _openPicker : null,
       child: InputDecorator(

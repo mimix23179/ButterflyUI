@@ -16,9 +16,9 @@ class Box(LayoutControl, SingleChildControl):
     ``height``, ``padding``, ``margin``, ``alignment``, and ``bgcolor``
     styling values.
 
-    ``Box`` also forwards universal runtime props through ``**kwargs``. This
-    includes style/modifier/motion/effects keys plus optional ``icon``,
-    ``color``, and ``transparency`` hints used by higher-level styling flows.
+    ``Box`` also forwards shared visual runtime props through ``**kwargs``.
+    This includes motion, effects, and optional ``icon``, ``color``, and
+    ``transparency`` hints.
 
     Example:
 

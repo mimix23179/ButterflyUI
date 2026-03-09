@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildOptionControl(
@@ -32,7 +31,9 @@ Widget buildOptionControl(
       selected: selected,
       leading: iconData == null ? null : Icon(iconData),
       title: Text(label),
-      subtitle: description == null || description.isEmpty ? null : Text(description),
+      subtitle: description == null || description.isEmpty
+          ? null
+          : Text(description),
       trailing: selected ? const Icon(Icons.check, size: 18) : null,
       onTap: enabled
           ? () {

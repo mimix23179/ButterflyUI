@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/renderers/render_layers.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -231,7 +231,7 @@ class _AnimatedGradientControlState extends State<_AnimatedGradientControl>
           ),
           child: renderedChild,
         );
-        built = wrapWithCandyRenderLayers(
+        built = wrapWithEffectRenderLayers(
           controlId: '${widget.controlId}::layers',
           props: widget.props,
           child: built,

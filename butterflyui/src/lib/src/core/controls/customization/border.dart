@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:butterflyui_runtime/src/core/candy/renderers/candy_effect_layers.dart';
+import 'package:butterflyui_runtime/src/core/styling/effects/visuals/renderers/render_layers.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -136,7 +136,7 @@ class _BorderControlState extends State<_BorderControl>
       );
     }
 
-    child = wrapWithCandyRenderLayers(
+    child = wrapWithEffectRenderLayers(
       controlId: '${widget.controlId}::layers',
       props: widget.props,
       child: child,
@@ -147,7 +147,7 @@ class _BorderControlState extends State<_BorderControl>
       child: Padding(padding: padding, child: child),
       builder: (context, renderedChild) {
         return CustomPaint(
-          foregroundPainter: _CandyBorderPainter(
+          foregroundPainter: _EffectBorderPainter(
             color: _color,
             colors: _colors,
             width: _width,
@@ -185,8 +185,8 @@ class _BorderControlState extends State<_BorderControl>
   }
 }
 
-class _CandyBorderPainter extends CustomPainter {
-  const _CandyBorderPainter({
+class _EffectBorderPainter extends CustomPainter {
+  const _EffectBorderPainter({
     required this.color,
     required this.colors,
     required this.width,
@@ -302,7 +302,7 @@ class _CandyBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _CandyBorderPainter oldDelegate) {
+  bool shouldRepaint(covariant _EffectBorderPainter oldDelegate) {
     return color != oldDelegate.color ||
         width != oldDelegate.width ||
         radius != oldDelegate.radius ||

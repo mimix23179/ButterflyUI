@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/webview/webview_api.dart';
 import 'runtime_splash_frame.dart';
 import 'traceback_logger.dart';
-import '../../core/candy/theme_extension.dart';
+import '../../core/styling/theme_extension.dart';
 
 class ButterflyUIProblemScreen extends StatelessWidget {
   final String? title;

@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/candy/theme.dart';
+import '../../core/styling/theme.dart';
 import '../../core/control_utils.dart';
 import '../../core/control_renderer.dart';
 import '../../core/control_registry.dart';
 import '../../core/webview/webview_api.dart';
 import '../protocol/message.dart';
 import '../runtime_client.dart';
-import '../../core/style/style_packs.dart';
-import '../../core/style/style_pack.dart';
-import '../../core/modifiers/control_capabilities.dart';
+import '../../core/styling/style_packs.dart';
+import '../../core/styling/style_pack.dart';
+import '../../core/styling/stylesheet.dart';
+import '../../core/styling/effects/interaction/control_interaction_capabilities.dart';
 
 class _PatchApplyResult {
   final bool patched;
@@ -92,7 +93,7 @@ class _AppRendererState extends State<AppRenderer> {
     'toasts',
   };
 
-  final CandyTokens _tokens = CandyTokens();
+  final StylingTokens _tokens = StylingTokens();
   Map<String, Object?> _rawTokens = {};
   Map<String, Object?>? _root;
   Map<String, Object?>? _screen;
@@ -102,6 +103,7 @@ class _AppRendererState extends State<AppRenderer> {
   Object? _paddingSpec;
   String? _stylePackName;
   StylePack _stylePack = stylePackRegistry.defaultPack;
+  RuntimeStyleSheet _stylesheet = RuntimeStyleSheet.empty;
   StreamSubscription<RuntimeMessage>? _subscription;
   final Map<String, ButterflyUIInvokeHandler> _invokeHandlers = {};
   final Map<String, Map<String, Object?>> _nodeIndex =
@@ -136,6 +138,7 @@ class _AppRendererState extends State<AppRenderer> {
           _screen = null;
           _overlay = null;
           _splash = null;
+          _stylesheet = RuntimeStyleSheet.empty;
           _nodeIndex.clear();
           _paddingSpec = null;
         });
@@ -145,9 +148,11 @@ class _AppRendererState extends State<AppRenderer> {
       case 'ui.apply':
         final hadRoot = _root != null;
         final payload = message.payload;
-        if (payload.containsKey('modifier_capabilities')) {
-          ControlModifierCapabilities.applySerializedManifest(
-            payload['modifier_capabilities'],
+        if (payload.containsKey('interaction_capabilities') ||
+            payload.containsKey('modifier_capabilities')) {
+          ControlInteractionCapabilities.applySerializedManifest(
+            payload['interaction_capabilities'] ??
+                payload['modifier_capabilities'],
           );
         }
         if (payload.containsKey('protocol_version')) {
@@ -186,6 +191,7 @@ class _AppRendererState extends State<AppRenderer> {
         final hasScreenUpdate = payload.containsKey('screen');
         final hasOverlayUpdate = payload.containsKey('overlay');
         final hasSplashUpdate = payload.containsKey('splash');
+        final hasStylesheetUpdate = payload.containsKey('stylesheet');
         final structureChanged =
             hasRootUpdate ||
             hasScreenUpdate ||
@@ -194,7 +200,7 @@ class _AppRendererState extends State<AppRenderer> {
         final hasPatches = patchesRaw is List || patchRaw is Map;
         var usedFallbackPatch = false;
 
-        if (structureChanged || hasPatches) {
+        if (structureChanged || hasPatches || hasStylesheetUpdate) {
           setState(() {
             if (hasRootUpdate) {
               final rootRaw = payload['root'];
@@ -217,6 +223,11 @@ class _AppRendererState extends State<AppRenderer> {
               _splash = splashRaw is Map
                   ? splashRaw.cast<String, Object?>()
                   : null;
+            }
+            if (hasStylesheetUpdate) {
+              _stylesheet = RuntimeStyleSheet.fromPayload(
+                payload['stylesheet'],
+              );
             }
 
             if (structureChanged) {
@@ -254,6 +265,7 @@ class _AppRendererState extends State<AppRenderer> {
         final hasTokens =
             payload.containsKey('tokens') ||
             payload.containsKey('theme') ||
+            payload.containsKey('styling') ||
             payload.containsKey('candy');
         if (hasTokens) {
           _rawTokens = _extractRuntimeTokens(payload);
@@ -531,7 +543,7 @@ class _AppRendererState extends State<AppRenderer> {
         ? stylePackRegistry.defaultPack
         : stylePackRegistry.resolve(baseName);
     final tokenMap = _extractStylePackTokens(spec);
-    final mergedTokens = CandyTokens.mergeMaps(
+    final mergedTokens = StylingTokens.mergeMaps(
       basePack.defaultTokens,
       tokenMap,
     );
@@ -539,17 +551,17 @@ class _AppRendererState extends State<AppRenderer> {
       spec['overrides'],
       basePack.overrides,
     );
-    final componentStyles = CandyTokens.mergeMaps(
+    final componentStyles = StylingTokens.mergeMaps(
       basePack.componentStyles,
       _coerceMapSection(
         spec['components'] ?? spec['component_styles'] ?? spec['controls'],
       ),
     );
-    final motionPack = CandyTokens.mergeMaps(
+    final motionPack = StylingTokens.mergeMaps(
       basePack.motionPack,
       _coerceMapSection(spec['motion'] ?? spec['motion_pack']),
     );
-    final effectPresets = CandyTokens.mergeMaps(
+    final effectPresets = StylingTokens.mergeMaps(
       basePack.effectPresets,
       _coerceMapSection(spec['effects'] ?? spec['effect_presets']),
     );
@@ -611,8 +623,11 @@ class _AppRendererState extends State<AppRenderer> {
     final theme = _extractTokenMap(payload['theme']);
     if (theme.isNotEmpty) return theme;
 
-    final candy = _extractTokenMap(payload['candy']);
-    if (candy.isNotEmpty) return candy;
+    final styling = _extractTokenMap(payload['styling']);
+    if (styling.isNotEmpty) return styling;
+
+    final legacyStyling = _extractTokenMap(payload['candy']);
+    if (legacyStyling.isNotEmpty) return legacyStyling;
 
     return <String, Object?>{};
   }
@@ -621,8 +636,11 @@ class _AppRendererState extends State<AppRenderer> {
     final direct = _extractTokenMap(spec['tokens']);
     if (direct.isNotEmpty) return direct;
 
-    final candy = _extractTokenMap(spec['candy']);
-    if (candy.isNotEmpty) return candy;
+    final styling = _extractTokenMap(spec['styling']);
+    if (styling.isNotEmpty) return styling;
+
+    final legacyStyling = _extractTokenMap(spec['candy']);
+    if (legacyStyling.isNotEmpty) return legacyStyling;
 
     final theme = _extractTokenMap(spec['theme']);
     if (theme.isNotEmpty) return theme;
@@ -649,22 +667,22 @@ class _AppRendererState extends State<AppRenderer> {
       }
     }
 
-    final looksLikeCandyControl =
+    final looksLikeLegacyStylingControl =
         map.containsKey('module') ||
         map.containsKey('modules') ||
         map.containsKey('state') ||
         map.containsKey('schema_version');
 
-    if (looksLikeCandyControl) {
+    if (looksLikeLegacyStylingControl) {
       return <String, Object?>{};
     }
 
     return map;
   }
 
-  Widget Function(BuildContext, CandyTokens) _backgroundFromSpec(
+  Widget Function(BuildContext, StylingTokens) _backgroundFromSpec(
     Object spec,
-    Widget Function(BuildContext, CandyTokens)? fallback,
+    Widget Function(BuildContext, StylingTokens)? fallback,
   ) {
     return (context, tokens) {
       if (spec is String) {
@@ -706,6 +724,9 @@ class _AppRendererState extends State<AppRenderer> {
       );
     }
 
+    final viewportSize = MediaQuery.sizeOf(context);
+    final viewportWidth = viewportSize.width;
+    final viewportHeight = viewportSize.height;
     final renderer = ControlRenderer(
       tokens: _tokens,
       registry: ButterflyUIControlRegistry(),
@@ -715,6 +736,9 @@ class _AppRendererState extends State<AppRenderer> {
       sendSystemEvent: _sendSystemEvent,
       stylePack: _stylePack,
       styleTokens: _rawTokens,
+      stylesheet: _stylesheet,
+      viewportWidth: viewportWidth,
+      viewportHeight: viewportHeight,
     );
 
     final base = renderer.buildFromControl(baseRoot);
@@ -850,8 +874,10 @@ class _AppRendererState extends State<AppRenderer> {
       'has_root': hasRoot,
       'protocol_version': _protocolVersion,
       if (_contractVersion != null) 'contract_version': _contractVersion,
+      'interaction_capabilities_version':
+          ControlInteractionCapabilities.manifestVersion,
       'modifier_capabilities_version':
-          ControlModifierCapabilities.manifestVersion,
+          ControlInteractionCapabilities.manifestVersion,
     };
     if (includeStyleSync) {
       if (_stylePackRevision != null) {

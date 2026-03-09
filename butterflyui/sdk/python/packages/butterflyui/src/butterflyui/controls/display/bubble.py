@@ -24,9 +24,8 @@ class Bubble(LayoutControl):
     - ``variant="thread"`` / ``variant="chat"``: message list ergonomics, separators, jump APIs.
     - ``variant="composer"``: expanding input row with attach/send behaviors.
 
-    Bubble supports the same universal style/modifier/motion/effects contract
-    as other core controls, including slot styling (``label``, ``leading``,
-    ``trailing``, ``overlay``) and state modifier lists.
+    Bubble also accepts shared visual props such as motion, effects, and color
+    through ``**kwargs`` when the runtime supports them.
 
     Example:
     ```python

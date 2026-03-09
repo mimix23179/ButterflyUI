@@ -17,11 +17,9 @@ class Surface(LayoutControl, SingleChildControl):
     for the background fill, and ``border_color``/``border_width`` for an
     optional border stroke.
 
-    ``Surface`` participates in the universal styling/effects pipeline exposed
-    by the shared renderer. You can pass the same cross-control props used by
-    Candy/Skins/Style/Modifier/Gallery through ``**kwargs`` (for example
-    ``variant``, ``classes``, ``modifiers``, ``motion``, ``effects``,
-    ``on_hover_modifiers``, ``icon``, ``color``, ``transparency``).
+    ``Surface`` also accepts shared visual props such as motion, effects,
+    color, and transparency through ``**kwargs`` when the runtime supports
+    them.
 
     Example:
 

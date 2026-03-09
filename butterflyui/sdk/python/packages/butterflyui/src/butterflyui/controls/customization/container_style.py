@@ -101,5 +101,3 @@ class ContainerStyle(LayoutControl):
     Animation value forwarded to the `container_style` runtime control.
     """
 
-    def set_style(self, session: Any, **style_props: Any) -> dict[str, Any]:
-        return self.invoke(session, "set_style", style_props)
