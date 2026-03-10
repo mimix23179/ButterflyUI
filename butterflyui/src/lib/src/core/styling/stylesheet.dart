@@ -135,9 +135,29 @@ Object? _coerceEffectsValue(Object? value) {
 
 Map<String, Object?> _normalizeDeclarations(Map<String, Object?> source) {
   final normalized = <String, Object?>{};
+  final slotStyles = <String, Object?>{};
+  final tokenOverrides = <String, Object?>{};
   source.forEach((rawKey, rawValue) {
-    final key = _normStyleToken(rawKey);
+    final key = rawKey.startsWith('token:')
+        ? rawKey
+        : _normStyleToken(rawKey);
     final value = _normalizeDeclarationValue(rawValue);
+    if (key.startsWith('token:')) {
+      _writeTokenOverride(tokenOverrides, key.substring(6), value);
+      return;
+    }
+    final slotMatch = RegExp(
+      r'^(label|icon|content|field|placeholder|helper|surface)_(.+)$',
+    ).firstMatch(key);
+    if (slotMatch != null) {
+      _writeSlotDeclaration(
+        slotStyles,
+        slotMatch.group(1)!,
+        slotMatch.group(2)!,
+        value,
+      );
+      return;
+    }
     switch (key) {
       case 'background_color':
         normalized['bgcolor'] = value;
@@ -150,6 +170,21 @@ Map<String, Object?> _normalizeDeclarations(Map<String, Object?> source) {
         break;
       case 'motion_preset':
         normalized['motion'] = value;
+        break;
+      case 'mix_blend_mode':
+      case 'blend_mode':
+      case 'background_blend_mode':
+      case 'foreground_blend_mode':
+      case 'scene_blend_mode':
+      case 'clip_behavior':
+      case 'scene_opacity':
+      case 'background_layer_opacity':
+      case 'foreground_layer_opacity':
+      case 'scene_scrim':
+      case 'scene_scrim_color':
+      case 'scene_scrim_opacity':
+      case 'scene_isolation':
+        normalized[key] = value;
         break;
       case 'background_effect':
         final resolved = _coerceEffectPresetValue(
@@ -194,7 +229,113 @@ Map<String, Object?> _normalizeDeclarations(Map<String, Object?> source) {
         break;
     }
   });
+  if (slotStyles.isNotEmpty) {
+    normalized['style_slots'] = slotStyles;
+  }
+  if (tokenOverrides.isNotEmpty) {
+    normalized['style_tokens'] = tokenOverrides;
+  }
   return normalized;
+}
+
+Map<String, Object?> normalizeStylingDeclarations(Map<String, Object?> source) {
+  return _normalizeDeclarations(source);
+}
+
+RuntimeStyleSheet runtimeStyleSheetFromInlineCss(
+  String source, {
+  String selector = '*',
+}) {
+  final trimmed = source.trim();
+  if (trimmed.isEmpty) {
+    return RuntimeStyleSheet.empty;
+  }
+  final hasRuleBlock = trimmed.contains('{') && trimmed.contains('}');
+  if (hasRuleBlock) {
+    return RuntimeStyleSheet.fromSource(trimmed);
+  }
+  return RuntimeStyleSheet.fromSource('$selector { $trimmed }');
+}
+
+void _writeSlotDeclaration(
+  Map<String, Object?> slotStyles,
+  String slot,
+  String prop,
+  Object? value,
+) {
+  final existing = slotStyles[slot] is Map
+      ? coerceObjectMap(slotStyles[slot] as Map)
+      : <String, Object?>{};
+  existing[prop] = value;
+  slotStyles[slot] = existing;
+}
+
+void _writeTokenOverride(
+  Map<String, Object?> tokenOverrides,
+  String tokenName,
+  Object? value,
+) {
+  final normalized = _normStyleToken(tokenName);
+  if (normalized.isEmpty) return;
+  final path = _tokenOverridePath(normalized);
+  if (path.isEmpty) return;
+  Map<String, Object?> cursor = tokenOverrides;
+  for (var index = 0; index < path.length - 1; index += 1) {
+    final segment = path[index];
+    final next = cursor[segment] is Map
+        ? coerceObjectMap(cursor[segment] as Map)
+        : <String, Object?>{};
+    cursor[segment] = next;
+    cursor = next;
+  }
+  cursor[path.last] = value;
+}
+
+List<String> _tokenOverridePath(String token) {
+  switch (token) {
+    case 'surface':
+    case 'background':
+    case 'text':
+    case 'muted_text':
+    case 'border':
+    case 'primary':
+    case 'secondary':
+    case 'success':
+    case 'warning':
+    case 'info':
+    case 'error':
+    case 'on_primary':
+    case 'on_surface':
+      return <String>['colors', token];
+    case 'radius_sm':
+      return <String>['radii', 'sm'];
+    case 'radius_md':
+      return <String>['radii', 'md'];
+    case 'radius_lg':
+      return <String>['radii', 'lg'];
+    case 'spacing_xs':
+      return <String>['spacing', 'xs'];
+    case 'spacing_sm':
+      return <String>['spacing', 'sm'];
+    case 'spacing_md':
+      return <String>['spacing', 'md'];
+    case 'spacing_lg':
+      return <String>['spacing', 'lg'];
+    case 'font_family':
+      return <String>['typography', 'font_family'];
+    case 'mono_family':
+      return <String>['typography', 'mono_family'];
+    case 'body_size':
+      return <String>['typography', 'body_size'];
+    case 'title_size':
+      return <String>['typography', 'title_size'];
+    case 'label_size':
+      return <String>['typography', 'label_size'];
+    case 'brightness':
+      return <String>['theme', 'brightness'];
+    default:
+      return const <String>[];
+  }
 }
 
 Map<String, Object?> _mergeStyleMaps(
@@ -221,6 +362,7 @@ Map<String, Object?> _mergeStyleMaps(
 }
 
 class RuntimeStyleSelector {
+  final bool isRoot;
   final String? controlType;
   final String? elementId;
   final List<String> classes;
@@ -228,6 +370,7 @@ class RuntimeStyleSelector {
   final double? minWidth;
 
   const RuntimeStyleSelector({
+    required this.isRoot,
     required this.controlType,
     required this.elementId,
     required this.classes,
@@ -238,6 +381,7 @@ class RuntimeStyleSelector {
   factory RuntimeStyleSelector.fromPayload(Object? payload) {
     final map = _asObjectMap(payload);
     return RuntimeStyleSelector(
+      isRoot: map['root'] == true,
       controlType: map['type'] == null
           ? null
           : _normStyleToken(map['type'].toString()),
@@ -253,6 +397,9 @@ class RuntimeStyleSelector {
   }
 
   int get specificity =>
+      isRoot
+          ? 0
+          :
       (elementId == null ? 0 : 100) +
       ((classes.length + (state == null ? 0 : 1)) * 10) +
       (controlType == null ? 0 : 1);
@@ -264,6 +411,9 @@ class RuntimeStyleSelector {
     required String state,
     required double viewportWidth,
   }) {
+    if (isRoot) {
+      return false;
+    }
     if (minWidth != null && viewportWidth < minWidth!) {
       return false;
     }
@@ -420,6 +570,26 @@ class RuntimeStyleSheet {
     }
     return resolved;
   }
+
+  Map<String, Object?> resolveTokenOverrides({
+    double viewportWidth = 1280,
+  }) {
+    if (rules.isEmpty) return const <String, Object?>{};
+    var resolved = <String, Object?>{};
+    for (var index = 0; index < rules.length; index += 1) {
+      final rule = rules[index];
+      final matchingRoot = rule.selectors.any(
+        (selector) =>
+            selector.isRoot &&
+            (selector.minWidth == null || viewportWidth >= selector.minWidth!),
+      );
+      if (!matchingRoot) continue;
+      final tokenLayer = _asObjectMap(rule.declarations['style_tokens']);
+      if (tokenLayer.isEmpty) continue;
+      resolved = StylingTokens.mergeMaps(resolved, tokenLayer);
+    }
+    return resolved;
+  }
 }
 
 class _RuntimeRuleMatch {
@@ -481,6 +651,17 @@ RuntimeStyleSelector? _parseInlineSelector(String selector) {
     }
   }
   if (raw.isEmpty) return null;
+  final isRoot = raw == ':root' || _normStyleToken(raw) == 'root';
+  if (isRoot) {
+    return RuntimeStyleSelector(
+      isRoot: true,
+      controlType: null,
+      elementId: null,
+      classes: const <String>[],
+      state: null,
+      minWidth: minWidth,
+    );
+  }
   var main = raw;
   String? state;
   final stateIndex = raw.indexOf(':');
@@ -507,6 +688,7 @@ RuntimeStyleSelector? _parseInlineSelector(String selector) {
     controlType = _normStyleToken(token);
   }
   return RuntimeStyleSelector(
+    isRoot: false,
     controlType: controlType,
     elementId: elementId,
     classes: classes,
@@ -522,7 +704,10 @@ Map<String, Object?> _parseInlineDeclarations(String body) {
     if (trimmed.isEmpty) continue;
     final colon = trimmed.indexOf(':');
     if (colon <= 0) continue;
-    final name = _normStyleToken(trimmed.substring(0, colon));
+    final rawName = trimmed.substring(0, colon).trim();
+    final name = rawName.startsWith('--')
+        ? 'token:${_normStyleToken(rawName.substring(2))}'
+        : _normStyleToken(rawName);
     final rawValue = trimmed.substring(colon + 1).trim();
     if (rawValue.isEmpty) continue;
     final normalizedName = switch (name) {

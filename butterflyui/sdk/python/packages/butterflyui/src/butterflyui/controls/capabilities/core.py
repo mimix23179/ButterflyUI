@@ -85,10 +85,10 @@ class CoreProps:
 
     theme: str | None = None
     """
-    Alias for ``style_pack`` when selecting a named visual theme for this control.
+    Preferred named styling theme applied to this control subtree.
     """
 
     style_pack: str | None = None
     """
-    Named style pack applied to this control subtree.
+    Compatibility alias for ``theme`` kept for older ButterflyUI payloads.
     """

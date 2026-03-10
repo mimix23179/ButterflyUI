@@ -19,18 +19,18 @@ import 'controls/buttons/text_button.dart';
 import 'controls/common/color_value.dart';
 import 'controls/common/option_types.dart';
 import 'controls/common/icon_value.dart';
-import 'controls/customization/animated_gradient.dart';
-import 'controls/customization/avatar_stack.dart';
-import 'controls/customization/badge.dart';
-import 'controls/customization/blend_mode_picker.dart';
-import 'controls/customization/blob_field.dart';
-import 'controls/customization/border.dart';
-import 'controls/customization/border_side.dart';
-import 'controls/customization/button_style.dart';
-import 'controls/customization/crop_box.dart';
-import 'controls/customization/histogram_overlay.dart';
-import 'controls/customization/histogram_view.dart';
-import 'controls/customization/color_tools.dart';
+import 'styling/helpers/customization/animated_gradient.dart';
+import 'styling/helpers/customization/avatar_stack.dart';
+import 'styling/helpers/customization/badge.dart';
+import 'styling/helpers/customization/blend_mode_picker.dart';
+import 'styling/helpers/customization/blob_field.dart';
+import 'styling/helpers/customization/border.dart';
+import 'styling/helpers/customization/border_side.dart';
+import 'styling/helpers/customization/button_style.dart';
+import 'styling/helpers/customization/crop_box.dart';
+import 'styling/helpers/customization/histogram_overlay.dart';
+import 'styling/helpers/customization/histogram_view.dart';
+import 'styling/helpers/customization/color_tools.dart';
 import 'controls/display/chart.dart';
 import 'controls/display/artifact_card.dart';
 import 'controls/display/bar_chart.dart';
@@ -52,27 +52,27 @@ import 'controls/display/markdown_view.dart';
 import 'controls/display/spark_plot.dart';
 import 'controls/display/sparkline.dart';
 import 'controls/display/text.dart';
-import 'controls/effects/animated_background.dart';
-import 'controls/effects/animation.dart';
-import 'controls/effects/effects.dart';
-import 'controls/effects/fold_layer.dart';
-import 'controls/effects/flow_field.dart';
-import 'controls/effects/liquid_morph.dart';
-import 'controls/effects/morphing_border.dart';
-import 'controls/effects/motion.dart';
-import 'controls/effects/parallax.dart';
-import 'controls/effects/particles.dart';
-import 'controls/effects/pixelate.dart';
-import 'controls/effects/ripple_burst.dart';
-import 'controls/effects/particle_field.dart';
-import 'controls/effects/noise_fx.dart';
-import 'controls/effects/scanline_overlay.dart';
-import 'controls/effects/shadow.dart';
-import 'controls/effects/shimmer_shadow.dart';
-import 'controls/effects/stagger.dart';
-import 'controls/effects/transition.dart';
-import 'controls/effects/visual_fx.dart';
-import 'controls/effects/vignette.dart';
+import 'styling/helpers/effects/animated_background.dart';
+import 'styling/helpers/effects/animation.dart';
+import 'styling/helpers/effects/effects.dart';
+import 'styling/helpers/effects/fold_layer.dart';
+import 'styling/helpers/effects/flow_field.dart';
+import 'styling/helpers/effects/liquid_morph.dart';
+import 'styling/helpers/effects/morphing_border.dart';
+import 'styling/helpers/effects/motion.dart';
+import 'styling/helpers/effects/parallax.dart';
+import 'styling/helpers/effects/particles.dart';
+import 'styling/helpers/effects/pixelate.dart';
+import 'styling/helpers/effects/ripple_burst.dart';
+import 'styling/helpers/effects/particle_field.dart';
+import 'styling/helpers/effects/noise_fx.dart';
+import 'styling/helpers/effects/scanline_overlay.dart';
+import 'styling/helpers/effects/shadow.dart';
+import 'styling/helpers/effects/shimmer_shadow.dart';
+import 'styling/helpers/effects/stagger.dart';
+import 'styling/helpers/effects/transition.dart';
+import 'styling/helpers/effects/visual_fx.dart';
+import 'styling/helpers/effects/vignette.dart';
 import 'controls/feedback/progress_bar.dart';
 import 'controls/feedback/progress_ring.dart';
 import 'controls/feedback/timeline.dart';
@@ -401,7 +401,13 @@ class ControlRenderer {
     );
 
     final basePack = inheritedPack ?? stylePack;
-    final parentTokenOverrides = inheritedTokenOverrides ?? styleTokens;
+    final stylesheetTokenOverrides = stylesheet.resolveTokenOverrides(
+      viewportWidth: viewportWidth,
+    );
+    final parentTokenOverrides = StylingTokens.mergeMaps(
+      inheritedTokenOverrides ?? styleTokens,
+      stylesheetTokenOverrides,
+    );
     final packName = baseProps['style_pack']?.toString();
     final resolvedPack = (packName == null || packName.isEmpty)
         ? basePack
@@ -3154,6 +3160,60 @@ class ControlRenderer {
         hoverOpacity: hoverOpacity,
         hoverDuration: Duration(milliseconds: layerDurationMs.clamp(0, 2000)),
         hoverCurve: layerCurve,
+        clipBehavior:
+            _parseOverflowClip(
+              props['overflow'] ??
+                  surfaceStyle['overflow'] ??
+                  props['clip_behavior'] ??
+                  surfaceStyle['clip_behavior'],
+            ) ??
+            (_parseBoxShape(props['shape'] ?? surfaceStyle['shape']) ==
+                        BoxShape.circle ||
+                    _coerceBorderRadius(
+                          props['radius'] ??
+                              props['border_radius'] ??
+                              surfaceStyle['radius'] ??
+                              surfaceStyle['border_radius'],
+                        ) !=
+                        null
+                ? Clip.antiAlias
+                : Clip.none),
+        borderRadius: _coerceBorderRadius(
+          props['radius'] ??
+              props['border_radius'] ??
+              surfaceStyle['radius'] ??
+              surfaceStyle['border_radius'],
+        ),
+        shape: _parseBoxShape(props['shape'] ?? surfaceStyle['shape']),
+        backgroundOpacity:
+            (coerceDouble(
+                      props['background_layer_opacity'] ??
+                          props['scene_opacity'] ??
+                          surfaceStyle['background_layer_opacity'] ??
+                          surfaceStyle['scene_opacity'],
+                    ) ??
+                    1.0)
+                .clamp(0.0, 1.0),
+        foregroundOpacity:
+            (coerceDouble(
+                      props['foreground_layer_opacity'] ??
+                          surfaceStyle['foreground_layer_opacity'],
+                    ) ??
+                    1.0)
+                .clamp(0.0, 1.0),
+        scrimColor: coerceColor(
+          props['scene_scrim'] ??
+              props['scene_scrim_color'] ??
+              surfaceStyle['scene_scrim'] ??
+              surfaceStyle['scene_scrim_color'],
+        ),
+        scrimOpacity:
+            (coerceDouble(
+                      props['scene_scrim_opacity'] ??
+                          surfaceStyle['scene_scrim_opacity'],
+                    ) ??
+                    0.0)
+                .clamp(0.0, 1.0),
         child: built,
       );
     }
@@ -4422,6 +4482,13 @@ class _LayeredSurfaceHost extends StatefulWidget {
     required this.hoverOpacity,
     required this.hoverDuration,
     required this.hoverCurve,
+    required this.clipBehavior,
+    required this.borderRadius,
+    required this.shape,
+    required this.backgroundOpacity,
+    required this.foregroundOpacity,
+    required this.scrimColor,
+    required this.scrimOpacity,
     required this.child,
   });
 
@@ -4431,6 +4498,13 @@ class _LayeredSurfaceHost extends StatefulWidget {
   final double hoverOpacity;
   final Duration hoverDuration;
   final Curve hoverCurve;
+  final Clip clipBehavior;
+  final BorderRadius? borderRadius;
+  final BoxShape shape;
+  final double backgroundOpacity;
+  final double foregroundOpacity;
+  final Color? scrimColor;
+  final double scrimOpacity;
   final Widget child;
 
   @override
@@ -4448,7 +4522,22 @@ class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
       fit: StackFit.passthrough,
       children: <Widget>[
         for (final layer in widget.backgroundLayers)
-          Positioned.fill(child: IgnorePointer(child: layer)),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: widget.backgroundOpacity,
+                child: layer,
+              ),
+            ),
+          ),
+        if (widget.scrimColor != null && widget.scrimOpacity > 0)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: widget.scrimColor!.withValues(alpha: widget.scrimOpacity),
+              ),
+            ),
+          ),
         if (hasHoverLayer)
           Positioned.fill(
             child: IgnorePointer(
@@ -4467,9 +4556,29 @@ class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
           ),
         widget.child,
         for (final layer in widget.foregroundLayers)
-          Positioned.fill(child: IgnorePointer(child: layer)),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: widget.foregroundOpacity,
+                child: layer,
+              ),
+            ),
+          ),
       ],
     );
+
+    if (widget.shape == BoxShape.circle) {
+      layered = ClipOval(
+        clipBehavior: widget.clipBehavior,
+        child: layered,
+      );
+    } else if (widget.clipBehavior != Clip.none || widget.borderRadius != null) {
+      layered = ClipRRect(
+        clipBehavior: widget.clipBehavior,
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
+        child: layered,
+      );
+    }
 
     if (!hasHoverLayer) return layered;
     return MouseRegion(

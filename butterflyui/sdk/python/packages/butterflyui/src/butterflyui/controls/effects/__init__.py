@@ -1,7 +1,8 @@
-"""Internal runtime effect controls.
+"""Internal Styling helpers for visual effects.
 
-ButterflyUI styles visual polish through the stylesheet system instead of
-publishing these effect wrappers as part of the main Python API surface.
+These wrappers back the Dart ``core/styling/helpers/effects`` runtime surface
+and are intended for advanced styling workflows rather than the main public
+ButterflyUI API.
 """
 
 __all__: list[str] = []

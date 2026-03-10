@@ -161,12 +161,8 @@ class _ButterflyUIOverlayState extends State<_ButterflyUIOverlay> {
     if (base is Map) {
       return coerceObjectMap(base);
     }
-    final childProp = _liveProps['child'];
-    if (childProp is Map) {
-      return coerceObjectMap(childProp);
-    }
     final children = _rawChildMaps();
-    if (children.isNotEmpty) {
+    if (children.length > 1) {
       return children.first;
     }
     return null;
@@ -188,6 +184,9 @@ class _ButterflyUIOverlayState extends State<_ButterflyUIOverlay> {
     final childMaps = _rawChildMaps();
     if (childMaps.length > 1) {
       return childMaps.sublist(1);
+    }
+    if (childMaps.length == 1 && _resolveBaseMap() == null) {
+      return childMaps;
     }
     return const <Map<String, Object?>>[];
   }

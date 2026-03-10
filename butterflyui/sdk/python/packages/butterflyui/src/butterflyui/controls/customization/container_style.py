@@ -9,13 +9,12 @@ __all__ = ["ContainerStyle"]
 @butterfly_control('container_style')
 class ContainerStyle(LayoutControl):
     """
-    Surface decorator that applies background, border, shadow, and
-    corner-radius styling to a child control.
+    Thin Styling helper that decorates a child surface through the
+    shared Styling engine.
 
-    The runtime wraps the child in a ``Container`` with a ``BoxDecoration``
-    built from the supplied style properties. A ``BoxShadow`` is added when
-    any shadow property is set. Gradient fills are supported alongside or
-    instead of a flat background colour.
+    The runtime resolves local style declarations, inline ``css`` blocks,
+    stylesheet payloads, and optional scene layers before painting the
+    resulting styled surface around the child content.
 
     ```python
     import butterflyui as bui
@@ -99,5 +98,35 @@ class ContainerStyle(LayoutControl):
     animation: Any | None = None
     """
     Animation value forwarded to the `container_style` runtime control.
+    """
+
+    css: str | None = None
+    """
+    Inline CSS-like declaration block merged through the Styling engine.
+    """
+
+    stylesheet: str | Mapping[str, Any] | list[Any] | None = None
+    """
+    Stylesheet payload or CSS source resolved against this helper.
+    """
+
+    background_layers: list[Any] | None = None
+    """
+    Background scene-layer definitions rendered behind the styled surface.
+    """
+
+    foreground_layers: list[Any] | None = None
+    """
+    Foreground scene-layer definitions rendered above the styled surface.
+    """
+
+    lottie: Any = None
+    """
+    Lottie shorthand forwarded into the helper's overlay scene layers.
+    """
+
+    rive: Any = None
+    """
+    Rive shorthand forwarded into the helper's overlay scene layers.
     """
 

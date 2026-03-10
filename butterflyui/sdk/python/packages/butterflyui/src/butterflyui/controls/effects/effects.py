@@ -1,92 +1,104 @@
 from __future__ import annotations
+
 from collections.abc import Mapping
 from typing import Any
+
 from .._shared import Component, merge_props
 
 __all__ = ["Effects"]
 
+
 class Effects(Component):
     """
-    Composite visual-effects wrapper that applies blur, colour
-    filtering, colour-matrix adjustments, and opacity to its children.
-    
-    The Flutter runtime applies effects in order: **Gaussian blur** →
-    **colour filter** (``ColorFilter.mode``) → **colour-matrix filter**
-    (brightness / contrast / saturation / grayscale via a 5×4
-    ``ColorFilter.matrix``) → **opacity**.  When ``enabled`` is
-    ``False`` the child is returned unmodified.
-    
-    Example:
-    
-    ```python
-    import butterflyui as bui
+    Thin Styling helper that applies filter-style effects and authored
+    render layers to its child content.
 
-    blurred = bui.Effects(
-        bui.Image(src="photo.png"),
-        blur=6.0,
-        saturation=0.5,
-        brightness=1.1,
-        opacity=0.9,
-    )
-    ```
+    The Flutter runtime resolves local ``style`` mappings, inline
+    ``css`` declarations, stylesheet payloads, and optional Lottie /
+    Rive shorthands through the shared Styling engine before running the
+    helper's blur, tint, color-matrix, opacity, and scene-layer passes.
     """
-
 
     blur: float | None = None
     """
     Gaussian blur sigma applied equally in X and Y.
-    Values ≤ 0 are ignored.
     """
 
     opacity: float | None = None
     """
-    Layer opacity (``0.0`` – ``1.0``).
-    Values ≥ 1 are ignored.
+    Layer opacity in the ``0.0`` to ``1.0`` range.
     """
 
     color: Any | None = None
     """
-    Tint colour applied via ``ColorFilter.mode``.
+    Tint color applied through the helper's blend-mode filter path.
     """
 
     blend_mode: str | None = None
     """
-    Blend mode string used with *color* (e.g. ``"multiply"``,
-    ``"screen"``, ``"overlay"``).  Defaults to ``"src_atop"``.
+    Blend mode token used when applying ``color``.
     """
 
     brightness: float | None = None
     """
-    Brightness multiplier where ``1.0`` is unchanged.
-    Internally shifts the colour-matrix offset channel.
+    Brightness multiplier forwarded into the color-matrix stage.
     """
 
     contrast: float | None = None
     """
-    Contrast multiplier where ``1.0`` is unchanged.
+    Contrast multiplier forwarded into the color-matrix stage.
     """
 
     saturation: float | None = None
     """
-    Saturation multiplier where ``1.0`` is unchanged and
-    ``0.0`` is fully desaturated.
+    Saturation multiplier forwarded into the color-matrix stage.
     """
 
     hue_rotate: float | None = None
     """
-    Reserved — hue rotation angle in degrees.
+    Reserved hue-rotation value in degrees.
     """
 
     grayscale: float | None = None
     """
-    Grayscale mix (``0.0`` – ``1.0``) blended into the
-    luminance-weighted colour matrix.
+    Grayscale mix blended into the helper's color-matrix filter.
+    """
+
+    css: str | None = None
+    """
+    Inline CSS-like declaration block resolved through ButterflyUI Styling.
+    """
+
+    stylesheet: str | Mapping[str, Any] | list[Any] | None = None
+    """
+    Stylesheet payload or CSS source applied to this helper before rendering.
+    """
+
+    background_layers: list[Any] | None = None
+    """
+    Background scene-layer definitions rendered behind the child content.
+    """
+
+    foreground_layers: list[Any] | None = None
+    """
+    Foreground scene-layer definitions rendered above the child content.
+    """
+
+    lottie: Any = None
+    """
+    Lottie shorthand converted into an overlay scene layer by the runtime.
+    """
+
+    rive: Any = None
+    """
+    Rive shorthand converted into an overlay scene layer by the runtime.
     """
 
     events: list[str] | None = None
     """
-    List of runtime event names that should be emitted back to Python for this control instance.
+    Runtime event names that should be emitted back to Python.
     """
+
     control_type = "effects"
 
     def __init__(
@@ -103,6 +115,12 @@ class Effects(Component):
         hue_rotate: float | None = None,
         grayscale: float | None = None,
         enabled: bool | None = None,
+        css: str | None = None,
+        stylesheet: str | Mapping[str, Any] | list[Any] | None = None,
+        background_layers: list[Any] | None = None,
+        foreground_layers: list[Any] | None = None,
+        lottie: Any = None,
+        rive: Any = None,
         events: list[str] | None = None,
         props: Mapping[str, Any] | None = None,
         style: Mapping[str, Any] | None = None,
@@ -121,6 +139,12 @@ class Effects(Component):
             hue_rotate=hue_rotate,
             grayscale=grayscale,
             enabled=enabled,
+            css=css,
+            stylesheet=stylesheet,
+            background_layers=background_layers,
+            foreground_layers=foreground_layers,
+            lottie=lottie,
+            rive=rive,
             events=events,
             **kwargs,
         )

@@ -170,12 +170,37 @@ def _parse_value(name: str, raw: str) -> Any:
 
 @dataclass(frozen=True, slots=True)
 class StyleSelector:
+    """Single selector used by the ButterflyUI stylesheet engine."""
+
     raw: str
+    """
+    Original selector text exactly as authored in the stylesheet.
+    """
+
     control_type: str | None = None
+    """
+    Normalized control type selector such as ``button`` or ``container``.
+    """
+
     element_id: str | None = None
+    """
+    Optional ``#id`` selector target.
+    """
+
     classes: tuple[str, ...] = ()
+    """
+    Normalized ``.class`` selector tokens attached to the selector.
+    """
+
     state: str | None = None
+    """
+    Optional pseudo-state such as ``hover`` or ``pressed``.
+    """
+
     breakpoint: str | None = None
+    """
+    Optional responsive breakpoint prefix such as ``md`` or ``lg``.
+    """
 
     @classmethod
     def parse(cls, selector: str) -> "StyleSelector":
@@ -235,8 +260,17 @@ class StyleSelector:
 
 @dataclass(frozen=True, slots=True)
 class StyleRule:
+    """Parsed stylesheet rule containing selectors and declarations."""
+
     selectors: tuple[StyleSelector, ...]
+    """
+    Selector list that can match one or more runtime controls.
+    """
+
     declarations: dict[str, Any]
+    """
+    Normalized declaration mapping applied when a selector matches.
+    """
 
     @classmethod
     def parse(cls, selector_text: str, body_text: str) -> "StyleRule":
@@ -268,7 +302,12 @@ class StyleRule:
 
 @dataclass(frozen=True, slots=True)
 class StyleSheet:
+    """Parsed ButterflyUI stylesheet ready for serialization to the runtime."""
+
     rules: tuple[StyleRule, ...]
+    """
+    Ordered stylesheet rules preserved in author-defined order.
+    """
 
     @classmethod
     def parse(cls, source: str) -> "StyleSheet":

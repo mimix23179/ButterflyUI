@@ -1,7 +1,8 @@
-"""Internal customization helpers.
+"""Internal Styling helpers.
 
-ButterflyUI applies these runtime primitives through stylesheet rules rather
-than exposing them as first-class public controls in the Python SDK.
+These wrappers back the Dart ``core/styling/helpers/customization`` runtime
+surface and are intended for advanced styling workflows rather than the main
+public ButterflyUI API.
 """
 
 __all__: list[str] = []

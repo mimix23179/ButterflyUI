@@ -148,11 +148,9 @@ class _AppRendererState extends State<AppRenderer> {
       case 'ui.apply':
         final hadRoot = _root != null;
         final payload = message.payload;
-        if (payload.containsKey('interaction_capabilities') ||
-            payload.containsKey('modifier_capabilities')) {
+        if (payload.containsKey('interaction_capabilities')) {
           ControlInteractionCapabilities.applySerializedManifest(
-            payload['interaction_capabilities'] ??
-                payload['modifier_capabilities'],
+            payload['interaction_capabilities'],
           );
         }
         if (payload.containsKey('protocol_version')) {
@@ -265,8 +263,7 @@ class _AppRendererState extends State<AppRenderer> {
         final hasTokens =
             payload.containsKey('tokens') ||
             payload.containsKey('theme') ||
-            payload.containsKey('styling') ||
-            payload.containsKey('candy');
+            payload.containsKey('styling');
         if (hasTokens) {
           _rawTokens = _extractRuntimeTokens(payload);
         }
@@ -626,9 +623,6 @@ class _AppRendererState extends State<AppRenderer> {
     final styling = _extractTokenMap(payload['styling']);
     if (styling.isNotEmpty) return styling;
 
-    final legacyStyling = _extractTokenMap(payload['candy']);
-    if (legacyStyling.isNotEmpty) return legacyStyling;
-
     return <String, Object?>{};
   }
 
@@ -638,9 +632,6 @@ class _AppRendererState extends State<AppRenderer> {
 
     final styling = _extractTokenMap(spec['styling']);
     if (styling.isNotEmpty) return styling;
-
-    final legacyStyling = _extractTokenMap(spec['candy']);
-    if (legacyStyling.isNotEmpty) return legacyStyling;
 
     final theme = _extractTokenMap(spec['theme']);
     if (theme.isNotEmpty) return theme;
@@ -875,8 +866,6 @@ class _AppRendererState extends State<AppRenderer> {
       'protocol_version': _protocolVersion,
       if (_contractVersion != null) 'contract_version': _contractVersion,
       'interaction_capabilities_version':
-          ControlInteractionCapabilities.manifestVersion,
-      'modifier_capabilities_version':
           ControlInteractionCapabilities.manifestVersion,
     };
     if (includeStyleSync) {

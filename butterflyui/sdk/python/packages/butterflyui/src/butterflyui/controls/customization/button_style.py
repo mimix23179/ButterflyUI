@@ -9,12 +9,14 @@ __all__ = ["ButtonStyle"]
 @butterfly_control('button_style', positional_fields=('value',))
 class ButtonStyle(LayoutControl):
     """
-    Style-preset picker rendered as a row of ``ChoiceChip`` widgets.
+    Thin Styling helper for previewing and selecting button-surface
+    variants.
 
-    The default presets are ``"solid"``, ``"outline"``, and ``"ghost"``.
-    Selecting a chip emits a ``"change"`` event with the chosen preset's
-    ``id``. The control also supports per-state style overrides (base,
-    hover, pressed) and a full action/event dispatch system.
+    The runtime keeps the option-picker behavior, but the preview
+    surfaces are now resolved through ButterflyUI's Styling engine so
+    local ``style`` maps, inline ``css`` declarations, stylesheet
+    payloads, and optional Lottie / Rive overlay layers all participate
+    in the same render path.
 
     ```python
     import butterflyui as bui
@@ -63,6 +65,36 @@ class ButtonStyle(LayoutControl):
     motion_behavior: Mapping[str, Any] | None = None
     """
     Motion configuration used when transitioning between interaction states. Use it to tune duration, easing, and animation behavior for hover, press, focus, or selection changes.
+    """
+
+    css: str | None = None
+    """
+    Inline CSS-like declaration block merged through the Styling engine.
+    """
+
+    stylesheet: str | Mapping[str, Any] | list[Any] | None = None
+    """
+    Stylesheet payload or CSS source resolved against this helper.
+    """
+
+    background_layers: list[Any] | None = None
+    """
+    Background scene-layer definitions rendered behind the preview surfaces.
+    """
+
+    foreground_layers: list[Any] | None = None
+    """
+    Foreground scene-layer definitions rendered above the preview surfaces.
+    """
+
+    lottie: Any = None
+    """
+    Lottie shorthand forwarded into the helper's overlay scene layers.
+    """
+
+    rive: Any = None
+    """
+    Rive shorthand forwarded into the helper's overlay scene layers.
     """
 
     action: Any | None = None

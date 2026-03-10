@@ -24,12 +24,37 @@ __all__ = [
 
 @dataclass(slots=True)
 class BoxShadow:
+    """Shadow specification for local control styling."""
+
     color: Any = None
+    """
+    Shadow color applied to the rendered surface.
+    """
+
     blur: float = 16.0
+    """
+    Blur radius used to soften the shadow.
+    """
+
     spread: float = 0.0
+    """
+    Spread distance applied before the blur is rendered.
+    """
+
     offset: Any | None = None
+    """
+    Optional explicit offset object or two-value list.
+    """
+
     offset_x: float = 0.0
+    """
+    Horizontal shadow offset used when ``offset`` is not provided.
+    """
+
     offset_y: float = 8.0
+    """
+    Vertical shadow offset used when ``offset`` is not provided.
+    """
 
     def to_json(self) -> dict[str, Any]:
         offset = self.offset
@@ -47,11 +72,32 @@ class BoxShadow:
 
 @dataclass(slots=True)
 class DecorationImage:
+    """Image decoration payload for surfaces and local style objects."""
+
     src: str
+    """
+    Source path or URL for the decoration image.
+    """
+
     fit: str | None = None
+    """
+    Image fit forwarded to the runtime decoration image renderer.
+    """
+
     alignment: Any | None = None
+    """
+    Alignment used when the image does not fully cover the target area.
+    """
+
     repeat: str | None = None
+    """
+    Repeat behavior for the image within the styled region.
+    """
+
     opacity: float | None = None
+    """
+    Optional opacity multiplier applied to the image layer.
+    """
 
     def to_json(self) -> dict[str, Any]:
         payload = {"src": self.src}
@@ -68,10 +114,27 @@ class DecorationImage:
 
 @dataclass(slots=True)
 class LinearGradient:
+    """Linear gradient value object for local style declarations."""
+
     colors: list[Any]
+    """
+    Ordered color stops for the gradient.
+    """
+
     begin: str | None = None
+    """
+    Gradient start alignment token such as ``top_left``.
+    """
+
     end: str | None = None
+    """
+    Gradient end alignment token such as ``bottom_right``.
+    """
+
     stops: list[float] | None = None
+    """
+    Optional normalized stop positions matching ``colors``.
+    """
 
     def to_json(self) -> dict[str, Any]:
         payload = {
@@ -89,10 +152,27 @@ class LinearGradient:
 
 @dataclass(slots=True)
 class RadialGradient:
+    """Radial gradient value object for local style declarations."""
+
     colors: list[Any]
+    """
+    Ordered color stops for the gradient.
+    """
+
     radius: float | None = None
+    """
+    Radius factor for the radial falloff.
+    """
+
     center: Any | None = None
+    """
+    Gradient center point or alignment token.
+    """
+
     stops: list[float] | None = None
+    """
+    Optional normalized stop positions matching ``colors``.
+    """
 
     def to_json(self) -> dict[str, Any]:
         payload = {
@@ -110,11 +190,32 @@ class RadialGradient:
 
 @dataclass(slots=True)
 class SweepGradient:
+    """Sweep gradient value object for angular color transitions."""
+
     colors: list[Any]
+    """
+    Ordered color stops for the gradient.
+    """
+
     start_angle: float | None = None
+    """
+    Starting angle in radians for the sweep.
+    """
+
     end_angle: float | None = None
+    """
+    Ending angle in radians for the sweep.
+    """
+
     center: Any | None = None
+    """
+    Gradient center point or alignment token.
+    """
+
     stops: list[float] | None = None
+    """
+    Optional normalized stop positions matching ``colors``.
+    """
 
     def to_json(self) -> dict[str, Any]:
         payload = {
@@ -133,15 +234,52 @@ class SweepGradient:
 
 
 class SceneLayer:
+    """Base authored scene layer that Styling can compose behind or above content."""
+
     type: str
+    """
+    Runtime scene-layer kind such as ``particle_field`` or ``shader``.
+    """
+
     position: str | None = None
+    """
+    Placement region for the layer, for example ``background`` or ``foreground``.
+    """
+
     opacity: float | None = None
+    """
+    Opacity multiplier applied to the rendered scene layer.
+    """
+
     speed: float | None = None
+    """
+    Animation speed multiplier used by moving layers.
+    """
+
     density: float | None = None
+    """
+    Density hint forwarded to painter or shader-backed scene layers.
+    """
+
     intensity: float | None = None
+    """
+    Overall strength value used by the runtime effect renderer.
+    """
+
     color: Any | None = None
+    """
+    Primary tint color for the scene layer.
+    """
+
     accent_color: Any | None = None
+    """
+    Secondary tint color used for richer authored scenes.
+    """
+
     config: Mapping[str, Any] | None = None
+    """
+    Extra scene-layer configuration merged into the serialized payload.
+    """
 
     def __init__(
         self,
@@ -194,15 +332,52 @@ class SceneLayer:
 
 
 class ParticleField(SceneLayer):
+    """Authored particle field layer for lightweight motion backgrounds."""
+
     count: int | None = None
+    """
+    Approximate particle count to render.
+    """
+
     spread: str | None = None
+    """
+    Distribution mode such as ``radial`` or ``scatter``.
+    """
+
     center: Any | None = None
+    """
+    Optional center point for radial or clustered particle layouts.
+    """
+
     drift: float | None = None
+    """
+    Drift factor that controls how much particles wander over time.
+    """
+
     rotation: float | None = None
+    """
+    Rotation amount used for orbital or angled motion.
+    """
+
     length: float | None = None
+    """
+    Visual length of each particle mark.
+    """
+
     thickness: float | None = None
+    """
+    Stroke thickness for each particle mark.
+    """
+
     palette: list[Any] | None = None
+    """
+    Optional color palette cycled across the particle field.
+    """
+
     shape: str | None = None
+    """
+    Particle glyph shape such as ``capsule`` or ``line``.
+    """
 
     def __init__(
         self,
@@ -270,7 +445,12 @@ class ParticleField(SceneLayer):
 
 
 class GradientWash(SceneLayer):
+    """Soft atmospheric gradient wash layer for large surfaces or page backgrounds."""
+
     gradient: Any | None = None
+    """
+    Gradient value object or raw gradient mapping used by the wash.
+    """
 
     def __init__(
         self,
@@ -306,12 +486,37 @@ class GradientWash(SceneLayer):
 
 
 class LineField(SceneLayer):
+    """Authored line-field layer for directional motion patterns."""
+
     count: int | None = None
+    """
+    Approximate number of line marks to render.
+    """
+
     direction: str | None = None
+    """
+    Primary flow direction such as ``diagonal`` or ``vertical``.
+    """
+
     spacing: float | None = None
+    """
+    Spacing value used when the line field is arranged in bands.
+    """
+
     thickness: float | None = None
+    """
+    Stroke thickness for each line mark.
+    """
+
     length: float | None = None
+    """
+    Visual length of each rendered line.
+    """
+
     palette: list[Any] | None = None
+    """
+    Optional color palette cycled across the line field.
+    """
 
     def __init__(
         self,
@@ -367,12 +572,37 @@ class LineField(SceneLayer):
 
 
 class OrbitField(SceneLayer):
+    """Scene layer for orbital bands, swirls, and circular motion fields."""
+
     count: int | None = None
+    """
+    Approximate number of orbit markers to render.
+    """
+
     radius: float | None = None
+    """
+    Base radius for the orbit field.
+    """
+
     band_width: float | None = None
+    """
+    Width of the orbital band around the base radius.
+    """
+
     swirl: float | None = None
+    """
+    Swirl amount applied to the orbital motion.
+    """
+
     marker_size: float | None = None
+    """
+    Visual size for each orbit marker.
+    """
+
     palette: list[Any] | None = None
+    """
+    Optional color palette cycled across orbit markers.
+    """
 
     def __init__(
         self,
@@ -432,9 +662,22 @@ class OrbitField(SceneLayer):
 
 
 class NoiseField(SceneLayer):
+    """Scene layer for lightweight procedural noise and atmospheric grain."""
+
     scale: float | None = None
+    """
+    Noise scale controlling feature size in the generated field.
+    """
+
     contrast: float | None = None
+    """
+    Contrast multiplier applied to the generated noise signal.
+    """
+
     octaves: int | None = None
+    """
+    Number of octaves used when layering fractal noise.
+    """
 
     def __init__(
         self,
@@ -478,8 +721,17 @@ class NoiseField(SceneLayer):
 
 
 class ShaderLayer(SceneLayer):
+    """Shader-backed scene layer for authored fragment effects."""
+
     shader_asset: str
+    """
+    Flutter shader asset path loaded by the runtime.
+    """
+
     uniforms: Mapping[str, Any] | None = None
+    """
+    Uniform values forwarded to the shader layer at render time.
+    """
 
     def __init__(
         self,
@@ -550,6 +802,346 @@ class Style:
     `Style` is intentionally engine-friendly: it serializes to a plain mapping
     that the Dart runtime can merge with stylesheet rules, utility classes, and
     style-pack defaults.
+    """
+
+    bg: Any | None = None
+    """
+    Shortcut background color value. When present it wins over ``bgcolor``.
+    """
+
+    bgcolor: Any | None = None
+    """
+    Explicit background color forwarded to the styled surface.
+    """
+
+    background: Any | None = None
+    """
+    Full background payload used for advanced surface configuration.
+    """
+
+    fg: Any | None = None
+    """
+    Shortcut foreground color value. When present it wins over ``foreground``.
+    """
+
+    foreground: Any | None = None
+    """
+    Foreground tint color applied to icons and simple content.
+    """
+
+    text_color: Any | None = None
+    """
+    Primary text color for content rendered inside the styled control.
+    """
+
+    icon_color: Any | None = None
+    """
+    Default icon color for icon-bearing slots within the styled control.
+    """
+
+    color: Any | None = None
+    """
+    Generic color channel used by some controls and effects.
+    """
+
+    border_color: Any | None = None
+    """
+    Border color for the styled surface.
+    """
+
+    border_width: float | None = None
+    """
+    Border width for the styled surface.
+    """
+
+    radius: Any | None = None
+    """
+    Corner radius token, number, or per-corner specification.
+    """
+
+    padding: Any | None = None
+    """
+    Inner padding applied to the styled control content.
+    """
+
+    margin: Any | None = None
+    """
+    Outer margin applied around the styled control.
+    """
+
+    alignment: Any | None = None
+    """
+    Alignment for child content inside the styled control.
+    """
+
+    shadow: Any | None = None
+    """
+    Shadow stack or shadow value object for the styled surface.
+    """
+
+    gradient: Any | None = None
+    """
+    Gradient value object or mapping applied to the surface fill.
+    """
+
+    image: Any | None = None
+    """
+    Decoration image payload rendered on the surface.
+    """
+
+    blur: float | None = None
+    """
+    Foreground blur amount used by supporting runtime controls.
+    """
+
+    backdrop_blur: float | None = None
+    """
+    Background blur amount for glass-like surfaces.
+    """
+
+    shape: str | None = None
+    """
+    Shape token used by controls that support alternative surface outlines.
+    """
+
+    width: float | str | None = None
+    """
+    Explicit width override for the styled control.
+    """
+
+    height: float | str | None = None
+    """
+    Explicit height override for the styled control.
+    """
+
+    min_width: float | str | None = None
+    """
+    Minimum width constraint applied by the layout runtime.
+    """
+
+    min_height: float | str | None = None
+    """
+    Minimum height constraint applied by the layout runtime.
+    """
+
+    max_width: float | str | None = None
+    """
+    Maximum width constraint applied by the layout runtime.
+    """
+
+    max_height: float | str | None = None
+    """
+    Maximum height constraint applied by the layout runtime.
+    """
+
+    expand: bool | None = None
+    """
+    Whether the control should expand within flexible parent layouts.
+    """
+
+    flex: int | None = None
+    """
+    Flex factor used in row and column layouts.
+    """
+
+    opacity: float | None = None
+    """
+    Opacity multiplier applied to the rendered control.
+    """
+
+    elevation: float | None = None
+    """
+    Elevation hint for controls that expose material-like layering.
+    """
+
+    font_size: float | None = None
+    """
+    Preferred text size for styled text-bearing controls.
+    """
+
+    size: float | str | None = None
+    """
+    Generic size shorthand used by some controls and text surfaces.
+    """
+
+    weight: str | None = None
+    """
+    Preferred font weight token. When present it wins over ``font_weight``.
+    """
+
+    font_weight: str | None = None
+    """
+    Explicit font weight token forwarded to the runtime text renderer.
+    """
+
+    font_family: str | None = None
+    """
+    Font family name used for styled text.
+    """
+
+    italic: bool | None = None
+    """
+    Whether styled text should render in italic form.
+    """
+
+    variant: str | Mapping[str, Any] | None = None
+    """
+    Variant token or structured variant payload applied to the control.
+    """
+
+    motion: Any | None = None
+    """
+    Motion payload merged into the runtime styling contract.
+    """
+
+    effect: Any | None = None
+    """
+    Single effect declaration for the styled control.
+    """
+
+    effects: Any | None = None
+    """
+    List or mapping of effect declarations for the styled control.
+    """
+
+    background_effect: Any | None = None
+    """
+    Background effect declaration resolved behind the control surface.
+    """
+
+    foreground_effect: Any | None = None
+    """
+    Foreground effect declaration resolved above the control content.
+    """
+
+    overlay_effect: Any | None = None
+    """
+    Overlay effect declaration resolved in the top-most local layer.
+    """
+
+    background_layers: Any | None = None
+    """
+    Authored scene layers rendered behind the surface.
+    """
+
+    foreground_layers: Any | None = None
+    """
+    Authored scene layers rendered above the control content.
+    """
+
+    overlay_layers: Any | None = None
+    """
+    Authored scene layers rendered in the overlay plane.
+    """
+
+    classes: str | list[str] | None = None
+    """
+    CSS-like utility classes or semantic class names for the control.
+    """
+
+    class_name: str | list[str] | None = None
+    """
+    Alias for ``classes`` kept for ergonomic Python authoring.
+    """
+
+    tokens: Mapping[str, Any] | None = None
+    """
+    Local design-token overrides merged into the styling cascade.
+    """
+
+    slots: Mapping[str, Any] | None = None
+    """
+    Slot-specific style payloads such as ``label`` or ``helper``.
+    """
+
+    position: str | None = None
+    """
+    Positioning mode such as ``relative`` or ``absolute``.
+    """
+
+    top: float | str | None = None
+    """
+    Top inset used with positioned layouts.
+    """
+
+    right: float | str | None = None
+    """
+    Right inset used with positioned layouts.
+    """
+
+    bottom: float | str | None = None
+    """
+    Bottom inset used with positioned layouts.
+    """
+
+    left: float | str | None = None
+    """
+    Left inset used with positioned layouts.
+    """
+
+    z_index: float | None = None
+    """
+    Stacking order applied when the runtime supports layered positioning.
+    """
+
+    translate: Any | None = None
+    """
+    Two-value translation payload or transform shorthand.
+    """
+
+    translate_x: float | None = None
+    """
+    Horizontal translation applied after layout.
+    """
+
+    translate_y: float | None = None
+    """
+    Vertical translation applied after layout.
+    """
+
+    scale: Any | None = None
+    """
+    Scale transform value or transform payload.
+    """
+
+    overflow: str | None = None
+    """
+    Overflow behavior such as ``visible``, ``clip``, or ``hidden``.
+    """
+
+    hover: "Style | Mapping[str, Any] | None" = None
+    """
+    State-specific style payload applied while the control is hovered.
+    """
+
+    pressed: "Style | Mapping[str, Any] | None" = None
+    """
+    State-specific style payload applied while the control is pressed.
+    """
+
+    focus: "Style | Mapping[str, Any] | None" = None
+    """
+    State-specific style payload applied while the control is focused.
+    """
+
+    disabled: "Style | Mapping[str, Any] | None" = None
+    """
+    State-specific style payload applied while the control is disabled.
+    """
+
+    theme: Any | None = None
+    """
+    Theme or style-pack alias resolved into ``style_pack`` at serialization time.
+    """
+
+    style_pack: Any | None = None
+    """
+    Explicit style-pack value forwarded to the runtime.
+    """
+
+    extra: Mapping[str, Any] | None = None
+    """
+    Extra styling declarations preserved for forward-compatible runtime features.
     """
 
     def __init__(

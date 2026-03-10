@@ -339,7 +339,7 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   final shape = radius == null
       ? null
       : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
-  final side = (variant == 'outlined' && outlineColor != null)
+  final side = (!surfaceWrapped && variant == 'outlined' && outlineColor != null)
       ? BorderSide(color: outlineColor, width: borderWidth)
       : null;
   if (bgColor != null ||
@@ -362,8 +362,10 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       padding: padding == null ? null : WidgetStateProperty.all(padding),
       shape: shape == null ? null : WidgetStateProperty.all(shape),
       side: side == null ? null : WidgetStateProperty.all(side),
-      elevation: elevation == null ? null : WidgetStateProperty.all(elevation),
-      shadowColor: shadowColor == null
+      elevation: surfaceWrapped || elevation == null
+          ? null
+          : WidgetStateProperty.all(elevation),
+      shadowColor: surfaceWrapped || shadowColor == null
           ? null
           : WidgetStateProperty.all(shadowColor),
       overlayColor: overlayColor == null
@@ -1011,7 +1013,14 @@ bool _usesDecoratedButtonSurface(Map<String, Object?> props) {
   )) {
     return true;
   }
-  return props['gradient'] != null ||
+  return props['color'] != null ||
+      props['bgcolor'] != null ||
+      props['background'] != null ||
+      props['border_color'] != null ||
+      props['border_width'] != null ||
+      props['radius'] != null ||
+      props['border_radius'] != null ||
+      props['gradient'] != null ||
       props['shadow'] != null ||
       props['image'] != null ||
       props['backdrop_color'] != null ||

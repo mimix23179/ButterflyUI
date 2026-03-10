@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:butterflyui_runtime/src/core/styling/effects/visuals/actors/actor_overlay.dart';
 import 'package:butterflyui_runtime/src/core/styling/effects/visuals/renderers/render_layers.dart';
 import 'package:butterflyui_runtime/src/core/styling/effects/visuals/scene/preset_registry.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/animated_background.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/liquid_morph.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/parallax.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/particle_field.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/scanline_overlay.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/shimmer_shadow.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/vignette.dart';
-import 'package:butterflyui_runtime/src/core/controls/effects/visual_fx.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/animated_background.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/liquid_morph.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/parallax.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/particle_field.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/scanline_overlay.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/shimmer_shadow.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/vignette.dart';
+import 'package:butterflyui_runtime/src/core/styling/helpers/effects/visual_fx.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget applyEffectEnhancementLayers({
