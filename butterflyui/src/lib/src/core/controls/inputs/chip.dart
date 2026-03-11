@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/type_roles.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -234,13 +236,115 @@ class _ChipControlState extends State<_ChipControl> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.extension<ButterflyUIThemeTokens>();
+    final slotStyles = widget.props['__slot_styles'] is Map
+        ? coerceObjectMap(widget.props['__slot_styles'] as Map)
+        : <String, Object?>{};
+    final labelSlot = slotStyles['label'] is Map
+        ? coerceObjectMap(slotStyles['label'] as Map)
+        : <String, Object?>{};
+    final backgroundSlot = slotStyles['background'] is Map
+        ? coerceObjectMap(slotStyles['background'] as Map)
+        : <String, Object?>{};
+    final borderSlot = slotStyles['border'] is Map
+        ? coerceObjectMap(slotStyles['border'] as Map)
+        : <String, Object?>{};
+    final contentSlot = slotStyles['content'] is Map
+        ? coerceObjectMap(slotStyles['content'] as Map)
+        : <String, Object?>{};
+    final labelRole = resolveStylingTypeRole(
+      tokens,
+      widget.props['type_role'] ?? widget.props['text_role'],
+      secondary: labelSlot['type_role'] ?? labelSlot['text_role'],
+      fallback: 'caption',
+    );
     final enabled =
         widget.props['enabled'] == null || widget.props['enabled'] == true;
     final dense = widget.props['dense'] == true;
     final spacing =
-        coerceDouble(widget.props['spacing']) ?? (dense ? 4.0 : 8.0);
+        coerceDouble(widget.props['spacing'] ?? contentSlot['spacing']) ??
+        (dense ? 4.0 : 8.0);
     final runSpacing =
-        coerceDouble(widget.props['run_spacing']) ?? (dense ? 4.0 : 8.0);
+        coerceDouble(widget.props['run_spacing'] ?? contentSlot['run_spacing']) ??
+        (dense ? 4.0 : 8.0);
+    final baseForeground =
+        coerceColor(
+          widget.props['text_color'] ??
+              widget.props['foreground'] ??
+              labelSlot['text_color'] ??
+              labelSlot['foreground'] ??
+              labelSlot['color'],
+        ) ??
+        stylingTypeRoleColor(labelRole) ??
+        tokens?.text ??
+        theme.colorScheme.onSurface;
+    final baseBackground =
+        coerceColor(
+          backgroundSlot['bgcolor'] ??
+              backgroundSlot['background'] ??
+              widget.props['bgcolor'] ??
+              widget.props['background'] ??
+              widget.props['color'],
+        ) ??
+        tokens?.surfaceAlt ??
+        theme.colorScheme.surfaceContainerHighest;
+    final selectedBackground =
+        coerceColor(
+          widget.props['selected_bgcolor'] ??
+              widget.props['selected_background'] ??
+              backgroundSlot['selected_bgcolor'] ??
+              backgroundSlot['selected_background'],
+        ) ??
+        tokens?.primary.withValues(alpha: 0.16) ??
+        theme.colorScheme.primaryContainer.withValues(alpha: 0.72);
+    final selectedForeground =
+        coerceColor(
+          widget.props['selected_text_color'] ??
+              widget.props['selected_foreground'] ??
+              labelSlot['selected_text_color'] ??
+              labelSlot['selected_foreground'],
+        ) ??
+        tokens?.primary ??
+        theme.colorScheme.primary;
+    final borderColor =
+        coerceColor(
+          widget.props['border_color'] ??
+              borderSlot['border_color'] ??
+              borderSlot['foreground'] ??
+              borderSlot['color'],
+        ) ??
+        tokens?.border ??
+        theme.colorScheme.outlineVariant;
+    final borderWidth =
+        coerceDouble(widget.props['border_width'] ?? borderSlot['border_width']) ??
+        1.0;
+    final radius =
+        coerceDouble(
+          widget.props['radius'] ??
+              widget.props['border_radius'] ??
+              borderSlot['radius'] ??
+              borderSlot['border_radius'],
+        ) ??
+        tokens?.radiusLg ??
+        999.0;
+    final labelStyle = TextStyle(
+      color: baseForeground,
+      fontSize:
+          coerceDouble(
+            widget.props['font_size'] ??
+                labelSlot['font_size'] ??
+                stylingTypeRoleDouble(labelRole, 'font_size'),
+          ) ??
+          (dense ? 11 : 12),
+      fontWeight: _coerceFontWeight(
+            widget.props['font_weight'] ??
+                labelSlot['font_weight'] ??
+                stylingTypeRoleString(labelRole, 'font_weight'),
+          ) ??
+          FontWeight.w600,
+    );
+    final selectedLabelStyle = labelStyle.copyWith(color: selectedForeground);
 
     if (_isGroup) {
       final multiSelect = _isMultiSelect();
@@ -250,12 +354,20 @@ class _ChipControlState extends State<_ChipControl> {
         children: _options
             .map((option) {
               final selected = _selectedValues.contains(option.id);
+              final chipBackground = option.color?.withValues(alpha: 0.12) ?? baseBackground;
+              final chipSelectedBackground =
+                  option.color?.withValues(alpha: 0.24) ?? selectedBackground;
+              final chipSelectedForeground = option.color ?? selectedForeground;
               return FilterChip(
-                label: Text(option.label),
+                label: Text(option.label, style: selected ? selectedLabelStyle.copyWith(color: chipSelectedForeground) : labelStyle),
                 selected: selected,
-                selectedColor: option.color?.withValues(alpha: 0.25),
-                checkmarkColor: option.color,
-                backgroundColor: option.color?.withValues(alpha: 0.12),
+                selectedColor: chipSelectedBackground,
+                checkmarkColor: chipSelectedForeground,
+                backgroundColor: chipBackground,
+                side: BorderSide(color: borderColor, width: borderWidth),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(radius),
+                ),
                 onSelected: option.enabled && enabled
                     ? (next) {
                         setState(() {
@@ -298,8 +410,15 @@ class _ChipControlState extends State<_ChipControl> {
                 'chip')
             .toString();
     return FilterChip(
-      label: Text(label),
+      label: Text(label, style: _selected ? selectedLabelStyle : labelStyle),
       selected: _selected,
+      selectedColor: selectedBackground,
+      backgroundColor: baseBackground,
+      checkmarkColor: selectedForeground,
+      side: BorderSide(color: borderColor, width: borderWidth),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(radius),
+      ),
       onSelected: enabled
           ? (next) {
               setState(() => _selected = next);
@@ -314,5 +433,45 @@ class _ChipControlState extends State<_ChipControl> {
             }
           : null,
     );
+  }
+}
+
+FontWeight? _coerceFontWeight(Object? value) {
+  if (value == null) return null;
+  final normalized = value.toString().trim().toLowerCase();
+  switch (normalized) {
+    case '100':
+    case 'thin':
+      return FontWeight.w100;
+    case '200':
+    case 'extra_light':
+    case 'extralight':
+      return FontWeight.w200;
+    case '300':
+    case 'light':
+      return FontWeight.w300;
+    case '400':
+    case 'normal':
+    case 'regular':
+      return FontWeight.w400;
+    case '500':
+    case 'medium':
+      return FontWeight.w500;
+    case '600':
+    case 'semi_bold':
+    case 'semibold':
+      return FontWeight.w600;
+    case '700':
+    case 'bold':
+      return FontWeight.w700;
+    case '800':
+    case 'extra_bold':
+    case 'extrabold':
+      return FontWeight.w800;
+    case '900':
+    case 'black':
+      return FontWeight.w900;
+    default:
+      return null;
   }
 }

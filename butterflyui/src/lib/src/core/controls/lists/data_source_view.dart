@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -163,15 +164,24 @@ class _DataSourceViewControlState extends State<_DataSourceViewControl> {
               final source = visible[index];
               final id = (source['id'] ?? 'source_$index').toString();
               final selected = id == _selectedId;
-              return ListTile(
-                dense: dense,
-                selected: selected,
-                title: Text((source['title'] ?? source['label'] ?? id).toString()),
-                subtitle: source['subtitle'] == null ? null : Text(source['subtitle'].toString()),
-                onTap: () {
-                  setState(() => _selectedId = id);
-                  _emit('select', {'id': id, 'index': index, 'source': source, ..._statePayload()});
-                },
+              final tileProps = <String, Object?>{...widget.props, ...source};
+              return butterflyuiSurfaceContainer(
+                context,
+                props: tileProps,
+                fallbackPadding: EdgeInsets.zero,
+                child: ListTileTheme(
+                  data: butterflyuiListTileTheme(context, tileProps),
+                  child: ListTile(
+                    dense: dense,
+                    selected: selected,
+                    title: Text((source['title'] ?? source['label'] ?? id).toString()),
+                    subtitle: source['subtitle'] == null ? null : Text(source['subtitle'].toString()),
+                    onTap: () {
+                      setState(() => _selectedId = id);
+                      _emit('select', {'id': id, 'index': index, 'source': source, ..._statePayload()});
+                    },
+                  ),
+                ),
               );
             },
           ),

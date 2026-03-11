@@ -55,24 +55,42 @@ def _nav_link(label: str) -> bui.Control:
 
 
 def _metric(label: str, value: str) -> bui.Control:
-    return bui.Container(
+    return bui.Surface(
         bui.Column(
             bui.Text(label, size=12, color=MUTED),
             bui.Text(value, size=18, weight="700", color=INK),
-            spacing=4,
+            spacing=2,
         ),
-        class_name="metric_card rounded-2xl px-4 py-3 shadow-lg",
+        class_name="metric_card rounded-2xl shadow-lg",
+        width=164,
+        padding={"x": 18, "y": 14},
+        radius=18,
+        style=bui.Style(
+            bgcolor="#FFFFFFFC",
+            border_color="#11182718",
+            border_width=1,
+            shadow=[_shadow("#11182718", dy=14, blur=28)],
+        ),
     )
 
 
 def _feature_card(title: str, body: str, class_name: str) -> bui.Control:
-    return bui.Container(
+    return bui.Surface(
         bui.Column(
-            bui.Text(title, size=22, weight="700", color=INK),
-            bui.Text(body, size=14, color=MUTED),
-            spacing=10,
+            bui.Text(title, size=20, weight="700", color=INK),
+            bui.Text(body, size=14, color=MUTED, class_name="leading-relaxed"),
+            spacing=8,
         ),
         class_name=class_name,
+        width=470,
+        radius=28,
+        padding=24,
+        style=bui.Style(
+            bgcolor="#FFFFFE",
+            border_color="#11182716",
+            border_width=1,
+            shadow=[_shadow("#11182716", dy=18, blur=38)],
+        ),
     )
 
 
@@ -85,6 +103,20 @@ def _pill_button(label: str, *, dark: bool = False) -> bui.Control:
     return bui.Button(
         label,
         class_name="cta_secondary rounded-full px-7 py-4 shadow-lg",
+    )
+
+
+def _tag(label: str, *, color: str, background: str) -> bui.Control:
+    return bui.Surface(
+        bui.Text(label, size=13, weight="600", color=color),
+        radius=999,
+        padding={"x": 14, "y": 10},
+        style=bui.Style(
+            bgcolor=background,
+            border_color="#11182712",
+            border_width=1,
+            shadow=[_shadow("#1118270C", dy=6, blur=14)],
+        ),
     )
 
 
@@ -112,35 +144,39 @@ def build_page(page: bui.Page) -> bui.Control:
         }
 
         .glass_card {
-          background_color: #ffffffc2;
-          border_color: #11182714;
+          background_color: #fffffff0;
+          border_color: token(border);
           border_width: 1;
-        }
-
-        .metric_card:hover {
-          translate_y: -4;
-          border_color: #2563eb33;
+          shadow: 0 14 32 #11182712;
         }
 
         .hero_shell {
           background_color: #ffffffe0;
-          border_color: #ffffff9a;
+          border_color: token(border);
           border_width: 1;
           scene_scrim_color: #ffffff;
           scene_scrim_opacity: 0.16;
           scene_opacity: 0.88;
+          scene_isolation: isolate;
+        }
+
+        .hero_support {
+          background_color: #fffdfa;
+          border_color: #11182714;
+          border_width: 1;
+          shadow: 0 30 68 #11182716;
         }
 
         .hero_badge {
           background_color: #eef35b;
-          border_color: #11182712;
+          border_color: token(border);
           border_width: 1;
           label_text_color: #2b5dd8;
         }
 
         Button.cta_primary {
-          background_color: #111218;
-          border_color: #111218;
+          background_color: token(primary);
+          border_color: token(primary);
           border_width: 1;
           label_text_color: #ffffff;
           label_font_size: 17;
@@ -153,7 +189,7 @@ def build_page(page: bui.Page) -> bui.Control:
 
         Button.cta_secondary {
           background_color: #ffffffe0;
-          border_color: #10131c14;
+          border_color: token(border);
           border_width: 1;
           label_text_color: #222531;
           label_font_size: 17;
@@ -166,41 +202,38 @@ def build_page(page: bui.Page) -> bui.Control:
         }
 
         .hero_tag_primary {
-          background_color: #eef35bcc;
-          border_color: #27469022;
+          background_color: #eff59a;
+          border_color: token(border);
           border_width: 1;
         }
 
         .hero_tag_secondary {
-          background_color: #fff7a8cc;
-          border_color: #5b21b622;
-          border_width: 1;
-        }
-
-        .feature_card_primary {
-          background_color: #eef35bcc;
-          border_color: #11182714;
-          border_width: 1;
-        }
-
-        .feature_card_secondary {
-          background_color: #fff4aacc;
-          border_color: #11182714;
+          background_color: #ffeaa0;
+          border_color: token(border);
           border_width: 1;
         }
 
         .hero_feature_card {
-          radius: 28;
-          padding: 24;
+          background_color: #fffffe;
+          border_color: #11182716;
+          border_width: 1;
+          shadow: 0 18 38 #11182716;
+        }
+
+        .metric_card {
+          background_color: #fffffffc;
+          border_color: #11182718;
+          border_width: 1;
+          shadow: 0 14 28 #11182714;
         }
 
         @md #hero_title {
-          font_size: 104;
+          font_size: 60;
         }
 
         @lg #hero_title {
-          font_size: 118;
-          max_width: 1040;
+          font_size: 68;
+          max_width: 980;
         }
     """
 
@@ -221,7 +254,10 @@ def build_page(page: bui.Page) -> bui.Control:
             count=88,
             density=1.0,
             intensity=0.52,
-            speed=0.24,
+            speed=1.05,
+            duration_ms=5200,
+            repeat=True,
+            phase=0.08,
             center={"x": 0.16, "y": 0.48},
             length=11,
             thickness=1.5,
@@ -234,7 +270,10 @@ def build_page(page: bui.Page) -> bui.Control:
             count=94,
             density=1.0,
             intensity=0.54,
-            speed=0.27,
+            speed=0.92,
+            duration_ms=6100,
+            repeat=True,
+            phase=0.44,
             center={"x": 0.84, "y": 0.43},
             length=11,
             thickness=1.5,
@@ -244,12 +283,30 @@ def build_page(page: bui.Page) -> bui.Control:
             opacity=0.66,
         ),
         bui.LineField(
-            count=24,
+            count=32,
             direction="diagonal",
             length=28,
             thickness=1.0,
             palette=["#11182710", "#3B82F620"],
             opacity=0.18,
+            speed=0.72,
+            duration_ms=7400,
+            repeat=True,
+            phase=0.26,
+        ),
+        bui.OrbitField(
+            count=30,
+            radius=158,
+            band_width=52,
+            marker_size=4.2,
+            swirl=1.18,
+            speed=0.86,
+            duration_ms=8600,
+            repeat=True,
+            phase=0.18,
+            center={"x": 0.52, "y": 0.34},
+            palette=["#3B82F620", "#6D5DFB24", "#F43F5E18"],
+            opacity=0.22,
         ),
         bui.NoiseField(
             opacity=0.07,
@@ -261,33 +318,42 @@ def build_page(page: bui.Page) -> bui.Control:
     ]
 
     nav = bui.Row(
-        bui.Text("ButterflyUI", size=26, weight="700", color=INK),
+        bui.Text("ButterflyUI", size=24, weight="700", color=INK),
         bui.Row(
             _nav_link("Product"),
             _nav_link("Use Cases"),
             _nav_link("Pricing"),
             _nav_link("Blog"),
             _nav_link("Resources"),
-            spacing=26,
+            spacing=24,
         ),
         _pill_button("Download", dark=True),
         alignment="space_between",
     )
 
     hero_content = bui.Column(
-        bui.Container(
+        bui.Surface(
             bui.Text("Built with ButterflyUI", size=17, weight="600", color="#2B5DD8"),
-            class_name="hero_badge rounded-full px-5 py-3 shadow-lg",
+            class_name="hero_badge rounded-full shadow-lg",
+            radius=999,
+            padding={"x": 18, "y": 12},
+            style=bui.Style(
+                bgcolor="#EEF35B",
+                border_color="#11182712",
+                border_width=1,
+                shadow=[_shadow("#F43F5E22", dy=10, blur=24)],
+            ),
         ),
         bui.Container(
             bui.Text(
-                "Design polished\ninterfaces with\ndirect Python styling.",
+                "Design polished interfaces\nwith direct Python styling.",
                 color=INK,
                 align="center",
                 id="hero_title",
-                class_name="text-display md:text-8xl tracking-tight leading-none font-bold mx-auto",
+                class_name="text-display tracking-tight leading-none font-bold mx-auto",
             ),
-            class_name="max-w-6xl mx-auto",
+            max_width=980,
+            alignment="center",
         ),
         bui.Container(
             bui.Text(
@@ -296,7 +362,8 @@ def build_page(page: bui.Page) -> bui.Control:
                 align="center",
                 class_name="text-body md:text-xl leading-relaxed",
             ),
-            class_name="max-w-3xl mx-auto",
+            max_width=720,
+            alignment="center",
         ),
         bui.Row(
             _pill_button("Download for Windows", dark=True),
@@ -304,55 +371,79 @@ def build_page(page: bui.Page) -> bui.Control:
             class_name="gap-4",
             alignment="center",
         ),
-        bui.Row(
-            bui.Container(
-                bui.Text("No preset required", size=13, weight="600", color="#274690"),
-                class_name="hero_tag_primary rounded-full px-4 py-3 shadow-md",
+        bui.Surface(
+            bui.Column(
+                bui.Wrap(
+                    _tag(
+                        "No preset required",
+                        color="#274690",
+                        background="#EEF35BCC",
+                    ),
+                    _tag(
+                        "ParticleField + GradientWash",
+                        color="#5B21B6",
+                        background="#FFF4AACC",
+                    ),
+                    spacing=12,
+                    run_spacing=12,
+                    alignment="center",
+                ),
+                bui.Row(
+                    _metric("Active rules", "14"),
+                    _metric("Scene layers", "5"),
+                    _metric("Page width", "1320px"),
+                    spacing=14,
+                    alignment="center",
+                ),
+                bui.Row(
+                    _feature_card(
+                        "Author scenes directly",
+                        "Typed scene layers let you code motion fields and atmospheric washes without named presets.",
+                        "hero_feature_card max-w-lg",
+                    ),
+                    _feature_card(
+                        "CSS-like, Flutter-native",
+                        "Selectors, utility classes, local Style objects, and real scene layers compose into one system.",
+                        "hero_feature_card max-w-lg",
+                    ),
+                    spacing=18,
+                    alignment="center",
+                ),
+                spacing=18,
+                alignment="center",
             ),
-            bui.Container(
-                bui.Text("ParticleField + GradientWash", size=13, weight="600", color="#5B21B6"),
-                class_name="hero_tag_secondary rounded-full px-4 py-3 shadow-md",
+            class_name="hero_support",
+            radius=30,
+            padding={"x": 28, "y": 24},
+            style=bui.Style(
+                bgcolor="#FFFDFC",
+                border_color="#11182714",
+                border_width=1,
+                shadow=[_shadow("#11182712", dy=24, blur=54)],
             ),
-            spacing=12,
-            alignment="center",
         ),
-        bui.Row(
-            bui.Container(_metric("Active rules", "14"), class_name="metric_card"),
-            bui.Container(_metric("Scene layers", "5"), class_name="metric_card"),
-            bui.Container(_metric("Page width", "1320px"), class_name="metric_card"),
-            spacing=16,
-            alignment="center",
-        ),
-        bui.Row(
-            _feature_card(
-                "Author scenes directly",
-                "Typed scene layers let you code motion fields and atmospheric washes without named presets.",
-                "glass_card feature_card_primary hero_feature_card",
-            ),
-            _feature_card(
-                "CSS-like, Flutter-native",
-                "Selectors, utility classes, local Style objects, and real scene layers compose into one system.",
-                "glass_card feature_card_secondary hero_feature_card",
-            ),
-            spacing=18,
-        ),
-        spacing=24,
+        spacing=16,
         alignment="center",
     )
 
-    hero = bui.Container(
+    hero = bui.Surface(
         bui.Column(
             nav,
-            bui.Expanded(
-                bui.Center(hero_content),
+            bui.Container(
+                hero_content,
+                alignment="top_center",
+                padding={"top": 12},
             ),
-            spacing=28,
+            spacing=12,
         ),
         class_name="hero_shell rounded-3xl shadow-2xl",
+        radius=30,
         style=bui.Style(
             background_layers=background_layers,
-            min_height=700,
-            padding={"x": 48, "top": 28, "bottom": 44},
+            padding={"x": 40, "top": 18, "bottom": 20},
+            bgcolor="#FFFFFEE8",
+            border_color="#11182710",
+            border_width=1,
             overflow="hidden",
         ),
         clip_behavior="anti_alias",

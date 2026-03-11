@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -148,22 +149,31 @@ class _ReorderableListViewControlState
         final subtitle =
             item['subtitle']?.toString() ?? item['description']?.toString();
 
-        return ListTile(
-          key: ValueKey<String>(id),
-          dense: dense,
-          title: Text(title),
-          subtitle: subtitle == null ? null : Text(subtitle),
-          trailing: showHandle
-              ? ReorderableDragStartListener(
-                  index: index,
-                  child: const Icon(Icons.drag_handle),
-                )
-              : null,
-          onTap: widget.controlId.isEmpty
-              ? null
-              : () {
-                  _emit('select', {'id': id, 'index': index, 'item': item});
-                },
+        final tileProps = <String, Object?>{...widget.props, ...item};
+        return butterflyuiSurfaceContainer(
+          context,
+          props: tileProps,
+          fallbackPadding: EdgeInsets.zero,
+          child: ListTileTheme(
+            data: butterflyuiListTileTheme(context, tileProps),
+            child: ListTile(
+              key: ValueKey<String>(id),
+              dense: dense,
+              title: Text(title),
+              subtitle: subtitle == null ? null : Text(subtitle),
+              trailing: showHandle
+                  ? ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    )
+                  : null,
+              onTap: widget.controlId.isEmpty
+                  ? null
+                  : () {
+                      _emit('select', {'id': id, 'index': index, 'item': item});
+                    },
+            ),
+          ),
         );
       },
     );

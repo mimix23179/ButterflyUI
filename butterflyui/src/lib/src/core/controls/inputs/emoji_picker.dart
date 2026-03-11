@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -185,8 +186,8 @@ class _EmojiPickerControlState extends State<_EmojiPickerControl> {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: selected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outlineVariant,
+                        ? butterflyuiPrimary(context)
+                        : butterflyuiBorder(context),
                     width: selected ? 2 : 1,
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 DateTime? _parseDate(Object? value) {
@@ -195,12 +196,17 @@ class _ButterflyUIDatePickerState extends State<ButterflyUIDatePicker> {
     final icon = _isRange
         ? Icons.date_range_outlined
         : Icons.calendar_today_outlined;
+    final textColor = ((_isRange && (_start == null || _end == null)) ||
+            (!_isRange && _value == null))
+        ? butterflyuiMutedText(context)
+        : butterflyuiText(context);
 
     return InputDecorator(
       decoration: InputDecoration(
         labelText: widget.label,
         isDense: widget.dense,
         border: const OutlineInputBorder(),
+        labelStyle: TextStyle(color: butterflyuiMutedText(context)),
       ),
       child: InkWell(
         onTap: widget.enabled ? _openPicker : null,
@@ -209,16 +215,10 @@ class _ButterflyUIDatePickerState extends State<ButterflyUIDatePicker> {
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(
-                  color:
-                      ((_isRange && (_start == null || _end == null)) ||
-                          (!_isRange && _value == null))
-                      ? Theme.of(context).hintColor
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
+                style: TextStyle(color: textColor),
               ),
             ),
-            Icon(icon, size: 18),
+            Icon(icon, size: 18, color: butterflyuiMutedText(context)),
           ],
         ),
       ),

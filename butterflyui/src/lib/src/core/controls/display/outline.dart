@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -15,30 +16,34 @@ Widget buildOutlineControl(
 
   if (nodes.isEmpty) return const SizedBox.shrink();
 
-  return ListView(
-    shrinkWrap: true,
-    children: nodes
-        .map(
-          (node) => _buildNode(
-            node,
-            dense: dense,
-            showIcons: showIcons,
-            selectedId: selectedId,
-            onSelect: (id, label) {
-              if (controlId.isEmpty) return;
-              sendEvent(controlId, 'select', {
-                'selected_id': id,
-                'id': id,
-                'label': label,
-              });
-            },
-          ),
-        )
-        .toList(growable: false),
+  return Builder(
+    builder: (context) => ListView(
+      shrinkWrap: true,
+      children: nodes
+          .map(
+            (node) => _buildNode(
+              context,
+              node,
+              dense: dense,
+              showIcons: showIcons,
+              selectedId: selectedId,
+              onSelect: (id, label) {
+                if (controlId.isEmpty) return;
+                sendEvent(controlId, 'select', {
+                  'selected_id': id,
+                  'id': id,
+                  'label': label,
+                });
+              },
+            ),
+          )
+          .toList(growable: false),
+    ),
   );
 }
 
 Widget _buildNode(
+  BuildContext context,
   Map<String, Object?> node, {
   required bool dense,
   required bool showIcons,
@@ -52,12 +57,21 @@ Widget _buildNode(
   final selected = selectedId != null && selectedId == id;
 
   if (children.isEmpty) {
-    return ListTile(
-      dense: dense,
-      selected: selected,
-      leading: icon == null ? null : Icon(icon, size: dense ? 16 : 18),
-      title: Text(label),
-      onTap: () => onSelect(id, label),
+    final props = <String, Object?>{'selected': selected, 'dense': dense};
+    return butterflyuiSurfaceContainer(
+      context,
+      props: props,
+      fallbackPadding: EdgeInsets.zero,
+      child: ListTileTheme(
+        data: butterflyuiListTileTheme(context, props),
+        child: ListTile(
+          dense: dense,
+          selected: selected,
+          leading: icon == null ? null : Icon(icon, size: dense ? 16 : 18),
+          title: Text(label),
+          onTap: () => onSelect(id, label),
+        ),
+      ),
     );
   }
 
@@ -70,6 +84,7 @@ Widget _buildNode(
           (child) => Padding(
             padding: const EdgeInsets.only(left: 12),
             child: _buildNode(
+              context,
               child,
               dense: dense,
               showIcons: showIcons,

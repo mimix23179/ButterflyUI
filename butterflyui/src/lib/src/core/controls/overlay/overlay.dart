@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -287,8 +288,10 @@ class _ButterflyUIOverlayState extends State<_ButterflyUIOverlay> {
 
     final dismissible =
         _liveProps['dismissible'] == null || _liveProps['dismissible'] == true;
+    final tokens = Theme.of(context).extension<ButterflyUIThemeTokens>();
     final scrim =
         coerceColor(_liveProps['scrim_color']) ??
+        tokens?.overlayScrim ??
         Colors.black.withValues(alpha: 0.35);
     final alignment = _coerceAlignment(_liveProps['alignment']);
     final clip = _liveProps['clip'] == true ? Clip.antiAlias : Clip.none;

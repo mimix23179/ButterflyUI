@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -1009,14 +1010,20 @@ class _BubbleControlState extends State<_BubbleControl> {
     final style = (action['style'] ?? action['variant'] ?? '').toString();
     final filled = style == 'filled' || style == 'primary';
     final onPressed = () => _emit(event, {'id': id, 'label': label, ...action});
+    final fg = filled ? butterflyuiBackground(context) : butterflyuiPrimary(context);
+    final bg = filled ? butterflyuiPrimary(context) : Colors.transparent;
     if (filled) {
       return FilledButton(
         onPressed: onPressed,
-        style: FilledButton.styleFrom(
+        style: ButtonStyle(
           visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-          padding: EdgeInsets.symmetric(
-            horizontal: dense ? 10 : 12,
-            vertical: dense ? 6 : 8,
+          backgroundColor: WidgetStatePropertyAll(bg),
+          foregroundColor: WidgetStatePropertyAll(fg),
+          padding: WidgetStatePropertyAll(
+            EdgeInsets.symmetric(
+              horizontal: dense ? 10 : 12,
+              vertical: dense ? 6 : 8,
+            ),
           ),
         ),
         child: Text(label),
@@ -1024,11 +1031,17 @@ class _BubbleControlState extends State<_BubbleControl> {
     }
     return OutlinedButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
+      style: ButtonStyle(
         visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-        padding: EdgeInsets.symmetric(
-          horizontal: dense ? 10 : 12,
-          vertical: dense ? 6 : 8,
+        foregroundColor: WidgetStatePropertyAll(fg),
+        side: WidgetStatePropertyAll(
+          BorderSide(color: butterflyuiBorder(context)),
+        ),
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(
+            horizontal: dense ? 10 : 12,
+            vertical: dense ? 6 : 8,
+          ),
         ),
       ),
       child: Text(label),

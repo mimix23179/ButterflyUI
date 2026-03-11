@@ -5,20 +5,34 @@ from dataclasses import dataclass
 from typing import Any
 
 __all__ = [
+    "BorderTokens",
     "BoxShadow",
+    "ColorTokens",
+    "DepthTokens",
     "DecorationImage",
     "LinearGradient",
     "GradientWash",
     "LineField",
+    "LottieLayer",
+    "MotionTokens",
     "NoiseField",
     "OrbitField",
     "ParticleField",
     "RadialGradient",
+    "RadiusTokens",
+    "RiveLayer",
+    "SceneMask",
+    "SceneRegion",
     "SceneLayer",
     "ShaderLayer",
+    "ShadowTokens",
+    "SpacingTokens",
     "Style",
+    "StyleTokens",
     "StyleValue",
     "SweepGradient",
+    "TypographyRole",
+    "TypographyTokens",
 ]
 
 
@@ -233,6 +247,592 @@ class SweepGradient:
         return payload
 
 
+@dataclass(slots=True)
+class SceneRegion:
+    """Typed scene-region constraint used to clip a layer inside a surface."""
+
+    x: float = 0.0
+    """
+    Normalized left position of the region inside the host surface.
+    """
+
+    y: float = 0.0
+    """
+    Normalized top position of the region inside the host surface.
+    """
+
+    width: float = 1.0
+    """
+    Normalized region width relative to the host surface.
+    """
+
+    height: float = 1.0
+    """
+    Normalized region height relative to the host surface.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "x": float(self.x),
+            "y": float(self.y),
+            "width": float(self.width),
+            "height": float(self.height),
+        }
+
+
+@dataclass(slots=True)
+class SceneMask:
+    """Typed scene mask used to constrain authored scene layers."""
+
+    type: str
+    """
+    Mask kind such as ``oval``, ``rounded``, ``radial``, or ``rect``.
+    """
+
+    radius: float | None = None
+    """
+    Corner radius used by rounded masks.
+    """
+
+    feather: float | None = None
+    """
+    Optional feather amount used to soften the mask edge.
+    """
+
+    center: Any | None = None
+    """
+    Optional center point used by radial masks.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload = {"type": self.type}
+        if self.radius is not None:
+            payload["radius"] = float(self.radius)
+        if self.feather is not None:
+            payload["feather"] = float(self.feather)
+        if self.center is not None:
+            payload["center"] = _to_json_value(self.center)
+        return payload
+
+
+@dataclass(slots=True)
+class ColorTokens:
+    """Color token collection forwarded to the Styling engine."""
+
+    background: Any | None = None
+    """
+    App/page background color token.
+    """
+
+    surface: Any | None = None
+    """
+    Default surface color token for cards and containers.
+    """
+
+    surface_alt: Any | None = None
+    """
+    Alternate surface color token for nested panels and soft contrasts.
+    """
+
+    text: Any | None = None
+    """
+    Primary foreground text token.
+    """
+
+    muted_text: Any | None = None
+    """
+    Secondary muted text token for captions and helper copy.
+    """
+
+    border: Any | None = None
+    """
+    Default border color token.
+    """
+
+    primary: Any | None = None
+    """
+    Primary accent token for CTA surfaces and focus states.
+    """
+
+    secondary: Any | None = None
+    """
+    Secondary accent token for alternate emphasis surfaces.
+    """
+
+    success: Any | None = None
+    """
+    Success state color token.
+    """
+
+    warning: Any | None = None
+    """
+    Warning state color token.
+    """
+
+    info: Any | None = None
+    """
+    Informational state color token.
+    """
+
+    error: Any | None = None
+    """
+    Error state color token.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        for key in (
+            "background",
+            "surface",
+            "surface_alt",
+            "text",
+            "muted_text",
+            "border",
+            "primary",
+            "secondary",
+            "success",
+            "warning",
+            "info",
+            "error",
+        ):
+            value = getattr(self, key)
+            if value is not None:
+                payload[key] = _to_json_value(value)
+        return payload
+
+
+@dataclass(slots=True)
+class RadiusTokens:
+    """Corner-radius token collection."""
+
+    sm: float | None = None
+    """
+    Small radius token.
+    """
+
+    md: float | None = None
+    """
+    Medium radius token.
+    """
+
+    lg: float | None = None
+    """
+    Large radius token.
+    """
+
+    xl: float | None = None
+    """
+    Extra-large radius token.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            key: float(value)
+            for key in ("sm", "md", "lg", "xl")
+            if (value := getattr(self, key)) is not None
+        }
+
+
+@dataclass(slots=True)
+class SpacingTokens:
+    """Spacing token collection."""
+
+    xs: float | None = None
+    """
+    Extra-small spacing token.
+    """
+
+    sm: float | None = None
+    """
+    Small spacing token.
+    """
+
+    md: float | None = None
+    """
+    Medium spacing token.
+    """
+
+    lg: float | None = None
+    """
+    Large spacing token.
+    """
+
+    xl: float | None = None
+    """
+    Extra-large spacing token.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            key: float(value)
+            for key in ("xs", "sm", "md", "lg", "xl")
+            if (value := getattr(self, key)) is not None
+        }
+
+
+@dataclass(slots=True)
+class BorderTokens:
+    """Border-width token collection."""
+
+    sm: float | None = None
+    """
+    Small border-width token.
+    """
+
+    md: float | None = None
+    """
+    Medium border-width token.
+    """
+
+    lg: float | None = None
+    """
+    Large border-width token.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            key: float(value)
+            for key in ("sm", "md", "lg")
+            if (value := getattr(self, key)) is not None
+        }
+
+
+@dataclass(slots=True)
+class ShadowTokens:
+    """Shadow-intensity token collection."""
+
+    sm: float | None = None
+    """
+    Small shadow token.
+    """
+
+    md: float | None = None
+    """
+    Medium shadow token.
+    """
+
+    lg: float | None = None
+    """
+    Large shadow token.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            key: float(value)
+            for key in ("sm", "md", "lg")
+            if (value := getattr(self, key)) is not None
+        }
+
+
+@dataclass(slots=True)
+class MotionTokens:
+    """Motion timing token collection."""
+
+    fast_ms: int | None = None
+    """
+    Fast transition duration in milliseconds.
+    """
+
+    normal_ms: int | None = None
+    """
+    Default transition duration in milliseconds.
+    """
+
+    slow_ms: int | None = None
+    """
+    Slow transition duration in milliseconds.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if self.fast_ms is not None:
+            payload["fast_ms"] = int(self.fast_ms)
+        if self.normal_ms is not None:
+            payload["normal_ms"] = int(self.normal_ms)
+        if self.slow_ms is not None:
+            payload["slow_ms"] = int(self.slow_ms)
+        return payload
+
+
+@dataclass(slots=True)
+class DepthTokens:
+    """Depth/z-plane token collection."""
+
+    base: float | None = None
+    """
+    Base z-depth token for regular surfaces.
+    """
+
+    overlay: float | None = None
+    """
+    Overlay z-depth token for popovers and floating panels.
+    """
+
+    modal: float | None = None
+    """
+    Modal z-depth token for dialogs and scrims.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            key: float(value)
+            for key in ("base", "overlay", "modal")
+            if (value := getattr(self, key)) is not None
+        }
+
+
+@dataclass(slots=True)
+class TypographyRole:
+    """Single named typography role forwarded into Styling tokens."""
+
+    font_size: float | None = None
+    """
+    Role font size in logical pixels.
+    """
+
+    font_weight: Any | None = None
+    """
+    Role font weight token or numeric weight.
+    """
+
+    line_height: float | None = None
+    """
+    Line-height multiplier for the role.
+    """
+
+    letter_spacing: float | None = None
+    """
+    Letter-spacing/tracking value for the role.
+    """
+
+    font_family: str | None = None
+    """
+    Font family override for the role.
+    """
+
+    color: Any | None = None
+    """
+    Optional default color for the role.
+    """
+
+    max_width: float | None = None
+    """
+    Optional max text width associated with the role.
+    """
+
+    wrap: str | None = None
+    """
+    Preferred wrap policy such as ``balance`` or ``pretty``.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        if self.font_size is not None:
+            payload["font_size"] = float(self.font_size)
+        if self.font_weight is not None:
+            payload["font_weight"] = _to_json_value(self.font_weight)
+        if self.line_height is not None:
+            payload["line_height"] = float(self.line_height)
+        if self.letter_spacing is not None:
+            payload["letter_spacing"] = float(self.letter_spacing)
+        if self.font_family is not None:
+            payload["font_family"] = self.font_family
+        if self.color is not None:
+            payload["color"] = _to_json_value(self.color)
+        if self.max_width is not None:
+            payload["max_width"] = float(self.max_width)
+        if self.wrap is not None:
+            payload["wrap"] = self.wrap
+        return payload
+
+
+@dataclass(slots=True)
+class TypographyTokens:
+    """Typography role collection used by the Styling theme layer."""
+
+    display_hero: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for the largest hero titles.
+    """
+
+    display: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for strong display headings.
+    """
+
+    headline: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for major section headings.
+    """
+
+    title: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for medium titles and subsection headers.
+    """
+
+    body: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for primary body copy.
+    """
+
+    body_lg: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for larger supporting body text.
+    """
+
+    caption: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for captions and metadata.
+    """
+
+    helper: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for input helper and muted supporting text.
+    """
+
+    button_label: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for button labels.
+    """
+
+    input: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for input field values.
+    """
+
+    nav: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for navigation links and tabs.
+    """
+
+    overline: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for overlines and eyebrow labels.
+    """
+
+    mono: TypographyRole | Mapping[str, Any] | None = None
+    """
+    Typography role for code and monospaced UI elements.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        for key in (
+            "display_hero",
+            "display",
+            "headline",
+            "title",
+            "body",
+            "body_lg",
+            "caption",
+            "helper",
+            "button_label",
+            "input",
+            "nav",
+            "overline",
+            "mono",
+        ):
+            value = getattr(self, key)
+            if value is None:
+                continue
+            if isinstance(value, TypographyRole):
+                payload[key] = value.to_json()
+            elif isinstance(value, Mapping):
+                payload[key] = _to_json_value(value)
+        return payload
+
+
+@dataclass(slots=True)
+class StyleTokens:
+    """Typed token bundle used by the Styling engine."""
+
+    colors: ColorTokens | Mapping[str, Any] | None = None
+    """
+    Color token collection.
+    """
+
+    radii: RadiusTokens | Mapping[str, Any] | None = None
+    """
+    Radius token collection.
+    """
+
+    spacing: SpacingTokens | Mapping[str, Any] | None = None
+    """
+    Spacing token collection.
+    """
+
+    borders: BorderTokens | Mapping[str, Any] | None = None
+    """
+    Border token collection.
+    """
+
+    shadows: ShadowTokens | Mapping[str, Any] | None = None
+    """
+    Shadow token collection.
+    """
+
+    motion: MotionTokens | Mapping[str, Any] | None = None
+    """
+    Motion timing token collection.
+    """
+
+    depth: DepthTokens | Mapping[str, Any] | None = None
+    """
+    Depth/z-plane token collection.
+    """
+
+    typography: TypographyTokens | Mapping[str, Any] | None = None
+    """
+    Typography role collection.
+    """
+
+    font_family: str | None = None
+    """
+    Default proportional font family token.
+    """
+
+    mono_family: str | None = None
+    """
+    Default monospaced font family token.
+    """
+
+    focus_ring: Any | None = None
+    """
+    Focus-ring color token.
+    """
+
+    overlay_scrim: Any | None = None
+    """
+    Overlay scrim color token used by dialogs and sheets.
+    """
+
+    glass_blur: float | None = None
+    """
+    Default backdrop-blur token for glass-like surfaces.
+    """
+
+    def to_json(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        for key in ("colors", "radii", "spacing", "borders", "shadows", "motion", "depth"):
+            value = getattr(self, key)
+            if value is None:
+                continue
+            payload[key] = _to_json_value(value)
+        if self.typography is not None:
+            payload["typography"] = _to_json_value(self.typography)
+        if self.font_family is not None:
+            payload["font_family"] = self.font_family
+        if self.mono_family is not None:
+            payload["mono_family"] = self.mono_family
+        if self.focus_ring is not None:
+            payload["focus_ring"] = _to_json_value(self.focus_ring)
+        if self.overlay_scrim is not None:
+            payload["overlay_scrim"] = _to_json_value(self.overlay_scrim)
+        if self.glass_blur is not None:
+            payload["glass_blur"] = float(self.glass_blur)
+        return payload
+
+
 class SceneLayer:
     """Base authored scene layer that Styling can compose behind or above content."""
 
@@ -276,6 +876,41 @@ class SceneLayer:
     Secondary tint color used for richer authored scenes.
     """
 
+    region: Any | None = None
+    """
+    Optional region map or token that constrains the layer inside the host surface.
+    """
+
+    mask: Any | None = None
+    """
+    Optional layer mask such as ``oval``, ``radial``, or a rounded-mask mapping.
+    """
+
+    animate: bool | None = None
+    """
+    Controls whether the scene layer animates when hosted by the runtime.
+    """
+
+    repeat: bool | None = None
+    """
+    Controls whether asset-backed scene layers loop after reaching the end.
+    """
+
+    reverse: bool | None = None
+    """
+    Controls reverse playback for asset-backed animated layers.
+    """
+
+    duration_ms: int | None = None
+    """
+    Optional authored duration used by asset-backed layers and scene hosts.
+    """
+
+    phase: float | None = None
+    """
+    Optional normalized phase offset used to desynchronize repeated scene layers.
+    """
+
     config: Mapping[str, Any] | None = None
     """
     Extra scene-layer configuration merged into the serialized payload.
@@ -292,8 +927,23 @@ class SceneLayer:
         intensity: float | None = None,
         color: Any | None = None,
         accent_color: Any | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         config: Mapping[str, Any] | None = None,
     ) -> None:
+        _validate_scene_position(position)
+        _validate_unit_interval("opacity", opacity)
+        _validate_positive_float("speed", speed)
+        _validate_positive_float("density", density)
+        _validate_positive_float("intensity", intensity)
+        _validate_scene_region(region)
+        _validate_positive_int("duration_ms", duration_ms)
+        _validate_unit_interval("phase", phase)
         self.type = type
         self.position = position
         self.opacity = opacity
@@ -302,6 +952,13 @@ class SceneLayer:
         self.intensity = intensity
         self.color = color
         self.accent_color = accent_color
+        self.region = region
+        self.mask = mask
+        self.animate = animate
+        self.repeat = repeat
+        self.reverse = reverse
+        self.duration_ms = duration_ms
+        self.phase = phase
         self.config = dict(config or {})
 
     def to_json(self) -> dict[str, Any]:
@@ -320,6 +977,20 @@ class SceneLayer:
             payload["color"] = _to_json_value(self.color)
         if self.accent_color is not None:
             payload["accent_color"] = _to_json_value(self.accent_color)
+        if self.region is not None:
+            payload["region"] = _to_json_value(self.region)
+        if self.mask is not None:
+            payload["mask"] = _to_json_value(self.mask)
+        if self.animate is not None:
+            payload["animate"] = bool(self.animate)
+        if self.repeat is not None:
+            payload["repeat"] = bool(self.repeat)
+        if self.reverse is not None:
+            payload["reverse"] = bool(self.reverse)
+        if self.duration_ms is not None:
+            payload["duration_ms"] = int(self.duration_ms)
+        if self.phase is not None:
+            payload["phase"] = float(self.phase)
         if self.config:
             payload.update(
                 {
@@ -329,6 +1000,75 @@ class SceneLayer:
                 }
             )
         return payload
+
+
+def _validate_non_negative_int(name: str, value: int | None) -> None:
+    if value is None:
+        return
+    if int(value) < 0:
+        raise ValueError(f"{name} must be >= 0")
+
+
+def _validate_positive_int(name: str, value: int | None) -> None:
+    if value is None:
+        return
+    if int(value) <= 0:
+        raise ValueError(f"{name} must be > 0")
+
+
+def _validate_non_negative_float(name: str, value: float | None) -> None:
+    if value is None:
+        return
+    if float(value) < 0:
+        raise ValueError(f"{name} must be >= 0")
+
+
+def _validate_positive_float(name: str, value: float | None) -> None:
+    if value is None:
+        return
+    if float(value) <= 0:
+        raise ValueError(f"{name} must be > 0")
+
+
+def _validate_unit_interval(name: str, value: float | None) -> None:
+    if value is None:
+        return
+    if not 0.0 <= float(value) <= 1.0:
+        raise ValueError(f"{name} must be between 0.0 and 1.0")
+
+
+def _validate_scene_position(value: str | None) -> None:
+    if value is None:
+        return
+    if value not in {"background", "foreground", "overlay"}:
+        raise ValueError("position must be one of: background, foreground, overlay")
+
+
+def _validate_scene_region(region: Any | None) -> None:
+    if region is None or isinstance(region, str):
+        return
+    if isinstance(region, SceneRegion):
+        _validate_unit_interval("region.x", region.x)
+        _validate_unit_interval("region.y", region.y)
+        _validate_positive_float("region.width", region.width)
+        _validate_positive_float("region.height", region.height)
+        return
+    if isinstance(region, Mapping):
+        mapping = dict(region)
+        x = mapping.get("x", mapping.get("left"))
+        y = mapping.get("y", mapping.get("top"))
+        width = mapping.get("width", mapping.get("w"))
+        height = mapping.get("height", mapping.get("h"))
+        if x is not None:
+            _validate_unit_interval("region.x", float(x))
+        if y is not None:
+            _validate_unit_interval("region.y", float(y))
+        if width is not None:
+            _validate_positive_float("region.width", float(width))
+        if height is not None:
+            _validate_positive_float("region.height", float(height))
+        return
+    raise TypeError("region must be a SceneRegion, mapping, string token, or None")
 
 
 class ParticleField(SceneLayer):
@@ -398,8 +1138,19 @@ class ParticleField(SceneLayer):
         thickness: float | None = None,
         palette: list[Any] | None = None,
         shape: str | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
+        _validate_non_negative_int("count", count)
+        _validate_non_negative_float("drift", drift)
+        _validate_positive_float("length", length)
+        _validate_positive_float("thickness", thickness)
         super().__init__(
             type="particle_field",
             position=position,
@@ -409,6 +1160,13 @@ class ParticleField(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=config or None,
         )
         self.count = count
@@ -463,6 +1221,13 @@ class GradientWash(SceneLayer):
         intensity: float | None = None,
         color: Any | None = None,
         accent_color: Any | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
         super().__init__(
@@ -474,6 +1239,13 @@ class GradientWash(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=config or None,
         )
         self.gradient = gradient
@@ -534,8 +1306,19 @@ class LineField(SceneLayer):
         thickness: float | None = None,
         length: float | None = None,
         palette: list[Any] | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
+        _validate_non_negative_int("count", count)
+        _validate_positive_float("spacing", spacing)
+        _validate_positive_float("thickness", thickness)
+        _validate_positive_float("length", length)
         super().__init__(
             type="line_field",
             position=position,
@@ -545,6 +1328,13 @@ class LineField(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=config or None,
         )
         self.count = count
@@ -621,8 +1411,19 @@ class OrbitField(SceneLayer):
         marker_size: float | None = None,
         palette: list[Any] | None = None,
         center: Any | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
+        _validate_non_negative_int("count", count)
+        _validate_positive_float("radius", radius)
+        _validate_positive_float("band_width", band_width)
+        _validate_positive_float("marker_size", marker_size)
         merged_config = dict(config or {})
         if center is not None:
             merged_config["center"] = center
@@ -635,6 +1436,13 @@ class OrbitField(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=merged_config or None,
         )
         self.count = count
@@ -692,8 +1500,18 @@ class NoiseField(SceneLayer):
         scale: float | None = None,
         contrast: float | None = None,
         octaves: int | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
+        _validate_positive_float("scale", scale)
+        _validate_positive_float("contrast", contrast)
+        _validate_positive_int("octaves", octaves)
         super().__init__(
             type="noise_field",
             position=position,
@@ -703,6 +1521,13 @@ class NoiseField(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=config or None,
         )
         self.scale = scale
@@ -745,8 +1570,17 @@ class ShaderLayer(SceneLayer):
         color: Any | None = None,
         accent_color: Any | None = None,
         uniforms: Mapping[str, Any] | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
         **config: Any,
     ) -> None:
+        if not shader_asset or not shader_asset.strip():
+            raise ValueError("shader_asset must not be empty")
         super().__init__(
             type="shader",
             position=position,
@@ -756,6 +1590,13 @@ class ShaderLayer(SceneLayer):
             intensity=intensity,
             color=color,
             accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
             config=config or None,
         )
         self.shader_asset = shader_asset
@@ -766,6 +1607,201 @@ class ShaderLayer(SceneLayer):
         payload["shader_asset"] = self.shader_asset
         if self.uniforms:
             payload["uniforms"] = _to_json_value(self.uniforms)
+        return payload
+
+
+class LottieLayer(SceneLayer):
+    """Typed Lottie scene layer hosted directly through the Styling engine."""
+
+    lottie_asset: str | None = None
+    """
+    Local Lottie asset path used by the runtime layer host.
+    """
+
+    lottie_url: str | None = None
+    """
+    Remote Lottie URL used when an asset path is not provided.
+    """
+
+    lottie_data: Any | None = None
+    """
+    Inline Lottie JSON or binary payload.
+    """
+
+    fit: str | None = None
+    """
+    Box-fit token used when the animation is placed inside a surface region.
+    """
+
+    alignment: Any | None = None
+    """
+    Alignment used when the layer does not fully cover its host region.
+    """
+
+    def __init__(
+        self,
+        *,
+        lottie_asset: str | None = None,
+        lottie_url: str | None = None,
+        lottie_data: Any | None = None,
+        fit: str | None = None,
+        alignment: Any | None = None,
+        position: str | None = None,
+        opacity: float | None = None,
+        speed: float | None = None,
+        density: float | None = None,
+        intensity: float | None = None,
+        color: Any | None = None,
+        accent_color: Any | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
+        **config: Any,
+    ) -> None:
+        if not any((lottie_asset, lottie_url, lottie_data is not None)):
+            raise ValueError("LottieLayer requires lottie_asset, lottie_url, or lottie_data")
+        super().__init__(
+            type="lottie",
+            position=position,
+            opacity=opacity,
+            speed=speed,
+            density=density,
+            intensity=intensity,
+            color=color,
+            accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
+            config=config or None,
+        )
+        self.lottie_asset = lottie_asset
+        self.lottie_url = lottie_url
+        self.lottie_data = lottie_data
+        self.fit = fit
+        self.alignment = alignment
+
+    def to_json(self) -> dict[str, Any]:
+        payload = super().to_json()
+        if self.lottie_asset is not None:
+            payload["lottie_asset"] = self.lottie_asset
+        if self.lottie_url is not None:
+            payload["lottie_url"] = self.lottie_url
+        if self.lottie_data is not None:
+            payload["lottie_data"] = _to_json_value(self.lottie_data)
+        if self.fit is not None:
+            payload["fit"] = self.fit
+        if self.alignment is not None:
+            payload["alignment"] = _to_json_value(self.alignment)
+        return payload
+
+
+class RiveLayer(SceneLayer):
+    """Typed Rive scene layer hosted directly through the Styling engine."""
+
+    rive_asset: str | None = None
+    """
+    Local Rive asset path used by the runtime layer host.
+    """
+
+    rive_url: str | None = None
+    """
+    Remote Rive URL used when an asset path is not provided.
+    """
+
+    artboard: str | None = None
+    """
+    Optional artboard selector forwarded to the runtime host.
+    """
+
+    state_machine: str | None = None
+    """
+    Optional state-machine selector forwarded to the runtime host.
+    """
+
+    fit: str | None = None
+    """
+    Box-fit token used when the animation is placed inside a surface region.
+    """
+
+    alignment: Any | None = None
+    """
+    Alignment used when the layer does not fully cover its host region.
+    """
+
+    def __init__(
+        self,
+        *,
+        rive_asset: str | None = None,
+        rive_url: str | None = None,
+        artboard: str | None = None,
+        state_machine: str | None = None,
+        fit: str | None = None,
+        alignment: Any | None = None,
+        position: str | None = None,
+        opacity: float | None = None,
+        speed: float | None = None,
+        density: float | None = None,
+        intensity: float | None = None,
+        color: Any | None = None,
+        accent_color: Any | None = None,
+        region: Any | None = None,
+        mask: Any | None = None,
+        animate: bool | None = None,
+        repeat: bool | None = None,
+        reverse: bool | None = None,
+        duration_ms: int | None = None,
+        phase: float | None = None,
+        **config: Any,
+    ) -> None:
+        if not any((rive_asset, rive_url)):
+            raise ValueError("RiveLayer requires rive_asset or rive_url")
+        super().__init__(
+            type="rive",
+            position=position,
+            opacity=opacity,
+            speed=speed,
+            density=density,
+            intensity=intensity,
+            color=color,
+            accent_color=accent_color,
+            region=region,
+            mask=mask,
+            animate=animate,
+            repeat=repeat,
+            reverse=reverse,
+            duration_ms=duration_ms,
+            phase=phase,
+            config=config or None,
+        )
+        self.rive_asset = rive_asset
+        self.rive_url = rive_url
+        self.artboard = artboard
+        self.state_machine = state_machine
+        self.fit = fit
+        self.alignment = alignment
+
+    def to_json(self) -> dict[str, Any]:
+        payload = super().to_json()
+        if self.rive_asset is not None:
+            payload["rive_asset"] = self.rive_asset
+        if self.rive_url is not None:
+            payload["rive_url"] = self.rive_url
+        if self.artboard is not None:
+            payload["rive_artboard"] = self.artboard
+        if self.state_machine is not None:
+            payload["rive_state_machine"] = self.state_machine
+        if self.fit is not None:
+            payload["fit"] = self.fit
+        if self.alignment is not None:
+            payload["alignment"] = _to_json_value(self.alignment)
         return payload
 
 
@@ -979,6 +2015,16 @@ class Style:
     Font family name used for styled text.
     """
 
+    type_role: str | None = None
+    """
+    Named typography role such as ``display_hero``, ``body``, ``caption``, or ``button_label``.
+    """
+
+    text_role: str | None = None
+    """
+    Alias for ``type_role`` kept for ergonomic CSS-like authoring.
+    """
+
     italic: bool | None = None
     """
     Whether styled text should render in italic form.
@@ -1182,6 +2228,8 @@ class Style:
         weight: str | None = None,
         font_weight: str | None = None,
         font_family: str | None = None,
+        type_role: str | None = None,
+        text_role: str | None = None,
         italic: bool | None = None,
         variant: str | Mapping[str, Any] | None = None,
         motion: Any | None = None,
@@ -1251,6 +2299,8 @@ class Style:
         self.weight = weight
         self.font_weight = font_weight
         self.font_family = font_family
+        self.type_role = type_role
+        self.text_role = text_role
         self.italic = italic
         self.variant = variant
         self.motion = motion
@@ -1324,6 +2374,7 @@ class Style:
         put("font_size", self.font_size if self.font_size is not None else self.size)
         put("weight", self.weight if self.weight is not None else self.font_weight)
         put("font_family", self.font_family)
+        put("type_role", self.type_role if self.type_role is not None else self.text_role)
         put("italic", self.italic)
         put("variant", self.variant)
         put("motion", self.motion)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -194,7 +195,7 @@ class _SplashControlState extends State<_SplashControl> {
     final radius = coerceDouble(_liveProps['radius']) ?? 20;
     final splashColor =
         coerceColor(_liveProps['color']) ??
-        Theme.of(context).colorScheme.primary.withValues(alpha: 0.22);
+        butterflyuiPrimary(context).withValues(alpha: 0.22);
     final background =
         coerceColor(_liveProps['background']) ?? Colors.transparent;
     final showProgress =
@@ -235,14 +236,19 @@ class _SplashControlState extends State<_SplashControl> {
                         if (title != null && title.isNotEmpty)
                           Text(
                             title,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: butterflyuiText(context),
+                            ),
                           ),
                         if (subtitle != null && subtitle.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
                               subtitle,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: butterflyuiMutedText(context),
+                                  ),
                             ),
                           ),
                         if (showProgress)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -179,6 +180,36 @@ class _GridControlState extends State<_GridControl> {
     final runSpacing = coerceDouble(_liveProps['run_spacing']) ?? spacing;
     final childAspectRatio =
         coerceDouble(_liveProps['child_aspect_ratio']) ?? 1;
+    final useSpans = _hasExplicitSpans(widget.children, _liveProps);
+
+    if (axis == Axis.vertical && useSpans) {
+      final tiles = _buildStaggeredTiles(
+        controlId: widget.controlId,
+        props: _liveProps,
+        children: widget.children,
+        buildChild: widget.buildChild,
+        sendEvent: widget.sendEvent,
+        columns: columns,
+      );
+      final grid = StaggeredGrid.count(
+        crossAxisCount: columns,
+        mainAxisSpacing: runSpacing,
+        crossAxisSpacing: spacing,
+        children: tiles,
+      );
+      if (!scrollable) {
+        return Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: grid,
+        );
+      }
+      return SingleChildScrollView(
+        reverse: reverse,
+        padding: padding,
+        physics: physics,
+        child: grid,
+      );
+    }
 
     return GridView.count(
       crossAxisCount: columns,
@@ -251,6 +282,134 @@ List<Widget> _buildTiles({
     }
   }
   return tiles;
+}
+
+List<Widget> _buildStaggeredTiles({
+  required String controlId,
+  required Map<String, Object?> props,
+  required List<Map<String, Object?>> children,
+  required Widget Function(Map<String, Object?> child) buildChild,
+  required ButterflyUISendRuntimeEvent sendEvent,
+  required int columns,
+}) {
+  final tiles = <Widget>[];
+  if (children.isNotEmpty) {
+    for (final child in children) {
+      final childProps = child['props'] is Map
+          ? coerceObjectMap(child['props'] as Map)
+          : <String, Object?>{};
+      final columnSpan =
+          (coerceOptionalInt(
+                    childProps['column_span'] ??
+                        childProps['col_span'] ??
+                        childProps['span'] ??
+                        childProps['cross_axis_span'],
+                  ) ??
+                  1)
+              .clamp(1, columns);
+      final rowSpan =
+          (coerceOptionalInt(
+                    childProps['row_span'] ??
+                        childProps['main_axis_span'] ??
+                        childProps['span_y'],
+                  ) ??
+                  1)
+              .clamp(1, 100);
+      tiles.add(
+        StaggeredGridTile.count(
+          crossAxisCellCount: columnSpan,
+          mainAxisCellCount: rowSpan.toDouble(),
+          child: buildChild(child),
+        ),
+      );
+    }
+    return tiles;
+  }
+  if (props['items'] is! List) {
+    return tiles;
+  }
+  final items = props['items'] as List;
+  for (var i = 0; i < items.length; i += 1) {
+    final item = items[i];
+    final map = item is Map ? coerceObjectMap(item) : <String, Object?>{};
+    final columnSpan =
+        (coerceOptionalInt(
+                  map['column_span'] ??
+                      map['col_span'] ??
+                      map['span'] ??
+                      map['cross_axis_span'],
+                ) ??
+                1)
+            .clamp(1, columns);
+    final rowSpan =
+        (coerceOptionalInt(
+                  map['row_span'] ??
+                      map['main_axis_span'] ??
+                      map['span_y'],
+                ) ??
+                1)
+            .clamp(1, 100);
+    Widget child;
+    if (item is Map) {
+      final title =
+          map['title']?.toString() ??
+          map['label']?.toString() ??
+          '${map['id'] ?? i}';
+      child = Card(
+        child: InkWell(
+          onTap: controlId.isEmpty
+              ? null
+              : () {
+                  sendEvent(controlId, 'select', {'index': i, 'item': map});
+                },
+          child: Center(child: Text(title, textAlign: TextAlign.center)),
+        ),
+      );
+    } else {
+      child = Card(child: Center(child: Text(item?.toString() ?? '')));
+    }
+    tiles.add(
+      StaggeredGridTile.count(
+        crossAxisCellCount: columnSpan,
+        mainAxisCellCount: rowSpan.toDouble(),
+        child: child,
+      ),
+    );
+  }
+  return tiles;
+}
+
+bool _hasExplicitSpans(
+  List<Map<String, Object?>> children,
+  Map<String, Object?> props,
+) {
+  for (final child in children) {
+    final childProps = child['props'] is Map
+        ? coerceObjectMap(child['props'] as Map)
+        : <String, Object?>{};
+    if (childProps['column_span'] != null ||
+        childProps['col_span'] != null ||
+        childProps['row_span'] != null ||
+        childProps['main_axis_span'] != null ||
+        childProps['span'] != null) {
+      return true;
+    }
+  }
+  if (props['items'] is List) {
+    for (final item in props['items'] as List) {
+      if (item is Map) {
+        final map = coerceObjectMap(item);
+        if (map['column_span'] != null ||
+            map['col_span'] != null ||
+            map['row_span'] != null ||
+            map['main_axis_span'] != null ||
+            map['span'] != null) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 Axis? _parseAxis(Object? value) {

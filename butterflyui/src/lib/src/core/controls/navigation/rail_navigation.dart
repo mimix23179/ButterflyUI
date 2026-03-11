@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -205,24 +206,48 @@ class _ButterflyUIRailNavigationState
       if (idx >= 0) selectedIndex = idx;
     }
 
-    final bgColor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface;
-    final indicatorColor =
-        coerceColor(_liveProps['indicator_color']) ??
-        Theme.of(context).colorScheme.primaryContainer;
-    final selectedIconColor =
-        coerceColor(_liveProps['selected_icon_color']) ??
-        Theme.of(context).colorScheme.onPrimaryContainer;
-    final unselectedIconColor =
-        coerceColor(_liveProps['icon_color']) ??
-        Theme.of(context).colorScheme.onSurfaceVariant;
-    final selectedLabelColor =
-        coerceColor(_liveProps['selected_text_color']) ??
-        Theme.of(context).colorScheme.onPrimaryContainer;
-    final unselectedLabelColor =
-        coerceColor(_liveProps['text_color']) ??
-        Theme.of(context).colorScheme.onSurfaceVariant;
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.6),
+      fallbackRadius: coerceDouble(_liveProps['radius']),
+    );
+    final indicatorColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'background',
+      explicit: _liveProps['indicator_color'],
+      fallback: butterflyuiPrimary(context).withValues(alpha: 0.18),
+    );
+    final selectedIconColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'icon',
+      explicit: _liveProps['selected_icon_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final unselectedIconColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'icon',
+      explicit: _liveProps['icon_color'],
+      fallback: butterflyuiMutedText(context),
+    );
+    final selectedLabelColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['selected_text_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final unselectedLabelColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['text_color'],
+      fallback: butterflyuiMutedText(context),
+    );
 
     final labelTypeToken =
         (_liveProps['label_type'] ?? _liveProps['policy'] ?? 'selected')
@@ -240,14 +265,20 @@ class _ButterflyUIRailNavigationState
 
     final rail = Container(
       decoration: BoxDecoration(
-        color: bgColor,
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(
-              context,
-            ).colorScheme.outlineVariant.withValues(alpha: 0.6),
-          ),
-        ),
+        color: surface.backgroundColor,
+        gradient: surface.gradient,
+        border: surface.borderWidth > 0
+            ? Border(
+                right: BorderSide(
+                  color: surface.borderColor,
+                  width: surface.borderWidth,
+                ),
+              )
+            : null,
+        borderRadius: surface.radius > 0
+            ? BorderRadius.circular(surface.radius)
+            : null,
+        boxShadow: surface.boxShadow,
       ),
       child: NavigationRail(
         selectedIndex: selectedIndex,
@@ -307,7 +338,7 @@ class _ButterflyUIRailNavigationState
       props: _liveProps,
       child: rail,
       clipToRadius: true,
-      defaultRadius: coerceDouble(_liveProps['radius']),
+      defaultRadius: surface.radius,
     );
   }
 }

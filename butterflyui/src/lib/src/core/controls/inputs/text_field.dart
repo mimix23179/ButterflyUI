@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/type_roles.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -211,6 +212,30 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
     final backgroundSlot = slotStyles['background'] is Map
         ? coerceObjectMap(slotStyles['background'] as Map)
         : <String, Object?>{};
+    final fieldRole = resolveStylingTypeRole(
+      tokens,
+      widget.props['type_role'] ?? widget.props['text_role'],
+      secondary: fieldSlot['type_role'] ?? fieldSlot['text_role'],
+      fallback: 'input',
+    );
+    final labelRole = resolveStylingTypeRole(
+      tokens,
+      widget.props['label_type_role'] ?? labelSlot['type_role'],
+      secondary: labelSlot['text_role'],
+      fallback: 'caption',
+    );
+    final helperRole = resolveStylingTypeRole(
+      tokens,
+      widget.props['helper_type_role'] ?? helperSlot['type_role'],
+      secondary: helperSlot['text_role'],
+      fallback: 'helper',
+    );
+    final placeholderRole = resolveStylingTypeRole(
+      tokens,
+      widget.props['placeholder_type_role'] ?? placeholderSlot['type_role'],
+      secondary: placeholderSlot['text_role'],
+      fallback: 'helper',
+    );
     final sceneAwareSurface =
         (widget.props['background_layers'] != null ||
             widget.props['background_layer'] != null ||
@@ -220,13 +245,13 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
             false;
     final backgroundColor = _sceneAwareColor(
       coerceColor(
-            widget.props['bgcolor'] ??
-                widget.props['background'] ??
-                widget.props['color'] ??
+            backgroundSlot['bgcolor'] ??
+                backgroundSlot['background'] ??
                 fieldSlot['bgcolor'] ??
                 fieldSlot['background'] ??
-                backgroundSlot['bgcolor'] ??
-                backgroundSlot['background'],
+                widget.props['bgcolor'] ??
+                widget.props['background'] ??
+                widget.props['color'],
           ) ??
           (tokens == null
               ? theme.colorScheme.surface.withValues(alpha: 0.22)
@@ -235,10 +260,10 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
     );
     final borderColor =
         coerceColor(
-          widget.props['border_color'] ??
-              borderSlot['border_color'] ??
+          borderSlot['border_color'] ??
               borderSlot['foreground'] ??
-              borderSlot['color'],
+              borderSlot['color'] ??
+              widget.props['border_color'],
         ) ??
         tokens?.border ??
         theme.colorScheme.outlineVariant;
@@ -280,6 +305,7 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
               fieldSlot['foreground'] ??
               fieldSlot['color'],
         ) ??
+        stylingTypeRoleColor(fieldRole) ??
         tokens?.text ??
         theme.colorScheme.onSurface;
     final labelColor =
@@ -289,6 +315,7 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
               labelSlot['foreground'] ??
               labelSlot['color'],
         ) ??
+        stylingTypeRoleColor(labelRole) ??
         tokens?.mutedText ??
         theme.colorScheme.onSurfaceVariant;
     final helperColor =
@@ -298,6 +325,7 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
               helperSlot['foreground'] ??
               helperSlot['color'],
         ) ??
+        stylingTypeRoleColor(helperRole) ??
         tokens?.mutedText ??
         theme.colorScheme.onSurfaceVariant;
     final hintColor =
@@ -307,6 +335,7 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
               placeholderSlot['foreground'] ??
               placeholderSlot['color'],
         ) ??
+        stylingTypeRoleColor(placeholderRole) ??
         tokens?.mutedText.withValues(alpha: 0.8) ??
         theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8);
     final cursorColor =
@@ -326,25 +355,36 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
       fontSize: coerceDouble(
         widget.props['font_size'] ??
             fieldSlot['font_size'] ??
-            fieldSlot['size'],
+            fieldSlot['size'] ??
+            stylingTypeRoleDouble(fieldRole, 'font_size'),
       ),
       fontWeight: _parseFontWeight(
         widget.props['font_weight'] ??
             widget.props['weight'] ??
             fieldSlot['font_weight'] ??
-            fieldSlot['weight'],
+            fieldSlot['weight'] ??
+            stylingTypeRoleString(fieldRole, 'font_weight'),
       ),
       fontFamily:
           widget.props['font_family']?.toString() ??
-          fieldSlot['font_family']?.toString(),
+          fieldSlot['font_family']?.toString() ??
+          stylingTypeRoleString(fieldRole, 'font_family'),
       letterSpacing: coerceDouble(
-        widget.props['letter_spacing'] ?? fieldSlot['letter_spacing'],
+        widget.props['letter_spacing'] ??
+            fieldSlot['letter_spacing'] ??
+            stylingTypeRoleDouble(fieldRole, 'letter_spacing'),
       ),
       fontStyle: _parseFontStyle(
         widget.props['font_style'] ??
             widget.props['italic'] ??
             fieldSlot['font_style'] ??
-            fieldSlot['italic'],
+            fieldSlot['italic'] ??
+            stylingTypeRoleString(fieldRole, 'font_style'),
+      ),
+      height: coerceDouble(
+        widget.props['line_height'] ??
+            fieldSlot['line_height'] ??
+            stylingTypeRoleDouble(fieldRole, 'line_height'),
       ),
     );
     final keyboardType = widget.multiline
@@ -354,21 +394,81 @@ class _ButterflyUITextFieldState extends State<ButterflyUITextField> {
     final maxLines = widget.multiline ? widget.maxLines : 1;
     final decoration = InputDecoration(
       hintText: widget.placeholder,
-      hintStyle: TextStyle(color: hintColor),
+      hintStyle: TextStyle(
+        color: hintColor,
+        fontSize: coerceDouble(
+          placeholderSlot['font_size'] ??
+              placeholderSlot['size'] ??
+              stylingTypeRoleDouble(placeholderRole, 'font_size'),
+        ),
+        fontWeight: _parseFontWeight(
+          placeholderSlot['font_weight'] ??
+              placeholderSlot['weight'] ??
+              stylingTypeRoleString(placeholderRole, 'font_weight'),
+        ),
+        fontFamily:
+            placeholderSlot['font_family']?.toString() ??
+            stylingTypeRoleString(placeholderRole, 'font_family'),
+        letterSpacing: coerceDouble(
+          placeholderSlot['letter_spacing'] ??
+              stylingTypeRoleDouble(placeholderRole, 'letter_spacing'),
+        ),
+        fontStyle: _parseFontStyle(
+          placeholderSlot['font_style'] ??
+              placeholderSlot['italic'] ??
+              stylingTypeRoleString(placeholderRole, 'font_style'),
+        ),
+      ),
       labelText: widget.label,
       labelStyle: TextStyle(
         color: labelColor,
-        fontSize: coerceDouble(labelSlot['font_size'] ?? labelSlot['size']),
+        fontSize: coerceDouble(
+          labelSlot['font_size'] ??
+              labelSlot['size'] ??
+              stylingTypeRoleDouble(labelRole, 'font_size'),
+        ),
         fontWeight: _parseFontWeight(
-          labelSlot['font_weight'] ?? labelSlot['weight'],
+          labelSlot['font_weight'] ??
+              labelSlot['weight'] ??
+              stylingTypeRoleString(labelRole, 'font_weight'),
+        ),
+        fontFamily:
+            labelSlot['font_family']?.toString() ??
+            stylingTypeRoleString(labelRole, 'font_family'),
+        letterSpacing: coerceDouble(
+          labelSlot['letter_spacing'] ??
+              stylingTypeRoleDouble(labelRole, 'letter_spacing'),
+        ),
+        fontStyle: _parseFontStyle(
+          labelSlot['font_style'] ??
+              labelSlot['italic'] ??
+              stylingTypeRoleString(labelRole, 'font_style'),
         ),
       ),
       helperText: widget.helperText,
       helperStyle: TextStyle(
         color: helperColor,
-        fontSize: coerceDouble(helperSlot['font_size'] ?? helperSlot['size']),
+        fontSize: coerceDouble(
+          helperSlot['font_size'] ??
+              helperSlot['size'] ??
+              stylingTypeRoleDouble(helperRole, 'font_size'),
+        ),
         fontWeight: _parseFontWeight(
-          helperSlot['font_weight'] ?? helperSlot['weight'],
+          helperSlot['font_weight'] ??
+              helperSlot['weight'] ??
+              stylingTypeRoleString(helperRole, 'font_weight'),
+        ),
+        fontFamily:
+            helperSlot['font_family']?.toString() ??
+            stylingTypeRoleString(helperRole, 'font_family'),
+        letterSpacing: coerceDouble(
+          helperSlot['letter_spacing'] ??
+              stylingTypeRoleDouble(helperRole, 'letter_spacing'),
+        ),
+        fontStyle: _parseFontStyle(
+          helperSlot['font_style'] ??
+              helperSlot['italic'] ??
+              stylingTypeRoleString(helperRole, 'font_style'),
         ),
       ),
       errorText: widget.errorText,

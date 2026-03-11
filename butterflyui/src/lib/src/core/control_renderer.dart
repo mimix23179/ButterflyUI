@@ -1,9 +1,11 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'animation/animation_spec.dart';
 import 'styling/theme.dart';
+import 'styling/theme_extension.dart';
 import 'butterflyui_event_box.dart';
 import 'control_registry.dart';
 import 'control_utils.dart';
@@ -424,23 +426,28 @@ class ControlRenderer {
       tokens: effectiveTokens,
       stylePack: resolvedPack,
     );
-    final rawProps = _mergeResolvedStyleProps(
-      controlType: type,
-      props: normalizedProps,
-      resolvedStyle: resolvedStyle,
+    final rawProps = resolveStylingTokenReferences(
+      _mergeResolvedStyleProps(
+        controlType: type,
+        props: normalizedProps,
+        resolvedStyle: resolvedStyle,
+        effectiveTokens: effectiveTokens,
+      ),
+      effectiveTokens,
     );
     final hasExplicitSurfaceFill =
-        baseProps.containsKey('bgcolor') ||
-        baseProps.containsKey('background') ||
-        baseProps.containsKey('color') ||
-        baseProps.containsKey('gradient') ||
-        baseProps.containsKey('image');
+        coerceColor(
+              rawProps['bgcolor'] ?? rawProps['background'] ?? rawProps['color'],
+            ) !=
+            null ||
+        coerceGradient(rawProps['gradient']) != null ||
+        coerceDecorationImage(rawProps['image']) != null;
     rawProps['__has_explicit_surface_fill'] = hasExplicitSurfaceFill;
     if (inheritedImageBackdrop) {
       rawProps['__image_backdrop_inherited'] = true;
     }
     final explicitSurfaceTint = coerceColor(
-      baseProps['bgcolor'] ?? baseProps['background'] ?? baseProps['color'],
+      rawProps['bgcolor'] ?? rawProps['background'] ?? rawProps['color'],
     );
     final effectiveSurfaceTintArgb =
         explicitSurfaceTint?.toARGB32() ?? inheritedSurfaceTintArgb;
@@ -1033,7 +1040,11 @@ class ControlRenderer {
         );
 
       case 'text':
-        return buildTextControl(props, defaultText: defaultText);
+        return buildTextControl(
+          props,
+          defaultText: defaultText,
+          tokens: context.tokens.buildTheme().extension<ButterflyUIThemeTokens>(),
+        );
 
       case 'markdown_view':
         return buildMarkdownViewControl(
@@ -1269,6 +1280,7 @@ class ControlRenderer {
       case 'checkbox':
         return ButterflyUICheckbox(
           controlId: controlId,
+          props: props,
           label: props['label']?.toString(),
           value: _coerceBoolOrNull(props['value'] ?? props['checked']),
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
@@ -1283,6 +1295,7 @@ class ControlRenderer {
       case 'switch':
         return ButterflyUISwitch(
           controlId: controlId,
+          props: props,
           label: props['label']?.toString(),
           value: _coerceBool(props['value'], fallback: false),
           enabled: props['enabled'] == null ? true : (props['enabled'] == true),
@@ -1317,6 +1330,7 @@ class ControlRenderer {
       case 'slider':
         return ButterflyUISlider(
           controlId: controlId,
+          props: props,
           value: coerceDouble(props['value']) ?? 0.0,
           start: coerceDouble(props['start']),
           end: coerceDouble(props['end']),
@@ -1348,6 +1362,7 @@ class ControlRenderer {
           hint: props['hint']?.toString() ?? props['placeholder']?.toString(),
           autofocus: props['autofocus'] == true,
           events: props['events'],
+          props: props,
           registerInvokeHandler: context.registerInvokeHandler,
           unregisterInvokeHandler: context.unregisterInvokeHandler,
           sendEvent: context.sendEvent,
@@ -2609,8 +2624,14 @@ class ControlRenderer {
     required String controlType,
     required Map<String, Object?> props,
     required ResolvedControlStyle resolvedStyle,
+    required StylingTokens effectiveTokens,
   }) {
     final capabilities = ControlInteractionCapabilities.forControl(controlType);
+    final normalizedControlType = controlType
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
     bool supportsSlot(String name) =>
         capabilities.supportedSlots.contains(name);
     final merged = <String, Object?>{...props};
@@ -2662,6 +2683,39 @@ class ControlRenderer {
           ? coerceObjectMap(merged['__slot_styles'] as Map)
           : <String, Object?>{};
       merged['__slot_styles'] = StylingTokens.mergeMaps(existing, slotStyles);
+    }
+    if ((normalizedControlType == 'container' ||
+            normalizedControlType == 'surface' ||
+            normalizedControlType == 'box' ||
+            normalizedControlType == 'card' ||
+            normalizedControlType == 'decorated_box') &&
+        merged['content_padding'] == null &&
+        merged['padding'] != null) {
+      merged['content_padding'] = merged['padding'];
+      merged.remove('padding');
+    }
+    if (normalizedControlType == 'container' ||
+        normalizedControlType == 'surface' ||
+        normalizedControlType == 'box' ||
+        normalizedControlType == 'card' ||
+        normalizedControlType == 'decorated_box') {
+      final rootSlot = resolvedStyle.slot('root');
+      final surfaceSlot = resolvedStyle.slot('surface');
+      final backgroundSlot = resolvedStyle.slot('background');
+      merged['bgcolor'] ??=
+          surfaceSlot['background_color'] ??
+          surfaceSlot['bgcolor'] ??
+          backgroundSlot['background_color'] ??
+          backgroundSlot['bgcolor'] ??
+          rootSlot['background_color'] ??
+          rootSlot['bgcolor'] ??
+          _surfaceToken(effectiveTokens);
+      merged['color'] ??= merged['bgcolor'];
+      merged['border_color'] ??=
+          surfaceSlot['border_color'] ??
+          backgroundSlot['border_color'] ??
+          rootSlot['border_color'] ??
+          _borderToken(effectiveTokens);
     }
     return merged;
   }
@@ -2890,6 +2944,12 @@ class ControlRenderer {
             ? null
             : props['gradient'] ?? surfaceStyle['gradient'],
       );
+      final backgroundBlendMode = _parseBlendMode(
+        props['background_blend_mode'] ??
+            surfaceStyle['background_blend_mode'] ??
+            props['blend_mode'] ??
+            surfaceStyle['blend_mode'],
+      );
       final image = coerceDecorationImage(
         props['image'] ?? surfaceStyle['image'],
       );
@@ -2951,6 +3011,7 @@ class ControlRenderer {
         built = DecoratedBox(
           decoration: BoxDecoration(
             color: bg,
+            backgroundBlendMode: backgroundBlendMode,
             border: border,
             shape: shape,
             borderRadius: borderRadius,
@@ -3153,10 +3214,35 @@ class ControlRenderer {
                 surfaceStyle['hover_surface_curve'])
             ?.toString(),
       );
+      final backgroundBlendMode = _parseBlendMode(
+        props['background_blend_mode'] ??
+            props['scene_blend_mode'] ??
+            surfaceStyle['background_blend_mode'] ??
+            surfaceStyle['scene_blend_mode'],
+      );
+      final foregroundBlendMode = _parseBlendMode(
+        props['foreground_blend_mode'] ??
+            props['overlay_blend_mode'] ??
+            surfaceStyle['foreground_blend_mode'] ??
+            surfaceStyle['overlay_blend_mode'] ??
+            props['scene_blend_mode'] ??
+            surfaceStyle['scene_blend_mode'],
+      );
+      final hoverBlendMode = _parseBlendMode(
+        props['hover_background_blend_mode'] ??
+            props['hover_surface_blend_mode'] ??
+            surfaceStyle['hover_background_blend_mode'] ??
+            surfaceStyle['hover_surface_blend_mode'] ??
+            props['background_blend_mode'] ??
+            surfaceStyle['background_blend_mode'],
+      );
       built = _LayeredSurfaceHost(
         backgroundLayers: surfaceLayers,
         foregroundLayers: foregroundLayers,
         hoverBackgroundLayers: hoverSurfaceLayers,
+        backgroundBlendMode: backgroundBlendMode,
+        foregroundBlendMode: foregroundBlendMode,
+        hoverBackgroundBlendMode: hoverBlendMode,
         hoverOpacity: hoverOpacity,
         hoverDuration: Duration(milliseconds: layerDurationMs.clamp(0, 2000)),
         hoverCurve: layerCurve,
@@ -3214,6 +3300,9 @@ class ControlRenderer {
                     ) ??
                     0.0)
                 .clamp(0.0, 1.0),
+        isolateScene: _parseSceneIsolation(
+          props['scene_isolation'] ?? surfaceStyle['scene_isolation'],
+        ),
         child: built,
       );
     }
@@ -3353,7 +3442,7 @@ class ControlRenderer {
       }
       if (value is! Map) return;
       final map = coerceObjectMap(value);
-      if (EffectLayer.fromValue(map) != null) {
+      if (looksLikeEffectLayerValue(map)) {
         return;
       }
       if (map['type'] != null) {
@@ -4264,6 +4353,68 @@ class ControlRenderer {
     return null;
   }
 
+  BlendMode? _parseBlendMode(Object? value) {
+    final normalized = value
+        ?.toString()
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    switch (normalized) {
+      case null:
+      case '':
+      case 'normal':
+      case 'src_over':
+        return null;
+      case 'multiply':
+        return BlendMode.multiply;
+      case 'screen':
+        return BlendMode.screen;
+      case 'overlay':
+        return BlendMode.overlay;
+      case 'soft_light':
+      case 'softlight':
+        return BlendMode.softLight;
+      case 'hard_light':
+      case 'hardlight':
+        return BlendMode.hardLight;
+      case 'plus':
+      case 'add':
+        return BlendMode.plus;
+      case 'difference':
+        return BlendMode.difference;
+      case 'exclusion':
+        return BlendMode.exclusion;
+      case 'color_dodge':
+      case 'colordodge':
+        return BlendMode.colorDodge;
+      case 'color_burn':
+      case 'colorburn':
+        return BlendMode.colorBurn;
+      case 'lighten':
+        return BlendMode.lighten;
+      case 'darken':
+        return BlendMode.darken;
+      default:
+        return null;
+    }
+  }
+
+  bool _parseSceneIsolation(Object? value) {
+    if (value is bool) return value;
+    final normalized = value
+        ?.toString()
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    return normalized == 'isolate' ||
+        normalized == 'true' ||
+        normalized == '1' ||
+        normalized == 'yes' ||
+        normalized == 'on';
+  }
+
   FontWeight? _parseFontWeight(Object? value) {
     if (value == null) return null;
     if (value is int) return _fontWeightFromInt(value);
@@ -4479,6 +4630,9 @@ class _LayeredSurfaceHost extends StatefulWidget {
     required this.backgroundLayers,
     required this.foregroundLayers,
     required this.hoverBackgroundLayers,
+    required this.backgroundBlendMode,
+    required this.foregroundBlendMode,
+    required this.hoverBackgroundBlendMode,
     required this.hoverOpacity,
     required this.hoverDuration,
     required this.hoverCurve,
@@ -4489,12 +4643,16 @@ class _LayeredSurfaceHost extends StatefulWidget {
     required this.foregroundOpacity,
     required this.scrimColor,
     required this.scrimOpacity,
+    required this.isolateScene,
     required this.child,
   });
 
   final List<Widget> backgroundLayers;
   final List<Widget> foregroundLayers;
   final List<Widget> hoverBackgroundLayers;
+  final BlendMode? backgroundBlendMode;
+  final BlendMode? foregroundBlendMode;
+  final BlendMode? hoverBackgroundBlendMode;
   final double hoverOpacity;
   final Duration hoverDuration;
   final Curve hoverCurve;
@@ -4505,6 +4663,7 @@ class _LayeredSurfaceHost extends StatefulWidget {
   final double foregroundOpacity;
   final Color? scrimColor;
   final double scrimOpacity;
+  final bool isolateScene;
   final Widget child;
 
   @override
@@ -4523,11 +4682,10 @@ class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
       children: <Widget>[
         for (final layer in widget.backgroundLayers)
           Positioned.fill(
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: widget.backgroundOpacity,
-                child: layer,
-              ),
+            child: _SceneLayerHost(
+              blendMode: widget.backgroundBlendMode,
+              opacity: widget.backgroundOpacity,
+              child: layer,
             ),
           ),
         if (widget.scrimColor != null && widget.scrimOpacity > 0)
@@ -4545,23 +4703,27 @@ class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
                 opacity: _hovered ? widget.hoverOpacity : 0.0,
                 duration: widget.hoverDuration,
                 curve: widget.hoverCurve,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    for (final layer in widget.hoverBackgroundLayers) layer,
-                  ],
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      for (final layer in widget.hoverBackgroundLayers)
+                        _SceneLayerHost(
+                          blendMode: widget.hoverBackgroundBlendMode,
+                          opacity: 1.0,
+                          child: layer,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
             ),
           ),
         widget.child,
         for (final layer in widget.foregroundLayers)
           Positioned.fill(
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: widget.foregroundOpacity,
-                child: layer,
-              ),
+            child: _SceneLayerHost(
+              blendMode: widget.foregroundBlendMode,
+              opacity: widget.foregroundOpacity,
+              child: layer,
             ),
           ),
       ],
@@ -4580,11 +4742,81 @@ class _LayeredSurfaceHostState extends State<_LayeredSurfaceHost> {
       );
     }
 
+    if (widget.isolateScene) {
+      layered = RepaintBoundary(child: layered);
+    }
+
     if (!hasHoverLayer) return layered;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: layered,
     );
+  }
+}
+
+class _SceneLayerHost extends StatelessWidget {
+  const _SceneLayerHost({
+    required this.child,
+    required this.opacity,
+    this.blendMode,
+  });
+
+  final Widget child;
+  final double opacity;
+  final BlendMode? blendMode;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget current = child;
+    if (blendMode != null) {
+      current = _BlendModeLayer(blendMode: blendMode!, child: current);
+    }
+    if (opacity >= 0.0 && opacity < 1.0) {
+      current = Opacity(opacity: opacity.clamp(0.0, 1.0), child: current);
+    }
+    return IgnorePointer(child: current);
+  }
+}
+
+class _BlendModeLayer extends SingleChildRenderObjectWidget {
+  const _BlendModeLayer({
+    required this.blendMode,
+    super.child,
+  });
+
+  final BlendMode blendMode;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderBlendModeLayer(blendMode);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderBlendModeLayer renderObject,
+  ) {
+    renderObject.blendMode = blendMode;
+  }
+}
+
+class _RenderBlendModeLayer extends RenderProxyBox {
+  _RenderBlendModeLayer(this._blendMode);
+
+  BlendMode _blendMode;
+
+  set blendMode(BlendMode value) {
+    if (_blendMode == value) return;
+    _blendMode = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    context.canvas.saveLayer(offset & size, Paint()..blendMode = _blendMode);
+    context.paintChild(child!, offset);
+    context.canvas.restore();
   }
 }

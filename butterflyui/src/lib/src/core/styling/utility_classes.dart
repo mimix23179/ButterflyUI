@@ -1,4 +1,5 @@
 import '../control_utils.dart';
+import 'stylesheet.dart';
 import 'theme.dart';
 
 Map<String, Object?> applyUtilityClassStyles(
@@ -6,7 +7,10 @@ Map<String, Object?> applyUtilityClassStyles(
   double viewportWidth = 1280,
   double viewportHeight = 800,
 }) {
-  final tokens = _coerceUtilityTokens(props['class_name'] ?? props['classes']);
+  final tokens = <String>{
+    ..._coerceUtilityTokens(props['class_name']),
+    ..._coerceUtilityTokens(props['classes']),
+  }.toList(growable: false);
   if (tokens.isEmpty) return props;
 
   final style = _coerceMap(props['style']);
@@ -78,22 +82,7 @@ Map<String, Object?> applyUtilityClassStyles(
 }
 
 List<String> _coerceUtilityTokens(Object? value) {
-  if (value == null) return const <String>[];
-  if (value is String) {
-    return value
-        .split(RegExp(r'[\s,]+'))
-        .map((part) => part.trim())
-        .where((part) => part.isNotEmpty)
-        .toList(growable: false);
-  }
-  if (value is List) {
-    return value
-        .where((item) => item != null)
-        .map((item) => item.toString().trim())
-        .where((part) => part.isNotEmpty)
-        .toList(growable: false);
-  }
-  return <String>[value.toString().trim()];
+  return normalizeStylingClassNames(value);
 }
 
 Map<String, Object?> _coerceMap(Object? value) {
@@ -433,6 +422,34 @@ class _UtilityClassResolver {
     required double viewportWidth,
     required double viewportHeight,
   }) {
+    final width = _dimensionValue(token, prefix: 'w_', viewport: viewportWidth);
+    if (width != null) {
+      target['width'] = width;
+      return true;
+    }
+    final minWidth = _dimensionValue(
+      token,
+      prefix: 'min_w_',
+      viewport: viewportWidth,
+    );
+    if (minWidth != null) {
+      target['min_width'] = minWidth;
+      return true;
+    }
+    final height = _dimensionValue(token, prefix: 'h_', viewport: viewportHeight);
+    if (height != null) {
+      target['height'] = height;
+      return true;
+    }
+    final minHeight = _dimensionValue(
+      token,
+      prefix: 'min_h_',
+      viewport: viewportHeight,
+    );
+    if (minHeight != null) {
+      target['min_height'] = minHeight;
+      return true;
+    }
     final maxWidth = _maxWidthValue(token, viewportWidth);
     if (maxWidth != null) {
       target['max_width'] = maxWidth;
@@ -455,6 +472,17 @@ class _UtilityClassResolver {
       case 'fixed':
         target['position'] = token;
         return true;
+      case 'flex_row':
+      case 'flex_col':
+        target['direction'] = token == 'flex_row' ? 'row' : 'column';
+        target['axis'] = token == 'flex_row' ? 'horizontal' : 'vertical';
+        return true;
+      case 'flex_wrap':
+        target['wrap'] = true;
+        return true;
+      case 'flex_nowrap':
+        target['wrap'] = false;
+        return true;
       case 'overflow_hidden':
       case 'overflow_clip':
       case 'overflow_visible':
@@ -468,6 +496,58 @@ class _UtilityClassResolver {
       case 'z_50':
         target['z_index'] = double.parse(token.substring(2));
         return true;
+      case 'grow':
+      case 'grow_1':
+        target['expand'] = true;
+        target['flex'] = 1;
+        return true;
+      case 'grow_0':
+        target['expand'] = false;
+        target['flex'] = 0;
+        return true;
+      case 'shrink':
+      case 'shrink_1':
+        target['shrink'] = 1;
+        return true;
+      case 'shrink_0':
+        target['shrink'] = 0;
+        return true;
+      case 'justify_start':
+      case 'justify_center':
+      case 'justify_end':
+      case 'justify_between':
+      case 'justify_around':
+      case 'justify_evenly':
+        target['main_axis'] = switch (token) {
+          'justify_between' => 'space_between',
+          'justify_around' => 'space_around',
+          'justify_evenly' => 'space_evenly',
+          _ => token.substring('justify_'.length),
+        };
+        return true;
+      case 'items_start':
+      case 'items_center':
+      case 'items_end':
+      case 'items_stretch':
+      case 'items_baseline':
+        target['cross_axis'] = token.substring('items_'.length);
+        return true;
+      case 'place_items_start':
+      case 'place_items_center':
+      case 'place_items_end':
+      case 'place_items_stretch':
+        final value = token.substring('place_items_'.length);
+        target['main_axis'] = value == 'stretch' ? 'center' : value;
+        target['cross_axis'] = value;
+        return true;
+    }
+
+    final basis = RegExp(r'^basis_(.+)$').firstMatch(token);
+    if (basis != null) {
+      final amount = _basisValue(basis.group(1)!, viewportWidth);
+      if (amount == null) return false;
+      target['basis'] = amount;
+      return true;
     }
 
     final inset = RegExp(r'^inset_(.+)$').firstMatch(token);
@@ -566,6 +646,39 @@ class _UtilityClassResolver {
   }
 
   static bool _applyTypographyToken(String token, Map<String, Object?> target) {
+    final typeRole = switch (token) {
+      'role_display_hero' => 'display_hero',
+      'role_display' => 'display',
+      'role_headline' => 'headline',
+      'role_heading' => 'heading',
+      'role_title' => 'title',
+      'role_body_lg' => 'body_lg',
+      'role_body' => 'body',
+      'role_caption' => 'caption',
+      'role_helper' => 'helper',
+      'role_button_label' => 'button_label',
+      'role_input' => 'input',
+      'role_nav' => 'nav',
+      'role_overline' => 'overline',
+      'type_display_hero' => 'display_hero',
+      'type_display' => 'display',
+      'type_headline' => 'headline',
+      'type_heading' => 'heading',
+      'type_title' => 'title',
+      'type_body_lg' => 'body_lg',
+      'type_body' => 'body',
+      'type_caption' => 'caption',
+      'type_helper' => 'helper',
+      'type_button_label' => 'button_label',
+      'type_input' => 'input',
+      'type_nav' => 'nav',
+      'type_overline' => 'overline',
+      _ => null,
+    };
+    if (typeRole != null) {
+      target['type_role'] = typeRole;
+      return true;
+    }
     final fontSize = switch (token) {
       'text_xs' => 12.0,
       'text_sm' => 14.0,
@@ -580,6 +693,9 @@ class _UtilityClassResolver {
       'text_7xl' => 72.0,
       'text_8xl' => 96.0,
       'text_display' => 84.0,
+      'text_display_sm' => 64.0,
+      'text_display_md' => 72.0,
+      'text_display_lg' => 96.0,
       'text_headline' => 52.0,
       'text_body' => 18.0,
       'text_caption' => 13.0,
@@ -624,6 +740,29 @@ class _UtilityClassResolver {
     if (leading != null) {
       target['line_height'] = leading;
       return true;
+    }
+    final maxTextWidth = switch (token) {
+      'max_text_w_sm' => 480.0,
+      'max_text_w_md' => 560.0,
+      'max_text_w_lg' => 640.0,
+      'max_text_w_xl' => 720.0,
+      'max_text_w_prose' => 680.0,
+      _ => null,
+    };
+    if (maxTextWidth != null) {
+      target['max_width'] = maxTextWidth;
+      return true;
+    }
+    switch (token) {
+      case 'text_wrap_balance':
+        target['text_wrap'] = 'balance';
+        return true;
+      case 'text_wrap_pretty':
+        target['text_wrap'] = 'pretty';
+        return true;
+      case 'text_wrap_nowrap':
+        target['text_wrap'] = 'nowrap';
+        return true;
     }
     return false;
   }
@@ -690,9 +829,9 @@ class _GradientParts {
 
   Map<String, Object?>? toGradient() {
     final colors = <String>[
-      if (from != null) from!,
-      if (via != null) via!,
-      if (to != null) to!,
+      ...?(from == null ? null : <String>[from!]),
+      ...?(via == null ? null : <String>[via!]),
+      ...?(to == null ? null : <String>[to!]),
     ];
     if (colors.length < 2) return null;
     return <String, Object?>{
@@ -764,6 +903,38 @@ double? _spacingValue(String token) {
     '16': 64,
   };
   return scale[normalized];
+}
+
+double? _basisValue(String token, double viewportWidth) {
+  final normalized = token.replaceAll('/', '_');
+  return switch (normalized) {
+    'auto' => null,
+    'full' => viewportWidth,
+    '1_2' => viewportWidth * 0.5,
+    '1_3' => viewportWidth / 3.0,
+    '2_3' => viewportWidth * (2.0 / 3.0),
+    '1_4' => viewportWidth * 0.25,
+    '3_4' => viewportWidth * 0.75,
+    _ => _spacingValue(token),
+  };
+}
+
+double? _dimensionValue(
+  String token, {
+  required String prefix,
+  required double viewport,
+}) {
+  if (!token.startsWith(prefix)) return null;
+  final suffix = token.substring(prefix.length).replaceAll('/', '_');
+  return switch (suffix) {
+    'full' || 'screen' => viewport,
+    '1_2' => viewport * 0.5,
+    '1_3' => viewport / 3.0,
+    '2_3' => viewport * (2.0 / 3.0),
+    '1_4' => viewport * 0.25,
+    '3_4' => viewport * 0.75,
+    _ => _spacingValue(suffix),
+  };
 }
 
 String? _resolveUtilityColor(String token) {

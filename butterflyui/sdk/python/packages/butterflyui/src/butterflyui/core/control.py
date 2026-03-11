@@ -446,16 +446,19 @@ def _merge_props(target: dict[str, Any], extra: Mapping[str, Any], *, override: 
 def _coerce_style_payload(style: Any) -> dict[str, Any] | None:
     if style is None:
         return None
+    payload: dict[str, Any] | None = None
     if isinstance(style, Mapping):
-        return dict(style)
-    if hasattr(style, "to_json"):
+        payload = dict(style)
+    elif hasattr(style, "to_json"):
         try:
-            payload = style.to_json()
+            raw_payload = style.to_json()
         except Exception:
             return None
-        if isinstance(payload, Mapping):
-            return dict(payload)
-    return None
+        if isinstance(raw_payload, Mapping):
+            payload = dict(raw_payload)
+    if payload is None:
+        return None
+    return _normalize_universal_prop_aliases(payload)
 
 
 def _merge_local_style(
@@ -481,10 +484,39 @@ def _normalize_universal_prop_aliases(props: Mapping[str, Any] | None) -> dict[s
     if not isinstance(props, Mapping):
         return {}
     normalized = dict(props)
-    if "classes" not in normalized and "class_name" in normalized:
-        normalized["classes"] = normalized.pop("class_name")
-    if "style_pack" not in normalized and "theme" in normalized:
-        normalized["style_pack"] = normalized.pop("theme")
+    classes = normalized.get("classes")
+    class_name = normalized.pop("class_name", None)
+    if classes is None:
+        if class_name is not None:
+            normalized["classes"] = class_name
+    elif class_name is not None:
+        if isinstance(classes, str):
+            merged_classes: list[str] = classes.split()
+        elif isinstance(classes, (list, tuple, set)):
+            merged_classes = [str(item) for item in classes if item is not None]
+        else:
+            merged_classes = [str(classes)]
+        if isinstance(class_name, str):
+            merged_classes.extend(token for token in class_name.split() if token)
+        elif isinstance(class_name, (list, tuple, set)):
+            merged_classes.extend(str(item) for item in class_name if item is not None)
+        else:
+            merged_classes.append(str(class_name))
+        seen: set[str] = set()
+        ordered: list[str] = []
+        for token in merged_classes:
+            if token and token not in seen:
+                ordered.append(token)
+                seen.add(token)
+        normalized["classes"] = ordered
+    theme = normalized.pop("theme", None)
+    if "style_pack" not in normalized and theme is not None:
+        normalized["style_pack"] = theme
+    style_value = normalized.get("style")
+    if style_value is not None:
+        style_payload = _coerce_style_payload(style_value)
+        if style_payload is not None:
+            normalized["style"] = style_payload
     return normalized
 
 

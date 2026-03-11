@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/window/window_api.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -125,10 +126,12 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final base = widget.bgColor ?? scheme.surface.withValues(alpha: 0.18);
-    final border = widget.borderColor ?? scheme.outline.withValues(alpha: 0.35);
-    final icon = widget.iconColor ?? scheme.onSurface;
+    final base =
+        widget.bgColor ?? butterflyuiSurface(context).withValues(alpha: 0.18);
+    final border =
+        widget.borderColor ??
+        butterflyuiBorder(context).withValues(alpha: 0.35);
+    final icon = widget.iconColor ?? butterflyuiText(context);
     final color = _pressed
         ? base.withValues(alpha: (base.a + 0.18).clamp(0.0, 1.0))
         : (_hovered

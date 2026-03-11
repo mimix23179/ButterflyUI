@@ -215,11 +215,15 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
       targetHeight = viewSize.height * 0.35;
     }
 
-    final radius = coerceDouble(_liveProps['radius']) ?? 16.0;
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackBorder: butterflyuiBorder(context),
+      fallbackRadius: 16.0,
+      fallbackBorderWidth: 1.0,
+    );
     final elevation = coerceDouble(_liveProps['elevation']) ?? 8.0;
-    final background =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface;
     final panelAlignment =
         coerceAlignmentGeometry(
           _liveProps['alignment'] ??
@@ -243,32 +247,52 @@ class _BottomSheetControlState extends State<_BottomSheetControl>
         coerceClipBehavior(_liveProps['clip_behavior']) ?? Clip.antiAlias;
     final showHandle =
         _liveProps['show_handle'] == null || _liveProps['show_handle'] == true;
+    final handleColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'border',
+      fallback: butterflyuiMutedText(context).withValues(alpha: 0.3),
+    );
 
     Widget panel = Material(
-      color: background,
+      color: Colors.transparent,
       elevation: elevation,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(surface.radius)),
       clipBehavior: panelClip,
-      child: SizedBox(
-        height: targetHeight,
-        child: Column(
-          children: [
-            if (showHandle)
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 6),
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(999),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: surface.backgroundColor,
+          gradient: surface.gradient,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(surface.radius),
+          ),
+          border: surface.borderWidth <= 0
+              ? null
+              : Border.all(
+                  color: surface.borderColor,
+                  width: surface.borderWidth,
+                ),
+          boxShadow: surface.boxShadow,
+        ),
+        child: SizedBox(
+          height: targetHeight,
+          child: Column(
+            children: [
+              if (showHandle)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 6),
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: handleColor,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                 ),
-              ),
-            Expanded(child: _resolveChild()),
-          ],
+              Expanded(child: _resolveChild()),
+            ],
+          ),
         ),
       ),
     );

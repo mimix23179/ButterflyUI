@@ -7,6 +7,11 @@ import 'package:butterflyui_runtime/src/core/styling/effects/visuals/scene/layer
 
 double _fract(double value) => value - value.floorToDouble();
 
+double _layerProgress(EffectLayer layer, double progress) {
+  final phase = (coerceDouble(layer.config['phase']) ?? 0.0).clamp(0.0, 1.0);
+  return _fract(progress + phase);
+}
+
 double _seed(int index, [double offset = 0]) {
   final value = math.sin((index + 1) * 12.9898 + offset * 78.233) * 43758.5453;
   return _fract(value.abs());
@@ -24,6 +29,7 @@ class _MatrixRainPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final columnCount = math.max(10, (size.width / 28 * layer.density).round());
     final trailLength = math.max(6, (8 + layer.intensity * 10).round());
     final glyphHeight = 10 + layer.intensity * 6;
@@ -36,7 +42,7 @@ class _MatrixRainPainter extends CustomPainter {
       final x = ((column + 0.5) / columnCount) * size.width;
       final travel = size.height + trailLength * glyphHeight;
       final yBase =
-          (_fract(progress * layer.speed * 1.35 + seed) * travel) -
+          (_fract(layerProgress * layer.speed * 1.35 + seed) * travel) -
           trailLength * glyphHeight;
       for (var index = 0; index < trailLength; index++) {
         final alpha = math.max(0.0, 1 - (index / trailLength));
@@ -101,6 +107,7 @@ class _StarfieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final starCount = math.max(36, (140 * layer.density).round());
     final color = layer.color ?? const Color(0xFFEAF9FF);
     final accent = layer.accentColor ?? const Color(0xFF7DDCFF);
@@ -110,12 +117,12 @@ class _StarfieldPainter extends CustomPainter {
       final seedT = _seed(index, 1.3);
       final twinkle =
           0.45 +
-          (math.sin((progress * layer.speed * 6) + seedT * math.pi * 2) + 1) *
+          (math.sin((layerProgress * layer.speed * 6) + seedT * math.pi * 2) + 1) *
               0.25;
       final radius = 0.6 + _seed(index, 2.1) * 1.9 * layer.intensity;
       final dx = seedX * size.width;
       final dy =
-          _fract(seedY + progress * layer.speed * (0.02 + seedX * 0.05)) *
+          _fract(seedY + layerProgress * layer.speed * (0.02 + seedX * 0.05)) *
           size.height;
       final paint = Paint()
         ..color = _withOpacity(
@@ -155,6 +162,7 @@ class _ParticleFieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final particleCount =
         coerceOptionalInt(layer.config['count']) ??
         math.max(120, (260 * layer.density).round());
@@ -180,7 +188,7 @@ class _ParticleFieldPainter extends CustomPainter {
       final seedA = _seed(index, 0.2);
       final seedB = _seed(index, 0.7);
       final seedC = _seed(index, 1.4);
-      final orbit = progress * layer.speed * 0.35 + seedC * math.pi * 2;
+      final orbit = layerProgress * layer.speed * 0.35 + seedC * math.pi * 2;
       final angle =
           (seedA * math.pi * 2) +
           (spread == 'spiral' ? orbit : orbit * 0.45) +
@@ -244,6 +252,7 @@ class _LineFieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final count =
         coerceOptionalInt(layer.config['count']) ??
         math.max(42, (120 * layer.density).round());
@@ -266,8 +275,9 @@ class _LineFieldPainter extends CustomPainter {
       final seedB = _seed(index, 12.3);
       final seedC = _seed(index, 13.4);
       final dx = seedA * size.width;
-      final dy = _fract(seedB + progress * layer.speed * 0.15) * size.height;
-      final angle = tilt + math.sin(progress * layer.speed + seedC * 7) * 0.12;
+      final dy = _fract(seedB + layerProgress * layer.speed * 0.15) * size.height;
+      final angle =
+          tilt + math.sin(layerProgress * layer.speed + seedC * 7) * 0.12;
       final half = length * (0.7 + seedC * 0.6);
       final paint = Paint()
         ..strokeCap = StrokeCap.round
@@ -312,6 +322,7 @@ class _OrbitFieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final centerRaw = layer.config['center'];
     final center = centerRaw is Map
         ? Offset(
@@ -339,7 +350,7 @@ class _OrbitFieldPainter extends CustomPainter {
       final seedB = _seed(index, 15.1);
       final seedC = _seed(index, 16.1);
       final ringRadius = baseRadius + bandWidth * seedB;
-      final orbit = progress * layer.speed * (0.18 + seedA * 0.22);
+      final orbit = layerProgress * layer.speed * (0.18 + seedA * 0.22);
       final angle = (seedA * math.pi * 2) + orbit * swirl;
       final dx = center.dx + math.cos(angle) * ringRadius;
       final dy = center.dy + math.sin(angle) * ringRadius * 0.72;
@@ -378,6 +389,7 @@ class _NoiseFieldPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final count =
         coerceOptionalInt(layer.config['count']) ??
         math.max(180, (420 * layer.density).round());
@@ -391,7 +403,7 @@ class _NoiseFieldPainter extends CustomPainter {
     final accent = layer.accentColor ?? const Color(0xFF475569);
 
     for (var index = 0; index < count; index++) {
-      final seedA = _seed(index, 17.0 + progress * layer.speed);
+      final seedA = _seed(index, 17.0 + layerProgress * layer.speed);
       final seedB = _seed(index, 18.0);
       final seedC = _seed(index, 19.0);
       final dx = seedA * size.width;
@@ -418,6 +430,7 @@ class _RainPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final dropCount = math.max(40, (120 * layer.density).round());
     final paint = Paint()
       ..color = _withOpacity(
@@ -433,7 +446,7 @@ class _RainPainter extends CustomPainter {
       final seedY = _seed(index, 5.3);
       final dx = seedX * (size.width + slant) - slant;
       final dy =
-          _fract(seedY + progress * layer.speed * (0.55 + seedX * 0.2)) *
+          _fract(seedY + layerProgress * layer.speed * (0.55 + seedX * 0.2)) *
               (size.height + length) -
           length;
       canvas.drawLine(Offset(dx, dy), Offset(dx + slant, dy + length), paint);
@@ -452,6 +465,7 @@ class _NebulaPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final rect = Offset.zero & size;
     final base = layer.color ?? const Color(0xFF24104B);
     final accent = layer.accentColor ?? const Color(0xFF46C8FF);
@@ -471,7 +485,8 @@ class _NebulaPainter extends CustomPainter {
     for (var index = 0; index < cloudCount; index++) {
       final seedX = _seed(index, 6.2);
       final seedY = _seed(index, 7.4);
-      final drift = math.sin(progress * layer.speed * math.pi * 2 + index) * 18;
+      final drift =
+          math.sin(layerProgress * layer.speed * math.pi * 2 + index) * 18;
       final center = Offset(
         size.width * (0.12 + seedX * 0.76) + drift,
         size.height * (0.14 + seedY * 0.72) - drift * 0.35,
@@ -500,6 +515,7 @@ class _LiquidGlowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final layerProgress = _layerProgress(layer, progress);
     final rect = Offset.zero & size;
     final base = layer.color ?? const Color(0xFF0F4475);
     final accent = layer.accentColor ?? const Color(0xFF35D0FF);
@@ -507,8 +523,11 @@ class _LiquidGlowPainter extends CustomPainter {
     path.moveTo(0, size.height * 0.62);
     for (var x = 0.0; x <= size.width; x += 14) {
       final wave =
-          math.sin((x / size.width) * math.pi * 3 + progress * layer.speed * math.pi * 2) *
-          (16 + layer.intensity * 22);
+          math.sin(
+                (x / size.width) * math.pi * 3 +
+                    layerProgress * layer.speed * math.pi * 2,
+              ) *
+              (16 + layer.intensity * 22);
       path.lineTo(x, size.height * 0.58 + wave);
     }
     path.lineTo(size.width, size.height);
@@ -583,14 +602,9 @@ Widget? buildEffectScenePaintLayer(
 }) {
   final painter = buildEffectScenePainter(layer, progress: progress);
   if (painter == null) return null;
-  return Positioned.fill(
-    child: IgnorePointer(
-      child: Opacity(
-        opacity: layer.opacity,
-        child: RepaintBoundary(
-          child: CustomPaint(painter: painter, child: const SizedBox.expand()),
-        ),
-      ),
+  return IgnorePointer(
+    child: RepaintBoundary(
+      child: CustomPaint(painter: painter, child: const SizedBox.expand()),
     ),
   );
 }

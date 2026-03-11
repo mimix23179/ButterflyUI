@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -477,22 +478,38 @@ class _DisplayControlState extends State<_DisplayControl> {
   }
 
   Widget _buildCheck() {
+    final checkboxTheme = Theme.of(context).copyWith(
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return butterflyuiPrimary(context);
+          }
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStatePropertyAll(butterflyuiBackground(context)),
+        side: BorderSide(color: butterflyuiBorder(context)),
+      ),
+      listTileTheme: butterflyuiListTileTheme(context, _state),
+    );
     final single = _state['checked_value'];
     if (single != null) {
       final value = single == true;
-      return CheckboxListTile(
-        dense: _isDense,
-        contentPadding: EdgeInsets.zero,
-        controlAffinity: ListTileControlAffinity.leading,
-        value: value,
-        title: Text(
-          (_state['title'] ?? _state['label'] ?? 'Checked').toString(),
+      return Theme(
+        data: checkboxTheme,
+        child: CheckboxListTile(
+          dense: _isDense,
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: value,
+          title: Text(
+            (_state['title'] ?? _state['label'] ?? 'Checked').toString(),
+          ),
+          onChanged: (next) {
+            _state['checked_value'] = next == true;
+            _emit('check_change', {'checked': next == true});
+            setState(() {});
+          },
         ),
-        onChanged: (next) {
-          _state['checked_value'] = next == true;
-          _emit('check_change', {'checked': next == true});
-          setState(() {});
-        },
       );
     }
 
@@ -504,25 +521,28 @@ class _DisplayControlState extends State<_DisplayControl> {
           .map((item) {
             final id = (item['id'] ?? item['key'] ?? '').toString();
             final label = (item['label'] ?? item['title'] ?? id).toString();
-            return CheckboxListTile(
-              dense: _isDense,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: _checked.contains(id),
-              title: Text(label),
-              onChanged: (next) {
-                setState(() {
-                  if (next == true) {
-                    _checked.add(id);
-                  } else {
-                    _checked.remove(id);
-                  }
-                });
-                _emit('check_change', {
-                  'id': id,
-                  'checked': _checked.toList(growable: false),
-                });
-              },
+            return Theme(
+              data: checkboxTheme,
+              child: CheckboxListTile(
+                dense: _isDense,
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _checked.contains(id),
+                title: Text(label),
+                onChanged: (next) {
+                  setState(() {
+                    if (next == true) {
+                      _checked.add(id);
+                    } else {
+                      _checked.remove(id);
+                    }
+                  });
+                  _emit('check_change', {
+                    'id': id,
+                    'checked': _checked.toList(growable: false),
+                  });
+                },
+              ),
             );
           })
           .toList(growable: false),

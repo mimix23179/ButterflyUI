@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUICheckbox extends StatefulWidget {
   final String controlId;
+  final Map<String, Object?> props;
   final String? label;
   final bool? value;
   final bool enabled;
@@ -19,6 +21,7 @@ class ButterflyUICheckbox extends StatefulWidget {
   const ButterflyUICheckbox({
     super.key,
     required this.controlId,
+    required this.props,
     required this.label,
     required this.value,
     required this.enabled,
@@ -151,19 +154,49 @@ class _ButterflyUICheckboxState extends State<ButterflyUICheckbox> {
     final label = widget.label;
     final tristate = widget.tristate;
     final value = tristate ? _value : (_value ?? false);
-    final control = (label == null || label.trim().isEmpty)
-        ? Checkbox(
-            value: value,
-            tristate: tristate,
-            onChanged: widget.enabled ? _handleChanged : null,
-          )
-        : CheckboxListTile(
-            value: value,
-            tristate: tristate,
-            title: Text(label),
-            controlAffinity: ListTileControlAffinity.leading,
-            onChanged: widget.enabled ? _handleChanged : null,
-          );
+    final tileTheme = butterflyuiListTileTheme(context, widget.props);
+    final activeColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'background',
+      explicit: widget.props['active_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final borderColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'border',
+      explicit: widget.props['border_color'],
+      fallback: butterflyuiBorder(context),
+    );
+    final control = Theme(
+      data: Theme.of(context).copyWith(
+        checkboxTheme: CheckboxThemeData(
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return activeColor;
+            return Colors.transparent;
+          }),
+          checkColor: WidgetStatePropertyAll(butterflyuiBackground(context)),
+          side: BorderSide(color: borderColor),
+        ),
+        listTileTheme: tileTheme,
+        unselectedWidgetColor: borderColor,
+      ),
+      child: (label == null || label.trim().isEmpty)
+          ? Checkbox(
+              value: value,
+              tristate: tristate,
+              onChanged: widget.enabled ? _handleChanged : null,
+            )
+          : CheckboxListTile(
+              value: value,
+              tristate: tristate,
+              contentPadding: EdgeInsets.zero,
+              title: Text(label),
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: widget.enabled ? _handleChanged : null,
+            ),
+    );
     return wrapFocusableFormField(
       focusNode: _focusNode,
       autofocus: widget.autofocus,

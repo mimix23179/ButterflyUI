@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -228,11 +229,18 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
     required VoidCallback? onPressed,
     required bool dense,
   }) {
+    final textColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      fallback: butterflyuiText(context),
+    );
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
         visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
         minimumSize: Size(0, dense ? 30 : 36),
+        foregroundColor: textColor,
       ),
       child: Text(label),
     );
@@ -245,6 +253,34 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
     required bool enabled,
     required bool dense,
   }) {
+    final selectedBackground = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'background',
+      explicit: _liveProps['selected_bgcolor'] ?? _liveProps['selected_background'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final selectedForeground = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['selected_text_color'],
+      fallback: _resolveReadableForeground(selectedBackground),
+    );
+    final borderColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'border',
+      explicit: _liveProps['border_color'],
+      fallback: butterflyuiBorder(context),
+    );
+    final textColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['text_color'],
+      fallback: butterflyuiText(context),
+    );
     final style = selected
         ? FilledButton.styleFrom(
             visualDensity: dense
@@ -252,6 +288,8 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
                 : VisualDensity.standard,
             minimumSize: Size(dense ? 32 : 36, dense ? 30 : 36),
             padding: EdgeInsets.symmetric(horizontal: dense ? 8 : 10),
+            backgroundColor: selectedBackground,
+            foregroundColor: selectedForeground,
           )
         : OutlinedButton.styleFrom(
             visualDensity: dense
@@ -259,6 +297,8 @@ class _ButterflyUIPaginationState extends State<ButterflyUIPagination> {
                 : VisualDensity.standard,
             minimumSize: Size(dense ? 32 : 36, dense ? 30 : 36),
             padding: EdgeInsets.symmetric(horizontal: dense ? 8 : 10),
+            foregroundColor: textColor,
+            side: BorderSide(color: borderColor),
           );
 
     final button = selected
@@ -338,4 +378,10 @@ class _PageButtonModel {
 
   const _PageButtonModel.page(this.page) : isGap = false;
   const _PageButtonModel.gap() : isGap = true, page = -1;
+}
+
+Color _resolveReadableForeground(Color background) {
+  return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 }

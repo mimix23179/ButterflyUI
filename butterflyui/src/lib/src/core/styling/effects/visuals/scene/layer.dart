@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -18,7 +20,42 @@ enum EffectLayerKind {
   custom,
 }
 
-enum EffectLayerPosition { background, overlay }
+enum EffectLayerPosition { background, foreground, overlay }
+
+const Set<String> _knownEffectLayerTokens = <String>{
+  'gradient_wash',
+  'gradient',
+  'wash',
+  'matrix_rain',
+  'matrix',
+  'stars',
+  'starfield',
+  'galaxy_stars',
+  'particle_field',
+  'particles',
+  'radial_particles',
+  'orbital_field',
+  'line_field',
+  'line_sweep',
+  'segments',
+  'orbit_field',
+  'orbit',
+  'rings',
+  'noise_field',
+  'noise',
+  'grain',
+  'rain',
+  'rainstorm',
+  'nebula',
+  'galaxy',
+  'water_flow',
+  'flowing_water',
+  'liquid_dream',
+  'liquid_glow',
+  'shader',
+  'lottie',
+  'rive',
+};
 
 String normalizeEffectLayerToken(Object? value) {
   if (value == null) return '';
@@ -33,13 +70,55 @@ String normalizeEffectLayerToken(Object? value) {
 EffectLayerPosition _parseEffectLayerPosition(Object? value) {
   final normalized = normalizeEffectLayerToken(value);
   switch (normalized) {
-    case 'overlay':
     case 'foreground':
     case 'front':
+    case 'content':
+      return EffectLayerPosition.foreground;
+    case 'overlay':
+    case 'top':
       return EffectLayerPosition.overlay;
     default:
       return EffectLayerPosition.background;
   }
+}
+
+bool looksLikeEffectLayerValue(Object? raw) {
+  if (raw == null) return false;
+  if (raw is EffectLayer) return true;
+  if (raw is String) {
+    return _knownEffectLayerTokens.contains(normalizeEffectLayerToken(raw));
+  }
+  if (raw is! Map) return false;
+  final config = coerceObjectMap(raw);
+  if (config.isEmpty) return false;
+  if (config['shader_asset'] != null ||
+      config['lottie_asset'] != null ||
+      config['lottie_url'] != null ||
+      config['lottie_data'] != null ||
+      config['lottie_json'] != null ||
+      config['rive_asset'] != null ||
+      config['rive_url'] != null ||
+      config['uniforms'] != null ||
+      config['region'] != null ||
+      config['bounds'] != null ||
+      config['mask'] != null ||
+      config['scene_mask'] != null ||
+      config['gradient'] != null ||
+      config['palette'] != null) {
+    return true;
+  }
+  final token = normalizeEffectLayerToken(
+    config['type'] ??
+        config['kind'] ??
+        config['preset'] ??
+        config['effect'] ??
+        config['scene'],
+  );
+  if (_knownEffectLayerTokens.contains(token)) {
+    return true;
+  }
+  final renderer = normalizeEffectLayerToken(config['renderer']);
+  return renderer == 'shader';
 }
 
 EffectLayerKind _parseEffectLayerKind(Map<String, Object?> config) {
@@ -150,7 +229,7 @@ class EffectLayer {
     } else {
       return null;
     }
-    if (config.isEmpty) return null;
+    if (config.isEmpty || !looksLikeEffectLayerValue(config)) return null;
 
     final position =
         defaultPosition ??
@@ -205,5 +284,35 @@ class EffectLayer {
       kind == EffectLayerKind.liquidGlow;
 
   String get signature =>
-      '${position.name}:$normalizedType:${config['shader_asset'] ?? config['lottie_asset'] ?? config['rive_asset'] ?? config['lottie_url'] ?? config['rive_url'] ?? ''}:${color?.toARGB32() ?? ''}:${accentColor?.toARGB32() ?? ''}:${speed.toStringAsFixed(2)}:${density.toStringAsFixed(2)}:${intensity.toStringAsFixed(2)}';
+      jsonEncode(<String, Object?>{
+        'position': position.name,
+        'type': normalizedType,
+        'opacity': opacity.toStringAsFixed(3),
+        'speed': speed.toStringAsFixed(3),
+        'density': density.toStringAsFixed(3),
+        'intensity': intensity.toStringAsFixed(3),
+        'color': color?.toARGB32(),
+        'accent_color': accentColor?.toARGB32(),
+        'config': _stableSignatureValue(config),
+      });
+}
+
+Object? _stableSignatureValue(Object? value) {
+  if (value == null || value is num || value is bool || value is String) {
+    return value;
+  }
+  if (value is Color) {
+    return value.toARGB32();
+  }
+  if (value is Map) {
+    final sortedKeys = value.keys.map((key) => key.toString()).toList()..sort();
+    return <String, Object?>{
+      for (final key in sortedKeys)
+        key: _stableSignatureValue(value[key]),
+    };
+  }
+  if (value is Iterable) {
+    return value.map(_stableSignatureValue).toList(growable: false);
+  }
+  return value.toString();
 }

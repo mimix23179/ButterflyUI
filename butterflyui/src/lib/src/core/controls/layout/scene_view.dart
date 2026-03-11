@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -103,7 +104,7 @@ class _SceneViewControlState extends State<_SceneViewControl> {
     final showGrid = widget.props['show_grid'] == true;
     final showAxes = widget.props['show_axes'] == true;
     final backgroundColor = coerceColor(widget.props['background']) ??
-        Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.45);
+        butterflyuiSurfaceAlt(context).withValues(alpha: 0.45);
 
     final children = <Widget>[];
     for (final raw in widget.rawChildren) {
@@ -121,7 +122,7 @@ class _SceneViewControlState extends State<_SceneViewControl> {
             IgnorePointer(
               child: CustomPaint(
                 painter: _SceneGridPainter(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: butterflyuiBorder(context).withValues(alpha: 0.2),
                   step: coerceDouble(widget.props['grid_size']) ?? 24,
                 ),
               ),
@@ -130,8 +131,8 @@ class _SceneViewControlState extends State<_SceneViewControl> {
             IgnorePointer(
               child: CustomPaint(
                 painter: _AxesPainter(
-                  xColor: Theme.of(context).colorScheme.primary,
-                  yColor: Theme.of(context).colorScheme.tertiary,
+                  xColor: butterflyuiPrimary(context),
+                  yColor: butterflyuiSecondary(context),
                 ),
               ),
             ),

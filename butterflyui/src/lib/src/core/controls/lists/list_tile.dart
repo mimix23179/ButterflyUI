@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -111,25 +112,34 @@ class _ListTileControlState extends State<_ListTileControl> {
       textStyle: ThemeData.fallback().textTheme.labelMedium,
     );
 
-    return ListTile(
-      dense: widget.props['dense'] == true,
-      enabled: _enabled,
-      selected: _selected,
-      title: Text(title),
-      subtitle: subtitle == null ? null : Text(subtitle),
-      leading: leading,
-      trailing: trailing ?? (meta == null ? null : Text(meta)),
-      onTap: _enabled
-          ? () {
-              if (widget.controlId.isEmpty) return;
-              widget.sendEvent(widget.controlId, 'select', {
-                'id': widget.props['id']?.toString() ?? title,
-                'title': title,
-                if (widget.props['value'] != null) 'value': widget.props['value'],
-                if (widget.props['meta'] != null) 'meta': widget.props['meta'],
-              });
-            }
-          : null,
+    return butterflyuiSurfaceContainer(
+      context,
+      props: widget.props,
+      fallbackPadding: EdgeInsets.zero,
+      child: ListTileTheme(
+        data: butterflyuiListTileTheme(context, widget.props),
+        child: ListTile(
+          dense: widget.props['dense'] == true,
+          enabled: _enabled,
+          selected: _selected,
+          title: Text(title),
+          subtitle: subtitle == null ? null : Text(subtitle),
+          leading: leading,
+          trailing: trailing ?? (meta == null ? null : Text(meta)),
+          onTap: _enabled
+              ? () {
+                  if (widget.controlId.isEmpty) return;
+                  widget.sendEvent(widget.controlId, 'select', {
+                    'id': widget.props['id']?.toString() ?? title,
+                    'title': title,
+                    if (widget.props['value'] != null)
+                      'value': widget.props['value'],
+                    if (widget.props['meta'] != null) 'meta': widget.props['meta'],
+                  });
+                }
+              : null,
+        ),
+      ),
     );
   }
 }

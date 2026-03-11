@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -168,10 +169,15 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
     final statusColor = _statusColor(context, item['status']?.toString());
     final fg =
         coerceColor(item['text_color']) ??
-        Theme.of(context).colorScheme.onSurface;
+        butterflyuiResolveSlotColor(context, _liveProps, slot: 'label');
     final chipBg =
         coerceColor(item['bgcolor']) ??
-        Theme.of(context).colorScheme.surface.withValues(alpha: 0.25);
+        butterflyuiResolveSlotColor(
+          context,
+          _liveProps,
+          slot: 'background',
+          fallback: butterflyuiSurfaceAlt(context),
+        ).withValues(alpha: 0.35);
 
     return InkWell(
       borderRadius: BorderRadius.circular(8),
@@ -257,19 +263,24 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
                   {'id': _text, 'label': _text},
                 ]);
     final dense = _liveProps['dense'] == true;
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackRadius: 0,
+      fallbackPadding: EdgeInsets.symmetric(
+        horizontal: dense ? 8 : 12,
+        vertical: dense ? 4 : 6,
+      ),
+    );
     final padding =
-        coercePadding(_liveProps['padding']) ??
+        surface.contentPadding ??
         EdgeInsets.symmetric(
           horizontal: dense ? 8 : 12,
           vertical: dense ? 4 : 6,
         );
-    final bgcolor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface;
-    final borderColor =
-        coerceColor(_liveProps['border_color']) ??
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.65);
-    final radius = coerceDouble(_liveProps['radius']) ?? 0;
+    final bgcolor = surface.backgroundColor;
+    final borderColor = surface.borderColor.withValues(alpha: 0.65);
+    final radius = surface.radius;
 
     final left = <Widget>[];
     final right = <Widget>[];
@@ -288,6 +299,8 @@ class _ButterflyUIStatusBarState extends State<_ButterflyUIStatusBar> {
       padding: padding,
       decoration: BoxDecoration(
         color: bgcolor,
+        gradient: surface.gradient,
+        boxShadow: surface.boxShadow,
         borderRadius: radius > 0 ? BorderRadius.circular(radius) : null,
         border: Border(top: BorderSide(color: borderColor, width: 1)),
       ),

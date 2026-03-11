@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -243,33 +244,39 @@ class _ButterflyUINotificationCenterState
 
   @override
   Widget build(BuildContext context) {
-    final card = Card(
-      margin: EdgeInsets.zero,
+    final card = butterflyuiSurfaceContainer(
+      context,
+      props: _liveProps,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackPadding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ListTile(
-            dense: true,
-            title: Text(
-              (_liveProps['title'] ?? widget.title ?? 'Notifications')
-                  .toString(),
+          ListTileTheme(
+            data: butterflyuiListTileTheme(context, _liveProps),
+            child: ListTile(
+              dense: true,
+              title: Text(
+                (_liveProps['title'] ?? widget.title ?? 'Notifications')
+                    .toString(),
+              ),
+              trailing:
+                  (_liveProps['show_clear_all'] == null
+                      ? widget.showClearAll
+                      : (_liveProps['show_clear_all'] == true))
+                  ? TextButton(
+                      onPressed: _items.isEmpty
+                          ? null
+                          : () {
+                              setState(() {
+                                _items.clear();
+                              });
+                              widget.sendEvent(widget.controlId, 'clear', {});
+                            },
+                      child: const Text('Clear'),
+                    )
+                  : null,
             ),
-            trailing:
-                (_liveProps['show_clear_all'] == null
-                    ? widget.showClearAll
-                    : (_liveProps['show_clear_all'] == true))
-                ? TextButton(
-                    onPressed: _items.isEmpty
-                        ? null
-                        : () {
-                            setState(() {
-                              _items.clear();
-                            });
-                            widget.sendEvent(widget.controlId, 'clear', {});
-                          },
-                    child: const Text('Clear'),
-                  )
-                : null,
           ),
           const Divider(height: 1),
           if (_items.isEmpty)
@@ -285,21 +292,24 @@ class _ButterflyUINotificationCenterState
                 separatorBuilder: (_, index) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final item = _items[index];
-                  return ListTile(
-                    dense: true,
-                    title: Text(item.title),
-                    subtitle: item.message.isEmpty
-                        ? null
-                        : Text(
-                            item.message,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () => _dismiss(item),
+                  return ListTileTheme(
+                    data: butterflyuiListTileTheme(context, _liveProps),
+                    child: ListTile(
+                      dense: true,
+                      title: Text(item.title),
+                      subtitle: item.message.isEmpty
+                          ? null
+                          : Text(
+                              item.message,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () => _dismiss(item),
+                      ),
+                      onTap: () => _open(item),
                     ),
-                    onTap: () => _open(item),
                   );
                 },
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -167,31 +168,25 @@ class _ButterflyUIPreviewSurfaceState
             },
       child: Builder(
         builder: (context) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                coerceDouble(_liveProps['radius']) ?? 10,
-              ),
-              border: Border.all(
-                color:
-                    (coerceColor(_liveProps['border_color']) ??
-                            Theme.of(context).dividerColor)
-                        .withValues(alpha: 0.4),
-              ),
-              color: coerceColor(
-                _liveProps['bgcolor'] ?? _liveProps['background'],
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
+          return butterflyuiSurfaceContainer(
+            context,
+            props: _liveProps,
+            fallbackBackground: butterflyuiSurface(context),
+            fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.4),
+            fallbackRadius: coerceDouble(_liveProps['radius']) ?? 10,
+            fallbackPadding: EdgeInsets.zero,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (title != null || subtitle != null)
-                  ListTile(
-                    dense: true,
-                    title: title == null ? null : Text(title),
-                    subtitle: subtitle == null ? null : Text(subtitle),
+                  ListTileTheme(
+                    data: butterflyuiListTileTheme(context, _liveProps),
+                    child: ListTile(
+                      dense: true,
+                      title: title == null ? null : Text(title),
+                      subtitle: subtitle == null ? null : Text(subtitle),
+                    ),
                   ),
                 if (loading)
                   const Padding(

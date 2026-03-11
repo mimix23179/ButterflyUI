@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildOptionControl(
@@ -23,24 +24,31 @@ Widget buildOptionControl(
     });
   }
 
-  return Card(
-    margin: EdgeInsets.zero,
-    child: ListTile(
-      dense: dense,
-      enabled: enabled,
-      selected: selected,
-      leading: iconData == null ? null : Icon(iconData),
-      title: Text(label),
-      subtitle: description == null || description.isEmpty
-          ? null
-          : Text(description),
-      trailing: selected ? const Icon(Icons.check, size: 18) : null,
-      onTap: enabled
-          ? () {
-              emit('select');
-            }
-          : null,
-      onLongPress: enabled ? () => emit('long_press') : null,
+  return Builder(
+    builder: (context) => butterflyuiSurfaceContainer(
+      context,
+      props: props,
+      fallbackPadding: EdgeInsets.zero,
+      child: ListTileTheme(
+        data: butterflyuiListTileTheme(context, props),
+        child: ListTile(
+          dense: dense,
+          enabled: enabled,
+          selected: selected,
+          leading: iconData == null ? null : Icon(iconData),
+          title: Text(label),
+          subtitle: description == null || description.isEmpty
+              ? null
+              : Text(description),
+          trailing: selected ? const Icon(Icons.check, size: 18) : null,
+          onTap: enabled
+              ? () {
+                  emit('select');
+                }
+              : null,
+          onLongPress: enabled ? () => emit('long_press') : null,
+        ),
+      ),
     ),
   );
 }

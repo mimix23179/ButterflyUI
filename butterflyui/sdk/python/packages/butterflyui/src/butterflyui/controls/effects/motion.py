@@ -10,7 +10,7 @@ __all__ = ["Motion"]
 
 class Motion(Component):
     """
-    Interaction-aware motion choreography wrapper.
+    Interaction-aware motion choreography helper.
     
     ``Motion`` sits above ``Animation`` and focuses on state-driven micro-interactions:
     hover lift, press sink, focus pulse, enter transitions, and shared-axis style

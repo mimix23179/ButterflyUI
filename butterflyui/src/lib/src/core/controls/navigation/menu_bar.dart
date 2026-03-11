@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -203,18 +204,22 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
   @override
   Widget build(BuildContext context) {
     final height = coerceDouble(_liveProps['height']) ?? (_dense ? 34 : 40);
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackRadius: coerceDouble(_liveProps['radius']),
+      fallbackPadding:
+          EdgeInsets.symmetric(horizontal: _dense ? 8 : 12, vertical: 4),
+    );
     final padding =
-        coercePadding(_liveProps['padding']) ??
+        surface.contentPadding ??
         EdgeInsets.symmetric(horizontal: _dense ? 8 : 12, vertical: 4);
-
-    final bgColor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface;
+    final bgColor = surface.backgroundColor;
     final borderColor =
         coerceColor(
           _liveProps['divider_color'] ?? _liveProps['border_color'],
         ) ??
-        Theme.of(context).colorScheme.outlineVariant;
+        surface.borderColor;
 
     if (_groups.isEmpty) {
       final bar = Container(
@@ -223,13 +228,23 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
           color: bgColor,
+          gradient: surface.gradient,
+          boxShadow: surface.boxShadow,
+          borderRadius: BorderRadius.circular(surface.radius),
           border: Border(
             bottom: BorderSide(color: borderColor.withValues(alpha: 0.6)),
           ),
         ),
         child: Text(
           _liveProps['title']?.toString() ?? 'Menu',
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: butterflyuiResolveSlotColor(
+              context,
+              _liveProps,
+              slot: 'label',
+              fallback: butterflyuiText(context),
+            ),
+          ),
         ),
       );
       return applyControlFrameLayout(
@@ -245,6 +260,9 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
       padding: padding,
       decoration: BoxDecoration(
         color: bgColor,
+        gradient: surface.gradient,
+        boxShadow: surface.boxShadow,
+        borderRadius: BorderRadius.circular(surface.radius),
         border: Border(
           bottom: BorderSide(color: borderColor.withValues(alpha: 0.6)),
         ),
@@ -268,7 +286,7 @@ class _ButterflyUIMenuBarState extends State<ButterflyUIMenuBar> {
       props: _liveProps,
       child: bar,
       clipToRadius: true,
-      defaultRadius: coerceDouble(_liveProps['radius']),
+      defaultRadius: surface.radius,
     );
   }
 }
@@ -439,15 +457,23 @@ class _ButterflyUIMenuItemState extends State<_ButterflyUIMenuItem> {
         : (_liveProps['enabled'] == true);
     final selected = _liveProps['selected'] == true;
 
-    final tile = ListTile(
-      dense: _liveProps['dense'] == true,
-      enabled: enabled,
-      selected: selected,
-      leading: iconWidget,
-      title: Text(label),
-      subtitle: subtitle == null ? null : Text(subtitle),
-      trailing: trailingText == null ? null : Text(trailingText),
-      onTap: enabled ? _emitSelect : null,
+    final tile = butterflyuiSurfaceContainer(
+      context,
+      props: _liveProps,
+      fallbackPadding: EdgeInsets.zero,
+      child: ListTileTheme(
+        data: butterflyuiListTileTheme(context, _liveProps),
+        child: ListTile(
+          dense: _liveProps['dense'] == true,
+          enabled: enabled,
+          selected: selected,
+          leading: iconWidget,
+          title: Text(label),
+          subtitle: subtitle == null ? null : Text(subtitle),
+          trailing: trailingText == null ? null : Text(trailingText),
+          onTap: enabled ? _emitSelect : null,
+        ),
+      ),
     );
     return applyControlFrameLayout(
       props: _liveProps,
@@ -513,8 +539,13 @@ class _MenuGroupButton extends StatelessWidget {
 
               final iconWidget = buildIconValue(action.icon, size: 16);
               final textColor = action.danger
-                  ? Theme.of(context).colorScheme.error
-                  : null;
+                  ? butterflyuiStatusColor(context, 'error')
+                  : butterflyuiResolveSlotColor(
+                      context,
+                      const <String, Object?>{},
+                      slot: 'label',
+                      fallback: butterflyuiText(context),
+                    );
 
               return PopupMenuItem<_MenuActionData>(
                 value: action,
@@ -531,9 +562,7 @@ class _MenuGroupButton extends StatelessWidget {
                         action.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: textColor == null
-                            ? null
-                            : TextStyle(color: textColor),
+                        style: TextStyle(color: textColor),
                       ),
                     ),
                     if (action.shortcut != null && action.shortcut!.isNotEmpty)
@@ -541,7 +570,9 @@ class _MenuGroupButton extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 12),
                         child: Text(
                           action.shortcut!,
-                          style: Theme.of(context).textTheme.labelSmall,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: butterflyuiMutedText(context),
+                          ),
                         ),
                       ),
                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -207,14 +208,20 @@ class _AutoFormControlState extends State<_AutoFormControl> {
       Widget fieldWidget;
       if (type == 'bool' || type == 'boolean' || type == 'checkbox') {
         final current = _values[key] == true;
-        fieldWidget = SwitchListTile(
-          value: current,
-          onChanged: (value) {
-            setState(() => _values[key] = value);
-            widget.sendEvent(widget.controlId, 'change', {'field': key, 'value': value, 'values': _values});
-          },
-          title: Text(label),
-          dense: widget.props['dense'] == true,
+        fieldWidget = Theme(
+          data: Theme.of(context).copyWith(
+            listTileTheme: butterflyuiListTileTheme(context, widget.props),
+          ),
+          child: SwitchListTile(
+            value: current,
+            contentPadding: EdgeInsets.zero,
+            onChanged: (value) {
+              setState(() => _values[key] = value);
+              widget.sendEvent(widget.controlId, 'change', {'field': key, 'value': value, 'values': _values});
+            },
+            title: Text(label),
+            dense: widget.props['dense'] == true,
+          ),
         );
       } else {
         fieldWidget = TextField(

@@ -31,6 +31,8 @@ Widget buildStackControl(
             if (frameFromChild is Map) ...coerceObjectMap(frameFromChild),
             if (frameFromProps is Map) ...coerceObjectMap(frameFromProps),
             for (final key in const <String>[
+              'position',
+              'inset',
               'left',
               'top',
               'right',
@@ -43,6 +45,13 @@ Widget buildStackControl(
               'alignment',
               'z',
               'z_index',
+              'translate',
+              'translate_x',
+              'translate_y',
+              'scale',
+              'rotate',
+              'rotation',
+              'opacity',
             ])
               if (childProps[key] != null) key: childProps[key],
           };
@@ -91,26 +100,41 @@ Widget _buildStackChild(
   );
   final right = _resolveDimension(frame['right'], parentSize, isWidth: true);
   final bottom = _resolveDimension(frame['bottom'], parentSize, isWidth: false);
+  final inset = frame['inset'];
+  final insetAll = _resolveDimension(inset, parentSize, isWidth: true);
   var width = _resolveDimension(frame['width'], parentSize, isWidth: true);
   var height = _resolveDimension(frame['height'], parentSize, isWidth: false);
   final anchor = _parseAlignment(frame['anchor'] ?? frame['alignment']);
+  final positionMode = frame['position']?.toString().trim().toLowerCase();
+  final resolvedLeft = left ?? insetAll;
+  final resolvedTop = top ?? insetAll;
+  final resolvedRight = right ?? insetAll;
+  final resolvedBottom = bottom ?? insetAll;
   final hasPosition =
-      left != null ||
-      top != null ||
-      right != null ||
-      bottom != null ||
+      resolvedLeft != null ||
+      resolvedTop != null ||
+      resolvedRight != null ||
+      resolvedBottom != null ||
       width != null ||
       height != null;
+  final shouldPosition =
+      positionMode == null ||
+      positionMode.isEmpty ||
+      positionMode == 'absolute' ||
+      positionMode == 'positioned';
   if (!hasPosition) {
-    return built;
+    return _applyStackTransforms(built, frame);
   }
-  if (left != null && right != null) {
+  if (!shouldPosition) {
+    return _applyStackTransforms(built, frame);
+  }
+  if (resolvedLeft != null && resolvedRight != null) {
     width = null;
   }
-  if (top != null && bottom != null) {
+  if (resolvedTop != null && resolvedBottom != null) {
     height = null;
   }
-  Widget child = built;
+  Widget child = _applyStackTransforms(built, frame);
   if (anchor != null) {
     child = FractionalTranslation(
       translation: _alignmentToFraction(anchor),
@@ -118,14 +142,70 @@ Widget _buildStackChild(
     );
   }
   return Positioned(
-    left: left,
-    top: top,
-    right: right,
-    bottom: bottom,
+    left: resolvedLeft,
+    top: resolvedTop,
+    right: resolvedRight,
+    bottom: resolvedBottom,
     width: width,
     height: height,
     child: child,
   );
+}
+
+Widget _applyStackTransforms(Widget child, Map<String, Object?> frame) {
+  Widget current = child;
+  final opacity = coerceDouble(frame['opacity']);
+  final scale = _resolveScale(frame['scale']);
+  final translate = _resolveTranslate(frame['translate']);
+  final translateX = coerceDouble(frame['translate_x']) ?? translate?.dx ?? 0.0;
+  final translateY = coerceDouble(frame['translate_y']) ?? translate?.dy ?? 0.0;
+  final rotate =
+      coerceDouble(frame['rotate'] ?? frame['rotation']) ?? 0.0;
+
+  if (scale != null && scale != 1.0) {
+    current = Transform.scale(scale: scale, child: current);
+  }
+  if (rotate != 0.0) {
+    current = Transform.rotate(angle: rotate, child: current);
+  }
+  if (translateX != 0.0 || translateY != 0.0) {
+    current = Transform.translate(
+      offset: Offset(translateX, translateY),
+      child: current,
+    );
+  }
+  if (opacity != null && opacity < 1.0) {
+    current = Opacity(opacity: opacity.clamp(0.0, 1.0), child: current);
+  }
+  return current;
+}
+
+double? _resolveScale(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  if (value is List && value.isNotEmpty) {
+    return coerceDouble(value.first);
+  }
+  if (value is Map) {
+    final map = coerceObjectMap(value);
+    return coerceDouble(map['x'] ?? map['scale']);
+  }
+  return double.tryParse(value.toString());
+}
+
+Offset? _resolveTranslate(Object? value) {
+  if (value == null) return null;
+  if (value is List && value.length >= 2) {
+    return Offset(coerceDouble(value[0]) ?? 0.0, coerceDouble(value[1]) ?? 0.0);
+  }
+  if (value is Map) {
+    final map = coerceObjectMap(value);
+    return Offset(
+      coerceDouble(map['x'] ?? map['dx']) ?? 0.0,
+      coerceDouble(map['y'] ?? map['dy']) ?? 0.0,
+    );
+  }
+  return null;
 }
 
 double _extractZ(

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/color_value.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/type_roles.dart';
 
 Widget buildTextControl(
   Map<String, Object?> props, {
   required Color defaultText,
+  ButterflyUIThemeTokens? tokens,
 }) {
   final slotStyles = props['__slot_styles'] is Map
       ? coerceObjectMap(props['__slot_styles'] as Map)
@@ -26,21 +29,35 @@ Widget buildTextControl(
       ? coerceObjectMap(slotStyles['border'] as Map)
       : <String, Object?>{};
   final textValue = (props['text'] ?? props['value'] ?? '').toString();
+  final typeRole = resolveStylingTypeRole(
+    tokens,
+    props['type_role'] ?? props['text_role'],
+    secondary:
+        labelSlot['type_role'] ??
+        labelSlot['text_role'] ??
+        contentSlot['type_role'] ??
+        contentSlot['text_role'],
+    fallback: _defaultTextRole(props),
+  );
   final size = coerceDouble(
     props['size'] ??
         props['font_size'] ??
         labelSlot['size'] ??
         labelSlot['font_size'] ??
         contentSlot['size'] ??
-        contentSlot['font_size'],
+        contentSlot['font_size'] ??
+        typeRole['font_size'] ??
+        typeRole['size'],
   );
-  final weight = _parseFontWeight(
+  final weight = parseStylingFontWeight(
     props['weight'] ??
         props['font_weight'] ??
         labelSlot['weight'] ??
         labelSlot['font_weight'] ??
         contentSlot['weight'] ??
-        contentSlot['font_weight'],
+        contentSlot['font_weight'] ??
+        typeRole['weight'] ??
+        typeRole['font_weight'],
   );
   final textBackground = resolveColorValue(
     props['background'] ??
@@ -64,7 +81,8 @@ Widget buildTextControl(
             labelSlot['foreground'] ??
             contentSlot['color'] ??
             contentSlot['text_color'] ??
-            contentSlot['foreground'],
+            contentSlot['foreground'] ??
+            stylingTypeRoleColor(typeRole),
         fallback: defaultText,
         background: textBackground,
         autoContrast: autoContrast,
@@ -81,7 +99,8 @@ Widget buildTextControl(
   final textTransform =
       (props['text_transform'] ??
               labelSlot['text_transform'] ??
-              contentSlot['text_transform'])
+              contentSlot['text_transform'] ??
+              typeRole['text_transform'])
           ?.toString()
           .toLowerCase()
           .trim();
@@ -91,25 +110,30 @@ Widget buildTextControl(
         labelSlot['text_decoration'] ??
         labelSlot['decoration'] ??
         contentSlot['text_decoration'] ??
-        contentSlot['decoration'],
+        contentSlot['decoration'] ??
+        typeRole['text_decoration'],
   );
   final decorationColor = resolveColorValue(
     props['decoration_color'] ??
         labelSlot['decoration_color'] ??
-        contentSlot['decoration_color'],
+        contentSlot['decoration_color'] ??
+        typeRole['decoration_color'],
   );
   final decorationStyle = _parseTextDecorationStyle(
     props['decoration_style'] ??
         labelSlot['decoration_style'] ??
-        contentSlot['decoration_style'],
+        contentSlot['decoration_style'] ??
+        typeRole['decoration_style'],
   );
-  final fontStyle = _coerceFontStyle(
+  final fontStyle = parseStylingFontStyle(
     props['italic'] ??
         labelSlot['italic'] ??
         contentSlot['italic'] ??
         props['font_style'] ??
         labelSlot['font_style'] ??
-        contentSlot['font_style'],
+        contentSlot['font_style'] ??
+        typeRole['font_style'] ??
+        typeRole['italic'],
   );
   final textShadow = _coerceTextShadows(
     props['text_shadow'] ??
@@ -125,12 +149,14 @@ Widget buildTextControl(
     fontFamily:
         props['font_family']?.toString() ??
         labelSlot['font_family']?.toString() ??
-        contentSlot['font_family']?.toString(),
+        contentSlot['font_family']?.toString() ??
+        typeRole['font_family']?.toString(),
     fontStyle: fontStyle,
     letterSpacing: coerceDouble(
       props['letter_spacing'] ??
           labelSlot['letter_spacing'] ??
-          contentSlot['letter_spacing'],
+          contentSlot['letter_spacing'] ??
+          typeRole['letter_spacing'],
     ),
     wordSpacing: coerceDouble(
       props['word_spacing'] ??
@@ -140,7 +166,8 @@ Widget buildTextControl(
     height: coerceDouble(
       props['line_height'] ??
           labelSlot['line_height'] ??
-          contentSlot['line_height'],
+          contentSlot['line_height'] ??
+          typeRole['line_height'],
     ),
     decoration: textDecoration,
     decorationColor: decorationColor,
@@ -240,6 +267,31 @@ Widget buildTextControl(
   return child;
 }
 
+String _defaultTextRole(Map<String, Object?> props) {
+  final role =
+          normalizeButterflyTypeRoleName(
+            props['role'] ?? props['variant'] ?? props['kind'],
+          ) ??
+      '';
+  switch (role) {
+    case 'display_hero':
+    case 'display':
+    case 'headline':
+    case 'heading':
+    case 'title':
+    case 'body_lg':
+    case 'body':
+    case 'caption':
+    case 'helper':
+    case 'button_label':
+    case 'input':
+    case 'nav':
+    case 'overline':
+      return role;
+  }
+  return 'body';
+}
+
 TextAlign? _parseTextAlign(Object? value) {
   final s = value?.toString().toLowerCase();
   switch (s) {
@@ -268,45 +320,6 @@ TextOverflow? _parseTextOverflow(Object? value) {
       return TextOverflow.visible;
     case 'ellipsis':
       return TextOverflow.ellipsis;
-  }
-  return null;
-}
-
-FontWeight? _parseFontWeight(Object? value) {
-  if (value == null) return null;
-  if (value is int) return _fontWeightFromInt(value);
-  final s = value.toString().toLowerCase();
-  if (s == 'bold') return FontWeight.bold;
-  if (s == 'normal') return FontWeight.normal;
-  if (s.startsWith('w')) {
-    final parsed = int.tryParse(s.substring(1));
-    if (parsed != null) return _fontWeightFromInt(parsed);
-  }
-  final parsed = int.tryParse(s);
-  if (parsed != null) return _fontWeightFromInt(parsed);
-  return null;
-}
-
-FontWeight? _fontWeightFromInt(int value) {
-  switch (value) {
-    case 100:
-      return FontWeight.w100;
-    case 200:
-      return FontWeight.w200;
-    case 300:
-      return FontWeight.w300;
-    case 400:
-      return FontWeight.w400;
-    case 500:
-      return FontWeight.w500;
-    case 600:
-      return FontWeight.w600;
-    case 700:
-      return FontWeight.w700;
-    case 800:
-      return FontWeight.w800;
-    case 900:
-      return FontWeight.w900;
   }
   return null;
 }
@@ -342,13 +355,6 @@ TextDecorationStyle? _parseTextDecorationStyle(Object? value) {
     case 'solid':
       return TextDecorationStyle.solid;
   }
-  return null;
-}
-
-FontStyle? _coerceFontStyle(Object? value) {
-  final normalized = value?.toString().trim().toLowerCase();
-  if (value == true || normalized == 'italic') return FontStyle.italic;
-  if (normalized == 'normal' || value == false) return FontStyle.normal;
   return null;
 }
 

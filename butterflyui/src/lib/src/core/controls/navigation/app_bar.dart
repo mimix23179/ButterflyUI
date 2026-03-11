@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -332,13 +333,13 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
                     vertical: 1,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: butterflyuiPrimary(context),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     badge,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: butterflyuiBackground(context),
                     ),
                   ),
                 ),
@@ -372,10 +373,28 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
               if (_title != null)
                 Text(
                   _title!,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: butterflyuiResolveSlotColor(
+                      context,
+                      _liveProps,
+                      slot: 'label',
+                      fallback: butterflyuiText(context),
+                    ),
+                  ),
                 ),
               if (_subtitle != null)
-                Text(_subtitle!, style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  _subtitle!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: butterflyuiResolveSlotColor(
+                      context,
+                      _liveProps,
+                      slot: 'helper',
+                      fallback: butterflyuiMutedText(context),
+                    ),
+                  ),
+                ),
             ],
           );
 
@@ -438,28 +457,18 @@ class _ButterflyUIAppBarState extends State<ButterflyUIAppBar> {
 
     final radius = coerceDouble(_liveProps['radius']) ?? 0.0;
     final clip = radius > 0 ? Clip.antiAlias : Clip.none;
-    final bar = Material(
-      type: MaterialType.transparency,
-      child: Material(
-        color:
-            coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-            Theme.of(context).colorScheme.surface,
-        elevation: coerceDouble(_liveProps['elevation']) ?? 0,
-        clipBehavior: clip,
-        shape: radius > 0
-            ? RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(radius),
-              )
-            : null,
-        child: SizedBox(
-          height: coerceDouble(_liveProps['height']) ?? kToolbarHeight,
-          child: Padding(
-            padding:
-                coercePadding(_liveProps['padding']) ??
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: row,
-          ),
-        ),
+    final bar = butterflyuiSurfaceContainer(
+      context,
+      props: _liveProps,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackPadding:
+          coercePadding(_liveProps['padding']) ??
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      fallbackRadius: radius > 0 ? radius : null,
+      clip: clip != Clip.none,
+      child: SizedBox(
+        height: coerceDouble(_liveProps['height']) ?? kToolbarHeight,
+        child: row,
       ),
     );
     return applyControlFrameLayout(

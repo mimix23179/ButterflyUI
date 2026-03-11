@@ -9,6 +9,29 @@ String _normStyleToken(String value) {
   return value.trim().toLowerCase().replaceAll('-', '_').replaceAll(' ', '_');
 }
 
+/// Normalizes `class_name`, `classes`, or `class` payloads into one internal
+/// list of Styling class tokens.
+List<String> normalizeStylingClassNames(Object? value) {
+  if (value == null) return const <String>[];
+  if (value is String) {
+    return value
+        .split(RegExp(r'[\s,]+'))
+        .map((part) => _normStyleToken(part))
+        .where((part) => part.isNotEmpty)
+        .toList(growable: false);
+  }
+  if (value is List) {
+    return value
+        .where((item) => item != null)
+        .map((item) => _normStyleToken(item.toString()))
+        .where((part) => part.isNotEmpty)
+        .toList(growable: false);
+  }
+  final normalized = _normStyleToken(value.toString());
+  if (normalized.isEmpty) return const <String>[];
+  return <String>[normalized];
+}
+
 double? _breakpointWidth(String? value) {
   switch (_normStyleToken(value ?? '')) {
     case 'sm':
@@ -35,24 +58,7 @@ Map<String, Object?> _asObjectMap(Object? value) {
 }
 
 List<String> _coerceStringList(Object? value) {
-  if (value == null) return const <String>[];
-  if (value is String) {
-    return value
-        .split(RegExp(r'[\s,]+'))
-        .map((part) => _normStyleToken(part))
-        .where((part) => part.isNotEmpty)
-        .toList(growable: false);
-  }
-  if (value is List) {
-    return value
-        .where((item) => item != null)
-        .map((item) => _normStyleToken(item.toString()))
-        .where((part) => part.isNotEmpty)
-        .toList(growable: false);
-  }
-  final normalized = _normStyleToken(value.toString());
-  if (normalized.isEmpty) return const <String>[];
-  return <String>[normalized];
+  return normalizeStylingClassNames(value);
 }
 
 String _resolveControlState(Map<String, Object?> props) {
@@ -159,6 +165,10 @@ Map<String, Object?> _normalizeDeclarations(Map<String, Object?> source) {
       return;
     }
     switch (key) {
+      case 'role':
+      case 'text_role':
+        normalized['type_role'] = value;
+        break;
       case 'background_color':
         normalized['bgcolor'] = value;
         break;
@@ -242,6 +252,54 @@ Map<String, Object?> normalizeStylingDeclarations(Map<String, Object?> source) {
   return _normalizeDeclarations(source);
 }
 
+Object? resolveStylingTokenValue(Object? value, StylingTokens tokens) {
+  if (value is Map) {
+    final resolved = <String, Object?>{};
+    value.forEach((key, nestedValue) {
+      resolved[key.toString()] = resolveStylingTokenValue(nestedValue, tokens);
+    });
+    return resolved;
+  }
+  if (value is List) {
+    return value
+        .map((item) => resolveStylingTokenValue(item, tokens))
+        .toList(growable: false);
+  }
+  if (value is! String) return value;
+
+  final raw = value.trim();
+  final varMatch = RegExp(
+    r'^var\(\s*--([A-Za-z0-9_.\-]+)\s*(?:,\s*(.+))?\)$',
+  ).firstMatch(raw);
+  final tokenMatch = RegExp(
+    r'^token\(\s*([A-Za-z0-9_.\-]+)\s*(?:,\s*(.+))?\)$',
+  ).firstMatch(raw);
+  final tokenName = varMatch?.group(1) ?? tokenMatch?.group(1);
+  if (tokenName == null || tokenName.trim().isEmpty) {
+    return value;
+  }
+  final resolved = _lookupStylingTokenValue(tokenName, tokens);
+  if (resolved != null) {
+    return resolved;
+  }
+  final fallback = varMatch?.group(2) ?? tokenMatch?.group(2);
+  if (fallback == null || fallback.trim().isEmpty) {
+    return value;
+  }
+  return resolveStylingTokenValue(_parseTokenFallbackLiteral(fallback), tokens);
+}
+
+Map<String, Object?> resolveStylingTokenReferences(
+  Map<String, Object?> source,
+  StylingTokens tokens,
+) {
+  final resolved = resolveStylingTokenValue(source, tokens);
+  if (resolved is Map) {
+    return coerceObjectMap(resolved);
+  }
+  return Map<String, Object?>.from(source);
+}
+
 RuntimeStyleSheet runtimeStyleSheetFromInlineCss(
   String source, {
   String selector = '*',
@@ -255,6 +313,83 @@ RuntimeStyleSheet runtimeStyleSheetFromInlineCss(
     return RuntimeStyleSheet.fromSource(trimmed);
   }
   return RuntimeStyleSheet.fromSource('$selector { $trimmed }');
+}
+
+Object? _lookupStylingTokenValue(String tokenName, StylingTokens tokens) {
+  final normalized = _normStyleToken(tokenName);
+  if (normalized.contains('.')) {
+    final parts = normalized
+        .split('.')
+        .where((part) => part.isNotEmpty)
+        .toList(growable: false);
+    if (parts.isNotEmpty) {
+      return _lookupNestedTokenValue(tokens.toJson(), parts);
+    }
+  }
+  switch (normalized) {
+    case 'surface':
+    case 'background':
+    case 'text':
+    case 'muted_text':
+    case 'border':
+    case 'primary':
+    case 'secondary':
+    case 'success':
+    case 'warning':
+    case 'info':
+    case 'error':
+    case 'on_primary':
+    case 'on_surface':
+      return tokens.color(normalized);
+    case 'radius_sm':
+      return tokens.number('radii', 'sm');
+    case 'radius_md':
+      return tokens.number('radii', 'md');
+    case 'radius_lg':
+      return tokens.number('radii', 'lg');
+    case 'spacing_xs':
+      return tokens.number('spacing', 'xs');
+    case 'spacing_sm':
+      return tokens.number('spacing', 'sm');
+    case 'spacing_md':
+      return tokens.number('spacing', 'md');
+    case 'spacing_lg':
+      return tokens.number('spacing', 'lg');
+    case 'font_family':
+      return tokens.string('typography', 'font_family');
+    case 'mono_family':
+      return tokens.string('typography', 'mono_family');
+    case 'body_size':
+      return tokens.number('typography', 'body_size');
+    case 'title_size':
+      return tokens.number('typography', 'title_size');
+    case 'label_size':
+      return tokens.number('typography', 'label_size');
+    case 'type_display_hero':
+      return tokens.section('typography')['roles'] is Map
+          ? coerceObjectMap(tokens.section('typography')['roles'] as Map)['display_hero']
+          : null;
+    case 'brightness':
+      return tokens.themeString('brightness');
+  }
+  return null;
+}
+
+Object? _parseTokenFallbackLiteral(String source) {
+  final text = source.trim();
+  if (text.isEmpty) return null;
+  if ((text.startsWith('"') && text.endsWith('"')) ||
+      (text.startsWith("'") && text.endsWith("'"))) {
+    return text.substring(1, text.length - 1);
+  }
+  if (text == 'true') return true;
+  if (text == 'false') return false;
+  if (text == 'null' || text == 'none') return null;
+  final number = double.tryParse(text);
+  if (number != null) {
+    return text.contains('.') ? number : number.toInt();
+  }
+  return coerceColor(text) ?? text;
 }
 
 void _writeSlotDeclaration(
@@ -292,6 +427,13 @@ void _writeTokenOverride(
 }
 
 List<String> _tokenOverridePath(String token) {
+  if (token.contains('.')) {
+    return token
+        .split('.')
+        .map(_normStyleToken)
+        .where((part) => part.isNotEmpty)
+        .toList(growable: false);
+  }
   switch (token) {
     case 'surface':
     case 'background':
@@ -336,6 +478,18 @@ List<String> _tokenOverridePath(String token) {
     default:
       return const <String>[];
   }
+}
+
+Object? _lookupNestedTokenValue(
+  Map<String, Object?> source,
+  List<String> path,
+) {
+  Object? cursor = source;
+  for (final segment in path) {
+    if (cursor is! Map) return null;
+    cursor = coerceObjectMap(cursor)[segment];
+  }
+  return cursor;
 }
 
 Map<String, Object?> _mergeStyleMaps(
@@ -711,6 +865,7 @@ Map<String, Object?> _parseInlineDeclarations(String body) {
     final rawValue = trimmed.substring(colon + 1).trim();
     if (rawValue.isEmpty) continue;
     final normalizedName = switch (name) {
+      'role' => 'type_role',
       'background_color' => 'bgcolor',
       'border_radius' => 'radius',
       'box_shadow' => 'shadow',

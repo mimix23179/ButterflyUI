@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -234,7 +235,7 @@ class _ButterflyUISplitViewState extends State<ButterflyUISplitView> {
   Widget _buildDivider(Axis axis, bool draggable) {
     final color =
         coerceColor(widget.props['divider_color']) ??
-        Theme.of(context).colorScheme.outlineVariant;
+        butterflyuiBorder(context);
     final handle = Container(
       color: color.withOpacity(0.35),
       child: Center(

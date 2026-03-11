@@ -10,7 +10,7 @@ __all__ = ["AnimationEffect", "Animation"]
 @butterfly_control('animation')
 class AnimationEffect(EffectControl):
     """
-    Low-level timeline animation wrapper for opacity and transform transitions.
+    Low-level Styling animation helper for opacity and transform transitions.
     """
 
     from_: Mapping[str, Any] | None = None
@@ -20,7 +20,7 @@ class AnimationEffect(EffectControl):
 
     offset: Any | None = None
     """
-    Positional offset applied by the wrapper.
+    Positional offset applied by the animation helper.
     """
 
     duration: str | None = None
@@ -75,7 +75,7 @@ class AnimationEffect(EffectControl):
 
     scale: float | None = None
     """
-    Target scale factor applied by the wrapper.
+    Target scale factor applied by the animation helper.
     """
 
     rotation: float | None = None
@@ -85,7 +85,7 @@ class AnimationEffect(EffectControl):
 
     blur: float | None = None
     """
-    Blur amount animated by the wrapper.
+    Blur amount animated by the helper.
     """
 
 Animation = AnimationEffect

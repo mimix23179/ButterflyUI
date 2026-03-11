@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -146,36 +147,56 @@ class _ButterflyUINoticeBarState extends State<_ButterflyUINoticeBar> {
     final dismissible = _liveProps['dismissible'] == true;
     final actionLabel = _liveProps['action_label']?.toString();
     final actionId = _liveProps['action_id']?.toString() ?? 'action';
+    final fallbackBackground = switch (variant) {
+      'success' => butterflyuiStatusColor(context, 'success').withValues(alpha: 0.18),
+      'warning' => butterflyuiStatusColor(context, 'warning').withValues(alpha: 0.18),
+      'error' => butterflyuiStatusColor(context, 'error').withValues(alpha: 0.18),
+      _ => butterflyuiStatusColor(context, 'info').withValues(alpha: 0.18),
+    };
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackBackground: fallbackBackground,
+      fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.6),
+      fallbackRadius: coerceDouble(_liveProps['radius']) ?? 8,
+      fallbackPadding:
+          coercePadding(_liveProps['padding']) ??
+          const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    );
+    final labelColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      fallback: butterflyuiText(context),
+    );
     final icon = buildIconValue(
       _liveProps['icon'],
       size: 16,
-      color: Colors.white,
+      color: labelColor,
     );
 
-    final bg =
-        coerceColor(_liveProps['bgcolor']) ??
-        switch (variant) {
-          'success' => const Color(0xff14532d),
-          'warning' => const Color(0xff78350f),
-          'error' => const Color(0xff7f1d1d),
-          _ => const Color(0xff1e3a8a),
-        };
-
     final bar = Container(
-      padding:
-          coercePadding(_liveProps['padding']) ??
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: surface.contentPadding,
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(
-          coerceDouble(_liveProps['radius']) ?? 8,
+        color: surface.backgroundColor,
+        gradient: surface.gradient,
+        borderRadius: BorderRadius.circular(surface.radius),
+        border: Border.all(
+          color: surface.borderColor,
+          width: surface.borderWidth,
         ),
+        boxShadow: surface.boxShadow,
       ),
       child: Row(
         children: [
           if (icon != null) ...[icon, const SizedBox(width: 8)],
           Expanded(
-            child: Text(text, style: const TextStyle(color: Colors.white)),
+            child: Text(
+              text,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: labelColor),
+            ),
           ),
           if (actionLabel != null && actionLabel.isNotEmpty)
             TextButton(
@@ -185,6 +206,7 @@ class _ButterflyUINoticeBarState extends State<_ButterflyUINoticeBar> {
                       'action_id': actionId,
                       'action_label': actionLabel,
                     }),
+              style: TextButton.styleFrom(foregroundColor: labelColor),
               child: Text(actionLabel),
             ),
           if (dismissible)
@@ -192,7 +214,7 @@ class _ButterflyUINoticeBarState extends State<_ButterflyUINoticeBar> {
               onPressed: widget.controlId.isEmpty
                   ? null
                   : () => _emit('dismiss', {}),
-              icon: const Icon(Icons.close, color: Colors.white),
+              icon: Icon(Icons.close, color: labelColor),
             ),
         ],
       ),
@@ -201,7 +223,7 @@ class _ButterflyUINoticeBarState extends State<_ButterflyUINoticeBar> {
       props: _liveProps,
       child: bar,
       clipToRadius: true,
-      defaultRadius: coerceDouble(_liveProps['radius']) ?? 8,
+      defaultRadius: surface.radius,
     );
   }
 }

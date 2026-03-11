@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -346,35 +347,52 @@ class _ButterflyUIVirtualListState extends State<ButterflyUIVirtualList> {
               .toString();
       final subtitle = map['subtitle']?.toString();
       final enabled = map['enabled'] == null ? true : (map['enabled'] == true);
-      return ListTile(
-        dense: widget.props['dense'] == true,
-        enabled: enabled,
-        title: Text(title),
-        subtitle: subtitle == null ? null : Text(subtitle),
-        onTap: enabled
-            ? () {
-                if (widget.controlId.isEmpty) return;
-                widget.sendEvent(widget.controlId, 'select', {
-                  'index': index,
-                  'id': map['id']?.toString() ?? title,
-                  'item': map,
-                });
-              }
-            : null,
+      final tileProps = <String, Object?>{...widget.props, ...map};
+      return butterflyuiSurfaceContainer(
+        context,
+        props: tileProps,
+        fallbackPadding: EdgeInsets.zero,
+        child: ListTileTheme(
+          data: butterflyuiListTileTheme(context, tileProps),
+          child: ListTile(
+            dense: widget.props['dense'] == true,
+            enabled: enabled,
+            title: Text(title),
+            subtitle: subtitle == null ? null : Text(subtitle),
+            onTap: enabled
+                ? () {
+                    if (widget.controlId.isEmpty) return;
+                    widget.sendEvent(widget.controlId, 'select', {
+                      'index': index,
+                      'id': map['id']?.toString() ?? title,
+                      'item': map,
+                    });
+                  }
+                : null,
+          ),
+        ),
       );
     }
     final text = item?.toString() ?? '';
-    return ListTile(
-      dense: widget.props['dense'] == true,
-      title: Text(text),
-      onTap: widget.controlId.isEmpty
-          ? null
-          : () {
-              widget.sendEvent(widget.controlId, 'select', {
-                'index': index,
-                'value': text,
-              });
-            },
+    return butterflyuiSurfaceContainer(
+      context,
+      props: widget.props,
+      fallbackPadding: EdgeInsets.zero,
+      child: ListTileTheme(
+        data: butterflyuiListTileTheme(context, widget.props),
+        child: ListTile(
+          dense: widget.props['dense'] == true,
+          title: Text(text),
+          onTap: widget.controlId.isEmpty
+              ? null
+              : () {
+                  widget.sendEvent(widget.controlId, 'select', {
+                    'index': index,
+                    'value': text,
+                  });
+                },
+        ),
+      ),
     );
   }
 

@@ -10,7 +10,7 @@ __all__ = ["GradientEffect", "Gradient"]
 @butterfly_control('gradient')
 class GradientEffect(LayoutControl):
     """
-    Apply a gradient fill or mesh gradient to a child wrapper.
+    Apply a gradient fill or mesh gradient as a Styling helper surface.
     """
 
     colors: list[Any] | None = None

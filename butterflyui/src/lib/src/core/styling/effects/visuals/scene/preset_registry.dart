@@ -143,14 +143,20 @@ EffectScene resolveEffectSceneFromProps(Map<String, Object?> props) {
       final map = coerceObjectMap(value);
       final nestedSceneLayers = map['scene_layers'];
       final nestedBackgroundLayers = map['background_layers'];
+      final nestedForegroundLayers = map['foreground_layers'];
       final nestedOverlayLayers = map['overlay_layers'];
       if (nestedSceneLayers != null ||
           nestedBackgroundLayers != null ||
+          nestedForegroundLayers != null ||
           nestedOverlayLayers != null) {
         addValue(nestedSceneLayers, position: position);
         addValue(
           nestedBackgroundLayers,
           position: EffectLayerPosition.background,
+        );
+        addValue(
+          nestedForegroundLayers,
+          position: EffectLayerPosition.foreground,
         );
         addValue(nestedOverlayLayers, position: EffectLayerPosition.overlay);
         return;
@@ -168,6 +174,10 @@ EffectScene resolveEffectSceneFromProps(Map<String, Object?> props) {
   addValue(
     props['background_layers'],
     position: EffectLayerPosition.background,
+  );
+  addValue(
+    props['foreground_layers'],
+    position: EffectLayerPosition.foreground,
   );
   addValue(props['overlay_layers'], position: EffectLayerPosition.overlay);
 

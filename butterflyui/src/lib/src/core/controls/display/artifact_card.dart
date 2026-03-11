@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -131,37 +132,23 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
     final theme = Theme.of(context);
     final tokens = theme.extension<ButterflyUIThemeTokens>();
     final props = widget.props;
-    final explicitSurfaceFill =
-        props.containsKey('bgcolor') ||
-        props.containsKey('background') ||
-        props.containsKey('gradient');
-    final inheritedTint = coerceColor(
-      props['surface_tint_color'] ??
-          props['__surface_tint_color'] ??
-          props['color'],
+    final surfaceChrome = butterflyuiResolveSurfaceChrome(
+      context,
+      props,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackBorder: butterflyuiBorder(context),
+      fallbackRadius: tokens?.radiusLg ?? 18.0,
+      fallbackPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
     final accent =
         coerceColor(props['action_color'] ?? props['color']) ??
-        inheritedTint ??
+        coerceColor(
+          props['surface_tint_color'] ?? props['__surface_tint_color'],
+        ) ??
         tokens?.primary ??
         theme.colorScheme.primary;
-    final backgroundColor =
-        coerceColor(props['bgcolor'] ?? props['background']) ??
-        (!explicitSurfaceFill && inheritedTint != null
-            ? deriveInheritedSurfaceFill(inheritedTint, alpha: 0.18)
-            : tokens?.surface ?? theme.cardColor);
-    final borderColor =
-        coerceColor(props['border_color']) ??
-        (!explicitSurfaceFill && inheritedTint != null
-            ? deriveInheritedSurfaceBorder(inheritedTint)
-            : tokens?.border ?? theme.colorScheme.outlineVariant);
-    final borderWidth =
-        coerceDouble(props['border_width']) ??
-        (!explicitSurfaceFill && inheritedTint != null ? 1.0 : 0.0);
-    final radius = coerceDouble(props['radius']) ?? tokens?.radiusLg ?? 18.0;
-    final gradient = coerceGradient(props['gradient']);
     final shadow =
-        coerceBoxShadow(props['shadow']) ??
+        surfaceChrome.boxShadow ??
         (props['glow'] == true
             ? <BoxShadow>[
                 BoxShadow(
@@ -172,23 +159,24 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
                 ),
               ]
             : null);
-    final titleColor =
-        coerceColor(
-          props['title_color'] ?? props['text_color'] ?? props['foreground'],
-        ) ??
-        tokens?.text ??
-        theme.colorScheme.onSurface;
-    final messageColor =
-        coerceColor(
+    final titleColor = butterflyuiResolveSlotColor(
+      context,
+      props,
+      slot: 'label',
+      explicit: props['title_color'] ?? props['text_color'] ?? props['foreground'],
+      fallback: butterflyuiText(context),
+    );
+    final messageColor = butterflyuiResolveSlotColor(
+      context,
+      props,
+      slot: 'content',
+      explicit:
           props['message_color'] ??
-              props['subtitle_color'] ??
-              props['muted_text_color'],
-        ) ??
-        tokens?.mutedText ??
-        theme.colorScheme.onSurfaceVariant;
-    final contentPadding =
-        coercePadding(props['content_padding']) ??
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 14);
+          props['subtitle_color'] ??
+          props['muted_text_color'],
+      fallback: butterflyuiMutedText(context),
+      muted: true,
+    );
 
     Widget? child;
     for (final raw in widget.rawChildren) {
@@ -266,23 +254,37 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
       body = Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.circular(surfaceChrome.radius),
           onTap: () => _emit('tap', _statePayload()),
-          child: Padding(padding: contentPadding, child: body),
+          child: Padding(
+            padding:
+                surfaceChrome.contentPadding ??
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: body,
+          ),
         ),
       );
     } else {
-      body = Padding(padding: contentPadding, child: body);
+      body = Padding(
+        padding:
+            surfaceChrome.contentPadding ??
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: body,
+      );
     }
 
     Widget surface = DecoratedBox(
       decoration: BoxDecoration(
-        color: gradient == null ? backgroundColor : null,
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(radius),
-        border: borderWidth <= 0
+        color:
+            surfaceChrome.gradient == null ? surfaceChrome.backgroundColor : null,
+        gradient: surfaceChrome.gradient,
+        borderRadius: BorderRadius.circular(surfaceChrome.radius),
+        border: surfaceChrome.borderWidth <= 0
             ? null
-            : Border.all(color: borderColor, width: borderWidth),
+            : Border.all(
+                color: surfaceChrome.borderColor,
+                width: surfaceChrome.borderWidth,
+              ),
         boxShadow: shadow,
       ),
       child: body,
@@ -293,13 +295,13 @@ class _ArtifactCardControlState extends State<_ArtifactCardControl> {
     final backdropColor = coerceColor(props['backdrop_color']);
     if (blur > 0 || backdropColor != null) {
       surface = ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: BorderRadius.circular(surfaceChrome.radius),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: backdropColor,
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: BorderRadius.circular(surfaceChrome.radius),
             ),
             child: surface,
           ),

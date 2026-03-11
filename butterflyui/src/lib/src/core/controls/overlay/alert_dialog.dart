@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
+import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 Widget buildAlertDialogControl(
@@ -35,7 +36,6 @@ Widget buildAlertDialogControl(
 
   return _AlertDialogModal(
     controlId: controlId,
-    child: child,
     initialOpen: props['open'] == true,
     dismissible: props['dismissible'] == true,
     closeOnEscape: props['close_on_escape'] == null
@@ -62,6 +62,7 @@ Widget buildAlertDialogControl(
     registerInvokeHandler: registerInvokeHandler,
     unregisterInvokeHandler: unregisterInvokeHandler,
     sendEvent: sendEvent,
+    child: child,
   );
 }
 
@@ -71,52 +72,117 @@ Widget _buildAlertDialogBody(
   Widget Function(Map<String, Object?> child) buildFromControl,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
-  final title = _coerceDialogNode(
-    props['title'],
-    buildFromControl,
-    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-  );
-  final content = _coerceDialogNode(props['content'], buildFromControl, null);
+  return Builder(
+    builder: (context) {
+      final tokens = Theme.of(context).extension<ButterflyUIThemeTokens>();
+      final surface = butterflyuiResolveSurfaceChrome(
+        context,
+        props,
+        fallbackBackground: butterflyuiSurface(context),
+        fallbackBorder: butterflyuiBorder(context),
+        fallbackRadius: tokens?.radiusLg ?? 16.0,
+        fallbackBorderWidth: coerceDouble(props['border_width']) ?? 1.0,
+        fallbackPadding: const EdgeInsets.all(16),
+      );
+      final titleColor = butterflyuiResolveSlotColor(
+        context,
+        props,
+        slot: 'label',
+        explicit: props['title_color'],
+        fallback: butterflyuiText(context),
+      );
+      final bodyColor = butterflyuiResolveSlotColor(
+        context,
+        props,
+        slot: 'content',
+        explicit: props['text_color'] ?? props['content_color'],
+        fallback: butterflyuiMutedText(context),
+        muted: true,
+      );
+      final title = _coerceDialogNode(
+        props['title'],
+        buildFromControl,
+        TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: titleColor,
+        ),
+      );
+      final content = _coerceDialogNode(
+        props['content'],
+        buildFromControl,
+        TextStyle(color: bodyColor),
+      );
+      final actions = _coerceActions(props['actions']);
+      final actionWidgets = actions
+          .map(
+            (action) => _buildActionButton(
+              context,
+              controlId,
+              props,
+              action,
+              sendEvent,
+            ),
+          )
+          .whereType<Widget>()
+          .toList();
 
-  final actions = _coerceActions(props['actions']);
-  final actionWidgets = actions
-      .map((action) => _buildActionButton(controlId, action, sendEvent))
-      .whereType<Widget>()
-      .toList();
-
-  return ConstrainedBox(
-    constraints: BoxConstraints(
-      maxWidth: coerceDouble(props['max_width']) ?? 520,
-      minWidth: coerceDouble(props['min_width']) ?? 280,
-    ),
-    child: Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(coerceDouble(props['radius']) ?? 12),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (title != null) title,
-            if (title != null && content != null) const SizedBox(height: 8),
-            if (content != null) content,
-            if (actionWidgets.isNotEmpty) const SizedBox(height: 16),
-            if (actionWidgets.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: coerceDouble(props['max_width']) ?? 520,
+          minWidth: coerceDouble(props['min_width']) ?? 280,
+        ),
+        child: Material(
+          color: surface.backgroundColor,
+          elevation: 0,
+          borderRadius: BorderRadius.circular(surface.radius),
+          clipBehavior: Clip.antiAlias,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: surface.backgroundColor,
+              gradient: surface.gradient,
+              borderRadius: BorderRadius.circular(surface.radius),
+              border: surface.borderWidth <= 0
+                  ? null
+                  : Border.all(
+                      color: surface.borderColor,
+                      width: surface.borderWidth,
+                    ),
+              boxShadow: surface.boxShadow,
+            ),
+            child: Padding(
+              padding:
+                  surface.contentPadding ??
+                  const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (var i = 0; i < actionWidgets.length; i += 1) ...[
-                    if (i > 0) const SizedBox(width: 8),
-                    actionWidgets[i],
-                  ],
+                  if (title case final titleWidget?) titleWidget,
+                  if (title != null && content != null) const SizedBox(height: 8),
+                  if (content case final contentWidget?)
+                    DefaultTextStyle.merge(
+                      style: TextStyle(color: bodyColor),
+                      child: contentWidget,
+                    ),
+                  if (actionWidgets.isNotEmpty) const SizedBox(height: 16),
+                  if (actionWidgets.isNotEmpty)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        for (var i = 0; i < actionWidgets.length; i += 1) ...[
+                          if (i > 0) const SizedBox(width: 8),
+                          actionWidgets[i],
+                        ],
+                      ],
+                    ),
                 ],
               ),
-          ],
+            ),
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 
@@ -148,7 +214,9 @@ List<Map<String, Object?>> _coerceActions(Object? raw) {
 }
 
 Widget? _buildActionButton(
+  BuildContext context,
   String controlId,
+  Map<String, Object?> dialogProps,
   Map<String, Object?> action,
   ButterflyUISendRuntimeEvent sendEvent,
 ) {
@@ -168,21 +236,77 @@ Widget? _buildActionButton(
     sendEvent(controlId, 'action', payload);
   }
 
+  final mergedProps = <String, Object?>{...dialogProps, ...action};
+  final surface = butterflyuiResolveSurfaceChrome(
+    context,
+    mergedProps,
+    fallbackBackground: switch (variant) {
+      'filled' || 'elevated' => butterflyuiPrimary(context),
+      'outlined' => Colors.transparent,
+      _ => Colors.transparent,
+    },
+    fallbackBorder: butterflyuiBorder(context),
+    fallbackRadius: butterflyuiTokens(context)?.radiusMd ?? 12,
+    fallbackBorderWidth: variant == 'outlined' ? 1.0 : 0.0,
+    fallbackPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+  );
+  final primary = butterflyuiPrimary(context);
+  final text = butterflyuiResolveSlotColor(
+    context,
+    mergedProps,
+    slot: 'label',
+    fallback: butterflyuiText(context),
+  );
+  final filledForeground = butterflyuiResolveSlotColor(
+    context,
+    mergedProps,
+    slot: 'label',
+    fallback: _resolveReadableForeground(
+      surface.backgroundColor ?? primary,
+    ),
+  );
+  final shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(surface.radius),
+  );
+
   switch (variant) {
     case 'filled':
     case 'elevated':
       return ElevatedButton(
         onPressed: enabled ? handleTap : null,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: surface.backgroundColor ?? primary,
+          foregroundColor: filledForeground,
+          shape: shape,
+          padding: surface.contentPadding,
+        ),
         child: Text(label),
       );
     case 'outlined':
       return OutlinedButton(
         onPressed: enabled ? handleTap : null,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: text,
+          side: BorderSide(
+            color: surface.borderColor,
+            width: surface.borderWidth,
+          ),
+          shape: shape,
+          backgroundColor: surface.backgroundColor,
+          padding: surface.contentPadding,
+        ),
         child: Text(label),
       );
     default:
       return TextButton(
         onPressed: enabled ? handleTap : null,
+        style: TextButton.styleFrom(
+          foregroundColor: text,
+          shape: shape,
+          backgroundColor: surface.backgroundColor,
+          padding: surface.contentPadding,
+        ),
         child: Text(label),
       );
   }
@@ -209,6 +333,12 @@ Rect? _coerceRect(Object? raw) {
     }
   }
   return null;
+}
+
+Color _resolveReadableForeground(Color background) {
+  return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 }
 
 class _AlertDialogModal extends StatefulWidget {

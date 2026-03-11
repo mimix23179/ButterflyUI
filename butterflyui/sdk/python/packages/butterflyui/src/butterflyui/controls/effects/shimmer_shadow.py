@@ -10,7 +10,7 @@ __all__ = ["ShimmerShadow"]
 @butterfly_control('shimmer_shadow')
 class ShimmerShadow(EffectControl):
     """
-    Combined shimmer + layered shadow effect wrapper.
+    Combined shimmer and layered shadow Styling helper.
 
     This control applies a shadow stack and then overlays shimmer animation
     around the same child.

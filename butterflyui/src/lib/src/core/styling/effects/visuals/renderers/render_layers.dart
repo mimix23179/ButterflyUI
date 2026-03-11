@@ -51,14 +51,13 @@ Widget? buildEffectAnimatedLayer(
       coerceDouble(config['height']) ??
       coerceDouble(config['size']) ??
       coerceDouble(config['diameter']);
-  final opacity = (coerceDouble(config['opacity']) ?? 1.0).clamp(0.0, 1.0);
   final alignment = _coerceAlignment(
     config['alignment'] ?? config['position'],
     fallbackAlignment,
   );
   final padding = coercePadding(config['padding']) ?? EdgeInsets.zero;
 
-  Widget child = Opacity(opacity: opacity, child: widget);
+  Widget child = widget;
   if (width != null || height != null) {
     child = SizedBox(width: width, height: height, child: child);
   }
@@ -66,10 +65,251 @@ Widget? buildEffectAnimatedLayer(
     child = Padding(padding: padding, child: child);
   }
 
+  return Align(
+    alignment: alignment,
+    child: IgnorePointer(child: child),
+  );
+}
+
+class _EffectPlaneStyle {
+  const _EffectPlaneStyle({
+    required this.opacity,
+    required this.mask,
+  });
+
+  final double opacity;
+  final Object? mask;
+}
+
+class _EffectRegion {
+  const _EffectRegion({
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+  });
+
+  final double left;
+  final double top;
+  final double width;
+  final double height;
+
+  bool get isValid => width > 0 && height > 0;
+  Rect get rect => Rect.fromLTWH(left, top, width, height);
+}
+
+enum _EffectMaskKind { none, oval, rounded }
+
+_EffectMaskKind _parseEffectMaskKind(Object? rawMask) {
+  if (rawMask == null || rawMask == false) {
+    return _EffectMaskKind.none;
+  }
+  final normalized = rawMask is Map
+      ? normalizeEffectLayerToken(
+          coerceObjectMap(rawMask)['type'] ??
+              coerceObjectMap(rawMask)['shape'] ??
+              coerceObjectMap(rawMask)['mask'],
+        )
+      : normalizeEffectLayerToken(rawMask);
+  switch (normalized) {
+    case 'oval':
+    case 'circle':
+    case 'radial':
+      return _EffectMaskKind.oval;
+    case 'rounded':
+    case 'round':
+    case 'capsule':
+    case 'pill':
+      return _EffectMaskKind.rounded;
+    default:
+      return _EffectMaskKind.none;
+  }
+}
+
+double? _resolveMaskRadius(
+  Object? rawMask, {
+  required double fallback,
+}) {
+  if (rawMask is! Map) return fallback > 0 ? fallback : null;
+  final map = coerceObjectMap(rawMask);
+  final radius =
+      coerceDouble(map['radius']) ?? coerceDouble(map['corner_radius']);
+  if (radius != null && radius > 0) {
+    return radius;
+  }
+  return fallback > 0 ? fallback : null;
+}
+
+Widget _applyEffectMask(
+  Widget child,
+  Object? rawMask, {
+  required double fallbackRadius,
+}) {
+  switch (_parseEffectMaskKind(rawMask)) {
+    case _EffectMaskKind.none:
+      return child;
+    case _EffectMaskKind.oval:
+      return ClipOval(child: child);
+    case _EffectMaskKind.rounded:
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(
+          _resolveMaskRadius(rawMask, fallback: fallbackRadius) ?? 18.0,
+        ),
+        child: child,
+      );
+  }
+}
+
+double _resolveEffectPlaneOpacity(
+  Map<String, Object?> props,
+  String plane,
+) {
+  final sceneOpacity = coerceDouble(props['scene_opacity']) ?? 1.0;
+  final planeOpacity =
+      coerceDouble(props['${plane}_scene_opacity']) ??
+      coerceDouble(props['${plane}SceneOpacity']) ??
+      1.0;
+  return (sceneOpacity * planeOpacity).clamp(0.0, 1.0);
+}
+
+Object? _resolveEffectPlaneMask(
+  Map<String, Object?> props,
+  String plane,
+) {
+  return props['${plane}_scene_mask'] ??
+      props['${plane}SceneMask'] ??
+      props['scene_mask'] ??
+      props['sceneMask'];
+}
+
+double _resolveAxisOffset(Object? value, double extent) {
+  final resolved = coerceDouble(value);
+  if (resolved == null) return 0.0;
+  if (resolved >= 0.0 && resolved <= 1.0) {
+    return resolved * extent;
+  }
+  return resolved;
+}
+
+double _resolveAxisExtent(Object? value, double extent) {
+  final resolved = coerceDouble(value);
+  if (resolved == null) return extent;
+  if (resolved >= 0.0 && resolved <= 1.0) {
+    return resolved * extent;
+  }
+  return resolved;
+}
+
+_EffectRegion? _resolveEffectRegion(Object? rawRegion, Size size) {
+  if (rawRegion == null) return null;
+  if (rawRegion is String) {
+    switch (normalizeEffectLayerToken(rawRegion)) {
+      case 'top_half':
+        return _EffectRegion(
+          left: 0,
+          top: 0,
+          width: size.width,
+          height: size.height * 0.5,
+        );
+      case 'bottom_half':
+        return _EffectRegion(
+          left: 0,
+          top: size.height * 0.5,
+          width: size.width,
+          height: size.height * 0.5,
+        );
+      case 'left_half':
+        return _EffectRegion(
+          left: 0,
+          top: 0,
+          width: size.width * 0.5,
+          height: size.height,
+        );
+      case 'right_half':
+        return _EffectRegion(
+          left: size.width * 0.5,
+          top: 0,
+          width: size.width * 0.5,
+          height: size.height,
+        );
+      case 'center':
+        return _EffectRegion(
+          left: size.width * 0.15,
+          top: size.height * 0.15,
+          width: size.width * 0.7,
+          height: size.height * 0.7,
+        );
+      default:
+        return null;
+    }
+  }
+  if (rawRegion is! Map) return null;
+  final map = coerceObjectMap(rawRegion);
+  final left = _resolveAxisOffset(map['x'] ?? map['left'], size.width);
+  final top = _resolveAxisOffset(map['y'] ?? map['top'], size.height);
+  final width = _resolveAxisExtent(
+    map['width'] ?? map['w'],
+    (size.width - left).clamp(0.0, size.width),
+  );
+  final height = _resolveAxisExtent(
+    map['height'] ?? map['h'],
+    (size.height - top).clamp(0.0, size.height),
+  );
+  final region = _EffectRegion(
+    left: left.clamp(0.0, size.width),
+    top: top.clamp(0.0, size.height),
+    width: width.clamp(0.0, size.width),
+    height: height.clamp(0.0, size.height),
+  );
+  return region.isValid ? region : null;
+}
+
+Widget _wrapEffectLayerForStack({
+  required Widget child,
+  required EffectLayer layer,
+  required _EffectPlaneStyle planeStyle,
+  required double clipRadius,
+}) {
   return Positioned.fill(
-    child: Align(
-      alignment: alignment,
-      child: IgnorePointer(child: child),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final region = _resolveEffectRegion(
+          layer.config['region'] ?? layer.config['bounds'],
+          constraints.biggest,
+        );
+        final mask = layer.config['mask'] ?? planeStyle.mask;
+        final opacity = (planeStyle.opacity * layer.opacity).clamp(0.0, 1.0);
+
+        Widget composed;
+        if (region != null) {
+          composed = SizedBox(
+            width: region.width,
+            height: region.height,
+            child: child,
+          );
+        } else {
+          composed = SizedBox.expand(child: child);
+        }
+        composed = _applyEffectMask(
+          composed,
+          mask,
+          fallbackRadius: clipRadius,
+        );
+        if (opacity < 1.0) {
+          composed = Opacity(opacity: opacity, child: composed);
+        }
+        if (region == null) {
+          return IgnorePointer(child: composed);
+        }
+        return IgnorePointer(
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Positioned.fromRect(rect: region.rect, child: composed),
+            ],
+          ),
+        );
+      },
     ),
   );
 }
@@ -190,11 +430,6 @@ class _EffectRenderLayerHostState extends State<_EffectRenderLayerHost>
   }
 
   Widget _buildLayeredStack() {
-    final clipBehavior = coerceClipBehavior(
-      widget.props['clip_scene'] == true
-          ? (widget.props['clip_behavior'] ?? 'anti_alias')
-          : widget.props['clip_behavior'],
-    );
     final radius =
         coerceDouble(
           widget.props['scene_clip_radius'] ??
@@ -203,7 +438,26 @@ class _EffectRenderLayerHostState extends State<_EffectRenderLayerHost>
               widget.props['radius'],
         ) ??
         0.0;
+    final clipScenes = widget.props['clip_scene'] != false;
+    final clipBehavior = coerceClipBehavior(
+      clipScenes
+          ? (widget.props['clip_behavior'] ??
+                (radius > 0 ? 'anti_alias' : null))
+          : widget.props['clip_behavior'],
+    );
     final enableTicker = !_pauseWhenHidden || _visible;
+    final backgroundPlane = _EffectPlaneStyle(
+      opacity: _resolveEffectPlaneOpacity(widget.props, 'background'),
+      mask: _resolveEffectPlaneMask(widget.props, 'background'),
+    );
+    final foregroundPlane = _EffectPlaneStyle(
+      opacity: _resolveEffectPlaneOpacity(widget.props, 'foreground'),
+      mask: _resolveEffectPlaneMask(widget.props, 'foreground'),
+    );
+    final overlayPlane = _EffectPlaneStyle(
+      opacity: _resolveEffectPlaneOpacity(widget.props, 'overlay'),
+      mask: _resolveEffectPlaneMask(widget.props, 'overlay'),
+    );
 
     final stack = AnimatedBuilder(
       animation: _controller,
@@ -212,15 +466,58 @@ class _EffectRenderLayerHostState extends State<_EffectRenderLayerHost>
         final progress = _controller.value;
         final backgroundLayers = widget.scene.backgroundLayers
             .map(
-              (layer) =>
-                  _buildSceneLayer(layer, progress, enableTicker: enableTicker),
+              (layer) {
+                final built = _buildSceneLayer(
+                  layer,
+                  progress,
+                  enableTicker: enableTicker,
+                );
+                if (built == null) return null;
+                return _wrapEffectLayerForStack(
+                  child: built,
+                  layer: layer,
+                  planeStyle: backgroundPlane,
+                  clipRadius: radius,
+                );
+              },
+            )
+            .whereType<Widget>()
+            .toList(growable: false);
+        final foregroundLayers = widget.scene.foregroundLayers
+            .map(
+              (layer) {
+                final built = _buildSceneLayer(
+                  layer,
+                  progress,
+                  enableTicker: enableTicker,
+                );
+                if (built == null) return null;
+                return _wrapEffectLayerForStack(
+                  child: built,
+                  layer: layer,
+                  planeStyle: foregroundPlane,
+                  clipRadius: radius,
+                );
+              },
             )
             .whereType<Widget>()
             .toList(growable: false);
         final overlayLayers = widget.scene.overlayLayers
             .map(
-              (layer) =>
-                  _buildSceneLayer(layer, progress, enableTicker: enableTicker),
+              (layer) {
+                final built = _buildSceneLayer(
+                  layer,
+                  progress,
+                  enableTicker: enableTicker,
+                );
+                if (built == null) return null;
+                return _wrapEffectLayerForStack(
+                  child: built,
+                  layer: layer,
+                  planeStyle: overlayPlane,
+                  clipRadius: radius,
+                );
+              },
             )
             .whereType<Widget>()
             .toList(growable: false);
@@ -230,6 +527,7 @@ class _EffectRenderLayerHostState extends State<_EffectRenderLayerHost>
           children: <Widget>[
             ...backgroundLayers,
             ...(sceneChild == null ? const <Widget>[] : <Widget>[sceneChild]),
+            ...foregroundLayers,
             ...overlayLayers,
           ],
         );
@@ -307,17 +605,12 @@ Widget? _buildEffectShaderLayer(
 }) {
   final asset = _resolveEffectShaderAsset(layer);
   if (asset == null || asset.isEmpty) return null;
-  return Positioned.fill(
-    child: IgnorePointer(
-      child: Opacity(
-        opacity: layer.opacity,
-        child: RepaintBoundary(
-          child: _EffectShaderLayerHost(
-            asset: asset,
-            layer: layer,
-            progress: progress,
-          ),
-        ),
+  return IgnorePointer(
+    child: RepaintBoundary(
+      child: _EffectShaderLayerHost(
+        asset: asset,
+        layer: layer,
+        progress: progress,
       ),
     ),
   );
@@ -408,18 +701,41 @@ class _EffectShaderPainter extends CustomPainter {
     final shader = program.fragmentShader();
     final base = layer.color ?? const Color(0xFF4F46E5);
     final accent = layer.accentColor ?? const Color(0xFF22D3EE);
-    shader.setFloat(0, size.width);
-    shader.setFloat(1, size.height);
-    shader.setFloat(2, progress * layer.speed * 12.0);
-    shader.setFloat(3, base.red / 255.0);
-    shader.setFloat(4, base.green / 255.0);
-    shader.setFloat(5, base.blue / 255.0);
-    shader.setFloat(6, base.alpha / 255.0);
-    shader.setFloat(7, accent.red / 255.0);
-    shader.setFloat(8, accent.green / 255.0);
-    shader.setFloat(9, accent.blue / 255.0);
-    shader.setFloat(10, accent.alpha / 255.0);
-    shader.setFloat(11, layer.intensity.clamp(0.0, 2.0));
+    final uniformValues = <double>[];
+    final uniforms = layer.config['uniforms'];
+    if (uniforms is Map) {
+      final keys = uniforms.keys.map((key) => key.toString()).toList()..sort();
+      for (final key in keys) {
+        final value = uniforms[key];
+        if (value is num) {
+          uniformValues.add(value.toDouble());
+        } else if (value is Iterable) {
+          for (final entry in value) {
+            if (entry is num) {
+              uniformValues.add(entry.toDouble());
+            }
+          }
+        }
+      }
+    }
+    final values = <double>[
+      size.width,
+      size.height,
+      progress * layer.speed * 12.0,
+      base.r,
+      base.g,
+      base.b,
+      base.a,
+      accent.r,
+      accent.g,
+      accent.b,
+      accent.a,
+      layer.intensity.clamp(0.0, 2.0),
+      ...uniformValues,
+    ];
+    for (var index = 0; index < values.length; index++) {
+      shader.setFloat(index, values[index]);
+    }
     canvas.drawRect(
       Offset.zero & size,
       Paint()
@@ -443,9 +759,6 @@ Widget? _buildEffectAnimatedAssetWidget(
 }) {
   final fit = _coerceBoxFit(config['fit'], fallbackFit);
   final alignment = _coerceAlignment(config['alignment'], fallbackAlignment);
-  final animate = config['animate'] != false;
-  final repeat = config['repeat'] != false;
-  final reverse = config['reverse'] == true;
 
   final lottieAsset = config['lottie_asset']?.toString().trim();
   final lottieUrl = config['lottie_url']?.toString().trim();
@@ -453,36 +766,27 @@ Widget? _buildEffectAnimatedAssetWidget(
     config['lottie_data'] ?? config['lottie_json'] ?? config['json'],
   );
   if (lottieBytes != null) {
-    return Lottie.memory(
-      lottieBytes,
-      animate: animate,
-      repeat: repeat,
-      reverse: reverse,
+    return _EffectLottieLayerHost(
+      source: _EffectLottieSource.memory(lottieBytes),
+      config: config,
       fit: fit,
       alignment: alignment,
-      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
     );
   }
   if (lottieUrl != null && lottieUrl.isNotEmpty) {
-    return Lottie.network(
-      lottieUrl,
-      animate: animate,
-      repeat: repeat,
-      reverse: reverse,
+    return _EffectLottieLayerHost(
+      source: _EffectLottieSource.network(lottieUrl),
+      config: config,
       fit: fit,
       alignment: alignment,
-      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
     );
   }
   if (lottieAsset != null && lottieAsset.isNotEmpty) {
-    return Lottie.asset(
-      lottieAsset,
-      animate: animate,
-      repeat: repeat,
-      reverse: reverse,
+    return _EffectLottieLayerHost(
+      source: _EffectLottieSource.asset(lottieAsset),
+      config: config,
       fit: fit,
       alignment: alignment,
-      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
     );
   }
 
@@ -526,6 +830,121 @@ Widget? _buildEffectAnimatedAssetWidget(
   }
 
   return null;
+}
+
+enum _EffectLottieSourceKind { asset, network, memory }
+
+class _EffectLottieSource {
+  const _EffectLottieSource._(this.kind, this.asset, this.url, this.bytes);
+
+  const _EffectLottieSource.asset(String asset)
+      : this._(_EffectLottieSourceKind.asset, asset, null, null);
+
+  const _EffectLottieSource.network(String url)
+      : this._(_EffectLottieSourceKind.network, null, url, null);
+
+  const _EffectLottieSource.memory(Uint8List bytes)
+      : this._(_EffectLottieSourceKind.memory, null, null, bytes);
+
+  final _EffectLottieSourceKind kind;
+  final String? asset;
+  final String? url;
+  final Uint8List? bytes;
+}
+
+class _EffectLottieLayerHost extends StatefulWidget {
+  const _EffectLottieLayerHost({
+    required this.source,
+    required this.config,
+    required this.fit,
+    required this.alignment,
+  });
+
+  final _EffectLottieSource source;
+  final Map<String, Object?> config;
+  final BoxFit fit;
+  final Alignment alignment;
+
+  @override
+  State<_EffectLottieLayerHost> createState() => _EffectLottieLayerHostState();
+}
+
+class _EffectLottieLayerHostState extends State<_EffectLottieLayerHost>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  bool get _animate => widget.config['animate'] != false;
+  bool get _repeat => widget.config['repeat'] != false;
+  bool get _reverse => widget.config['reverse'] == true;
+  double get _speed =>
+      (coerceDouble(widget.config['speed']) ?? 1.0).clamp(0.05, 12.0);
+  double get _phase =>
+      (coerceDouble(widget.config['phase']) ?? 0.0).clamp(0.0, 1.0);
+  int? get _durationMs => coerceOptionalInt(widget.config['duration_ms']);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Duration _scaledDuration(Duration base) {
+    final override = _durationMs;
+    final effective = override != null
+        ? Duration(milliseconds: override.clamp(1, 600000))
+        : base;
+    final micros = (effective.inMicroseconds / _speed).round().clamp(1, 600000000);
+    return Duration(microseconds: micros);
+  }
+
+  void _handleLoaded(LottieComposition composition) {
+    _controller.duration = _scaledDuration(composition.duration);
+    _controller.value = _phase;
+    if (!_animate) {
+      return;
+    }
+    if (_repeat) {
+      _controller.repeat(reverse: _reverse);
+      return;
+    }
+    _controller.forward(from: _phase);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (widget.source.kind) {
+      _EffectLottieSourceKind.asset => Lottie.asset(
+        widget.source.asset!,
+        controller: _controller,
+        fit: widget.fit,
+        alignment: widget.alignment,
+        onLoaded: _handleLoaded,
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      ),
+      _EffectLottieSourceKind.network => Lottie.network(
+        widget.source.url!,
+        controller: _controller,
+        fit: widget.fit,
+        alignment: widget.alignment,
+        onLoaded: _handleLoaded,
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      ),
+      _EffectLottieSourceKind.memory => Lottie.memory(
+        widget.source.bytes!,
+        controller: _controller,
+        fit: widget.fit,
+        alignment: widget.alignment,
+        onLoaded: _handleLoaded,
+        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+      ),
+    };
+  }
 }
 
 Alignment _coerceAlignment(Object? value, Alignment fallback) {

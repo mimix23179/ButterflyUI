@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -260,9 +261,8 @@ class _ToastCard extends StatelessWidget {
     }
 
     final variant = item['variant']?.toString().toLowerCase();
-    final scheme = Theme.of(context).colorScheme;
-    final bg = _variantColor(variant, scheme).withValues(alpha: 0.94);
-    final fg = _variantOnColor(variant, scheme);
+    final bg = _variantColor(context, variant).withValues(alpha: 0.94);
+    final fg = _variantOnColor(context, variant);
 
     return Material(
       color: Colors.transparent,
@@ -273,12 +273,12 @@ class _ToastCard extends StatelessWidget {
             color: bg,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: fg.withValues(alpha: 0.2)),
-            boxShadow: const <BoxShadow>[
+            boxShadow: <BoxShadow>[
               BoxShadow(
                 blurRadius: 14,
                 spreadRadius: 1,
-                offset: Offset(0, 6),
-                color: Color(0x33000000),
+                offset: const Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.2),
               ),
             ],
           ),
@@ -367,7 +367,7 @@ bool _isRight(Alignment alignment) {
   return alignment.x > 0.2;
 }
 
-Color _variantColor(String? variant, ColorScheme scheme) {
+Color _variantColor(BuildContext context, String? variant) {
   switch (variant) {
     case 'success':
       return const Color(0xFF1F8A5D);
@@ -377,11 +377,11 @@ Color _variantColor(String? variant, ColorScheme scheme) {
     case 'danger':
       return const Color(0xFF8C2E2E);
     default:
-      return scheme.surface;
+      return butterflyuiSurface(context);
   }
 }
 
-Color _variantOnColor(String? variant, ColorScheme scheme) {
+Color _variantOnColor(BuildContext context, String? variant) {
   switch (variant) {
     case 'success':
     case 'warning':
@@ -389,6 +389,6 @@ Color _variantOnColor(String? variant, ColorScheme scheme) {
     case 'danger':
       return Colors.white;
     default:
-      return scheme.onSurface;
+      return butterflyuiText(context);
   }
 }

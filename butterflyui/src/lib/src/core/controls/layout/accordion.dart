@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
@@ -226,9 +227,12 @@ class _ButterflyUIAccordionState extends State<ButterflyUIAccordion> {
             headerBuilder: (context, isExpanded) {
               final section = _sections[i];
               final label = (section['label'] ?? section['title'] ?? 'Section ${i + 1}').toString();
-              return ListTile(
-                dense: dense,
-                title: Text(label),
+              return ListTileTheme(
+                data: butterflyuiListTileTheme(context, widget.props),
+                child: ListTile(
+                  dense: dense,
+                  title: Text(label),
+                ),
               );
             },
             body: Padding(

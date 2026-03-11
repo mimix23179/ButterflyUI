@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUISwitch extends StatefulWidget {
   const ButterflyUISwitch({
     super.key,
     required this.controlId,
+    required this.props,
     required this.label,
     required this.value,
     required this.enabled,
@@ -24,6 +26,7 @@ class ButterflyUISwitch extends StatefulWidget {
   });
 
   final String controlId;
+  final Map<String, Object?> props;
   final String? label;
   final bool value;
   final bool enabled;
@@ -161,14 +164,47 @@ class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
   @override
   Widget build(BuildContext context) {
     final label = widget.label;
+    final tileTheme = butterflyuiListTileTheme(context, widget.props);
+    final activeColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'background',
+      explicit: widget.props['active_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final borderColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'border',
+      explicit: widget.props['border_color'],
+      fallback: butterflyuiBorder(context),
+    );
     final segmented =
         widget.mode.toLowerCase() == 'segmented' || widget.segments.isNotEmpty;
-    final control = segmented
-        ? _buildSegmented()
-        : Switch(
-            value: _value,
-            onChanged: widget.enabled ? _handleChanged : null,
-          );
+    final control = Theme(
+      data: Theme.of(context).copyWith(
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return butterflyuiBackground(context);
+            }
+            return butterflyuiBackground(context);
+          }),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return activeColor;
+            return borderColor.withValues(alpha: 0.3);
+          }),
+          trackOutlineColor: WidgetStatePropertyAll(borderColor),
+        ),
+        listTileTheme: tileTheme,
+      ),
+      child: segmented
+          ? _buildSegmented()
+          : Switch(
+              value: _value,
+              onChanged: widget.enabled ? _handleChanged : null,
+            ),
+    );
 
     final child = (label == null || label.trim().isEmpty)
         ? control
@@ -179,6 +215,7 @@ class _ButterflyUISwitchState extends State<ButterflyUISwitch> {
                 )
               : SwitchListTile(
                   value: _value,
+                  contentPadding: EdgeInsets.zero,
                   title: Text(label),
                   onChanged: widget.enabled ? _handleChanged : null,
                 ));

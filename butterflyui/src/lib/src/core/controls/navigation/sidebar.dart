@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -303,6 +304,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
     required Color selectedTextColor,
     required Color textColor,
     required Color iconColor,
+    required Color badgeColor,
   }) {
     final selected = _selectedId == item.id;
     final icon = buildIconValue(
@@ -339,9 +341,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surface.withValues(alpha: 0.4),
+                  color: badgeColor,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -374,27 +374,40 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
   Widget build(BuildContext context) {
     final sections = _parseSections();
     final dense = _dense;
-    final bgColor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface;
-    final borderColor =
-        coerceColor(_liveProps['border_color']) ??
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackRadius: 14,
+      fallbackPadding: const EdgeInsets.all(8),
+    );
     final selectedColor =
         coerceColor(_liveProps['selected_color']) ??
-        Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.7);
+        butterflyuiPrimary(context).withValues(alpha: 0.16);
     final selectedTextColor =
-        coerceColor(_liveProps['selected_text_color']) ??
-        Theme.of(context).colorScheme.onPrimaryContainer;
-    final textColor =
-        coerceColor(_liveProps['text_color']) ??
-        Theme.of(context).colorScheme.onSurface;
-    final iconColor =
-        coerceColor(_liveProps['icon_color']) ??
-        Theme.of(context).colorScheme.onSurfaceVariant;
-    final padding =
-        coercePadding(_liveProps['padding']) ?? const EdgeInsets.all(8);
-    final radius = coerceDouble(_liveProps['radius']) ?? 14;
+        coerceColor(_liveProps['selected_text_color']) ?? butterflyuiPrimary(context);
+    final textColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['text_color'],
+    );
+    final iconColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'icon',
+      explicit: _liveProps['icon_color'],
+      fallback: butterflyuiMutedText(context),
+    );
+    final badgeColor =
+        butterflyuiResolveSlotColor(
+          context,
+          _liveProps,
+          slot: 'background',
+          explicit: _liveProps['badge_bgcolor'],
+          fallback: butterflyuiSurfaceAlt(context).withValues(alpha: 0.82),
+        ).withValues(alpha: 0.82);
+    final padding = surface.contentPadding ?? const EdgeInsets.all(8);
+    final radius = surface.radius;
 
     final listChildren = <Widget>[];
     for (final section in sections) {
@@ -423,6 +436,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
                   selectedTextColor: selectedTextColor,
                   textColor: textColor,
                   iconColor: iconColor,
+                  badgeColor: badgeColor,
                 ),
             ],
           ),
@@ -447,6 +461,7 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
               selectedTextColor: selectedTextColor,
               textColor: textColor,
               iconColor: iconColor,
+              badgeColor: badgeColor,
             ),
           );
         }
@@ -484,9 +499,14 @@ class _ButterflyUISidebarState extends State<ButterflyUISidebar> {
     final sidebar = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: bgColor,
+        color: surface.backgroundColor,
+        gradient: surface.gradient,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor, width: 1),
+        border: Border.all(
+          color: surface.borderColor,
+          width: surface.borderWidth,
+        ),
+        boxShadow: surface.boxShadow,
       ),
       child: body,
     );

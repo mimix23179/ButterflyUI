@@ -1,5 +1,6 @@
 import 'theme.dart';
 import '../control_utils.dart';
+import 'stylesheet.dart';
 import 'style_pack.dart';
 
 class ResolvedControlStyle {
@@ -148,6 +149,20 @@ class ResolvedControlStyle {
 }
 
 class ControlStyleResolver {
+  /// Resolves the Styling cascade in this exact order:
+  ///
+  /// 1. design tokens / active theme
+  /// 2. control defaults from the active style pack
+  /// 3. stylesheet selector matches
+  /// 4. utility-class expansion
+  /// 5. local `Style(...)`
+  /// 6. local state overrides
+  /// 7. runtime interaction state
+  ///
+  /// The caller is responsible for applying stylesheet and utility expansion to
+  /// `props` before calling this resolver. This resolver then merges the
+  /// control-level result deterministically for slots, variants, classes, and
+  /// states.
   static ResolvedControlStyle resolve({
     required String controlType,
     required Map<String, Object?> props,
@@ -210,19 +225,9 @@ class ControlStyleResolver {
   ) {
     final values = <String>[];
     void addRaw(Object? raw) {
-      if (raw == null) return;
-      if (raw is String) {
-        for (final part in raw.split(RegExp(r'[\s,]+'))) {
-          final normalized = _norm(part);
-          if (normalized.isNotEmpty && !values.contains(normalized)) {
-            values.add(normalized);
-          }
-        }
-        return;
-      }
-      if (raw is List) {
-        for (final item in raw) {
-          addRaw(item);
+      for (final className in normalizeStylingClassNames(raw)) {
+        if (!values.contains(className)) {
+          values.add(className);
         }
       }
     }

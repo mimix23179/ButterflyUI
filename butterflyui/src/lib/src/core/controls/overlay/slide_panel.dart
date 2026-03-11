@@ -285,11 +285,20 @@ class _ButterflyUISlidePanelControlState
           height: horizontal ? null : panelSize,
           child: Material(
             type: MaterialType.transparency,
-            child: Material(
-              elevation: elevation,
-              color: panelColor,
-              clipBehavior: panelClip,
-              borderRadius: radius <= 0 ? null : BorderRadius.circular(radius),
+            child: butterflyuiSurfaceContainer(
+              context,
+              props: _liveProps,
+              fallbackBackground: panelColor,
+              fallbackRadius: radius > 0 ? radius : null,
+              fallbackShadow: <BoxShadow>[
+                BoxShadow(
+                  blurRadius: elevation * 4,
+                  spreadRadius: elevation * 0.25,
+                  offset: Offset(0, elevation),
+                  color: Colors.black.withValues(alpha: 0.18),
+                ),
+              ],
+              clip: panelClip != Clip.none,
               child: child,
             ),
           ),

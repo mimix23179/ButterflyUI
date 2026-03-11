@@ -455,18 +455,54 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
   Widget _buildDefaultContent(BuildContext context) {
     final title = widget.props['title']?.toString();
     final subtitle = widget.props['subtitle']?.toString();
-    final textColor =
-        coerceColor(widget.props['text_color']) ??
-        Theme.of(context).colorScheme.onSurface;
-    final iconColor =
-        coerceColor(widget.props['icon_color']) ??
-        Theme.of(context).colorScheme.onSurfaceVariant;
-    final selectedColor =
-        coerceColor(widget.props['selected_color']) ??
-        Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.7);
-    final selectedTextColor =
-        coerceColor(widget.props['selected_text_color']) ??
-        Theme.of(context).colorScheme.onPrimaryContainer;
+    final textColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'label',
+      explicit: widget.props['text_color'],
+      fallback: butterflyuiText(context),
+    );
+    final iconColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'icon',
+      explicit: widget.props['icon_color'],
+      fallback: butterflyuiMutedText(context),
+    );
+    final selectedColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'background',
+      explicit: widget.props['selected_color'],
+      fallback: butterflyuiPrimary(context).withValues(alpha: 0.18),
+    );
+    final selectedTextColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'label',
+      explicit: widget.props['selected_text_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final subtitleColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'content',
+      fallback: butterflyuiMutedText(context),
+      muted: true,
+    );
+    final searchFill = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'background',
+      fallback: butterflyuiSurfaceAlt(context).withValues(alpha: 0.72),
+    );
+    final searchBorder = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'border',
+      explicit: widget.props['border_color'],
+      fallback: butterflyuiBorder(context),
+    );
 
     final listChildren = <Widget>[];
     for (final section in _sections) {
@@ -502,7 +538,9 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
             child: Text(
               section.title,
-              style: Theme.of(context).textTheme.labelLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: textColor),
             ),
           ),
         );
@@ -531,13 +569,21 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
               title,
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
           ),
         if (subtitle != null && subtitle.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-            child: Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+            child: Text(
+              subtitle,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: subtitleColor),
+            ),
           ),
         if (_showSearch)
           Padding(
@@ -547,10 +593,26 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 isDense: true,
-                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: searchFill,
+                prefixIcon: Icon(Icons.search, color: iconColor),
                 hintText:
                     widget.props['search_placeholder']?.toString() ?? 'Search',
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: subtitleColor,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: searchBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: butterflyuiPrimary(context)),
+                ),
               ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: textColor),
             ),
           ),
         Expanded(
@@ -602,9 +664,15 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Theme.of(
+                  color: butterflyuiResolveSlotColor(
                     context,
-                  ).colorScheme.surface.withValues(alpha: 0.4),
+                    widget.props,
+                    slot: 'background',
+                    explicit: widget.props['badge_bgcolor'],
+                    fallback: butterflyuiSurfaceAlt(
+                      context,
+                    ).withValues(alpha: 0.82),
+                  ),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -645,14 +713,15 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
     final panelSize = _size <= 0
         ? (horizontal ? size.width * 0.3 : size.height * 0.3)
         : _size;
-    final panelColor =
-        coerceColor(widget.props['bgcolor'] ?? widget.props['background']) ??
-        Theme.of(context).colorScheme.surface;
-    final borderColor =
-        coerceColor(widget.props['border_color']) ??
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      widget.props,
+      fallbackBackground: butterflyuiSurface(context),
+      fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.7),
+      fallbackRadius: 16.0,
+      fallbackBorderWidth: 1.0,
+    );
     final elevation = coerceDouble(widget.props['elevation']) ?? 6.0;
-    final radius = coerceDouble(widget.props['radius']) ?? 16.0;
     final panelClip =
         coerceClipBehavior(widget.props['clip_behavior']) ?? Clip.antiAlias;
     final panelMargin =
@@ -692,15 +761,30 @@ class _ButterflyUIDrawerControlState extends State<_ButterflyUIDrawerControl> {
 
     final panel = Material(
       type: MaterialType.transparency,
-      child: Material(
-        color: panelColor,
-        elevation: elevation,
-        clipBehavior: panelClip,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
-          side: BorderSide(color: borderColor, width: 1),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: surface.backgroundColor,
+          gradient: surface.gradient,
+          borderRadius: BorderRadius.circular(surface.radius),
+          border: Border.all(
+            color: surface.borderColor,
+            width: surface.borderWidth,
+          ),
+          boxShadow: surface.boxShadow,
         ),
-        child: _resolvePanelChild(context),
+        child: Material(
+          color: Colors.transparent,
+          elevation: elevation,
+          clipBehavior: panelClip,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(surface.radius),
+            side: BorderSide(
+              color: surface.borderColor,
+              width: surface.borderWidth,
+            ),
+          ),
+          child: _resolvePanelChild(context),
+        ),
       ),
     );
 

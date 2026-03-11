@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/styling/theme.dart';
 import 'package:butterflyui_runtime/src/core/styling/theme_extension.dart';
+import 'package:butterflyui_runtime/src/core/styling/type_roles.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/focusable_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
@@ -213,6 +214,7 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   required StylingTokens tokens,
   required String variant,
   required String fallbackLabel,
+  ButterflyUIThemeTokens? themeTokens,
   Color? themePrimary,
   Color? themeOnPrimary,
   Color? themeText,
@@ -231,6 +233,22 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
   final contentSlot = slotStyles['content'] is Map
       ? coerceObjectMap(slotStyles['content'] as Map)
       : <String, Object?>{};
+  final backgroundSlot = slotStyles['background'] is Map
+      ? coerceObjectMap(slotStyles['background'] as Map)
+      : <String, Object?>{};
+  final borderSlot = slotStyles['border'] is Map
+      ? coerceObjectMap(slotStyles['border'] as Map)
+      : <String, Object?>{};
+  final typeRole = resolveStylingTypeRole(
+    themeTokens,
+    props['type_role'] ?? props['text_role'],
+    secondary:
+        labelSlot['type_role'] ??
+        labelSlot['text_role'] ??
+        contentSlot['type_role'] ??
+        contentSlot['text_role'],
+    fallback: 'button_label',
+  );
   final label = (props['text'] ?? props['label'])?.toString() ?? fallbackLabel;
   final candyPrimary = tokens.color('primary') ?? inheritedTint ?? themePrimary;
   final candyOnPrimary =
@@ -239,7 +257,11 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       tokens.color('text') ??
       themeText;
   final bgColor = resolveColorValue(
-    props['color'] ?? props['bgcolor'] ?? props['background'],
+    backgroundSlot['bgcolor'] ??
+        backgroundSlot['background'] ??
+        props['color'] ??
+        props['bgcolor'] ??
+        props['background'],
     fallback: (variant == 'text' || variant == 'outlined')
         ? null
         : candyPrimary,
@@ -271,28 +293,40 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
         tokens.padding('button', 'padding'),
   );
   final outlineColor = resolveColorValue(
-    props['border_color'],
+    borderSlot['border_color'] ??
+        borderSlot['foreground'] ??
+        borderSlot['color'] ??
+        props['border_color'],
     fallback: candyPrimary,
   );
-  final borderWidth = coerceDouble(props['border_width']) ?? 1.0;
+  final borderWidth =
+      coerceDouble(borderSlot['border_width'] ?? props['border_width']) ?? 1.0;
   final elevation = coerceDouble(props['elevation']);
   final shadowColor = resolveColorValue(props['shadow_color']);
   final overlayColor = resolveColorValue(
     props['overlay_color'] ?? props['splash_color'],
   );
   final fontSize = coerceDouble(
-    props['font_size'] ?? labelSlot['font_size'] ?? labelSlot['size'],
+    props['font_size'] ??
+        labelSlot['font_size'] ??
+        labelSlot['size'] ??
+        stylingTypeRoleDouble(typeRole, 'font_size'),
   );
   final fontFamily =
-      props['font_family']?.toString() ?? labelSlot['font_family']?.toString();
+      props['font_family']?.toString() ??
+      labelSlot['font_family']?.toString() ??
+      stylingTypeRoleString(typeRole, 'font_family');
   final fontWeight = parseButtonFontWeight(
     props['font_weight'] ??
         props['weight'] ??
         labelSlot['font_weight'] ??
-        labelSlot['weight'],
+        labelSlot['weight'] ??
+        stylingTypeRoleString(typeRole, 'font_weight'),
   );
   final letterSpacing = coerceDouble(
-    props['letter_spacing'] ?? labelSlot['letter_spacing'],
+    props['letter_spacing'] ??
+        labelSlot['letter_spacing'] ??
+        stylingTypeRoleDouble(typeRole, 'letter_spacing'),
   );
   final labelTransform =
       (props['text_transform'] ?? labelSlot['text_transform'])
@@ -315,7 +349,8 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
     props['italic'] ??
         props['font_style'] ??
         labelSlot['italic'] ??
-        labelSlot['font_style'],
+        labelSlot['font_style'] ??
+        stylingTypeRoleString(typeRole, 'font_style'),
   );
   final textStyle =
       (fontSize != null ||
@@ -359,7 +394,9 @@ ButterflyUIButtonVisualSpec buildButtonVisualSpec({
       foregroundColor: fgColor == null
           ? null
           : WidgetStateProperty.all(fgColor),
-      padding: padding == null ? null : WidgetStateProperty.all(padding),
+      padding: surfaceWrapped || padding == null
+          ? null
+          : WidgetStateProperty.all(padding),
       shape: shape == null ? null : WidgetStateProperty.all(shape),
       side: side == null ? null : WidgetStateProperty.all(side),
       elevation: surfaceWrapped || elevation == null
@@ -692,6 +729,7 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
       themePrimary: themeTokens?.primary ?? theme.colorScheme.primary,
       themeOnPrimary: theme.colorScheme.onPrimary,
       themeText: themeTokens?.text ?? theme.colorScheme.onSurface,
+      themeTokens: themeTokens,
       inheritedTint: inheritedTint,
       surfaceWrapped: surfaceWrapped,
     );
@@ -911,7 +949,7 @@ class _ButterflyUIButtonControlState extends State<_ButterflyUIButtonControl> {
                   : background == null
                   ? null
                   : WidgetStateProperty.all(background),
-              padding: padding == null
+              padding: spec.surfaceWrapped || padding == null
                   ? null
                   : WidgetStateProperty.all(padding),
             )
@@ -1077,6 +1115,11 @@ Widget _decorateButtonSurface(
     enabled: sceneAwareSurface,
   );
   final image = coerceDecorationImage(props['image']);
+  final backgroundBlendMode = _parseButtonBlendMode(
+    props['background_blend_mode'] ??
+        props['blend_mode'] ??
+        props['scene_blend_mode'],
+  );
   final borderColor =
       coerceColor(props['border_color']) ??
       (!explicitSurfaceFill
@@ -1116,6 +1159,7 @@ Widget _decorateButtonSurface(
   Widget surface = DecoratedBox(
     decoration: BoxDecoration(
       color: gradient == null ? backgroundColor : null,
+      backgroundBlendMode: backgroundBlendMode,
       gradient: gradient,
       image: image,
       shape: shape,
@@ -1163,6 +1207,47 @@ Widget _decorateButtonSurface(
     surface = Padding(padding: margin, child: surface);
   }
   return surface;
+}
+
+BlendMode? _parseButtonBlendMode(Object? value) {
+  final normalized = value
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_');
+  switch (normalized) {
+    case null:
+    case '':
+    case 'normal':
+    case 'src_over':
+      return null;
+    case 'multiply':
+      return BlendMode.multiply;
+    case 'screen':
+      return BlendMode.screen;
+    case 'overlay':
+      return BlendMode.overlay;
+    case 'soft_light':
+    case 'softlight':
+      return BlendMode.softLight;
+    case 'hard_light':
+    case 'hardlight':
+      return BlendMode.hardLight;
+    case 'plus':
+    case 'add':
+      return BlendMode.plus;
+    case 'difference':
+      return BlendMode.difference;
+    case 'exclusion':
+      return BlendMode.exclusion;
+    case 'lighten':
+      return BlendMode.lighten;
+    case 'darken':
+      return BlendMode.darken;
+    default:
+      return null;
+  }
 }
 
 TextDecoration? _parseTextDecoration(Object? value) {

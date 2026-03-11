@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -228,37 +229,51 @@ class _ButterflyUINavigationRingState
         .toLowerCase()
         .replaceAll('-', '_');
     final spacing = coerceDouble(_liveProps['spacing']) ?? (dense ? 6 : 10);
-    final padding =
-        coercePadding(_liveProps['padding']) ??
-        EdgeInsets.symmetric(
-          horizontal: dense ? 8 : 12,
-          vertical: dense ? 6 : 8,
-        );
-    final radius = coerceDouble(_liveProps['radius']) ?? 999;
-
-    final bgColor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface.withValues(alpha: 0.75);
-    final borderColor =
-        coerceColor(_liveProps['border_color']) ??
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
-    final selectedColor =
-        coerceColor(_liveProps['selected_color']) ??
-        Theme.of(context).colorScheme.primaryContainer;
-    final selectedTextColor =
-        coerceColor(_liveProps['selected_text_color']) ??
-        Theme.of(context).colorScheme.onPrimaryContainer;
-    final textColor =
-        coerceColor(_liveProps['text_color']) ??
-        Theme.of(context).colorScheme.onSurface;
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackBackground: butterflyuiSurface(context).withValues(alpha: 0.78),
+      fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.72),
+      fallbackRadius: 999,
+      fallbackPadding: EdgeInsets.symmetric(
+        horizontal: dense ? 8 : 12,
+        vertical: dense ? 6 : 8,
+      ),
+    );
+    final selectedColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'background',
+      explicit: _liveProps['selected_color'],
+      fallback: butterflyuiPrimary(context).withValues(alpha: 0.18),
+    );
+    final selectedTextColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['selected_text_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final textColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      explicit: _liveProps['text_color'],
+      fallback: butterflyuiText(context),
+    );
 
     final ring = Container(
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor, width: 1),
+        color: surface.backgroundColor,
+        gradient: surface.gradient,
+        borderRadius: BorderRadius.circular(surface.radius),
+        border: Border.all(
+          color: surface.borderColor,
+          width: surface.borderWidth,
+        ),
+        boxShadow: surface.boxShadow,
       ),
-      padding: padding,
+      padding: surface.contentPadding,
       child: Wrap(
         spacing: spacing,
         runSpacing: spacing,
@@ -283,7 +298,7 @@ class _ButterflyUINavigationRingState
       props: _liveProps,
       child: ring,
       clipToRadius: true,
-      defaultRadius: radius,
+      defaultRadius: surface.radius,
     );
   }
 
@@ -319,9 +334,7 @@ class _ButterflyUINavigationRingState
         border: Border.all(
           color: selected
               ? selectedColor.withValues(alpha: 0.9)
-              : Theme.of(
-                  context,
-                ).colorScheme.outlineVariant.withValues(alpha: 0.7),
+              : butterflyuiBorder(context).withValues(alpha: 0.7),
           width: selected ? 1.2 : 1,
         ),
       ),
@@ -352,9 +365,9 @@ class _ButterflyUINavigationRingState
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(
+                    color: butterflyuiSurfaceAlt(
                       context,
-                    ).colorScheme.surface.withValues(alpha: 0.3),
+                    ).withValues(alpha: 0.82),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(

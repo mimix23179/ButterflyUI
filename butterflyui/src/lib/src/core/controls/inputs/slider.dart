@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:butterflyui_runtime/src/core/control_shells/base_control_shell.dart';
 import 'package:butterflyui_runtime/src/core/control_shells/form_field_control_shell.dart';
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
 
 class ButterflyUISlider extends StatefulWidget {
   const ButterflyUISlider({
     super.key,
     required this.controlId,
+    required this.props,
     required this.value,
     required this.start,
     required this.end,
@@ -28,6 +30,7 @@ class ButterflyUISlider extends StatefulWidget {
   });
 
   final String controlId;
+  final Map<String, Object?> props;
   final double value;
   final double? start;
   final double? end;
@@ -230,8 +233,34 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
 
   @override
   Widget build(BuildContext context) {
-    final slider = _isRange
-        ? RangeSlider(
+    final activeColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'background',
+      explicit: widget.props['active_color'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final inactiveColor = butterflyuiResolveSlotColor(
+      context,
+      widget.props,
+      slot: 'border',
+      explicit: widget.props['inactive_color'],
+      fallback: butterflyuiBorder(context),
+    );
+    final slider = Theme(
+      data: Theme.of(context).copyWith(
+        sliderTheme: Theme.of(context).sliderTheme.copyWith(
+          activeTrackColor: activeColor,
+          inactiveTrackColor: inactiveColor.withValues(alpha: 0.35),
+          thumbColor: activeColor,
+          overlayColor: activeColor.withValues(alpha: 0.14),
+          valueIndicatorColor: activeColor,
+          valueIndicatorTextStyle: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: butterflyuiBackground(context)),
+        ),
+      ),
+      child: _isRange
+          ? RangeSlider(
             values: RangeValues(_start, _end),
             min: _rangeMin,
             max: _rangeMax,
@@ -264,7 +293,7 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
                   }, stage: 'change_end')
                 : null,
           )
-        : Slider(
+          : Slider(
             value: _value,
             min: _rangeMin,
             max: _rangeMax,
@@ -298,7 +327,8 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
                     'value': _snap(next),
                   }, stage: 'change_end')
                 : null,
-          );
+          ),
+    );
     final helper = _buildHelper(context);
     final child = helper == null
         ? slider
@@ -340,7 +370,12 @@ class _ButterflyUISliderState extends State<ButterflyUISlider> {
       return null;
     }
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+      color: butterflyuiResolveSlotColor(
+        context,
+        widget.props,
+        slot: 'helper',
+        fallback: butterflyuiMutedText(context),
+      ),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),

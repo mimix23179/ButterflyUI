@@ -18,11 +18,28 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
   final double radiusSm;
   final double radiusMd;
   final double radiusLg;
+  final double radiusXl;
   final double spacingXs;
   final double spacingSm;
   final double spacingMd;
   final double spacingLg;
+  final double spacingXl;
+  final double borderWidthSm;
+  final double borderWidthMd;
+  final double borderWidthLg;
+  final double shadowSm;
+  final double shadowMd;
+  final double shadowLg;
+  final int motionFastMs;
+  final int motionNormalMs;
+  final int motionSlowMs;
+  final double zDepthBase;
+  final double zDepthOverlay;
+  final double zDepthModal;
+  final Color overlayScrim;
+  final Color focusRing;
   final double glassBlur;
+  final Map<String, Map<String, Object?>> typeRoles;
 
   const ButterflyUIThemeTokens({
     required this.background,
@@ -42,11 +59,28 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
     required this.radiusSm,
     required this.radiusMd,
     required this.radiusLg,
+    required this.radiusXl,
     required this.spacingXs,
     required this.spacingSm,
     required this.spacingMd,
     required this.spacingLg,
+    required this.spacingXl,
+    required this.borderWidthSm,
+    required this.borderWidthMd,
+    required this.borderWidthLg,
+    required this.shadowSm,
+    required this.shadowMd,
+    required this.shadowLg,
+    required this.motionFastMs,
+    required this.motionNormalMs,
+    required this.motionSlowMs,
+    required this.zDepthBase,
+    required this.zDepthOverlay,
+    required this.zDepthModal,
+    required this.overlayScrim,
+    required this.focusRing,
     required this.glassBlur,
+    required this.typeRoles,
   });
 
   @override
@@ -68,11 +102,28 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
     double? radiusSm,
     double? radiusMd,
     double? radiusLg,
+    double? radiusXl,
     double? spacingXs,
     double? spacingSm,
     double? spacingMd,
     double? spacingLg,
+    double? spacingXl,
+    double? borderWidthSm,
+    double? borderWidthMd,
+    double? borderWidthLg,
+    double? shadowSm,
+    double? shadowMd,
+    double? shadowLg,
+    int? motionFastMs,
+    int? motionNormalMs,
+    int? motionSlowMs,
+    double? zDepthBase,
+    double? zDepthOverlay,
+    double? zDepthModal,
+    Color? overlayScrim,
+    Color? focusRing,
     double? glassBlur,
+    Map<String, Map<String, Object?>>? typeRoles,
   }) {
     return ButterflyUIThemeTokens(
       background: background ?? this.background,
@@ -92,11 +143,28 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
       radiusSm: radiusSm ?? this.radiusSm,
       radiusMd: radiusMd ?? this.radiusMd,
       radiusLg: radiusLg ?? this.radiusLg,
+      radiusXl: radiusXl ?? this.radiusXl,
       spacingXs: spacingXs ?? this.spacingXs,
       spacingSm: spacingSm ?? this.spacingSm,
       spacingMd: spacingMd ?? this.spacingMd,
       spacingLg: spacingLg ?? this.spacingLg,
+      spacingXl: spacingXl ?? this.spacingXl,
+      borderWidthSm: borderWidthSm ?? this.borderWidthSm,
+      borderWidthMd: borderWidthMd ?? this.borderWidthMd,
+      borderWidthLg: borderWidthLg ?? this.borderWidthLg,
+      shadowSm: shadowSm ?? this.shadowSm,
+      shadowMd: shadowMd ?? this.shadowMd,
+      shadowLg: shadowLg ?? this.shadowLg,
+      motionFastMs: motionFastMs ?? this.motionFastMs,
+      motionNormalMs: motionNormalMs ?? this.motionNormalMs,
+      motionSlowMs: motionSlowMs ?? this.motionSlowMs,
+      zDepthBase: zDepthBase ?? this.zDepthBase,
+      zDepthOverlay: zDepthOverlay ?? this.zDepthOverlay,
+      zDepthModal: zDepthModal ?? this.zDepthModal,
+      overlayScrim: overlayScrim ?? this.overlayScrim,
+      focusRing: focusRing ?? this.focusRing,
       glassBlur: glassBlur ?? this.glassBlur,
+      typeRoles: typeRoles ?? this.typeRoles,
     );
   }
 
@@ -108,6 +176,7 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
     if (other is! ButterflyUIThemeTokens) return this;
     Color lerpColor(Color a, Color b) => Color.lerp(a, b, t) ?? a;
     double lerpDouble(double a, double b) => a + (b - a) * t;
+    int lerpInt(int a, int b) => (a + (b - a) * t).round();
     return ButterflyUIThemeTokens(
       background: lerpColor(background, other.background),
       surface: lerpColor(surface, other.surface),
@@ -126,11 +195,70 @@ class ButterflyUIThemeTokens extends ThemeExtension<ButterflyUIThemeTokens> {
       radiusSm: lerpDouble(radiusSm, other.radiusSm),
       radiusMd: lerpDouble(radiusMd, other.radiusMd),
       radiusLg: lerpDouble(radiusLg, other.radiusLg),
+      radiusXl: lerpDouble(radiusXl, other.radiusXl),
       spacingXs: lerpDouble(spacingXs, other.spacingXs),
       spacingSm: lerpDouble(spacingSm, other.spacingSm),
       spacingMd: lerpDouble(spacingMd, other.spacingMd),
       spacingLg: lerpDouble(spacingLg, other.spacingLg),
+      spacingXl: lerpDouble(spacingXl, other.spacingXl),
+      borderWidthSm: lerpDouble(borderWidthSm, other.borderWidthSm),
+      borderWidthMd: lerpDouble(borderWidthMd, other.borderWidthMd),
+      borderWidthLg: lerpDouble(borderWidthLg, other.borderWidthLg),
+      shadowSm: lerpDouble(shadowSm, other.shadowSm),
+      shadowMd: lerpDouble(shadowMd, other.shadowMd),
+      shadowLg: lerpDouble(shadowLg, other.shadowLg),
+      motionFastMs: lerpInt(motionFastMs, other.motionFastMs),
+      motionNormalMs: lerpInt(motionNormalMs, other.motionNormalMs),
+      motionSlowMs: lerpInt(motionSlowMs, other.motionSlowMs),
+      zDepthBase: lerpDouble(zDepthBase, other.zDepthBase),
+      zDepthOverlay: lerpDouble(zDepthOverlay, other.zDepthOverlay),
+      zDepthModal: lerpDouble(zDepthModal, other.zDepthModal),
+      overlayScrim: lerpColor(overlayScrim, other.overlayScrim),
+      focusRing: lerpColor(focusRing, other.focusRing),
       glassBlur: lerpDouble(glassBlur, other.glassBlur),
+      typeRoles: t < 0.5 ? typeRoles : other.typeRoles,
     );
+  }
+
+  Map<String, Object?> typeRole(String? name, {String? fallback}) {
+    final requested = normalizeButterflyTypeRoleName(name);
+    if (requested != null && typeRoles.containsKey(requested)) {
+      return typeRoles[requested] ?? const <String, Object?>{};
+    }
+    final fallbackName = normalizeButterflyTypeRoleName(fallback);
+    if (fallbackName != null && typeRoles.containsKey(fallbackName)) {
+      return typeRoles[fallbackName] ?? const <String, Object?>{};
+    }
+    return const <String, Object?>{};
+  }
+}
+
+String? normalizeButterflyTypeRoleName(Object? value) {
+  final raw = value?.toString().trim();
+  if (raw == null || raw.isEmpty) return null;
+  final normalized = raw
+      .toLowerCase()
+      .replaceAll('-', '_')
+      .replaceAll(' ', '_')
+      .replaceAll(':', '_');
+  switch (normalized) {
+    case 'displayhero':
+    case 'hero':
+      return 'display_hero';
+    case 'display':
+    case 'headline':
+    case 'heading':
+    case 'title':
+    case 'body':
+    case 'body_lg':
+    case 'caption':
+    case 'helper':
+    case 'button_label':
+    case 'input':
+    case 'nav':
+    case 'overline':
+      return normalized;
+    default:
+      return normalized;
   }
 }

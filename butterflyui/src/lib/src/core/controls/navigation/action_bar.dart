@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:butterflyui_runtime/src/core/control_theme.dart';
 import 'package:butterflyui_runtime/src/core/control_utils.dart';
 import 'package:butterflyui_runtime/src/core/controls/common/icon_value.dart';
 import 'package:butterflyui_runtime/src/core/webview/webview_api.dart';
@@ -184,6 +185,7 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
 
   ButtonStyle _buttonStyleForVariant({
     required BuildContext context,
+    required Map<String, Object?> item,
     required String variant,
     required bool dense,
     required bool selected,
@@ -193,30 +195,94 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
       horizontal: dense ? 10 : 12,
       vertical: dense ? 8 : 10,
     );
+    final mergedProps = <String, Object?>{..._liveProps, ...item};
+    final defaultFilledBackground = butterflyuiResolveSlotColor(
+      context,
+      mergedProps,
+      slot: 'background',
+      explicit:
+          mergedProps['selected_bgcolor'] ??
+          mergedProps['selected_background'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final defaultForeground = butterflyuiResolveSlotColor(
+      context,
+      mergedProps,
+      slot: 'label',
+      fallback: butterflyuiText(context),
+    );
+    final selectedForeground = butterflyuiResolveSlotColor(
+      context,
+      mergedProps,
+      slot: 'label',
+      explicit:
+          mergedProps['selected_text_color'] ??
+          mergedProps['selected_foreground'],
+      fallback: butterflyuiPrimary(context),
+    );
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      mergedProps,
+      fallbackBackground: switch (variant) {
+        'filled' => selected ? defaultFilledBackground : butterflyuiPrimary(context),
+        'text' => selected
+            ? butterflyuiPrimary(context).withValues(alpha: 0.12)
+            : Colors.transparent,
+        _ => Colors.transparent,
+      },
+      fallbackBorder: butterflyuiBorder(context),
+      fallbackRadius: dense ? 10 : 12,
+      fallbackBorderWidth: variant == 'text' ? 0.0 : 1.0,
+      fallbackPadding: basePadding,
+    );
+    final foreground = switch (variant) {
+      'filled' => butterflyuiResolveSlotColor(
+        context,
+        mergedProps,
+        slot: 'label',
+        fallback: _resolveReadableForeground(
+          surface.backgroundColor ?? defaultFilledBackground,
+        ),
+      ),
+      _ => selected ? selectedForeground : defaultForeground,
+    };
+    final side = surface.borderWidth > 0
+        ? BorderSide(color: surface.borderColor, width: surface.borderWidth)
+        : null;
+    final visualDensity = dense
+        ? VisualDensity.compact
+        : VisualDensity.standard;
+    final shape = RoundedRectangleBorder(
+      borderRadius: baseRadius,
+      side: side ?? BorderSide.none,
+    );
 
     switch (variant) {
       case 'filled':
         return FilledButton.styleFrom(
-          visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-          shape: RoundedRectangleBorder(borderRadius: baseRadius),
-          padding: basePadding,
+          visualDensity: visualDensity,
+          shape: shape,
+          padding: surface.contentPadding ?? basePadding,
+          foregroundColor: foreground,
+          backgroundColor:
+              surface.backgroundColor ?? defaultFilledBackground,
         );
       case 'outlined':
         return OutlinedButton.styleFrom(
-          visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-          shape: RoundedRectangleBorder(borderRadius: baseRadius),
-          padding: basePadding,
+          visualDensity: visualDensity,
+          shape: shape,
+          padding: surface.contentPadding ?? basePadding,
+          foregroundColor: foreground,
+          side: side,
+          backgroundColor: surface.backgroundColor,
         );
       default:
         return TextButton.styleFrom(
-          visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-          shape: RoundedRectangleBorder(borderRadius: baseRadius),
-          padding: basePadding,
-          backgroundColor: selected
-              ? Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.45)
-              : null,
+          visualDensity: visualDensity,
+          shape: shape,
+          padding: surface.contentPadding ?? basePadding,
+          foregroundColor: foreground,
+          backgroundColor: surface.backgroundColor,
         );
     }
   }
@@ -235,6 +301,7 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     final variant = (item['variant'] ?? (selected ? 'filled' : 'outlined'))
         .toString()
         .toLowerCase();
+    final mergedProps = <String, Object?>{..._liveProps, ...item};
     final icon = buildIconValue(
       item['icon'] ?? item['leading_icon'],
       size: dense ? 16 : 18,
@@ -242,9 +309,16 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     final trailing = item['badge']?.toString();
     final style = _buttonStyleForVariant(
       context: context,
+      item: item,
       variant: variant,
       dense: dense,
       selected: selected,
+    );
+    final labelColor = butterflyuiResolveSlotColor(
+      context,
+      mergedProps,
+      slot: 'label',
+      fallback: selected ? butterflyuiPrimary(context) : butterflyuiText(context),
     );
 
     final labelWidget = Text(
@@ -252,20 +326,33 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
+        color: labelColor,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
     );
 
     Widget? trailingWidget;
     if (trailing != null && trailing.isNotEmpty) {
+      final badgeColor = butterflyuiResolveSlotColor(
+        context,
+        mergedProps,
+        slot: 'background',
+        explicit: mergedProps['badge_bgcolor'],
+        fallback: butterflyuiSurfaceAlt(context).withValues(alpha: 0.82),
+      );
       trailingWidget = Container(
         margin: const EdgeInsets.only(left: 8),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.35),
+          color: badgeColor,
           borderRadius: BorderRadius.circular(999),
         ),
-        child: Text(trailing, style: Theme.of(context).textTheme.labelSmall),
+        child: Text(
+          trailing,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: labelColor,
+          ),
+        ),
       );
     }
 
@@ -340,19 +427,30 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     final scrollable = _liveProps['scrollable'] == true;
     final spacing = coerceDouble(_liveProps['spacing']) ?? (dense ? 6 : 8);
     final runSpacing = coerceDouble(_liveProps['run_spacing']) ?? spacing;
-    final bgColor =
-        coerceColor(_liveProps['bgcolor'] ?? _liveProps['background']) ??
-        Theme.of(context).colorScheme.surface.withValues(alpha: 0.75);
-    final borderColor =
-        coerceColor(_liveProps['border_color']) ??
-        Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.7);
-    final radius = coerceDouble(_liveProps['radius']) ?? 14;
-    final padding =
-        coercePadding(_liveProps['padding']) ??
-        EdgeInsets.symmetric(
-          horizontal: dense ? 8 : 10,
-          vertical: dense ? 6 : 8,
-        );
+    final surface = butterflyuiResolveSurfaceChrome(
+      context,
+      _liveProps,
+      fallbackBackground: butterflyuiSurface(context).withValues(alpha: 0.78),
+      fallbackBorder: butterflyuiBorder(context).withValues(alpha: 0.72),
+      fallbackRadius: 14,
+      fallbackPadding: EdgeInsets.symmetric(
+        horizontal: dense ? 8 : 10,
+        vertical: dense ? 6 : 8,
+      ),
+    );
+    final titleColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'label',
+      fallback: butterflyuiText(context),
+    );
+    final subtitleColor = butterflyuiResolveSlotColor(
+      context,
+      _liveProps,
+      slot: 'content',
+      fallback: butterflyuiMutedText(context),
+      muted: true,
+    );
     final alignment = _mainAxisAlignment(
       (_liveProps['alignment'] ?? _liveProps['main_axis'] ?? 'start')
           .toString()
@@ -415,11 +513,16 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
     }
 
     final bar = Container(
-      padding: padding,
+      padding: surface.contentPadding,
       decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: borderColor, width: 1),
-        borderRadius: BorderRadius.circular(radius),
+        color: surface.backgroundColor,
+        gradient: surface.gradient,
+        border: Border.all(
+          color: surface.borderColor,
+          width: surface.borderWidth,
+        ),
+        borderRadius: BorderRadius.circular(surface.radius),
+        boxShadow: surface.boxShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -430,11 +533,19 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
               title,
               style: Theme.of(
                 context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: titleColor,
+              ),
             ),
           if (subtitle != null && subtitle.isNotEmpty) ...[
             const SizedBox(height: 2),
-            Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              subtitle,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: subtitleColor),
+            ),
           ],
           if (title != null && title.isNotEmpty ||
               subtitle != null && subtitle.isNotEmpty)
@@ -448,7 +559,13 @@ class _ButterflyUIActionBarState extends State<ButterflyUIActionBar> {
       props: _liveProps,
       child: bar,
       clipToRadius: true,
-      defaultRadius: radius,
+      defaultRadius: surface.radius,
     );
   }
+}
+
+Color _resolveReadableForeground(Color background) {
+  return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 }
